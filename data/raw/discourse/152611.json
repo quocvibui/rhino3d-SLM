@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-pass-mesh-to-hops/152611",
+  "topic_id": 152611,
+  "title": "How to pass mesh to Hops",
+  "question": "Hi there, I can’t seem to pass a mesh to my hops component, any help is appreciated.\n\n\nfrom flask import Flask\nimport ghhops_server as hs\nimport rhino3dm as r3\n\n#register hops app as middleware\napp = Flask(__name__)\nhops = hs.Hops(app)\n\n@hops.component(\n    \"/meshInOut\",\n    name=\"meshInOut\",\n    description=\"randomly shift mesh vertices\",\n    inputs=[\n        hs.HopsMesh(\"MeshIn\", \"M_i\", \"Mesh to be shifted\"),\n        hs.HopsNumber(\"Shift\", \"s\", \"distance of shift\", default=2.0),\n    ],\n    outputs = [\n        hs.HopsMesh(\"MeshOut\", \"M_o\", \"Shifted Mesh\"),\n    ],\n)\ndef meshInOut(msh: r3.Mesh, s):\n    if type(msh) is None:\n        print('what the fuck')\n    print((msh))\n    for v in msh.Vertices:\n        v += np.random.random(3)*s\n    msh_out = msh\n    return msh_out\n\nif __name__== \"__main__\":\n    app.run()\n\n\n\nmesshift.gh\n (7.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nrhinoinside.load(8)\nimport System\nimport Rhino.Geometry as rg\nimport Rhino.FileIO as rf\nimport rhino3dm\n\n# ... hops component that passes the mesh from grasshopper to python (JSON data states it is Rhino Geometry Mesh type, but in python it is rhino3dm.mesh)...\n\nmesh_JSON = mesh.Encode()\nrg_mesh = rg.Mesh.FromBase64String(\n    mesh_JSON['archive3dm'],\n    mesh_JSON['opennurbs'], \n    mesh_JSON['data']\n)\n# modify your mesh ...\nmodified_mesh = do_something_in_python(rg_mesh)\n# pass the modified mesh back for hops\ns_options = rf.SerializationOptions()\nmesh_out = modified_mesh.ToJSON(s_options)\n\nreturn rhino3dm.CommonObject.Decode(json.loads(mesh_out))",
+      "language": "python",
+      "author": "Will_Nash",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "from flask import Flask\nimport ghhops_server as hs\nimport rhino3dm as r3\n\n#register hops app as middleware\napp = Flask(__name__)\nhops = hs.Hops(app)\n\n@hops.component(\n    \"/meshInOut\",\n    name=\"meshInOut\",\n    description=\"randomly shift mesh vertices\",\n    inputs=[\n        hs.HopsMesh(\"MeshIn\", \"M_i\", \"Mesh to be shifted\"),\n        hs.HopsNumber(\"Shift\", \"s\", \"distance of shift\", default=2.0),\n    ],\n    outputs = [\n        hs.HopsMesh(\"MeshOut\", \"M_o\", \"Shifted Mesh\"),\n    ],\n)\ndef meshInOut(msh: r3.Mesh, s):\n    if type(msh) is None:\n        print('what the fuck')\n    print((msh))\n    for v in msh.Vertices:\n        v += np.random.random(3)*s\n    msh_out = msh\n    return msh_out\n\nif __name__== \"__main__\":\n    app.run()",
+      "language": "python",
+      "author": "Will_Nash",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 152,
+  "posts_count": 8,
+  "views": 678
+}

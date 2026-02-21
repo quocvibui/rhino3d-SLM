@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problems-with-ghpython-data-structure/164034",
+  "topic_id": 164034,
+  "title": "Problems with GhPython data structure",
+  "question": "There is a problem with the data structure of GhPython: when my input is a list, the tree data on the output is merged; When the input end is in a tree shape, this problem will not occur (ps: the following string of data is the correct data)\n\n\nimage\n923×735 70.9 KB\n\n\ndef RunScript(self, Curve, Tolerance):\n        try:\n            sc.doc = Rhino.RhinoDoc.ActiveDoc\n            self.tol = Tolerance if Tolerance else sc.doc.ModelAbsoluteTolerance\n            intersection_points_list = self.Find_Intersections(Curve)\n            zip_list = list(zip(Curve, intersection_points_list))\n            Broken_curve = ghp.run(self.temp, zip_list)\n            Broken_curve = ght.list_to_tree(Broken_curve)\n            print(Broken_curve)\n            \n            sc.doc.Views.Redraw()\n            ghdoc = GhPython.DocReplacement.GrasshopperDocument()\n            sc.doc = ghdoc\n            \n            return Broken_curve\n        finally:\n            pass\n\n\n\nAttach some of my source code\n\n\nimage\n913×429 42.7 KB\n\nIs there a problem with this part of the source code?\n\nIf anyone needs the source code and gh files, I can send them to you",
+  "code_blocks": [
+    {
+      "code": "class IntersectionBreak(component):\n    def SetUpParam(self, p, name, nickname, description):\n        p.Name = name\n        p.NickName = nickname\n        p.Description = description\n        p.Optional = True\n    \n    def RegisterInputParams(self, pManager):\n        p = Grasshopper.Kernel.Parameters.Param_Curve()\n        self.SetUpParam(p, \"Curve\", \"C\", \"xxx\")\n        p.Access = Grasshopper.Kernel.GH_ParamAccess.list\n        self.Params.Input.Add(p)\n    \n        p = Grasshopper.Kernel.Parameters.Param_Number()\n        self.SetUpParam(p, \"Tolerance\", \"T\", \"xxx\")\n        Tolerance = 0.0001\n        p.SetPersistentData(gk.Types.GH_Number(Tolerance))\n        p.Access = Grasshopper.Kernel.GH_ParamAccess.item\n        self.Params.Input.Add(p)\n    \n    def RegisterOutputParams(self, pManager):\n        p = Grasshopper.Kernel.Parameters.Param_ScriptVariable()\n        self.SetUpParam(p, \"Res_Curve\", \"C\", \"xxx\")\n        self.Params.Output.Add(p)\n    \n    def SolveInstance(self, DA):\n        p0 = self.marshal.GetInput(DA, 0)\n        p1 = self.marshal.GetInput(DA, 1)\n        result = self.RunScript(p0, p1)\n    \n        if result is not None:\n            self.marshal.SetOutput(result, DA, 0, True)\n    def temp(self, tuple):\n        curve, points = tuple\n        curves = self.split_curve(curve, points)\n        return curves\n    \n    def split_curve(self, curve, points):\n        t = []\n        for p in points:\n            t.append(curve.ClosestPoint(p)[1])\n        return curve.Split(t)\n    \n    def Find_Intersections(self, curves):\n        intersection_points_list = []\n        for curve in curves:\n            pts = []\n            for other_curve in curves:\n                if curve == other_curve:\n                    continue\n               \n                curve_intersections = rg.Intersect.Intersection.CurveCurve(curve, other_curve, self.tol, self.tol)\n                for i in curve_intersections:\n                    if i.IsPoint:\n                        pts.append(i.PointA)\n            intersection_points_list.append(pts) \n        return intersection_points_list\n    \n    def RunScript(self, curve, tol):\n        try:\n            sc.doc = Rhino.RhinoDoc.ActiveDoc\n            Broken_curve = gd[object]()\n            self.tol = tol if tol else self.tol\n    \n            if curve:\n                self.tol = tol if tol else self.tol\n                intersection_points_list = self.Find_Intersections(curve)\n    \n                zip_list = list(zip(curve, intersection_points_list))\n                Broken_curve = ghp.run(self.temp, zip_list)\n                Broken_curve = ght.list_to_tree(Broken_curve)\n            else:\n                self.message2(xxx')\n            sc.doc.Views.Redraw()\n            ghdoc = GhPython.DocReplacement.GrasshopperDocument()\n            sc.doc = ghdoc\n            return Broken_curve\n        finally:\n            self.Message = 'xxx'",
+      "language": "python",
+      "author": "Niko",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "def RunScript(self, Curve, Tolerance):\n        try:\n            sc.doc = Rhino.RhinoDoc.ActiveDoc\n            self.tol = Tolerance if Tolerance else sc.doc.ModelAbsoluteTolerance\n            intersection_points_list = self.Find_Intersections(Curve)\n            zip_list = list(zip(Curve, intersection_points_list))\n            Broken_curve = ghp.run(self.temp, zip_list)\n            Broken_curve = ght.list_to_tree(Broken_curve)\n            print(Broken_curve)\n            \n            sc.doc.Views.Redraw()\n            ghdoc = GhPython.DocReplacement.GrasshopperDocument()\n            sc.doc = ghdoc\n            \n            return Broken_curve\n        finally:\n            pass",
+      "language": "python",
+      "author": "Niko",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 664
+}

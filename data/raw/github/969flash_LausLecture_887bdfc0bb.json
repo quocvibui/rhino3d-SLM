@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/969flash/LausLecture/blob/004c0a8938bf805b8d70c744ddf5eb911fd4277f/Lecture1/util_func.py",
+  "repo": "969flash/LausLecture",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Lecture1/util_func.py",
+  "instruction": "Util func",
+  "code": "import Rhino.Geometry as geo\n\nTOL = 0.01  # 기본 허용 오차\nROUNDING_PRECISION = 6  # 반올림 소수점 자리수\n\n\ndef get_dist_between_pts(\n    pt_a: geo.Point3d, pt_b: geo.Point3d, rounding_precision=ROUNDING_PRECISION\n):\n    \"\"\"\n    두 점 사이의 거리 계산\n    :param pt_a: Rhino.Geometry.Point3d 객체\n    :param pt_b: Rhino.Geometry.Point3d 객체\n    :param rounding_precision: 거리 반올림 소수점 자리수\n    :return: 거리 (float)\n    \"\"\"\n    return round(pt_a.DistanceTo(pt_b), rounding_precision)\n\n\ndef has_intersection(\n    crv_a: geo.Curve, crv_b: geo.Curve, plane=geo.Plane.WorldXY, tol=TOL\n):\n    \"\"\"\n    두 커브가 교차하는지 여부를 확인\n    :param curve_a: Rhino.Geometry.Curve 객체\n    :param curve_b: Rhino.Geometry.Curve 객체\n    :return: 교차 여부 (bool)\n    \"\"\"\n    return geo.Curve.PlanarCurveCollision(crv_a, crv_b, plane, tol)\n\n\n## 커브간의 교차 점 생성\ndef get_intersection_from_crvs(crv_a: geo.Curve, crv_b: geo.Curve, tol=TOL):\n    \"\"\"\n    두 커브 사이의 교차점 계산\n    :param curve_a: Rhino.Geometry.Curve 객체\n    :param curve_b: Rhino.Geometry.Curve 객체\n    :param tol: 허용 오차\n    :return: 교차점 리스트 (list of Point3d)\n    \"\"\"\n    intersections = geo.Intersect.Intersection.CurveCurve(crv_a, crv_b, tol, tol)\n\n    # 교차점이 없을 경우 빈 리스트 반환\n    if not intersections:\n        return []\n\n    return [pt.PointA for pt in intersections if pt.IsPointAValid]\n\n\n## 커브간의 점간의 거리 계산\ndef get_dist_between_crvs(\n    crv_a: geo.Curve, crv_b: geo.Curve, rounding_precision=ROUNDING_PRECISION\n):\n    \"\"\"\n    두 커브 사이의 최소 거리 계산\n    :param curve_a: Rhino.Geometry.Curve 객체\n    :param curve_b: Rhino.Geometry.Curve 객체\n    :param rounding_precision: 거리 반올림 소수점 자리수\n    :return: 최소 거리 (float)\n    \"\"\"\n    _, a, b = crv_a.ClosestPoints(crv_b)\n    dist = a.DistanceTo(b)\n    return round(dist, rounding_precision)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

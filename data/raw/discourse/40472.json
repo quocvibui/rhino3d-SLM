@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trouble-with-python-script-im-creating/40472",
+  "topic_id": 40472,
+  "title": "Trouble with Python Script I'm Creating",
+  "question": "I’m trying to create a script that will allow me to select some curves, 1 or more, and run a pipe command on them with dialog boxes that give options for tubing diameter and wall thickness. I’m having trouble getting the script to just run the pipe command on curves one after another. Getting guid issues, which I thought I could fix by using coercecurve to translate the guid to an actual curve:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef createTube():\n\tunitSystem = rs.UnitSystem()\n\ttol=sc.doc.ModelAbsoluteTolerance\n\taTol=sc.doc.ModelAngleToleranceRadians\n\n\tcrvID = rs.GetObjects(\"Choose Curves to Create Tubing From\", 4, rs.filter.curve, preselect=True)\n\t\n\t# Tubing Parameters\n\ttubeDiameter = [\"2.0\", \"1.875\", \"1.75\", \"1.675\", \"1.5\", \"1.25\", \"1.0\", \"0.875\",  \"0.75\", \"0.675\", \"0.5\"]\n\twallThickness = [\"0.035\", \"0.049\", \"0.065\", \"0.083\", \"0.095\", \"0.120\", \"0.156\", \"0.188\", \"0.250\"]\n\ttubeDiameter = rs.ListBox(tubeDiameter, \"Choose Tube Diameter\", default = \"2.0\", title = \"DOM Tubing\")\n\twallThickness = rs.ListBox(wallThickness, \"Choose Wall Thickness\", default = \"0.095\", title = \"DOM Tubing\")\n    \t\n\ttubeDiameterIndex = tubeDiameter.index(tubeDiameter)\n\twallThicknessIndex = wallThickness.index(wallThickness)\n\t\n\t\n        for crv in crvID:\n\t\t\tcurve = rs.coercecurve(crv)\n\t\t\trs.UnselectAllObjects()\n\t\t\trs.SelectObject(curve)\n\t\t\tlayer = rs.ObjectLayer(curve)\n\t\t\tRhino.Geometry.Brep.CreatePipe(curve,(0.0,1.0),(tubeDiameterIndex,tubeDiameterIndex),True,0,False,tol,aTol)\n        print \"Tubes Created\"\n\ncreateTube()\n\n\n\nI’m sure I have messed the script up royally by now trying to fix it, but any tips on how to do this more efficiently would be appreciated. Thank you.\n\n\nCarl",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#encapsulate in function definition to ensure graceful exit if user bails out\ndef TestMultiPipe():\n    crvIDs = rs.GetObjects(\"Choose Curves to Create Tubing From\", 4, preselect=True)\n    #if no curves chosen, exit\n    if not crvIDs: return\n    # Tubing Parameters\n    dia_list=[\"2.0\",\"1.875\",\"1.75\",\"1.675\",\"1.5\",\"1.25\",\"1.0\",\"0.875\", \"0.75\",\"0.675\",\"0.5\"]\n    resp=rs.ListBox(dia_list, \"Choose Tube Diameter\", default = \"2.0\", title = \"DOM Tubing\")\n    #if no response from listbox, exit\n    if not resp: return\n    #the return from the listbox will be a string, need to convert to a float (double)\n    tube_dia=float(resp)\n    #counter\n    pipes_created=0\n    #main loop\n    for crv in crvIDs:\n        #get parameter of curve start and end\n        dom_start,dom_end=rs.CurveDomain(crv)\n        #simple case for one single diameter of pipe\n        pipe=rs.AddPipe(crv,dom_start,tube_dia/2.0,0,1,False)\n        #increment counter if pipe got made\n        if pipe: pipes_created +=1\n    print \"{} Tubes Created\".format(pipes_created)\nTestMultiPipe()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef TestMultiHollowPipe():\n    crvIDs = rs.GetObjects(\"Choose Curves to Create Tubing From\", 4, preselect=True)\n    if not crvIDs: return\n    # Tubing Parameters\n    dia_list=[\"2.0\",\"1.875\",\"1.75\",\"1.675\",\"1.5\",\"1.25\",\"1.0\",\"0.875\", \"0.75\",\"0.675\",\"0.5\"]\n    thk_list=[\"0.035\", \"0.049\", \"0.065\", \"0.083\", \"0.095\", \"0.120\", \"0.156\", \"0.188\", \"0.250\"]\n    resp=rs.ListBox(dia_list, \"Choose Tube Diameter\", default = \"2.0\", title = \"DOM Tubing\")\n    if not resp: return\n    tube_rad_outer=float(resp)*0.5\n    resp=rs.ListBox(thk_list, \"Wall thickness?\", default = \"2.0\", title = \"DOM Tubing\")\n    if not resp: return\n    tube_rad_inner=tube_rad_outer-(2*float(resp))\n    \n    #main loop\n    pipes_created=0\n    rs.EnableRedraw(False)\n    for crv in crvIDs:\n        dom_start,dom_end=rs.CurveDomain(crv)\n        outer_pipe=rs.AddPipe(crv,dom_start,tube_rad_outer,0,0,False)\n        inner_pipe=rs.AddPipe(crv,dom_start,tube_rad_inner,0,0,False)\n        bord_0=rs.DuplicateSurfaceBorder(outer_pipe)\n        bord_1=rs.DuplicateSurfaceBorder(inner_pipe)\n        ec_0=rs.AddPlanarSrf([bord_0[0],bord_1[0]])\n        ec_1=rs.AddPlanarSrf([bord_0[1],bord_1[1]])\n        h_pipe=rs.JoinSurfaces([outer_pipe,inner_pipe,ec_0,ec_1],True)\n        rs.DeleteObjects(bord_0)\n        rs.DeleteObjects(bord_1)\n        #increment counter if pipe got made\n        if h_pipe: pipes_created +=1\n    print \"{} Tubes Created\".format(pipes_created)\nTestMultiHollowPipe()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef createTube():\n\tunitSystem = rs.UnitSystem()\n\ttol=sc.doc.ModelAbsoluteTolerance\n\taTol=sc.doc.ModelAngleToleranceRadians\n\n\tcrvID = rs.GetObjects(\"Choose Curves to Create Tubing From\", 4, rs.filter.curve, preselect=True)\n\t\n\t# Tubing Parameters\n\ttubeDiameter = [\"2.0\", \"1.875\", \"1.75\", \"1.675\", \"1.5\", \"1.25\", \"1.0\", \"0.875\",  \"0.75\", \"0.675\", \"0.5\"]\n\twallThickness = [\"0.035\", \"0.049\", \"0.065\", \"0.083\", \"0.095\", \"0.120\", \"0.156\", \"0.188\", \"0.250\"]\n\ttubeDiameter = rs.ListBox(tubeDiameter, \"Choose Tube Diameter\", default = \"2.0\", title = \"DOM Tubing\")\n\twallThickness = rs.ListBox(wallThickness, \"Choose Wall Thickness\", default = \"0.095\", title = \"DOM Tubing\")\n    \t\n\ttubeDiameterIndex = tubeDiameter.index(tubeDiameter)\n\twallThicknessIndex = wallThickness.index(wallThickness)\n\t\n\t\n        for crv in crvID:\n\t\t\tcurve = rs.coercecurve(crv)\n\t\t\trs.UnselectAllObjects()\n\t\t\trs.SelectObject(curve)\n\t\t\tlayer = rs.ObjectLayer(curve)\n\t\t\tRhino.Geometry.Brep.CreatePipe(curve,(0.0,1.0),(tubeDiameterIndex,tubeDiameterIndex),True,0,False,tol,aTol)\n        print \"Tubes Created\"\n\ncreateTube()",
+      "language": "python",
+      "author": "carljarrett",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 2199
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-overloads-with-decomposeaffine/106563",
+  "topic_id": 106563,
+  "title": "Using Overloads with DecomposeAffine",
+  "question": "Hi-\n\n\nI’m relatively new to using python in Rhino and am trying to understand the use of Overloads with Transform.DecomposeAffine. When enter the following:\n\n\nblock = rs.GetObject(\"\",4096)\nXForm = rs.BlockInstanceXform(block)\ndecompAff = Rhino.Geometry.Transform.DecomposeAffine.Overloads[Transform, Vector3d](XForm)\nprint decompAff    \n\n\n\nI get “Message: ‘method_descriptor’ object has no attribute ‘Overloads’” error. Is this the correct syntax? Or is there a step I’m missing?\n\n\nThanks,\n\nDavid",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport clr\n\ndef DoSomething():\n\n    block = rs.GetObject(\"Select block\", rs.filter.instance, True, False)\n    if not block: return\n    \n    block_xform = rs.BlockInstanceXform(block)\n    \n    outXform = clr.StrongBox[Rhino.Geometry.Transform]()\n    outVector = clr.StrongBox[Rhino.Geometry.Vector3d]()\n    \n    rc = block_xform.DecomposeAffine(outXform, outVector)\n    if not rc: return\n    \n    print outXform.Value\n    print outVector.Value\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "block = rs.GetObject(\"\",4096)\nXForm = rs.BlockInstanceXform(block)\ndecompAff = Rhino.Geometry.Transform.DecomposeAffine.Overloads[Transform, Vector3d](XForm)\nprint decompAff",
+      "language": "python",
+      "author": "David_Moreau",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 503
+}

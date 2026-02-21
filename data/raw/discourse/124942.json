@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/assign-custom-linetype-to-curves-with-python/124942",
+  "topic_id": 124942,
+  "title": "Assign Custom Linetype to Curves with Python",
+  "question": "Hello,\n\nIs there a way I can assign a custom/default Linetype to a Curve, both created with RhinoCommon inside ghpython?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "def ObjectLinetype(object_ids, linetype=None):\n    \"\"\"Returns of modifies the linetype of an object\n    Parameters:\n      object_ids ({guid, ...]): identifiers of object(s)\n      linetype (str, optional): name of an existing linetype. If omitted, the current\n        linetype is returned. If object_ids is a list of identifiers, this parameter\n        is required\n    Returns:\n      str: If a linetype is not specified, the object's current linetype\n      str: If linetype is specified, the object's previous linetype\n      number: If object_ids is a list, the number of objects modified\n    Example:\n      import rhinoscriptsyntax as rs\n      obj = rs.GetObject(\"Select object\")\n      if obj: rs.ObjectLinetype(obj, \"Continuous\")\n    See Also:\n      ObjectLinetypeSource\n    \"\"\"\n    id = rhutil.coerceguid(object_ids, False)\n    if id:\n        rhino_object = rhutil.coercerhinoobject(id, True, True)\n        oldindex = scriptcontext.doc.Linetypes.LinetypeIndexForObject(rhino_object)\n        if linetype:\n            newindex = scriptcontext.doc.Linetypes.Find(linetype)\n            rhino_object.Attributes.LinetypeSource = Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject\n            rhino_object.Attributes.LinetypeIndex = newindex\n            rhino_object.CommitChanges()\n            scriptcontext.doc.Views.Redraw()\n        return scriptcontext.doc.Linetypes[oldindex].Name\n\n    newindex = scriptcontext.doc.Linetypes.Find(linetype)\n    if newindex<0: raise Exception(\"%s does not exist in LineTypes table\"%linetype)\n    for id in object_ids:\n        rhino_object = rhutil.coercerhinoobject(id, True, True)\n        rhino_object.Attributes.LinetypeSource = Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject\n        rhino_object.Attributes.LinetypeIndex = newindex\n        rhino_object.CommitChanges()\n    scriptcontext.doc.Views.Redraw()\n    return len(object_ids)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 788
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/j0hnm4r5/portfolio-projects/blob/fe4f5b2fd5be055b59ae6bcf0387b0dd4b07691b/Block%20Island/hmVoxelCreator.py",
+  "repo": "j0hnm4r5/portfolio-projects",
+  "repo_stars": 1,
+  "repo_description": "Code for projects on john-mars.com",
+  "license": "NOASSERTION",
+  "filepath": "Block Island/hmVoxelCreator.py",
+  "instruction": "Hm voxel creator",
+  "code": "import rhinoscriptsyntax as rs\nimport pickle\n\nwith open('siteImages/buildable.pkl', 'r') as p:\n\tbuildable = pickle.load(p)\nwith open('siteImages/height.pkl', 'r') as p:\n\televation = pickle.load(p)\n\nwith open('siteImages/buildable_islands.pkl', 'r') as p:\n\tisland = pickle.load(p)\n\nwidth = len(buildable[0])\nheight = len(buildable)\n\nx = 0\ny = 0\nz = 0\n\ndef box(x,y,z):\n\tbox = [(x, y, 0), (x, y + 1, 0), (x + 1, y + 1, 0), (x + 1, y, 0), (x, y, z), (x, y + 1, z), (x + 1, y + 1, z), (x + 1, y, z)]\n\treturn box\n\nrs.AddLayer(name=\"STEEP\", color= (255,0,0))\nrs.AddLayer(name=\"FLAT\", color=(0,0,0))\n\niY = 0\nwhile iY < height:\n\tiX = 0\n\twhile iX < width:\n\t\t# print buildable[iY][iX]\n\t\tx = iX\n\t\ty = iY\n\t\tz = elevation[iY][iX] / 10\n\t\tif z != 0:\n\t\t\tdrawn = rs.AddBox(box(x,y,z))\n\t\telse:\n\t\t\tdrawn = rs.AddSrfPt([box(x,y,z)[0], box(x,y,z)[1], box(x,y,z)[2], box(x,y,z)[3]])\n\t\tif buildable[iY][iX] == 0:\n\t\t\trs.ObjectLayer(drawn, \"FLAT\")\n\t\t\t# print \"FLAT\"\n\t\telse:\n\t\t\trs.ObjectLayer(drawn, \"STEEP\")\n\t\t\t# print \"STEEP\"\n\t\tiX += 1\n\tiY += 1",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

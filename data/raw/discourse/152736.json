@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-display-component-pattern-hatch-content-via-python-code/152736",
+  "topic_id": 152736,
+  "title": "Get display component (Pattern Hatch) content via python code",
+  "question": "Hello,\n\n\nI’m using a display component, (Display->Dimensions->Pattern Hatch) without any out gate:\n\n\n\n\nI assume there is a field that contains the values of this component (in this case, lines) which can be accessed via code.\n\n\nI prefer to use python and I tried to explore this component:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rh\nimport inspect\n\nghdoc = ghenv.Component.Attributes.Owner.OnPingDocument()\nrhdoc = rh.RhinoDoc.ActiveDoc\nhatch = [x for x in ghdoc.Objects if x.NickName == \"PHatch\"]\n\nfor prop in inspect.getmembers(type(hatch[-1]), lambda a:not(inspect.isroutine(a))):\n    print(prop)\n\nfor attr in inspect.getmembers(type(hatch[-1].Attributes), lambda a:not(inspect.isroutine(a))):\n    print(attr)\n\n\n\nwithout any success to find the correct attribute and getting the content itself.\n\n\nI’ll appreciate any help.\n\n\n– Y",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper\n\nghdoc = ghenv.Component.Attributes.Owner.OnPingDocument()\nobjs = ghdoc.Objects \nhatch = [x for x in objs if x.Name == \"Pattern Hatch\"]\n\nhatches = [\"Solid\",\"Single Line\",\"Double Line\",\n\"Triple Line\",\"Dashed Line\",\n\"Square Grid\",\"Triangle Grid\",\n\"Plus Grid\", \"Squares\"]\n\nids = []\nnames = []\nfor i,h in enumerate(hatch):\n    id = hatch[i].Params.Input[1].VolatileData[0][0]\n    hname = hatches[int(id.ToString())]\n    names.append(hname)\n    ids.append(id)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino as rh\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\nimport scriptcontext as sc\n\n\nhatches = [\"Solid\",\"Single Line\",\"Double Line\",\n\"Triple Line\",\"Dashed Line\",\n\"Square Grid\",\"Triangle Grid\",\n\"Plus Grid\", \"Squares\"]\n\ndef HatchInfo(hdata):\n    sc.doc = rh.RhinoDoc.ActiveDoc\n    Hp = sc.doc.ActiveDoc.HatchPatterns\n    \n    crvs = []\n    geos = []\n    \n    for b in hdata.Params.Input[0].VolatileData[0]:\n        crvs.append(b.Value)\n    p = hdata.Params.Input[1].VolatileData[0][0].Value\n    s = hdata.Params.Input[2].VolatileData[0][0].Value\n    a = hdata.Params.Input[3].VolatileData[0][0].Value\n    hname = hatches[p]\n    new = rg.Hatch.Create(crvs,p,a,s)\n    \n    for i,n in enumerate(new):\n        g = rg.Hatch.CreateDisplayGeometry(n,Hp[p],1)\n        geos.append(g[1])\n    geos = th.list_to_tree(geos)\n    \n    return crvs,p,s,a,hname,new,geos\n\n\ncrvs,pat,scale,angle,name,new,geos = HatchInfo(hatch)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport inspect\n\nghdoc = ghenv.Component.Attributes.Owner.OnPingDocument()\nrhdoc = rh.RhinoDoc.ActiveDoc\nhatch = [x for x in ghdoc.Objects if x.NickName == \"PHatch\"]\n\nfor prop in inspect.getmembers(type(hatch[-1]), lambda a:not(inspect.isroutine(a))):\n    print(prop)\n\nfor attr in inspect.getmembers(type(hatch[-1].Attributes), lambda a:not(inspect.isroutine(a))):\n    print(attr)",
+      "language": "python",
+      "author": "Yitzchak_Vaknin",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 29,
+  "views": 1181
+}

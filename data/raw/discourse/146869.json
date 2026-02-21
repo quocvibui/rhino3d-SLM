@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/failed-to-change-the-inactivetabbackground-color-by-python/146869",
+  "topic_id": 146869,
+  "title": "Failed to change the \"InactiveTabBackground\" color by Python",
+  "question": "hi guys!\n\nI was trying to modify the color of Rhino interface these days by Python.\n\nAll the color change i expected had almost taken effect,\n\nexcept for “Rhino.Options.UiPaintColors.InactiveTabBackground”.\n\nWhatever color i set for InactiveTabBackground,\n\nit just keep the default Color [A=0, R=255, G=255, B=255].\n\n\nAt the same time, i found something strange.\n\nIf i set a newcolor = default Color [A=0, R=255, G=255, B=255],\n\nthe codes would change “Rhino.Options.UiPaintColors.NormalEnd” color to its default.\n\nIf i set a newcolor = other color,\n\nthe codes would change “Rhino.Options.UiPaintColors.NormalEnd” color to the newcolor.\n\n\nI was really confused.\n\nI’m a beginner in Python, maybe i have not found the right way.\n\nHere’s the codes I wrote for test.\n\n\nimport Rhino.ApplicationSettings.AppearanceSettings as ras\nimport Rhino.ApplicationSettings.PaintColor as PaintColor\nimport rhinoscriptsyntax as rs\n\nnewcolor = rs.CreateColor([255,255,255,0])\n\n# PaintColor(23):InactiveTabBackground\n# the codes below will not change the InactiveTabBackground color \n# but i found something strange\n# if newcolor = default Color [A=0, R=255, G=255, B=255]\n# the codes will change \"Rhino.Options.UiPaintColors.NormalEnd\" color to its default\n# if newcolor = other color\n# the codes will change \"Rhino.Options.UiPaintColors.NormalEnd\" color to newcolor\n\nras.SetPaintColor(PaintColor(23),newcolor)\n\nrs.Redraw()\n\n\n\nCan someone help me?\n\nI will be grateful!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System\nfrom System.Drawing import Color\n\n# get the color\npc = Rhino.ApplicationSettings.PaintColor.InactiveTabBackground\nold_color = Rhino.ApplicationSettings.AppearanceSettings.GetPaintColor(pc, True)\nprint \"OldColor: {}\".format(old_color)\n\n# set the color\nnew_color = Color.FromArgb(255, 245, 245, 245)\nprint \"NewColor: {}\".format(new_color)\nRhino.ApplicationSettings.AppearanceSettings.SetPaintColor(pc, new_color, True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System\nfrom System.Drawing import Color\n\n# set the color\nnew_color = Color.Yellow\nprint \"NewColor: {}\".format(new_color)\nRhino.ApplicationSettings.AppearanceSettings.SetPaintColor(pc, new_color, True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.ApplicationSettings.AppearanceSettings as ras\nimport Rhino.ApplicationSettings.PaintColor as PaintColor\nimport rhinoscriptsyntax as rs\n\nnewcolor = rs.CreateColor([255,255,255,0])\n\n# PaintColor(23):InactiveTabBackground\n# the codes below will not change the InactiveTabBackground color \n# but i found something strange\n# if newcolor = default Color [A=0, R=255, G=255, B=255]\n# the codes will change \"Rhino.Options.UiPaintColors.NormalEnd\" color to its default\n# if newcolor = other color\n# the codes will change \"Rhino.Options.UiPaintColors.NormalEnd\" color to newcolor\n\nras.SetPaintColor(PaintColor(23),newcolor)\n\nrs.Redraw()",
+      "language": "python",
+      "author": "hubble",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 500
+}

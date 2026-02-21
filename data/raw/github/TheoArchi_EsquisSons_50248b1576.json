@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TheoArchi/EsquisSons/blob/00d1b02f7ce3e190b5c4c3429d3e84756c29bfdb/Components_Uncompiled_for%20ghpython/Source_Options.py",
+  "repo": "TheoArchi/EsquisSons",
+  "repo_stars": 3,
+  "repo_description": "Esquissons is a grasshopper plugin which help you to design with sound ;)",
+  "license": "NOASSERTION",
+  "filepath": "Components_Uncompiled_for ghpython/Source_Options.py",
+  "instruction": "EsquisSons Source Options allows you to more precisely define a source (shuffle, volume, mute etc.)\n-\nAAU / Theo Marchal / BETA VERSION / AVRIL2020",
+  "code": "\"\"\"EsquisSons Source Options allows you to more precisely define a source (shuffle, volume, mute etc.)\n-\nAAU / Theo Marchal / BETA VERSION / AVRIL2020\"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, Source_On, RandomizeSource, Manual_Volume_1_100):\n        \n        __author__ = \"theomarchal\"\n        self.Params.Input[0].Description = \"Mute the source if set to False (use boolean here)\"\n        self.Params.Input[1].Description = \"Set chance of playing the source (1/x chance where x is the input)(Int input, if none the source is continuously looped)\"\n        self.Params.Input[2].Description = \"Manual Volume from 1 to 100 (disengage the mainengine calculation for volume if connected - not active if volume is set to 0)\"\n        self.Params.Output[0].Description = \"Source options (connect to Source component)\"\n        self.Name = \"Source options\"\n        self.NickName = \"Source_Opt\" \n        self.Message = \"EsquisSons V3\"\n        self.Category = \"EsquisSons\"\n        self.SubCategory = \"2/ Option\"\n        \n        \n        import rhinoscriptsyntax as rs\n        import math\n        Son = Source_On\n        Mvol = Manual_Volume_1_100\n        rdm = RandomizeSource\n        \n        if Mvol is None :\n            Mvol = 0\n        if Mvol>100:\n            Mvol=100\n        if Mvol<0:\n            Mvol=0\n        if Mvol != 0:\n            Mvol = ((10*math.log10(1+Mvol)))\n            Mvol = 3.49*Mvol\n        if Son is None :\n            Son = True\n        if Son is False :\n            Mvol = 1\n        \n        if rdm is None :\n            rdm = 0\n        if rdm == 1 :\n            rdm = 0\n        \n        OptionSource = ['None',Son,Mvol,rdm]\n        OptSource = [OptionSource]\n        return OptSource\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

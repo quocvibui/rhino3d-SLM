@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-define-point3d-type-in-python/191971",
+  "topic_id": 191971,
+  "title": "How to define Point3d type in python?",
+  "question": "I am trying to bake what would ba a point clouds worth of point to create a terrain from Grasshopper. i have found the option to add points so this should mean they are all baked at once but i am now having the issue that the code needs to know what type of point this is and i haven’t work out how to define that.\n\n\nThis is my error:\n\nRuntime error (ArgumentTypeException): Multiple targets could match: AddPoints(IEnumerable[Point3f], ObjectAttributes), AddPoints(IEnumerable[Point3d], ObjectAttributes)\n\n\nTraceback:\n\nline 8, in script\n\n\nimport scriptcontext as sc\nimport Rhino as rc\n\nif B:\n    sc.doc = rc.RhinoDoc.ActiveDoc\n    attr =rc.DocObjects.ObjectAttributes()\n    attr.LayerIndex = sc.doc.Layers.Find(L,True)\n    sc.doc.Objects.AddPoints(P,attr)\n    sc.doc = ghdoc\n\n\n\nBake Pts.gh\n (9.7 KB)",
+  "code_blocks": [
+    {
+      "code": "import System.Collections.Generic.IEnumerable as IEnumerable\nimport scriptcontext as sc\nimport Rhino as rc\n\nif B:\n    sc.doc = rc.RhinoDoc.ActiveDoc\n    attr =rc.DocObjects.ObjectAttributes()\n    attr.LayerIndex = sc.doc.Layers.FindByFullPath(L,True)\n    sc.doc.Objects.AddPoints.Overloads[IEnumerable[rc.Geometry.Point3d],rc.DocObjects.ObjectAttributes](P,attr)\n    sc.doc = ghdoc",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import scriptcontext as sc\nimport Rhino as rc\n\nif B:\n    sc.doc = rc.RhinoDoc.ActiveDoc\n    attr =rc.DocObjects.ObjectAttributes()\n    attr.LayerIndex = sc.doc.Layers.Find(L,True)\n    sc.doc.Objects.AddPoints(P,attr)\n    sc.doc = ghdoc",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 165
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/centroid-for-line-or-polyline/26547",
+  "topic_id": 26547,
+  "title": "Centroid for line or polyline",
+  "question": "Was wondering if a line or polyline or curve have its centroid turned on like objects can?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef cent1( cur, cnt ):\n  '''\n  algorithm 1\n  '''\n  pars = cur.DivideByCount( cnt, True )\n  pts = [ cur.PointAt( par ) for par in pars ]\n  cen = reduce( lambda a, b : a + b, pts ) / len( pts )\n  return cen\n\ndef cent2( cur, cnt ):\n  '''\n  algorithm 2\n  '''\n  pars = cur.DivideByCount( cnt, True )\n  pts = [ cur.PointAt( par ) for par in pars ]\n  pts[ 0 ] /= 2\n  pts[ -1 ] /= 2\n  cen = reduce( lambda a, b : a + b, pts ) / len( pts )\n  return cen\n\ndef cent3( cur, cnt ):\n  '''\n  algorithm 3\n  '''\n  pars = cur.DivideByCount( cnt, True )\n  pars = pars[ 1 : : 2 ]\n  pts = [ cur.PointAt( par ) for par in pars ]\n  cen = reduce( lambda a, b : a + b, pts ) / len( pts )\n  return cen\n\ndef main():\n  gob = Rhino.Input.Custom.GetObject()\n  gob.AcceptNothing( True )\n  gob.SetCommandPrompt( 'Curve for centroid ?' )\n  gob.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n  gob.Get()\n  res = gob.Result()\n  if res == Rhino.Input.GetResult.Cancel:\n    return\n  elif res == Rhino.Input.GetResult.Object:\n    obref = gob.Object( 0 )\n    cur = obref.Curve()\n  else:\n    return\n  tolr = 0.001\n \n  cnt = 4\n  prev = Rhino.Geometry.Point3d( 1.0e99, 0, 0 )\n  itr = 0\n  att = Rhino.DocObjects.ObjectAttributes()\n  att.ObjectColor = System.Drawing.Color.Red\n  att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n  while True:\n    scriptcontext.escape_test()\n    itr += 1\n    cen = cent1( cur, cnt )\n    if cen.DistanceTo( prev ) < tolr:\n      print 'Algorithm 1: %d iterations' % itr\n      Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint( cen, att )\n      break\n    prev = cen\n    cnt += 2\n \n  cnt = 4\n  prev = Rhino.Geometry.Point3d( 1.0e99, 0, 0 )\n  itr = 0\n  att = Rhino.DocObjects.ObjectAttributes()\n  att.ObjectColor = System.Drawing.Color.Green\n  att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n  while True:\n    scriptcontext.escape_test()\n    itr += 1\n    cen = cent2( cur, cnt )\n    if cen.DistanceTo( prev ) < tolr:\n      print 'Algorithm 2: %d iterations' % itr\n      Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint( cen, att )\n      break\n    prev = cen\n    cnt += 2\n \n  cnt = 4\n  prev = Rhino.Geometry.Point3d( 1.0e99, 0, 0 )\n  itr = 0\n  att = Rhino.DocObjects.ObjectAttributes()\n  att.ObjectColor = System.Drawing.Color.Blue\n  att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n  while True:\n    scriptcontext.escape_test()\n    itr += 1\n    cen = cent3( cur, cnt )\n    if cen.DistanceTo( prev ) < tolr:\n      print 'Algorithm 3: %d iterations' % itr\n      Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint( cen, att )\n      break\n    prev = cen\n    cnt += 2\n      \n# Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 29,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef cent1( cur, cnt ):\n  '''\n  algorithm 1\n  '''\n  pars = cur.DivideByCount( cnt, True )\n  pts = [ cur.PointAt( par ) for par in pars ]\n  cen = reduce( lambda a, b : a + b, pts ) / len( pts )\n  return cen\n\ndef cent2( cur, cnt ):\n  '''\n  algorithm 2\n  '''\n  pars = cur.DivideByCount( cnt, True )\n  pts = [ cur.PointAt( par ) for par in pars ]\n  pts[ 0 ] = ( pts[ 0 ] + pts[ -1 ] ) / 2.0\n  pts.pop()\n  cen = reduce( lambda a, b : a + b, pts ) / len( pts )\n  return cen\n\ndef cent3( cur, cnt ):\n  '''\n  algorithm 3\n  '''\n  pars = cur.DivideByCount( cnt, True )\n  pars = pars[ 1 : : 2 ]\n  pts = [ cur.PointAt( par ) for par in pars ]\n  cen = reduce( lambda a, b : a + b, pts ) / len( pts )\n  return cen\n\ndef main():\n  gob = Rhino.Input.Custom.GetObject()\n  gob.AcceptNothing( True )\n  gob.SetCommandPrompt( 'Curve for centroid ?' )\n  gob.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n  gob.Get()\n  res = gob.Result()\n  if res == Rhino.Input.GetResult.Cancel:\n    return\n  elif res == Rhino.Input.GetResult.Object:\n    obref = gob.Object( 0 )\n    cur = obref.Curve()\n  else:\n    return\n  tolr = 0.001\n \n  cnt = 4\n  prev = Rhino.Geometry.Point3d( 1.0e99, 0, 0 )\n  itr = 0\n  att = Rhino.DocObjects.ObjectAttributes()\n  att.ObjectColor = System.Drawing.Color.Red\n  att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n  while True:\n    scriptcontext.escape_test()\n    itr += 1\n    cen = cent1( cur, cnt )\n    if cen.DistanceTo( prev ) < tolr:\n      print 'Algorithm 1: %d iterations' % itr\n      Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint( cen, att )\n      break\n    prev = cen\n    cnt += 2\n \n  cnt = 4\n  prev = Rhino.Geometry.Point3d( 1.0e99, 0, 0 )\n  itr = 0\n  att = Rhino.DocObjects.ObjectAttributes()\n  att.ObjectColor = System.Drawing.Color.Green\n  att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n  while True:\n    scriptcontext.escape_test()\n    itr += 1\n    cen = cent2( cur, cnt )\n    if cen.DistanceTo( prev ) < tolr:\n      print 'Algorithm 2: %d iterations' % itr\n      Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint( cen, att )\n      break\n    prev = cen\n    cnt += 2\n \n  cnt = 4\n  prev = Rhino.Geometry.Point3d( 1.0e99, 0, 0 )\n  itr = 0\n  att = Rhino.DocObjects.ObjectAttributes()\n  att.ObjectColor = System.Drawing.Color.Blue\n  att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n  while True:\n    scriptcontext.escape_test()\n    itr += 1\n    cen = cent3( cur, cnt )\n    if cen.DistanceTo( prev ) < tolr:\n      print 'Algorithm 3: %d iterations' % itr\n      Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint( cen, att )\n      break\n    prev = cen\n    cnt += 2\n      \n# Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 31,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 30,
+  "views": 10718
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/toggle-rhinocam-on-off-scripts-run-10-20x-slower/204509",
+  "topic_id": 204509,
+  "title": "Toggle RhinoCAM on/off - scripts run 10-20x slower",
+  "question": "Hi all, and thanks for those who responded to my previous script performance post.\n\n\nHave finally gotten to the bottom of why scripts that should run in seconds were taking 30-60 seconds which I tried uninstalling RhinoCAM.\n\n\nI queried RhinoCAM and received the following information. I’d hoped they might advised some specifics as I’m sure I’m not the first, but I’m going down the path they have suggested.\n\n\nIs there a way to Load/Unload the RhinoCAM plugin on the fly, so that Rhino doesn’t have to be restarted? Like most people I often have multiple sessions open, which makes restarting quite a hassle!\n\n\nThanks,\n\n\nAdrian\n\n\nFROM MECSOFT\n\n\nRhinoCAM, when loaded and active,  resolves its internal database whenever new objects are created in Rhino.  So if your script is creating objects constantly it is triggering RhinoCAM to reconstruct its database also.  What I would suggest is to turn off RhinoCAM when the script is running and only make RhinoCAM active when it is needed - sort of a on-demand load of RhinoCAM.  This could be managed in the Rhino script itself I would think.  Rhino support will be able to help with the API calls needed to load and unload plug-ins, which can be used in your cabinet design script.",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport scriptcontext as sc\nimport Rhino, time\n\ndef MakeBox(plane,x, y, z):\n    xi=Rhino.Geometry.Interval(0,x)\n    yi=Rhino.Geometry.Interval(0,y)\n    zi=Rhino.Geometry.Interval(0,z)\n    return Rhino.Geometry.Box(plane,xi,yi,zi)\n\ndef CheckRCAddObjTime():\n    boxes=[]\n    xrange=50\n    yrange=50\n    xsize=10.0\n    ysize=5.0\n    zsize=2.0\n    space=1.0\n    plane=Rhino.Geometry.Plane.WorldXY\n    st=time.time()\n    for i in range(xrange):\n        for j in range(yrange):\n            plane.Origin=Rhino.Geometry.Point3d(i*(xsize+space),j*(ysize+space),0)\n            boxes.append(MakeBox(plane,xsize,ysize,zsize))\n    box_ids=[sc.doc.Objects.AddBox(box) for box in boxes]\n    sc.doc.Views.Redraw()\n    print(\"Elapsed time = {}\".format(time.time()-st))\nCheckRCAddObjTime()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 217
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_edgesrf.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_edgesrf.py",
+  "instruction": "Ex edgesrf",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  go = GetObject()\n  go.SetCommandPrompt(\"Select 2, 3, or 4 open curves\")\n  go.GeometryFilter = ObjectType.Curve\n  go.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\n  go.GetMultiple(2, 4)\n  if go.CommandResult() <> Result.Success:\n    return go.CommandResult()\n\n  curves = [o.Curve() for o in go.Objects()]\n\n  brep = Brep.CreateEdgeSurface(curves)\n\n  if brep <> None:\n    doc.Objects.AddBrep(brep)\n    doc.Views.Redraw()\n\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Drshelden/DP2/blob/5a4943a031847a44ecc295153ef08068443de42d/Classes/Week%2001/DP2%20-%20Class%2001%20-%20Scripts/exercise%2001%20-%20%20closed%20sphere%20with%20center%20enter%20and%20counts.py",
+  "repo": "Drshelden/DP2",
+  "repo_stars": 0,
+  "repo_description": "Design Programming 2 Course Locker",
+  "license": "unknown",
+  "filepath": "Classes/Week 01/DP2 - Class 01 - Scripts/exercise 01 -  closed sphere with center enter and counts.py",
+  "instruction": "Testing pip install specific packages",
+  "code": "#! python3\n\"\"\"Testing pip install specific packages\"\"\"\n# r: numpy\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nimport System\nimport System.Collections.Generic\nimport Rhino\nimport random\nimport math\nimport numpy as np\n\n\nxCount = 8\nyCount = 8\nzCount = 5\nxScale = 10\nyScale = 10\nzScale = 10\nrSphere = 2\n\ncenterPoint = rs.GetPoint(\"Enter the center point\")\nxCount = rs.GetInteger(\"How many in X?\")\nyCount = rs.GetInteger(\"How many in Y?\")\n\nthetaValues = np.arange(0, 2 * math.pi, 2 * math.pi /xCount) # 0 to 2PI in xCount steps\nalphaValues = np.arange(0, math.pi / 2.0, math.pi / 2.0 / yCount) # 0 to PI / 2 in yCount steps\n\npointIds = []\n\n\n\n# Print out the coordinates of each point\ni = 0\n\npointIds = [[0 for _ in range(yCount)] for _ in range(xCount)]\n\nfor theta in thetaValues:\n    j = 0\n    for alpha in alphaValues:\n\n        x = math.cos(theta) * math.cos(alpha)\n        y = math.sin(theta) * math.cos(alpha)\n        z = math.sin(alpha)\n\n        pointId = rs.AddPoint( (x * xScale + centerPoint[0], y * yScale  + centerPoint[1], z * zScale  + centerPoint[2]) )\n\n\n        rs.ObjectColor(pointId, [int(random.random() * 255), int(random.random() * 255), int(random.random() * 255) ])\n\n        pointIds[i][j] = pointId # add it to an array of points!!\n        if (i > 0): rs.AddLine(pointIds[i-1][j], pointIds[i][j]) # if this isn't the first row\n        if (j > 0): rs.AddLine(pointIds[i][j-1], pointIds[i][j]) # if this isn't the first column\n        if (i >= xCount - 1):  rs.AddLine(pointIds[0][j], pointIds[i][j]) # if this IS last row\n        #if (j >= yCount - 1): rs.AddLine(pointIds[i][0], pointIds[i][j]) # if this IS the last column\n\n        #sphereId = rs.AddSphere( (x * xScale, y * yScale, z * zScale), rSphere )\n        #print(sphereId)\n        #rs.ObjectColor(sphereId, [int(random.random() * 255), int(random.random() * 255), int(random.random() * 255) ])\n\n        j = j + 1\n    i = i + 1\n\n # done!",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/orient-on-surface.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/orient-on-surface.py",
+  "instruction": "Orient on surface",
+  "code": "import Rhino\nimport scriptcontext\nimport System.Guid\n\ndef OrientOnSrf():\n    # Select objects to orient\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects to orient\")\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n\n    # Point to orient from\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Point to orient from\")\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n\n    # Define source plane\n    view = gp.View()\n    if not view:\n        view = doc.Views.ActiveView\n        if not view: return Rhino.Commands.Result.Failure\n\n    source_plane = view.ActiveViewport.ConstructionPlane()\n    source_plane.Origin = gp.Point()\n\n    # Surface to orient on\n    gs = Rhino.Input.Custom.GetObject()\n    gs.SetCommandPrompt(\"Surface to orient on\")\n    gs.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    gs.SubObjectSelect = True\n    gs.DeselectAllBeforePostSelect = False\n    gs.OneByOnePostSelect = True\n    gs.Get()\n    if gs.CommandResult()!=Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    objref = gs.Object(0)\n    # get selected surface object\n    obj = objref.Object()\n    if not obj: return Rhino.Commands.Result.Failure\n    # get selected surface (face)\n    surface = objref.Surface()\n    if not surface: return Rhino.Commands.Result.Failure\n    # Unselect surface\n    obj.Select(False)\n\n    # Point on surface to orient to\n    gp.SetCommandPrompt(\"Point on surface to orient to\")\n    gp.Constrain(surface, False)\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n\n    # Do transformation\n    rc = Rhino.Commands.Result.Failure\n    getrc, u, v = surface.ClosestPoint(gp.Point())\n    if getrc:\n        getrc, target_plane = surface.FrameAt(u,v)\n        if getrc:\n            # Build transformation\n            xform = Rhino.Geometry.Transform.PlaneToPlane(source_plane, target_plane)\n            # Do the transformation. In this example, we will copy the original objects\n            delete_original = False\n            for i in range(go.ObjectCount):\n                rhobj = go.Object(i)\n                scriptcontext.doc.Objects.Transform(rhobj, xform, delete_original)\n            scriptcontext.doc.Views.Redraw()\n            rc = Rhino.Commands.Result.Success\n    return rc\n\n\nif __name__==\"__main__\":\n    OrientOnSrf()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

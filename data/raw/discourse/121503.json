@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/nurbssurface-epsilonequals-bug/121503",
+  "topic_id": 121503,
+  "title": "NurbsSurface.EpsilonEquals bug",
+  "question": "I noticed that \nxMergeFace / xMergeAllFaces | Food4Rhino\n isn’t merging NurbsSurface faces that it should and discovered that NurbsSurface.EpsilonEquals returns False even for duplicate NurbsSurfaces.\n\n\nI see that method was recently modified: \nhttps://mcneel.myjetbrains.com/youtrack/issue/RH-61937\n\n\nThis script returns True in 6.34, but False in 7.4:\n\n\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nimport random\n\ndef main():\n    \n    pts = []\n    for iU in range(4):\n        for iV in range(4):\n            pts.append(rg.Point3d(\n                float(iU) + 0.2*(random.random()-0.5),\n                float(iV) + 0.2*(random.random()-0.5),\n                            0.2*(random.random()-0.5)\n                ))\n    \n    nsA = rg.NurbsSurface.CreateFromPoints(\n        points=pts,\n        uCount=4,\n        vCount=4,\n        uDegree=3,\n        vDegree=3)\n    \n    nsB = nsA.Duplicate()\n    \n    fTolerance = 0.001 * sc.doc.ModelAbsoluteTolerance\n    \n    print nsA.EpsilonEquals(other=nsB, epsilon=fTolerance)\n\nif __name__ == '__main__': main()",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\nimport random\n\ndef main():\n    \n    pts = []\n    for iU in range(4):\n        for iV in range(4):\n            pts.append(rg.Point3d(\n                float(iU) + 0.2*(random.random()-0.5),\n                float(iV) + 0.2*(random.random()-0.5),\n                            0.2*(random.random()-0.5)\n                ))\n    \n    nsA = rg.NurbsSurface.CreateFromPoints(\n        points=pts,\n        uCount=4,\n        vCount=4,\n        uDegree=3,\n        vDegree=3)\n    \n    nsB = nsA.Duplicate()\n    \n    fTolerance = 0.001 * sc.doc.ModelAbsoluteTolerance\n    \n    print nsA.EpsilonEquals(other=nsB, epsilon=fTolerance)\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 758
+}

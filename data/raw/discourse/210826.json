@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/eto-python-gridview-datastore-is-not-populating-data/210826",
+  "topic_id": 210826,
+  "title": "ETO, Python: GridView.DataStore is not populating data",
+  "question": "I’m trying to make a table using GridView. I can’t figure out how to populate it with data. I asked Grok to make a very simple example to demonstrate the problem. The below example is what he came up with. Grok insists I need a dictionary for each row where the key is the column title. But whether I try that or just setting the gridview’s DataStore property to the list or row data, nothing displays.\n\n\nWhat am I doing wrong?\n\n\n#! python 2\n\nimport Eto.Forms\nimport Eto.Drawing\n\n# Create the form\nform = Eto.Forms.Dialog()\nform.Title = \"Fruit Table\"\nform.Size = Eto.Drawing.Size(600, 300)\n\n# Create the GridView\ngrid_view = Eto.Forms.GridView()\ngrid_view.Size = Eto.Drawing.Size(550, 250)\n\n# Define column headers\ncolumns = [\"Fruit 1\", \"Fruit 2\", \"Fruit 3\"]\nfor col_name in columns:\n    column = Eto.Forms.GridColumn()\n    column.HeaderText = col_name\n    column.DataCell = Eto.Forms.TextBoxCell(col_name)  # Bind to dictionary key\n    column.Width = 150  # Set width for visibility\n    grid_view.Columns.Add(column)\n\n# Sample data: list of rows, each with three fruit names\ndata = [\n    [\"Apple\", \"Banana\", \"Orange\"],\n    [\"Mango\", \"Pineapple\", \"Grape\"],\n    [\"Kiwi\", \"Strawberry\", \"Blueberry\"]\n]\n\n# Convert data to DataStore format: list of dictionaries\n# this is Grok's idea and it doesn't work\ngrid_view.DataStore = [\n    {\n        \"Fruit 1\": row[0],\n        \"Fruit 2\": row[1],\n        \"Fruit 3\": row[2]\n    } for row in data\n]\n\n# this is my idea, and it also doesn't work\n# grid_view.DataStore = data\n\n# Create layout and add GridView\nlayout = Eto.Forms.DynamicLayout()\nlayout.Padding = Eto.Drawing.Padding(10)\nlayout.Add(grid_view)",
+  "code_blocks": [
+    {
+      "code": "[ERROR] FATAL UNHANDLED EXCEPTION: Python.Runtime.PythonException: unhashable type: 'list'\n   at Python.Runtime.PythonException.ThrowLastAsClrException()\n   at Python.Runtime.PyObject.GetHashCode()\n   at System.Collections.Hashtable.ContainsKey(Object key)\n   at System.Windows.Automation.Peers.ItemPeersStorage`1.set_Item(Object item, T value)\n   at System.Windows.Automation.Peers.ItemsControlAutomationPeer.GetChildrenCore()\n   at System.Windows.Automation.Peers.DataGridAutomationPeer.GetChildrenCore()\n   at System.Windows.Automation.Peers.AutomationPeer.EnsureChildren()\n   at System.Windows.Automation.Peers.AutomationPeer.UpdateChildrenInternal(Int32 invalidateLimit)\n   at System.Windows.Automation.Peers.ItemsControlAutomationPeer.UpdateChildren()\n   at System.Windows.Automation.Peers.AutomationPeer.UpdateSubtree()\n   at System.Windows.Automation.Peers.AutomationPeer.UpdateSubtree()\n   at System.Windows.ContextLayoutManager.fireAutomationEvents()\n   at System.Windows.ContextLayoutManager.UpdateLayout()\n   at System.Windows.Interop.HwndSource.Process_WM_SIZE(UIElement rootUIElement, IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam)\n   at System.Windows.Interop.HwndSource.LayoutFilterMessage(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean& handled)\n   at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)\n   at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)\n[END ERROR]",
+      "language": "python",
+      "author": "Domenic_Gallo",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 140
+}

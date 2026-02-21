@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extrusion-objects/464",
+  "topic_id": 464,
+  "title": "Extrusion Objects",
+  "question": "Hi Dale, hi Steve,\n\nLet’s see how well support will work in discourse… \n\n\nI want to use Extrusions within my Steel Detailing PlugIn. So far I can add these but I do not see a way to retrieve generic information. It would be great to have a RS method which returns the basic properties i.e. extract the curves, the plane, the height and cap status. I know there are more complex extrusions with miters, but somewhere it needs to start…\n\n\nOr can this be done with RhinoCommon meanwhile?\n\n\nThanks for your feedback,\n\n\n\n\nJess",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef getextrusionpieces():\n    id = rs.GetObject(\"select extrusion\", rs.filter.extrusion)\n    # coerce the id into a Rhino.Geometry.Extrusion object\n    extrusion = rs.coercegeometry(id)\n    if extrusion:\n        ids = []\n        for i in range(extrusion.ProfileCount):\n            start_curve = extrusion.Profile3d(i,0)\n            end_curve = extrusion.Profile3d(i,1)\n            sid = scriptcontext.doc.Objects.AddCurve(start_curve)\n            eid = scriptcontext.doc.Objects.AddCurve(end_curve)\n            ids.append(sid)\n            ids.append(eid)\n        line_id = rs.AddLine(extrusion.PathStart, extrusion.PathEnd)\n        ids.append(line_id)\n        rs.SelectObjects(ids)\n        \nif __name__==\"__main__\":\n    getextrusionpieces()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2781
+}

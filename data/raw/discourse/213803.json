@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-surface-from-polyline-c/213803",
+  "topic_id": 213803,
+  "title": "Create surface from polyline c#",
+  "question": "Hi everyone,\n\n\nI am trying to create a surface from a polyline in c# but I am stuck…\n\n\nThis is the code I have:\n\n\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing Rhino;\nusing Rhino.Geometry;\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    private void RunScript(Polyline P, ref object S)\n    {\n        if (!P.IsClosed) return;\n\n        Curve c = P.ToNurbsCurve();\n        double tol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n\n        Brep[] breps = Brep.CreatePlanarBreps(c, tol);\n        if (breps != null && breps.Length > 0)\n        {\n            S = breps[0].Faces[0].DuplicateSurface();\n        }\n    }\n}\n\n\n\nIn this image you can see the polyline and the result… It seems I am always creating a 4 corner surface but I do not know what is wrong…\n\n\nimage\n737×621 14.8 KB\n\n\nCan someone take a look?\n\n\nThanks a lot!",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing Rhino;\nusing Rhino.Geometry;\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    private void RunScript(Polyline P, ref object S)\n    {\n        if (!P.IsClosed) return;\n\n        Curve c = P.ToNurbsCurve();\n        double tol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n\n        Brep[] breps = Brep.CreatePlanarBreps(c, tol);\n        if (breps != null && breps.Length > 0)\n        {\n            S = breps[0].Faces[0].DuplicateSurface();\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "bbalbastre",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 75
+}

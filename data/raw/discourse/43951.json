@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-while-trying-to-zoomextend-a-detailview/43951",
+  "topic_id": 43951,
+  "title": "Bug while trying to zoomExtend a detailView",
+  "question": "Hi,\n\nI’ve got an issue when trying to ZoomExtents a DetailViewObject:\n\n*If I set as active the detailView it seems to work, but as soon as I set back as active the pageView, everything is cancelled.\n\n*Even stanger: If I breack the code with a dummy user action, it works! (for exemple: \nRhinoGet.GetBool(“PressEnterToContinue”, True, “”, “”, True)\n\n\nI think this some kind of commit bug, here is my code:\n\n\n   `Dim CoverSheetpageview As Rhino.Display.RhinoPageView = TryCast(doc.Views.ActiveView, Rhino.Display.RhinoPageView)\n        CoverSheetpageview.PageName = \"CoverSheet\"\n        Dim CoverSheetdetailview As Rhino.DocObjects.DetailViewObject = CoverSheetpageview.GetDetailViews(0)\n        CoverSheetpageview.SetActiveDetail(CoverSheetdetailview.Id) 'activer le premier détail de la page en cours (a généraliser)\n        CoverSheetdetailview.Viewport.ZoomExtents()\n        CoverSheetdetailview.CommitViewportChanges()\n        CoverSheetdetailview.CommitChanges()\n        CoverSheetpageview.Redraw()\n        'Désactiver le détail\n        RhinoGet.GetBool(\"PressEnterToContinue\", True, \"\", \"\", True)\n        CoverSheetpageview.SetPageAsActive()\n        doc.Views.ActiveView = CoverSheetpageview\n        CoverSheetpageview.Redraw()`",
+  "code_blocks": [
+    {
+      "code": "using Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\nusing Rhino.Input.Custom;\n\nnamespace SampleCsCommands\n{\n  [System.Runtime.InteropServices.Guid(\"c067ae91-9244-4e3f-afd6-2f0606174df8\")]\n  public class SampleCsZoom : Command\n  {\n    public SampleCsZoom()\n    {\n    }\n\n    public override string EnglishName\n    {\n      get { return \"SampleCsZoom\"; }\n    }\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Protected Overrides Function RunCommand(ByVal doc As RhinoDoc, ByVal mode As RunMode) As Result\n\n      Dim pageView = TryCast(doc.Views.ActiveView, RhinoPageView)\n      If pageView Is Nothing Then\n        Return Result.Failure\n      End If\n\n      Dim details = pageView.GetDetailViews()\n      If details Is Nothing OrElse 0 = details.Length Then\n        Return Result.Failure\n      End If\n\n      pageView.PageName = \"CoverSheet\"\n\n      For Each detail As DetailViewObject In details\n        pageView.SetActiveDetail(detail.Id)\n        detail.Viewport.ZoomExtents()\n        detail.CommitViewportChanges()\n        pageView.Redraw()\n        RhinoApp.Wait()\n      Next\n\n      pageView.SetPageAsActive()\n      pageView.Redraw()\n\n      Dim tmp As String = Nothing\n      RhinoGet.GetString(\"Press <Enter> to continue\", True, tmp)\n\n      doc.Views.ActiveView = pageView\n\n      Return Result.Success\n\n    End Function",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "pageview.SetActiveDetail(detail.Id)\ndetail.Viewport.ZoomBoundingBox(bbox)\ndetail.CommitViewportChanges()\ndetail.DetailGeometry.IsProjectionLocked = False\ndetail.DetailGeometry.SetScale(1.0, scriptcontext.doc.ModelUnitSystem, 1.0, scriptcontext.doc.PageUnitSystem)\ndetail.CommitChanges()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nobject_ids = rs.ObjectsByName('Circle')\nbbox = rs.BoundingBox(object_ids)\nrs.ZoomBoundingBox(bbox)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "`Dim CoverSheetpageview As Rhino.Display.RhinoPageView = TryCast(doc.Views.ActiveView, Rhino.Display.RhinoPageView)\n        CoverSheetpageview.PageName = \"CoverSheet\"\n        Dim CoverSheetdetailview As Rhino.DocObjects.DetailViewObject = CoverSheetpageview.GetDetailViews(0)\n        CoverSheetpageview.SetActiveDetail(CoverSheetdetailview.Id) 'activer le premier détail de la page en cours (a généraliser)\n        CoverSheetdetailview.Viewport.ZoomExtents()\n        CoverSheetdetailview.CommitViewportChanges()\n        CoverSheetdetailview.CommitChanges()\n        CoverSheetpageview.Redraw()\n        'Désactiver le détail\n        RhinoGet.GetBool(\"PressEnterToContinue\", True, \"\", \"\", True)\n        CoverSheetpageview.SetPageAsActive()\n        doc.Views.ActiveView = CoverSheetpageview\n        CoverSheetpageview.Redraw()`",
+      "language": "unknown",
+      "author": "Matthieu_from_NAVINN",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1422
+}

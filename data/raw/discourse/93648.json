@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/can-an-osnap-be-subtracted-from-a-set-in-a-python-script/93648",
+  "topic_id": 93648,
+  "title": "Can an Osnap be subtracted from a set in a Python script?",
+  "question": "What I would like to be able to do is take a “snapshot” of the current Osnap state (easy to do) and subtract one from the current set. For example, let’s say the user has \nEnd\n, \nNear\n, \nPoint\n and \nCen\n active when the script begins. But I want whatever they had active to stay active with the exception of \nNear\n. Let the script execute with \nNear\n turned off, then when the script ends, restore their Osnap state (that part is easy to do too).\n\n\nThe next user might have \nNear\n, \nPoint\n and \nMid\n enabled, and I want that state to exist with the exception of \nNear\n. Each user might have a different Osnap state, so that’s why forcing certain  Osnaps isn’t the answer (I already do that, I’m trying to improve on that).\n\n\nHope this makes sense,\n\n\nDan",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSomething():\n    old_modes = rs.OsnapMode()\n    rhOsnapModeNear = 2\n    \n    # check if Near is enabled\n    if old_modes & rhOsnapModeNear:\n        new_modes = old_modes - rhOsnapModeNear\n    else:\n        new_modes = old_modes\n    \n    # set new modes, but without Near\n    rs.OsnapMode(new_modes)\n    \n    # prompt for a point\n    point = rs.GetPoint(\"Pick a point\")\n    \n    # reset to old modes\n    rs.OsnapMode(old_modes)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 387
+}

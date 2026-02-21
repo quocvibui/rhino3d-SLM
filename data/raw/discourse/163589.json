@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-coloring-surface/163589",
+  "topic_id": 163589,
+  "title": "Rhino Coloring Surface",
+  "question": "Hi all,\n\n\nI am trying to output some colored surfaces through a python function which I intend to use in a headless compute environment.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\nghdoc = scriptcontext.doc\n\nmy_doc = Rhino.RhinoDoc.CreateHeadless(None)\nmy_doc.ModelUnitSystem = Rhino.UnitSystem.Meters\nRhino.RhinoDoc.ActiveDoc = my_doc\ndoc_object = my_doc.Objects.Find(G)\n\nif doc_object is not None:\n    attributes = doc_object.Attributes\n    geometry = doc_object.Geometry\n    scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n        \n    # We add both the geometry and the attributes to the Rhino doc\n    rhino_brep = scriptcontext.doc.Objects.Add(geometry, attributes)\n        \n    # Set print color if provided\n    if C:\n       rs.ObjectColor(rhino_brep, color=C)\n\n    scriptcontext.doc = ghdoc\n    a=rhino_brep\n\n\n\nUnfortunately this doesn’t return the colored geometry.\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "if doc_object is not None:\n    attributes = doc_object.Attributes\n    if C:\n        attributes.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n        attributes.ObjectColor = C",
+      "language": "unknown",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\nghdoc = scriptcontext.doc\n\nmy_doc = Rhino.RhinoDoc.CreateHeadless(None)\nmy_doc.ModelUnitSystem = Rhino.UnitSystem.Meters\nRhino.RhinoDoc.ActiveDoc = my_doc\ndoc_object = my_doc.Objects.Find(G)\n\nif doc_object is not None:\n    attributes = doc_object.Attributes\n    geometry = doc_object.Geometry\n    scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n        \n    # We add both the geometry and the attributes to the Rhino doc\n    rhino_brep = scriptcontext.doc.Objects.Add(geometry, attributes)\n    \n    if C:\n        attributes.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n        attributes.ObjectColor = C\n\n    scriptcontext.doc = ghdoc\n    a=rhino_brep",
+      "language": "python",
+      "author": "Rivindu_Bandara",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\nghdoc = scriptcontext.doc\n\nmy_doc = Rhino.RhinoDoc.CreateHeadless(None)\nmy_doc.ModelUnitSystem = Rhino.UnitSystem.Meters\nRhino.RhinoDoc.ActiveDoc = my_doc\ndoc_object = my_doc.Objects.Find(G)\n\nif doc_object is not None:\n    attributes = doc_object.Attributes\n    if C:\n        attributes.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n        attributes.ObjectColor = C\n    geometry = doc_object.Geometry\n    scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n        \n    # We add both the geometry and the attributes to the Rhino doc\n    rhino_brep = scriptcontext.doc.Objects.Add(geometry, attributes)\n\n    scriptcontext.doc = ghdoc\n    a=rhino_brep",
+      "language": "python",
+      "author": "Rivindu_Bandara",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "colors = []\n\nfor val in response_object:\n    paramName = val['ParamName']\n    if paramName == \"RH_OUT:Colors\":\n        innerTree = val['InnerTree']\n        for key, innerVals in innerTree.items():\n            for innerVal in innerVals:\n                if 'data' in innerVal:\n                    data = json.loads(innerVal['data'])\n                    colors.append(data)\n\nfor idx, val in enumerate(response_object):\n    paramName = val['ParamName']\n    if paramName == \"RH_OUT:Surface\":\n        innerTree = val['InnerTree']\n        for key, innerVals in innerTree.items():\n            for innerVal in innerVals:\n                if 'data' in innerVal:\n                    data = json.loads(innerVal['data'])\n                    geo = rh.CommonObject.Decode(data)\n\n                    if idx < len(colors):\n                        color_str = colors[idx]\n                        r, g, b = map(int, color_str.split(','))\n                        a = 255\n                        att = rh.ObjectAttributes()\n                        att.PlotColor = (r, g, b, int(a))\n                        model.Objects.AddBrep(geo, att)",
+      "language": "python",
+      "author": "Rivindu_Bandara",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "if(breps.Count != colors.Count) return; //the list of breps does not match the list of colors\n\nusing (var doc = RhinoDoc.CreateHeadless(null))\n{\n  for(int i = 0; i < breps.Count; i++)\n  {\n    var att = new Rhino.DocObjects.ObjectAttributes();\n    att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject;\n    att.ObjectColor = colors[i];\n    doc.Objects.Add(breps[i], att);\n  }\n  if(export && !doc.Export(filepath)){\n    //File could not be saved\n  }\n}",
+      "language": "csharp",
+      "author": "AndyPayne",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\nghdoc = scriptcontext.doc\n\nmy_doc = Rhino.RhinoDoc.CreateHeadless(None)\nmy_doc.ModelUnitSystem = Rhino.UnitSystem.Meters\nRhino.RhinoDoc.ActiveDoc = my_doc\ndoc_object = my_doc.Objects.Find(G)\n\nif doc_object is not None:\n    attributes = doc_object.Attributes\n    geometry = doc_object.Geometry\n    scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n        \n    # We add both the geometry and the attributes to the Rhino doc\n    rhino_brep = scriptcontext.doc.Objects.Add(geometry, attributes)\n        \n    # Set print color if provided\n    if C:\n       rs.ObjectColor(rhino_brep, color=C)\n\n    scriptcontext.doc = ghdoc\n    a=rhino_brep",
+      "language": "python",
+      "author": "Rivindu_Bandara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 15,
+  "views": 981
+}

@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cant-bake-hatches-if-created-in-grasshopper-bug/211019",
+  "topic_id": 211019,
+  "title": "Can't bake hatches if created in Grasshopper? bug!",
+  "question": "I have a workflow where I am baking hatches using C# and I have found that Rhino 8/Grashopper will only bake hatches if they are referenced, or internalized from a referenced hatch from Rhino. Rhino 8 will NOT bake hatches if they are created within Grasshopper. See the attached video showing the issue. See the attached Grasshopper file where you can (hopefully) recreate the issue.\n\n\nThe only thing I can think is there is some difference with GH_Hatches vs Hatches? Not sure. I am using \nRhino.RhinoDoc.ActiveDoc.Objects.Add(hatch);\n as the method in C# to bake the hatches to Rhino.\n\n\n\n\n\n\nhatch_bug_exploration.gh\n (31.1 KB)",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(Hatch hatch, bool run, ref object a)\n    {\n        if(run) {\n            GH_Hatch h = new GH_Hatch(hatch);\n            var attrs = new ObjectAttributes();\n            if (h is IGH_BakeAwareData bakeAware)\n            {\n                bakeAware.BakeGeometry(Rhino.RhinoDoc.ActiveDoc, attrs, out Guid id);\n            }\n        }\n    }",
+      "language": "csharp",
+      "author": "James_D",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "grasshopper"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 107
+}

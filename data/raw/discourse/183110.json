@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wish-loose-lock-allow-selecting-of-locked-objects/183110",
+  "topic_id": 183110,
+  "title": "Wish: Loose lock! Allow selecting of locked objects",
+  "question": "I would love to see a new option in Rhino that lets me select or extract edges or surfaces from locked objects or objects of locked layers. This way, the original locked object will remain intact, but with the added benefit that the user could still use it as a reference to extract sub-object geometry or edges, or match its properties and transfer them to unlocked objects without the need to unlock it preliminary. Not to mention that this will heavily reduce the need to often reach the Layers panel to lock or unlock various objects in the scene.\n\n\nIn fact, any unnecessary unlocking of an important object potentially may lead to its accidental moving, scaling, rotating etc. Having a so-called “Loose lock” will bring the benefits from both Worlds.\n\n\nAlso, add another option to choose whether the “Isolate” command will hide the locked objects or not. Or, the user could take advantage of the “Loose lock” and select even locked objects that he or she wants to isolate, whereas the non-selected locked objects will be hidden during the isolation.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport eLib as e\n\ndef AllSelectable():\n    \n    # skip turning on or off for specific layers from a template file\n    layersToSkip = [\n        '1ced3d60-c6a7-48b5-81f1-4daef190945f', #Layout::MM::Grandpappy\n        '67bfd040-c5c5-4493-9b0e-8061b7d8c488' # 0\n    ]\n\n    # get a list of all layers in the document\n    layerIDs = rs.LayerIds()\n    \n    # create an empty list to store the layer information\n    layerStates = []\n\n    # loop through each layer and get its visibility and lock state\n    for layerID in layerIDs:",
+      "language": "python",
+      "author": "EricM",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport eLib as e\n\ndef UndoAllSelectable():\n\n    if sc.sticky.has_key(e.layerStatesKey):\n        layerStates = sc.sticky[e.layerStatesKey]\n        if isinstance(layerStates, list):\n            for layer in layerStates:\n                if isinstance(layer, e.LayerState) and rs.IsLayer(layer.layerId):\n                    rs.LayerVisible(layer.layerId, layer.visible)\n                    rs.LayerLocked(layer.layerId, layer.locked)\n        \n        del sc.sticky[e.layerStatesKey]\n\n\n    if sc.sticky.has_key(e.hiddenObjsKey):\n        hiddenObjs = sc.sticky[e.hiddenObjsKey]\n        if isinstance(hiddenObjs, list):",
+      "language": "python",
+      "author": "EricM",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 27,
+  "views": 844
+}

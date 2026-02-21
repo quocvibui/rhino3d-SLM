@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-control-of-picture-srf-transparency-settings/204751",
+  "topic_id": 204751,
+  "title": "Python Control of Picture (Srf) Transparency Settings",
+  "question": "I am trying to automate the control of the transparency within a PNG and am unable to this with the implements that I’m aware of.  I’ve built tools to automate the production of transparent PNGs where the perfs come in on that layer of the image (this way I don’t have to create a massive file size by perfing a surface) - works great when I do this manually.  When I bring it in via python, the mask is not acknowledged - shows up white.  I found a radio button that turns it on, but all this seems clunky.\n\n\nI don’t want to render anything, but I’m trying to get a visualization from the shaded view that can be placed on the drawing - so I can print the linework with the perfs/material.\n\n\nNeed help, thx!\n\n\nimage\n776×554 32.5 KB",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport rhinoscriptsyntax as rs\npicture = rs.GetObject(preselect=True)\nmat = rs.ObjectMaterialIndex(picture)\nvalue = 0.5\nrs.MaterialTransparency(mat, value)",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npicture = rs.GetObject(preselect=True)\nmat = rs.ObjectMaterialIndex(picture)\nmaterial = sc.doc.Materials[mat]\nmaterial.AlphaTransparency = True\nmaterial.CommitChanges()",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npicture = rs.GetObject(preselect=True)\nmat = rs.ObjectMaterialIndex(picture)\nmaterial = sc.doc.Materials[mat]\nrender_material = material.RenderMaterial\nchild_name = \"bitmap-texture\"\ntexture = render_material.FindChild(child_name)\nfield_name = \"use-alpha-channel\"\ntexture.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Script)\ntexture.Fields.Set(field_name, True)\ntexture.EndChange()",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport System\n\npicture = rs.GetObject(preselect=True)\nmat = rs.ObjectMaterialIndex(picture)\nmaterial = sc.doc.Materials[mat]\nrender_material = material.RenderMaterial\nchild_name = \"bitmap-texture\"\ntexture = render_material.FindChild(child_name)\ntexture.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Script)\ntexture.Fields.Set(\"has-transparent-color\", True)\ntexture.Fields.Set(\"transparent-color\", System.Drawing.Color.Black)\ntexture.Fields.Set(\"transparent-color-sensitivity\", 0.5) # adjust as needed\ntexture.EndChange()",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "picture = rs.GetObject(preselect=True)\nmat = rs.ObjectMaterialIndex(picture)\nmaterial = sc.doc.Materials[mat]\nrender_material = material.RenderMaterial\nchild_name = \"bitmap-texture\"\ntexture = render_material.FindChild(child_name)\ntexture.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Script)\ntexture.Fields.Set(\"has-transparent-color\", True)\ntexture.Fields.Set(\"transparent-color\", System.Drawing.Color.Black)\ntexture.Fields.Set(\"transparent-color-sensitivity\", 0.5) # adjust as needed\ntexture.EndChange()",
+      "language": "python",
+      "author": "dushea",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 161
+}

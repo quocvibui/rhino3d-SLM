@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/run-a-script-when-saving/47300",
+  "topic_id": 47300,
+  "title": "Run a script when saving",
+  "question": "Hi,\n\nI am searching for a way to launch a script right after another command.\n\nHow can I do that ?\n\n\nExample : I made a python script to export a CSV file of my model. I’d like it to be launched every time I save my model.\n\n\nAnother question : Can I have a script launched every 10 minutes?\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef MyBeginSaveDocumentEvent(sender, e):\n    print \"BeginSaveDocument Event\"\n    # setup idle event\n    Rhino.RhinoApp.Idle += MyIdleEvent\n\ndef MyIdleEvent(sender, e):\n    print \"Idle Event, LastCommand:\", rs.LastCommandName()\n    # let the idle event remove itself\n    Rhino.RhinoApp.Idle -= MyIdleEvent\n    \nkey = \"MyBeginSaveDocumentEvent\"\nif scriptcontext.sticky.has_key(key):\n    print \"removing event:\", key\n    scriptcontext.doc.BeginSaveDocument -= scriptcontext.sticky[key]\n    scriptcontext.sticky.Remove(key)\nelse:\n    print \"adding event:\", key\n    scriptcontext.sticky[key] = MyBeginSaveDocumentEvent\n    scriptcontext.doc.BeginSaveDocument += MyBeginSaveDocumentEvent",
+      "language": "python",
+      "author": "clement",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1224
+}

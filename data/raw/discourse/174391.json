@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-geometry-python-script-error/174391",
+  "topic_id": 174391,
+  "title": "Rhino.geometry python script error",
+  "question": "Hi all,\n\n\nI have created a small script that defined the midpoints based on a input list of points.\n\nI am trying to calculate the distance between all the mid points (d_1,d_2,d_3) and the distance between the first point to the first mid point (m_1), and the distance from the last point to the last mid points (m_2).\n\n\nimage\n892×544 11.1 KB\n\n\nWhenever I calculate the distance m2 I get the following error:\n\n\nSystem.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter ‘index’)\n\n**   at Rhino.Runtime.Code.Languages.PythonNet.CPythonCode.Execute(RunContext context)**\n\n**   at Rhino.Runtime.Code.Code.ExecTry(RunContext context, IPlatformDocument& doc, Object& docState)**\n\n**   at Rhino.Runtime.Code.Code.Run(RunContext context)**\n\n\nCode:\n\n\n<\nimport Rhino.Geometry as rg\n\n# Input parameter\ninput_points = your_input_points  # Connect your list of points here\n\n# Initialize an empty list to store midpoints\nmidpoints = []\nA = input_points[0]\nZ = input_points[-1]\n\n# Compute midpoints between subsequent points\nfor i in range(len(input_points) - 1):\n    point1 = input_points[i]\n    point2 = input_points[i + 1]\n    midpoint = (point1 + point2) / 2\n    midpoints.append(midpoint)\n\n# Initialize a list to store distances between midpoints\ndistances_between_midpoints = []\n\n# Compute distances between consecutive midpoints\nfor i in range(len(midpoints) - 1):\n    distance_between_midpoints = rg.Point3d.DistanceTo(midpoints[i], midpoints[i + 1])\n    distances_between_midpoints.append(distance_between_midpoints)\n\n# Calculate the distance from the first original point to the first midpoint\nB = midpoints[0]\ndistance_to_first_midpoint = A.DistanceTo(B)\n\n# Calculate the distance from the last original point to the last midpoint\nC = midpoints[-1]\ndistance_to_last_midpoint = Z.DistanceTo(C)\n\n# Output the resulting midpoints and distances between midpoints\na = midpoints\nb = distances_between_midpoints\nc = distance_to_first_mi...",
+  "code_blocks": [
+    {
+      "code": "<\nimport Rhino.Geometry as rg\n\n# Input parameter\ninput_points = your_input_points  # Connect your list of points here\n\n# Initialize an empty list to store midpoints\nmidpoints = []\nA = input_points[0]\nZ = input_points[-1]\n\n# Compute midpoints between subsequent points\nfor i in range(len(input_points) - 1):\n    point1 = input_points[i]\n    point2 = input_points[i + 1]\n    midpoint = (point1 + point2) / 2\n    midpoints.append(midpoint)\n\n# Initialize a list to store distances between midpoints\ndistances_between_midpoints = []\n\n# Compute distances between consecutive midpoints\nfor i in range(len(midpoints) - 1):\n    distance_between_midpoints = rg.Point3d.DistanceTo(midpoints[i], midpoints[i + 1])\n    distances_between_midpoints.append(distance_between_midpoints)\n\n# Calculate the distance from the first original point to the first midpoint\nB = midpoints[0]\ndistance_to_first_midpoint = A.DistanceTo(B)\n\n# Calculate the distance from the last original point to the last midpoint\nC = midpoints[-1]\ndistance_to_last_midpoint = Z.DistanceTo(C)\n\n# Output the resulting midpoints and distances between midpoints\na = midpoints\nb = distances_between_midpoints\nc = distance_to_first_midpoint\nd = distance_to_last_midpoint>",
+      "language": "python",
+      "author": "tommasovidali94",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n# Input parameter\ninput_points = your_input_points  # Connect your list of points here\n\n# Initialize an empty list to store midpoints\nmidpoints = []\nA = input_points[0]\n#Z = input_points[-1]\n\n# Compute midpoints between subsequent points\nfor i in range(len(input_points) - 1):\n    point1 = input_points[i]\n    point2 = input_points[i + 1]\n    midpoint = (point1 + point2) / 2\n    midpoints.append(midpoint)\n\n# Initialize a list to store distances between midpoints\ndistances_between_midpoints = []\n\n# Compute distances between consecutive midpoints\nfor i in range(len(midpoints) - 1):\n    distance_between_midpoints = rg.Point3d.DistanceTo(midpoints[i], midpoints[i + 1])\n    distances_between_midpoints.append(distance_between_midpoints)\n\n# Calculate the distance from the first original point to the first midpoint\nB = midpoints[0]\ndistance_to_first_midpoint = A.DistanceTo(B)\n\n# Calculate the distance from the last original point to the last midpoint\n#C = midpoints[-1]\n#distance_to_first_midpoint = Z.DistanceTo(C)\n\n# Output the resulting midpoints and distances between midpoints\na = midpoints\nb = distances_between_midpoints\nc = distance_to_first_midpoint\n#d = distance_to_last_midpoint",
+      "language": "python",
+      "author": "tommasovidali94",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 292
+}

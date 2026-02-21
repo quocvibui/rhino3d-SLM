@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/can-i-pay-someone-to-write-me-two-python-scripts-that-i-need-both-involve-selection-methods/35968",
+  "topic_id": 35968,
+  "title": "Can I pay someone to write me two Python scripts that I need? Both involve selection methods",
+  "question": "Hey, I’d like to commission two Python scripts that I need if someone can offer their services. What I need are described below:\n\n\n\n\n\n\nFirstly, a script that selects all objects on a layer that are intersecting with all objects of another layer. The user is prompted for each layer name. For example, let’s say a cube on “Layer 01” is intersecting with a mesh on “Layer 02”, and I only want to select the cube. With this script running, the user is prompted first for the layer that contains the objects they want to add to selection (e.g. Layer 01, which has a cube), but only if those objects are intersecting with a subsequently designated layer’s objects (Layer 02, which has a mesh). In this example, the cube would be selected after running this script, but not the mesh of course. Let’s say you had 80,000 polysurfaces on one layer that are overlapping a reference mesh on another layer, but only wanted to select the polysurfaces that touch the mesh – that’s why I need this script.\n\n\n\n\n\n\nThe second script selects all objects that are in any way visible (from outside the extents of everything in the scene), from any direction. For example, let’s say you had 27 cubes, contiguously joined as a 3 by 3 by 3 amalgamation. This script when run would add the outside 26 cubes to the selection, leaving the hidden center cube unselected.\n\n\n\n\n\n\nLet me know if you are interested, and we can talk! Thanks!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\ndef SelectLayers():\n    filter_layer = rs.GetLayer(title = 'select layer to filter by intersection')\n    if not filter_layer: return None,None\n    \n    intersect_layer = rs.GetLayer(title = 'select layer with intersecting geometry')\n    if not intersect_layer: return None,None\n    \n    return filter_layer,intersect_layer\n\ndef TestIntersection(obj,tester):\n    # there are a few possible intersection methods in rhinoscriptsyntax\n    # as an initial setup only a few intersections are handled\n    # to make this script faster and more robuste best would be to intersect not with rhinoscriptsyntax\n    # But use RhinoCommon methods instead.\n    #\n    #for now only rhinoscriptsyntax methods are used as an example below:\n    \n    # if both are breps ( (poly)surface or extrusion\n    if rs.IsBrep(obj) and rs.IsBrep(tester):\n        intersections = rs.IntersectBreps(obj,tester)\n        if intersections : \n            #Delete intersections if they were made\n            rs.DeleteObjects(intersections)\n            return True\n\n    if rs.IsMesh(obj) and rs.IsMesh(tester):\n        intersections = rs.MeshMeshIntersection(obj,tester)\n        if intersections : \n            #This method does not create a curve but returns a list of points\n            #so nothing to delete\n            return True\n            \n    #Mixed input needs to be handled different as is with curves.\n    #if either is a mesh the other needs to be converted to a mesh as well\n    \n    #catchall return False\n    return False\n    \n    \ndef Main():\n    \n    # run method to select 2 layers\n    filter_layer,intersect_layer =  SelectLayers()\n    if not filter_layer: return \n    \n    # Get all objects on the layers (note that also hidden/locked are used)\n    filter_objs = rs.ObjectsByLayer(filter_layer)\n    intersect_objs  = rs.ObjectsByLayer(intersect_layer)\n    \n    # test if object on filter_layer intersects with any object on intersect layer\n    intersecting_objs = []\n    for obj in filter_objs:\n        for tester in intersect_objs:\n            # here the pseudo code is: does obj intersect with tester\n            # I do not know the type of objects possible so\n            # a more elaborate intersection methos is needed.\n            if TestIntersection(obj,tester):\n                intersecting_objs.append(obj)\n                break #break out of for loop to prevent unneeded tests         \n            \n            \n    if intersecting_objs:\n        rs.SelectObjects(intersecting_objs)\n    \nMain()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1124
+}

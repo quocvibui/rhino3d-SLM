@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/SHLFab/shl-toolbox/blob/268349a38b254c507c73a5a12f81f05d8af3acfc/lib/rhino_util.py",
+  "repo": "SHLFab/shl-toolbox",
+  "repo_stars": 1,
+  "repo_description": "SHL Fabrication tools",
+  "license": "AGPL-3.0",
+  "filepath": "lib/rhino_util.py",
+  "instruction": "help docstring",
+  "code": "\"\"\"help docstring\"\"\"\n#workshop_lib\n#rhino utilities\n\n#SHL Architects\n#Sean Lamb 2018-09-26\n#TODO: define an __all__\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nfrom scriptcontext import doc\nimport scriptcontext as sc\nimport System\n\nimport shl_toolbox_lib.util as wut\nreload(wut)\n\nimport random\nfrom collections import namedtuple\n\n\ndef extrusion_to_brep(extrusion):\n\t\"\"\"convert a single extrusion geometry to a brep geometry\"\"\"\n\tif extrusion.HasBrepForm == True: brep = extrusion.ToBrep()\n\treturn brep\n\n\ndef docobj_to_guid(doc_input):\n\t\"\"\"convert list of doc objects to guids. handles single objects as well.\"\"\"\n\tif isinstance(doc_input, list):\n\t\toutput = [obj.Id for obj in doc_input]\n\telse:\n\t\toutput = doc_input.Id\n\treturn output\n\n\ndef add_curve_to_layer(curve,layer_index):\n\t\"\"\"add curve to layer by layer index\"\"\"\n\tattribs = Rhino.DocObjects.ObjectAttributes()\n\tattribs.LayerIndex = layer_index\n\tcrv_added = doc.Objects.AddCurve(curve,attribs)\n\tif crv_added != System.Guid.Empty:\n\t\treturn crv_added\n\treturn Rhino.Commands.Result.Failure\n\n\ndef add_brep_to_layer(brep,layer_index):\n\t\"\"\"add brep to layer by layer index\"\"\"\n\tattribs = Rhino.DocObjects.ObjectAttributes()\n\tattribs.LayerIndex = layer_index\n\tcrv_added = doc.Objects.AddBrep(brep,attribs)\n\tif crv_added != System.Guid.Empty:\n\t\treturn crv_added\n\treturn Rhino.Commands.Result.Failure\n\n\ndef add_curves_to_layer(curves_list,layer_index):\n\t\"\"\"add list of curves to layer by layer index\"\"\"\n\tattribs = Rhino.DocObjects.ObjectAttributes()\n\tattribs.LayerIndex = layer_index\n\tcrv_added = []\n\tfor curve in curves_list:\n\t\tcrv_added.append(doc.Objects.AddCurve(curve,attribs))\n\treturn crv_added\n\n\ndef polycurve_to_polyline(g_polycurve,absolute_tolerance,angle_tolerance):\n\t\"\"\"convert a polycurve to a polyline\"\"\"\n\tmax_len = 0\n\tmin_len = 0\n\n\tfor i in xrange(g_polycurve.SegmentCount):\n\t\tseg = g_polycurve.SegmentCurve(i)\n\t\t#print i\n\t\tseg_len = seg.GetLength()\n\t\t#get segs\n\t\tif i == 0: min_len = seg_len\n\t\tif seg_len > max_len: max_len = seg_len\n\t\tif seg_len < min_len: min_len = seg_len\n\n\t#Polyline conversion\n\tg_polyline = g_polycurve.ToPolyline(doc.ModelAbsoluteTolerance,doc.ModelAngleToleranceDegrees,min_len,max_len)\n\n\treturn g_polyline\n\n\ndef polylinecurve_to_polycurve(g_polylinecurve):\n\tg_polycurve = Rhino.Geometry.PolyCurve()\n\tptcount = g_polylinecurve.PointCount\n\tfor i in xrange(ptcount-1):\n\t\tpt1 = g_polylinecurve.Point(i)\n\t\tpt2 = g_polylinecurve.Point(i+1)\n\t\tline = Rhino.Geometry.Line(pt1,pt2)\n\t\tg_polycurve.Append(line)\n\tg_polycurve.MakeClosed(doc.ActiveDoc.ModelAbsoluteTolerance)\n\treturn g_polycurve\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

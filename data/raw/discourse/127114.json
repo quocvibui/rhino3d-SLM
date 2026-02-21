@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-contral-the-orientation-of-offset-with-rhinoscriptsyntax/127114",
+  "topic_id": 127114,
+  "title": "How to contral the orientation of offset with rhinoscriptsyntax",
+  "question": "I meet a problem when I am programming with rhinoscriptsyntax.Basically, I need to offset a curve to the direction that contrary to it (like the picture show). But when I use the OffsetCurve command, I find out that the ‘direction’ parameter, which inputed as a point or a Vector3D, can not adjust the direction of the offset. In this case, I use (0, -1, 0) as a direction, but it still points in the positive direction of the y-axis. The only that I can control the direction is to use the positive and negative values of distance.\n\n\n\nMy question is: How to control the orientation of offset with a vector or point, but not positive and negative of numbers.\n\nThat is my first forum of this forum, I sincerely ask the experts for help😊",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nbase_line = rs.AddLine(rs.AddPoint((1, 10, 0)), rs.AddPoint((10, 10, 0)))\noffseted_line_1 = rs.OffsetCurve(base_line, (0, 1, 0), 2)\n\n'''\nI wanna use \"vector\" as a direction vector or point to describe the 'Y-axis positive direction'\nWhile, it not work, the direction of offset can only be controled by the positive and negative of \"distance\" \nI trying to convert a point to a vector, and received a similar result\n\n'''\n\nvector = rs.VectorCreate((0, 0, 0), (0, 1, 0))\noffseted_line_2 = rs.OffsetCurve(base_line, vector, 2)",
+      "language": "python",
+      "author": "eastnoob",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#create start and end points\ns_pt=rs.coerce3dpoint([1,10,0])\ne_pt=rs.coerce3dpoint([10,10,0])\n#add line\nbase_line = rs.AddLine(s_pt,e_pt)\n#create a world +Y vector\ny_vec=rs.coerce3dvector([0,1,0]) \n#add the vector to line mid point to create offset point\noffset_pt=rs.CurveMidPoint(base_line)+y_vec\n#offset the line\noffset_line_1 = rs.OffsetCurve(base_line, offset_pt, 2)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 990
+}

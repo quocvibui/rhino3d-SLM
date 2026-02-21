@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-can-i-coding-runtime-message-in-rhino-8-s-grasshopper-sdk/180039",
+  "topic_id": 180039,
+  "title": "How can I coding runtime message in Rhino 8 's Grasshopper SDK?",
+  "question": "I have try to convert program from Grasshopper in Rhino 7 with IronPython to Grasshopper in Rhino 8 with both IronPython and Python3 but not successful.\n\n\nThis error are intend after compiled it to a component\n\n\nIt would be great if anyone can suggest me on how to fixed it.\n\n\nHere are what I have try\n\n\nThere are 5 different source:\n\n\n\n\nCode A\n, SDK and Class(component) with ghenv.Component in class\n\n\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, x, y):\n        a = 1\n        blWarn = ghenv.Component.RuntimeMessageLevel.Warning\n        ghenv.Component.AddRuntimeMessage(blWarn, \"Balloon Message\")\n        ghenv.Component.Message = \"Component Message\"\n        return a\n\n\n\n\n\n\nCode B\n, SDK  and Class(component) but use self instead of ghenv.Compoent in class\n\n\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, x, y):\n        a = 1\n        blWarn = self.RuntimeMessageLevel.Warning\n        self.AddRuntimeMessage(blWarn, \"Balloon Message\")\n        self.Message = \"Component Message\"\n        return a\n\n\n\n\n\nCode C\n, SDK  and Class(GH_ScriptInstance) with ghenv.Compoent in class\n\n\n\n\nimport System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        blWarn = ghenv.Component.RuntimeMessageLevel.Warning\n        ghenv.Component.AddRuntimeMessage(blWarn, \"Balloon Message\")\n        ghenv.Component.Message = \"Component Message\"\n        a = 1\n        \n        return a\n\n\n\n\n\nCode D\n, SDK  and Class(GH_ScriptInstance) but use self instead of ghenv.Compoent in class\n\n\n\n\nimport System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grassho...",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, x, y):\n        a = 1\n        blWarn = ghenv.Component.RuntimeMessageLevel.Warning\n        ghenv.Component.AddRuntimeMessage(blWarn, \"Balloon Message\")\n        ghenv.Component.Message = \"Component Message\"\n        return a",
+      "language": "python",
+      "author": "NongKode",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, x, y):\n        a = 1\n        blWarn = self.RuntimeMessageLevel.Warning\n        self.AddRuntimeMessage(blWarn, \"Balloon Message\")\n        self.Message = \"Component Message\"\n        return a",
+      "language": "python",
+      "author": "NongKode",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        blWarn = ghenv.Component.RuntimeMessageLevel.Warning\n        ghenv.Component.AddRuntimeMessage(blWarn, \"Balloon Message\")\n        ghenv.Component.Message = \"Component Message\"\n        a = 1\n        \n        return a",
+      "language": "python",
+      "author": "NongKode",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        blWarn = self.RuntimeMessageLevel.Warning\n        self.AddRuntimeMessage(blWarn, \"Balloon Message\")\n        self.Message = \"Component Message\"\n        a = 1\n        \n        return a",
+      "language": "python",
+      "author": "NongKode",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 424
+}

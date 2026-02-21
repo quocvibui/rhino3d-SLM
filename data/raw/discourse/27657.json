@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-exclude-press-the-enter-button-using-the-macro/27657",
+  "topic_id": 27657,
+  "title": "How to exclude press the \"Enter\" button using the macro?",
+  "question": "Hi\n\n\nSome commands to need a select one or more objects to execute the command.\n\n\nFor example, consider the command _Pull\n\nThis command use one or more curves and the one or more surfaces.\n\n\nIn the process of executing the command must first select the curve or curves, press enter when done. Select the surfaces and then press Enter to complete the command.\n\n\nFor example, I will use only one curve and only one surface.\n\nIn this case, there is no need to enter the keys\n\nIs it possible with the help of a macro to find good way to stop the selection process without an Enter key / Right mouse button / Spacebar\n\n\nOr for this purpose it is necessary to write the script?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n    \ndef PullCurveToSurface():\n    \n    crv_id = rs.GetObject(\"Select curve to pull\", 4, True, False)\n    if not crv_id: return\n    \n    srf_id = rs.GetObject(\"Select surface that pulls\", 8, False, False)\n    if not srf_id: return\n    \n    result = rs.PullCurve(srf_id, crv_id, delete_input=True)\n    if result: rs.SelectObjects(result)\n    \nPullCurveToSurface()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef PullCurveToSurface():\n    \n    crv_id = rs.GetObject(\"Select curve to pull\", 4, True, False)\n    if not crv_id: return\n    \n    ref = rs.GetObject(\"Select surface that pulls\", 8, True, False, None, True)\n    if not ref: return\n    \n    crv = rs.coercecurve(crv_id, True)\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    curves = crv.PullToBrepFace(ref.Face(), tolerance)\n    if curves.Count > 0:\n        ids = [scriptcontext.doc.Objects.AddCurve(c) for c in curves]\n        rs.SelectObjects(ids)\n        rs.DeleteObject(crv_id)\n    \nPullCurveToSurface()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "crv_id = rs.GetObject(\"Select curve to pull\", 4, True, False)\nif not crv_id: return\n\nref = rs.GetObject(\"Select surface that pulls\", 8, True, False, None, True)\nif not ref: return\n\ncrv = rs.coercecurve(crv_id, True)\ntolerance = scriptcontext.doc.ModelAbsoluteTolerance\ncurves = crv.PullToBrepFace(ref.Face(), tolerance)\nif curves.Count > 0:\n    ids = [scriptcontext.doc.Objects.AddCurve(c) for c in curves]\n    rs.SelectObjects(ids)\n    rs.DeleteObject(crv_id)",
+      "language": "python",
+      "author": "leex",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 13,
+  "views": 3017
+}

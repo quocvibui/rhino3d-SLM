@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-convert-guid-to-point3d-by-python-script/35594",
+  "topic_id": 35594,
+  "title": "How to convert GUID to Point3D by python script",
+  "question": "Hi!\n\n\nI am trying to make grasshopper components using ghpython.\n\nIn the script, I need to change data type from GUID to point3d.\n\nCan anyone tell how to convert data type by python script?\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rg\nimport rhinoscriptsyntax as rs\n\nguid = rs.GetObjects('pick please')\n\npt = rs.coerce3dpoint(guid)\nprint pt",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nfrom Rhino import *\nfrom scriptcontext import doc\n\nfilter = Rhino.DocObjects.ObjectType.Point\nrc, obj_ref = Rhino.Input.RhinoGet.GetOneObject(\"Select point\", False, filter)\n\npoint = obj_ref.Point()\npoint3 = doc.Objects.AddPoint(point.Location)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "for i in range(0, 10, 2):\n    xform = rg.Geometry.Transform.Translation(i, 0, 0)\n    point_ref = doc.Objects.Transform(obj, xform, False)\n    pts = rs.coerce3dpoint(point_ref)\n    \n    circle = rg.Geometry.Circle(pts, 5)\n    obj_ref = doc.Objects.AddCircle(circle)\n    doc.Views.Redraw()",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef CreateCircles():\n    obj = rs.GetObject('select a point')\n    pt = rs.coerce3dpoint(obj)\n    dist=2\n    for i in range(10):\n        xform = Rhino.Geometry.Transform.Translation(dist,0,0)\n        pt.Transform(xform)\n        circle = Rhino.Geometry.Circle(pt, 5)\n        obj_ref = sc.doc.Objects.AddCircle(circle)\n        sc.doc.Views.Redraw()\n\nCreateCircles()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef CreateCircles():\n    pick_pt = rs.GetPoint(\"Pick start point\")\n    if pick_pt:\n        dist=2\n        circle_ids=[]\n        for i in range(10):\n            pt=Rhino.Geometry.Point3d(pick_pt.X+i*dist,pick_pt.Y,pick_pt.Z)\n            circle = Rhino.Geometry.Circle(pt, 5)\n            circle_ids.append(sc.doc.Objects.AddCircle(circle))\n            sc.doc.Views.Redraw()\n\nCreateCircles()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 10857
+}

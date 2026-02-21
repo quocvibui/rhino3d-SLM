@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curve-mathemathics-curve-gradient-derivative-constant/26886",
+  "topic_id": 26886,
+  "title": "Curve mathemathics: curve + gradient derivative * constant",
+  "question": "Hi there,\n\nI’m looking into finding information about OpenNurbs access with python scripting on mac.\n\nBasically what i’d have to do is this:\n\nGiven a curve A, i’d like to generate another curve B which is generated according to the following formula:\n\n\nCurve B = Curve A + gradient(X,Y,Z) * constant\n\n\nMy current and idiotic script does the following:\n\nIt divides the curve in a lot of small points and offsets these points by the derivative,\n\nbut this gets computationally very messy and generates messy curves too.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System.Guid\n\nclass TanLines:\n    def __init__ (self, INcurve, INdivideBy, INradius):\n        self.curve = INcurve\n        self.divideBy = float(INdivideBy)\n        self.radius = int(INradius)\n\n    def tanPoints(self):\n        doms = rs.CurveDomain(self.curve)\n        minDom = doms[0]\n        maxDom = doms[1]\n        points = Rhino.Collections.Point3dList(30)\n        lengthCurve = rs.CurveLength(self.curve)\n        self.numOfDivs = (lengthCurve/self.divideBy)\n\n        for i in range(0, int(self.numOfDivs)):\n            if i > 1:\n                paramNext = ((maxDom-minDom)/self.numOfDivs) * (1+i)\n            if i == 1:\n                param = ((maxDom-minDom)/self.numOfDivs) * (i)\n            param = (maxDom-minDom)/self.numOfDivs * i\n\n            pt = rs.EvaluateCurve(self.curve,  param)\n            tan = rs.CurveTangent(self.curve, param)\n            if i > 1:\n                tanNext = rs.CurveTangent(self.curve, paramNext)\n\n            if i == 0:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), -10)\n            elif i == self.numOfDivs-1:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), 10)\n            else:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), self.radius)\n\n            tanPt = rs.PointAdd(rs.PointAdd(tan, pt), (0,0,i*0.00))\n            #rs.AddLine(pt, tanPt)\n            if (i > 1):\n                if ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System.Guid\n\nclass TanLines:\n    def __init__ (self, INcurve, INdivideBy, INradius):\n        self.curve = INcurve\n        self.divideBy = float(INdivideBy)\n        self.radius = int(INradius)\n\n    def tanPoints(self):\n        doms = rs.CurveDomain(self.curve)\n        minDom = doms[0]\n        maxDom = doms[1]\n        points = Rhino.Collections.Point3dList(30)\n        lengthCurve = rs.CurveLength(self.curve)\n        self.numOfDivs = (lengthCurve/self.divideBy)\n\n        for i in range(0, int(self.numOfDivs)):\n            if i > 1:\n                paramNext = ((maxDom-minDom)/self.numOfDivs) * (1+i)\n            if i == 1:\n                param = ((maxDom-minDom)/self.numOfDivs) * (i)\n            param = (maxDom-minDom)/self.numOfDivs * i\n\n            pt = rs.EvaluateCurve(self.curve,  param)\n            tan = rs.CurveTangent(self.curve, param)\n            if i > 1:\n                tanNext = rs.CurveTangent(self.curve, paramNext)\n\n            if i == 0:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), -10)\n            elif i == self.numOfDivs-1:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), 10)\n            else:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), self.radius)\n\n            tanPt = rs.PointAdd(rs.PointAdd(tan, pt), (0,0,i*0.00))\n            #rs.AddLine(pt, tanPt)\n            if (i > 1):\n                if (rs.IsVectorParallelTo(tan, tanNext) == 1):\n                    points.Add(tanPt)\n            else:\n                points.Add(tanPt)\n\n        nc = Rhino.Geometry.NurbsCurve.Create(False, 3, points)\n        rc = Rhino.Commands.Result.Failure\n        if nc and nc.IsValid:\n            if scriptcontext.doc.Objects.AddCurve(nc)!=System.Guid.Empty:\n                scriptcontext.doc.Views.Redraw()\n                rc = Rhino.Commands.Result.Success\n        return rc\n\ncurve = rs.GetObject(\"Select a curve\")\nobj = TanLines(curve, rs.GetReal(\"length\", 1, 0, 10000), rs.GetReal(\"Radius\", 200, 0, 10000))\nobj.tanPoints()",
+      "language": "python",
+      "author": "Thomaxo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 844
+}

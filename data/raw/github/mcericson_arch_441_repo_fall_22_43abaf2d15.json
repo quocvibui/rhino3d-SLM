@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcericson/arch_441_repo_fall_22/blob/51976acc603fbc68cdef1edff124885fe3d917b0/09_week/center_cube.py",
+  "repo": "mcericson/arch_441_repo_fall_22",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "09_week/center_cube.py",
+  "instruction": "Center cube",
+  "code": "import rhinoscriptsyntax as rs\n\ndef center_box(center, width, length, height):\n    cx, cy, cz = center\n    \n    #lower 4 points\n    h = height/2\n    w = width/2\n    l = length/2\n    p1 = (cx - w, cy - l, cz - h)\n    p2 = (cx + w, cy - l, cz - h)\n    p3 = (cx + w, cy + l, cz - h)\n    p4 = (cx - w, cy + l, cz - h)\n    \n    #upper 4 points\n    p5 = (cx - w, cy - l, cz + h)\n    p6 = (cx + w, cy - l, cz + h)\n    p7 = (cx + w, cy + l, cz + h)\n    p8 = (cx - w, cy + l, cz + h)\n    \n    points = [p1, p2, p3, p4, p5, p6, p7, p8]\n    \n    cube = rs.AddBox(points)\n    return(cube,points)\n\n\ndef center_cube(center, radius):\n    cx, cy, cz = center\n    \n    #lower 4 points\n    p1 = (cx - radius, cy - radius, cz - radius)\n    p2 = (cx + radius, cy - radius, cz - radius)\n    p3 = (cx + radius, cy + radius, cz - radius)\n    p4 = (cx - radius, cy + radius, cz - radius)\n    \n    #upper 4 points\n    p5 = (cx - radius, cy - radius, cz + radius)\n    p6 = (cx + radius, cy - radius, cz + radius)\n    p7 = (cx + radius, cy + radius, cz + radius)\n    p8 = (cx - radius, cy + radius, cz + radius)\n    \n    points = [p1, p2, p3, p4, p5, p6, p7, p8]\n    \n    cube = rs.AddBox(points)\n    return(cube)\n\n\ndef cubic_grid(x_num, y_num, z_num, space, start_point):\n    points = []\n    x_start, y_start, z_start = start_point\n    \n    for i in range(x_start, x_num+x_start, space):\n        x = i\n        for j in range(y_start, y_num+y_start, space):\n            y = j\n            for p in range(z_start, z_num+z_start, space):\n                z = p\n                point = (x, y, z)\n                points.append(point)\n    return points\n\n\ndef coordinates_to_color(cooridinates, floor, ceiling):\n    max_color = float(255)\n    min_color = float(0)\n    \n    x, y, z = cooridinates\n    max_value = ceiling - floor\n    r_scalar = x/max_value\n    g_scalar = y/max_value\n    b_scalar = z/max_value\n    \n    r = max_color*r_scalar\n    g = max_color*g_scalar\n    b = max_color*b_scalar\n    \n    color = rs.CreateColor(r, g, b)\n    return color\n\ndef assign_material_color(object, color):\n    rs.AddMaterialToObject(object)\n    index = rs.ObjectMaterialIndex(object)\n    rs.MaterialColor(index, color)\n\n\n\ndef rgb_cube(x_num, y_num,z_num, space, start_point, floor, ceiling):\n    rs.EnableRedraw(False)\n    points = cubic_grid(x_num, y_num, z_num, space, start_point)\n    for i in points:\n        cube = center_cube(i,space/2)\n        x, y, z = i\n        color = coordinates_to_color((x, y, z),floor, ceiling)\n        assign_material_color(cube, color)\n\n\nrgb_cube(20, 20, 20, 1, (0,0,0), 0,20)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

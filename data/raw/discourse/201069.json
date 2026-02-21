@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-partition-list-problem/201069",
+  "topic_id": 201069,
+  "title": "GhPython - partition list problem",
+  "question": "Hi,\n\n\nI’m writing a python 2 script that is designed to \nexpand the index range of an input list based on a specific mode\n, then select corresponding elements using these expanded indices to generate a new data structure.\n\n\nexpand_list.gh\n (12.7 KB)\n\n\nIndex Expansion (\nexpand_indices\n function)\n\n\n\n\nComputes new index ranges based on the \nmode (\nTrailing\n, \nCentered\n, \nLeading\n)\n.\n\n\nUses \ncount\n to control how many neighboring elements are selected for each index.\n\n\nEnsures index values do not exceed the input list boundaries and supports \nwrap-around indexing\n.\n\n\n\n\nI am currently encountering an issue where the output from \ntrees.PartitionList\n does not correctly partition the data.\n\n\n圖片\n1276×831 77.1 KB\n\n\nAs shown in the uploaded image, the \ncurrent partitioning result is incorrect\n, while the \nright-side panel\n represents the \ndesired partitioning outcome\n, which maintains the correct hierarchical relationship with the input list.\n\n\nAny assistance would be greatly appreciated.\n\n\nimport ghpythonlib.treehelpers as th\nimport ghpythonlib.components as ghc\n\ndef expand_indices(index, count, mode, max_length):\n\"\"\" Expand index range based on the selected mode and ensure it does not exceed the boundary \"\"\"\noffset = (count - 1) // 2 if mode == 0 else 0  # Centered offset\n\nif mode == -1:  # Trailing (select previous elements)\n    expanded = [index - i for i in range(count - 1, -1, -1)]\nelif mode == 0:  # Centered (select both previous and next elements)\n    expanded = [index + i - offset for i in range(count)]\nelif mode == 1:  # Leading (select next elements)\n    expanded = [index + i for i in range(count)]\nelse:\n    raise ValueError(\"Invalid mode. Use -1 (Trailing), 0 (Centered), or 1 (Leading).\")\n\n# Ensure index does not exceed range\nexpanded = [i % max_length for i in expanded]\nreturn expanded\n\n# Ensure list_input is a standard list\nif not isinstance(list_input, list):\nraise ValueError(\"Input data must be a Python list.\")\n\n# Ensure list_input is a nested structure (preve...",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib import treehelpers as th\n\nstart = th.tree_to_list(start)\nresult = []\n\n#calculate offset value depending on mode and count\noffset = int( (count-1) * mode )\n\nfor i in range(len(start)):\n    container = []\n    \n    # prepare the list by initially shifting it by offset value\n    shifted_list = start[i][offset:] + start[i][:offset]\n    \n    for j in range(len(shifted_list)):\n        # copysave first c=count values into a separate list\n        container.append(shifted_list[:count])\n        \n        # prepare list for next iteration by shifting it 1 position\n        shifted_list = shifted_list[1:] + shifted_list[:1]\n    \n    result.append(container)\n\nresult = th.list_to_tree(result)",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import ghpythonlib.treehelpers as th\nimport ghpythonlib.components as ghc\n\ndef expand_indices(index, count, mode, max_length):\n\"\"\" Expand index range based on the selected mode and ensure it does not exceed the boundary \"\"\"\noffset = (count - 1) // 2 if mode == 0 else 0  # Centered offset\n\nif mode == -1:  # Trailing (select previous elements)\n    expanded = [index - i for i in range(count - 1, -1, -1)]\nelif mode == 0:  # Centered (select both previous and next elements)\n    expanded = [index + i - offset for i in range(count)]\nelif mode == 1:  # Leading (select next elements)\n    expanded = [index + i for i in range(count)]\nelse:\n    raise ValueError(\"Invalid mode. Use -1 (Trailing), 0 (Centered), or 1 (Leading).\")\n\n# Ensure index does not exceed range\nexpanded = [i % max_length for i in expanded]\nreturn expanded\n\n# Ensure list_input is a standard list\nif not isinstance(list_input, list):\nraise ValueError(\"Input data must be a Python list.\")\n\n# Ensure list_input is a nested structure (prevent single lists from being treated as one   large list)\nif not any(isinstance(sublist, list) for sublist in list_input):\nlist_input = [list_input]  # Convert to [[]] structure to maintain correct grouping\n\n# Initialize output list\noutput_list = []\n\n# Process each branch in list_input\nfor branch in list_input:\nlist_length = len(branch)\nindex_list = range(list_length)\n\n# Expand indices\nexpanded_indices = [expand_indices(i, count, mode, list_length) for i in index_list]\n\n# Select data\nselected_data = [[branch[i] for i in indices] for indices in expanded_indices]\n\n# Maintain separate branches to avoid merging data\noutput_list.append(selected_data)\n\n# Flatten the data while maintaining {X;Y} structure\nflat_selected_data = [item for branch in output_list for subset in branch for item in subset]\n\n# Output the expanded list\nlist_ex = ghc.trees.PartitionList(flat_selected_data,count)\n\nprint selected_data",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 143
+}

@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-fast-image-manipulation/80503",
+  "topic_id": 80503,
+  "title": "Help, fast image manipulation",
+  "question": "Hi guys, I am struggeling with a slow image manipluation as reading and writing each pixel take a long time.\n\n\nThis script gets the viewport image and sets all RED values to 255, but it takes like 5 seconds to recalculate a 1000x500 pixel viewport.\n\n\nimport scriptcontext\nimport System\nimport rhinoscriptsyntax as rs\n\n# Capture the active view to a System.Drawing.Bitmap\nbitmap = scriptcontext.doc.Views.ActiveView.CaptureToBitmap()\n\n### --- modify bitmap\n### --- make new bitmap\nformat = System.Drawing.Imaging.PixelFormat.Format32bppRgb\nWidth= bitmap.Size.Width\nHeight=bitmap.Size.Height\n\nprint Width,str(\"x\"),Height, str(\"pixels.  Total = \"), Width*Height\n\nbitmapNew = System.Drawing.Bitmap(Width, Height, format)\n\nfor iW in range(Width):\n    for iH in range(Height):\n        pixel=System.Drawing.Bitmap.GetPixel(bitmap,iW,iH)\n        RGB = (255, pixel.G, pixel.B)\n        color = rs.CreateColor(RGB)\n        System.Drawing.Bitmap.SetPixel(bitmapNew, iW,iH, color)\n\n\n\nIs there anything I can easily do to speed this up?",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport System\nimport rhinoscriptsyntax as rs\n\nimport time\n\n\ndef JH_version():\n\n    # Capture the active view to a System.Drawing.Bitmap\n    bitmap = scriptcontext.doc.Views.ActiveView.CaptureToBitmap()\n    \n    ### --- modify bitmap\n    ### --- make new bitmap\n    format = System.Drawing.Imaging.PixelFormat.Format32bppRgb\n    Width= bitmap.Size.Width\n    Height=bitmap.Size.Height\n    \n    print Width,str(\"x\"),Height, str(\"pixels.  Total = \"), Width*Height\n    \n    bitmapNew = System.Drawing.Bitmap(Width, Height, format)\n    \n    for iW in range(Width):\n        for iH in range(Height):\n            pixel=System.Drawing.Bitmap.GetPixel(bitmap,iW,iH)\n            RGB = (255, pixel.G, pixel.B)\n            color = rs.CreateColor(RGB)\n            System.Drawing.Bitmap.SetPixel(bitmapNew, iW,iH, color)\n            \n            \ndef WD_version():\n    \n    # Capture the active view to a System.Drawing.Bitmap\n    bitmap = scriptcontext.doc.Views.ActiveView.CaptureToBitmap()\n    \n    ### --- modify bitmap\n    ### --- make new bitmap\n    format = System.Drawing.Imaging.PixelFormat.Format32bppRgb\n    Width= bitmap.Size.Width\n    Height=bitmap.Size.Height\n    \n    print Width,str(\"x\"),Height, str(\"pixels.  Total = \"), Width*Height\n    \n    bitmapNew = System.Drawing.Bitmap(Width, Height, format)\n    \n    for iW in range(Width):\n        for iH in range(Height):\n            pixel=System.Drawing.Bitmap.GetPixel(bitmap,iW,iH)\n            color = pixel.FromArgb(255,pixel.G, pixel.B)\n            bitmapNew.SetPixel(iW,iH, color)\n\n    #bitmapNew.Save('C:\\\\test.jpg')\n\n\n\n\n            \ndef main():\n    \n    stime = time.time()\n    JH_version()\n    print 'JH_version time : {}'.format( time.time() - stime )\n    \n    \n    stime = time.time()\n    WD_version()\n    print 'WD_version time : {}'.format( time.time() - stime )\n\nmain()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport System\nimport rhinoscriptsyntax as rs\n\n# Capture the active view to a System.Drawing.Bitmap\nbitmap = scriptcontext.doc.Views.ActiveView.CaptureToBitmap()\n\n### --- modify bitmap\n### --- make new bitmap\nformat = System.Drawing.Imaging.PixelFormat.Format32bppRgb\nWidth= bitmap.Size.Width\nHeight=bitmap.Size.Height\n\nprint Width,str(\"x\"),Height, str(\"pixels.  Total = \"), Width*Height\n\nbitmapNew = System.Drawing.Bitmap(Width, Height, format)\n\nfor iW in range(Width):\n    for iH in range(Height):\n        pixel=System.Drawing.Bitmap.GetPixel(bitmap,iW,iH)\n        RGB = (255, pixel.G, pixel.B)\n        color = rs.CreateColor(RGB)\n        System.Drawing.Bitmap.SetPixel(bitmapNew, iW,iH, color)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1137
+}

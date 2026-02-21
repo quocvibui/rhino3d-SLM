@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/when-grammatically-creating-a-layer-structure-weird-numbers-in-the-layer-names/93902",
+  "topic_id": 93902,
+  "title": "When grammatically creating a layer structure, weird numbers in the layer names",
+  "question": "Hello, I’m trying to generate a specific layer structure from a Python code, and when I add some layers under a parent layer, a weird text ( something like (e47a)) is added to the layer name. Does anybody know what is this?\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rhino\nimport os\nimport Rhino.FileIO as io\nimport Rhino.Geometry as rg\nimport Rhino as rhino\nimport System\n\ndir=\"somewhere in my HDD\"\nfile=\"target.3dm\"\nnewfile=io.File3dm()\n    \nfor key in x.keys():\n    data=x[key]\n    layer=rhino.DocObjects.Layer()\n    layer.Name=key\n    newfile.Layers.Add(layer)\n    layer=newfile.Layers.FindName(key,System.Guid.Empty)\n    parent_id=layer.Id\n    Index=layer.Index\n    for i,key in enumerate(data):\n        layer=rhino.DocObjects.Layer()\n        layer.ParentLayerId = parent_id\n        index=newfile.Layers.Add(layer)\n        layer=newfile.Layers.FindIndex(i+1+Index)\n        layer.Name=key\n        att=rhino.DocObjects.ObjectAttributes()\n        att.LayerIndex=i+1+Index\n        for mesh in data[key][\"G\"]:\n            if mesh and isinstance(mesh,rg.Mesh):\n                newfile.Objects.AddMesh(mesh,att)\nif y:\n    newfile.Write(os.path.join(dir,file+\".3dm\"),2)",
+      "language": "python",
+      "author": "masaaki.miki",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 438
+}

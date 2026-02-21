@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/_rhino/File.tab/create_worksession.button/create_worksession_left.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/_rhino/File.tab/create_worksession.button/create_worksession_left.py",
+  "instruction": "Create worksession left",
+  "code": "__title__ = \"CreateWorksession\"\r\n__doc__ = \"\"\"Create multi-file Rhino worksession.\r\n\r\nKey Features:\r\n- Multiple file selection support\r\n- Custom session naming\r\n- Automatic file linking\r\n- Performance optimization\r\n- Batch file processing\"\"\"\r\n\r\n\r\nimport rhinoscriptsyntax as rs\r\nfrom EnneadTab import TIME\r\nfrom EnneadTab import LOG, ERROR_HANDLE\r\n\r\n\r\n@LOG.log(__file__, __title__)\r\n@ERROR_HANDLE.try_catch_error()\r\ndef create_worksession():\r\n\r\n    files = rs.OpenFileNames(title = \"Pick Rhino files to attach\", filter = \"Rhino File (*.3dm)|*.3dm||\")\r\n    #files = [r\"I:\\2135\\0_3D\\{}\".format(file) for file in files]\r\n    if not files:\r\n        return\r\n    #session_name = rs.StringBox(message = \"What is the name of the Rhino session file?\", default_value = None, title = \"EnneadTab Session Creation\")\r\n    session_file_path = rs.SaveFileName(title  = \"What is the name of the Rhino session file?\",\r\n                                        filter = \"Rhino Session File (*.rws)|*.rws||\",\r\n                                        folder = None,\r\n                                        filename = \"{}_XXX\".format(TIME.get_YYYY_MM_DD()),\r\n                                        extension = None)\r\n\r\n    if not session_file_path:\r\n        return\r\n\r\n    file_string_link = \"\"\r\n    for file in files:\r\n        file_string_link += \" Attach \\\"{}\\\"\".format(file)\r\n    rs.Command(\"-WorkSession  {} Saveas \\\"{}\\\" Enter\".format(file_string_link, session_file_path))\r\n\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    create_worksession()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

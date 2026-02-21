@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bounding-box/165232",
+  "topic_id": 165232,
+  "title": "Bounding box",
+  "question": "Buona sera a tutti,\n\nsono un autodidatta e sto iniziando solo ora a scrivere qualche macro che mi automatizzi un lavoro ripetitivo.\n\ndopo aver  caricato un modello,devo creare un bounding box e poi quotare le dimensioni massime di ingombro.\n\nnon riesco a fare e seguire lo script qui sotto con Rhino7…fa solo lo zoom di tutto e poi si ferma.\n\nqualcuno mi può aiutare?\n\n\ngrazie buona serata\n\nStefano\n\n\nimport rhinoscriptsyntax as rs\n       #fa zoom di tutto \nrs.ZoomExtents(view=None,all=True)\n      # seleziona tutto\ndef create_and_quote_bounding_box():\n #Seleziona tutti gli oggetti nella scena\n objects = rs.AllObjects()\n # Verifica se ci sono oggetti nella scena\n if objects:\n # Calcola il bounding box di tutti gli oggetti\n  bounding_box = rs.BoundingBox(objects)\n # Verifica se il bounding box  stato calcolato correttamente\n  if bounding_box:\n    # Crea un parallelepipedo limite utilizzando il bounding box\n     rs.AddBox(bounding_box)\n     rs.SelectObjects(objects)\n # Estrai i punti del bounding box\n     points = rs.BoundingBoxCorners(bounding_box)\n # Crea le quote per i lati del bounding box\n     for i in range(4):\n         start_point = points[i]\n         end_point = points[(i+1)%4]\n         rs.AddAlignedDimension(start_point, end_point)\n # Crea le quote per le altezze del bounding box\n     rs.AddAlignedDimension(points[0], points[4])\n     rs.AddAlignedDimension(points[1], points[5])\n     rs.AddAlignedDimension(points[2], points[6])\n     rs.AddAlignedDimension(points[3], points[7])\n     rs.SelectObjects(objects)\n\t# Seleziona nuovamente gli oggetti\n  else:\n      print(\"Impossibile calcolare il bounding box degli oggetti.\")\n else:\n  print(\"Nessun oggetto presente nella scena.\")\n # Esegui la funzione per quotare il bounding box\n create_and_quote_bounding_box()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef create_linear_dimension(origin, point_x, point_y):\n    plane = Rhino.Geometry.Plane(origin, point_x, point_y)\n    rc, s, t = plane.ClosestParameter(origin)\n    p0 = Rhino.Geometry.Point2d(s,t)\n    success, s, t = plane.ClosestParameter(point_x)\n    p1 = Rhino.Geometry.Point2d(s,t)\n    success, s, t = plane.ClosestParameter((origin + point_x) * 0.5)\n    p2 = Rhino.Geometry.Point2d(s,t)\n    dim = Rhino.Geometry.LinearDimension(plane, p0, p1, p2)\n    sc.doc.Objects.AddLinearDimension(dim)\n\ndef create_and_quote_bounding_box():\n    objects = rs.NormalObjects()\n    if objects:\n        bbox = rs.BoundingBox(objects)\n        if bbox:\n            rs.AddBox(bbox)\n            create_linear_dimension(bbox[0], bbox[1], bbox[4])\n            create_linear_dimension(bbox[3], bbox[0], bbox[7])\n            create_linear_dimension(bbox[0], bbox[4], bbox[3])\n            rs.ZoomExtents(view=None,all=True)\n        else:\n            print(\"Unable to calculate the bounding box of objects.\")\n    else:\n        print(\"No objects present in the scene.\")\n\nif __name__ == \"__main__\":\n    create_and_quote_bounding_box()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n       #fa zoom di tutto \nrs.ZoomExtents(view=None,all=True)\n      # seleziona tutto\ndef create_and_quote_bounding_box():\n #Seleziona tutti gli oggetti nella scena\n objects = rs.AllObjects()\n # Verifica se ci sono oggetti nella scena\n if objects:\n # Calcola il bounding box di tutti gli oggetti\n  bounding_box = rs.BoundingBox(objects)\n # Verifica se il bounding box  stato calcolato correttamente\n  if bounding_box:\n    # Crea un parallelepipedo limite utilizzando il bounding box\n     rs.AddBox(bounding_box)\n     rs.SelectObjects(objects)\n # Estrai i punti del bounding box\n     points = rs.BoundingBoxCorners(bounding_box)\n # Crea le quote per i lati del bounding box\n     for i in range(4):\n         start_point = points[i]\n         end_point = points[(i+1)%4]\n         rs.AddAlignedDimension(start_point, end_point)\n # Crea le quote per le altezze del bounding box\n     rs.AddAlignedDimension(points[0], points[4])\n     rs.AddAlignedDimension(points[1], points[5])\n     rs.AddAlignedDimension(points[2], points[6])\n     rs.AddAlignedDimension(points[3], points[7])\n     rs.SelectObjects(objects)\n\t# Seleziona nuovamente gli oggetti\n  else:\n      print(\"Impossibile calcolare il bounding box degli oggetti.\")\n else:\n  print(\"Nessun oggetto presente nella scena.\")\n # Esegui la funzione per quotare il bounding box\n create_and_quote_bounding_box()",
+      "language": "python",
+      "author": "Stefano7",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 343
+}

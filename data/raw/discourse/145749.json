@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/convert-guid-into-breps-in-ghpython-with-grasshopper-kernel-gh-convert/145749",
+  "topic_id": 145749,
+  "title": "Convert GUID into BREPS in ghpython with Grasshopper.Kernel.GH_Convert",
+  "question": "Hi!\n\n\nI am trying to convert some surfaces in the “\nWalls\n”-list in my project. I´d like to use \nghpythonlib.components\n (e.g., \nDeconstructBrep\n) on the geometry I got with \nrhinoscriptsyntax\n.\n\n\nI try to convert GUIDs into Breps with Grasshopper.Kernel.GH_Convert.ToBrep and get always invalid Breps as result.\n\n\nThanks a lot if someone can help me with that one.\n\n\nBelow is the ghpython-code and the .gh file:\n\n\n\n\nUnbenannt\n1900×902 239 KB\n\n\n\n\nConversion_GUIDtoBREP.gh\n (70.2 KB)\n\n\nimport rhinoscriptsyntax as rs\nfrom ghpythonlib import components as ghcomp\nfrom Grasshopper import Kernel as K\nimport Rhino\nimport Grasshopper\n\nLine_like_Elements = []\nSurface_Elements = []\n\nfor Element in Element_list:\n    if rs.IsCurve(Element):\n        Line_like_Elements.append(Element)\n    elif rs.IsBrep(Element):\n        Surface_Elements.append(Element)\n\nSlabs = []\nWalls = []\n\nfor Surface_Element in Surface_Elements:\n    Vertices = []\n    Vertices = rs.SurfacePoints(Surface_Element)\n    Zcoor = []\n    for i in Vertices:\n        Zcoor.append(round(i.Z,2))\n    if Zcoor[0] == Zcoor[1] == Zcoor[2] == Zcoor[3]:\n        Slabs.append(Surface_Element)\n    else:\n        Walls.append(Surface_Element)\n\nConverted_Walls = []\nfor Wall in Walls:\n    Converted_Wall = K.GH_Convert.ToBrep(Wall,Rhino.Geometry.Brep(),K.GH_Conversion(2))\n    Converted_Walls.append(Converted_Wall[1]) # Gives invalid Breps :(\n\nfor Converted_Wall in Converted_Walls:\n    Deconstructed = ghcomp.DeconstructBrep(Converted_Wall)\n    Deconstructed_Vertices = Deconstructed[2] # Gives *None* as output",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom ghpythonlib import components as ghcomp\nfrom Grasshopper import Kernel as K\nimport Rhino\nimport Grasshopper\n\nLine_like_Elements = []\nSurface_Elements = []\n\nfor Element in Element_list:\n    if rs.IsCurve(Element):\n        Line_like_Elements.append(Element)\n    elif rs.IsBrep(Element):\n        Surface_Elements.append(Element)\n\nSlabs = []\nWalls = []\n\nfor Surface_Element in Surface_Elements:\n    Vertices = []\n    Vertices = rs.SurfacePoints(Surface_Element)\n    Zcoor = []\n    for i in Vertices:\n        Zcoor.append(round(i.Z,2))\n    if Zcoor[0] == Zcoor[1] == Zcoor[2] == Zcoor[3]:\n        Slabs.append(Surface_Element)\n    else:\n        Walls.append(Surface_Element)\n\nConverted_Walls = []\nfor Wall in Walls:\n    Converted_Wall = K.GH_Convert.ToBrep(Wall,Rhino.Geometry.Brep(),K.GH_Conversion(2))\n    Converted_Walls.append(Converted_Wall[1]) # Gives invalid Breps :(\n\nfor Converted_Wall in Converted_Walls:\n    Deconstructed = ghcomp.DeconstructBrep(Converted_Wall)\n    Deconstructed_Vertices = Deconstructed[2] # Gives *None* as output",
+      "language": "python",
+      "author": "Dalel",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 1,
+  "views": 629
+}

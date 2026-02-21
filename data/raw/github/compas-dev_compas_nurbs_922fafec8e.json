@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_nurbs/blob/a64f3a024d660d4df40a6d5838fbc14c1421d873/src/compas_nurbs/ghpython/curve_artist.py",
+  "repo": "compas-dev/compas_nurbs",
+  "repo_stars": 12,
+  "repo_description": "NURBS for COMPAS",
+  "license": "MIT",
+  "filepath": "src/compas_nurbs/ghpython/curve_artist.py",
+  "instruction": "Curve artist",
+  "code": "import Rhino.Geometry as rg\n\nfrom compas_rhino.artists import BaseArtist\n\n\nclass CurveArtist(BaseArtist):\n    \"\"\"\n    \"\"\"\n\n    def __init__(self, curve):\n        self.curve = curve\n\n    def draw(self):\n        points = [rg.Point3d(*p) for p in self.curve.control_points]\n        knots = self.curve.knot_vector[1:-1]\n        cvcount = len(points)\n        knotcount = cvcount + self.curve.degree - 1\n        if len(knots) != knotcount:\n            raise Exception(\"Number of elements in knots must equal the number of elements in points plus degree minus 1\")\n        if self.curve.weights and len(self.curve.weights) != cvcount:\n            raise Exception(\"Number of elements in weights should equal the number of elements in points\")\n        rational = (self.curve.weights is not None)\n        nc = rg.NurbsCurve(3, rational, self.curve.degree+1, cvcount)\n        if rational:\n            for i in range(cvcount):\n                nc.Points.SetPoint(i, points[i], self.curve.weights[i])\n        else:\n            for i in range(cvcount):\n                nc.Points.SetPoint(i, points[i])\n        for i in range(knotcount):\n            nc.Knots[i] = knots[i]\n        return nc\n\n    def draw_points(self):\n        return [rg.Point3d(*p) for p in self.curve.control_points]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

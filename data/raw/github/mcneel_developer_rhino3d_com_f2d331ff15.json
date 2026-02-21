@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcneel/developer.rhino3d.com/blob/6e9b91820175abba93f399fbd04f6459343091cf/content/en/samples/rhinopython/rhinopython101/8_7_1_BlendCorners.py",
+  "repo": "mcneel/developer.rhino3d.com",
+  "repo_stars": 88,
+  "repo_description": "The developer.rhino3d.com website contents",
+  "license": "unknown",
+  "filepath": "content/en/samples/rhinopython/rhinopython101/8_7_1_BlendCorners.py",
+  "instruction": "8 7 1 blend corners",
+  "code": "import rhinoscriptsyntax as rs\n\n\ndef blendcorners():\n    polyline_id = rs.GetObject(\"Polyline to blend\", 4, True, True)\n    if not polyline_id: return\n\n    vertices = rs.PolylineVertices(polyline_id)\n    if not vertices: return\n\n    radius = rs.GetReal(\"Blend radius\", 1.0, 0.0)\n    if radius is None: return\n\n    between = lambda a,b: (a+b)/2.0\n    newverts = []\n    for i in range(len(vertices)-1):\n        a = vertices[i]\n        b = vertices[i+1]\n        segmentlength = rs.Distance(a, b)\n        vec_segment = rs.PointSubtract(b, a)\n        vec_segment = rs.VectorUnitize(vec_segment)\n\n        if radius<(0.5*segmentlength):\n            vec_segment = rs.VectorScale(vec_segment, radius)\n        else:\n            vec_segment = rs.VectorScale(vec_segment, 0.5*segmentlength)\n\n        w1 = rs.PointAdd(a, vec_segment)\n        w2 = rs.PointSubtract(b, vec_segment)\n        newverts.append(a)\n        newverts.append(between(a,w1))\n        newverts.append(w1)\n        newverts.append(between(w1,w2))\n        newverts.append(w2)\n        newverts.append(between(w2,b))\n    newverts.append(vertices[len(vertices)-1])\n    rs.AddCurve(newverts, 5)\n    rs.DeleteObject(polyline_id)\n\n\nif __name__==\"__main__\":\n    blendcorners()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

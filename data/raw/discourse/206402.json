@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-convert-quadmesh-to-subd-in-rhinocommon-likewise-tosubd-in-gui/206402",
+  "topic_id": 206402,
+  "title": "How to convert QuadMesh to SubD in RhinoCommon likewise _ToSubD in GUI?",
+  "question": "Hello,\n\n\nI would like to convert a QuadMesh object to a SubD in Rhino using RhinoCommon, but I want to avoid using [rs.Command(“_ToSubD”)] or any command-line calls.\n\n\nIn the GUI, I usually use _ToSubD with the following options:\n\n\n\n\nMesh Use = Control Points\n\n\nMesh Crease = Yes\n\n\nMesh Edge = Yes\n\n\nSurface Use = Position\n\n\nSurface Edge = No\n\n\n\n\nHowever, RhinoCommon’s SubDCreationOptions exposes different parameters, and I’m not sure how to set them to match the GUI options above.\n\n\nIs there a way to achieve the same result as _ToSubD with these options using only RhinoCommon?\n\nOr is there another function in RhinoCommon that uses the exact same parameters as _ToSubD?\n\n\nEither approach would be a solution for me.\n\n\nAdditionally, when using Rhino.Geometry.Mesh.QuadRemesh() to remesh to a quad mesh, is there a way to directly convert the result to SubD as in the GUI, without using command macros?\n\n\nAny advice or code examples would be greatly appreciated. Thank you!",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\n\ndef GetSubDCreationOptions(UseMesh, MeshCreases, MeshCorners):\n\n    options = Rhino.Geometry.SubDCreationOptions.Smooth\n\n    # True = ControlPoints, False = Location\n    options.InterpolateMeshVertices = UseMesh\n    \n    if MeshCreases:\n        options.InteriorCreaseTest = Rhino.Geometry.SubDCreationOptions.InteriorCreaseOption.AtMeshDoubleEdge\n    else:\n        options.InteriorCreaseTest = Rhino.Geometry.SubDCreationOptions.InteriorCreaseOption.NONE\n\n    if MeshCorners:\n        options.ConvexCornerTest  = Rhino.Geometry.SubDCreationOptions.ConvexCornerOption.AtMeshCorner \n    else:\n        options.ConvexCornerTest  = Rhino.Geometry.SubDCreationOptions.ConvexCornerOption.NONE\n\n    return options",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 138
+}

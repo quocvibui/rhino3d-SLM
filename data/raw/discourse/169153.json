@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-8-and-ghs-python-parallel-computation-is-slower-than-sequential/169153",
+  "topic_id": 169153,
+  "title": "Rhino 8 and GH's python - parallel computation is slower than sequential",
+  "question": "Hi All,\n\nI need to perform a lot of ray-mesh intersections and do some calculations after that.\n\nI try to do it using \nghpythonlib.parallel\n but in my case parallelization is much worse than sequential operations.\n\nThe parallelized function takes a. tuple as argument and does some stuff on mesh, which is a global variable inside python script component.\n\nCould you please have a look on attached gh file and help me figure out why using parallelization is much worse? The example is just to illustrate my problem with an example of something that is a bottleneck in my case.\n\n\nimage\n570×532 52 KB\n\n\nBest regards,\n\nJerzy\n\n\nThe code:\n\n\nimport Rhino.Geometry as rg\nfrom Rhino.Geometry.Intersect import Intersection as isct\nfrom ghpythonlib.parallel import run\n\n## number of rays per side\nn = len(P)\nprint(\"number of rays: \", n)\n\n## output variables\nP_out = []\nNrms = []\n\n## list storing results of parallel and sequential computation\nres = []\n\n## function that intersects rays with mesh and retrieving normals\n## input argument is a tuple for parallel computation\ndef do_stuff(ray_o_ray_v):\n    ## output variables\n    p_out = None\n    nrm = None\n\n    ## unpacking of input data\n    pp, vv = ray_o_ray_v\n\n    ## creations of ray and intersecting of the ray with mesh\n    ray = rg.Ray3d(pp, vv)\n    lngth = isct.MeshRay(mesh, ray)\n\n    ## get point of intersection and normal at this point\n    if lngth >= 0.0:\n        p = pp + vv * lngth\n        mcp = mesh.ClosestMeshPoint(p, 0.0)\n        p_out = mcp.Point\n        nrm = mesh.NormalAt(mcp)\n        nrm = rg.Line(mcp.Point, mcp.Point + nrm * 3.0)\n\n    return(p_out, nrm)\n\nif is_parallel:\n    data = [(P[ii], V[ii]) for ii in range(n)]\n    res = list(run(do_stuff, data, True))\n\nelse:   \n    for ii in range(n):\n        res.append(do_stuff((P[ii], V[ii])))\n\n## putting data to component's output lists\nfor ii in range(len(res)):\n    P_out.append(res[ii][0])\n    Nrms.append(res[ii][1])\n\n\n\nslow_parallel_computation.gh\n (26.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nfrom Rhino.Geometry.Intersect import Intersection as isct\nfrom ghpythonlib.parallel import run",
+      "language": "python",
+      "author": "Francesco_Pelizzari",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nfrom Rhino.Geometry.Intersect import Intersection as isct\nfrom ghpythonlib.parallel import run\n\n## number of rays per side\nn = len(P)\nprint(\"number of rays: \", n)\n\n## output variables\nP_out = []\nNrms = []\n\n## list storing results of parallel and sequential computation\nres = []\n\n## function that intersects rays with mesh and retrieving normals\n## input argument is a tuple for parallel computation\ndef do_stuff(ray_o_ray_v):\n    ## output variables\n    p_out = None\n    nrm = None\n\n    ## unpacking of input data\n    pp, vv = ray_o_ray_v\n\n    ## creations of ray and intersecting of the ray with mesh\n    ray = rg.Ray3d(pp, vv)\n    lngth = isct.MeshRay(mesh, ray)\n\n    ## get point of intersection and normal at this point\n    if lngth >= 0.0:\n        p = pp + vv * lngth\n        mcp = mesh.ClosestMeshPoint(p, 0.0)\n        p_out = mcp.Point\n        nrm = mesh.NormalAt(mcp)\n        nrm = rg.Line(mcp.Point, mcp.Point + nrm * 3.0)\n\n    return(p_out, nrm)\n\nif is_parallel:\n    data = [(P[ii], V[ii]) for ii in range(n)]\n    res = list(run(do_stuff, data, True))\n\nelse:   \n    for ii in range(n):\n        res.append(do_stuff((P[ii], V[ii])))\n\n## putting data to component's output lists\nfor ii in range(len(res)):\n    P_out.append(res[ii][0])\n    Nrms.append(res[ii][1])",
+      "language": "python",
+      "author": "jkrezel",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 58,
+  "posts_count": 3,
+  "views": 596
+}

@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/exit-grasshopper-and-rhino-started-by-python-subprocess/109799",
+  "topic_id": 109799,
+  "title": "Exit Grasshopper and Rhino started by python subprocess",
+  "question": "I also got the problem described in the following threads:\n\n\nimport rhinoscriptsyntax as rs\nrs.Command(\"_Exit\")\nrs.Exit()\n\n\n\ndon’t work when executed in an ‘if’ clause. If I click “Test code”, it works as expected.\n\n\n\n\n\n\n\n\n\n\nRhinoScript – Rhino.Exit doesn't work in an IF statement\n \nScripting\n\n\n\n\n\n    Hi, \nI am trying to write a Rhinoscipt program to run from the Windows command prompt that closes Rhino when it is complete. At the end of my code, I have been successfully using Rhino.Exit; however, it doesn’t work when I try to use it to abort the script in case of an error. \nThe script below attempts to create geometry using a parameter-driven Grasshopper file. It then checks if any geometry exists, writing the current state to a flag and exiting if necessary. I have tested the code and found…\n  \n\n\n\n\n\n\n\n\n\n\n\n\nExit rhino from script/command file\n \nScripting\n\n\n\n\n\n    Hi! \nI have a script in Rhinoscript for automating/batching some computations in rhino remotely. \nI use in my script Rhino.DocumentModified “False” to avoid the prompt asking to save modified file so if I write manually _Exit in the command line after executing my script, Rhino close itself without asking so is perfect. \nBut if I use in my script Rhino.Exit or Rhino.Command(\"_Exit\"), this doesn’t work. Rhino is still opened. \nI got Rhino closed if I play my script from Rhino Script Editor in Rhi…\n  \n\n\n\n\nI call the python component for closing Rhino and GH at the end of my solution. I could kill the process from within a python component, but that could lead to license issues (\nKilling a Rhino.exe process does not free a license in Zoo\n)at\n\n\nHas anything changed on this topic or is it still a problem?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nexit = True\n\nif exit:\n    rs.Exit()",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import subprocess\n\nedit_path = r\"path\\_exit_example.gh\"\ncom = f\"C:\\\\Program Files\\\\Rhino 6\\\\System\\\\Rhino.exe /nosplash /runscript=\\\"!-RunPythonScript (import sys;sys.path.append(r'folder');import rhino_script;rhino_script.runGHDef(r'{edit_path}'))\\\"\"\nsubprocess.call(com)",
+      "language": "python",
+      "author": "martinborst1",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\n\ndef runGHDef(path):\n    Gh = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\n    if not Gh:\n        return\n\n    Gh.LoadEditor()\n    Gh.CloseAllDocuments()\n    ok = Gh.OpenDocument(path)\n    if not ok:\n        return",
+      "language": "python",
+      "author": "martinborst1",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.Command(\"_Exit\")\nrs.Exit()",
+      "language": "python",
+      "author": "martinborst1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1593
+}

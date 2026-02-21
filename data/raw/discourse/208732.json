@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-deterministic-file3dm-class-instances-between-sessions/208732",
+  "topic_id": 208732,
+  "title": "Creating deterministic File3dm class instances between sessions",
+  "question": "I’m trying to deterministically convert instances of \nFile3dm\n to byte arrays for serialisation, but noticed that the resulting array is mutated between Rhino sessions (with no changes to file objects, and all settable file settings set to default values, all user data cleared, etc).\n\n\nInspecting the \nCreatedBy\n and \nLastEdited\n fields showed min values or null values.\n\n\nIt looks like there may be session-related metadata stored in \nFile3dm\n that is resulting in the changed bytes - is it possible to expose these fields in the api with setters, or to omit them from the encoding?",
+  "code_blocks": [
+    {
+      "code": "public string Encode(GeometryBase target, RhinoDoc doc) {\n  using var file = new File3dm();\n    switch (target)\n    {\n      case RG.Brep b:\n        file.Objects.AddBrep(b);\n        break;\n      case RG.Extrusion e:\n        file.Objects.AddExtrusion(e);\n        break;\n      case RG.SubD d:\n        file.Objects.AddSubD(d);\n        break;\n      default:\n        throw new ConversionException($\"Unsupported type for encoding: {target.GetType().FullName}\");\n    }\n\n    file.Settings.ModelUnitSystem = doc.ModelUnitSystem;\n    file.Settings.ModelAbsoluteTolerance = doc.ModelAbsoluteTolerance;\n    file.Settings.ModelAngleToleranceRadians = doc.ModelAngleToleranceRadians;\n\n    var fb = file.ToByteArray(new File3dmWriteOptions() { SaveUserData = false, Version = 7 });\n    var fbString = System.Convert.ToBase64String(fb);\n\n    return fbString ;\n  }",
+      "language": "csharp",
+      "author": "Jedd_Morgan",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 110
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/placing-the-intersection-point-between-two-lines-using-rhino-python-vsc/136569",
+  "topic_id": 136569,
+  "title": "Placing the intersection point between two lines using rhino python vsc",
+  "question": "I use this code to select two lines. Then I am trying to place a point in the middle of each line and a point in the intersection between those two lines. Also, is there any option to offset a point\n\n\nimport rhinoscriptsyntax as rs\n\nimport math\n\nimport Rhino as rc\n\n\nfirst_line = rs.GetObjects(“Select first edge”, rs.filter.curve, True, True)\n\nperp_line = rs.GetObjects(“select perpendicular edge”, rs.filter.curve, True, True)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv_id1 = rs.GetObjects(“Select first curve”, rs.filter.curve, True, True)\ncrv_id2 = rs.GetObjects(“Select second curve”, rs.filter.curve, True, True)\n\ncrv_ids = [crv_id1, crv_id2]\nfor crv_id in crv_ids:\n    dom = rs.CurveDomain(crv_id)\n    t = dom[1]  * 0.5   # parameter in the middle of the curve\n    pt = rs.EvaluateCurve(crv_id, t)\n    rs.AddPoint(pt)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nline1 = rs.GetLine(message1=“Select first line”)\nline2 = rs.GetLine(message1=“Select second line”)\n\npoints = rs.LineLineIntersection(line1, line2)  # intersection point on first and second line\nif points:\n    rs.AddPoint(points[0])",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1298
+}

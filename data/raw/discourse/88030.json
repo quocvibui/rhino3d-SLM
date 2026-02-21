@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/parametric-layouts-from-grasshopper/88030",
+  "topic_id": 88030,
+  "title": "Parametric layouts from Grasshopper",
+  "question": "Hello\n\n\nI need to export about 1300 drawings, each A4 PDF in scale, contains some baked geometry. I was trying to use FabTools for Grasshopper but it’s crashing my Rhino as it’s not suitable for Rhino 6. Is there a way how to use RhinoScriptSyntax or some different workaround? Does anyone have an experience with that? How are you guys exporting data for fabrication if that requires piece-by-page layouts?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nlayouts = []\n\nif run==True:\n    for i in range(len(target)):\n        layout = rs.AddLayout(title=str(i),size=[210,297])\n        layouts.append(str(layout))\n     \n    for l in layouts:\n        detail = rs.AddDetail(l,(0,0),(210,297),title=\"D1\",projection=1)",
+      "language": "python",
+      "author": "PetrVacek",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nif run==True:\n        layout = rs.AddLayout(\"layout\", size=[210,297])\n        if layout:\n            rs.AddDetail(layout, (5,5), (205,292), None, 1)",
+      "language": "python",
+      "author": "PetrVacek",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "corner1 = rhutil.coerce2dpoint(corner1, True)\n    corner2 = rhutil.coerce2dpoint(corner2, True)\n    if projection<1 or projection>7: raise ValueError(\"projection must be a value between 1-7\")\n    layout = scriptcontext.doc.Views.Find(layout_id)\n    if not layout: raise ValueError(\"no layout found for given layout_id\")\n    projection = System.Enum.ToObject(Rhino.Display.DefinedViewportProjection, projection)\n    detail = layout.AddDetailView(title, corner1, corner2, projection)\n    if not detail: return scriptcontext.errorhandler()\n    scriptcontext.doc.Views.Redraw()\n    return detail.Id",
+      "language": "python",
+      "author": "dharman",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 22,
+  "views": 8585
+}

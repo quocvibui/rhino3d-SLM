@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/assigning-layers-in-a-worksession-environment-bug/16076",
+  "topic_id": 16076,
+  "title": "Assigning layers in a Worksession environment. Bug?",
+  "question": "Hi,\n\n\nI’ve been using scripts in an Worksession environment. If I try to create a layer name in the active Document, which already exists in an “not active” file, it is not created. Also layer assignment does’t always work correctly.\n\n\nI didn’t get to the bottom of the problem yet, but there is some issue there. Currently I’m working with Python an VB Scripts in Parallel. (one after the other).\n\n\nAlso I don’t have time to really track it down right now and report the error thoroughly. Just posting it now, so I don’t forget to post it.\n\n\nThanks\n\nMartin",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef IsLayerInActiveDocument(layer_name):\n    if not rs.IsLayer(\"myParent\"):\n        return False\n    if rs.IsLayerReference(layer_name):\n        return False\n    return True\n\ndef main():\n    \n    rs.AddLayer(\"ScriptLayer1\")\n    \n    parent = \"myParent\"\n    if not IsLayerInActiveDocument(\"myParent\"):\n        parent = rs.AddLayer(parent)\n        \n    child = rs.AddLayer(\"myChild\", None, True, False, parent)\n    pt_id = rs.AddPoint([0,0,0])\n    rs.ObjectLayer(pt_id, child)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 641
+}

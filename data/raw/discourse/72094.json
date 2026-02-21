@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-brep-createoffsetbrep-return-empty-array/72094",
+  "topic_id": 72094,
+  "title": "C# Brep.CreateOffsetBrep(...) return empty Array",
+  "question": "I allways get an empty Brep array if i try to:\n\n\nBrep u = surface.CreateExtrusion(line, true);\nBrep[] bigger_u = Brep.CreateOffsetBrep(u, 0.2, true, true, doc.ModelAbsoluteTolerance, out var test1, out var test2);\n\n\n\ntest1 and test2 are null.\n\n\nThe Brep u is an simple Object like a straight tube or a straight cylinder and if i use the OffsetSrf command  inside Rhino the command success without problems.\n\n\nAs i understand the documation souldnt the command return always some kind of breps and/or brepfaces?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\np0 = Rhino.Geometry.Point3d(0,0,0)\np1 = Rhino.Geometry.Point3d(10,10,0)\ncrv = Rhino.Geometry.LineCurve(p0, p1)\n\ndir = Rhino.Geometry.Vector3d.ZAxis * 5\nsrf = Rhino.Geometry.Surface.CreateExtrusion(crv, dir)\nbrep = srf.ToBrep()\n\ntol = sc.doc.ModelAbsoluteTolerance\nout_breps, out_blends, out_walls = Rhino.Geometry.Brep.CreateOffsetBrep(brep, 2, False, False, tol)\nfor b in out_breps:\n    sc.doc.Objects.AddBrep(b)\n    \nsc.doc.Objects.AddBrep(brep)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 938
+}

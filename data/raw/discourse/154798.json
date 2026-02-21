@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-projectpointstomeshesex-unstable-for-simple-meshes/154798",
+  "topic_id": 154798,
+  "title": "Is ProjectPointsToMeshesEx unstable for simple Meshes?",
+  "question": "When I try to apply the ProjectPointsToMeshesEx (Rhino.Intersect.Intersection) method to meshes that are created by a simple _BoundingBox rhino command (option: Output=Meshes) it randomly fails. None of the points that are inside of the box are found.\n\nThe strange thing is that the following works perfectly fine with ProjectPointsToMeshesEx:\n\n\n\n\ncreating the BoundingBox as a Brep first and meshing it afterwards\n\n\ncreating a mesh of the BoundingBox via RhinoCommon (PointCloud.GetBoundingBox → Mesh.CreateFromBox)\n\n\narbitrary complex meshes\n\n\n\n\nI created a simple script that shows the random (?) character of this issue:\n\n\ntest_failed_ProjectPointsToMeshesEx.py\n (2.5 KB)\n\n\nIt simply adds a random PointCloud to the document, creates a bounding box via rhino command and finally tries to find the projections of the points on its bounding box mesh.\n\nOn my machine, using the ModelDocumentTolerance and the z-axis as direction of projection ProjectPointsToMeshesEx fails on approx. every 4th attempt. Choosing different tolerances or directions can help a little bit, but still, it’s not watertight.\n\n\nIs ProjectPointsToMeshesEx broken?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\nimport System.Collections.Generic.IEnumerable as IEnumerable\n\n# Cook up a random 3d point\ndef randomPoint(rand, min, max):\n    x = rand.NextDouble() * (max - min) + min\n    y = rand.NextDouble() * (max - min) + min\n    z = rand.NextDouble() * (max - min) + min\n    return Rhino.Geometry.Point3d(x, y, z)\n\n# Project a point onto a mesh\ndef projectPointToMesh(mesh, point, tol):\n    # axis-aligned bounding box\n    bbox = mesh.GetBoundingBox(True)\n    # some line to intersect\n    line = Rhino.Geometry.Line(point, point + Rhino.Geometry.Vector3d.ZAxis)\n    # extend the line through the bbox\n    # +- 1.0 makes the line a little bigger than the box\n    p0 = line.From\n    p1 = line.To\n    p0.Z = bbox.Min.Z - 1.0\n    p1.Z = bbox.Max.Z + 1.0\n    line = Rhino.Geometry.Line(p0, p1)\n    # do the intersection\n    return Rhino.Geometry.Intersect.Intersection.MeshLine(mesh, line)\n\n# Project random points onto a mesh generated from the \n# boundinng box of the points\ndef testProject():\n    # random number generator\n    rand = System.Random(System.Guid.NewGuid().GetHashCode())\n    # random 3d points\n    in_points = []\n    for i in range(0, 100):\n        in_points.append(randomPoint(rand, 0.0, 10.0))\n    # mesh from points\n    bbox = Rhino.Geometry.BoundingBox(in_points)\n    mesh = Rhino.Geometry.Mesh.CreateFromBox(bbox, 1, 1, 1)\n    # project points onto mesh\n    #tol = Rhino.RhinoMath.ZeroTolerance\n    tol = 0.0\n    for i in range(0, len(in_points)):\n        out_points = projectPointToMesh(mesh, in_points[i], tol)\n        if out_points:\n            sc.doc.Objects.AddPoints.Overloads[IEnumerable[Rhino.Geometry.Point3d]](out_points)\n        else:\n            print('Intersect failed {0} = {1}'.format(i, in_points[i].ToString()))\n    sc.doc.Objects.AddMesh(mesh)\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    testProject()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 451
+}

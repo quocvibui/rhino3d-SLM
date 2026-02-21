@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trouble-with-creating-silhouette-outlines-of-solids-with-python/176645",
+  "topic_id": 176645,
+  "title": "Trouble with creating silhouette outlines of solids with Python",
+  "question": "I’ve had a lot of help in the past (thanks mainly to Helvetosaur) in writing a script which splits a solid into layers of constant thickness.   Then it creates a silhouette outline on each layer from which I derive an offset outline (used for CNC machining the final solid when it’s all put back together).   I’ve used this a lot, and it sometimes has trouble getting the silhouette for some shapes.   But the latest solid I’m using it seems to fail with every layer.    I don’t know if the shape is too complex, but there’s no benefit in using the script if it fails for all layers.   And when it works, it’s wonderful and saves lots of time.   I’ll copy the script in and the solid I’m using to see if anyone can help point out a way to make this more reliable.   There’s a bit of other stuff going on in the script, but it’s the CreateOffsetOutlines which fails (it needs to be run taking the slices from the Top View as that’s what the machine and I do.\n\n\nThanks,  Ben\n\n\nCombined Slices and Outline.py\n (4.2 KB)\n\n\nTest Model.3dm\n (5.3 MB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef CreateOffsetOutlineView(ObjectID,OffsetDistance):\n    rs.EnableRedraw(False)\n    #store current view\n    prev_view=rs.CurrentView()\n    #set top view for Silhouette command\n    rs.CurrentView(\"Top\")\n    rs.UnselectAllObjects()\n    rs.SelectObject(ObjectID)\n    rs.Command(\"_Silhouette\")\n    lco=rs.LastCreatedObjects()\n    if lco:\n        xform=rs.XformPlanarProjection(rg.Plane.WorldXY)\n        crv_ids=rs.TransformObjects(lco,xform)\n        if not crv_ids:\n            rs.DeleteObjects(lco)\n            return\n            \n    tol=scriptcontext.doc.ModelAbsoluteTolerance\n    atol=scriptcontext.doc.ModelAngleToleranceRadians\n        \n    crvs=[rs.coercecurve(crv_id) for crv_id in crv_ids]\n    rs.DeleteObjects(crv_ids)\n    regions = rg.Curve.CreateBooleanRegions(crvs,rg.Plane.WorldXY,True,tol)\n    a = regions.RegionCurves(0)\n    outline_id=scriptcontext.doc.Objects.AddCurve(a[0])\n    \n    #restore previous current view\n    rs.CurrentView(prev_view)\n    \n    if outline_id:\n        wz_vec=Rhino.Geometry.Plane.WorldXY.ZAxis\n        offset_id=rs.OffsetCurve(outline_id,[4000,4000,0],OffsetDistance,wz_vec)\n        rs.DeleteObject(outline_id)\n        if offset_id: return offset_id\n\n\nobj_id=rs.GetObject(\"Select volume for offset outline\",8+16,preselect=True)\ntest=CreateOffsetOutlineView(obj_id,10)\nprint test",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 293
+}

@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/meshing-works-through-ui-mesh-bad-results-from-mesh-createfrombrep/206753",
+  "topic_id": 206753,
+  "title": "Meshing works through UI _Mesh, bad results from Mesh.CreateFromBrep",
+  "question": "gen5.3dm\n (1.7 MB)\n\n\ntl;dr: I can create a mesh that meets my requirements (closed, if not “good”) with _Mesh in the UI, but trying to do the same thing programmatically through RhinoCommon via Python gives an open mesh at best. A file is enclosed, and I think this will be an easy one to reproduce. I am \nblocked\n on forward progress because later steps require a closed mesh.\n\n\nSee attached file, which contains a single closed polysurface.\n\n\nWhen running \n_Mesh\n from the UI, I get a well-formed, closed mesh as a result, regardless of the settings in the dialog – for example using “Smooth and slower” works fine… maybe not great, since \n_MeshRepair\n says:\n\n\n\n\nHere is what is wrong with this mesh:\n\nMesh has 47 non manifold edges.\n\nSkipping face direction check because of positive non manifold edge count.\n\nMesh has 139 pairs of faces that intersect each other.\n\nThis can cause problems if you’re doing mesh boolean operations with it.\n\n\nImportant things to consider with this mesh:\n\nMesh has 10 naked edges. Although this does not necessarily mean that the mesh is bad,\n\nnaked edges can cause problems if the ultimate goal is STL output.\n\nMesh has 94 faces where the face normal differs substantially from the vertex normals.\n\nAlthough this does not necessarily mean that the mesh is bad,\n\nthese normals can cause problems if the ultimate goal is for rendering or boolean purposes.\n\n\n\n\n(Side note – how can a mesh be closed when it has 10 naked edges?)\n\n\n_What\n says:\n\n\n\n\nGeometry:\n\nValid mesh.\n\nClosed double precision polygon mesh: 35587 vertices, 39642 faces\n\nBounding box: (-335.143,-83.077,-32.741) to (335.143,373.007,159.890)\n\n\n\n\nHowever, when I run \nGeometry.Mesh.CreateFromBrep()\n on this same object (that was created entirely programmatically; before adding it to the document), regardless of meshing parameters (for example \nGeometry.MeshingParameters.Smooth\n, which I know is deprecated but allows most direct comparison; I’ve tried many others with similar results), I always get...",
+  "code_blocks": [
+    {
+      "code": "Open double precision polygon mesh: 37502 vertices, 42477 faces with normals\n  Bounding box: (-335.143,-83.077,-32.741) to (335.143,373.007,159.890)\n  Quality meshing parameters.\n  Adaptive SubD meshing density = 256 mesh quads per SubD quad.\n  DoublePrecision = true",
+      "language": "python",
+      "author": "Adam_Berger",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 96
+}

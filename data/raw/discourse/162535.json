@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-zoomtoscreenrect/162535",
+  "topic_id": 162535,
+  "title": "Scripting ZoomToScreenRect",
+  "question": "Hi there,\n\n\nnothing seems to happen in my view when using \nZoomToScreenRect\n in below example script:\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef DoSomething():\n    \n    rect = System.Drawing.Rectangle(50,50,400,300)\n    view = scriptcontext.doc.Views.ActiveView.ActiveViewport\n    info = Rhino.DocObjects.ViewportInfo(view)\n    info.ZoomToScreenRect(rect)\n    \n    scriptcontext.doc.Views.ActiveView.Redraw()\n    \nDoSomething()\n\n\n\nHow is this supposed to work ?\n\n\nthanks,\n\nc.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef DoSomething():\n    view = scriptcontext.doc.Views.ActiveView\n    if view:\n        vp_info = Rhino.DocObjects.ViewportInfo(view.ActiveViewport)\n        rect = System.Drawing.Rectangle(50,50,400,300)\n        vp_info.ZoomToScreenRect(rect)\n        view.ActiveViewport.SetViewProjection(vp_info, True)\n        view.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_zoom():\n    rc, rect, view = Rhino.Input.RhinoGet.Get2dRectangle(True)\n    if rc != Rhino.Commands.Result.Success:\n        return\n    view = sc.doc.Views.ActiveView\n    if not view:\n        return\n    s2w = view.ActiveViewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen,  Rhino.DocObjects.CoordinateSystem.World)\n    p0 = Rhino.Geometry.Point3d(rect.Left, rect.Top, 0.0)\n    p1 = Rhino.Geometry.Point3d(rect.Right, rect.Bottom, 0.0)\n    p0.Transform(s2w)\n    p1.Transform(s2w)\n    scr = \"_Zoom {0} {1}\".format(p0, p1)\n    Rhino.RhinoApp.RunScript(scr, True)\n    \ntest_zoom()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef DoSomething():\n    \n    rect = System.Drawing.Rectangle(50,50,400,300)\n    view = scriptcontext.doc.Views.ActiveView.ActiveViewport\n    info = Rhino.DocObjects.ViewportInfo(view)\n    info.ZoomToScreenRect(rect)\n    \n    scriptcontext.doc.Views.ActiveView.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 571
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-ghpython-error-when-called-from-rhinocomputejs/164245",
+  "topic_id": 164245,
+  "title": "Grasshopper GHPython error when called from RhinoComputeJS",
+  "question": "My own implementation of the grasshopper GHPython plugin gives me an error when I call it from RhinoCompute, but it works fine when I open it directly from grasshopper.\n\nI just want to implement a function to merge an open mesh into a closed mesh, here is the code.\n\n\n#coding=utf-8\n\"\"\"\nclose opening mesh\n    Inputs:\n        mesh: opening mesh\n    Output:\n        mesh_out: closed mesh\n\"\"\"\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n\n    def RunScript(self, mesh):\n        print(mesh)\n        meshobj = rs.coercemesh(mesh)\n        if not meshobj:\n            mesh_out = None\n        else:\n            mcopy = meshobj.DuplicateMesh()\n            distance = 0.1\n            rachet = True\n            rc = mcopy.MatchEdges(distance, rachet)\n            if rc:\n                rs.Redraw()\n                mesh_out = mcopy\n            else:\n                mesh_out = None\n        return mesh_out\n\n\n\nIt works fine in grasshopper!\n\n\nimage\n1920×1175 139 KB\n\n\nCalling it with RhinoCompute gives an error and does not return the mesh.\n\n\nwarning: Parameter failed to collect data: component \"closeMeshC\" (d925838e-124f-46b6-9ce4-8bfaef877258)\n\n\nimage\n1691×511 61.1 KB\n\n\nWhat’s the problem? What should I do?\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "#coding=utf-8\n\"\"\"\nclose opening mesh\n    Inputs:\n        mesh: opening mesh\n    Output:\n        mesh_out: closed mesh\n\"\"\"\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n\n    def RunScript(self, mesh):\n        print(mesh)\n        meshobj = rs.coercemesh(mesh)\n        if not meshobj:\n            mesh_out = None\n        else:\n            mcopy = meshobj.DuplicateMesh()\n            distance = 0.1\n            rachet = True\n            rc = mcopy.MatchEdges(distance, rachet)\n            if rc:\n                rs.Redraw()\n                mesh_out = mcopy\n            else:\n                mesh_out = None\n        return mesh_out",
+      "language": "python",
+      "author": "Hhhz",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 2,
+  "views": 253
+}

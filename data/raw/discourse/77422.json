@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/duplicateedgecurves-method-for-polysurfaces-solved/77422",
+  "topic_id": 77422,
+  "title": "DuplicateEdgeCurves Method for Polysurfaces [SOLVED]",
+  "question": "Hi,\n\n\nI tried to use the Brep.DuplicateEdgeCurves Method (Boolean) from Rhino Common but I realized it works for Surfaces only but not for polysurfaces however in Rhino Python the DuplicateEdgeCurves works for polysurfaces as well. Why is the difference?\n\n\nhttps://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Brep_DuplicateEdgeCurves_1.htm\n\n\n    import Rhino\n    import scriptcontext\n\n    def DupBorder():\n        filter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n        rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface or polysurface\", False, filter)\n        if rc != Rhino.Commands.Result.Success: return rc\n\n        rhobj = objref.Object()\n        brep = objref.Brep()\n        if not rhobj or not brep: return Rhino.Commands.Result.Failure\n        rhobj.Select(False)\n        curves = brep.DuplicateEdgeCurves(True)\n        tol = scriptcontext.doc.ModelAbsoluteTolerance * 2.1\n        curves = Rhino.Geometry.Curve.JoinCurves(curves, tol)\n        for curve in curves:\n            id = scriptcontext.doc.Objects.AddCurve(curve)\n            scriptcontext.doc.Objects.Select(id)\n        scriptcontext.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n\n    if __name__==\"__main__\":\n        DupBorder()",
+  "code_blocks": [
+    {
+      "code": "for curve in curves:\n        id = scriptcontext.doc.Objects.AddCurve(curve)\n        scriptcontext.doc.Objects.Select(id)\n    scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n    import scriptcontext\n\n    def DupBorder():\n        filter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n        rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface or polysurface\", False, filter)\n        if rc != Rhino.Commands.Result.Success: return rc\n\n        rhobj = objref.Object()\n        brep = objref.Brep()\n        if not rhobj or not brep: return Rhino.Commands.Result.Failure\n        rhobj.Select(False)\n        curves = brep.DuplicateEdgeCurves(True)\n        tol = scriptcontext.doc.ModelAbsoluteTolerance * 2.1\n        curves = Rhino.Geometry.Curve.JoinCurves(curves, tol)\n        for curve in curves:\n            id = scriptcontext.doc.Objects.AddCurve(curve)\n            scriptcontext.doc.Objects.Select(id)\n        scriptcontext.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n\n    if __name__==\"__main__\":\n        DupBorder()",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 494
+}

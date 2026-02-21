@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/karim-daw/FacadeManager/blob/d9d53528ed0387646dae683dd5e145bd5e477793/FM-Python/src/ComputeRayHits.py",
+  "repo": "karim-daw/FacadeManager",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "FM-Python/src/ComputeRayHits.py",
+  "instruction": "Given a nested list of Rays, this function computes the amount of rays per view point that hits the target mesh\n    Args:\n        Rays: Nested Lists of Rays to use for raytrace {list[list]:ray3d}\n   ...",
+  "code": "\"\"\"\nGiven a nested list of Rays, this function computes the amount of rays per view point that hits the target mesh\n    Args:\n        Rays: Nested Lists of Rays to use for raytrace {list[list]:ray3d}\n        TargetMesh: Mesh to be used as a target for View Ray calculation {item:mesh}\n        ObstaclesMesh: Mesh to be used as Obstacles occluding the view of the target (dont forget self occluding objects) {item:mesh}\n        Run: Set to \"True\" to run calculation {item:bool}\n    Returns:\n        HitCounts: The amount of hits each view point recieved for each of its view rays {list:int}\n    Remarks:\n        Author: Karim Daw \n        Project: EDUES\n        License:\n        Version: 230621\n\"\"\"\n\n# Give your component a unique name and nickname (portrayed on the canvas).\nghenv.Component.Name = \"ComputeRayHits\"\nghenv.Component.NickName = \"CRH\"\n\n# Keep it in the \"Performing\" tab\nghenv.Component.Category = \"FM-Python\"\n\n# Define the subcategory\nghenv.Component.SubCategory = \"3-Performance\"\n\n\n\nimport time\nimport Rhino\nimport ghpythonlib.treehelpers as th\n\n# If you want to give the component a version number etc.\nghenv.Component.Message = time.strftime(\"%d/%m/%Y\") + \"\\n\" + time.strftime(\"%H:%M:%S\")\n\n\n# Compute hits for every ray shot by view points\ndef calculateHits(nestedRays,targetMesh,obstaclesMesh):\n    \n    hitGroups = []\n    \n    # loop through nested lists of lists of rays\n    for i, rays in enumerate(nestedRays):\n        \n        # start counter for hits\n        hitAmount = 0\n        \n        #loop through rays\n        for j, ray in enumerate(rays):\n            \n            \n            hitTarget = Rhino.Geometry.Intersect.Intersection.MeshRay(TargetMesh,ray) > 0\n            hitObstacle = Rhino.Geometry.Intersect.Intersection.MeshRay(ObstaclesMesh,ray) > 0\n            if hitTarget and not hitObstacle:\n                \n                # Accumulate hit points\n                hitAmount = hitAmount + 1\n\n            else:\n                pass\n        hitGroups.append(hitAmount)\n\n    print(len(hitGroups))\n    #hitsAsTree = th.list_to_tree(hitGroups, source=[0,0])\n    \n    return hitGroups\n\n# Call function\nif Run:\n    HitCounts = calculateHits(Rays,TargetMesh,ObstaclesMesh)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

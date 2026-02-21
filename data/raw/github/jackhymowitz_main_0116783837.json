@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jackhymowitz/main/blob/7325131db23094f1a28bd184b6a68f864f41a729/01_GH_Components/py/BT_filterZonesByName.py",
+  "repo": "jackhymowitz/main",
+  "repo_stars": 0,
+  "repo_description": "IDF2PH is a free open source toolkit for working with E+ and PHPP Energy Models",
+  "license": "GPL-3.0",
+  "filepath": "01_GH_Components/py/BT_filterZonesByName.py",
+  "instruction": "Use this to split apart multi-zone Groups based on Zone Name. Useful since the order of the zones in the list changes sometimes - so if you want one or another zone isolated out to apply unique...",
+  "code": "#\r\r\n# IDF2PHPP: A Plugin for exporting an EnergyPlus IDF file to the Passive House Planning Package (PHPP). Created by blgdtyp, llc\r\r\n# \r\r\n# This component is part of IDF2PHPP.\r\r\n# \r\r\n# Copyright (c) 2020, bldgtyp, llc <info@bldgtyp.com> \r\r\n# IDF2PHPP is free software; you can redistribute it and/or modify \r\r\n# it under the terms of the GNU General Public License as published \r\r\n# by the Free Software Foundation; either version 3 of the License, \r\r\n# or (at your option) any later version. \r\r\n# \r\r\n# IDF2PHPP is distributed in the hope that it will be useful,\r\r\n# but WITHOUT ANY WARRANTY; without even the implied warranty of \r\r\n# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the \r\r\n# GNU General Public License for more details.\r\r\n# \r\r\n# For a copy of the GNU General Public License\r\r\n# see <http://www.gnu.org/licenses/>.\r\r\n# \r\r\n# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>\r\r\n#\r\r\n\"\"\"\r\r\nUse this to split apart multi-zone Groups based on Zone Name. Useful since the order of the zones in the list changes sometimes - so if you want one or another zone isolated out to apply unique loads, use this component.\r\r\n-\r\r\nEM Jul. 10, 2020\r\r\n    Args:\r\r\n        _HBZones: The Honeybee Zones\r\r\n        _findZone: (list) The name or names (as multiline) of the zone(s) to seach for.\r\r\n    Returns:\r\r\n        foundZones_: A list of the zones who's name matches the search name(s).\r\r\n        otherZones_: A list of all the zone which don't match the search name(s).\r\r\n\"\"\"\r\r\n\r\r\nghenv.Component.Name = \"BT_filterZonesByName\"\r\r\nghenv.Component.NickName = \"Filter Zones\"\r\r\nghenv.Component.Message = 'JUL_10_2020'\r\r\nghenv.Component.IconDisplayMode = ghenv.Component.IconDisplayMode.application\r\r\nghenv.Component.Category = \"BT\"\r\r\nghenv.Component.SubCategory = \"01 | Model\"\r\r\n\r\r\nimport scriptcontext as sc\r\r\n\r\r\nhb_hive = sc.sticky[\"honeybee_Hive\"]()\r\r\nHBZoneObjects = hb_hive.callFromHoneybeeHive(_HBZones)\r\r\n\r\r\nfoundZones_ = []\r\r\notherZones_ = []\r\r\n\r\r\nfor i, zoneObj in enumerate(HBZoneObjects):\r\r\n    for each in _findZone:\r\r\n        if each in zoneObj.name:\r\r\n            foundZones_.append(_HBZones[i])\r\r\n            break\r\r\n    else:\r\r\n        otherZones_.append(_HBZones[i])\r\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

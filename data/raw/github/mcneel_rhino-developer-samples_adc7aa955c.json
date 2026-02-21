@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_movecplane.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_movecplane.py",
+  "instruction": "Ex movecplane",
+  "code": "import Rhino\nimport scriptcontext\n\nclass MoveCPlanePoint(Rhino.Input.Custom.GetPoint):\n    def __init__(self, cplane):\n        self.m_cplane = cplane\n    def OnMouseMove(self, e):\n        pl = self.m_cplane.Plane\n        pl.Origin = e.Point\n        self.m_cplane.Plane = pl\n    def OnDynamicDraw(self, e):\n        e.Display.DrawConstructionPlane(self.m_cplane);\n\ndef MoveCPlane():\n    view = scriptcontext.doc.Views.ActiveView\n    if not view: return Rhino.Commands.Result.Failure\n    \n    cplane = view.ActiveViewport.GetConstructionPlane()\n    origin = cplane.Plane.Origin\n    gp = MoveCPlanePoint(cplane)\n    gp.SetCommandPrompt(\"CPlane origin\")\n    gp.SetBasePoint(origin, True)\n    gp.DrawLineFromPoint(origin, True)\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n\n    point = gp.Point()\n    v = origin - point\n    if v.IsTiny(): return Rhino.Commands.Result.Nothing\n    pl = cplane.Plane\n    pl.Origin = point\n    cplane.Plane = pl\n    view.ActiveViewport.SetConstructionPlane(cplane)\n    view.Redraw()\n    return Rhino.Commands.Result.Success\n\n\nif __name__==\"__main__\":\n    MoveCPlane()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-python-with-strongbox-example/31918",
+  "topic_id": 31918,
+  "title": "Rhinocommon Python with StrongBox Example",
+  "question": "Continuing the discussion from \nHow can I use Plane.FitPlaneToPoints from Python correctly?\n:\n\n\nI was also confused when I initially tried to use a function that modified an input variable in-place, using rhinocommon and Python. I got this error when I tried passing in a python boolean to  Mesh.TopologyEdges.GetEdgesForFace(Int32,Boolean[]):\n\n\nTypeError: expected StrongBox[Array[bool]], got bool\n\n\n\nSo, to avoid similar confusion, here is an example using the Mesh.TopologyEdges.GetEdgesForFace(Int32,Boolean[])\n\nmethod. The method “gets the indices of the edges that surround the given face.”\n\n\nimport clr\nimport System\nimport Rhino.Geometry as geom\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef get_edges_orientations_for_face(mesh,face):\n    '''\n    returns a list of tuples: [(edgeIndex,alignedWithFace),...]\n    where edgeIndex is the index of the TopologyEdge in the mesh\n    and alignedWithFace is a boolean which is True if the edge direction is consistent with the face\n    '''\n    orientations = clr.StrongBox[System.Array[bool]]()\n    edges =  mesh.TopologyEdges.GetEdgesForFace(face,orientations)\n    edges = list(edges)\n    orientations = list(orientations.Value)\n    edges_with_orientations = zip(edges,orientations)\n    return edges_with_orientations\n\ndef make_mesh():\n    '''\n    creates an upright square mesh with two triangular faces\n    '''\n    vertices = []\n    vertices.append((0.0,0.0,0.0))\n    vertices.append((5.0,0.0,0.0))\n    vertices.append((5.0,0.0,5.0))\n    vertices.append((0.0,0.0,5.0))\n    face_vertices = []\n    face_vertices.append((0,1,3,3))\n    face_vertices.append((1,2,3,3))\n    rhino_mesh = create_mesh(vertices,face_vertices)\n    return rhino_mesh\n\ndef create_mesh(vertices,face_vertices):\n    '''add a mesh to doc and get the Rhino.Geometry.Mesh object''' \n    mesh_GUID = rs.AddMesh( vertices, face_vertices )\n    obj = scriptcontext.doc.Objects.Find(mesh_GUID)\n    return obj.Geometry\n\nif __name__ == \"__main__\":\n    mesh = make_mesh()\n    fa...",
+  "code_blocks": [
+    {
+      "code": "import clr\nimport System\nimport Rhino.Geometry as geom\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef get_edges_orientations_for_face(mesh,face):\n    '''\n    returns a list of tuples: [(edgeIndex,alignedWithFace),...]\n    where edgeIndex is the index of the TopologyEdge in the mesh\n    and alignedWithFace is a boolean which is True if the edge direction is consistent with the face\n    '''\n    orientations = clr.StrongBox[System.Array[bool]]()\n    edges =  mesh.TopologyEdges.GetEdgesForFace(face,orientations)\n    edges = list(edges)\n    orientations = list(orientations.Value)\n    edges_with_orientations = zip(edges,orientations)\n    return edges_with_orientations\n\ndef make_mesh():\n    '''\n    creates an upright square mesh with two triangular faces\n    '''\n    vertices = []\n    vertices.append((0.0,0.0,0.0))\n    vertices.append((5.0,0.0,0.0))\n    vertices.append((5.0,0.0,5.0))\n    vertices.append((0.0,0.0,5.0))\n    face_vertices = []\n    face_vertices.append((0,1,3,3))\n    face_vertices.append((1,2,3,3))\n    rhino_mesh = create_mesh(vertices,face_vertices)\n    return rhino_mesh\n\ndef create_mesh(vertices,face_vertices):\n    '''add a mesh to doc and get the Rhino.Geometry.Mesh object''' \n    mesh_GUID = rs.AddMesh( vertices, face_vertices )\n    obj = scriptcontext.doc.Objects.Find(mesh_GUID)\n    return obj.Geometry\n\nif __name__ == \"__main__\":\n    mesh = make_mesh()\n    face = 0\n    edges_with_orientations = get_edges_orientations_for_face(mesh,face)\n    print \"for face {}, got oriented edge tuples: {}\".format(face,edges_with_orientations)",
+      "language": "python",
+      "author": "Josh_Lopez-Binder",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 3583
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/py/create-block-definition.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/py/create-block-definition.py",
+  "instruction": "Create block definition",
+  "code": "import Rhino\nimport scriptcontext\n\ndef CreateBlock():\n    # Select objects to define block\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt( \"Select objects to define block\" )\n    go.ReferenceObjectSelect = False\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n\n    # Phantoms, grips, lights, etc., cannot be in blocks.\n    forbidden_geometry_filter = Rhino.DocObjects.ObjectType.Light | Rhino.DocObjects.ObjectType.Grip | Rhino.DocObjects.ObjectType.Phantom\n    geometry_filter = forbidden_geometry_filter ^ Rhino.DocObjects.ObjectType.AnyObject\n    go.GeometryFilter = geometry_filter\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult()\n\n    # Block base point\n    rc, base_point = Rhino.Input.RhinoGet.GetPoint(\"Block base point\", False)\n    if rc != Rhino.Commands.Result.Success: return rc\n\n    # Block definition name\n    rc, idef_name = Rhino.Input.RhinoGet.GetString(\"Block definition name\", False, \"\")\n    if rc != Rhino.Commands.Result.Success: return rc\n    # Validate block name\n    idef_name = idef_name.strip()\n    if not idef_name: return Rhino.Commands.Result.Nothing\n\n    # See if block name already exists\n    existing_idef = scriptcontext.doc.InstanceDefinitions.Find(idef_name, True)\n    if existing_idef:\n        print \"Block definition\", idef_name, \"already exists\"\n        return Rhino.Commands.Result.Nothing\n\n    # Gather all of the selected objects\n    objrefs = go.Objects()\n    geometry = [item.Object().Geometry for item in objrefs]\n    attributes = [item.Object().Attributes for item in objrefs]\n\n    # Add the instance definition\n    idef_index = scriptcontext.doc.InstanceDefinitions.Add(idef_name, \"\", base_point, geometry, attributes)\n\n    if idef_index<0:\n        print \"Unable to create block definition\", idef_name\n        return Rhino.Commands.Result.Failure\n    return Rhino.Commands.Result.Failure\n\n\nif __name__==\"__main__\":\n    CreateBlock()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-script-exceptions-or-bug/43128",
+  "topic_id": 43128,
+  "title": "Rhino script exceptions or bug?",
+  "question": "Hi,\n\n\nToday I tried to repeat a python script by Jose Sanchez on Vimeo \nhttps://vimeo.com/29321808\n and I found a bug in rhino script. The script actually works with any numbers except 50. It is about a tangent line distribution on a curve. It was fine with 10,20,40,49,51,150 but not with 50. Is it possible?\n\n\nThe error message was the following:\n\n\nMessage:\n\n\nCould not convert None to a Vector3d\n\n\nTraceback:\n\n**  line 398, in coerce3dvector, “C:\\Users\\An\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\\nutility.py\n”**\n\n**  line 467, in VectorUnitize, “C:\\Users\\An\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\\npointvector.py\n”**\n\n**  line 20, in tanPoints, “C:\\Users\\An\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\scripts\\Rhino Python Tutorial 11 - TangentsCrv_Parameters.py”**\n\n**  line 31, in , “C:\\Users\\An\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\scripts\\Rhino Python Tutorial 11 - TangentsCrv_Parameters.py”**\n\n\nimport rhinoscriptsyntax as rs\n\nclass TanLines:\n    \n    def __init__(self, _curve, _numOfDivs):\n        self.curve = _curve\n        self.numOfDivs = _numOfDivs\n    def tanPoints(self):\n#        print(\"check\")\n        doms = rs.CurveDomain(self.curve)\n#        print (doms)\n        minDom = doms[0]\n        maxDom = doms[1]\n        \n        for i in range (0,self.numOfDivs +1):\n            \n            param = (maxDom - minDom)/self.numOfDivs * i\n            \n            tan = rs.CurveTangent(self.curve, param)    #3D Vector\n            tan = rs.VectorUnitize(tan)\n            tan = rs.VectorScale(tan, 3)\n            pt = rs.EvaluateCurve(self.curve, param)     \n            rs.AddPoint(pt)\n\n            tanPt = rs.VectorAdd(tan, pt)\n\n            rs.AddLine(pt,tanPt)\n\ncurve = rs.GetObject(\"pick curve\", 4)\nobj01 = TanLines(curve,50)\nobj01.tanPoints()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nclass TanLines:\n    \n    def __init__(self, _curve, _numOfDivs):\n        self.curve = _curve\n        self.numOfDivs = _numOfDivs\n    def tanPoints(self):\n#        print(\"check\")\n        doms = rs.CurveDomain(self.curve)\n#        print (doms)\n        minDom = doms[0]\n        maxDom = doms[1]\n        \n        for i in range (0,self.numOfDivs +1):\n            \n            param = (maxDom - minDom)/self.numOfDivs * i\n            \n            tan = rs.CurveTangent(self.curve, param)    #3D Vector\n            tan = rs.VectorUnitize(tan)\n            tan = rs.VectorScale(tan, 3)\n            pt = rs.EvaluateCurve(self.curve, param)     \n            rs.AddPoint(pt)\n\n            tanPt = rs.VectorAdd(tan, pt)\n\n            rs.AddLine(pt,tanPt)\n\ncurve = rs.GetObject(\"pick curve\", 4)\nobj01 = TanLines(curve,50)\nobj01.tanPoints()",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1036
+}

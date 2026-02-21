@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/fesmcr/Grafit/blob/0b80fd011af1d84bb50d5cafb684feb331ec3435/examples/rhino/Python%20F15%20Calculate%20BC%20Group.py",
+  "repo": "fesmcr/Grafit",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "examples/rhino/Python F15 Calculate BC Group.py",
+  "instruction": "Python f15 calculate bc group",
+  "code": "﻿import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport sys\nimport clr\n\nclr.AddReference(\"System.Core\")\nclr.AddReference(\"System.IO\")\n\nfrom System import Environment\nfrom System.IO import *\n\nif CustomLibPath is not None: \n\t# Check if the assembly is loaded\n\tif \"Grafit\" not in sys.modules: \n\t\tsearchResult = Directory.GetFiles(CustomLibPath, \"Grafit.dll\", SearchOption.AllDirectories)\n\n\t\tif len(searchResult) == 0:\n\t\t\traise Exception(\"Grafit.dll is not found in folder.\")\n\t\t\t\n\t\tLibPathGrafit = searchResult[0] \n\t\tLibPathGrafitRhino = Path.GetDirectoryName(LibPathGrafit) + \"\\\\\"  + \"GrafitRhino.dll\"   \n\t\n\t\tclr.AddReferenceToFileAndPath(LibPathGrafit)\n\t\tclr.AddReferenceToFileAndPath(LibPathGrafitRhino) \nelse:\n\tclr.AddReference(\"Grafit\") \n\tclr.AddReference(\"GrafitRhino\")\n \nfrom System.Linq import *\nfrom Grafit import *\nfrom GrafitRhino import * \nfrom System import *\nfrom System.Collections.Generic import List, Dictionary\n\n   \n \nn = Graph.NodesCount \n\n# Create a list of lists to represent the jagged array\nodwmtmp = [[0.0] * n for _ in range(n)]\n\n# Convert the list of lists to a jagged array\nodwm = Array[Array[float]]([Array[float](row) for row in odwmtmp])\n\nfc = range(len(From))\ntc = range(len(To))\n\nif(len(From) == 0): \n\tfc = range(n)\n\tFrom = list(fc)\n\t\nif(len(To) == 0):\n\ttc = range(n) \n\tTo = list(tc)\n\nfor i in fc:\n    for j in tc:\n        odwm[From[i]][To[j]] = ODWeightMatrixReduced[i, j]\n\t\t\n\n\nmeasurement = CMeasure(Graph)\n\nEdgeGroupsList = [] \n\nfor i in range(EdgeGroups.BranchCount):\n    EdgeGroupsList.append(List[int](EdgeGroups.Branches[i]))\n\nBCGroup = measurement.CalculateBCGroup(odwm, List[List[int]](EdgeGroupsList))\n \n\n\n \n ",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

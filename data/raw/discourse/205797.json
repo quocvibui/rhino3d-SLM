@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-text-entity-script-works-in-rh8-issues-in-rh7/205797",
+  "topic_id": 205797,
+  "title": "Python Text Entity Script: Works in RH8, Issues in RH7",
+  "question": "The file and script below are for creating a Text Entity.\n\nIt works fine in RH8. However, in RH7:\n\n\n\n\nThe wrap option doesn’t seem to work.\n\n\nThe output “Text Entity” is not visible in the viewport preview.\n\n\n\n\nI would really appreciate any insights or suggestions - thank you in advance.\n\n\nText_Entity.gh\n (8.2 KB)\n\n\nRH8:\n\n\n圖片\n1834×760 122 KB\n\nRH7:\n\n\n圖片\n1812×767 177 KB\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ndimstyle_name = \"ENV_INFO\"\nif not rs.IsDimStyle(dimstyle_name):\n    rs.AddDimStyle(dimstyle_name)\n\ndimstyle = sc.doc.DimStyles.FindName(dimstyle_name)\nds = dimstyle.Duplicate()\n\nrs.DimStyleFont(dimstyle_name, font_name)\n\nif font_size:\n    try:\n        ds.TextHeight = float(font_size)\n    except:\n        pass\n\nif max_width is None or max_width < 0:\n    max_width = 0.0\nelse:\n    max_width = float(max_width)\n\njustification_map = {\n    \"Left\": rg.TextJustification.Left,\n    \"Center\": rg.TextJustification.Center,\n    \"Right\": rg.TextJustification.Right\n}\njustification_value = justification_map.get(justification, rg.TextJustification.Left)\n\nplane = rg.Plane(position, rg.Vector3d.ZAxis)\n\ntextblock = rg.TextEntity.Create(text, plane, ds, wrap, max_width, 0.0)\ntextblock.Justification = justification_value\n\ntext_surfaces = rg.TextEntity.CreateSurfaces(textblock, ds, ds.TextHeight, 0.0)\n\nbbox = textblock.GetBoundingBox(True)\ncorner = bbox.Corner(True, True, True)\nwidth = bbox.Max.X - bbox.Min.X\nheight = bbox.Max.Y - bbox.Min.Y\nbbox_rect = rg.Rectangle3d(rg.Plane(corner, rg.Vector3d.XAxis, rg.Vector3d.YAxis), width, height)\n\nsc.doc = ghdoc",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ndimstyle_name = \"ENV_INFO\"\nif not rs.IsDimStyle(dimstyle_name):\n    rs.AddDimStyle(dimstyle_name)\n\ndimstyle = sc.doc.DimStyles.FindName(dimstyle_name)\nds = dimstyle.Duplicate()\n\nrs.DimStyleFont(dimstyle_name, font_name)\n\nif font_size:\n    try:\n        ds.TextHeight = float(font_size)\n    except:\n        pass\n\nif max_width is None or max_width < 0:\n    max_width = 0.0\nelse:\n    max_width = float(max_width)\n\njustification_map = {\n    \"Left\": rg.TextJustification.Left,\n    \"Center\": rg.TextJustification.Center,\n    \"Right\": rg.TextJustification.Right\n}\njustification_value = justification_map.get(justification, rg.TextJustification.Left)\n\nplane = rg.Plane(position, rg.Vector3d.ZAxis)\n\ntextblock = rg.TextEntity.Create(text, plane, ds, wrap, max_width, 0.0)\ntextblock.Justification = justification_value\n\ntext_surfaces = rg.TextEntity.CreateSurfaces(textblock, ds, ds.TextHeight, 0.0)\n\nbbox = textblock.GetBoundingBox(True)\ncorner = bbox.Corner(True, True, True)\nwidth = bbox.Max.X - bbox.Min.X\nheight = bbox.Max.Y - bbox.Min.Y\nbbox_rect = rg.Rectangle3d(rg.Plane(corner, rg.Vector3d.XAxis, rg.Vector3d.YAxis), width, height)\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 2,
+  "views": 109
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/split-brep-not-working-in-python/203897",
+  "topic_id": 203897,
+  "title": "Split brep not working in python?",
+  "question": "I am trying to do what I thought was quite a straightforward thing to do in python: splitting a surface using either curves on it or surfaces perpendicular to it. However the splitbrep seems not to work, not accepting the perpendicular surfaces as breps, but I can’t find any other command to do it.\n\n\nimage\n719×410 76.3 KB\n\n\nsurfaces.3dm\n (84.9 KB)\n\n\nCode was just\n\n\nimport rhinoscriptsyntax as rs\n\nsrf = rs.GetObject(“srf”, 8 )\n\ncut = rs.GetObjects(“cutting srfs”, 8)\n\nrs.SplitBrep(srf, cut, True)\n\n\nAnyone could please help?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nsrf_id = rs.GetObject(\"brep to split\", 8 )\ncutter_id = rs.GetObject(\"cutting brep\", 8+16)\nrs.SplitBrep(srf_id, cutter_id, True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef split_with_multiple_cutters(to_split, cutters):\n\tgroup_name = \"temp_cutters\"\n\trs.AddGroup(group_name)\n\trs.AddObjectsToGroup(cutters, group_name)\n\trs.UnselectAllObjects()\n\trs.SelectObject(to_split)\n\trs.Command(\"Split -SelGroup \" + group_name + \" Enter\")\n\trs.DeleteGroup(group_name)\n\treturn rs.SelectedObjects()\n\n# testing\nto_split = rs.GetObject(\"surface to split\")\ncutters = rs.GetObjects(\"cutters\")\n\npieces = split_with_multiple_cutters(to_split, cutters)",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 126
+}

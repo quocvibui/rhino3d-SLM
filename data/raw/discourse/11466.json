@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-addnurbscurve-encountered-some-problems/11466",
+  "topic_id": 11466,
+  "title": "Rs.AddNurbsCurve encountered some problems",
+  "question": "hello everone\n\nI created nurbs curve rs.AddNurbsCurve, but does not appear in rhino window，Such as pictures，I use rhinocommon can successfully create nurbs curve，Such as pictures，How do I use rs.AddNurbsCurve create nurbs curve，help me，thanks",
+  "code_blocks": [
+    {
+      "code": "nc = Rhino.Geometry.NurbsCurve(3,rational,degree+1,cvcount)\n#nc = Rhino.Geometry.NurbsCurve.Create(rational,degree,points)\nfor i in xrange(cvcount):\n    cp = Rhino.Geometry.ControlPoint()\n    cp.Location = points[i]\n    if weights: cp.Weight = weights[i]\n    nc.Points[i] = cp\nfor i in xrange(knotcount): nc.Knots[i] = knots[i]\nrc = scriptcontext.doc.Objects.AddCurve(nc)\nif rc !=System.Guid.Empty:\n    scriptcontext.doc.Views.Redraw()\nelse:\n    raise Exception(\"Unable to add curve to document\")\nreturn rc",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "newpoints = []\nfor p in points:\n    dx = rd.randrange(0,5)\n    dy = rd.randrange(0,5)\n    dz = rd.randrange(0,5)\n    d = [dx, dy, dz]\n    q = rs.PointAdd(p,d)\n    newpoints.append(q)\n    \nnewcurve = rs.AddNurbsCurve(newpoints, knots, degree)\nprint newcurve",
+      "language": "python",
+      "author": "Hiroo_Maruyama",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random as rd\n\ncurve = rs.GetObject(\"Select a curve\", 4)\n\nif curve:\n  points = rs.CurvePoints(curve)\n  knots = rs.CurveKnots(curve)\n  degree = rs.CurveDegree(curve)\n\n  newpoints = []\n  for p in points:\n    dx = rd.randrange(0,5)\n    dy = rd.randrange(0,5)\n    dz = rd.randrange(0,5)\n    d = [dx, dy, dz]\n    q = rs.PointAdd(p,d)\n    newpoints.append(q)\n    \n  newcurve = rs.AddNurbsCurve(newpoints, knots, degree)\n  print newcurve",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 2589
+}

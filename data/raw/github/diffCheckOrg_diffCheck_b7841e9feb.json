@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_remove_statistical_outliers/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_remove_statistical_outliers/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport Rhino\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nimport diffCheck.df_cvt_bindings as cvt\n\nclass DFRemoveStatisticalOutliers(component):\n    def RunScript(self, i_cloud: Rhino.Geometry.PointCloud, i_knn : int, i_ratio : float):\n        if i_cloud is None or i_ratio is None or i_knn is None:\n            return None\n\n        df_cloud = cvt.cvt_rhcloud_2_dfcloud(i_cloud)\n        df_cloud.remove_statistical_outliers(nb_neighbors=i_knn, std_ratio=i_ratio)\n        o_cloud = cvt.cvt_dfcloud_2_rhcloud(df_cloud)\n\n        return o_cloud\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

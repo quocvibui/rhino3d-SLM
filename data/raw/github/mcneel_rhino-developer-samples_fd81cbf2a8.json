@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_pickobjects.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_pickobjects.py",
+  "instruction": "Ex pickobjects",
+  "code": "import System.Drawing\nimport Rhino.Input.Custom\nfrom scriptcontext import doc\n\ndef RunCommand():\n  conduitPoints = []\n  conduit = PointsConduit(conduitPoints)\n  conduit.Enabled = True\n\n  gp = Rhino.Input.Custom.GetPoint()\n  result = Rhino.Commands.Result.Success\n\n  while True:\n    gp.SetCommandPrompt(\"click location to create point. (<ESC> exit)\")\n    gp.AcceptNothing(True)\n    gp.Get()\n    result = gp.CommandResult()\n    if result != Rhino.Commands.Result.Success:\n      break\n    conduitPoints.append(ConduitPoint(gp.Point()))\n    doc.Views.Redraw()\n    \n  gcp = GetConduitPoint(conduitPoints)\n  result = Rhino.Commands.Result.Success\n  \n  while True:\n    gcp.SetCommandPrompt(\"select conduit point. (<ESC> to exit)\")\n    gcp.AcceptNothing(True)\n    gcp.Get(True)\n    doc.Views.Redraw()\n    if gcp.CommandResult() != Rhino.Commands.Result.Success:\n      break\n    \n  return Rhino.Commands.Result.Success\n\nclass ConduitPoint():\n  def __init__(self, point):\n    self.Color = System.Drawing.Color.White\n    self.Point = point\n\nclass GetConduitPoint(Rhino.Input.Custom.GetPoint):\n  def __init__(self, conduitPoints):\n    self.conduitPoints = conduitPoints\n\n  def OnMouseDown(self, getPointMouseEventArgs):\n    picker = PickContext()\n    picker.View = getPointMouseEventArgs.Viewport.ParentView\n\n    picker.PickStyle = PickStyle.PointPick\n\n    xform = getPointMouseEventArgs.Viewport.GetPickTransform(getPointMouseEventArgs.WindowPoint)\n    picker.SetPickTransform(xform)\n\n    for cp in conduitPoints:\n      b, depth, distance = picker.PickFrustumTest(cp.Point)\n      if b:\n        cp.Color = System.Drawing.Color.Red\n      else:\n        cp.Color = System.Drawing.Color.White\n\nclass PointsConduit(Rhino.Display.DisplayConduit):\n  def __init__(self, conduitPoints ):\n    self.conduitPoints = conduitPoints\n\n  def DrawForeground(self, drawEventArgs):\n    for cp in conduitPoints:\n      drawEventArgs.Display.DrawPoint(cp.Point, PointStyle.Simple, 3, cp.Color)\n\nif __name__ == \"__main__\":\n  RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

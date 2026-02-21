@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-ui-localization-formatnumber-unexpected-results/204327",
+  "topic_id": 204327,
+  "title": "Rhino.UI.Localization.FormatNumber - Unexpected Results",
+  "question": "Hello,\n\n\nWhen I use \nRhino.UI.Localization.FormatNumber\n I get unexpected results and am trying to figure out if it’s me or the API method.\n\n\nBased on my debug prints below it would appear that the method correctly parses floats with a single decimal place and inserts the \n-\n symbol but fails to do so on numbers greater than single decimal.\n\n\nFurthermore, when the result is less than 1’ it returns inches instead of \n0'-inches number here\"\n which is (I believe?) more standard in representing Architectural feet/inches in drawings.\n\n\n\n\nInput:\n\nelevation_from_data: 0\n\nscaled_elevation: 0.0\n\nFormattDistance result: 0\"\n\nformatted_elevation: 0\"\n\n\nelevation_from_data: 0.15239999999999998\n\nscaled_elevation: 0.49999999999999994\n\nFormattDistance result: 6\"\n\nformatted_elevation: 6\"\n\n\nelevation_from_data: 4.267199999999999\n\nscaled_elevation: 13.999999999999996\n\nFormattDistance result: 14’0\"\n\nformatted_elevation: 14’0\"\n\n\nelevation_from_data: 7.924799999999999\n\nscaled_elevation: 26.0\n\nFormattDistance result: 26’-0\"\n\nformatted_elevation: 26’-0\"\n\n\nelevation_from_data: 11.582399999999998\n\nscaled_elevation: 37.99999999999999\n\nFormattDistance result: 38’0\"\n\nformatted_elevation: 38’0\"\n\n\nelevation_from_data: 15.239999999999998\n\nscaled_elevation: 49.99999999999999\n\nFormattDistance result: 50’0\"\n\nformatted_elevation: 50’0\"\n\n\nExpectation:\n\n38’-0\"\n\n26’-0\"\n\n\nResult: \n \n\n\n\n\nExpectation:\n\n38’-0\"\n\n0’-6\"\n\n\nResult: \n \n\n\nimage\n113×155 588 Bytes\n\n\n\n\nCode:\n\n\n    def FormatDistance(distance):\n        \"\"\"Given a number in model units, format to display in feet / inches (fractional)\"\"\"\n        try:\n            # inches = Rhino.UnitSystem.Inches\n            model_units = scriptcontext.doc.ActiveDoc.ModelUnitSystem\n\n            feetInches = Rhino.UI.DistanceDisplayMode.FeetInches\n            precision = 4\n\n            formatted_number = Rhino.UI.Localization.FormatNumber(distance, model_units, feetInches, precision, False)\n            print(f\"FormattDistance result: {formatted_number}\")\n            return...",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext\n\n\ndef FormatDistance(distance):\n    \"\"\"Given a number in model units, format to display in feet / inches (fractional)\"\"\"\n    try:\n        # inches = Rhino.UnitSystem.Inches\n        model_units = scriptcontext.doc.ActiveDoc.ModelUnitSystem\n\n        feetInches = Rhino.UI.DistanceDisplayMode.FeetInches\n        precision = 4\n\n        formatted_number = Rhino.UI.Localization.FormatNumber(distance, model_units, feetInches, precision, False)\n        print(f\"FormatDistance result: {formatted_number}\")\n        return formatted_number\n\n    except Exception as ex:\n        Rhino.RhinoApp.WriteLine(f\"FormatDistance Exception: {ex}\")\n\n\nif __name__ == \"__main__\":\n\n    formatted_number_result = []\n\n    test_numbers = [\n        0.49999999999999994,\n        13.999999999999996,\n        26.0,\n        37.99999999999999,\n        49.99999999999999,\n        35,\n        0,\n        1.0,\n        1.0000000000001]\n\n    for number in test_numbers:\n        formatted_number = FormatDistance(number)\n        formatted_number_result.append(formatted_number)\n\n    print(f\"formatted_number_result: {formatted_number_result}\")",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def FormatDistance(distance):\n        \"\"\"Given a number in model units, format to display in feet / inches (fractional)\"\"\"\n        try:\n            # inches = Rhino.UnitSystem.Inches\n            model_units = scriptcontext.doc.ActiveDoc.ModelUnitSystem\n\n            feetInches = Rhino.UI.DistanceDisplayMode.FeetInches\n            precision = 4\n\n            formatted_number = Rhino.UI.Localization.FormatNumber(distance, model_units, feetInches, precision, False)\n            print(f\"FormattDistance result: {formatted_number}\")\n            return formatted_number\n\n        except Exception as ex:\n            Rhino.RhinoApp.WriteLine(f\"Utils.FormatDistance Exception: {ex}\")",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 122
+}

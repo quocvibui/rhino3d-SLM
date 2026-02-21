@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-command-bugging-gh-canvas/188014",
+  "topic_id": 188014,
+  "title": "Rhinoscriptsyntax Command Bugging GH canvas?",
+  "question": "Hello,\n\n\nI have this pretty simple script that prompts the user to draw a line via RhinoScriptSyntax (rs.GetLine) in Rhino and then uses that to Scale a Grasshopper object but when I complete the rhino input portion it sometimes locks the gh interface in a weird way where I can’t click on my canvas components.\n\n\nI figure this is probably an issue with script context switching, component expiration, or some kind of “rhino command is complete” value being returned but I’m stuck and cannot figure out how to get it to prevent the canvas clicking from bugging out.\n\n\nGraph Space:\n\n\nimage\n1614×394 49 KB\n\n\nPython Code:\n\n\n#! python 3\n\n__author__ = \"Michael Vollrath\"\n__version__ = \"2024.07.14\"\n# Made With ♥ In Dallas, TX\n\nghenv.Component.Description = \"Given a user-drawn line, scales an object to the user-specified dimension.\"\nghenv.Component.Name = \"Scale Line\"\nghenv.Component.NickName = \"SL\"\n\nghenv.Component.Params.Input[0].Name = \"Object\"\nghenv.Component.Params.Input[0].NickName = \"O\"\nghenv.Component.Params.Input[0].Description = \"Object To Scale\"\n\nghenv.Component.Params.Output[0].Name = \"Object Scaled\"\nghenv.Component.Params.Output[0].NickName = \"OS\"\nghenv.Component.Params.Output[0].Description = \"Object Scale Result\"\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\ndef scale_object():\n    # Prompt the user to select the object to scale\n    obj = O\n    if not obj:\n        return\n\n    # Prompt the user to draw a line\n    line = rs.GetLine()\n    if not line:\n        return\n\n    pt1, pt2 = line[0], line[1]\n    if not pt1 or not pt2:\n        print(\"Invalid line drawn. Please draw a valid line.\")\n        return\n\n    # Calculate the current distance between the two points\n    current_distance = rs.Distance(pt1, pt2)\n    if current_distance == 0:\n        print(\"The distance between the points is zero. Please draw a valid line.\")\n        return\n\n    # Prompt the user for the desired dimension\n    desired_dimension_str = rs.GetString(\"Enter the desired dim...",
+  "code_blocks": [
+    {
+      "code": "#! python 3\n\n__author__ = \"Michael Vollrath\"\n__version__ = \"2024.07.14\"\n# Made With ♥ In Dallas, TX\n\nghenv.Component.Description = \"Given a user-drawn line, scales an object to the user-specified dimension.\"\nghenv.Component.Name = \"Scale Line\"\nghenv.Component.NickName = \"SL\"\n\nghenv.Component.Params.Input[0].Name = \"Object\"\nghenv.Component.Params.Input[0].NickName = \"O\"\nghenv.Component.Params.Input[0].Description = \"Object To Scale\"\n\nghenv.Component.Params.Output[0].Name = \"Object Scaled\"\nghenv.Component.Params.Output[0].NickName = \"OS\"\nghenv.Component.Params.Output[0].Description = \"Object Scale Result\"\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\ndef scale_object():\n    # Prompt the user to select the object to scale\n    obj = O\n    if not obj:\n        return\n\n    # Prompt the user to draw a line\n    line = rs.GetLine()\n    if not line:\n        return\n\n    pt1, pt2 = line[0], line[1]\n    if not pt1 or not pt2:\n        print(\"Invalid line drawn. Please draw a valid line.\")\n        return\n\n    # Calculate the current distance between the two points\n    current_distance = rs.Distance(pt1, pt2)\n    if current_distance == 0:\n        print(\"The distance between the points is zero. Please draw a valid line.\")\n        return\n\n    # Prompt the user for the desired dimension\n    desired_dimension_str = rs.GetString(\"Enter the desired dimension between the two points\")\n    try:\n        desired_dimension = float(desired_dimension_str)\n    except ValueError:\n        print(\"Invalid input for the desired dimension. Please enter a valid number.\")\n        return\n\n    # Calculate the scale factor\n    scale_factor = desired_dimension / current_distance\n\n    # Perform the scaling operation\n    scaled_obj = rs.ScaleObject(obj, pt1, (scale_factor, scale_factor, scale_factor))\n    if not scaled_obj:\n        print(\"Scale Failed.\")\n        return\n\n    if \"scaled_obj\" not in sc.sticky:\n        sc.sticky[\"scaled_obj\"] = scaled_obj\n    res = sc.sticky[\"scaled_obj\"]\n    print(\"Object scaled successfully.\")\n    return res\n\n\n# Execute the function\nif __name__ == \"__main__\":\n    if E:\n        OS = scale_object()\n    elif \"scaled_obj\" in sc.sticky:\n        OS = sc.sticky[\"scaled_obj\"]\n    else:\n        OS = None\n    # OS = scale_object()\n    sc.doc = ghdoc",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 152
+}

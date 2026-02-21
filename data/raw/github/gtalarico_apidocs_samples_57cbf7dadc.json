@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinopython/SampleModifyInstanceDef.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinopython/SampleModifyInstanceDef.py",
+  "instruction": "SampleModifyInstanceDef.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleModifyInstanceDef.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext as sc\n\n# Demonstates how to modify an instance definition's objects\ndef SampleModifyInstanceDef():\n    \n    # Get the name of the instance definition to modify\n    idef_name = ''\n    rc, idef_name = Rhino.Input.RhinoGet.GetString(\"Name of block to modify\", False, idef_name)\n    if rc != Rhino.Commands.Result.Success: \n        return\n    \n    # Find the instance definition\n    idef = sc.doc.InstanceDefinitions.Find(idef_name)\n    if idef is None:\n        print 'Instance definition not found'\n        return\n    \n    # Get the instance definition's objects\n    objects = idef.GetObjects()\n    \n    # Separate the object into geometry and attribute lists\n    geometry = []\n    attributes = []\n    for i, obj in enumerate(objects):\n        geometry.append(obj.Geometry)\n        attributes.append(obj.Attributes)\n    \n    # Create a new text dot\n    origin = Rhino.Geometry.Point3d.Origin\n    dot = Rhino.Geometry.TextDot(idef.Name, origin)\n    \n    # Append the text dot and default attributes to the lists\n    geometry.append(dot)\n    attributes.append(sc.doc.CreateDefaultAttributes())\n    \n    # Modify the instance definition and redraw\n    sc.doc.InstanceDefinitions.ModifyGeometry(idef.Index, geometry, attributes)\n    sc.doc.Views.Redraw()\n    \n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    SampleModifyInstanceDef()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

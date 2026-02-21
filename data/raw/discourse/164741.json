@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-surface-from-point-cloud/164741",
+  "topic_id": 164741,
+  "title": "Create surface from point cloud",
+  "question": "Hi, I am trying to fit a surface to a point cloud using Python scripting. Using the Patch command from the viewport I can successfully fit a surface to the point cloud (~500000 points, see below image).\n\n\nimage\n1248×731 135 KB\n\n\nI am trying to replicate the same in my Python script. This is the script I am using:\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nimport Rhino.Geometry as rg\n\nimport csv\n\n\n\n\n\n\n—Load point cloud from CSV—\n\ndef importPointCloudfromCSV():\n\nfilter = “CSV file (\n.csv)|\n.csv|\n.txt|All Files (\n.\n)|\n.*||”\n\nfilename = rs.OpenFileName(“Open Point File”, filter)\n\nif not filename: return\n\ncloud = rg.PointCloud()\n\nwith open(filename) as csvfile:\n\nreader = csv.reader(csvfile)\n\nfor row in reader:\n\nx = float(row[0])\n\ny = float(row[1])\n\nz = float(row[2])\n\ncloud.Add(rg.Point3d(x,y,z)) \n#add\n to pointcloud\n\nreturn cloud\n\n\n\n\n\n\n#—Visualize point cloud in viewport—\n\ndef visualizePointCloud(cloud, color):\n\ncloud_points = rs.PointCloudPoints(cloud)\n\nfor i in range(0,len(cloud_points)):\n\noffset = rg.Point3d(0,0,0)\n\npoint_id = rs.AddPoint(cloud_points[i]+offset)\n\nrs.ObjectColor(point_id, (color,0,0))\n\n\n\n\n\n\n#—Fit surface to point cloud—\n\ndef fitSurface(cloud, u_degree=3, v_degree=3, tolerance=0.01):\n\nsurface = rs.AddPatch(cloud, u_degree, v_degree, tolerance)\n\nprint surface\n\nreturn surface\n\n\n\n\n\n\nif( \nname\n == “\nmain\n” ):\n\ncloud = importPointCloudfromCSV()\n\nvisualizePointCloud(cloud, int(0))\n\nsurface = fitSurface(cloud)\n\n\n\n\nI import the point cloud from a csv file, and visualize it. This goes well. I use the AddPatch function (\nAddPatch\n) to fit the surface but it returns null. I tried multiple code variations and also with much simpler set of points, but the AddPatch function always returns null.\n\n\nI also tried using a Brep.CreatePatch method (\nhttps://developer.rhino3d.com/api/rhinocommon/rhino.geometry.brep/createpatch\n) as an alternative solution, but with this one I did not succeed in providing the arguments in the right format, leading to errors such as:\n\n\n\n\nMessage: Err...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    cloud_id = rs.GetObject(\"PointCloud\", rs.filter.pointcloud, True, False)\n    if not cloud_id: return\n    \n    cloud = rs.coercegeometry(cloud_id)\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    brep = Rhino.Geometry.Brep.CreatePatch([cloud], 3, 3, tolerance)\n    if brep:\n        scriptcontext.doc.Objects.AddBrep(brep)\n        scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1083
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getsettings-in-python/97662",
+  "topic_id": 97662,
+  "title": "GetSettings in Python",
+  "question": "G’day everyone,\n\n\nFair cop, I’m trying to translate/pilfer Dale Fugier’s steel section script from rhinoscript to rhinopython.\n\n\nBut GetSettings is giving me grief.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\n#**************************\n# Draws Flat Bar sections\n#**************************\ndef FlatBars():\n    \n    cmdname=\"Flat Bar\"\n    configfile=\"AllySections.ini\"\n    section=\"FLAT_BAR\"\n    \n    filename=rs.FindFile(configfile)\n    if not filename:\n        msg=(\"Unable to locate \" + configfile + \".\")\n        rs.MessageBox(msg, 16, cmdname)\n        return\n    \n    \n    entries=rs.GetSettings(filename, section)\n    if not entries: return\n\n\n\nentries=rs.GetSettings(filename,section) keeps giving the errors\n\n\"No section: ‘flat_bar’ \"\n\n\nYet the ini file has this on the first line…\n\n[FLAT_BAR]\n\n;,\n\n50x6    = 50.0,6.0\n\n\nThe help file sugggests there should be no issues with case sensitivity, but I have them as all caps anyway.\n\n\nIn SaveSettings there’s talk of a windows cache keeping the most recently accessed file around. Could this be the problem? If I delete the ini file it cannot be found, so don’t think this is the problem.\n\n\nAny other thoughts?\n\ncheers,\n\nNick\n\n\nsteel.ini\n (3.5 KB) \nsteel.rvb\n (10.7 KB)",
+  "code_blocks": [
+    {
+      "code": "import ConfigParser\n    try:\n        cp = ConfigParser.ConfigParser()\n        cp.read(filename)\n        if not section: return cp.sections()\n        section = string.lower(section)  #<-- converts to lower case\n        if not entry: return cp.options(section)\n        entry = string.lower(entry)  #<-- converts to lower case\n        return cp.get(section, entry)\n    except IOError:\n        return scriptcontext.errorhander()\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import ConfigParser\n    try:\n        cp = ConfigParser.ConfigParser()\n        cp.read(filename)\n        if not section: return cp.sections()\n        #section = string.lower(section)  #COMMENT OUT THIS LINE\n        if not entry: return cp.options(section)\n        entry = string.lower(entry)\n        return cp.get(section, entry)\n    except IOError:\n        return scriptcontext.errorhander()\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\n#**************************\n# Draws Flat Bar sections\n#**************************\ndef FlatBars():\n    \n    cmdname=\"Flat Bar\"\n    configfile=\"AllySections.ini\"\n    section=\"FLAT_BAR\"\n    \n    filename=rs.FindFile(configfile)\n    if not filename:\n        msg=(\"Unable to locate \" + configfile + \".\")\n        rs.MessageBox(msg, 16, cmdname)\n        return\n    \n    \n    entries=rs.GetSettings(filename, section)\n    if not entries: return",
+      "language": "python",
+      "author": "Ncik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 3314
+}

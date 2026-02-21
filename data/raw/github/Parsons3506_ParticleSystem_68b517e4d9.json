@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Parsons3506/ParticleSystem/blob/79597312ba08a27df1402c625a8d2caeb378dfa2/Particle.py",
+  "repo": "Parsons3506/ParticleSystem",
+  "repo_stars": 0,
+  "repo_description": "Particle system",
+  "license": "unknown",
+  "filepath": "Particle.py",
+  "instruction": "Particle",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\nclass Particle:\n    \n    def __init__(self, size, location, vel, acc):\n        self._size = size\n        self._loc = location\n        self._vel = vel\n        self._acc = acc\n        self._bBox = None\n        self._alive = True\n        self._history = []\n    \n    def applyForce(self,force):\n        newForce = rs.VectorDivide(force,self._size)\n        self._acc = rs.VectorAdd(self._acc,newForce)\n    \n    def setBoundingBox(self,boundingBox):\n        self._bBox = boundingBox\n        \n    def update(self):\n        self._vel = rs.VectorAdd(self._vel,self._acc)\n        self._loc = rs.VectorAdd(self._loc, self._vel)\n        if(self._bBox and not self._bBox.Contains(Rhino.Geometry.Point3d(self._loc))):\n            self._alive = False\n    \n    def drawCurve(self):\n        if(len(self._history)>2):\n            return rs.AddCurve(self._history)\n        else:\n            return 0\n    \n    def draw(self):\n        if(self._alive):\n            self._history.append(self._loc)\n            return rs.AddPoint(self._loc)\n        else:\n            return False\n            \n            \nclass Attractor:\n    \n    def __init__(self, location, force, rad):\n        self._loc = location\n        self._force = force\n        self._rad = rad\n        \n    def attract(self, particle):\n        dir = rs.VectorCreate(self._loc,particle._loc)\n        mag = rs.VectorLength(dir)\n        if(mag < self._rad):\n            dir = rs.VectorUnitize(dir)\n            force = self._force * (1-(mag/self._rad))\n            return rs.VectorScale(dir,force)\n        \n        \n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

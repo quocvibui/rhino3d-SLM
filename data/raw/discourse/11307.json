@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-add-on-compiler-with-example/11307",
+  "topic_id": 11307,
+  "title": "GhPython add-on compiler with example",
+  "question": "Hi all,\n\n\nI would like to introduce the new GhPython compiler feature we are developing for Rhino in Serengeti.\n\nThis is an early build, and it is the first time this is shown to  the public, so some “rough edges” might still be there. Keep that into account.\n\n\nYou are encouraged to write comments below here. I am also posting a example below here.\n\n\nStep by step example\n\n\nA component that shows a textdot relative to screen position (“billboard”).\n\n\n1 We begin with a customary GhPython component. Please note that these features are only available in Seregeti right now.\n\nWe can add and remove inputs by zooming in and out, and change the input names as usual.\n\n\n\n\n2 We put together a small definition for testing the script. We can override the icon by drag-and-dropping 24x24 png’s.\n\n\n\n\n3 We switch to component compilation mode. This mode allows to write a full class that represents the object that runs the script. This follows the Grasshopper SDK IGH_Component interface, but is technically not exactly it.\n\n\n\n\n4 The component code is replaced with a longer version, similar to this one:\n\n\n\n\n5 We need to type the full code. In this case:\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def __init__(self):\n        super(MyComponent,self).__init__()\n        self.x = \"\"\n        self.L = Rhino.Geometry.Point2d(0,0)\n    \n    def RunScript(self, x, L):\n        self.x = str(x)\n        if L is not None:\n            self.L = Rhino.Geometry.Point2d(L.X, 1000-L.Y)\n    \n    def DrawViewportWires(self, args):\n        try:\n            args.Display.DrawDot(self.L.X, self.L.Y, self.x, System.Drawing.Color.Black,\n                System.Drawing.Color.White)\n        except Exception, e:\n            System.Windows.Forms.MessageBox.Show(str(e), \"script error\")\n    \n    def get_ClippingBox(self):\n        return Rhino.Geometry.BoundingBox()\n\n\n\n\n\nO...",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def __init__(self):\n        super(MyComponent,self).__init__()\n        self.x = \"\"\n        self.L = Rhino.Geometry.Point2d(0,0)\n    \n    def RunScript(self, x, L):\n        self.x = str(x)\n        if L is not None:\n            self.L = Rhino.Geometry.Point2d(L.X, 1000-L.Y)\n    \n    def DrawViewportWires(self, args):\n        try:\n            args.Display.DrawDot(self.L.X, self.L.Y, self.x, System.Drawing.Color.Black,\n                System.Drawing.Color.White)\n        except Exception, e:\n            System.Windows.Forms.MessageBox.Show(str(e), \"script error\")\n    \n    def get_ClippingBox(self):\n        return Rhino.Geometry.BoundingBox()",
+      "language": "python",
+      "author": "piac",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 9682
+}

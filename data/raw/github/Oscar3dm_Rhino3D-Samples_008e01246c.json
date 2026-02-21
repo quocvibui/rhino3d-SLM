@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Oscar3dm/Rhino3D-Samples/blob/eca3e49214cf484c5764ebaf3b4df9a31442785b/code_examples/create_sublayers_for_layername.py",
+  "repo": "Oscar3dm/Rhino3D-Samples",
+  "repo_stars": 8,
+  "repo_description": "A collection of Rhino 3D functions",
+  "license": "MIT",
+  "filepath": "code_examples/create_sublayers_for_layername.py",
+  "instruction": "Create sublayers for layername",
+  "code": "import Rhino as rc\nimport rhinoscriptsyntax as rs\nfrom o3dm_rhino.layer.get_layers_with_name import get_layers_with_name\nfrom o3dm_rhino.layer.create_sublayer import create_sublayer\n\ndoc = rc.RhinoDoc.ActiveDoc\nlayertable = doc.Layers\n\n#Ask user for a layer with the name to replace, then ask the user for the new name\nlayerpath = rs.GetLayer(\"Select layer with name to create sublayers for\")\nnew_layername = rs.StringBox(\"Enter new sublayer name\")\n#Get the name of the layer from the full path\nlayername = layerpath.split(\"::\")[-1]\n#Search the document for layers with the same name\nmatch_layers = get_layers_with_name(doc, layername)\n\n#-- Option 1: RhinoCommon Add Layer\nfor layer in match_layers:\n\tcreate_sublayer(doc, layer, new_layername)\n\n#-- Option 2: RhinoScriptSyntax Add Layer\n#for layer in match_layers:\n#\tnew_layerpath = layer.FullPath + \"::\" + new_layername\n#\trs.AddLayer(new_layerpath)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

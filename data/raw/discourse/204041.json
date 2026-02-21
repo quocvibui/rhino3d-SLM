@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/tracking-point-with-mouse-hover-and-showing-z-value/204041",
+  "topic_id": 204041,
+  "title": "Tracking point with mouse hover and showing Z-value",
+  "question": "Hi Python Guru,\n\n\nI’m pulling my hair trying to fix this issue ‘Message: expected float, got Point3d’.\n\n\nI’m writing a python script that would allow me to hover my mouse over a group of points and it would dynamically display the Z-value of each point within the search radius. I seem to hit a road block. Has anyone else done similar script? Thanks!\n\n\nimport Rhino\nimport scriptcontext as sc\nimport time\nimport rhinoscriptsyntax as rs\nimport clr\nfrom Rhino.Display import DisplayConduit\nfrom Rhino.DocObjects import ObjectType\nfrom System.Drawing import Color\nfrom Rhino.Geometry import RTree, Point3d, Line\n\nclass HighestZConduit(DisplayConduit):\n    def __init__(self):\n        self.snap_point = None\n\n    def DrawForeground(self, e):\n        if self.snap_point:\n            e.Display.DrawPoint(self.snap_point, Rhino.Display.PointStyle.ControlPoint, 5, Color.Red)\n\ndef run_highest_z_tracker_loop(search_radius=5.0, duration_sec=30):\n    conduit = HighestZConduit()\n    conduit.Enabled = True\n    print(\"Tracking for {} seconds...\".format(duration_sec))\n\n    view = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView\n    viewport = view.ActiveViewport\n\n    # Build RTree with all point objects\n    rtree = RTree()\n    point_lookup = []\n    index = 0\n    for obj in sc.doc.Objects:\n        if obj.ObjectType == ObjectType.Point:\n            pt = obj.Geometry.Location\n            point_lookup.append(pt)\n            rtree.Insert(pt, index)\n            index += 1\n\n    start = time.time()\n    while time.time() - start < duration_sec:\n        cursor_coords = rs.GetCursorPos()\n        if not cursor_coords:\n            continue\n        cursor_point = Point3d(cursor_coords[0], cursor_coords[1], cursor_coords[2])\n        cam_location = viewport.CameraLocation\n\n        ray = Line(cam_location, cursor_point)\n\n        hits = []\n        def search_callback(sender, args):\n            pt = Point3d(point_lookup[args.Id])\n            t_ref = clr.StrongBox[float](0.0)\n            if ray.ClosestParameter(pt, t_r...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport time\nimport rhinoscriptsyntax as rs\nimport clr\nfrom Rhino.Display import DisplayConduit\nfrom Rhino.DocObjects import ObjectType\nfrom System.Drawing import Color\nfrom Rhino.Geometry import RTree, Point3d, Line\n\nclass HighestZConduit(DisplayConduit):\n    def __init__(self):\n        self.snap_point = None\n\n    def DrawForeground(self, e):\n        if self.snap_point:\n            e.Display.DrawPoint(self.snap_point, Rhino.Display.PointStyle.ControlPoint, 5, Color.Red)\n\ndef run_highest_z_tracker_loop(search_radius=5.0, duration_sec=30):\n    conduit = HighestZConduit()\n    conduit.Enabled = True\n    print(\"Tracking for {} seconds...\".format(duration_sec))\n\n    view = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView\n    viewport = view.ActiveViewport\n\n    # Build RTree with all point objects\n    rtree = RTree()\n    point_lookup = []\n    index = 0\n    for obj in sc.doc.Objects:\n        if obj.ObjectType == ObjectType.Point:\n            pt = obj.Geometry.Location\n            point_lookup.append(pt)\n            rtree.Insert(pt, index)\n            index += 1\n\n    start = time.time()\n    while time.time() - start < duration_sec:\n        cursor_coords = rs.GetCursorPos()\n        if not cursor_coords:\n            continue\n        cursor_point = Point3d(cursor_coords[0], cursor_coords[1], cursor_coords[2])\n        cam_location = viewport.CameraLocation\n\n        ray = Line(cam_location, cursor_point)\n\n        hits = []\n        def search_callback(sender, args):\n            pt = Point3d(point_lookup[args.Id])\n            t_ref = clr.StrongBox[float](0.0)\n            if ray.ClosestParameter(pt, t_ref):\n                t = t_ref.Value\n                if isinstance(t, float):\n                    closest = ray.PointAt(t)\n                    dist = pt.DistanceTo(closest)\n                    if dist <= search_radius:\n                        hits.append(pt)\n\n        rtree.SearchSphere(cursor_point, search_radius * 2, search_callback)\n\n        if hits:\n            best = max(hits, key=lambda p: p.Z)\n            conduit.snap_point = best\n            print(\"Highest Z:\", round(best.Z, 3))\n        else:\n            conduit.snap_point = None\n\n        sc.doc.Views.Redraw()\n        time.sleep(0.1)\n\n    conduit.Enabled = False\n    print(\"Finished tracking.\")\n\nrun_highest_z_tracker_loop()",
+      "language": "python",
+      "author": "IceTea",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 58
+}

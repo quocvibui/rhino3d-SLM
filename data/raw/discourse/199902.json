@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/updating-from-eto-forms-dialog/199902",
+  "topic_id": 199902,
+  "title": "Updating from eto.forms dialog",
+  "question": "I am very new to using eto.forms, but am trying to test something simple out before I go to far with it.\n\n\nThe goal is to have eto dialog pop up so that others can use a grasshopper script and select which geometry they are working with without getting too far into it, with variables being passed into the dialog from my grasshopper script.\n\n\nI have got it working with a dropdown list being populated from grasshopper, but cannot get variables to update without closing the dialog box, is it possible? Or am I barking up the wrong tree?\n\n\nI know that I can use something like Human or Synapse, but would rather solve it without another plugin if I can avoid it.\n\n\nHere is my cobbled together code:\n\n\nimport Rhino\nimport scriptcontext\nimport System\nimport Rhino.UI\nimport Eto.Drawing as drawing\nimport Eto.Forms as forms\n\nclass SlopeWindow(forms.Dialog[bool]):\n    def __init__(self):\n        super(SlopeWindow, self).__init__()\n\n        self.Title = 'Controls for slopes'\n        self.Padding = drawing.Padding(15)\n        self.Resizable = False\n\n        # list box label\n        self.m_label = forms.Label()\n        self.m_label.Text = 'Which curve?'\n\n        # list box - which curve\n        self.m_listbox = forms.ListBox()\n        self.m_listbox.DataStore = x\n        self.m_listbox.SelectedIndex = 0\n\n        # ok button to select the curve\n        self.DefaultButton = forms.Button()\n        self.DefaultButton.Text = 'OK'\n        self.DefaultButton.Click += self.OnOKButtonClick\n\n        # Create the abort button\n        self.AbortButton = forms.Button()\n        self.AbortButton.Text = 'Cancel'\n        self.AbortButton.Click += self.OnCloseButtonClick\n\n        # Try to bring it together\n        layout = forms.DynamicLayout()\n        layout.Spacing = drawing.Size(5, 5)\n        layout.AddRow(self.m_label, self.m_listbox)\n        layout.AddRow(None) # spacer\n        layout.AddRow(self.DefaultButton, self.AbortButton)\n\n        # Set dialog content\n        self.Content = layout\n\n    # L...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\nimport Rhino.UI\nimport Eto.Drawing as drawing\nimport Eto.Forms as forms\n\nclass SlopeWindow(forms.Dialog[bool]):\n    def __init__(self):\n        super(SlopeWindow, self).__init__()\n\n        self.Title = 'Controls for slopes'\n        self.Padding = drawing.Padding(15)\n        self.Resizable = False\n\n        # list box label\n        self.m_label = forms.Label()\n        self.m_label.Text = 'Which curve?'\n\n        # list box - which curve\n        self.m_listbox = forms.ListBox()\n        self.m_listbox.DataStore = x\n        self.m_listbox.SelectedIndex = 0\n\n        # ok button to select the curve\n        self.DefaultButton = forms.Button()\n        self.DefaultButton.Text = 'OK'\n        self.DefaultButton.Click += self.OnOKButtonClick\n\n        # Create the abort button\n        self.AbortButton = forms.Button()\n        self.AbortButton.Text = 'Cancel'\n        self.AbortButton.Click += self.OnCloseButtonClick\n\n        # Try to bring it together\n        layout = forms.DynamicLayout()\n        layout.Spacing = drawing.Size(5, 5)\n        layout.AddRow(self.m_label, self.m_listbox)\n        layout.AddRow(None) # spacer\n        layout.AddRow(self.DefaultButton, self.AbortButton)\n\n        # Set dialog content\n        self.Content = layout\n\n    # Listen to the window\n    def GetListValue(self):\n        return self.m_listbox.SelectedValue\n\n    def GetListIndex(self):\n        return self.m_listbox.SelectedIndex\n\n    # Close button click handler\n    def OnCloseButtonClick(self, sender, e):\n        self.Close(False)\n\n    # OK button clicker\n    def OnOKButtonClick(self, sender, e):\n        if self.m_listbox.SelectedValue == \"\":\n            self.Close(False)\n        else:\n            global a\n            global b\n            a = self.GetListValue()  # Update the variable 'a'\n            b = self.GetListIndex()\n            self.Close(True)\n\ndef GetLine():\n    dialog = SlopeWindow()\n    rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)\n    if rc:\n        print(\"Selected curve:\", a)\n\nif __name__ == \"__main__\":\n    x = [\"c1\", \"c2\", \"c3\"]  # just for testing - gets passed in from grasshopper otherwise\n    a = None\n    b = None\n    GetLine()",
+      "language": "python",
+      "author": "Jacob_Wood",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 1,
+  "views": 64
+}

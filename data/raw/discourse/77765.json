@@ -1,0 +1,64 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-patch/77765",
+  "topic_id": 77765,
+  "title": "Python patch",
+  "question": "I am trying to make a patch, but I do not know what they meant with a ‘Guid’ for the ‘rs.AddPatch()’ part .\n\n\nWhat am I doing wrong?\n\n\n20190123 problem patch 00.gh\n (13.6 KB)\n\n\n\n\n20190123%20problem%20patch%2000\n1353×738 93.1 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nall_curves = []\n\nprint(breps)\n\nfor i, b in enumerate(breps):\n    curves = rs.IntersectBreps(b, srf, sc.doc.ModelAbsoluteTolerance)\n    print(i, curves)\n    for c in curves:\n        all_curves.append(c)\n        \nbrep_out = rs.AddPatch(all_curves, (span, span))",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nall_curves = []\n\nfor i, b in enumerate(breps):\n    crvs = rs.IntersectBreps(b, srf, sc.doc.ModelAbsoluteTolerance)\n    for c in crvs:\n        # check to make sure intersection curves are closed and planar\n        if rs.IsCurveClosed(c) and rs.IsCurvePlanar(c):\n            all_curves.append(c)\n# check curve list\nprint(all_curves)\n\ncurve_boolean = rs.CurveBooleanUnion(all_curves)\n\npaper = rs.AddPlanarSrf(curve_boolean)",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "def CurveBrepIntersect(curve_id, brep_id, tolerance=None):\n    \"\"\"Intersects a curve object with a brep object. Note, unlike the\n    CurveSurfaceIntersection function, this function works on trimmed surfaces.\n    Parameters:\n      curve_id = identifier of a curve object\n      brep_id = identifier of a brep object\n      tolerance [opt] = distance tolerance at segment midpoints.\n                        If omitted, the current absolute tolerance is used.\n    Returns:\n      List of identifiers for the newly created intersection curve and\n      point objects if successful. None on error.            \n    \"\"\"\n    curve = rhutil.coercecurve(curve_id, -1, True)\n    brep = rhutil.coercebrep(brep_id, True)\n    if tolerance is None or tolerance<0:\n        tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    rc, out_curves, out_points = Rhino.Geometry.Intersect.Intersection.CurveBrep(curve, brep, tolerance)\n    if not rc: return scriptcontext.errorhandler()\n    \n    curves = []\n    points = []\n    for curve in out_curves:\n        if curve and curve.IsValid:\n            rc = scriptcontext.doc.Objects.AddCurve(curve)\n            curve.Dispose()\n            if rc==System.Guid.Empty: raise Exception(\"unable to add curve to document\")\n            curves.append(rc)\n    for point in out_points:\n        if point and point.IsValid:\n            rc = scriptcontext.doc.Objects.AddPoint(point)\n            points.append(rc)\n    if not curves and not points: return None\n    scriptcontext.doc.Views.Redraw()\n    return curves, points",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n\ndef list_to_tree(input, none_and_holes=True, source=[0]):\n    \"\"\"Transforms nestings of lists or tuples to a Grasshopper DataTree\"\"\"\n    # written by Giulio Piacentino, giulio@mcneel.com\n    from Grasshopper import DataTree as Tree\n    from Grasshopper.Kernel.Data import GH_Path as Path\n    from System import Array\n    def proc(input,tree,track):\n        path = Path(Array[int](track))\n        if len(input) == 0 and none_and_holes: tree.EnsurePath(path); return\n        for i,item in enumerate(input):\n            if hasattr(item, '__iter__'): #if list or tuple\n                track.append(i); proc(item,tree,track); track.pop()\n            else:\n                if none_and_holes: tree.Insert(item,path,i)\n                elif item is not None: tree.Add(item,path)\n    if input is not None: t=Tree[object]();proc(input,t,source[:]);return t\n\n\n\nall_outside_fragments = []\nall_inside_fragments = []\n\nfor crv in crvs:\n    # Explode polycurves into segments\n    crv_segments = []\n    exploded_crv = crv.DuplicateSegments()\n    if len(exploded_crv) > 0: # polyline\n        crv_segments.extend(crv.DuplicateSegments())\n    else: # line\n        crv_segments.append(crv)\n    \n    crv_out_frags = []\n    crv_in_frags = []\n    \n    # Evaluate each curve segments for intersections with the brep\n    for seg in crv_segments:\n        intersection_pts = rg.Intersect.Intersection.CurveBrep(seg, br, 0.01)[2]\n        \n        if len(intersection_pts) > 0: # brep intersects the curve segment\n            out_frags = [] # curve segment fragments outside of the brep\n            in_frags = [] # curve segment fragments inside of the brep\n            for pt in intersection_pts:\n                t = seg.ClosestPoint(pt)[1] # find the curve parameter of the intersection point\n                seg_fragments = seg.Split(t) # split the curve segment into fragments\n                #test.extend(seg_fragments)\n                # Evaluate each curve segment fragment for inside or outside relations with the brep\n                for frag in seg_fragments:\n                    start_pt = frag.PointAtStart\n                    end_pt = frag.PointAtEnd\n                    int_pts = rg.Intersect.Intersection.CurveBrep(frag, br, 0.01)[2]\n                    if len(int_pts) <= 1: # the fragment isn't partially inside the brep\n                        # Check wether the fragment is fully inside or outside the brep\n                        if not br.IsPointInside(start_pt, 0.01, True) and not br.IsPointInside(end_pt, 0.01, True):\n                            out_frags.append(frag)\n                        else:\n                            in_frags.append(frag)\n                    else: # the fragment is partially inside the brep\n                        #test.extend(int_pts)\n                        for i in range(len(int_pts)):\n                            # Identify the curve segment fragment long enough to be split again (for the inside segment)\n                            if int_pts[i].DistanceTo(start_pt) < 0.0001:\n                                split_pt = int_pts[abs(i-1)] # intersection point to split the curve segment fragment at\n                                tf = frag.ClosestPoint(split_pt)[1] # find the curve parameter of the intersection point\n                                frag_fragments = frag.Split(tf) # split the curve segment fragment into smaller fragments\n                                # Evaluate each curve segment fragment for inside or outside relations with the brep\n                                for ffrag in frag_fragments:\n                                    fstart_pt = ffrag.PointAtStart\n                                    fend_pt = ffrag.PointAtEnd\n                                    if br.IsPointInside(fstart_pt, 0.01, False) and br.IsPointInside(fend_pt, 0.01, False):\n                                        in_frags.append(ffrag)\n            \n            crv_out_frags.extend(out_frags)\n            crv_in_frags.extend(in_frags)        \n        \n        else: # brep does NOT intersect the curve segment\n            start_pt = seg.PointAtStart\n            end_pt = seg.PointAtEnd\n            # Check if the curve segment is outside or inside of the brep\n            if not br.IsPointInside(start_pt, 0.01, True) and not br.IsPointInside(end_pt, 0.01, True):\n                crv_out_frags.append(seg)\n            else:\n                crv_in_frags.append(seg)\n                \n    all_outside_fragments.append(crv_out_frags)\n    all_inside_fragments.append(crv_in_frags)\n        \n\ninsidecrvs = list_to_tree(all_inside_fragments)\noutsidecrvs = list_to_tree(all_outside_fragments)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 31,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nall_crvs = [] # flat list of all unioned itersection curves\n\nfor srf in srfs:\n    srf_crvs = [] # list of intersection curves per surface\n    # Perform the intersections\n    for brp in breps:\n        crvs = rs.IntersectBreps(brp, srf, sc.doc.ModelAbsoluteTolerance)\n        for crv in crvs:\n            # check to make sure intersection curves are closed and planar\n            if rs.IsCurveClosed(crv) and rs.IsCurvePlanar(crv):\n                srf_crvs.append(crv)\n    # Perform the boolean operation on surface curves of the same level\n    bool_crvs = rs.CurveBooleanUnion(srf_crvs)\n    all_crvs.extend(bool_crvs) # extend instead of append to avoid nested lists\n    \n# check curve list\nprint all_crvs\n\npaper = rs.AddPlanarSrf(all_crvs)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 34,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nintersectionCrvs = []\n\nfor i in x:\n    intersectionCrvs.extend(Rhino.Geometry.Intersect.Intersection.BrepBrep(i, y, 0.01)[1])\n\na = intersectionCrvs\nb = Rhino.Geometry.Curve.CreateBooleanUnion(intersectionCrvs)",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 37,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 37,
+  "views": 4487
+}

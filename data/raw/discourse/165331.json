@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-class-library-referencing-both-rhinocommon-and-rhino3dm/165331",
+  "topic_id": 165331,
+  "title": "C# Class Library Referencing both RhinoCommon and Rhino3dm",
+  "question": "This may be already well known, and might be considered questionable OO logic, but I thought I’d share what I found to be a neat trick in case any others have hit a similar issue.  Here is my setup:\n\n\n\n\nI have a primary .net application (“App.exe”) which uses Rhino3dm as a nuget package\n\n\nApp.exe also makes REST calls to methods exposed by an .RHP plugin I wrote which is hosted in a separate RhinoCompute instance (“Plugin.rhp”)\n\n\nThe primary App.exe compiles against an underlying C# class library project to do a bunch of the core CAD related operations (“Helper.dll”).\n\n\nHowever, the .RHP plugin also needs to be able to use logic from Helper.dll, and Helper.dll in order to be useful to both the App and the RHP, needs to be able to reference Rhino related classes as well (particularly the lower level math classes like points / vectors / transforms.)\n\n\n\n\nSo Helper.dll wants to know about Rhino.Geometry.Point3d, but will be consumed both by App.exe which wants Point3d to come from Rhino3dm, and Plugin.rhp which wants Point3d to come from RhinoCommon.  This is somewhat related to the “Diamond Problem” in OO design.\n\n\nSince the names of the classes and methods exposed by Rhino3dm are essentially a subset of that in RhinoCommon, the Helper.dll c# code (which only requires the subset in Rhino3dm) can actually compile against either of the nuget packages.  By creating 2 .csproj files in the project directory, Helper.Rhino3dm.csproj and Helper.RhinoCommon.csproj, each can compile the exact same set of .cs files, but each just references the respective Nuget package.  App.exe can then reference both Rhino3dm and Helper.Rhino3dm, and Plugin.rhp can reference RhinoCommon and Helper.RhinoCommon.\n\n\nThe tweaks required to make this work nicely are pretty simple.  My build process compiles both of the Helper.* variants in parallel, and by default the compiler will place temporary build artifacts in /obj/ and the compilation output in /bin/.  So we have to override the individual pro...",
+  "code_blocks": [
+    {
+      "code": "<ItemGroup>\n\t  <PackageReference Include=\"Grasshopper\" ExcludeAssets=\"runtime\" />\n\t  <PackageReference Include=\"RhinoCommon\" Aliases=\"RhinoCommonAlias\" ExcludeAssets=\"runtime\"/>\n  </ItemGroup>",
+      "language": "unknown",
+      "author": "MonkeyFace",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#if RHINO_COMMON  \npublic void CallRhinoCommongThing(){...}  \n#endif",
+      "language": "csharp",
+      "author": "Tai",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 553
+}

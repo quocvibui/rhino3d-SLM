@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/8462fc3487f8b7a58595ef73f6a5c09f92717f60/rhinopython/SampleCurveDirConduit.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinopython/SampleCurveDirConduit.py",
+  "instruction": "SampleCurveDirConduit.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleCurveDirConduit.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\n\nimport System\nimport Rhino\nimport scriptcontext as sc\n\n################################################################################\n# SampleCurveDirConduit display conduit class\n################################################################################\nclass SampleCurveDirConduit(Rhino.Display.DisplayConduit):\n    \n    # Initializer\n    def __init__(self):\n        super().__init__()\n        self.m_curve = None\n        self.m_arrow_count = 3\n    \n    # DrawOverlay override\n    def DrawOverlay(self, e):\n        if self.m_curve:\n            color = Rhino.ApplicationSettings.AppearanceSettings.TrackingColor\n            for x in range(0, self.m_arrow_count):\n                d = x / (self.m_arrow_count - 1)\n                t = self.m_curve.Domain.ParameterAt(d)\n                pt = self.m_curve.PointAt(t)\n                dir = self.m_curve.TangentAt(t)\n                e.Display.DrawDirectionArrow(pt, dir, color)\n    \n    @property\n    def Curve(self):\n        return self.m_curve\n    \n    @Curve.setter\n    def Curve(self, val):\n        self.m_curve = val\n    \n################################################################################\n# TestSampleCurveDirConduit function\n################################################################################\ndef TestSampleCurveDirConduit():\n          \n    res, objref = Rhino.Input.RhinoGet.GetOneObject(\n        \"Select curve for direction display\", \n        True, \n        Rhino.DocObjects.ObjectType.Curve\n        )\n    if res != Rhino.Commands.Result.Success: \n        return\n    \n    curve = objref.Curve()\n    if curve is None: \n        return\n    \n    conduit = SampleCurveDirConduit()\n    conduit.Curve = curve\n    conduit.Enabled = True\n    sc.doc.Views.Redraw()\n    \n    out_str = \"\"\n    rc = Rhino.Input.RhinoGet.GetString(\"Press <Enter> to continue\", True, out_str);\n    conduit.Enabled = False\n    sc.doc.Views.Redraw()\n    \n################################################################################\n# Check to see if this file is being executed as the 'main' python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\n################################################################################\nif __name__ == '__main__':\n    TestSampleCurveDirConduit()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

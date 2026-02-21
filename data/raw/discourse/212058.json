@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-subobject-in-rhino-common/212058",
+  "topic_id": 212058,
+  "title": "Get Subobject in Rhino Common",
+  "question": "Hi,\n\n\nI want to make my subobject selection behavior emulates the \nFillet\n command, which means users don’t have to hold \nCtrl+Shift\n to activate sub-object selection. Is there a way to achieve that? \nGetObject.SubObjectSelect = true; \nwon’t help on this.\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "﻿partial class Examples\n          {\n            public static Rhino.Commands.Result ExtrudeBrepFace(Rhino.RhinoDoc doc)\n            {\n              Rhino.Input.Custom.GetObject go0 = new Rhino.Input.Custom.GetObject();\n              go0.SetCommandPrompt(\"Select surface to extrude\");\n              go0.GeometryFilter = Rhino.DocObjects.ObjectType.Surface;\n              go0.SubObjectSelect = true;\n              go0.Get();\n              if (go0.CommandResult() != Rhino.Commands.Result.Success)\n                return go0.CommandResult();\n          \n              Rhino.Geometry.BrepFace face = go0.Object(0).Face();\n              if (null == face)\n                return Rhino.Commands.Result.Failure;\n          \n              Rhino.Input.Custom.GetObject go1 = new Rhino.Input.Custom.GetObject();\n              go1.SetCommandPrompt(\"Select path curve\");",
+      "language": "csharp",
+      "author": "nathanletwory",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "/// GetPointCloudPoints\n            /// </summary>\n            class GetPointCloudPoints : GetObject\n            {\n              private readonly Guid m_object_id;\n          \n              public GetPointCloudPoints(Guid objectId)\n              {\n                m_object_id = objectId;\n                GeometryFilter = ObjectType.Point;\n                SubObjectSelect = true;\n              }\n          \n              public override bool CustomGeometryFilter(RhinoObject obj, GeometryBase geom, ComponentIndex ci)\n              {\n                return (null != obj && obj.Id.Equals(m_object_id));\n              }\n            }\n          \n          }",
+      "language": "csharp",
+      "author": "nathanletwory",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "geometry",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 57
+}

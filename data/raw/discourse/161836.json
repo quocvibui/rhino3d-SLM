@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/tangent-lines-between-two-circles-curves/161836",
+  "topic_id": 161836,
+  "title": "Tangent lines between two circles (curves)",
+  "question": "I am looking for a method to detect tangent lines between two circles, i.e. to obtain the tangent lines which ‘TanIn’ and ‘TanEx’ provide. Is it exist at all or maybe there is a snippet of code for that?",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef test_clement():\n    plane = rg.Plane.WorldXY\n    cir0 = rg.Circle(plane, 5.0)\n    crv0 = rg.ArcCurve(cir0)\n    \n    plane.Origin = rg.Point3d(10, 5, 0)\n    cir1 = rg.Circle(plane, 5.0)\n    crv1 = rg.ArcCurve(cir1)\n    \n    rc, pt0, pt1 = crv0.ClosestPoints(crv1)\n    if not rc:\n        return\n    \n    rc, s0 = crv0.ClosestPoint(pt0)\n    rc, s1 = crv1.ClosestPoint(pt1)\n    \n    rc, t0, t1, line = rg.Line.TryCreateBetweenCurves(crv0, crv1, s0, s1, False, False)\n    if rc and line:\n        sc.doc.Objects.AddCurve(crv0)\n        sc.doc.Objects.AddCurve(crv1)\n        sc.doc.Objects.AddPoint(pt0)\n        sc.doc.Objects.AddPoint(pt1)\n        sc.doc.Objects.AddLine(line)\n        sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_clement()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 1479
+}

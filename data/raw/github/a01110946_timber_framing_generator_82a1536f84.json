@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/a01110946/timber_framing_generator/blob/0b689e23c0ee24a9cfbdf280b219f659a54afd43/scripts/visualize_wall_assembly.py",
+  "repo": "a01110946/timber_framing_generator",
+  "repo_stars": 3,
+  "repo_description": "A Python tool bridging Revit and Rhino through Rhino.Inside.Revit to automate timber frame design. Processes Revit walls to generate complete framing solutions including studs, plates, headers, and cripples. Features intelligent wall decomposition, opening analysis, and automated documentation generation.",
+  "license": "unknown",
+  "filepath": "scripts/visualize_wall_assembly.py",
+  "instruction": "A simple script to load wall data, generate framing cells, and visualize the assembly in Rhino.",
+  "code": "# File: scripts/visualize_wall_assembly.py\n\n#!/usr/bin/env python\n\"\"\"\nA simple script to load wall data, generate framing cells, and visualize the assembly in Rhino.\n\"\"\"\n\nfrom wall_data.revit_data_extractor import extract_wall_data_from_revit\nfrom cell_decomposition.cell_visualizer import create_rectangles_from_cell_data\nfrom src.timber_framing_generator.config.assembly import DEBUG\nimport Rhino.Geometry as rg\n\n# For example purposes, assume my_revit_walls is provided (e.g., from Revit)\nmy_revit_walls = []  # Replace with your list of Revit wall elements\ndoc = None         # Replace with your active Revit document reference\n\nall_rectangles = []\nall_colors = []\n\n# Process each wall.\nfor wall in my_revit_walls:\n    wall_data = extract_wall_data_from_revit(wall, doc)\n    base_plane = wall_data[\"base_plane\"]\n    cells = wall_data[\"cells\"]\n    rects, colors = create_rectangles_from_cell_data(cells, base_plane)\n    all_rectangles.extend(rects)\n    all_colors.extend(colors)\n\nif DEBUG:\n    print(\"Generated\", len(all_rectangles), \"rectangles for visualization.\")\n    \n# Now, pass all_rectangles and all_colors to your Rhino display components.\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

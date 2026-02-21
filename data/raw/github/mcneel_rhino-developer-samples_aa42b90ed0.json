@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_rhinogettransform.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_rhinogettransform.py",
+  "instruction": "Ex rhinogettransform",
+  "code": "import Rhino\nfrom Rhino.Geometry import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\n\nclass GetTranslation(GetTransform):\n  def CalculateTransform(self, viewport, point):\n    xform = Transform.Identity\n    b, base_point = self.TryGetBasePoint()\n    if (b):\n      v = point - base_point\n      if (not v.IsZero):\n        xform = Transform.Translation(v)\n        if (not xform.IsValid):\n          xform = Transform.Identity\n    return xform\n\ndef RunCommand():\n  objectIds = rs.GetObjects(\"Select objects to move\")\n  if objectIds is None: return\n\n  gp = GetPoint()\n  gp.SetCommandPrompt(\"Point to move from\")\n  gp.Get()\n  if gp.CommandResult() != Result.Success:\n    return gp.CommandResult()\n\n  gt = GetTranslation()\n  gt.SetCommandPrompt(\"Point to move to\")\n  gt.SetBasePoint(gp.Point(), True)\n  gt.DrawLineFromPoint(gp.Point(), True)\n  gt.GetXform()\n  if gt.CommandResult() != Result.Success:\n    return gt.CommandResult()\n\n  list = Rhino.Collections.TransformObjectList()\n  for id in objectIds:\n      rhobj = rs.coercerhinoobject(id, True, True)\n      list.Add(rhobj)\n  gt.AddTransformObjects(list)\n\n  xform = gt.CalculateTransform(gt.View().ActiveViewport, gt.Point())\n  TransformObjects(list, xform, False, False)\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

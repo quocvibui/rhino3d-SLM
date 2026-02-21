@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/baharmon/computational-design-library/blob/3b49802218466afb9dcdb0452cb0afe566b51382/15-terrain/import-color-laz.py",
+  "repo": "baharmon/computational-design-library",
+  "repo_stars": 8,
+  "repo_description": "A collection of Python scripts and Grasshopper definitions for the book Computational Design for Landscape Architects",
+  "license": "MIT",
+  "filepath": "15-terrain/import-color-laz.py",
+  "instruction": "Generate color point cloud from lidar in Rhino",
+  "code": "\"\"\"\r\nGenerate color point cloud from lidar in Rhino\r\n\"\"\"\r\n\r\n__author__ = \"Brendan Harmon\"\r\n__copyright__ = \"Copyright 2023, Brendan Harmon\"\r\n__email__ = \"brendan.harmon@gmail.com\"\r\n__license__ = \"MIT\"\r\n__version__ = \"1.0.0\"\r\n\r\n# requirements: lazrs, laspy, numpy\r\nimport pathlib\r\nimport os\r\nimport laspy\r\nimport numpy as np\r\nimport rhinoscriptsyntax as rs\r\n\r\n# set path\r\nfilename = 'ground.laz'\r\ndatapath = pathlib.Path(__file__).parent.absolute()\r\ndata = os.path.join(datapath, filename)\r\n\r\n# set variables\r\ndecimation = 2\r\n\r\n# read lidar\r\nlas = laspy.read(data)\r\n\r\n# decimate point cloud\r\nxyz = las.xyz[::decimation]\r\n\r\n# set colors\r\nrgb = np.column_stack((las.red, las.green, las.blue))\r\nrgb = rgb[::decimation].tolist()\r\n\r\n# generate colored point cloud\r\nrs.AddPointCloud(xyz, rgb)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

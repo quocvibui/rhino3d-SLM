@@ -1,0 +1,53 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhi-installer/74387",
+  "topic_id": 74387,
+  "title": "RHI installer",
+  "question": "I am getting close at “wrapping” up my small project.\n\nAnd wanted to know how to make an installer file.\n\nI see the information here about the cmd.py files.\n\n\n\n\n\n\n\n\ndeveloper.rhino3d.com\n\n\n\n\n\n\n\n\nRhino and Grasshopper Developer Documentation\n\n\nOfficial developer resources for Rhino and Grasshopper.  Rhino developer tools are royalty free and include support.\n\n\n\n\n\n\n\n\n\n\n\n\n\nBut what about images that are used inside of the scripts? I have them right now in a sub folder “icons” is that how it should be done? Or does it need to live at the root?\n\nAlso how about the toolbar, and images associated with that?\n\nHow do you make that associated with a plugin? Do you somehow save that as a separate file from Rhino?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\ndef DoSomething():\n   print \"Hello World\"\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef GetPluginPath(plugin_name=None, autoload=True, all_user=False):\n    \"\"\"finds the full path of a plugin\"\"\"\n    if not plugin_name: return \n\n    plugin_id = Rhino.PlugIns.PlugIn.IdFromName(plugin_name)\n    rc, loaded, loadprotected = Rhino.PlugIns.PlugIn.PlugInExists(plugin_id)\n    if not rc: return None\n\n    if not loaded and autoload: Rhino.PlugIns.PlugIn.LoadPlugIn(plugin_id)\n\n    plugin = Rhino.PlugIns.PlugIn.Find(plugin_id)\n    if not plugin: return None\n\n    if not all_user:\n        return plugin.SettingsDirectory\n    else:\n        return plugin.SettingsDirectoryAllUsers\n\nif __name__==\"__main__\":\n    path = GetPluginPath(plugin_name=\"IronPython\", autoload=True, all_user=False)\n    if path: print path",
+      "language": "python",
+      "author": "clement",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport os\n\ndef GetPluginDirectory(plugin_name):\n    path = Rhino.PlugIns.PlugIn.PathFromName(plugin_name)\n    if not path: return None\n    return os.path.dirname(path)\n\nif __name__==\"__main__\":\n    dirname = GetPluginDirectory(\"IronPython\")\n    print dirname",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport os\nfile_path = Rhino.PlugIns.PlugIn.PathFromName(\"Beetle\")\ndirectory = os.path.dirname(file_path)\nprint directory",
+      "language": "python",
+      "author": "clement",
+      "post_number": 26,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport os\n\ndef GetPluginPath(plugin_name=None, autoload=True):\n    \"\"\"finds installation path of a plugin which must be loadable\"\"\"\n    if not plugin_name: return \n    \n    plugin_id = Rhino.PlugIns.PlugIn.IdFromName(plugin_name)\n    rc, loaded, loadprotected = Rhino.PlugIns.PlugIn.PlugInExists(plugin_id)\n    if not rc: return None\n    \n    if not loaded and autoload: Rhino.PlugIns.PlugIn.LoadPlugIn(plugin_id)\n    \n    plugin = Rhino.PlugIns.PlugIn.Find(plugin_id)\n    if not plugin: return None\n    \n    path_name = plugin.Assembly.Location \n    if not path_name: return\n    \n    return os.path.dirname(path_name)\n\nif __name__==\"__main__\":\n    path = GetPluginPath(plugin_name=\"IronPython\", autoload=True)\n    if path:\n        print path",
+      "language": "python",
+      "author": "clement",
+      "post_number": 33,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 33,
+  "views": 4376
+}

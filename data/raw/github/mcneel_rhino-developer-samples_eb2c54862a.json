@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_makerhinocontours.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_makerhinocontours.py",
+  "instruction": "Ex makerhinocontours",
+  "code": "from System import *\nfrom Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  filter = ObjectType.Surface | ObjectType.PolysrfFilter | ObjectType.Mesh\n  rc, obj_refs = RhinoGet.GetMultipleObjects(\"Select objects to contour\", False, filter)\n  if rc <> Result.Success:\n    return rc\n\n  gp = GetPoint()\n  gp.SetCommandPrompt(\"Contour plane base point\")\n  gp.Get()\n  if gp.CommandResult() <> Result.Success:\n    return gp.CommandResult()\n  base_point = gp.Point()\n\n  gp.DrawLineFromPoint(base_point, True)\n  gp.SetCommandPrompt(\"Direction perpendicular to contour planes\")\n  gp.Get()\n  if gp.CommandResult() <> Result.Success:\n    return gp.CommandResult()\n  end_point = gp.Point()\n\n  if base_point.DistanceTo(end_point) < RhinoMath.ZeroTolerance:\n    return Result.Nothing\n\n  distance = 1.0\n  rc, distance = RhinoGet.GetNumber(\"Distance between contours\", False, distance)\n  if rc <> Result.Success:\n    return rc\n\n  interval = Math.Abs(distance)\n\n  for obj_ref in obj_refs:\n    geometry = obj_ref.Geometry()\n    if geometry == None:\n      return Result.Failure\n\n    if type(geometry) == Brep:\n      curves = Brep.CreateContourCurves(geometry, base_point, end_point, interval)\n    else:\n      curves = Mesh.CreateContourCurves(geometry, base_point, end_point, interval)\n\n    for curve in curves:\n      curve_object_id = doc.Objects.AddCurve(curve)\n      doc.Objects.Select(curve_object_id)\n\n  if curves <> None:\n    doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

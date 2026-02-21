@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-selectobject-acts-differently-under-osx-and-windows/18749",
+  "topic_id": 18749,
+  "title": "Rs.SelectObject acts differently under OSX and Windows",
+  "question": "I am looping through a set of objects, and I want all instances of non-closed curves to be selected when finished. So when  a non-closed curve is encountered, the curve gets selected and the loop restarted to find the next one. The odd thing is that the script works as intended on my Mac, but I am sharing this with a friend who runs the same script on a Windows PC, and he is finding that only the last encountered non-closed curve remains selected, and not the earlier found ones. This is identical to picking them by hand, and it is what I expected to happen in the first place, but what surprises me is the difference between the operating systems.\n\n\nMy script:\n\n\n#Create Layer Name Text Object for Surfaces and closed curves, Max Zuijdendorp, April 2015\n\nimport rhinoscriptsyntax as rs\n\n# Check if a layer \"Layer Names\" exists, if not, add it.\nif not rs.IsLayer(\"Layer Names\"):\n    rs.AddLayer(\"Layer Names\", (0,0,0))\n\n# Make \"Layer Names\" the current layer\nrs.CurrentLayer(\"Layer Names\")\n\ndef labelling():\n\tif rs.IsCurve(obj):\n\t\tif (rs.IsCurveClosed(obj)==False):\n\t\t\trs.SelectObject(obj)\n\t\t\trs.MessageBox(\"Non-closed curve encountered\")\n\t\t\treturn\n\t\torigin = rs.CurveAreaCentroid(obj)\n\telif rs.IsSurface(obj):\n\t\torigin = rs.SurfaceAreaCentroid(obj)\n\t\t\n\tpoint = rs.AddPoint(origin[0])\n\n\tlaag=rs.ObjectLayer(obj)\n\tnamepart=laag.split(\"::\")\n\tlaag=namepart[-1]\n\n\tgroup=rs.AddGroup()\n\trs.AddObjectToGroup(obj,group)\n\t\n\t#create your text object and group with object\n\tobjecttext=rs.AddText(laag,point,height=8,font=\"Arial\",font_style=0,justification=2)\n\n\trs.DeleteObject(point)\n\n\trs.AddObjectToGroup(objecttext,group)\n\nmore=1\nwhile(more==1):\n\t# Pick a set of surfaces or closed curves to be identified with the layer name\n\tobjects = rs.GetObjects(\"Select Surfaces or closed curves to label\", filter=12, preselect=False, select=False)\n\n\tif objects:\n\t\tfor obj in objects:\n\t\t\tlabelling()\n\n\tmore=rs.MessageBox(\"Do you want to place more labels?\",buttons=1)\n\n\n\nMax.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef cCrv_filt(rhino_object, geometry, component_index):\n    return rs.IsCurveClosed(geometry)\n    \nclosed_crvs=rs.GetObjects(\"Select curves\",4,select=True,custom_filter=cCrv_filt)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef cCrv_Srf_filt(rhino_object, geometry, component_index):\n    if rs.IsCurve(geometry):\n        if rs.IsCurveClosed(geometry): return True\n    elif rs.IsSurface(geometry): return True\n    else: return False\n    \nstuf=rs.GetObjects(\"Select objects\",4+8,select=True,custom_filter=cCrv_Srf_filt)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#Create Layer Name Text Object for Surfaces and closed curves, Max Zuijdendorp, April 2015\n\nimport rhinoscriptsyntax as rs\n\n# Check if a layer \"Layer Names\" exists, if not, add it.\nif not rs.IsLayer(\"Layer Names\"):\n    rs.AddLayer(\"Layer Names\", (0,0,0))\n\n# Make \"Layer Names\" the current layer\nrs.CurrentLayer(\"Layer Names\")\n\ndef labelling():\n\tif rs.IsCurve(obj):\n\t\tif (rs.IsCurveClosed(obj)==False):\n\t\t\trs.SelectObject(obj)\n\t\t\trs.MessageBox(\"Non-closed curve encountered\")\n\t\t\treturn\n\t\torigin = rs.CurveAreaCentroid(obj)\n\telif rs.IsSurface(obj):\n\t\torigin = rs.SurfaceAreaCentroid(obj)\n\t\t\n\tpoint = rs.AddPoint(origin[0])\n\n\tlaag=rs.ObjectLayer(obj)\n\tnamepart=laag.split(\"::\")\n\tlaag=namepart[-1]\n\n\tgroup=rs.AddGroup()\n\trs.AddObjectToGroup(obj,group)\n\t\n\t#create your text object and group with object\n\tobjecttext=rs.AddText(laag,point,height=8,font=\"Arial\",font_style=0,justification=2)\n\n\trs.DeleteObject(point)\n\n\trs.AddObjectToGroup(objecttext,group)\n\nmore=1\nwhile(more==1):\n\t# Pick a set of surfaces or closed curves to be identified with the layer name\n\tobjects = rs.GetObjects(\"Select Surfaces or closed curves to label\", filter=12, preselect=False, select=False)\n\n\tif objects:\n\t\tfor obj in objects:\n\t\t\tlabelling()\n\n\tmore=rs.MessageBox(\"Do you want to place more labels?\",buttons=1)",
+      "language": "python",
+      "author": "maxz",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1376
+}

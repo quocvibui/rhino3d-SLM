@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/surface-from-edge-curves.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/surface-from-edge-curves.py",
+  "instruction": "Surface from edge curves",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    go = GetObject()\n    go.SetCommandPrompt(\"Select 2, 3, or 4 open curves\")\n    go.GeometryFilter = ObjectType.Curve\n    go.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\n    go.GetMultiple(2, 4)\n    if go.CommandResult() != Result.Success:\n        return go.CommandResult()\n\n    curves = [o.Curve() for o in go.Objects()]\n\n    brep = Brep.CreateEdgeSurface(curves)\n\n    if brep != None:\n        doc.Objects.AddBrep(brep)\n        doc.Views.Redraw()\n\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

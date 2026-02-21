@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/255ribeiro/LPACAF/blob/a9d170b0feff9a66624dcb3b3fa181aae502130c/Aula_10/aula_10_final_2020.py",
+  "repo": "255ribeiro/LPACAF",
+  "repo_stars": 3,
+  "repo_description": "Repositório do curso Lógica de programação Aplicada à Criação e Análise da Forma. ",
+  "license": "unknown",
+  "filepath": "Aula_10/aula_10_final_2020.py",
+  "instruction": "Aula 10 final 2020",
+  "code": "﻿#Curso de Extensão:\n#Lógica de programação aplicada à criação e análise da forma\n#UFBa - Faculdade de Arquitetura - 2018.2\n#Professor: Fernando Ferraz Ribeiro\n#Exemplo pavimentos multiplos\nfrom __future__ import print_function\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Point3d, Vector3d, Plane\n\n\nif P2D is None:\n    P2D = Plane(Point3d(0,0,0), Vector3d(1,0,0), Vector3d(0,1,0))\n\n\nif P3D is None:\n    P3D =  Plane(Point3d(0,0,0), Vector3d(1,0,0), Vector3d(0,1,0))\n\n#--- Entradas:\n# P2D - ponto no desenho -- (item, Plane)\n# P3D - ponto no terreno -- (item, Plane)\n# Contorno - contorno da laje -- (list, ghdoc)\n# PaP - distancia piso a piso-- (item, float)\n# h_laje - altura da laje -- (item, float)\n# N_andares - Numerod e andares y -- (item, int)\n# Rot - rotação dos andares -- (item, float)\n\n#Saidas\n# listas de saida\npavConrotno = []\npavFace = []\npavLaje = []\n\n#lista para teste de codigo\nTeste = []\n\n#função principal\n\n# alinhando com o plano P3D\nContornoAux =[]\n\n# orinetando os contornos\nfor curva in Contorno:\n    ContornoOrient = rs.OrientObject(curva, \n    [P2D.Origin,  P2D.Origin + P2D.XAxis,  P2D.Origin + P2D.YAxis], \n    [P3D.Origin, P3D.Origin + P3D.XAxis, P3D.Origin + P3D.YAxis])\n    ContornoAux.append(ContornoOrient)\n    \n\n# loop dos andares\nfor i in range(N_andares +1):\n    \n    ## Colocando os contornos na posição dos pavimentos\n    \n    #movendo o Contorno para a altura do pavimento\n    ContornoPos = rs.CopyObjects(ContornoAux, (i * PaP *P3D.ZAxis) )\n    \n    # rotacionando o contorno dos pavimentos\n    ContornoPos = rs.RotateObjects(ContornoPos , P3D.Origin , (Rot * i/N_andares), P3D.ZAxis)\n\n    ## Saida dos contornos\n    # colocando o Contorno posicionado na lista de saida dos contornos\n    pavConrotno  = pavConrotno + ContornoPos\n    \n    # Gerando superficie atraves das linhas de contorno\n    face = rs.AddPlanarSrf(ContornoPos)\n    \n    ## Saida das faces\n    # colocando a face na lista de saida das faces\n    pavFace += face\n    \n    ## Gerando solidos\n    # ponto auxiliar para criaçao da diretriz da extrusão\n    pAux = P3D.Origin + Point3d( 0,0, h_laje)\n    # linha diretriz da extrusão\n    lAux = rs.AddLine(P3D.Origin, pAux)\n    # sólido gerado pela extrusão\n\n    lajeAux = rs.ExtrudeSurface(face, lAux)\n    \n    # saida das lajes\n    # colocando laje do pavimento na lista de saida PAV\n    pavLaje.append(lajeAux)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

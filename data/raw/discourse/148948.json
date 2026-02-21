@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-in-rs-addgroup-name-when-group-name-already-exists/148948",
+  "topic_id": 148948,
+  "title": "Bug? in rs.AddGroup(name) when group name already exists",
+  "question": "I ran into this just now and it’s confusing to say the least.\n\n\nRun the following script in a new Rhino file with nothing in it.\n\n\nimport rhinoscriptsyntax as rs\n\nfor i in range(5):\n    gn=\"Itemnumber {}\".format(i)\n    group_name=rs.AddGroup(gn)\n    print group_name\n\n\n\nThe first time you run it, no problem, you will get this:\n\n\nItem number 1\n\nItem number 2\n\nItem number 3\n\nItem number 4\n\nItem number 5\n\n\nRun it however a second time and you will get this:\n\n\nItem number01\n\nItem number02\n\nItem number03\n\nItem number04\n\nItem number05\n\n\nRun it a third time and you get this:\n\n\nItem number06\n\nItem number07\n\nItem number08\n\nItem number09\n\nItem number10\n\n\netc.\n\n\nFunny thing is that I have not added anything to these groups, so running SelGroup shows a blank dialog. I guess that’s sorta normal though…\n\n\n\n\nimage\n469×688 5.95 KB\n\n\n\n\nAnd why on earth did it take my “Item number” text, strip the original number and then start adding numbers to the end?  It should, by default, just automatically give me Group 01, Group 02, etc.  My feeling is that the algorithm behind the default numbering is getting confused, it finds an already used name but it isn’t looking for a “Group nn” format, it simply finds a name with a number at the end, says Eureka!, strips that number off and adds a new number.\n\n\nWhat it should do:\n\n\nFirst run OK\n\nSecond run:\n\n\nItem number 1 01\n\nItem number 2 01\n\nItem number 3 01\n\nItem number 4 01\n\nItem number 5 01\n\n\nThird run:\n\n\nItem number 1 02\n\nItem number 2 02\n\nItem number 3 02\n\nItem number 4 02\n\nItem number 5 02\n\n\netc.\n\n\nWorst is it also strips out the space so even if it was working correctly it might result in this:\n\n\nItem number 102\n\nItem number 202\n\nItem number 302\n\nItem number 402\n\nItem number 502\n\n\nWhich could be \nREALLY\n confusing.\n\n\nOK, lesson learned, I need to check for the existence of a group name before adding a new group with that name.  Plus for now I will not number groups with the number at the end of the name.  And maybe even run a routine to clea...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfor i in range(5):\n    gn=\"Itemnumber {}\".format(i)\n    group_name=rs.AddGroup(gn)\n    print group_name",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 392
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unable-to-get-a-valid-rectangle-using-getobject-pickrectangle/147176",
+  "topic_id": 147176,
+  "title": "Unable to get a valid rectangle using getObject().pickRectangle ()",
+  "question": "Hello:\n\n\nI used RHINO7.0SR16 and the code is as follows:\n\n\nPublic class Examples\n{\n\nPublic Rectangle GetRectangle()\n\n  {\n\n    var go = new GetObject();\n\n    go.SetCommandPrompt(\"Select point\");\n\n     go.GeometryFilter = ObjectType.Point;\n\n     go.GetMultiple(1, 0);\n\n    var rec =go.PickRectangle();\n\n   }\n\n}\n\n\n\nUnable to get a valid rectangle.\n\n\nthanks.",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  var rc = RhinoGet.GetRectangle(out var corners);\n  if (rc == Result.Success)\n  {\n    var polyline = new Polyline(corners);\n    polyline.Add(polyline[0]); // close\n    doc.Objects.AddPolyline(polyline);\n    doc.Views.Redraw();\n  }\n  return rc;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\n\ngo = Rhino.Input.Custom.GetObject()\ngo.SetCommandPrompt(\"Window select an object\")\ngo.Get()\nif go.CommandResult() == Rhino.Commands.Result.Success:\n    rect = go.PickRectangle()\n    print(rect)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "Public class Examples\n{\n\nPublic Rectangle GetRectangle()\n\n  {\n\n    var go = new GetObject();\n\n    go.SetCommandPrompt(\"Select point\");\n\n     go.GeometryFilter = ObjectType.Point;\n\n     go.GetMultiple(1, 0);\n\n    var rec =go.PickRectangle();\n\n   }\n\n}",
+      "language": "csharp",
+      "author": "401247906",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 351
+}

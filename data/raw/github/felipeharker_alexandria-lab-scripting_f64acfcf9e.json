@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhino3dm/py/SampleAddInstanceDefinition.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhino3dm/py/SampleAddInstanceDefinition.py",
+  "instruction": "Sample add instance definition",
+  "code": "import rhino3dm\n\nmodel = rhino3dm.File3dm()\n\n#create geometry\nsphere1 = rhino3dm.Sphere( rhino3dm.Point3d( 0,0,0 ), 10)\nsphere2 = rhino3dm.Sphere( rhino3dm.Point3d( 10,10,10 ), 4)\ngeometry = (sphere1.ToBrep(), sphere2.ToBrep())\n\n#create attributes\nattr1 = rhino3dm.ObjectAttributes()\nattr1.Name = \"Sphere 1\"\nattr2 = rhino3dm.ObjectAttributes()\nattr2.Name = \"Sphere 2\"\nattributes = (attr1, attr2)\nbasepoint = rhino3dm.Point3d( 0,0,0 )\n\n#create idef\nindex = model.InstanceDefinitions.Add(\"name\", \"description\", \"url\", \"urltag\", basepoint, geometry, attributes)\nprint(\"Index of new idef: \" + str(index))\n\n#create iref\nidef = model.InstanceDefinitions.FindIndex(index)\nxf = rhino3dm.Transform(10.00)\niref = rhino3dm.InstanceReference(idef.Id, xf)\nuuid = model.Objects.Add(iref, None)\nprint(\"id of new iref: \" + str(uuid))\n\n#save file\nmodel.Write('../models/InstanceDefinition.3dm',8)",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

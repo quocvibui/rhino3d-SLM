@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/eto-forms-openfiledialog-with-multiple-filters/211188",
+  "topic_id": 211188,
+  "title": "Eto.Forms.OpenFileDialog with multiple filters",
+  "question": "Hi I’m trying to use the \nEto.Forms.OpenFileDialog\n and its \nFilter\n property with Rhino Common to achieve the following behaviour:\n\n\n\n\nthe user can select a SINGLE file type filter (PNG, BMP, JPG, ZIP) if he already knows precisely what he’s looking for \n– or –\n\n\nthe user can select an “ALL FILE” filter to browse all files\n\n\n\n\nFor the single file type filters all is working as expected:\n\n\ndialog.Filters.Add(new FileFilter(\"Png files\", \".png\"));\ndialog.Filters.Add(new FileFilter(\"Jpg files\", \".jpg\", \".jpeg\"));\n...\n\n\n\nbut if I try to add a filter like this\n\n\ndialog.Filters.Add(new FileFilter(\"All files\", \".*\"));\n\n\n\nthe dialog is shown correctly, however as soon as I select the “All files” filter from the combo box, Rhino crashes.\n\n\nI guess filters in a “regexp style” with wildcard characters are not managed behind the hood of \nEto.Forms.OpenFileDialog\n class.\n\n\nScreenshot 2025-10-20 at 12.24.34\n1818×1500 643 KB\n\n\nI also tried to use \nRhino.UI.OpenFileDialog\n instead, where the \nFilter\n property can be set up in the classic way \n`Png files (*.png)|*.png|All files (*.*)|*.*\n`\n,\n but no filter is shown.\n\n\nScreenshot 2025-10-20 at 12.33.40\n1802×1448 545 KB\n\n\nI’m running my plugin on Rhino 8 for macOS.\n\n\n\n\nRhino version: 8.24\n\n\nmacOS version: Tahoe 26.0.1\n\n\n\n\nIs there any workaround to achieve the mentioned behaviour?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "#! python3\nimport Eto\nimport Rhino\nimport System\n\ndef Test():\n    dialog = Eto.Forms.OpenFileDialog()\n    dialog.Title = \"Open\"\n    dialog.Filters.Add(Eto.Forms.FileFilter(\"BMP\", [\".bmp\"]))\n    dialog.Filters.Add(Eto.Forms.FileFilter(\"JPG\", [\".jpeg\"]))\n    dialog.Filters.Add(Eto.Forms.FileFilter(\"PNG\", [\".png\"]))\n    dialog.Filters.Add(Eto.Forms.FileFilter(\"Supported Files\", [\".bmp\", \".jpeg\", \".png\"]))\n    dialog.Filters.Add(Eto.Forms.FileFilter(\"All Files\", [\"*\"]))\n    result = dialog.ShowDialog(Rhino.UI.RhinoEtoApp.MainWindow)\n    if result == Eto.Forms.DialogResult.Ok:\n        path = dialog.FileName\n        print(dialog.FileName)\n\nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "dialog.Filters.Add(new FileFilter(\"Png files\", \".png\"));\ndialog.Filters.Add(new FileFilter(\"Jpg files\", \".jpg\", \".jpeg\"));\n...",
+      "language": "csharp",
+      "author": "p.stragliotto",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 166
+}

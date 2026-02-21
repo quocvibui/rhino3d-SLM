@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/nurbs-surface-uv-data-to-mesh-object-vertices/131740",
+  "topic_id": 131740,
+  "title": "Nurbs surface UV data to Mesh object vertices",
+  "question": "Greetings to esteemed experts.\n\nLet’s say I get a mesh from a Nurbs surface. In a mesh object, I have data about vertices (x, y, z) and faces. The coordinates of vertices of a mesh are obtained by a mesher, in a simple explanation, on the intersection of uv isocurves of the original Nurbs surface with some step. So I have the following question: how can I create such a mesh object, in which for each vertice there would be additionally data of its initial uv coordiates of the parent Nurbs surface?\n\nIs it possible to achieve this with the original Rhino mesher, or I need to dig deeper and somehow modify/create some custom mesher?",
+  "code_blocks": [
+    {
+      "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Geometry import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select surface\", False, ObjectType.Surface)\n    if rc <> Result.Success or obj_ref == None:\n        return rc\n    surface = obj_ref.Surface()\n    \n    nu = 0\n    nv = 0\n    segments = 25\n    step = 1 / segments\n    i, j = 0, 0\n    p_array = []\n    while i < (segments + 1):\n        p_row = []\n        j = 0\n        while j < (segments + 1):\n            nv = j * step\n            u = surface.Domain(0).ParameterAt(nu)\n            v = surface.Domain(1).ParameterAt(nv)\n            pt = surface.PointAt(u, v)\n            #doc.Objects.AddPoint(pt)\n            p_row.append(pt)\n            #print(nu, nv)\n            j += 1\n            \n        p_array.append(p_row)\n        i += 1\n        nu = i * step\n    \n    i = 0\n    while i < (len(p_array)):\n        j = 1\n        if i < (len(p_array[0]) - 1):\n            doc.Objects.AddLine(p_array[i][j-1], p_array[i+1][j-1])\n        while j < (len(p_array[0])):\n            doc.Objects.AddLine(p_array[i][j], p_array[i][j-1])\n            if i < (len(p_array[0]) - 1):\n                doc.Objects.AddLine(p_array[i][j], p_array[i+1][j])\n            #print(i, j)\n            j += 1\n        i += 1\n\n    doc.Views.Redraw()\n    return Result.Success\n\n\nif __name__ == \"__main__\":\n  RunCommand()",
+      "language": "python",
+      "author": "monkelisha",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1132
+}

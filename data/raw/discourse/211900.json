@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wish-capture-output-of-rhino-rhinoapp-runscript-to-string/211900",
+  "topic_id": 211900,
+  "title": "WISH: Capture output of Rhino.RhinoApp.RunScript() to string",
+  "question": "Named Selections were introduced in R7, and there seems to be no progress with providing programmatic access through RS or RC.  This was promised for R8, but now might make it (with a bit of luck) into R9.\n\n\nFor any feature that can be called via the Rhino command line (rs.Command() or Rhino.RhinoApp.RunScript()), would it be possible to capture the output of the Rhino command to a string?\n\n\nThe rationale is that I’m a big fan of Named Selections, and need to at least know the names of the Named Selections that the user has defined:\n\n\n-_NamedSelections > List\n\n\nThe requested feature would not only enable me to do this whilst awaiting proper RS/RC access, but would also provide access to any/all features that have a cmd line interface (i.e. all native Rhino commands, as well as all commands provided by plug-ins)\n\n\nHow the string is dealt with, how it is parsed and whether or not the cmd line output makes sense would obviously be up to the programmer capturing the output.\n\n\nThank you for considering this.\n\n\nAxel",
+  "code_blocks": [
+    {
+      "code": "def listNamedSelections():\n    Rhino.RhinoApp.CommandWindowCaptureEnabled = True\n    Rhino.RhinoApp.CapturedCommandWindowStrings(clearBuffer=True)\n\n    cmd = ‘-_NamedSelections _List’\n    success = Rhino.RhinoApp.RunScript(cmd, echo=False)\n    strs = Rhino.RhinoApp.CapturedCommandWindowStrings(clearBuffer=True)\n    Rhino.RhinoApp.CommandWindowCaptureEnabled = False\n\n    named_selections = [i.rstrip() for i in strs]\n\n    return named_selections",
+      "language": "python",
+      "author": "axa",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 82
+}

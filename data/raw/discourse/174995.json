@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issue-rs-deleteobjects-doesnt-delete-hidden-geometry-in-rh8/174995",
+  "topic_id": 174995,
+  "title": "ISSUE: rs.DeleteObjects() doesn't delete hidden geometry in RH8",
+  "question": "Hi there,\n\n\nwhen I use rs.DeleteObjects() to remove geometry from the scene, hidden objects are not deleted.\n\nThe \ndocumentation\n doesn’t say anything about the visiblity state.\n\n\nplease see my script to demonstrate this effect:\n\n\n\n\nExpected behaviour is that all objects are deleted, regardless of their visibility state.\n\n\nActual behavior is that after running command ‘Show’ the hidden objects appear not to be deleted\n\n\n\n\nbest regards,\n\nTIm\n\n\nimport rhinoscriptsyntax as rs\nimport random\n\ndata = [\n    {\"x\": 49.0678524495116, \"y\": 7.919379520865089, \"z\": 0}, \n    {\"x\": 25.56026082842878, \"y\": 14.915053467815836, \"z\": 0}, \n    {\"x\": 47.2731842519928, \"y\": 0.5888198323628968, \"z\": 0}, \n    {\"x\": 5.856550407038497, \"y\": 31.827319204399195, \"z\": 0}, \n    {\"x\": 1.7161146209003997, \"y\": 42.56881702080915, \"z\": 0}, \n    {\"x\": 44.82476328457838, \"y\": 9.42424800111748, \"z\": 0}, \n    {\"x\": 0.9370494436862387, \"y\": 28.9739049613968, \"z\": 0}, \n    {\"x\": 16.39590751331968, \"y\": 14.23797380815779, \"z\": 0}, \n    {\"x\": 7.113163914331578, \"y\": 5.346340324542603, \"z\": 0}, \n    {\"x\": 1.2861890038707524, \"y\": 41.609614712757576, \"z\": 0}, \n    {\"x\": 22.49536389779682, \"y\": 23.631381955753366, \"z\": 0}, \n    {\"x\": 47.776179654336445, \"y\": 29.71259777000657, \"z\": 0}, \n    {\"x\": 1.8519621153271493, \"y\": 9.07692372387341, \"z\": 0}, \n    {\"x\": 10.271044565689097, \"y\": 8.25626816004248, \"z\": 0}, \n    {\"x\": 6.7040562191802096, \"y\": 8.472688462636057, \"z\": 0}, \n    {\"x\": 17.246187233196025, \"y\": 18.267583908935908, \"z\": 0}, \n    {\"x\": 12.632308225756445, \"y\": 12.544157463464739, \"z\": 0}, \n    {\"x\": 33.34157205412152, \"y\": 30.847526081157856, \"z\": 0}, \n    {\"x\": 22.593954020732493, \"y\": 23.45088802015678, \"z\": 0}, \n    {\"x\": 36.07346915168073, \"y\": 14.43192379491769, \"z\": 0}\n]\n\n\ndef main():\n\n    # create empty document\n    rs.DocumentModified(False)\n    rs.Command(\"-New None\", False)\n    rs.EnableRedraw(False)\n\n    # generate points from list\n    pts = []\n    for i, entry in enumerate(data):\n       ...",
+  "code_blocks": [
+    {
+      "code": "rc = 0\n    id = rhutil.coerceguid(object_ids, False)\n    if id: object_ids = [id]\n    for id in object_ids:\n        id = rhutil.coerceguid(id, True)\n        if scriptcontext.doc.Objects.Delete(id, True): rc+=1\n    if rc: scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, random\n\ndef CompleteDeleteObjects(obj_ids,silent=True,locked_hidden=True):\n    #deletes all input objects, including locked and hidden\n    rc = 0\n    id = rs.coerceguid(obj_ids, False)\n    if id: obj_ids = [id]\n    for id in obj_ids:\n        rhobj = rs.coercerhinoobject(id)\n        was_del=sc.doc.Objects.Delete(rhobj,silent,locked_hidden)\n        if was_del: rc+=1\n    if rc: sc.doc.Views.Redraw()\n    return rc\n\ndef TestFunction():\n    #make some random poiints\n    pts=[]\n    for i in range(24):\n        x=random.random()*10\n        y=random.random()*10\n        pts.append(Rhino.Geometry.Point3d(x,y,0))\n    #add the points to the document\n    all_pts=rs.AddPoints(pts)\n    rs.Sleep(1500)\n    #randomly hide some of the points\n    hidden=0\n    rs.EnableRedraw(False)\n    for pt in all_pts:\n        hide = random.choice([True, False])\n        if hide:\n            hidden+=1\n            rs.HideObject(pt)\n    rs.Redraw()\n    print(\"Total number of  points is {}\".format(len(all_pts)))\n    print(\"Number of hidden points is {}\".format(hidden))\n    rs.Sleep(1500)\n    #now delete all the points including hidden ones\n    CompleteDeleteObjects(all_pts)\n    shown=rs.ShowObjects(rs.AllObjects())\n    print(\"Showed {} objects\".format(shown))\n    #insurance\n    rs.Command(\"Show\",False)\nTestFunction()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\ndata = [\n    {\"x\": 49.0678524495116, \"y\": 7.919379520865089, \"z\": 0}, \n    {\"x\": 25.56026082842878, \"y\": 14.915053467815836, \"z\": 0}, \n    {\"x\": 47.2731842519928, \"y\": 0.5888198323628968, \"z\": 0}, \n    {\"x\": 5.856550407038497, \"y\": 31.827319204399195, \"z\": 0}, \n    {\"x\": 1.7161146209003997, \"y\": 42.56881702080915, \"z\": 0}, \n    {\"x\": 44.82476328457838, \"y\": 9.42424800111748, \"z\": 0}, \n    {\"x\": 0.9370494436862387, \"y\": 28.9739049613968, \"z\": 0}, \n    {\"x\": 16.39590751331968, \"y\": 14.23797380815779, \"z\": 0}, \n    {\"x\": 7.113163914331578, \"y\": 5.346340324542603, \"z\": 0}, \n    {\"x\": 1.2861890038707524, \"y\": 41.609614712757576, \"z\": 0}, \n    {\"x\": 22.49536389779682, \"y\": 23.631381955753366, \"z\": 0}, \n    {\"x\": 47.776179654336445, \"y\": 29.71259777000657, \"z\": 0}, \n    {\"x\": 1.8519621153271493, \"y\": 9.07692372387341, \"z\": 0}, \n    {\"x\": 10.271044565689097, \"y\": 8.25626816004248, \"z\": 0}, \n    {\"x\": 6.7040562191802096, \"y\": 8.472688462636057, \"z\": 0}, \n    {\"x\": 17.246187233196025, \"y\": 18.267583908935908, \"z\": 0}, \n    {\"x\": 12.632308225756445, \"y\": 12.544157463464739, \"z\": 0}, \n    {\"x\": 33.34157205412152, \"y\": 30.847526081157856, \"z\": 0}, \n    {\"x\": 22.593954020732493, \"y\": 23.45088802015678, \"z\": 0}, \n    {\"x\": 36.07346915168073, \"y\": 14.43192379491769, \"z\": 0}\n]\n\n\ndef main():\n\n    # create empty document\n    rs.DocumentModified(False)\n    rs.Command(\"-New None\", False)\n    rs.EnableRedraw(False)\n\n    # generate points from list\n    pts = []\n    for i, entry in enumerate(data):\n        pt = rs.AddPoint(entry['x'], entry['y'], entry['z'])\n        pts.append(pt)\n\n    # randomly hide some points\n    for pt in pts:\n        hide = random.choice([True, False])\n        if hide:\n            rs.HideObject(pt)\n\n    # delete all points\n    rs.DeleteObjects(pts)\n\n    # THIS COMMAND IS NORMALLY RUN BY THE USER VIA THE COMMAND BAR \n    # EXPECTED: nothing is shown, because all points were deleted\n    # ACTUAL: hidden points were not deleted\n    rs.Command('Show', False)\n    \n    rs.EnableRedraw(True)\n\nif __name__ == '__main__':\n    main()",
+      "language": "python",
+      "author": "timcastelijn",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 249
+}

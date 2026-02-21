@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/default-print-colour-to-by-display-all-objects/96788",
+  "topic_id": 96788,
+  "title": "Default Print Colour to By Display, All Objects",
+  "question": "Output Colour, at the printing stage, By Display is obviously really handy.\n\n\nWhat I often need is Print Widths + Display Colours at the same time - this is what changing all the Print:: By Display helps with.\n\n\nIs there a way to script it? In rhinoscriptsyntax I don’t see a By Display option \n \nhttps://developer.rhino3d.com/api/RhinoScriptSyntax/#object-ObjectPrintColorSource\n Maybe it’s possibe in Rhinocommon?\n\n\nBut I guess for all new objects the default will still be ByLayer printing?\n\n\n\n\nprintColourByDisplay\n1073×787 117 KB\n\n\n\nControlling ByDisplay , by layer, would be cool maybe?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\n#       Rhino.DocObjects.ObjectAttributes.PlotColorSource\n#       Rhino.DocObjects.ObjectAttributes.GetType( )\n#       Rhino.DocObjects.ObjectAttributes.PlotColor\n\nstring = \"Prompting for Selection\"\nbool = False\nfilter  = Rhino.DocObjects.ObjectType.Curve\n\nobject = Rhino.Input.RhinoGet.GetOneObject(string, bool, filter)\nattributes = Rhino.DocObjects.ObjectAttributes()\n\nprint attributes\n\n#   Rhino.Input.Custom.GetObject.Get()\n#   Rhino.Input.Custom.GetObject.GetMultiple()\n\n# Set to By Display (2) ObjectPlotColorSource\n\nattributes = Rhino.DocObjects.ObjectAttributes.ColorSource.Info\n\nRhino.DocObjects.ObjectPlotColorSource.PlotColorFromDisplay\n\n#   print object.PlotColour",
+      "language": "python",
+      "author": "Jonathan_Hutchinson1",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef test_object_print_color():\n    filter = Rhino.DocObjects.ObjectType.AnyObject\n    rc, objrefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Select objects\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc\n    if not objrefs: return Rhino.Commands.Result.Failure\n    \n    for objref in objrefs:\n        rh_obj = objref.Object()\n        if rh_obj:\n            if rh_obj.Attributes.PlotColorSource != Rhino.DocObjects.ObjectPlotColorSource.PlotColorFromDisplay:\n                atts = rh_obj.Attributes.Duplicate()\n                atts.PlotColorSource = Rhino.DocObjects.ObjectPlotColorSource.PlotColorFromDisplay\n                scriptcontext.doc.Objects.ModifyAttributes(objref, atts, True)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    test_object_print_color()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 933
+}

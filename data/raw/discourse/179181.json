@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/what-does-native-rhino-join-do-that-i-cant-in-rhinocommon/179181",
+  "topic_id": 179181,
+  "title": "What does native Rhino Join do that I can't in RhinoCommon?",
+  "question": "In the file below, there is another one of my bad volumes.\n\n\nFixBadBrep.3dm\n (2.7 MB)\n\n\nIf one simply runs Explode - you will get a bad object warning if you have CheckNewObjects turned on - and then Join, you will end up with one good, closed polysurface and one bad surface which you can delete.\n\n\nNow, if I try to do it script-wise - I can mimic the procedure with rhinoscriptsyntax and \nrs.Command()\n:\n\n\nimport rhinoscriptsyntax as rs\n\ndef ExplodeRejoinObject(obj_id,tol=sc.doc.ModelAbsoluteTolerance):\n    rs.UnselectAllObjects()\n    rs.SelectObject(obj_id)\n    rs.Command(\"_Explode\",False)\n    lco=rs.LastCreatedObjects()\n    rs.UnselectAllObjects()\n    rs.SelectObjects(lco)\n    rs.Command(\"_Join\",False)\n    return rs.LastCreatedObjects()\n\nobj_id=rs.GetObject(\"Select a polysurface\",16,preselect=True)\nif obj_id:\n    rs.EnableRedraw(False)\n    result=ExplodeRejoinObject(obj_id)\n    if result:\n        solid_count=0\n        for item in result:\n            if rs.IsObjectSolid(item):\n                solid_count+=1\n            else:\n                rs.DeleteObject(item)\n        if solid_count>0:\n            rs.DeleteObject(obj_id)\n\n\n\nThe main problem is that the CheckNewObjects dialog will come up and stop the script until I hit OK.  So I need to turn it off if I wnat the script to run to completion without having to do this.  But, because of \nthis issue\n, I have no way of knowing if it was turned on before, so if I automatically turn it back on after the script ends, that is maybe unwanted by the user.  But it does succe\n\n\nSo, I tried to duplicate what it does with RhinoCommon and avoid the CheckNewObjects coming up by hopefully eliminating invalid objects before I add them to the document, but I was spectacularly unsuccessful up to now.\n\n\nSo for example just trying to explode and rejoin via RhinoCommon, but it fails to create a solid.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ExplodeRejoinBrep(brep,tol=sc.doc.ModelAbsoluteTolerance):\n   ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef TestJoinBreps():\n    filter = Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select bad polysurface\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success:\n        return\n    \n    brep_obj = objref.Object()\n    if not isinstance(brep_obj, Rhino.DocObjects.BrepObject):\n        return\n        \n    brep = brep_obj.BrepGeometry \n    if not brep:\n        return\n        \n    if brep.IsValid:\n        print(\"The polysurface is valid.\")\n        return\n        \n    # Explode\n    subobjects = brep_obj.GetSubObjects()\n    in_breps = []\n    for obj in subobjects:\n        if isinstance(obj, Rhino.DocObjects.BrepObject):\n            in_breps.append(obj.BrepGeometry)\n    \n    # Join\n    tol = 1.8 * sc.doc.ModelAbsoluteTolerance\n    atol = sc.doc.ModelAngleToleranceRadians\n    out_breps = Rhino.Geometry.Brep.JoinBreps(in_breps, tol, atol)\n    if out_breps:\n        for i in range(len(out_breps)):\n            if i == 0:\n                sc.doc.Objects.Replace(objref, out_breps[i])\n            else:\n                atts = brep_obj.Attributes.Duplicate()\n                sc.doc.Objects.Add(out_breps[i], atts)\n    \n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    TestJoinBreps()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef ExplodeRejoinObject(obj_id,tol=sc.doc.ModelAbsoluteTolerance):\n    rs.UnselectAllObjects()\n    rs.SelectObject(obj_id)\n    rs.Command(\"_Explode\",False)\n    lco=rs.LastCreatedObjects()\n    rs.UnselectAllObjects()\n    rs.SelectObjects(lco)\n    rs.Command(\"_Join\",False)\n    return rs.LastCreatedObjects()\n\nobj_id=rs.GetObject(\"Select a polysurface\",16,preselect=True)\nif obj_id:\n    rs.EnableRedraw(False)\n    result=ExplodeRejoinObject(obj_id)\n    if result:\n        solid_count=0\n        for item in result:\n            if rs.IsObjectSolid(item):\n                solid_count+=1\n            else:\n                rs.DeleteObject(item)\n        if solid_count>0:\n            rs.DeleteObject(obj_id)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ExplodeRejoinBrep(brep,tol=sc.doc.ModelAbsoluteTolerance):\n    face_coll=[face.DuplicateFace(False) for face in brep.Faces]\n    joined=Rhino.Geometry.Brep.JoinBreps(face_coll,tol)\n    return joined\n\nobj_id=rs.GetObject(\"Select a polysurface\",16,preselect=True)\nif obj_id:\n    obj=rs.coercebrep(obj_id)\n    br_fix=ExplodeRejoinBrep(obj)\n    if br_fix:\n        solid_count=0\n        for brep in br_fix:\n            if brep.IsValid:\n                sc.doc.Objects.AddBrep(brep)\n                solid_count+=1\n        print(\"{} solids added to doc\".format(solid_count))\n        sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ExplodeCreateSolidBrep(brep,tol=sc.doc.ModelAbsoluteTolerance):\n    face_coll=[face.DuplicateFace(False) for face in brep.Faces]\n    cs=Rhino.Geometry.Brep.CreateSolid(face_coll,tol)\n    return cs\n\nobj_id=rs.GetObject(\"Select a polysurface\",16,preselect=True)\nif obj_id:\n    obj=rs.coercebrep(obj_id)\n    br_fix=ExplodeCreateSolidBrep(obj)\n    if br_fix:\n        solid_count=0\n        for brep in br_fix:\n            if brep.IsValid and brep.IsSolid:\n                sc.doc.Objects.AddBrep(brep)\n                solid_count+=1\n        print(\"{} solids added to doc\".format(solid_count))\n        sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 302
+}

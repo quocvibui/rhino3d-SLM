@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-python-stubs-in-vscode/183154",
+  "topic_id": 183154,
+  "title": "Using Python Stubs in VSCode?",
+  "question": "Hi,\n\n\nI am wondering about the correct usage of the \nRhino-Stubs\n within an outside IDE when writing Python? Specifically, VSCode. I am able to pip install the stubs just fine, and they are mostly recognized properly, but for some reason the the modules listed in the stub-file’s \n__all__\n are not being recognized, and I wonder if I should be setting this up differently to make it work as expected?\n\n\nFor instance, in VSCode, if I do something like:\n\n\nfrom Rhino import Geometry\n\nclass MyClass(object):\n\n    def __init__(self, _geom):\n        # type: (list[Geometry.GeometryBase]) -> None\n        self.geom = _geom\n\n\n\nthen it can find \nRhino\n (I can Command-Click and follow the Rhino ref successfully), but not \nGeometry\n, even though \n.Geometry\n \nis\n listed within the stub \n__all__\n:\n\n\nScreenshot 2024-05-31 at 9.35.40 AM\n1920×980 134 KB\n\n\nIn VSCode, \nRhino.___\n autocomplete lists the only classes within the file, as expected, but not the ones in  \n__all__\n:\n\n\nScreenshot 2024-05-31 at 9.48.20 AM\n2184×822 152 KB\n\n\nDoes anyone know of  a solution there that I am missing? I’ve just been adding \n# type: ignore\n to these lines, but obviously that’s not ideal at all.\n\n\nHas anyone been able to get these stubs to work in this context? Or maybe I’m not supposed to be imported ‘Geometry’ and the like through Rhino.___?\n\n\nthanks!!\n\n\n@ed.p.may\n\n\n\n\nEnvironment:\n\n\n\n\nRhino-stubs v7.7.21140\n\n\nVSCode v1.89.1\n\n\n\nPylance v2024.5.1\n\n\n\n\n\n\nMacOS Ventura 13.6.6",
+  "code_blocks": [
+    {
+      "code": "from typing import List\nimport Rhino.Geometry as RG\n\nclass MyClass(object):\n    def __init__(self, _geom):\n        self.geom: List[RG.GeometryBase] = _geom",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1644
+}

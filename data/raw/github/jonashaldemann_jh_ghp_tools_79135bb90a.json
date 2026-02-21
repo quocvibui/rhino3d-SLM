@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/vss_parkierungsnorm.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/vss_parkierungsnorm.py",
+  "instruction": "Vss parkierungsnorm",
+  "code": "import ghpythonlib.components as gh\nimport math\n\n\ndef vss_parkierungsnorm(Gv, W, Pf, U, V):\n    \"\"\"\n    Berechnet Parkierungsszenarien basierend auf der VSS-Norm.\n    Args:\n        Gv (bool): Gibt an, ob Gegenverkehr berücksichtigt werden soll.\n                   Wenn True, wird die Mindestbreite der Fahrgasse auf 5.50 gesetzt, falls sie kleiner ist.\n        W (float): Winkel der Parkplätze in Grad (z. B. 90, 75, 70, 60, 45, 30).\n        Pf (float): Breite eines Parkfeldes in Metern (z. B. 2.50, 2.55, 2.60, etc.).\n        U (int): Anzahl der Parkreihen in U-Richtung.\n        V (int): Anzahl der Parkplätze in V-Richtung.\n    Returns:\n        tuple:\n            - Geo (list): Liste von Rechtecken (geometrische Objekte), die die Parkplätze darstellen.\n            - Info (str): Information über die berechnete Fahrgassenbreite.\n    \"\"\"\n\n    # Fixe Werte\n    parkfeldlaenge = 5.00\n    winkel_rad = math.radians(90 - W)\n\n    d_pf = {\n        90: {\n            2.50: 6.50,\n            2.55: 6.25,\n            2.60: 6.00,\n            2.65: 5.75,\n            2.70: 5.50,\n            2.75: 5.25,\n            2.80: 5.00,\n        },\n        75: {2.50: 5.00, 2.65: 4.50},\n        70: {2.50: 4.50, 2.70: 4.00},\n        60: {2.50: 3.50, 2.80: 3.20},\n        45: {2.50: 3.20},\n        30: {2.50: 3.20},\n    }\n\n    # Fahrgasse auslesen ohne Fallback-Wert (\"\")\n    fahrgasse = d_pf.get(W, {}).get(Pf, \"\")\n\n    # Mindestbreite bei Gegenverkehr\n    if Gv and fahrgasse < 5.50:\n        fahrgasse = 5.50\n\n    # Versatzberechnungen\n    reihenversatz = parkfeldlaenge * math.sin(winkel_rad)\n    x_versatz = parkfeldlaenge * math.cos(winkel_rad)\n    versatz_y = [(i // 2) * reihenversatz for i in range(U)]\n    fahrgassenzuschlag = Pf * math.sin(winkel_rad)\n\n    # U-Richtung\n    series_u = []\n    wert = 0\n    for i in range(U):\n        series_u.append(wert)\n        wert += x_versatz + (fahrgasse + fahrgassenzuschlag if i % 2 == 0 else 0)\n\n    # V-Richtung\n    shift = Pf / math.cos(winkel_rad)\n    series_v = [i * shift for i in range(V)]\n\n    # Punktgitter\n    points = []\n    for i, u in enumerate(series_u):\n        y_offset = versatz_y[i]\n        for v in series_v:\n            points.append(gh.ConstructPoint(u, v + y_offset, 0))\n\n    # Rechtecke\n    Geo = gh.Rectangle(points, parkfeldlaenge, Pf, 0.0)[0]\n\n    Geo_rotated = []\n    for curve, point in zip(Geo, points):\n        rotated = gh.Rotate(curve, winkel_rad, point)[0]\n        Geo_rotated.append(rotated)\n\n    # Output\n    Geo = Geo_rotated\n    Info = f\"Fahrgasse = {fahrgasse}\"\n    return Geo, Info\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

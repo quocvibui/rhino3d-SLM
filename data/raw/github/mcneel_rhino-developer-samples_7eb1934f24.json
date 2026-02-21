@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/duplicate-surface-border.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/duplicate-surface-border.py",
+  "instruction": "Duplicate surface border",
+  "code": "import Rhino\nimport scriptcontext\n\ndef DupBorder():\n    filter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface or polysurface\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc\n\n    rhobj = objref.Object()\n    brep = objref.Brep()\n    if not rhobj or not brep: return Rhino.Commands.Result.Failure\n    rhobj.Select(False)\n    curves = brep.DuplicateEdgeCurves(True)\n    tol = scriptcontext.doc.ModelAbsoluteTolerance * 2.1\n    curves = Rhino.Geometry.Curve.JoinCurves(curves, tol)\n    for curve in curves:\n        id = scriptcontext.doc.Objects.AddCurve(curve)\n        scriptcontext.doc.Objects.Select(id)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    DupBorder()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

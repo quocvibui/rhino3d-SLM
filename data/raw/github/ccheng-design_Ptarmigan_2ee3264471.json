@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ccheng-design/Ptarmigan/blob/a473d0b66c2733bca3a483f6c4f82cd927a9e8c8/01_RHINO/_SOURCE%20CODE/_ARCHIVE/DetailScaleFactor.py",
+  "repo": "ccheng-design/Ptarmigan",
+  "repo_stars": 3,
+  "repo_description": "Rhino, Grasshopper, Houdini Scripts",
+  "license": "MIT",
+  "filepath": "01_RHINO/_SOURCE CODE/_ARCHIVE/DetailScaleFactor.py",
+  "instruction": "Detail scale factor",
+  "code": "\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\nimport System\nimport System.Collections.Generic\nimport Rhino\n\nimport math\nimport sys\n\n\nfrom fractions import Fraction\nfrom decimal import Decimal\n\n\n#Uses embedded text with attributes to define the scale factor\nrs.MessageBox(\"Select details and text in the same order!\", buttons=0, title=\"DetailScaleFactor\")\n\n\ndetailGet=rs.GetObjects(\"Get Details\",filter=32768)\ndescription=rs.GetObjects(\"Get Text\",filter=4096)\n\n#Exit clause\nif description or detailGet is None:\n    print(\"Nothing Selected\")\n\n\n\ndrawingScaleFactor=[]\ndescriptionCount=[]\n\n#description count\nfor i in description:\n    descriptionCount.append(i)\n\n#detail count\ndetailGetCount=[]\nfor i in detailGet:\n    detailGetCount.append(i)\n\n\nprint(len(descriptionCount))\nprint(len(detailGetCount))\n\nif len(descriptionCount) != len(detailGetCount):\n    sys.exit()\n\nprint(detailGet)\nfor i in detailGet:\n    detailObj=sc.doc.Objects.FindId(i)\n\n    #print(detailObj)\n\n    viewport=detailObj.DetailGeometry.PageToModelRatio\n\n\n    #print(viewport)\n\n    x=Fraction(viewport).limit_denominator()\n    fracScale=Fraction(12/x.denominator)\n\n    drawingScale=str(fracScale) + '\"' + \" = \" + \"1'-0\"+'\"'\n    #print(drawingScale)\n    drawingScaleFactor.append(drawingScale)\n\n    #print(str(fracScale) + '\"' + \" = \" + \"1'-0\"+'\"')\n\n#print(description)\nfor i,j in zip(description,drawingScaleFactor):\n  \n    print(j)\n    rs.SetUserText(i, \"SCALE\", j)\n    \n\n\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

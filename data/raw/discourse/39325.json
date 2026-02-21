@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-addsweep2-from-previously-defined-variables-instead-of-getobjects/39325",
+  "topic_id": 39325,
+  "title": "How to AddSweep2 from previously defined variables instead of GetObjects()?",
+  "question": "If I have already defined the two rails and cross-sectional curve, what do I need to do to process them so that they can be used as the arguments for the AddSweep2 function?  All of the examples in Rhino IronPython assume that its great to manually select objects.  I do NOT want to manually select objects.\n\n\nHere is my current script.  How do I make the last line work?\n\n\n#  Initializations:\n#   For the inside, short 240 degree spiral...\n\nRodRadius = 0.75\nDiagRadius = 0.50\na = DiagRadius * sqrt(pi)\nInsideWrapAngle = 240\nInsideApproachAngle = 21.05\nInsideApproachRadians = radians(InsideApproachAngle)\nLineLengthInner = (((a + 2*RodRadius)*pi*InsideWrapAngle/360)* tan(InsideApproachRadians))/2\nInsidePitch = 2*LineLengthInner/(240/360)\nInsideTwistHeight = a/cos(InsideApproachRadians)\n\n\n#  Add the vertical construction line for the spiral.\n#  First, define the top and bottom points...\nInsideBottom = rs.AddPoint(0,0,- LineLengthInner)\nInsideTop = rs.AddPoint(0,0, LineLengthInner)\n\ntest1 = rs.AddLine(InsideBottom, InsideTop)\n\n#  Add a point at the beginning of the base spiral\npntInsideBottomRailStart = rs.AddPoint(RodRadius,0,-LineLengthInner)\n\n#  Draw the base spiral for the inside twist.\nInsideBottomRail = rs.AddSpiral(InsideBottom, InsideTop,InsidePitch,InsideWrapAngle/360,RodRadius, RodRadius)\nobj1 = rs.LastCreatedObjects\n\n#  Offset the base spiral for the 2nd rail.\nInsideTopRail = rs.CopyObject(InsideBottomRail,(0,0,InsideTwistHeight))\n\n#  Add a point at the beginning of the 2nd rail\npntInsideTopRailStart = rs.CopyObject(pntInsideBottomRailStart,(0,0,InsideTwistHeight))\n\n#add a point a the end of the bottom rail\npntInsideBottomRailTop = rs.AddPoint(rs.CurveEndPoint(InsideBottomRail))\n\n#add a point a the end of the top rail\npntInsideTopRailTop = rs.AddPoint(rs.CurveEndPoint(InsideTopRail))\n\n\n#  Add another rail which will pass through the centroid of the twist crosssection.\nInsideCentroidRail = rs.AddSpiral(InsideBottom, InsideTop,InsidePitch,InsideWrapAngle/360,RodRadi...",
+  "code_blocks": [
+    {
+      "code": "#  Initializations:\n#   For the inside, short 240 degree spiral...\n\nRodRadius = 0.75\nDiagRadius = 0.50\na = DiagRadius * sqrt(pi)\nInsideWrapAngle = 240\nInsideApproachAngle = 21.05\nInsideApproachRadians = radians(InsideApproachAngle)\nLineLengthInner = (((a + 2*RodRadius)*pi*InsideWrapAngle/360)* tan(InsideApproachRadians))/2\nInsidePitch = 2*LineLengthInner/(240/360)\nInsideTwistHeight = a/cos(InsideApproachRadians)\n\n\n#  Add the vertical construction line for the spiral.\n#  First, define the top and bottom points...\nInsideBottom = rs.AddPoint(0,0,- LineLengthInner)\nInsideTop = rs.AddPoint(0,0, LineLengthInner)\n\ntest1 = rs.AddLine(InsideBottom, InsideTop)\n\n#  Add a point at the beginning of the base spiral\npntInsideBottomRailStart = rs.AddPoint(RodRadius,0,-LineLengthInner)\n\n#  Draw the base spiral for the inside twist.\nInsideBottomRail = rs.AddSpiral(InsideBottom, InsideTop,InsidePitch,InsideWrapAngle/360,RodRadius, RodRadius)\nobj1 = rs.LastCreatedObjects\n\n#  Offset the base spiral for the 2nd rail.\nInsideTopRail = rs.CopyObject(InsideBottomRail,(0,0,InsideTwistHeight))\n\n#  Add a point at the beginning of the 2nd rail\npntInsideTopRailStart = rs.CopyObject(pntInsideBottomRailStart,(0,0,InsideTwistHeight))\n\n#add a point a the end of the bottom rail\npntInsideBottomRailTop = rs.AddPoint(rs.CurveEndPoint(InsideBottomRail))\n\n#add a point a the end of the top rail\npntInsideTopRailTop = rs.AddPoint(rs.CurveEndPoint(InsideTopRail))\n\n\n#  Add another rail which will pass through the centroid of the twist crosssection.\nInsideCentroidRail = rs.AddSpiral(InsideBottom, InsideTop,InsidePitch,InsideWrapAngle/360,RodRadius + a/2, RodRadius + a/2)\n\n#  Now move the rail up to the centroid.\nrs.MoveObject(InsideCentroidRail, (0,0,InsideTwistHeight/2))\n\n#add points at the ends of the centroid rail\npntInsideCentroidRailBottom = rs.AddPoint(rs.CurveStartPoint(InsideCentroidRail))\npntInsideCentroidRailTop = rs.AddPoint(rs.CurveEndPoint(InsideCentroidRail))\n\n#   Draw a rectangle perpendicular to the rails\nInsideTwistStartFrame = rs.PlaneFromFrame(pntInsideBottomRailStart,(1,0,0),(0,0,1))\nInsideTwistStartRectangle = rs.AddRectangle(InsideTwistStartFrame,a,InsideTwistHeight)\nobj3 = rs.LastCreatedObjects\n\n#  Zoom in on the figure in all four views simultaneously\nrs.ZoomExtents(all=True)\n\n#  Sweep the rails to create the inner twist.\nrs.AddSweep2((InsideBottomRail,InsideTopRail),InsideTwistStartRectangle)",
+      "language": "python",
+      "author": "bluekite",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 838
+}

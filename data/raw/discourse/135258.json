@@ -1,0 +1,52 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/saving-a-specific-area-of-the-viewport-as-an-image/135258",
+  "topic_id": 135258,
+  "title": "Saving a specific area of the viewport as an image",
+  "question": "Hi,\n\n\nI’m looking for a way to save as a \n.jpg\n or \n.png\n file the elements that appear \ninside a specific area of the viewport\n and at a \n custom resolution\n . I was thinking about a Python script in Grasshopper that would take as inputs:\n\n\n\n\na closed polyline (area/contour of the canvas)\n\n\n2 ints (width and height in pixels)\n\n\n2 strings (path + file name)\n\n\na boolean (to trigger the saving of the image)\n\n\n\n\nss49\n1302×613 83.5 KB\n\n\nIs it feasible ?\n\n\nLooking at the RhinoCommon API I found the following classes and functions that, I think, could be useful in this case but I can’t seem to figure out which one exactly is the most relevant and how to use it properly:\n\n\n\n\n\n\nRhino.Display.ViewCaptureSettings\n:\n\n\n\n\nCropRectangle\n\n\nDrawSelectedObjectsOnly\n\n\nViewArea\n\n\nSetWindowRect\n\n\nViewAreaMapping\n\n\n\n\n\n\n\n\nRhino.Display.RhinoView\n:\n\n\n\n\nBounds\n\n\nClientRectangle\n\n\nScreenRectangle\n\n\nSize\n\n\n\n\n\n\n\n\nCould someone give me a hint on this ?",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport scriptcontext as sc\nimport System, operator\n\n# Get x and y coordinates of frame vertices\npx, py = set(frame.X), set(frame.Y)\n\n# Get horizontal and vertical lengths\ndx = abs(reduce(operator.sub, px))\ndy = abs(reduce(operator.sub, py))\n\n# Construct the points that will set the print area\noffx = (dx/dy) * (3/factor)\noffy = (dy/dx )* (3/factor)\np1 = rg.Point3d(min(px) + offx, min(py) + offy, 0)\np2 = rg.Point3d(max(px) - offx, max(py) - offy, 0)\n\n# Set resolution to chosen scaling factor\nsx, sy = dx*factor, dy*factor\n\n\ndef Capture():\n\n    view = sc.doc.Views.ActiveView\n    size = System.Drawing.Size(sx, sy) \n\n    settings = rd.ViewCaptureSettings(view, size, 300) #view, size, dpi\n    settings.SetWindowRect(p1, p2)\n    settings.RasterMode = True\n    settings.DrawGrid = False\n    settings.DrawAxis = False\n    settings.DrawWallpaper = False\n\n    bitmap = rd.ViewCapture.CaptureToBitmap(settings)\n    bitmap.Save(path+filename+\".png\")\n\n\nif save:\n    Capture()",
+      "language": "python",
+      "author": "liukov.dobriev",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef TestCapture():\n    \n    rc, rect, view = Rhino.Input.RhinoGet.Get2dRectangle(False)\n    if rc != Rhino.Commands.Result.Success: return\n    \n    size = System.Drawing.Size(rect.Width, rect.Height)\n    p0 = Rhino.Geometry.Point2d(rect.X, rect.Y)\n    p1 = Rhino.Geometry.Point2d(rect.X + rect.Width, rect.Y + rect.Height)\n    settings = Rhino.Display.ViewCaptureSettings(view, size, 72) \n    settings.SetWindowRect(p0, p1)\n    settings.DrawGrid = True\n    settings.DrawAxis = True\n    bitmap = Rhino.Display.ViewCapture.CaptureToBitmap(settings)\n    if not bitmap: print \"No bitmap\"; return\n    file = rs.SaveFileName (\"Save\", \"PNG Files (*.png)|*.png||\")\n    if file: bitmap.Save(file)\n    \nTestCapture()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "pt0 = rs.GetPoint(\"First point\")\npt1 = rs.GetPoint(\"Second point\")\n\ns = Rhino.DocObjects.CoordinateSystem.Screen\nw = Rhino.DocObjects.CoordinateSystem.World\nxform = viewport.GetTransform(w,s)\n\nscreen_pt0 = Rhino.Geometry.Point2d(xform * pt0)\nscreep_pt1 = Rhino.Geometry.Point2d(xform * pt1)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport ghpythonlib as gh\nimport os\n\nvector_length=gh.components.ListLength(Geometria)\n\nif Toggle:\n    for i in range(vector_length):\n        bb = rc.Geometry.BoundingBox.Empty\n        gb = Geometria[i]\n        solido = gb.GetBoundingBox(False)\n        avp = rc.RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport\n        Result= avp.ZoomBoundingBox(solido)\n        \n        if not os.path.exists(Directory):\n            print \"Folder does not exist\"\n        else:\n            filePath = Directory + \"\\\\\" + FileName[i] + \".png\"\n            filePath = filePath.replace(\"\\\\\",\"\\\\\\\\\")\n            wh = \" _Width=\" + str(Width) + \" _Height=\" + str(Height)\n            sga = \" _Scale=1 _DrawGrid=No _DrawWorldAxes=No\"\n            abg = \" _DrawCPlaneAxes=No _TransparentBackground=No \"\n            capSettings =  wh + sga + abg\n            if rc.RhinoApp.RunScript(\"-ViewCaptureToFile \" + filePath + capSettings + \"_Enter\",echo=False):\n                print \"Captured: \" + os.path.normpath(filePath)",
+      "language": "python",
+      "author": "bbalbastre",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 3431
+}

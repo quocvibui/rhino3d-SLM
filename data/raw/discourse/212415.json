@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-freeze-after-runscript-macro-rhino8-9/212415",
+  "topic_id": 212415,
+  "title": "Grasshopper freeze after RunScript macro(Rhino8,9)",
+  "question": "After the script runs via \nRhino.RhinoApp.RunScript\n inside a C# Grasshopper component, the Grasshopper window becomes unresponsive or “freezes”.\n\nTo unfreeze the Grasshopper interface, the user has to click the trigger \nButton\n again.\n\nThis appears to be a UI freeze issue caused by the interaction between Grasshopper and Rhino’s command execution thread.\n\nA fix or workaround would be appreciated to prevent the Grasshopper canvas from hanging after running macros through RhinoApp.RunScript.\n\n\nNote: It seems that this issue occurs with macros that need to execute one or more sub‑commands within a main command.\n\n\nPlease refer to the attached sample \n.gh\n file for demonstration.\n\n\nTested in:\n\nRhino 8 SR25 2025-11-4 (Rhino 8, 8.25.25308.13001)\n\nRhino 9 SR0 2025-11-11 (Rhino WIP, 9.0.25315.12305)\n\n\n**\n\n\nexampe Test Code:\n\n\nprivate void RunScript(bool extrudeCircle, ref object a)\n{\n    if (extrudeCircle)\n    {\n        Rhino.RhinoApp.RunScript(\"! _Circle 0,0,0 1.4275 _Enter _SelLast _ExtrudeCrv _Solid=Yes 7.58 _Enter\", false);\n        a = \"Circle with diameter 2.855 extruded Solid height 7.58.\";\n    }\n    else\n    {\n        a = \"Waiting for trigger...\";\n    }\n}\n\n\n\nexampe2 Test Code:\n\n\nprivate void RunScript(bool save, ref object a)\n{Component.NickName=\"SaveR8\";Component.Name=\"SaveR8\";\n    if(save)\n    {\n      \n        Rhino.RhinoApp.RunScript(\"! _-Save _SavePlugInData _Enter\",true);\n\n        a = \"Macro executed successfully.\";\n    }\n    else\n    {\n        a = \"Waiting for save trigger...\";\n    }\n}\n\n\n\nRhinoAppc#Bug.gh\n (18.0 KB)\n\n\nRhinoAppc#Bug.ghx\n (150.3 KB)\n\n\nbug RhinoApp\n1493×747 102 KB\n\n\n\n\n\n\n@eirannejad\n\n\n@Alain\n\n\n@Gijs\n\n\n*> I just realized that this issue occurred similarly with Python back in 2017, even in Rhino 7, according to the link below. It seems that Rhino’s SDK has had this problem for a long time.\n\n\n\n\n\n\n\n\n\n\nUsing Rhinoscript Macros renders GH unresponsive\n \nGrasshopper\n\n\n\n\n\n\n\n    I am not entirely sure what the problem was, but holding the “toggle boolean” b...",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(bool extrudeCircle, ref object a)\n{\n    if (extrudeCircle)\n    {\n        Rhino.RhinoApp.RunScript(\"! _Circle 0,0,0 1.4275 _Enter _SelLast _ExtrudeCrv _Solid=Yes 7.58 _Enter\", false);\n        a = \"Circle with diameter 2.855 extruded Solid height 7.58.\";\n    }\n    else\n    {\n        a = \"Waiting for trigger...\";\n    }\n}",
+      "language": "csharp",
+      "author": "flexibility",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(bool save, ref object a)\n{Component.NickName=\"SaveR8\";Component.Name=\"SaveR8\";\n    if(save)\n    {\n      \n        Rhino.RhinoApp.RunScript(\"! _-Save _SavePlugInData _Enter\",true);\n\n        a = \"Macro executed successfully.\";\n    }\n    else\n    {\n        a = \"Waiting for save trigger...\";\n    }\n}",
+      "language": "csharp",
+      "author": "flexibility",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 63
+}

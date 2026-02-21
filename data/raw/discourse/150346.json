@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-report-adding-detail-to-layout-crashes-rhino-python/150346",
+  "topic_id": 150346,
+  "title": "Bug Report: Adding detail to Layout crashes Rhino (Python)",
+  "question": "Hi fellow Rhino users and Developers,\n\n\ntrying to automate a boring task I have found what I believe is a bug in rhino.\n\nThe following script starts Grasshopper, loads a script and bakes an object. That all works per se. Object is baked and I can interact with it inside rhino. Commenting out the layout part of the script shows this.\n\nThe second part of the script adds a new layout and adds a detail to the layout. Executed by itself - skipping the GH part of the script -  it works fine - layout is created, detail added.\n\n\nExecuting them after each other however (as in the script below) crashes Rhino on the line where it should add the detail. I tried switching away from the Layout back to a viewport but that did not help…\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# GRASSHOPPER PART\nobjPlugin = rs.GetPlugInObject(\"Grasshopper\")\nif objPlugin is None:\n\tprint(\"Error\")\n\t\nif objPlugin is not None:\n\t#objPlugin.LoadEditor()\n\tobjPlugin.ShowEditor()\n\tdoc = objPlugin.OpenDocument(\"E:\\\\test.ghx\")\n\tif doc is False:\n\t\tprint(\"Error loading doc\")\n\tobjPlugin.RunSolver(True)\n\tobjs = []\n\tobjs = objPlugin.BakeDataInObject(\"e9eb1dcf-92f6-4d4d-84ae-96222d60f56b\")\n\n# LAYOUT PART \na4_height = 297\na4_width = 210 \nlay = rs.AddLayout(\"Teste\",(a4_height,a4_width))\nif not lay:\n\tprint(\"Error in creating layout\")\n\n# Tried switching away from the layout in order to prevent crash, failed.\nrs.CurrentView(\"Top\")\n\n# Crashes on next line\nsideview = rs.AddDetail(lay,(0,0),(a4_height,a4_width),\"Side View\",3)\n\n\n\ntest.ghx\n (69.7 KB)\n\n\nBugReport_AddLayout.py\n (822 Bytes)\n\n\nDoes anyone have an idea what could provoke this? I have included an .GHX file that creates 10 cones called test.ghx, put it somewhere and change the path in the python script to reproduce. I think the GUID for the component to be baked should remain the same.\n\n\nRhino Version is 7 SR23 . It crashes without a “Report crash window”.\n\n\nAny hints as to what I may do to resolve this issue (updating some obscure o...",
+  "code_blocks": [
+    {
+      "code": "lay = rs.AddLayout(\"TestLayout\",(a4w,a4h))\nif not lay:\n\tprint(\"Error in creating layout\")\n\t\nret = rs.IsLayout(lay)\nif ret == True:\n\tprint(\"Is a layout\")\n\tsideview = rs.AddDetail(lay,(0,0),(a4w/2,a4h),\"Side View\",3)\n\tfrontview = rs.AddDetail(lay,(a4w/2,0),(a4w,a4h),\"Front view\",1)",
+      "language": "python",
+      "author": "m112",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino 7 SR23 2022-10-9 (Rhino 7, 7.23.22282.13001, Git hash:master @ a931168ca9426920ae6aa97218710b662f17fc39)\nLicense type: Educational, build 2022-10-09\nLicense details: Cloud Zoo\n\nWindows 10 (10.0.19042 SR0.0) or greater (Physical RAM: 32Gb)\n\nComputer platform: DESKTOP \n\nStandard graphics configuration.\n  Primary display and OpenGL: NVIDIA GeForce RTX 2070 (NVidia) Memory: 8GB, Driver date: 12-29-2021 (M-D-Y). OpenGL Ver: 4.6.0 NVIDIA 511.09\n    > Accelerated graphics device with 4 adapter port(s)\n        - Windows Main Display attached to adapter port #0\n        - Secondary monitor attached to adapter port #1\n        - Secondary monitor attached to adapter port #2\n\nOpenGL Settings\n  Safe mode: Off\n  Use accelerated hardware modes: On\n  Redraw scene when viewports are exposed: On\n  Graphics level being used: OpenGL 4.6 (primary GPU's maximum)\n  \n  Anti-alias mode: 4x\n  Mip Map Filtering: Linear\n  Anisotropic Filtering Mode: High\n  \n  Vendor Name: NVIDIA Corporation\n  Render version: 4.6\n  Shading Language: 4.60 NVIDIA\n  Driver Date: 12-29-2021\n  Driver Version: 30.0.15.1109\n  Maximum Texture size: 32768 x 32768\n  Z-Buffer depth: 24 bits\n  Maximum Viewport size: 32768 x 32768\n  Total Video Memory: 8 GB\n\nRhino plugins that do not ship with Rhino\n  C:\\Users\\Teknix\\AppData\\Roaming\\McNeel\\Rhinoceros\\packages\\7.0\\EleFront\\4.2.2\\ElefrontProperties.rhp\t\"ElefrontProperties\"\t1.0.0.0\n  C:\\Users\\Teknix\\AppData\\Roaming\\McNeel\\Rhinoceros\\packages\\7.0\\Bullant\\1.5.11.0\\bullant.rhp\t\"bullant\"\t1.5.11.0\n\nRhino plugins that ship with Rhino\n  C:\\Program Files\\Rhino 7\\Plug-ins\\Commands.rhp\t\"Commands\"\t7.23.22282.13001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\rdk.rhp\t\"Renderer Development Kit\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\RhinoRenderCycles.rhp\t\"Rhino Render\"\t7.23.22282.13001\n  C:\\Users\\Teknix\\AppData\\Roaming\\McNeel\\Rhinoceros\\packages\\7.0\\PanelingTools\\2020.12.9.865\\PanelingTools.rhp\t\"PanelingTools\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\rdk_etoui.rhp\t\"RDK_EtoUI\"\t7.23.22282.13001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\rdk_ui.rhp\t\"Renderer Development Kit UI\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\NamedSnapshots.rhp\t\"Snapshots\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\RhinoCycles.rhp\t\"RhinoCycles\"\t7.23.22282.13001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\Toolbars\\Toolbars.rhp\t\"Toolbars\"\t7.23.22282.13001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\3dxrhino.rhp\t\"3Dconnexion 3D Mouse\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\Displacement.rhp\t\"Displacement\"",
+      "language": "python",
+      "author": "m112",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# GRASSHOPPER PART\nobjPlugin = rs.GetPlugInObject(\"Grasshopper\")\nif objPlugin is None:\n\tprint(\"Error\")\n\t\nif objPlugin is not None:\n\t#objPlugin.LoadEditor()\n\tobjPlugin.ShowEditor()\n\tdoc = objPlugin.OpenDocument(\"E:\\\\test.ghx\")\n\tif doc is False:\n\t\tprint(\"Error loading doc\")\n\tobjPlugin.RunSolver(True)\n\tobjs = []\n\tobjs = objPlugin.BakeDataInObject(\"a54c048f-08a2-4799-a03b-c22eb64f36eb\")\n\n\nrs.Command(\"_-SaveAs \"+chr(34)+\"E:\\\\BakedObjs.3dm\"+chr(34)+\" _Enter\",False)\nrs.Command(\"_-New \"+chr(34)+\"Small Objects - Millimeters.3dm\"+chr(34)+\" _Enter\",False)\nrs.Command(\"_-Open \"+chr(34)+\"E:\\\\BakedObjs.3dm\"+chr(34)+\" _Enter\",False)\n\n# LAYOUT PART \na4_height = 297\na4_width = 210 \nlay = rs.AddLayout(\"Teste\",(a4_height,a4_width))\nif not lay:\n\tprint(\"Error in creating layout\")\n\n# Tried switching away from the layout in order to prevent crash, failed.\nrs.CurrentView(\"Top\")\n\n# Crashes on next line\nret = rs.IsLayout(lay)\nif ret == True:\n\tprint(\"Is a layout shouldnt crash :(\")\n\tsideview = rs.AddDetail(lay,(0,0),(a4_height,a4_width),\"Side View\",3)",
+      "language": "python",
+      "author": "m112",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# GRASSHOPPER PART\nobjPlugin = rs.GetPlugInObject(\"Grasshopper\")\nif objPlugin is None:\n\tprint(\"Error\")\n\t\nif objPlugin is not None:\n\t#objPlugin.LoadEditor()\n\tobjPlugin.ShowEditor()\n\tdoc = objPlugin.OpenDocument(\"E:\\\\test.ghx\")\n\tif doc is False:\n\t\tprint(\"Error loading doc\")\n\tobjPlugin.RunSolver(True)\n\tobjs = []\n\tobjs = objPlugin.BakeDataInObject(\"e9eb1dcf-92f6-4d4d-84ae-96222d60f56b\")\n\n# LAYOUT PART \na4_height = 297\na4_width = 210 \nlay = rs.AddLayout(\"Teste\",(a4_height,a4_width))\nif not lay:\n\tprint(\"Error in creating layout\")\n\n# Tried switching away from the layout in order to prevent crash, failed.\nrs.CurrentView(\"Top\")\n\n# Crashes on next line\nsideview = rs.AddDetail(lay,(0,0),(a4_height,a4_width),\"Side View\",3)",
+      "language": "python",
+      "author": "m112",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 741
+}

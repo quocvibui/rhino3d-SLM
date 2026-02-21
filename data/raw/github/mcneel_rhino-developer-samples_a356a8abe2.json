@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/advanced-display-settings.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/advanced-display-settings.py",
+  "instruction": "Advanced display settings",
+  "code": "import Rhino\nimport scriptcontext\n\n# The following example demonstrates how to modify advanced display settings\n# using RhinoCommon. In this example, a display mode's mesh wireframe thickness\n# (in pixels) will be modified.\ndef AdvancedDisplay():\n    # Use the display attributes manager to build a list of display modes.\n    # Note, these are copies of the originals...\n    display_modes = Rhino.Display.DisplayModeDescription.GetDisplayModes()\n    if not display_modes: return Rhino.Commands.Result.Failure\n\n    # Construct an options picker so the user can pick which\n    # display mode they want modified\n    go = Rhino.Input.Custom.GetOption()\n    go.SetCommandPrompt(\"Display mode to modify mesh thickness\")\n    opt_list = []\n    for i, mode in enumerate(display_modes):\n        english_name = mode.EnglishName\n        english_name = english_name.translate(None, \"_ -,.\")\n        opt_list.append( go.AddOption(english_name) )\n\n    # Get the command option\n    go.Get()\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult();\n\n    selected_index = go.Option().Index\n    selected_description = None\n    for i,option in enumerate(opt_list):\n        if option==selected_index:\n            selected_description = display_modes[i]\n            break\n    # Validate...\n    if not selected_description: return Rhino.Commands.Result.Failure\n\n    # Modify the desired display mode. In this case, we\n    # will just set the mesh wireframe thickness to zero.\n    selected_description.DisplayAttributes.MeshSpecificAttributes.MeshWireThickness = 0\n    # Use the display attributes manager to update the display mode.\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(selected_description)\n    # Force the document to regenerate.\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    AdvancedDisplay()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

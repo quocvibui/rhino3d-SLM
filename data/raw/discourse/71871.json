@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-can-use-rhinoscriptsyntax-in-a-plugin/71871",
+  "topic_id": 71871,
+  "title": "How can use rhinoscriptsyntax in a plugin?",
+  "question": "Hi everybody,\n\n\nI am trying to use rhinoscriptsyntax as (rhino.getobejct, rhino.addpoint , rhino.istext, etc) in a plugin develop in Visual Studio.\n\n\nHow can I do this?\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "Imports System\nImports System.Collections.Generic\nImports Rhino\nImports Rhino.Commands\nImports Rhino.DocObjects\nImports Rhino.Geometry\nImports Rhino.Input\nImports Rhino.Input.Custom\n\nNamespace ACTIVAR_CAPAS\n\n    <System.Runtime.InteropServices.Guid(\"c1135058-446c-4002-bae0-3aa90b39e42b\"),\n    Rhino.Commands.CommandStyle(Rhino.Commands.Style.ScriptRunner)>\n    Public Class INCOMACTIVARCAPASCommand\n        Inherits Rhino.Commands.Command\n\n        Shared _instance As INCOMACTIVARCAPASCommand\n\n\n        '''<returns>The command name as it appears on the Rhino command line.</returns>\n        Public Overrides ReadOnly Property EnglishName() As String\n            Get\n                Return \"INCOMACTIVARCAPAS\"\n            End Get\n        End Property\n\n        Protected Overrides Function RunCommand(ByVal doc As RhinoDoc, ByVal mode As RunMode) As Result\n            Dim Rhino, objRhinoScript As Object\n\n\n            objRhinoScript = CreateObject(\"Rhino5x64.Interface\")\n            If (Err.Number <> 0) Then\n                RhinoApp.WriteLine(\"Unable to create Rhino5x64.Interface object\")\n                Exit Function\n            End If\n\n\n            Rhino = objRhinoScript.GetScriptObject\n\n            If (Rhino Is Nothing) Then\n                RhinoApp.WriteLine(\"Failed to get Rhinoscript object\")\n                Exit Function\n            Else\n                RhinoApp.WriteLine(\"Rhino object created.\")\n\n\n            End If\n\n            Dim arrLayers As Array\n            Dim strLayer As String\n\n\n            arrLayers = Rhino.LayerNames\n\n            If IsArray(arrLayers) Then\n\n                For Each strLayer In arrLayers\n\n                    If Rhino.islayervisible(strLayer) = False Then\n\n                        Rhino.layervisible(strLayer, True)\n\n                    End If\n\n\n\n                Next\n\n            End If\n\n            Rhino = Nothing\n\n            objRhinoScript = Nothing\n\n            Return Result.Success\n\n\n        End Function\n    End Class\nEnd Namespace",
+      "language": "csharp",
+      "author": "javiervg84",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 767
+}

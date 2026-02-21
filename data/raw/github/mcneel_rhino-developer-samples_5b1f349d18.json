@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_dupmeshboundary.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_dupmeshboundary.py",
+  "instruction": "Ex dupmeshboundary",
+  "code": "from Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.DocObjects import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  gm = GetObject()\n  gm.SetCommandPrompt(\"Select open mesh\")\n  gm.GeometryFilter = ObjectType.Mesh\n  gm.GeometryAttributeFilter = GeometryAttributeFilter.OpenMesh\n  gm.Get()\n  if gm.CommandResult() != Result.Success:\n    return gm.CommandResult()\n  mesh = gm.Object(0).Mesh()\n  if mesh == None:\n    return Result.Failure\n\n  polylines = mesh.GetNakedEdges()\n  for polyline in polylines:\n    doc.Objects.AddPolyline(polyline)\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

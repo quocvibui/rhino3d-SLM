@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/bflatau/RhinoPython/blob/035aa866cb2c9042f60df2d7810269bd25b70f7c/samples/advanced/MakeCircleWithRhinoCommon.py",
+  "repo": "bflatau/RhinoPython",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "samples/advanced/MakeCircleWithRhinoCommon.py",
+  "instruction": "Rhino Python Sample - MakeCircleWithRhinoCommon The rhinoscript package is provided as a scripting \"convenience\" Python can use all of the classes and functions defined in RhinoCommon and the rest of the .NET Framework!!! This sample creates a circle without using functions in the rhinoscript package Rhino is the base namespace of the RhinoCommon SDK",
+  "code": "################################################################\n# Rhino Python Sample - MakeCircleWithRhinoCommon\n#\n# The rhinoscript package is provided as a scripting \"convenience\"\n# Python can use all of the classes and functions defined\n# in RhinoCommon and the rest of the .NET Framework!!!\n#\n# This sample creates a circle without using functions in the\n# rhinoscript package\n#\n# Rhino is the base namespace of the RhinoCommon SDK\n################################################################\nimport math\nimport Rhino\nimport scriptcontext\n\n\n# Use a GetPoint to prompt the user to select a point\n# If the user doesn't cancel, this function returns a new Circle\n# class instance centered at the selection point with a radius of 1\ndef GetCircleFromUser():\n  get_result = Rhino.Input.RhinoGet.GetPoint(\"Circle center\", False)\n  if( get_result[0] != Rhino.Commands.Result.Success ):\n    print \"error getting point\"\n    return None\n  pt = get_result[1]\n  print \"Got a point at \", pt\n  # return a new Circle\n  return Rhino.Geometry.Circle( pt, 1 )\n\n# Add some points to the document that are on a circle\ndef MakeCirclePoints( circle, count ):\n  for i in xrange(count):\n    #circles parameterized between 0 and 2Pi\n    t = float(i) * 2 * math.pi / float(count)\n    print t\n    pt = circle.PointAt(t)\n    scriptcontext.doc.Objects.AddPoint(pt)\n\n\n######################################\n# Functions have been defined above - let's execute some script\n#\n# Here we check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == '__main__' ):\n  print \"Python sample script to make a circle curve and plop some points on it\"\n  circle = GetCircleFromUser()\n\n  if circle == None:\n    print \"circle is none\"\n  else:\n    print \"got a circle\"\n    scriptcontext.doc.Objects.AddCircle(circle)\n    MakeCirclePoints( circle, 10 )\n    # redraw everything so we can see what we got\n    scriptcontext.doc.Views.Redraw()\n\n  print \"Script Complete\"\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "RhinoCommon",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

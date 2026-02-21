@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-createbooleanunion-doesn-t-work/103039",
+  "topic_id": 103039,
+  "title": "RhinoCommon CreateBooleanUnion doesn’t work",
+  "question": "Hello there,\n\nRhinocommon CreateBooleanUnion doesn’t work well.\n\nI think it’s probably due to tolerance, but after trying several tolerances, the booleans on this model don’t work.\n\nRhinocommand’s BooleanUnion worked with this model\n\nDoes anyone have any idea what caused this?\n\n\nThanks a lot\n\n\nBooleanUnion.3dm\n (187.0 KB) \nBooleanUnion.py\n (516 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nobjs = rs.GetObjects(\"select objects\")\nbreps = [rs.coercebrep(obj) for obj in objs]\ndef BooleanUnion(uBreps):\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    newbreps = rg.Brep.CreateBooleanUnion(uBreps, tolerance, False)\n    if newbreps is None or len(newbreps) != 1: \n        print('ERROR')\n        return sc.errorhandler()\n    return newbreps[0]\nbrep = BooleanUnion(breps)\ndoc.Objects.AddBrep(brep)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 3,
+  "views": 492
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curveplane-intersection-fails-due-to-tolerance/199119",
+  "topic_id": 199119,
+  "title": "CurvePlane intersection fails due to tolerance",
+  "question": "Hi there,\n\n\nI have a plane and curve that clearly intersect :\n\n\nimage\n618×433 12.7 KB\n\n\nI’m running a CurvePlane intersection using model absolute tolerance set to \n0.001\n and fails to get a result. Reducing the tolerance to \n0.01\n works.\n\n\nGiven that the curve and the plane intersect, I don’t see what the tolerance has to do with it ?\n\nAlso moving the plane a bit with the same tolerance works.\n\n\nVersion : Version 8 SR8 (8.8.24170.13001, 2024-06-18)\n\n\nsnippet and model attached :\n\n\nimport rhinoscriptsyntax as rs \nimport scriptcontext \nfrom scriptcontext import doc \nimport Rhino \nimport Rhino.Geometry as rg \n\nTOL = rs.UnitAbsoluteTolerance()\n#TOL = 0.01\n\ns, plane = doc.Objects.Find(rs.GetObject(\"plane\")).Geometry.Faces[0].TryGetPlane(TOL)\ncrv = doc.Objects.Find(rs.GetObject(\"crv\")).Geometry \n\nprint Rhino.Geometry.Intersect.Intersection.CurvePlane(crv, plane, TOL)\n\n\n\n250206_CurvePlaneIntersectionFail.3dm\n (61.4 KB)\n\n\nEdit :\n\n\nThe same model and code works in Rhino 6\n\n\n250206_CurvePlaneIntersectionFail_RH6.3dm\n (58.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs \nimport scriptcontext \nfrom scriptcontext import doc \nimport Rhino \nimport Rhino.Geometry as rg \n\nTOL = rs.UnitAbsoluteTolerance()\n#TOL = 0.01\n\ns, plane = doc.Objects.Find(rs.GetObject(\"plane\")).Geometry.Faces[0].TryGetPlane(TOL)\ncrv = doc.Objects.Find(rs.GetObject(\"crv\")).Geometry \n\nprint Rhino.Geometry.Intersect.Intersection.CurvePlane(crv, plane, TOL)",
+      "language": "python",
+      "author": "_Sylvain",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 104
+}

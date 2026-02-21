@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-extendcurvepoint-missing-argument/20724",
+  "topic_id": 20724,
+  "title": "Rs.ExtendCurvePoint missing argument",
+  "question": "The VB Rhinoscript method has a 4th argument, which the Python rhinoscriptsyntax method does not have…  Can it be added?  Thanks, --Mitch\n\n\n\n\nExtendCurvePoint\n\nExtends a non-closed curve object by smooth extension to a point.\n\n\n\n\n\n\nSyntax\n\nRhino.ExtendCurvePoint (strObject, intSide, arrPoint [, intType])\n\n\n\n\n\n\nParameters\n\nstrObject Required.  String.  The object’s identifier.\n\n\n\n\n\n\nintSide Required.  Number.  The side to  extend.\n\n0 Extend from the start of the curve.\n\n1 Extend from the end of the curve.\n\n\n\n\n\n\narrPoint Required.  Array.  The 3-D point.\n\n\n\n\n\n\nintType Optional.  Number.  Type of extension.\n\n0 Line - Creates an line extension tangent to the original curve.\n\n1 Arc - Creates an arc extension tangent to the original curve.\n\n2 (Default) Smooth - Creates a smooth curve extension curvature continuous with the original curve.",
+  "code_blocks": [
+    {
+      "code": "def ExtendCurvePoint(curve_id, side, point, type=2):\n    \"\"\"Extends a non-closed curve by smooth extension to a point\n       -- modified by Mitch Heynick 09.11.20 --\n    Parameters:\n      curve_id (guid): curve to extend\n      side (number):\n        0=extend from start of the curve\n        1=extend from end of the curve\n      point (guid|point): point to extend to\n      type (number):\n        0=line extension tangent to the original curve\n        1=arc extension tangent to the original curve\n        2=smooth (curvature continuous) extension from the original curve.\n    Returns:\n      guid: The identifier of the new object if successful.\n      None: if not successful, or on error.\n    Example:\n      import rhinoscriptsyntax as rs\n      curve = rs.GetObject(\"Select curve to extend\", rs.filter.curve)\n      if curve:\n          point = rs.GetPoint(\"Point to extend to\")\n          if point: rs.ExtendCurvePoint(curve, 1, point, 1)\n    See Also:\n      ExtendCurve\n      ExtendCurveLength\n    \"\"\"\n    curve = rhutil.coercecurve(curve_id, -1, True)\n    point = rhutil.coerce3dpoint(point, True)\n    \n    if side==0: side = Rhino.Geometry.CurveEnd.Start\n    elif side==1: side = Rhino.Geometry.CurveEnd.End\n    else: raise ValueError(\"side must be 0 or 1\")\n    \n    if type==0: extension_type = Rhino.Geometry.CurveExtensionStyle.Line\n    elif type==1: extension_type = Rhino.Geometry.CurveExtensionStyle.Arc\n    elif type==2: extension_type = Rhino.Geometry.CurveExtensionStyle.Smooth\n    else: raise ValueError(\"type must be 0, 1, or 2\")\n    \n    newcurve = curve.Extend(side, extension_type, point)\n    if newcurve and newcurve.IsValid:\n        curve_id = rhutil.coerceguid(curve_id, True)\n        if scriptcontext.doc.Objects.Replace( curve_id, newcurve ):\n            scriptcontext.doc.Views.Redraw()\n            return curve_id\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ExtendCurveToPoint(curve_id, side, point, type=2):\n    #Extends a non-closed curve by smooth extension to a point\n    #Fixes limitation of rs.ExtendCurvePoint() by adding type argument\n    \n    curve = rs.coercecurve(curve_id, -1, True)\n    point = rs.coerce3dpoint(point, True)\n    \n    if side==0: side = Rhino.Geometry.CurveEnd.Start\n    elif side==1: side = Rhino.Geometry.CurveEnd.End\n    else: return\n    \n    if type==0: extension_type = Rhino.Geometry.CurveExtensionStyle.Line\n    elif type==1: extension_type = Rhino.Geometry.CurveExtensionStyle.Arc\n    elif type==2: extension_type = Rhino.Geometry.CurveExtensionStyle.Smooth\n    else: return\n    \n    newcurve = curve.Extend(side, extension_type, point)\n    if newcurve and newcurve.IsValid:\n        curve_id = rs.coerceguid(curve_id, True)\n        if sc.doc.Objects.Replace( curve_id, newcurve ):\n            sc.doc.Views.Redraw()\n            return curve_id",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 940
+}

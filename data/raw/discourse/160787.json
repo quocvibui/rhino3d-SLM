@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ispolycurve-ispolyline-vs-iscurve-behavior/160787",
+  "topic_id": 160787,
+  "title": "IsPolyCurve(), IsPolyline() vs. IsCurve() behavior",
+  "question": "@stevebaer\n \n@Alain\n\n\nIsPolyCurve() and IsPolyline() use rhutil.coercecurve(object_id, raise_if_missing=True) but IsCurve(object_id, raise_if_missing=False). This seems odd to me or is there a reason? In my opinion none of them should raise.\n\n\nI changed it in a fork. Let me know if I should make a PR. Thanks!",
+  "code_blocks": [
+    {
+      "code": "CircleCenterPoint\n                CircleCircumference\n                CircleRadius\n              \"\"\"\n              curve = rhutil.coercecurve(curve_id, -1, True)\n              if tolerance is None or tolerance < 0:\n                  tolerance = Rhino.RhinoMath.ZeroTolerance\n              return curve.IsCircle(tolerance)\n          \n          \n\n          \ndef IsCurve(object_id):\n              \"\"\"Verifies an object is a curve\n              Parameters:\n                object_id (guid): the object's identifier\n              Returns:\n                bool: True or False\n              Example:\n                import rhinoscriptsyntax as rs\n                object = rs.GetObject(\"Select a curve\")\n                if rs.IsCurve(object):\n                    print \"The object is a curve.\"",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "print \"The point is not on the curve\"\n              See Also:\n                IsCurve\n              \"\"\"\n              curve = rhutil.coercecurve(object_id, segment_index, True)\n              point = rhutil.coerce3dpoint(point, True)\n              rc, t = curve.ClosestPoint(point, Rhino.RhinoMath.SqrtEpsilon)\n              return rc\n          \n          \n\n          \ndef IsPolyCurve(object_id, segment_index=-1):\n              \"\"\"Verifies an object is a PolyCurve curve\n              Parameters:\n                curve_id (guid): identifier of the curve object\n                segment_index (number, optional) the curve segment index if `curve_id` identifies a polycurve\n              Returns:\n                bool: True or False\n              Example:\n                import rhinoscriptsyntax as rs\n                obj = rs.GetObject(\"Select a polycurve\")\n                if rs.IsPolyCurve(obj):",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 318
+}

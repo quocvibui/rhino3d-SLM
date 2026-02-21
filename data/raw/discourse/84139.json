@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/growth-branching-pattern/84139",
+  "topic_id": 84139,
+  "title": "Growth branching pattern",
+  "question": "Dear All (Developers, Architects and Engineers),\n\n\nI am a master student at TU Vienna.\n\n\nI am working on a housing project , in which I want to add a 2D population of points, then I connect the points with branches that are generated from a seed (an initial point). After this I array my units (houses)  on the generated network of lines. At the end I will optimize my results in relation to solar gain using Galapagos.\n\nUnfortunatley I am facing 2 problems with my python script : 1- After adding the populate 2d component and connecting it to python , I get an error or null results when I use the points as a list.\n\n2- Which is the more important, I can’t find the way I add lines between each 2 points after arranging them according to \nPointArrayClosestPoint\n in python, I have found an interesting example on design \nanalyze.com\n, which adds circles on the branches instead of connecting them.\n\nyou can find this tutorial here :\n\n[\nhttp://designalyze.com/intro-scripting-python-rhino/intro-python-scripting-17-simple-growth-01\n]\n\nFor more obvious picture of what I am writing, kindly check the photos to get my idea\n\n\nscrcap10d.jpg\n827×773 136 KB",
+  "code_blocks": [
+    {
+      "code": "rc, plane = boundaryCrv.TryGetPlane() # boundary curve plane\ntol = 0.001 # tolerance for point containment check\n\nin_pts = [] # points inside curve boundary\n\nfor pt in listPts:\n    rc = boundaryCrv.Contains(pt, plane, tol)\n    if rc == Rhino.Geometry.PointContainment.Inside or \\\n        rc == Rhino.Geometry.PointContainment.Coincident:\n        in_pts.append(pt)\n\n# continue with the inside points (in_pts) for Lando's script portion",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "lines = [] # empty list for the lines\nfor j in range(len(pts)-1):\n    line = rs.AddLine(pts[j], pts[j+1])\n    lines.append(line)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "lines = [] # empty, outised list for the lines, generated inside the for loop\nfor j in range(len(pts)-1):\n    line = rs.AddLine(pts[j], pts[j+1]) # new line at each iteration of the loop\n    lines.append(line) # new line is saved at each iteration inside the lines list that is outside the loop",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "closest_pts = []\n\nfor i in range(100): # no neep to specify the start of the range if it is 0\n    pt = rs.AddPoint(placePt(100, 100, 0))\n    idx = rs.PointArrayClosestPoint(pts, pt) # index of the closest point\n    closest_pts.append(pts[idx])",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\nrandom.seed(1) # fixes a random seed (remove if necessary!)\n\n\ndef random_point(x_range=100, y_range=100, z_range=0):\n    x = random.uniform(0, x_range)\n    y = random.uniform(0, y_range)\n    z = random.uniform(0, z_range)\n    pt = rs.AddPoint([x,y,z])\n    return pt # guid of the point\n\n\n# Define your start point\nstart_pt = rs.AddPoint([50,50,0])\n\n# Generate your random point population\nrandom_pts = []\nfor i in range(100):\n    random_pt = random_point()\n    random_pts.append(random_pt)\n\n# Define the current point as a copy of the start point\ncurr_pt = rs.AddPoint(start_pt)\n# Define the temporary random points list as a copy of the random points list\ntemp_pts = list(random_pts)\n\nlines = [] # list for the new lines generated below\nwhile True and len(temp_pts) > 0: # as long as there are points left to check\n    # Find the index of the closest temporary point to the current point\n    closest_idx = rs.PointArrayClosestPoint(temp_pts, curr_pt)\n    closest_pt = temp_pts[closest_idx]\n    # Construct the line between the current and closest point\n    line = rs.AddLine(closest_pt, curr_pt)\n    # Store the new line in the lines list\n    lines.append(line)\n    # Set the current point to the closest point for the next iteration\n    curr_pt = closest_pt\n    # Remove the closest point from the temporary points\n    temp_pts.pop(closest_idx)\n\n\n# OUTPUTS\nRandomPoints = random_pts\nStartPoint = start_pt\nConnections = lines",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 11,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 3109
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/maxcollombin/rhino3dm-gltf/blob/99c024d44323eaede67c6c09845ac8ddb9318981/scripts/3dm_toc.py",
+  "repo": "maxcollombin/rhino3dm-gltf",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "scripts/3dm_toc.py",
+  "instruction": "3dm toc",
+  "code": "import rhino3dm\nfrom collections import defaultdict\n\n# Charger le modèle 3DM\n# input_file = \"./R21_3d_trsl.3dm\"\ninput_file = \"./R21_3d.3dm\"\noutput_file = \"./output/toc1.txt\"\nmodel = rhino3dm.File3dm.Read(input_file)\n\n# Vérifier si le modèle a été chargé\nif not model:\n    raise ValueError(f\"Erreur : Impossible de charger {input_file}\")\n\n# Construire une hiérarchie imbriquée des calques\ndef build_hierarchy(layers):\n    hierarchy = defaultdict(list)\n    for layer in layers:\n        parts = layer.FullPath.split(\"::\")\n        for i in range(len(parts) - 1):\n            parent = \"::\".join(parts[:i + 1])\n            child = \"::\".join(parts[:i + 2])\n            hierarchy[parent].append(child)\n    return hierarchy\n\n# Fonction récursive pour écrire la hiérarchie dans le fichier\ndef write_hierarchy(f, hierarchy, parent, level=0):\n    children = sorted(set(hierarchy.get(parent, [])))\n    for child in children:\n        name = child.split(\"::\")[-1]\n        f.write(f\"{'  ' * level}- {name}\\n\")\n        write_hierarchy(f, hierarchy, child, level + 1)\n\n# Collecter les calques et construire la hiérarchie\nlayers = model.Layers\nhierarchy = build_hierarchy(layers)\n\n# Écrire la hiérarchie dans un fichier\nwith open(output_file, \"w\", encoding=\"utf-8\") as f:\n    f.write(\"Hiérarchie des calques regroupés :\\n\")\n    root_layers = sorted(set(layer.FullPath.split(\"::\")[0] for layer in layers))\n    for root in root_layers:\n        f.write(f\"- {root}\\n\")\n        write_hierarchy(f, hierarchy, root)\n\nprint(f\"✅ Hiérarchie des calques regroupés écrite dans le fichier : {output_file}\")",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

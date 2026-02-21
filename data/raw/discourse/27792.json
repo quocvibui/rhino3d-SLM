@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/both-sides-offset-using-ironpython/27792",
+  "topic_id": 27792,
+  "title": "Both sides offset using IronPython",
+  "question": "Hi,I needed some help regarding implementation of both sides offset using IronPython \nscripting.At\n present I am using the sample offset code given in the documentation in which it asks only to click the side in which we want to offset thereby neglecting any additional options pertaining to BothSides offset as well as Cap option.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef OffsetCurve2SidesSample():\n    tol=sc.doc.ModelAbsoluteTolerance\n    crvID=rs.GetObject(\"Select curve to offset 2 sides\",4,preselect=True)\n    if not crvID: return\n    dist=rs.GetReal(\"Offset distance\",minimum=tol)\n    if dist == None: return\n    \n    plane = rs.CurvePlane(crvID)\n    if not plane: plane = rs.ViewCPlane()\n    crv=sc.doc.Objects.Find(crvID).Geometry\n    \n    trans=Rhino.Geometry.CurveOffsetCornerStyle.Sharp\n    msg=\"Offset 2 sides failed!\"\n    #do first offset positive distance\n    offset1=crv.Offset(plane,dist,tol,trans)\n    if offset1:\n        #do second offset negative distance\n        offset2=crv.Offset(plane,-dist,tol,trans)\n        if offset2:\n            if len(offset1)== 1 and len(offset2)==1:\n                offset1ID=sc.doc.Objects.AddCurve(offset1[0])\n                offset2ID=sc.doc.Objects.AddCurve(offset2[0])\n                msg=\"Successfully offset one curve both sides\"\n                sc.doc.Views.Redraw()\n    print msg\nOffsetCurve2SidesSample()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 3434
+}

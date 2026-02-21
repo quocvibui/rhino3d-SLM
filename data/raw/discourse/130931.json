@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-7-and-sections-through-mesh-objects/130931",
+  "topic_id": 130931,
+  "title": "Rhino 7 and Sections through Mesh objects",
+  "question": "Hi Dale,\n\nI’ve noticed a change in behavior when creating contours/sections through mesh objects between Rhino 6 and 7. Below is a simple command that cuts 9 sections through a sample mesh. When I run this in Rhino 6 I get 9 closed curves and their direction (cw vs ccw) is consistent. When I run this in Rhino 7 with the same model I get some closed curves and lots of curve pieces. Also on the closed curves the orientation is not consistent. Do you have any thoughts on what might be the cause? The mesh is valid and I’ve tried it on a few meshes with similar results. Thanks\n\n\nRhino 6 Mesh Curves\n1259×586 43.6 KB\n\n\nRhino 7 Mesh Curves\n1060×530 32.8 KB\n\n\nSampleMesh.3dm\n (246.6 KB)\n\n\npublic class SampleMeshSectionCommand : Command\n{\n\tpublic SampleMeshSectionCommand()\n\t{\n\t\tInstance = this;\n\t}\n\n\t///<summary>The only instance of the CreateFloatPlaneCommand command.</summary>\n\tpublic static SampleMeshSectionCommand Instance { get; private set; }\n\n\tpublic override string EnglishName\n\t{\n\t\tget { return \"SampleMeshSection\"; }\n\t}\n\n\tprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n\t{\n\t\tRhinoGet.GetOneObject(\"Select mesh object to section\", false, ObjectType.Mesh, out ObjRef rhinoObj);\n\n\t\tdouble[] locs = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };\n\t\tforeach (var loc in locs)\n\t\t{\n\t\t\tvar curves = Mesh.CreateContourCurves(rhinoObj.Mesh(), new Plane(new Point3d(loc, 0, 0), Vector3d.XAxis));\n\t\t\tif (null != curves)\n\t\t\t{\n\t\t\t\tforeach (var curve in curves)\n\t\t\t\t\tdoc.Objects.AddCurve(curve);\n\t\t\t}\n\t\t}\n\t\treturn Result.Success;\n\t}\n}",
+  "code_blocks": [
+    {
+      "code": "public class SampleMeshSectionCommand : Command\n{\n\tpublic SampleMeshSectionCommand()\n\t{\n\t\tInstance = this;\n\t}\n\n\t///<summary>The only instance of the CreateFloatPlaneCommand command.</summary>\n\tpublic static SampleMeshSectionCommand Instance { get; private set; }\n\n\tpublic override string EnglishName\n\t{\n\t\tget { return \"SampleMeshSection\"; }\n\t}\n\n\tprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n\t{\n\t\tRhinoGet.GetOneObject(\"Select mesh object to section\", false, ObjectType.Mesh, out ObjRef rhinoObj);\n\n\t\tdouble[] locs = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };\n\t\tforeach (var loc in locs)\n\t\t{\n\t\t\tvar curves = Mesh.CreateContourCurves(rhinoObj.Mesh(), new Plane(new Point3d(loc, 0, 0), Vector3d.XAxis));\n\t\t\tif (null != curves)\n\t\t\t{\n\t\t\t\tforeach (var curve in curves)\n\t\t\t\t\tdoc.Objects.AddCurve(curve);\n\t\t\t}\n\t\t}\n\t\treturn Result.Success;\n\t}\n}",
+      "language": "csharp",
+      "author": "LarryL",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 13,
+  "views": 2256
+}

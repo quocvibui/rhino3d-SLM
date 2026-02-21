@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/cadop/dhart/blob/0d9627783b04b974fb130ab70c9135fb624e725f/src/Python/dhart/Examples/Rhino/RhinoDisplayUtils.py",
+  "repo": "cadop/dhart",
+  "repo_stars": 15,
+  "repo_description": "A library for creating Navigation Graphs, Visibility graphs, Raycasting used in design analysis, architecture, robotics, and human factors.",
+  "license": "GPL-3.0",
+  "filepath": "src/Python/dhart/Examples/Rhino/RhinoDisplayUtils.py",
+  "instruction": "Rhino display utils",
+  "code": "\nimport rhinoscriptsyntax as rs\nimport json\nimport scriptcontext as sc\nimport Rhino\nfrom colorsys import hsv_to_rgb, rgb_to_hsv\nfrom System.Drawing import Color\nfrom Rhino.Display import PointStyle, ColorHSV, ColorLAB\n\nPoint3d = Rhino.Geometry.Point3d\ndef lerp(t, min, max):\n    return (1 - t) * min + t * max\n\n\ndef SetupDisplay():\n    # Check to see if the display was created yet, if not make a new one\n    if \"display2\" not in sc.sticky:\n        print('display Not in sticky')\n        sc.sticky[\"display2\"] = Rhino.Display.CustomDisplay(True)# Get the display from sticky context then clear it\n    \n    display = sc.sticky[\"display2\"]\n    display.Clear()\n    # display.Enabled = False\n    return display\n\ndef calcColors(Scores):\n    Colors = []\n    filtered_scores = [score for score in Scores if score>0]\n    max_v = max(filtered_scores)\n    min_v = min(filtered_scores)\n    print('maxmin')\n    print(max_v)\n    print(min_v)\n    print('')\n    if (max_v == 0):\n        print(\"Max is zero!\")\n        exit()\n    elif(max_v - min_v == 0):\n        print(\"All values are the same!\")\n        return [colorbar(1.0)] * len(Scores)\n        \n    return [\n            colorbar((point-min_v)/(max_v-min_v))\n            if point > 0\n            else None\n            for point in Scores\n    ]\n\n\ndef colorbarlab(val):\n    L = 0.1\n    A = max((val-0.5)*2, 0)\n    B = min(val*2.0, 1)\n    \n    return ColorLAB(L,1,0,0)\n\ndef colorbar(val):\n    r = min(max(0, 1.5-abs(1-4*(val-0.5))),1)\n    g = min(max(0, 1.5-abs(1-4*(val-0.25))),1)\n    b = min(max(0, 1.5-abs(1-4*val)),1)            #conver to hsv?\n    tmp_color = rgb_to_hsv(r*255,g*255,b*255)\n    return ColorHSV(tmp_color[0],tmp_color[1],tmp_color[2])\n\ndef DrawPoints(display, nodes, colors, point_style = PointStyle.RoundSimple, radius = 5, push_off = 0.001):\n    for node, scored_color in zip(nodes, colors):\n        if scored_color == None:\n            continue\n            \n        node_to_add = Point3d(node[0], node[1], node[2]+push_off)\n        display.AddPoint(node_to_add, scored_color, point_style, radius)\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

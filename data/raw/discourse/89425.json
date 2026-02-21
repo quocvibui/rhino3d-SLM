@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-rhino-objects-by-guid/89425",
+  "topic_id": 89425,
+  "title": "Select Rhino objects by guid",
+  "question": "Could someone share a python, C#, or VBscript that inputs a list of guid’s and select the corresponding objects in Rhino ?\n\n\nWould be much appreciated",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nid_list = ['894b6c7d-6581-4fb6-a65b-c09b4e5dc88a',\n           '501983de-d55b-417d-92d2-9ce7b1cc78ee', \n           'd12c3658-0824-4471-9b77-a9ba801eda16', \n           'd17e0228-af5b-4f19-8853-2f0205a3168d']\n           \n#this line of could could/should be enough to select all objects in the list\nfor listed_id in id_list: rs.SelectObject(listed_id)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"Willem\"\n__version__ = \"2019.09.26\"\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport System\ndoc = Rhino.RhinoDoc.ActiveDoc\n\nseparate_lines = id_list.split('\\n')\n\nfor str_id in separate_lines:\n    obj_id = System.Guid(str_id)\n    rhobj = doc.Objects.Find(obj_id)\n    rhobj.Select(True)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(List<Guid> guids, bool Select, ref object A)\n  {\n    if(Select){\n      this.RhinoDocument.Objects.UnselectAll();\n      foreach(Guid guid in guids){\n        if(this.RhinoDocument.Objects.FindId(guid).Attributes.Name == null){\n          this.RhinoDocument.Objects.Select(guid, true, true, true);\n        }\n      }\n    }\n  }",
+      "language": "csharp",
+      "author": "maje90",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 19,
+  "views": 5441
+}

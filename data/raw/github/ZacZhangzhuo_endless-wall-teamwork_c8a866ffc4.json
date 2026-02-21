@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ZacZhangzhuo/endless-wall-teamwork/blob/7257f5f0a1ce359894a3dcd68962fbe23ae19ae7/simulation/robot_listen.py",
+  "repo": "ZacZhangzhuo/endless-wall-teamwork",
+  "repo_stars": 2,
+  "repo_description": "This is the brick pick and place of UR5 robot group practice, ETH Zurich MAS dfab 2022-23",
+  "license": "MIT",
+  "filepath": "simulation/robot_listen.py",
+  "instruction": "Robot listen",
+  "code": "\n\nimport rhinoscriptsyntax as rs\nimport compas\nimport compas_rhino\nimport simple_comm as comm\nimport Rhino.Geometry as rg\n\ndef rhino_to_robot_space(rhino_plane):\n    plane = rhino_plane.Clone()\n    rhino_matrix = rg.Transform.PlaneToPlane(rg.Plane.WorldXY,robot_base_plane)\n    plane.Transform(rhino_matrix)\n    return plane\n\ndef robot_space_to_rhino (robot_plane):\n    plane = robot_plane.Clone()\n    robot_matrix = rg.Transform.PlaneToPlane(robot_base_plane,rg.Plane.WorldXY)\n    plane.Transform(robot_matrix)\n    return plane\n\nreload(comm)\n\nif listen:\n    chunks = comm.listen_to_robot(\"192.168.10.10\")\n    config = chunks[\"actual_joints\"]\n    pose = chunks[\"pose\"]\n\n\n    \n    \npose = compas.geometry.Frame.from_axis_angle_vector([pose[3],pose[4],pose[5]],[pose[0]*1000,pose[1]*1000,pose[2]*1000])\npose = compas_rhino.conversions.frame_to_rhino(pose)\n\npose = robot_space_to_rhino (pose)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

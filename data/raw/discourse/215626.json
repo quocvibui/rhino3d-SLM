@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hiddenlinedrawing-clipping-planes-are-ignored-in-make2d-calculation-c/215626",
+  "topic_id": 215626,
+  "title": "HiddenLineDrawing: Clipping Planes are ignored in Make2D calculation (C#)",
+  "question": "I am developing a custom Make2D command using \nRhino.Geometry.HiddenLineDrawing\n in C#. I have successfully implemented the standard hidden line drawing (Visible/Hidden curves), but I am stuck on getting \nClipping Planes\n to work.\n\n\nThe Goal:\n I want to generate a 2D drawing of selected objects that respects the active Clipping Planes in the view, exactly like the native Rhino \nMake2D\n command does with “Clipping Plane Intersections” enabled.\n\n\nThe Issue:\n Even though I am adding the active clipping planes to the \nHiddenLineDrawingParameters\n and enabling \nOccludingSectionOption\n, the \nCompute\n method returns the \nfull, uncut geometry\n. It acts as if the clipping planes do not exist.\n\n\nWhat I have tried:\n\n\n\n\n\n\nChecking that the Clipping Plane is active in the specific Viewport ID.\n\n\n\n\n\n\nSetting \nhldParams.OccludingSectionOption = true\n.\n\n\n\n\n\n\nAdding the plane using \nhldParams.AddClippingPlane(plane)\n.\n\n\n\n\n\n\nI have tried \nGlobal Clipping\n (implicit) and \nSelective Clipping\n using \nhldParams.AddGeometryAndPlanes(...)\n.\n\n\n\n\n\n\nIn all cases, the output is the complete object, ignoring the cut.\n\n\nCode Snippet:\n Here is the core logic I am using to set up the parameters. Am I missing a step to “link” the planes to the view or the geometry?\n\n\npublic void CalculateMake2D(Rhino.Display.RhinoViewport viewport, List objects)\n{\nvar hldParams = new HiddenLineDrawingParameters\n{\nAbsoluteTolerance = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance,\nIncludeTangentEdges = false,\nIncludeHiddenCurves = true,\nFlatten = true, // We want the 2D projection\nOccludingSectionOption = true // Enabled for solid caps\n};\n\nhldParams.SetViewport(new ViewportInfo(viewport));\n\n// 1. Find and Add Active Clipping Planes\nList<Plane> activePlanes = new List<Plane>();\nforeach (var obj in RhinoDoc.ActiveDoc.Objects.FindByObjectType(ObjectType.ClipPlane))\n{\n    if (obj is ClippingPlaneObject cp && cp.ClippingPlaneGeometry.ViewportIds().Contains(viewport.Id))\n    {\n        // The plane is active in this view\n      ...",
+  "code_blocks": [
+    {
+      "code": "List<Plane> activePlanes = new List<Plane>();\nforeach (var obj in RhinoDoc.ActiveDoc.Objects.FindByObjectType(ObjectType.ClipPlane))\n{\n    if (obj is ClippingPlaneObject cp && cp.ClippingPlaneGeometry.ViewportIds().Contains(viewport.Id))\n    {\n        // The plane is active in this view\n        var plane = cp.ClippingPlaneGeometry.Plane;\n        plane.Flip();\n        activePlanes.Add(plane);\n\n        // Register the plane\n        hld_params.AddClippingPlane(plane);\n\n        // Check the depth\n        if (cp.ClippingPlaneGeometry.PlaneDepthEnabled)\n        {\n              Plane p1 = new Plane(plane);\n              p1.Translate(-cp.ClippingPlaneGeometry.PlaneDepth * plane.Normal);\n              p1.Flip();\n              activePlanes.Add(p1);\n\n              // Register the depth plane\n              hld_params.AddClippingPlane(p1);\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "rajaa",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "public void CalculateMake2D(Rhino.Display.RhinoViewport viewport, List objects)\n{\nvar hldParams = new HiddenLineDrawingParameters\n{\nAbsoluteTolerance = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance,\nIncludeTangentEdges = false,\nIncludeHiddenCurves = true,\nFlatten = true, // We want the 2D projection\nOccludingSectionOption = true // Enabled for solid caps\n};\n\nhldParams.SetViewport(new ViewportInfo(viewport));\n\n// 1. Find and Add Active Clipping Planes\nList<Plane> activePlanes = new List<Plane>();\nforeach (var obj in RhinoDoc.ActiveDoc.Objects.FindByObjectType(ObjectType.ClipPlane))\n{\n    if (obj is ClippingPlaneObject cp && cp.ClippingPlaneGeometry.ViewportIds().Contains(viewport.Id))\n    {\n        // The plane is active in this view\n        var plane = cp.ClippingPlaneGeometry.Plane;\n        activePlanes.Add(plane);\n        \n        // Register the plane\n        hldParams.AddClippingPlane(plane);\n    }\n}\n\n// 2. Add Geometry\nforeach (var objRef in objects)\n{\n    var geo = objRef.Geometry();\n    if (geo is Brep || geo is Mesh)\n    {\n        // Attempt 1: Selective Clipping (Explicitly passing the planes)\n        if (activePlanes.Count > 0)\n        {\n             // Using overload: (geometry, xform, id, occluding_sections, clips)\n             hldParams.AddGeometryAndPlanes(geo, Transform.Identity, objRef.ObjectId, true, activePlanes);\n        }\n        // Attempt 2: Standard Add (hoping for implicit global clipping)\n        else \n        {\n             hldParams.AddGeometry(geo, Transform.Identity, objRef.ObjectId, true);\n        }\n    }\n}\n\n// 3. Compute\n// The result here contains all curves (Visible/Hidden) but NO intersection cuts \n// and the geometry is fully drawn as if uncut.\nvar hld = HiddenLineDrawing.Compute(hldParams, true);\n\n// ... Processing hld.Segments ...\n\n}",
+      "language": "csharp",
+      "author": "Ali_Javaheri1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 61
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/beforetransformobjects-event/43338",
+  "topic_id": 43338,
+  "title": "BeforeTransformObjects Event",
+  "question": "Hi \n@dale\n,\n\n\ni am trying to get the objects which are transformed using an \nBeforeTransformObjects\n Event handler in Rhino 5 SR12. Below code toggles the event handler:\n\n\nimport Rhino\nimport scriptcontext\n\ndef MyTransformEvent(sender, e):\n    print e.Objects\n\ndef DoSomething():\n    key = \"MyTransformEvent\"\n    if scriptcontext.sticky.has_key(key):\n        print \"Event DISABLED\"\n        scriptcontext.doc.BeforeTransformObjects -= scriptcontext.sticky[key]\n        scriptcontext.sticky.Remove(key)\n    else:\n        print \"EVENT ENABLED\"\n        scriptcontext.sticky[key] = eval(key)\n        scriptcontext.doc.BeforeTransformObjects += eval(key)\n\nif __name__==\"__main__\":\n    DoSomething()\n\n\n\nWhile the event is enabled, in Rhino 5 SR 12 the \nMyTransformEvent\n function always returns \nNone\n for the objects beeing transformed while in Rhino 6 WIP, i get this result, eg. when a single point is transformed:\n\n\nArray[RhinoObject]((<Rhino.DocObjects.PointObject object at 0x000000000000002E [ModelGeometry: (unnamed) (0)]>))\n\n\n\nIs there anything i can do to make it work in Rhino 5 and get the objects beeing transformed ?\n\n\n\n\n\n\n\n\n\n\nc.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef MyTransformEvent(sender, e):\n    print e.Objects\n\ndef DoSomething():\n    key = \"MyTransformEvent\"\n    if scriptcontext.sticky.has_key(key):\n        print \"Event DISABLED\"\n        scriptcontext.doc.BeforeTransformObjects -= scriptcontext.sticky[key]\n        scriptcontext.sticky.Remove(key)\n    else:\n        print \"EVENT ENABLED\"\n        scriptcontext.sticky[key] = eval(key)\n        scriptcontext.doc.BeforeTransformObjects += eval(key)\n\nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1014
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/8462fc3487f8b7a58595ef73f6a5c09f92717f60/rhinopython/SamplePlaneSurfaceHoleMaker.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinopython/SamplePlaneSurfaceHoleMaker.py",
+  "instruction": "SamplePlaneSurfaceHoleMaker.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SamplePlaneSurfaceHoleMaker.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext as sc\n\n# Demonstrates how to quickly punch a bunch of holes in a planar surface.\ndef SamplePlaneSurfaceHoleMaker():\n    \n    # Select planar surface\n    gs = Rhino.Input.Custom.GetObject()\n    gs.SetCommandPrompt(\"Select planar surface\")\n    gs.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    gs.SubObjectSelect = False\n    gs.Get()\n    if (gs.CommandResult() != Rhino.Commands.Result.Success):\n        return\n    \n    brep_ref = gs.Object(0)\n    brep = brep_ref.Brep()\n    if not brep:\n        return\n    \n    # Verify underlying surface is a PlaneSurface\n    if not type(brep.Faces[0].UnderlyingSurface()) is Rhino.Geometry.PlaneSurface:\n        return\n    \n    # Select trimming curves on planar surface\n    gc = Rhino.Input.Custom.GetObject()\n    gc.SetCommandPrompt(\"Select trimming curves on planar surface\")\n    gc.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    gc.GroupSelect = True\n    gc.SubObjectSelect = False\n    gc.EnablePreSelect(False, True)\n    gc.DeselectAllBeforePostSelect = False\n    gc.GetMultiple(1, 0)\n    if (gc.CommandResult() != Rhino.Commands.Result.Success):\n        return\n    \n     # Make a copy of the selected Brep\n    new_brep = Rhino.Geometry.Brep()\n    new_brep.Append(brep)\n    boundary = []\n    \n    for i in range(gc.ObjectCount):\n        curve = gc.Object(i).Curve()\n        if curve:\n          boundary.append(curve)\n          new_brep.Loops.AddPlanarFaceLoop(0, Rhino.Geometry.BrepLoopType.Inner, [boundary.pop()])\n\n    new_brep.Faces[0].RebuildEdges(sc.doc.ModelAbsoluteTolerance, True, True)\n    new_brep.Compact()\n\n    if new_brep.IsValid:\n        sc.doc.Objects.Replace(brep_ref.ObjectId, new_brep)\n        sc.doc.Views.Redraw()\n    \n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    SamplePlaneSurfaceHoleMaker()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

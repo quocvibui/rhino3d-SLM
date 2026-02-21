@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curve-extend-by-length-doesnt-work/119110",
+  "topic_id": 119110,
+  "title": "Curve.Extend by length doesn't work?",
+  "question": "from Rhino.DocObjects import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Geometry import *\n\ngc = GetObject()\ngc.SetCommandPrompt(\"Select curve to extend\")\ngc.GeometryFilter = ObjectType.Curve\ngc.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\ngc.Get()\n\ncurve_obj_ref = gc.Object(0)\n\ncurve_obj_ref.Curve().Extend(CurveEnd.Both, 1, CurveExtensionStyle.Smooth) # this does nothing",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_shorten_curve():\n    \n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to shorten\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return\n    \n    crv = objref.Curve()\n    if not crv:\n        return\n        \n    crv_length = crv.GetLength()\n    if crv_length < Rhino.RhinoMath.ZeroTolerance:\n        return\n        \n    str = \"Curve length is {0:.3f}. Length to remove\".format(crv_length)\n    length = 1.0\n    rc, length = Rhino.Input.RhinoGet.GetNumber(str, False, length, 0, crv_length)\n    if rc != Rhino.Commands.Result.Success or length <= 0 or length >= crv_length: \n        return\n        \n    crv_trim = crv.Trim(Rhino.Geometry.CurveEnd.End, length)\n    if crv_trim:\n        sc.doc.Objects.Replace(objref, crv_trim)\n        sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_shorten_curve()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.DocObjects import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Geometry import *\n\ngc = GetObject()\ngc.SetCommandPrompt(\"Select curve to extend\")\ngc.GeometryFilter = ObjectType.Curve\ngc.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\ngc.Get()\n\ncurve_obj_ref = gc.Object(0)\n\ncurve_obj_ref.Curve().Extend(CurveEnd.Both, 1, CurveExtensionStyle.Smooth) # this does nothing",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1379
+}

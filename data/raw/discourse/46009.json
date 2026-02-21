@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/randomized-surface-mapping-script/46009",
+  "topic_id": 46009,
+  "title": "Randomized Surface Mapping script?",
+  "question": "Would like to ask if there is a script that randomizes the UVW repeat of a surface mapping?\n\nI am trying to achieve a different UVW surface mapping on same objects.\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "# randomize uv texture offset and repeat (c) 2017, Clement Greiner - CG3D\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport random\n\ndef RandomizeSurfaceTextureUV():\n    \n    msg = \"Select surface to randomize UV Texture\"\n    ids = rs.GetObjects(msg, 8, True, True, True)\n    if not ids: return\n    \n    rh_objs = [rs.coercerhinoobject(i, True, True) for i in ids]\n    \n    for i, obj in enumerate(rh_objs):\n        mapping = obj.GetTextureMapping(1)\n        if not mapping:\n            print \"No mapping ?\"\n        else:\n            xform = mapping.UvwTransform\n            \n            # random offset (float range between 0.0 and 1.0)\n            xform.M03 = random.random() # U-Offset\n            xform.M13 = random.random() # V-Offset\n            \n            # random repeat (integer range between 1 and 10)\n            xform.M00 = random.randint(1, 10) # U-Repeat\n            xform.M11 = random.randint(1, 10) # V-Repeat\n            \n            mapping.UvwTransform = xform\n            #obj.SetTextureMapping(1, mapping)\n            obj.CommitChanges()\n            scriptcontext.doc.Objects.ModifyTextureMapping(obj, 1, mapping)\n            \n            # required in Rhino 6 ??? Works without this in V5:\n            #scriptcontext.doc.Objects.Replace(ids[i], obj.Geometry)\n        \n    scriptcontext.doc.Views.Redraw()\n\nRandomizeSurfaceTextureUV()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 22,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 19,
+  "views": 3236
+}

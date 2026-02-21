@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-rtree/2432",
+  "topic_id": 2432,
+  "title": "Using rtree",
+  "question": "Hello,\n\n\nI am trying to make use of rtree to get points within a boundingbox.\n\nUntil now I am able to create an rtree object.\n\nBut I have to admit I have no Idea how to call a search and get the results back.\n\n\nimport Rhino as rc\nimport rhinoscriptsyntax as rs\npcloud = rs.GetObject(\"Select pointcloud\")\npcloud_obj = rs.coercegeometry(pcloud)\nbox = rs.GetObject(\"Select box\")\nbox_obj = rs.coercegeometry(box)\nbbox = box_obj.GetBoundingBox(True)\nrtree = rc.Geometry.RTree.CreatePointCloudTree(pcloud_obj)\n\nrtree.Search(bbox,?) \n\n\n\nPhilip",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport random as rnd\nimport time\n\n\"\"\"\nsimple demo of rhino common's rtree to return points within a search volume.\n\n\"\"\"\n\ndef SearchCallback(sender, e):\n    #you need a Searchcallback function\n    result.append(e.Id)\n\nrt = rg.RTree()\n# individual points can be added, but I don't think you can retrieve them from the \n# tree - so they will need to be tracked by their insertion index (which needs to be\n# a unique integer, but not necessarily sequential)\n# bounding boxes can also be added as can meshes and pointclouds\n\nadict = {}\nfor i in range(1000000):\n    pt = rg.Point3d(rnd.random()*100, rnd.random()*100, rnd.random()*100)\n    # insert the point in the tree\n    rt.Insert(pt, i)\n    # record the point to look up from search result indexes\n    adict[i] = pt\n    \n#build a search sphere\ncp = rg.Point3d(20,20,20)\nsp = rg.Sphere(cp, 3)\n\n#you can also search a bounding box\nbb = rg.BoundingBox(rg.Point3d(20,20,20), rg.Point3d(21.5,21.5,21.5))\n\nstart = time.time()\nresult = []\n\n# do the search\nprint rt.Search(sp, SearchCallback, result)\n\nprint \"Indices of points within search volume: \", result\nprint \"The actual points: \"\nfor r in result:\n    print adict[r]\n\nend = time.time()\n\nprint \"time taken:\", end - start",
+      "language": "python",
+      "author": "Greenbox",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport rhinoscriptsyntax as rs\npcloud = rs.GetObject(\"Select pointcloud\")\npcloud_obj = rs.coercegeometry(pcloud)\nbox = rs.GetObject(\"Select box\")\nbox_obj = rs.coercegeometry(box)\nbbox = box_obj.GetBoundingBox(True)\nrtree = rc.Geometry.RTree.CreatePointCloudTree(pcloud_obj)\n\nrtree.Search(bbox,?)",
+      "language": "python",
+      "author": "powerpp",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 4829
+}

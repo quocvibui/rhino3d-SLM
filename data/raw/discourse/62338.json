@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/solved-mathnet-numerics-gh-python-using-panel-component-to-create-matrix/62338",
+  "topic_id": 62338,
+  "title": "[Solved] MathNet.numerics GH_Python using panel component to create matrix",
+  "question": "Hi,\n\n\nCan someone elaborate on what is happening inside the \ndef\ns here:\n\n\nusing-math-net-numerics-in-ghpython\n\n\n@piac\n, I understand the result but what is happening inside the \ndef\ns?\n\n\nEDIT:\n\nI figured out that ctor is a ‘constructor’, not sure what that means but I’ll read about it. You can ignore the first part of this post.\n\n\ndef copy_matrix(m, ctor):\nn = ctor(m.RowCount, m.ColumnCount)\nfor r in range(m.RowCount):\n    for c in range(m.ColumnCount):\n        n[r,c]=m[r,c]\nreturn n\ndef to_rh_matrix(dotnet_m):\nfrom Rhino.Geometry import Matrix as rgm\nreturn copy_matrix(dotnet_m,rgm)\ndef to_dotnet_matrix(rhinocommon_m):\nfrom MathNet.Numerics.LinearAlgebra.Double import Matrix as dnm\ndense = dnm.Build.Dense\nreturn copy_matrix(rhinocommon_m,dense)\ndef copy_vector(m,ctor):\ntry:\n    if m.RowCount==1:\n        n=ctor(m.ColumnCount)\n        for c in range(m.ColumnCount):\n            n[c]=m[0,c]\n    elif m.ColumnCount==1:\n        n=ctor(m.RowCount)\n        for r in range(m.RowCount):\n            n[r]=m[r,0]\nexcept:\n    n=ctor(m.Count,1)\n    for i in range(m.Count):\n        n[1,0]=m[i]\nreturn n\ndef to_rh_vector(dotnet_v):\nfrom Rhino.Geometry import Matrix as rgm\nreturn copy_vector(dotnet_v,rgm)\ndef to_dotnet_vector(rhinocommon_v):\nfrom MathNet.Numerics.LinearAlgebra.Double import Vector as dnv\ndense = dnv.Build.Dense\nreturn copy_vector (rhinocommon_v,dense)\n\n\n\nSo about this code what is \nctor\n?\n\nIf it is a variable how can you use it without defining it?\n\n\n\n\nAnother question is\n,\n\n\n\n\nI define a matrix and I get output for A:\n\n\n\n\nand output for B:\n\n\n\n\nHowever, when I try to convert from output A to GH.matrix I get:\n\n\n\n\n2018-05-08 23_09_45-Grasshopper - GH.ANN_.png\n1556×640 70.9 KB\n\n\n\n\nIs there a way to define the matrix as a string from the “panel” component?",
+  "code_blocks": [
+    {
+      "code": "def copy_matrix(m, ctor):\nn = ctor(m.RowCount, m.ColumnCount)\nfor r in range(m.RowCount):\n    for c in range(m.ColumnCount):\n        n[r,c]=m[r,c]\nreturn n\ndef to_rh_matrix(dotnet_m):\nfrom Rhino.Geometry import Matrix as rgm\nreturn copy_matrix(dotnet_m,rgm)\ndef to_dotnet_matrix(rhinocommon_m):\nfrom MathNet.Numerics.LinearAlgebra.Double import Matrix as dnm\ndense = dnm.Build.Dense\nreturn copy_matrix(rhinocommon_m,dense)\ndef copy_vector(m,ctor):\ntry:\n    if m.RowCount==1:\n        n=ctor(m.ColumnCount)\n        for c in range(m.ColumnCount):\n            n[c]=m[0,c]\n    elif m.ColumnCount==1:\n        n=ctor(m.RowCount)\n        for r in range(m.RowCount):\n            n[r]=m[r,0]\nexcept:\n    n=ctor(m.Count,1)\n    for i in range(m.Count):\n        n[1,0]=m[i]\nreturn n\ndef to_rh_vector(dotnet_v):\nfrom Rhino.Geometry import Matrix as rgm\nreturn copy_vector(dotnet_v,rgm)\ndef to_dotnet_vector(rhinocommon_v):\nfrom MathNet.Numerics.LinearAlgebra.Double import Vector as dnv\ndense = dnv.Build.Dense\nreturn copy_vector (rhinocommon_v,dense)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 1422
+}

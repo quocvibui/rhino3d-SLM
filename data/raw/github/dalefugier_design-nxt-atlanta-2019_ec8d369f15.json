@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/dalefugier/design-nxt-atlanta-2019/blob/fc437cdfc71633443eb2484730d866e17f365136/python/sample5.py",
+  "repo": "dalefugier/design-nxt-atlanta-2019",
+  "repo_stars": 1,
+  "repo_description": "Reference material for the Rhino.Compute + Rhino3dm workshop with Dale Fugier and Travis Serio",
+  "license": "MIT",
+  "filepath": "python/sample5.py",
+  "instruction": "Design NXT 2019 Workshop\nSample 5: Output to svg instead of 3dm",
+  "code": "\"\"\"\nDesign NXT 2019 Workshop\nSample 5: Output to svg instead of 3dm\n\"\"\"\n\nimport rhino3dm\nimport compute_rhino3d.Util\nimport compute_rhino3d.Intersection\nimport svgwrite  # pip install svgwrite\n\ncompute_rhino3d.Util.authToken = 'ADD_TOKEN_HERE'\n\npoints = []\npoints.append(rhino3dm.Point3d(0.417, 0.262, 0))\npoints.append(rhino3dm.Point3d(11.718, 1.645, 0))\npoints.append(rhino3dm.Point3d(0.656, 4.029, 0))\npoints.append(rhino3dm.Point3d(11.814, 8.178, 0))\ncurve1 = rhino3dm.Curve.CreateControlPointCurve(points, 3)\n\ncircle = rhino3dm.Circle(rhino3dm.Point3d(5, 5, 0), 5)\ncurve2 = circle.ToNurbsCurve()\n\nintersection_results = compute_rhino3d.Intersection.CurveCurve(curve1, curve2, 0.01, 0.01)\n\nintersection_points = []\nfor intersection in intersection_results:\n    x = intersection[\"PointA\"][\"X\"]\n    y = intersection[\"PointA\"][\"Y\"]\n    z = intersection[\"PointA\"][\"Z\"]\n    intersection_points.append(rhino3dm.Point3d(x, y, z))\n\n\ndef curve_to_svg(curve, svg, scale):\n    domain = curve.Domain\n    for i in range(100):\n        t0 = domain.T0 + (domain.T1-domain.T0) * (i/100.0)\n        t1 = domain.T0 + (domain.T1-domain.T0) * ((i+1)/100.0)\n        pt0 = curve.PointAt(t0)\n        pt1 = curve.PointAt(t1)\n        svg.add(svg.line((pt0.X*scale, pt0.Y*scale), (pt1.X*scale, pt1.Y*scale), stroke=svgwrite.rgb(10, 10, 16, '%')))\n\n\nscale_factor = 50\ndwg = svgwrite.Drawing('design_nxt_sample5.svg')\ncurve_to_svg(curve1, dwg, scale_factor)\ncurve_to_svg(curve2, dwg, scale_factor)\n\nfor point in intersection_points:\n    dwg.add(dwg.circle((point.X*scale_factor, point.Y*scale_factor), 0.1*scale_factor,  stroke=svgwrite.rgb(10, 10, 16, '%')))\n\ndwg.save()\n\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

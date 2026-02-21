@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/stop-internal-timer-in-c-component/211034",
+  "topic_id": 211034,
+  "title": "Stop Internal Timer in C# component",
+  "question": "Hi everyone,\n\n\nI am developing a C# component that includes an internal timer, which I use to automatically save files at regular intervals. However, I’m facing an issue: the timer keeps running regardless of the component’s status. For example, when the component is locked, I want the timer to stop, and when it’s unlocked, I want the timer to resume.\n\n\nI’ve tried to implement this behavior but it’s beyond my current knowledge. Does anyone have experience or insights on how to control the timer based on the component’s state? Below is some of the logic I have so far:\n\n\n\n// --------------------------------------------------------------------------\n//  Main Autosave Component Logic\n// ---------------------------------------------------------------------------\n\npublic class AutoSaveComponent : GH_Component{public int IntervalMs { get; private set; } = 900000;public int MaxFiles { get; private set; } = 5;\nprivate Timer saveTimer;\npublic string AutosavePath { get; private set; } = @\"C:\\Temp\\gh_autosave\";\npublic string LastAutoSaveTime { get; private set; } = \"---\";\n\nprivate string unsavedFolderName = null;\n\npublic AutoSaveComponent() : base(\"AutoSave\", \"AutoSave\", \"Automatically saves Grasshopper documents at a set interval.\", \"APP\", \"Template\")\n{\n    SetupTimer();\n}\n\n// --- Initialize the autosave timer ---\nprivate void SetupTimer()\n{\n    saveTimer = new Timer();\n    saveTimer.Interval = IntervalMs;\n    saveTimer.Tick += (s, e) => PerformAutoSave();\n    saveTimer.Start();\n}\n\n// --- Update autosave interval ---\npublic void UpdateInterval(int newIntervalMinutes)\n{\n    IntervalMs = newIntervalMinutes * 60000;\n    saveTimer.Interval = IntervalMs;\n}\n\n// --- Update maximum number of autosave files ---\npublic void UpdateMaxFiles(int newMax)\n{\n    if (newMax > 0) MaxFiles = newMax;\n}\n\n// --- Perform the autosave ---\nprivate void PerformAutoSave()\n{\n    var doc = OnPingDocument();\n    if (doc == null) return;\n    try\n    {\n        if (!Directory.Exists(AutosavePath)) Directory.C...",
+  "code_blocks": [
+    {
+      "code": "public AutoSaveComponent() : base(\"AutoSave\", \"AutoSave\", \"Automatically saves Grasshopper documents at a set interval.\", \"TEST\", \"Template\")\n{\n    SetupTimer();\n    // Subscribe to ObjectChanged event to monitor lock state\n    this.ObjectChanged += OnObjectChanged;\n}\n\n// --- Initialize the autosave timer ---\nprivate void SetupTimer()\n{\n    saveTimer = new Timer();\n    saveTimer.Interval = IntervalMs;\n    saveTimer.Tick += (s, e) => PerformAutoSave();\n    saveTimer.Start();\n}\n\n// --- Event handler for component changes ---\nprivate void OnObjectChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)\n{\n    // Check the current lock state and manage timer accordingly\n    if (this.Locked)\n    {\n        // Stop the timer when component is locked\n        if (saveTimer.Enabled)\n        {\n            saveTimer.Stop();\n            Rhino.RhinoApp.WriteLine(\"AutoSave: Timer stopped (component locked)\");\n        }\n    }\n    else\n    {\n        // Start the timer when component is unlocked\n        if (!saveTimer.Enabled)\n        {\n            saveTimer.Start();\n            Rhino.RhinoApp.WriteLine(\"AutoSave: Timer started (component unlocked)\");\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "bbalbastre",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "// --------------------------------------------------------------------------\n//  Main Autosave Component Logic\n// ---------------------------------------------------------------------------\n\npublic class AutoSaveComponent : GH_Component{public int IntervalMs { get; private set; } = 900000;public int MaxFiles { get; private set; } = 5;\nprivate Timer saveTimer;\npublic string AutosavePath { get; private set; } = @\"C:\\Temp\\gh_autosave\";\npublic string LastAutoSaveTime { get; private set; } = \"---\";\n\nprivate string unsavedFolderName = null;\n\npublic AutoSaveComponent() : base(\"AutoSave\", \"AutoSave\", \"Automatically saves Grasshopper documents at a set interval.\", \"APP\", \"Template\")\n{\n    SetupTimer();\n}\n\n// --- Initialize the autosave timer ---\nprivate void SetupTimer()\n{\n    saveTimer = new Timer();\n    saveTimer.Interval = IntervalMs;\n    saveTimer.Tick += (s, e) => PerformAutoSave();\n    saveTimer.Start();\n}\n\n// --- Update autosave interval ---\npublic void UpdateInterval(int newIntervalMinutes)\n{\n    IntervalMs = newIntervalMinutes * 60000;\n    saveTimer.Interval = IntervalMs;\n}\n\n// --- Update maximum number of autosave files ---\npublic void UpdateMaxFiles(int newMax)\n{\n    if (newMax > 0) MaxFiles = newMax;\n}\n\n// --- Perform the autosave ---\nprivate void PerformAutoSave()\n{\n    var doc = OnPingDocument();\n    if (doc == null) return;\n    try\n    {\n        if (!Directory.Exists(AutosavePath)) Directory.CreateDirectory(AutosavePath);\n        string folderName = ResolveFolderName(doc);\n        string saveFolder = Path.Combine(AutosavePath, folderName);\n\n        if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);\n        string timestamp = DateTime.Now.ToString(\"yyyyMMdd_HHmmss\");\n        string fileName = $\"{folderName}_{timestamp}.gh\";\n        string fullPath = Path.Combine(saveFolder, fileName);\n\n        GH_DocumentIO io = new GH_DocumentIO(doc);\n        io.SaveQuiet(fullPath);\n\n        // --- Remove old files exceeding MaxFiles ---\n        var files = new DirectoryInfo(saveFolder).GetFiles(\"*.gh\").OrderBy(f => f.CreationTime).ToList();\n\n        while (files.Count > MaxFiles)\n        {\n            files.First().Delete();\n            files.RemoveAt(0);\n        }\n        LastAutoSaveTime = DateTime.Now.ToLongTimeString();\n        ExpireSolution(true);\n    }\n    catch (Exception ex)\n    {\n        Rhino.RhinoApp.WriteLine(\"AutoSave error: \" + ex.Message);\n    }\n}",
+      "language": "csharp",
+      "author": "bbalbastre",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 89
+}

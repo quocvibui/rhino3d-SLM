@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pythonscript-rotate-object-azimuth-and-elevation/135580",
+  "topic_id": 135580,
+  "title": "Pythonscript Rotate Object Azimuth and Elevation",
+  "question": "Hello,\n\nI am using the pythonscript tool in rhino to create a command, so not rhinocommon. I am trying to create a line that rotates in azimuth and then rotates in elevation. The issue I am finding is if you keep to one elevation axis, it begins to swirl. For example, if I did the [1,0,0] axis, then it will swirl around -45-45 degrees and 135- -135 degrees. Is there a way to rotate so that the elevation is consistent? I have been looking all over the place for an example, but have yet to come across it. Some of my code is below.\n\n\ni = -180\n\nwhile i <= 180:\n\nline = rs.AddLine(startpoint,endpoint)\n\np = rs.RotateObject(line,startpoint,i,[0,0,1])\n\nstartp = rs.CurveStartPoint(p)\n\nendp = rs.CurveEndPoint(p)\n\nj = -45\n\nwhile j <= 90:\n\nt = rs.AddLine(startp, endp)\n\nrs.RotateObject(t,startp,j,[1,0,0])\n\nj = j+1\n\ni = i+1",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\n__commandname__ = \"Test1\"\n\ndef RunCommand( is_interactive ):\n  x = 0\n  y = 0\n  z = 0\n  point = rs.AddPoint(x,y,z)\n  point2 = rs.AddPoint(x+100,y,z)\n  for i in range(-180, 180, 1):\n    p = rs.AddLine(point,point2)\n    q = rs.RotateObject(p,point,i,[0,0,1])\n    startp = rs.CurveStartPoint(q)\n    endp = rs.CurveEndPoint(q)\n    for j in range(-45,90,1):\n      t = rs.AddLine(startp,endp)\n      r = rs.RotateObject(t,startp,j,[1,0,0])",
+      "language": "python",
+      "author": "user2555",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\nimport System.Drawing.Color as clr\nx = 0\ny = 0\nz = 0\npoint = rs.AddPoint(x,y,z)\npoint2 = rs.AddPoint(x,y+100,z)\nfor i in range(-45, 90, 5):\n    color = clr.FromArgb(i*2+90,0,0)\n    p = rs.AddLine(point,point2)\n    q = rs.RotateObject(p,point,i,[1,0,0])\n    startp = rs.CurveStartPoint(q)\n    endp = rs.CurveEndPoint(q)\n    for j in range(-180,180,5):\n        t = rs.AddLine(startp,endp)\n        r = rs.RotateObject(t,startp,j,[0,0,1])\n        rs.ObjectColor(t, color)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "rs.EnableRedraw(False)\n\n#your code\n\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 867
+}

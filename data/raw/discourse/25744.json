@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ironpython-geometrybase-for-brep-getboundingbox-method-convert-brep-list-into-ienumerable/25744",
+  "topic_id": 25744,
+  "title": "IronPython \"GeometryBase\" for Brep.GetBoundingBox()-Method...convert Brep-List into IEnumerable",
+  "question": "Hi all,\n\nI tried to get a bounding box of some breps with “Rhino.Geometry.Brep.GetBoundingBox(self: GeometryBase, plane: Plane)”.\n\nMy Problem is, that “GeometryBase” is an .NET-style IEnumerable (“System.Collections.Generic.IEnumerable”) argument…\n\n\nHow can I cast a pythonic list with guid’s of breps into an IEnumerable, so that it fits as a\n\n“GeometryBase”-argument?\n\n\nI got no Idea of C# and .NET…\n\n\nThanks a lot\n\n\nRegards\n\nMr Sinter",
+  "code_blocks": [
+    {
+      "code": "brep_list = List[]\nbrep_extrude = rhi.Geometry.BrepFace.CreateExtrusion(brep_face, path_curve, True)\nbrep_list.append(sc.doc.Objects.AddBrep(brep_extrude))\n.....\n#Now I want to get a bounding box around all brep elements in my brep_list\nbounding_box = rhi.Geometry.Brep.GetBoundingBox(self: GeometryBase, plane: Plane)\n#How to cast brep_list into GeometryBase?",
+      "language": "unknown",
+      "author": "Mr_Sinter",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nobjIDs=rs.GetObjects(\"Select some brep objects\",8+16,preselect=True)\nbrep_list=[sc.doc.Objects.Find(objID).Geometry for objID in objIDs]\nbbs=[brep.GetBoundingBox(True) for brep in brep_list]\nubox=bbs[0]\nif len(bbs)>0:\n    for i in range (1,len(bbs)): ubox.Union(bbs[i])\nsc.doc.Objects.AddBrep(ubox.ToBrep())\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2066
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/baking-text/40301",
+  "topic_id": 40301,
+  "title": "Baking Text",
+  "question": "Hi Guys,\n\n\nWhat is the equivalent to rhinoscriptsyntax.AddText() method in RhinoCommon? I am having a hard time to find it, sorry. The final aim is to extend functionality when baking text to the screen.\n\n\nMany thanks,\n\nMiriam",
+  "code_blocks": [
+    {
+      "code": "def AddText(text, point_or_plane, height=1.0, font=\"Arial\", font_style=0, justification=None):\n    \"\"\"Adds a text string to the document\n    Parameters:\n      text = the text to display\n      point_or_plane = a 3-D point or the plane on which the text will lie.\n          The origin of the plane will be the origin point of the text\n      height [opt] = the text height\n      font [opt] = the text font\n      font_style[opt] = any of the following flags\n         0 = normal\n         1 = bold\n         2 = italic\n         3 = bold and italic\n      justification[opt] = text justification (see help for values)\n    Returns:\n      Guid for the object that was added to the doc on success\n      None on failure\n    \"\"\"\n    if not text: raise ValueError(\"text invalid\")\n    if not isinstance(text, str): text = str(text)\n    point = rhutil.coerce3dpoint(point_or_plane)\n    plane = None\n    if not point: plane = rhutil.coerceplane(point_or_plane, True)\n    if not plane:\n        plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        plane.Origin = point\n    bold = (1==font_style or 3==font_style)\n    italic = (2==font_style or 3==font_style)\n    id = None\n    if justification is None:\n        id = scriptcontext.doc.Objects.AddText(text, plane, height, font, bold, italic)\n    else:\n        just = System.Enum.ToObject(Rhino.Geometry.TextJustification, justification)\n        id = scriptcontext.doc.Objects.AddText(text, plane, height, font, bold, italic, just)\n    if id==System.Guid.Empty: raise ValueError(\"unable to add text to document\")\n    scriptcontext.doc.Views.Redraw()\n    return id",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 9,
+  "views": 3064
+}

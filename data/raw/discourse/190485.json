@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extrusion-functionality-in-3dm-makes-it-difficult-to-include-holes/190485",
+  "topic_id": 190485,
+  "title": "Extrusion functionality in 3dm makes it difficult to include holes",
+  "question": "Hello,\n\n\nI’ve noticed what I think is a strange behaviour in rhino3dm.js. I’ve already found a working solution, but I feel like it’s a bit unintuitive and not very elegant, so I’m posting here to let you know and/or to see if I’m missing something.\n\n\nI’m trying to create an Extrusion from a geojson polygon. In geojson the first curve is always the boundary and if there are more curves, those are holes.\n\n\nThis was my original attempt at doing this:\n\n\ntype Coordinate = [number, number]\n\ntoExtrusion(coordinates: Coordinate[][], referencePoint: Coordinate, height: number) {\n    const [first, ...rest] = (await this.toPolylineList(coordinates, referencePoint)).map((p) => p.toNurbsCurve())\n\n    const extrusion = rhino.Extrusion.create(first, height, true)\n    if (rest.length === 0) return extrusion\n\n    for (const curve of rest) {\n      extrusion.addInnerProfile(curve)\n    }\n    return extrusion\n  }\n\n\n\nbut when I saved the geometry to a .3dm this is what I ended up with:\n\n\nbefore transform\n1150×954 20.2 KB\n\n\nAfter some messing around I figured out that \nExtrusion.addInnerProfile()\n uses the local plane of the extrusion rather than the worldXY plane as the reference plane. The plane defaults to the plane spanned by the tangent vector of the curve it’s created from and a 90-degree rotated vector in the same plane.\n\n\nAnyway, the point is that since there is no create function in 3dmjs that takes a reference plane as an argument, I have to manually transform the holes to be in the same plane as the boundary like this:\n\n\ntoExtrusion(coordinates: Coordinate[][], referencePoint: Coordinate, height: number) {\n    const [first, ...rest] = (await this.toPolylineList(coordinates, referencePoint)).map((p) => p.toNurbsCurve())\n\n    const extrusion = rhino.Extrusion.create(first, height, true)\n    if (rest.length === 0) return extrusion\n\n   // Here I'm recreating the plane to make a transform for the hole-curve so it gets placed in the right place. \n    let plane = rhino.Plane.worldXY(...",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(Curve x, Curve y, Curve z, ref object a)\n    {\n        Rhino.Geometry.Extrusion ext = Rhino.Geometry.Extrusion.Create(x, Rhino.Geometry.Plane.WorldXY, 10, true); \n        ext.AddInnerProfile(y); \n        ext.AddInnerProfile(z); \n\n      a = ext;\n    }",
+      "language": "csharp",
+      "author": "erikforsberg95",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 102,
+  "posts_count": 18,
+  "views": 363
+}

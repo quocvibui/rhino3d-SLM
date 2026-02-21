@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/suffix-for-dimcurvelength-leaders/5314",
+  "topic_id": 5314,
+  "title": "Suffix for DimCurveLength leaders",
+  "question": "Anyone know how to automatically add a suffix (heck, prefix info as well) to DimCurveLength leaders? I want all my curve length annotation to end with ’ perimeter’ or ‘total cutting inches’ or something similar. Right now I’m just hand editing the text boxes.\n\nthanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef AddCustomCrvLengthLeader():\n    \"crv length leader with custom prefix and suffix\"\n\n    # enter your favourite text below in quotes\n    prefix = \"myprefix\"\n    suffix = \"mysuffix\"\n\n    result = rs.Command(\"_DimCurveLength\")\n    if result:\n        last_objs = rs.LastCreatedObjects()\n        leader_object = scriptcontext.doc.Objects.Find(last_objs[0])\n        if leader_object:\n            old_text = leader_object.DisplayText\n            new_text = str.join(\" \", (prefix,old_text,suffix))\n            print old_text\n            print new_text\n            leader_object.Geometry.Text = new_text\n            leader_object.CommitChanges()\n            scriptcontext.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    AddCustomCrvLengthLeader()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "# -*- coding: utf-8 -*-\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef AddCustomDimAreaLeader():\n\n    # enter your favourite text below in quotes\n    prefix = \"A: \"\n    suffix = \" m²\"\n\n    result = rs.Command(\"_DimArea\")\n    if result:\n        last_objs = rs.LastCreatedObjects()\n        leader_object = scriptcontext.doc.Objects.Find(last_objs[0])\n        if leader_object:\n            old_text = leader_object.DisplayText\n            new_text = \"{0}{1}{2}\".format(prefix, old_text, suffix)\n            leader_object.Geometry.Text = new_text\n            leader_object.CommitChanges()\n            scriptcontext.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    AddCustomDimAreaLeader()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 14,
+  "views": 2098
+}

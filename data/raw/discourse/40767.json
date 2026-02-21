@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-equivalent-to-blend-command/40767",
+  "topic_id": 40767,
+  "title": "RhinoCommon equivalent to Blend command",
+  "question": "Hi, I would like to know what is the RhinoCommon method that is equivalent to the Blend command in Rhino? I mean the Blend command used to create a curve connecting two curves (the “quick” version). I initially thought it was Curve.CreateBlendCurve, but after trying a while, I can’t produce the same curve. That method produces a curve more like the Connect command. I want a smooth, curvature-continuous curve like the one the Blend does.\n\nCan someone help me?\n\nThanks,\n\nIlidio.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry.Point3d as Point3d\nimport Rhino.Geometry.Vector3d as Vector3d\n\ndoc = Rhino.RhinoDoc.ActiveDoc\ndoc.Objects.UnselectAll()\ndoc.Views.Redraw()\n\ngetter = Rhino.Input.Custom.GetObject()\ngetter.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\ngetter.SubObjectSelect = False\ngetter.GroupSelect = False\n\ngetter.SetCommandPrompt(\"Give curves\")\n\nrt = getter.GetMultiple(1,0)\nif rt == Rhino.Input.GetResult.Cancel:\n    pass\nif getter.ObjectCount == 0:\n    print trl(\"no curve selected\")\nelse:\n    l = getter.Objects()\n    l = [oref.Curve() for oref in l]\n    cont = Rhino.Geometry.BlendContinuity.Curvature\n    blend_crv = Rhino.Geometry.Curve.CreateBlendCurve(l[0],l[1],cont)\n    doc.Objects.Add(blend_crv)\n\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "Ilidio_Antunes",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 1200
+}

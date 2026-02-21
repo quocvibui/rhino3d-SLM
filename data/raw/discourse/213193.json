@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/odd-situation-with-rc-getpoints/213193",
+  "topic_id": 213193,
+  "title": "Odd situation with RC GetPoints()",
+  "question": "Testing something for another thread and ran into this…  Below is the standard \nGetPoints\n from the rhinoscriptsyntax module, I just added one line (commented out) plus an additional argument at the end:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef GetPoints(draw_lines=False, in_plane=False, message1=None, message2=None, max_points=None, base_point=None,c_dist=None):\n    gp = Rhino.Input.Custom.GetPoint()\n    if message1: gp.SetCommandPrompt(message1)\n    gp.EnableDrawLineFromPoint( draw_lines )\n    if in_plane:\n        gp.ConstrainToConstructionPlane(True)\n        plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        gp.Constrain(plane, False)\n    getres = gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success: return None\n    prevPoint = gp.Point()\n    rc = [prevPoint]\n    if max_points is None or max_points>1:\n        current_point = 1\n        if message2: gp.SetCommandPrompt(message2)\n        def GetPointDynamicDrawFunc( sender, args ):\n            if len(rc)>1:\n                c = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor\n                args.Display.DrawPolyline(rc, c)\n        if draw_lines: gp.DynamicDraw += GetPointDynamicDrawFunc\n        while True:\n            if max_points and current_point>=max_points: break\n            if draw_lines: gp.DrawLineFromPoint(prevPoint, True)\n            gp.SetBasePoint(prevPoint, True)\n            #uncomment the following line and test\n            #gp.ConstrainDistanceFromBasePoint(c_dist)\n            current_point += 1\n            getres = gp.Get()\n            if getres==Rhino.Input.GetResult.Cancel: break\n            if gp.CommandResult()!=Rhino.Commands.Result.Success: return None\n            prevPoint = gp.Point()\n            rc.append(prevPoint)\n    return rc\n\n\n#test\nmsg1=\"Pick first point\"\nmsg2=\"Pick next point or Enter to finish\"\npts=GetPoints(True,False,msg1,msg2,None,None,10.0)\nrs.AddPolyline(pts)\n\n\n\nIf you run this, you can pick a few points and rig...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef GetPoints(draw_lines=False, in_plane=False, message1=None, message2=None, max_points=None, base_point=None,c_dist=None):\n    gp = Rhino.Input.Custom.GetPoint()\n    if message1: gp.SetCommandPrompt(message1)\n    gp.EnableDrawLineFromPoint( draw_lines )\n    if in_plane:\n        gp.ConstrainToConstructionPlane(True)\n        plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        gp.Constrain(plane, False)\n    getres = gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success: return None\n    prevPoint = gp.Point()\n    rc = [prevPoint]\n    if max_points is None or max_points>1:\n        current_point = 1\n        if message2: gp.SetCommandPrompt(message2)\n        def GetPointDynamicDrawFunc( sender, args ):\n            if len(rc)>1:\n                c = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor\n                args.Display.DrawPolyline(rc, c)\n        if draw_lines: gp.DynamicDraw += GetPointDynamicDrawFunc\n        while True:\n            if max_points and current_point>=max_points: break\n            if draw_lines: gp.DrawLineFromPoint(prevPoint, True)\n            gp.SetBasePoint(prevPoint, True)\n            #uncomment the following line and test\n            #gp.ConstrainDistanceFromBasePoint(c_dist)\n            current_point += 1\n            getres = gp.Get()\n            if getres==Rhino.Input.GetResult.Cancel: break\n            if gp.CommandResult()!=Rhino.Commands.Result.Success: return None\n            prevPoint = gp.Point()\n            rc.append(prevPoint)\n    return rc\n\n\n#test\nmsg1=\"Pick first point\"\nmsg2=\"Pick next point or Enter to finish\"\npts=GetPoints(True,False,msg1,msg2,None,None,10.0)\nrs.AddPolyline(pts)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 43
+}

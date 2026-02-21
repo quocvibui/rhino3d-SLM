@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/programmatically-creating-new-c-python-script-components/199692",
+  "topic_id": 199692,
+  "title": "Programmatically creating new C# & Python script components",
+  "question": "Hi McNeel and other experts\n\n\nDo you know the best way to programmatically create a RhinoCodePluginGH component (Rhino 8 C# and Python script components)?\n\n\nI have these aspects in mind:\n\n\n\n\ncreating a new script component instance\n\n\nsetting the inputs & outputs parameters, with type hints and persistent data\n\n\nsetting the source code & ensuring that the \nRunScript\n method signature matches the inputs & outputs\n\n\n\n\nIn my experimentation so far, for Rhino 7, this works well:\n\n\n\n\na new instance is created through \nActivator.CreateInstance\n\n\nset up inputs & outputs by\n\n\n\ncreating \nParam_ScriptVariable\n objects\n\n\nassigning objects to \nParam_ScriptVariable.TypeHint\n to set the type, and\n\n\nadding them via \nParams.RegisterInputParam\n and \nParams.RegisterOutputParam\n.\n\n\n\n\n\n\nto set the source code using,\n\n\n\nfor C#: the \nScriptSource.ScriptCode\n, \nScriptSource.AdditionalCode\n and \nScriptSource.UsingCode\n properties,\n\n\nand for Python, the \nCode\n property\n\n\n\n\n\n\n\n\nHowever for Rhino 8:\n\n\n\n\nI could actually set the inputs and outputs the same way using the legacy registration, but somehow it ends up with the \nRunScript\n signature seemingly not respecting the type hints, not reflecting these inputs/outputs, so it doesn’t work. Intriguingly, when I look at the XML for the component instance created this way, the \nConverterData\n chunk (needed for Rhino 8 it seems) isn’t there\n\n\nthere seems to be no source code property, although I find that serialising it to XML, using \nXDocument\n to parse and find the \nScript\n chunk, encoding the code to base64 and assigning it to the \nText\n item before deserialising it into a component instance, seems to work - except for the \nRunScript\n signature of course - but this does feel a little ‘hacky’\n\n\n\n\nIs there a better way to do it?  There might be no public API for it but if anyone can share the next best thing, the next most reliable mechanism, I’d much appreciate it.  Is there a plan at McNeel to offer a sanctioned way to do this at some point?\n\n\nI...",
+  "code_blocks": [
+    {
+      "code": "Params = self.Params # in RunScript(self, *args) on a ghpythonlib.componentbase.executingcomponent subclass called MyComponent\n\n        ParamsSyncObj = Params.EmitSyncObject()\n\n        for name, nick_name, description in [(\"Param_name\", \"P\", \"An example Parameter\"),]:\n\n\n            made_param = Param_ScriptVariable()\n\n            made_param.TypeHint = GhPython.Component.GhDocGuidHint()\n\n            for k, v in dict(NickName = nick_name,\n                             Name = name,\n                             Description = description,\n                             Access = Grasshopper.Kernel.GH_ParamAccess.list,  # or .item or .tree \n                             Optional = True, #I can't remember trying False\n                             ).items():\n                setattr(made_param, k, v)\n\n            Params.RegisterInputParameter(made_param) \n            Params.OnParametersChanged()\n\n        Params.Sync(ParamsSyncObj)\n        Params.RepairParamAssociations()",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "# r \"RhinoCodePluginGH.rhp\"                 // this is necessary to access script component types\nusing System;\nusing Grasshopper;\nusing Grasshopper.Kernel;\n\n// namespaces to access script components and variable parameter\nusing RhinoCodePluginGH.Components;\nusing RhinoCodePluginGH.Parameters;\n\n// this creates a python 3 component.\n// could also be:\n// CSharpComponent.Create\n// IronPython2Component.Create\nPython3Component c = Python3Component.Create(\"MyScript\", @\"\n# here is your custom python script going\n# into the component\n\");\n\nvar p = new ScriptVariableParam(\"first\")    // this is the variable name for script\n{\n    PrettyName = \"First Input\",             // pretty name is human-readable\n    ToolTip = \"This is the first input\",\n    Optional = true,\n    Access = GH_ParamAccess.list,\n    AllowTreeAccess = true,\n};\np.TypeHints.Select(typeof(double));         // .TypeHints is new helper to set type hints\np.CreateAttributes();\nc.Params.RegisterInputParam(p);\n\np = new ScriptVariableParam(\"second\")\n{\n    PrettyName = \"Second Input\",\n    ToolTip = \"This is the second input\",\n    Optional = true,\n    AllowTreeAccess = true,\n};\np.TypeHints.Select(\"Point3dList\");          // .TypeHints helper can set hints by name as well\np.CreateAttributes();\nc.Params.RegisterInputParam(p);\n\np = new ScriptVariableParam(\"output\")\n{\n    Hidden = true,\n};\np.CreateAttributes();\nc.Params.RegisterOutputParam(p);\n\nc.VariableParameterMaintenance();           // necessary step after changing component parameters\n\n\n// get and set script on a component\nc.TryGetSource(out string source);\nc.SetSource(\"# new source code to be set into component\");\n\n// special parameters can be accessed and enabled if necessary\nc.UsingStandardOutputParam = true;\nc.GraftStandardOutputLines = true;\n\n// marshalling settings can be changed as well\nc.MarshGuids = false;\n\n// parameters can also be applied or collected from the source\nc.SetParametersToScript()        // this updates RunScript signature to match component params\nc.SetParametersFromScript()      // this updates the component parameters from RunScript signature",
+      "language": "csharp",
+      "author": "eirannejad",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "# -*- coding: utf-8 -*-\n#! python3\n\nimport System\nimport Grasshopper\nimport GH_IO\n\n# get current component for testing\nthis_obj = ghenv.Component\n\n# create userobject that copies a\n# DocumentObject's contents as a workaround\nuo = Grasshopper.Kernel.GH_UserObject()\n\n# Set its properties based on the component properties\nuo.Icon = this_obj.Icon_24x24\nuo.BaseGuid = this_obj.ComponentGuid\nuo.Exposure = this_obj.Exposure.primary\nuo.Description.NickName = this_obj.NickName\nuo.Description.Name = this_obj.Name\nuo.Description.Description = this_obj.Description\nuo.Description.Category = this_obj.Category\nuo.Description.SubCategory = this_obj.SubCategory\nuo.SetDataFromObject(this_obj)\n\n# instantiate userobject to finally get a copy of the\n# DocumentObject and set new instanceguid (precaution)\nuo_comp = uo.InstantiateObject()\nuo_comp.NewInstanceGuid()\n\n# overwrite object location on canvas with something 'neutral'\nuo_comp.Attributes.Pivot = System.Drawing.PointF(20, 20)\n\n# create new doc and add object\nnew_doc = Grasshopper.Kernel.GH_Document()\nnew_doc.AddObject(uo_comp, False, 0)\n\n# create archive that can be serialized and add the doc\narchive = GH_IO.Serialization.GH_Archive()\narchive.AppendObject(new_doc, 'Clipboard')\n\n# last but not least: serialize to XML - hooray!\nxml = archive.Serialize_Xml()\nprint(xml)",
+      "language": "python",
+      "author": "efestwin",
+      "post_number": 34,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 24,
+  "views": 1051
+}

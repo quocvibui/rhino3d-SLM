@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/_old_axolotl-1.0/code/primitives/sphere.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "_old_axolotl-1.0/code/primitives/sphere.py",
+  "instruction": "Creates one or multiple Sphere(s)\nIf multiple centers and one radius is fed in, all spheres are created with equal radius.\nIf only one center but multiple radii are fed in, only the biggest sphere is...",
+  "code": "# -*- coding: utf-8 -*-\n\n\"\"\"\nCreates one or multiple Sphere(s)\nIf multiple centers and one radius is fed in, all spheres are created with equal radius.\nIf only one center but multiple radii are fed in, only the biggest sphere is created (others are within).\nIf multiple centers and multiple radii are fed in, values are matched by index (shorter list).\n    Inputs:\n        center: The center(s) of the sphere(s) (list)\n        radius: The radius/radii for the sphere(s) (list)\n        pts: List of points to query (list)\n    Output:\n        a: Distance values for all points in pts\n\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT / ETH Zurich'\n__license__    = 'MIT License'\n__email__      = '<bernhard@arch.ethz.ch>'\n\nimport rhinoscriptsyntax as rs\n\nif not radius:\n    radius = [10]\nif not center:\n    center = [(0,0,0)]\n\n# with multiple centers and only one radius,\n# all spheres get the same radius\nif len(radius)==1 and len(center)>1:\n    radius = [radius[0] for _ in center]\n\n# with only one center and multiple radii,\n# only the biggest radius is considered\nif len(center)==1 and len(radius)>1:\n    radius = [max(radius)]\n\nif len(radius) != len(center):\n    num = min(len(radius),len(center))\n    radius = radius[:num]\n    center = center[:num]\n\na = [9999 for p in pts]\nfor i,c in enumerate(center):\n    a = [min(a[j],rs.Distance(c,p)-radius[i]) for j,p in enumerate(pts)]\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

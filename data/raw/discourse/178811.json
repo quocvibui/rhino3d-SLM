@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino8-setperviewportvisible-not-working/178811",
+  "topic_id": 178811,
+  "title": "Rhino8 SetPerViewportVisible not working",
+  "question": "Rhino8 SetPerViewportVisible not working  between  two StandardModelingViewport.rhino7 Layer.SetPerViewportVisible  is working but Rhino8 isn`t.Is this a bug or is it designed like this？",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n      {\n          var layerIndex = doc.Layers.Add(\"test\", System.Drawing.Color.Red);\n          doc.Objects.AddText(\"ViewportVisibleTest...\", Plane.WorldXY, 10, \"Microsoft YaHei UI\", false, false, new ObjectAttributes()\n          {\n              LayerIndex = layerIndex,\n          });\n          var topView = doc.Views.Where(v=>v.ActiveViewport.Name==\"Top\").FirstOrDefault();\n          var secondView = doc.Views.Where(v => v.ActiveViewport.Name == \"Perspective\").FirstOrDefault();\n\n          var layer = doc.Layers.FindIndex(layerIndex);\n          layer.SetPerViewportVisible(topView.ActiveViewportID, true);\n          layer.SetPerViewportVisible(secondView.ActiveViewportID, false);\n          return Result.Success;\n      }",
+      "language": "csharp",
+      "author": "王佳伟",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "var doc = RhinoDoc.ActiveDoc;\nvar view_rectangle = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView.ScreenRectangle;\n\nvar new_view = doc.Views.Add(“LensFront Modeling”,\nRhino.Display.DefinedViewportProjection.Top,\nview_rectangle,\ntrue);\nGuid vpId = new_view.ActiveViewportID;\n\nvar layerindex = doc.Layers.AddPath(“toto”);\n\nvar layer = doc.Layers[layerindex];\nlayer.IsVisible = true;\nforeach( var view in doc.Views)\n{\nlayer.SetPerViewportVisible(view.ActiveViewportID, false);\n}\n\nlayer.SetPerViewportVisible(vpId, true);\n\nvar attr = new ObjectAttributes { LayerIndex = layerindex, Name = “Lens2DCurve”, ObjectColor = Color.OrangeRed, ColorSource = ObjectColorSource.ColorFromObject, ViewportId = view.ActiveViewportID};\nGuid objID = doc.Objects.Add(new Circle(20).ToNurbsCurve(), attr);",
+      "language": "csharp",
+      "author": "thomas.pitiot",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "layers",
+    "nurbs",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 462
+}

@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-calling-overloaded-methods-from-python/134164",
+  "topic_id": 134164,
+  "title": "Problem Calling Overloaded Methods from Python",
+  "question": "Hi there, I have been programming a script where I want to retrieve the Point3d from the NurbsSurfaceControlpoints.\n\nI got a NurbsSurfacePointList and I want to call the GetPoint() method which is Overloaded \nNurbsSurfacePointList\n\n\nI know there is a solution for calling RHinocommon overloaded methods with the following error: “Message: Multiple targets could match” by using the Overloads Method as explained here: \nCalling Overloaded Methods from Python\n\n\nBut whenever I use the Overloads method on the .Getpoint() method as seen here:\n\n\nsrfControlPoints.GetPoint.Overloads[System.Int32, System.Int32, rg.Point3d](u, v)#Get point3d from control points\n\n\n\nI get this error message:\n\n\n\n\nNo match found for the method signature GetPoint[Int32, Int32, Point3d]. Expected [Int32, Int32, Point4d&], [Int32, Int32, Point3d&]\n\n\n\n\nNow i ask myself what this expected Type “\nPoint3d&\n” is (It is not Rhino.Geometry.Point3d)\n\n\nI have been trying to solve this, but I could not figure it out. Maybe I am overseeing something.\n\nAny help would be helpful! \n\n_dromaius\n\n\nHere is a snipped of the code to recreate the error:\n\n\nimport Rhino, System\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef Main():\n    surfaceId = rs.GetSurfaceObject(\"Select surface\")\n    if not surfaceId:\n        sc.errorhandler()\n    \n    srfGeo = sc.doc.Objects.Find(surfaceId[0]).Geometry\n    if not srfGeo:\n        sc.errorhandler()\n        \n    if srfGeo.IsSurface:\n        srfGeo = srfGeo.Surfaces[0]\n    else:\n        print (\"User selected more then one surface\")\n        return None\n    \n    nurbsSurfacePoints = srfGeo.Points #Gets the NurbsSurfaceControlPoints\n    if not nurbsSurfacePoints:\n        print (\"ERROR: Could not retrive NurbsSurfaceControlPoints\")\n        return None\n\n    ControlPoints(nurbsSurfacePoints)\n\ndef ControlPoints(srfControlPoints):\n    #Get the u and v point from the surface\n    countU = srfControlPoints.CountU\n    countV = srfControlPoints.CountV\n\n    for...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ndef test_get_surface_cvs():\n    filter = Rhino.DocObjects.ObjectType.Surface\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success:\n        return\n        \n    srf = objref.Surface()\n    if not srf:\n        return\n        \n    nurb = srf.ToNurbsSurface()\n    if nurb:\n        for v in range(0, nurb.Points.CountV):\n            for u in range(0, nurb.Points.CountU):\n                cv = nurb.Points.GetControlPoint(u, v)\n                print('CV({0},{1}) = {2}'.format(u, v, cv.Location))\n\nif __name__ == \"__main__\":\n    test_get_surface_cvs()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def ControlPoints(srfControlPoints):\n    # Get the u and v point from the surface\n    countU = srfControlPoints.CountU\n    countV = srfControlPoints.CountV\n    \n    cvs = [\n        [clr.Reference[rg.Point3d]() for j in range(countV)]\n        for i in range(countU)\n    ]\n\n    for u in range(countU):\n        for v in range(countV):\n            srfControlPoints.GetPoint.Overloads[\n                System.Int32, System.Int32, System.Type.MakeByRefType(rg.Point3d)\n            ](u, v, cvs[u][v])  # Get point3d from control points\n            \n    return cvs",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino, System\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef Main():\n    surfaceId = rs.GetSurfaceObject(\"Select surface\")\n    if not surfaceId:\n        sc.errorhandler()\n    \n    srfGeo = sc.doc.Objects.Find(surfaceId[0]).Geometry\n    if not srfGeo:\n        sc.errorhandler()\n        \n    if srfGeo.IsSurface:\n        srfGeo = srfGeo.Surfaces[0]\n    else:\n        print (\"User selected more then one surface\")\n        return None\n    \n    nurbsSurfacePoints = srfGeo.Points #Gets the NurbsSurfaceControlPoints\n    if not nurbsSurfacePoints:\n        print (\"ERROR: Could not retrive NurbsSurfaceControlPoints\")\n        return None\n\n    ControlPoints(nurbsSurfacePoints)\n\ndef ControlPoints(srfControlPoints):\n    #Get the u and v point from the surface\n    countU = srfControlPoints.CountU\n    countV = srfControlPoints.CountV\n\n    for u in range(countU):\n        for v in range(countV):\n            srfControlPoints.GetPoint.Overloads[System.Int32, System.Int32, rg.Point3d](u, v)#Get point3d from control points\n\nif __name__ == \"__main__\":\n    Main()",
+      "language": "python",
+      "author": "Dromaius",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 880
+}

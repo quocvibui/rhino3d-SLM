@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-color-of-refrenced-objects-in-grasshopper/183999",
+  "topic_id": 183999,
+  "title": "Get color of refrenced objects in grasshopper",
+  "question": "import rhinoscriptsyntax as rs\n\nobj = rs.GetObject(\"Select:\", 0, True, True)\nprint(rs.ObjectColor(x))\n\n\n\nthe above python code has worked for me inside of rhino’s scripteditor but not in ghpython component\n\n\nheres the error:\n\n\nTraceback (most recent call last):\n  File \"rhinocode:///grasshopper/1/ee4a242e-117c-46ef-8b25-8edba4948778/0a1b1270-fceb-4f53-806e-815e35aae507\", line 35, in <module>\n  File \"C:\\Users\\ACER\\.rhinocode\\py39-rh8\\site-rhinopython\\rhinoscript\\object.py\", line 788, in ObjectColor\n    return rhino_object.Attributes.DrawColor(scriptcontext.doc)\nTypeError: RhinoCodePlatform.Rhino3D.GH1.Legacy.ProxyDocument value cannot be converted to Rhino.RhinoDoc in method System.Drawing.Color DrawColor(Rhino.RhinoDoc)\n\n\n\nany help is much appreciated",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n#Set Script Context To Rhino Doc\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\n# YOUR CODE HERE\n\n#Set Script Context To Grasshopper Doc\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# Set Script Context To Rhino Doc\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nobj_ids = []\nobj_colors = []\n\n\ndef GetObjs():\n    objs = rs.AllObjects()\n    for obj in objs:\n        if obj:\n            obj_ids.append(obj)\n\n    return obj_ids\n\n\ndef GetObjColors():\n    for obj in obj_ids:\n        # Use rs.ObjectColor to get the color of the object\n        color = rs.ObjectColor(obj)\n        if color:\n            obj_colors.append(color)\n\n    return obj_colors\n\n\nGetObjs()\nGetObjColors()\n\nguids = obj_ids\ncolors = obj_colors\n\n# Set Script Context To Grasshopper Doc\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobj = rs.GetObject(\"Select:\", 0, True, True)\nprint(rs.ObjectColor(x))",
+      "language": "python",
+      "author": "Lawand_Noa_man",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Traceback (most recent call last):\n  File \"rhinocode:///grasshopper/1/ee4a242e-117c-46ef-8b25-8edba4948778/0a1b1270-fceb-4f53-806e-815e35aae507\", line 35, in <module>\n  File \"C:\\Users\\ACER\\.rhinocode\\py39-rh8\\site-rhinopython\\rhinoscript\\object.py\", line 788, in ObjectColor\n    return rhino_object.Attributes.DrawColor(scriptcontext.doc)\nTypeError: RhinoCodePlatform.Rhino3D.GH1.Legacy.ProxyDocument value cannot be converted to Rhino.RhinoDoc in method System.Drawing.Color DrawColor(Rhino.RhinoDoc)",
+      "language": "unknown",
+      "author": "Lawand_Noa_man",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 6,
+  "views": 362
+}

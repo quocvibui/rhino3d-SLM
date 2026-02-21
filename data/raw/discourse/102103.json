@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/call-clipper-from-python-script/102103",
+  "topic_id": 102103,
+  "title": "Call Clipper from Python script",
+  "question": "Is there a way of calling Clipper’s OffsetPolyline from a Python script, without using rs.Command()?\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "from __future__ import print_function\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghcomp\n\ndef main():\n    msg = 'Pick polyline'\n    pline = rs.GetObject(msg, filter=rs.filter.curve, preselect=True, select=True)\n    if not pline:\n        print(\"Error: Need polyline.\")\n        return\n\n    ret = ghcomp.ClipperComponents.PolylineOffset(pline, distance=1, tolerance=0.001,\n            plane=rs.WorldXYPlane(), closedfillet=1, openfillet=0, miter=2)\n    if not ret:\n        return\n    print(ret)\n    return\n\nif __name__ == '__main__':\n    main()",
+      "language": "python",
+      "author": "axa",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "from __future__ import print_function\nfrom collections import Iterable\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghcomp\nimport scriptcontext\n\n\ndef main():\n    msg = 'Pick polyline'\n    #pline = rs.GetObject(msg, filter=rs.filter.curve, preselect=True, select=True)\n    plines = rs.GetObjects(msg, filter=rs.filter.curve, preselect=True, select=True)\n    if not plines:\n        print(\"Error: Need polyline.\")\n        return\n\n    # Equivalent to fit plane:\n    points = rs.PolylineVertices(plines[0])\n    plane = rs.PlaneFitFromPoints(points)\n    \n    ret = ghcomp.ClipperComponents.PolylineOffset(plines, distance=100, tolerance=0.001,\n            plane=plane, closedfillet=1, openfillet=0, miter=2)\n\n    if (ret.contour):\n        if isinstance(ret.contour, Iterable):\n            for item in ret.contour:\n                scriptcontext.doc.Objects.AddCurve(item)\n        else:\n            scriptcontext.doc.Objects.AddCurve(ret.contour)\n    \n    if (ret.holes):\n        if isinstance(ret.holes, Iterable):\n            for item in ret.holes:\n                scriptcontext.doc.Objects.AddCurve(item)\n        else:\n            scriptcontext.doc.Objects.AddCurve(ret.holes)\n    return\n\nif __name__ == '__main__':\n    main()",
+      "language": "python",
+      "author": "arendvw",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1179
+}

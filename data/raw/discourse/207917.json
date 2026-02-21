@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/better-way-to-collect-objects-created-via-rs-command-split/207917",
+  "topic_id": 207917,
+  "title": "Better way to collect objects created via rs.Command(\"Split\")?",
+  "question": "I am needing to use rhinoscriptsyntax to split a largish series of curves with some other objects.  For various reasons it is too complex to script with RhinoCommon or rhinoscriptsyntax methods, so I am resorting to scripting the Rhino command - which works fine, but…\n\n\nGetting the result of the scripted command involves invoking \nrs.LastCreatedObjects()\n.  However, this returns a list of ONLY the objects actually split by the \nSplit\n command.  If there are objects that were not split, they are not included, even though they were selected as input to the \nSplit\n command.\n\n\nI need to have the result of the split operation \nplus\n anything originally selected but was not split.  I have a way to do this, but it seems a bit of a kludge.  Basically after the split, I run \nrs.IsObject\n on the original selection and grab any GUID that returns true - as the others have presumably been deleted when the originals were split.  Just wondering if there is a better way is all…  Below is just some test code.\n\n\nimport rhinoscriptsyntax as rs\n\nlines=rs.GetObjects(\"Select lines\",4,preselect=True)\npts=rs.GetObjects(\"Select points\",1)\n\ntg=\"Test_Group\"\nif not rs.IsGroup(tg): rs.AddGroup(tg)\nrs.AddObjectsToGroup(pts,tg)\n\nrs.SelectObjects(lines)\nrs.Command(\"_Split -_SelGroup {} _Enter\".format(tg))\nrs.UnselectAllObjects()\nto_select=rs.LastCreatedObjects(True)\nprint(\"Last created object count={}\".format(len(to_select)))\n\nfor item in lines:\n    if rs.IsObject(item):\n        to_select.append(item)\n        rs.SelectObject(item)\nprint(\"Total selected object count={}\".format(len(to_select)))\n\n\n\nTest file - split the lines with the points.\n\n\nSplitTest.3dm\n (2.6 MB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\n# This example demonstrates how to retrieve the objects that\n# were created by scripting a Rhino command.\n\ndef test_import_file():\n    # Prompt the user to select a 3dm file\n    fd = Rhino.UI.OpenFileDialog()\n    fd.Filter = 'Rhino 3D Models|*.3dm||'\n    if not fd.ShowOpenDialog(): \n        return\n    \n    # Surround path with double-quotes (in case it contains spaces)\n    path = chr(34) + fd.FileName + chr(34)\n    \n    # Get the starting object runtime serial number\n    start_sn = Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber\n    \n    # Script the Import command\n    cmd = '_-Import {0} _Enter'.format(path)\n    Rhino.RhinoApp.RunScript(cmd, False)\n    \n    # Get the ending object runtime serial number\n    end_sn = Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber\n    \n    # If the scripted command completed successfully and new objects were\n    # added to the document, end_sn will be greater than start_sn. So all\n    # that's left to do is find the newly added objects.\n    rh_objects = []\n    for sn in range(start_sn, end_sn):\n        rh_obj = sc.doc.Objects.Find(sn)\n        if rh_obj:\n          rh_objects.append(rh_obj)\n    \n    # Move the newly added objects (example)\n    dir = Rhino.Geometry.Vector3d(10.0, 10.0, 0.0)\n    xform = Rhino.Geometry.Transform.Translation(dir)\n    for rh_obj in rh_objects:\n        sc.doc.Objects.Transform(rh_obj, xform, True)\n    \n    # Done!\n    sc.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    test_import_file()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nlines=rs.GetObjects(\"Select lines\",4,preselect=True)\npts=rs.GetObjects(\"Select points\",1)\n\ntg=\"Test_Group\"\nif not rs.IsGroup(tg): rs.AddGroup(tg)\nrs.AddObjectsToGroup(pts,tg)\n\nrs.SelectObjects(lines)\nrs.Command(\"_Split -_SelGroup {} _Enter\".format(tg))\nrs.UnselectAllObjects()\nto_select=rs.LastCreatedObjects(True)\nprint(\"Last created object count={}\".format(len(to_select)))\n\nfor item in lines:\n    if rs.IsObject(item):\n        to_select.append(item)\n        rs.SelectObject(item)\nprint(\"Total selected object count={}\".format(len(to_select)))",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 169
+}

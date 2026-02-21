@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/offset-with-an-angled-elevated-object/147344",
+  "topic_id": 147344,
+  "title": "Offset with an Angled (Elevated) Object",
+  "question": "Using RhinoScript (Python).\n\n\nI have a polyline in Rhino where the starting point is at Z=0 and the end point is at Z=20.  If I offset manually to the inside in Rhino and use the InCPlane=No then it looks great:\n\n\n\n\nOffset InCPlaneNo\n620×563 7.38 KB\n\n\n\n\nIf I offset manually to the inside in Rhino and use the InCPlane=Yes then it is not clean at all:\n\n\n\n\nOffset InCPlaneYes\n585×598 7.44 KB\n\n\n\n\nIf I run rs.OffsetCurve to programmatically offset the curve it comes out just like the “non-clean” version.  How to I get rs.OffsetCurve to give me the other version?  There is no “InCPlane” option.  I imagine the Offset command in Rhino with the InCPlane=No option does not use the current CPlane so maybe it uses the object’s CPlane.  Am I right?  Maybe I need to pass the normal to rs.OffsetCurve, but there’s not a CPlane for the object when I select it with rs.GetObject.\n\n\nAny help would be appreciated.\n\n\nOffset Issue.3dm\n (30.2 KB)\n\n\nOffset.py\n (260 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef TestOffset():\n    \n    crv_id = rs.GetObject(\"\", rs.filter.curve)\n    if not crv_id: return\n    \n    curve = rs.coercecurve(crv_id, -1, True)\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    is_planar, plane = curve.TryGetPlane(tolerance)\n    if not is_planar: return\n    \n    style = Rhino.Geometry.CurveOffsetCornerStyle.Sharp\n    rc = curve.Offset(plane, 10, tolerance, style)\n    if not rc: return\n    \n    for crv in rc: scriptcontext.doc.Objects.AddCurve(crv)\n    \n    scriptcontext.doc.Views.Redraw()\n    \nTestOffset()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 406
+}

@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-multiple-inputs-are-all-given-same-list-length-when-input-to-functions/101324",
+  "topic_id": 101324,
+  "title": "GhPython: Multiple Inputs are all given same list length when input to functions",
+  "question": "I am struggling to understand how Grasshopper and GHPython are handling multiple inputs. I need to understand this before I can really build out a lot of my script.\n\n\nContext\n\n\n\n\nI want to build a function (example: area calculations) that can be used across multiple inputs: devs, plots, buildings.\n\n\nI will be writing a bunch of similar functions that need to be applied in a similar way across all the geometry inputs.\n\n\n\n\nProblem:\n\n\n\n\nThe 3 inputs are all “cycled” over in the ghPython component to the longest list length.\n\n\nexample: devs = 3 items, plots = 4 items, buildings = 8 items. But They all get the function applied 8 times (longest set of items) meaning that the last item is duplicated repeatedly.\n\n\n\n\nHunch\n\nI suspect I’m misunderstanding something fundamental about multiple input treatment in the ghPython component. I’ve written the function to be encapsulated, but this might not be working. \nDo i need to make it a class in python?\n\n\nI already referred to the post by \n@piac\n about \naccessing item/list/tree\n. However I tried writing functions for ITEM and LIST and the problem wasn’t solved.\n\n\n\n\noperationBug-D.Ronald\n1048×953 187 KB\n\n\n\n\nMassDataMaker_SentOut.gh\n (20.7 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rc\ndef rcArea(c):\n    if c:\n        rcAreas = rc.Geometry.AreaMassProperties.Compute(c)\n        return rcAreas.Area\n\ndev_areas = []\nfor dev in devs:\n    dev_areas.append(rcArea(dev))\nplot_areas = []\nfor plot in plots:\n    plot_areas.append(rcArea(plot))\nbuilding_areas = []\nfor building in buildings:\n    building_areas.append(rcArea(building))",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1669
+}

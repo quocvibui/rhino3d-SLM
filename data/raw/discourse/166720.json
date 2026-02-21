@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unable-to-close-transaction-in-ghpython-component/166720",
+  "topic_id": 166720,
+  "title": "Unable to Close Transaction in GHPython Component",
+  "question": "Hello,\n\nI am trying to write a GHPython script for Rhino Inside Revit that will iterate through a folder of families and assign the built-in material parameter for the family geometry to a shared family parameter. I created the families using Rhino Inside Revit and a custom generic model template, but I was unable to associate the geometry to the family parameter at time of creation. I am hoping to process these families after the fact, but I am getting a transaction error. Any advice would be appreciated!\n\n\nHere is the code block:\n\n\nimport clr\nclr.AddReference('System.Core')\nclr.AddReference('RhinoInside.Revit')\nclr.AddReference('RevitAPI') \nclr.AddReference('RevitAPIUI')\n\nfrom System import Enum\n\nimport rhinoscriptsyntax as rs\nimport os\nimport Rhino\nimport RhinoInside\nimport Grasshopper\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\nfrom RhinoInside.Revit import Revit, Convert\nfrom Autodesk.Revit import DB, UI\nimport Autodesk.Revit.ApplicationServices as AS\n\ndef show_warning(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Warning, msg)\n\ndef show_error(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Error, msg)\n\ndef show_remark(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Remark, msg)\n\ndef assoc_elem_param_to_fam_param(family_path, built_in_param_name, family_param_name):\n    # Define current application\n    app = Revit.ActiveDBApplication\n    \n    \n    # Get default document and document path\n    original_doc = Revit.ActiveDBDocument\n    default_path = original_doc.PathName\n    \n    \n    # Open family file\n    print family_path\n    family_doc = app.OpenDocumentFile(family_path)\n    \n    \n    # Establish family-specific variables\n    family_manager = family_doc.FamilyManager\n    family_params = family_manager.GetParameters()\n    \n    # Get element geometry\n    \n    collector = DB.FilteredElementCollector(family_doc)\n    element = collector.OfClass(DB.FreeFormElement).ToElements()\n    built_in_param = DB.BuiltInParameter[built_in_param_name]\n    ele...",
+  "code_blocks": [
+    {
+      "code": "import clr\nclr.AddReference('System.Core')\nclr.AddReference('RhinoInside.Revit')\nclr.AddReference('RevitAPI') \nclr.AddReference('RevitAPIUI')\n\nfrom System import Enum\n\nimport rhinoscriptsyntax as rs\nimport os\nimport Rhino\nimport RhinoInside\nimport Grasshopper\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\nfrom RhinoInside.Revit import Revit, Convert\nfrom Autodesk.Revit import DB, UI\nimport Autodesk.Revit.ApplicationServices as AS\n\ndef show_warning(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Warning, msg)\n\ndef show_error(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Error, msg)\n\ndef show_remark(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Remark, msg)\n\ndef assoc_elem_param_to_fam_param(family_path, built_in_param_name, family_param_name):\n    # Define current application\n    app = Revit.ActiveDBApplication\n    \n    \n    # Get default document and document path\n    original_doc = Revit.ActiveDBDocument\n    default_path = original_doc.PathName\n    \n    \n    # Open family file\n    print family_path\n    family_doc = app.OpenDocumentFile(family_path)\n    \n    \n    # Establish family-specific variables\n    family_manager = family_doc.FamilyManager\n    family_params = family_manager.GetParameters()\n    \n    # Get element geometry\n    \n    collector = DB.FilteredElementCollector(family_doc)\n    element = collector.OfClass(DB.FreeFormElement).ToElements()\n    built_in_param = DB.BuiltInParameter[built_in_param_name]\n    element_param = element[0].Parameter[built_in_param]\n    \n    \n    # Get material shared parameter\n    param_list = []\n    for f in family_params:\n        if f.Definition.Name == _family_param_name:\n            param_list.append(f)\n        else:\n            continue\n    \n    material_parameter = param_list[0]\n    \n    \n    # Associate parameter in family document\n    with DB.Transaction(family_doc, \"New Transaction\") as t:\n        \n        try:\n            t.Start()\n            \n            family_manager.AssociateElementParameterToFamilyParameter(element_param, material_parameter)\n            \n            t.Commit()\n    \n        except Exception as e:\n            t.RollBack()\n            show_error(str(e))\n            print str(e)\n        \n        if t.HasStarted() and not t.HasEnded():\n            t.RollBack()\n    \n    # Close the family file\n    family_doc.Save()\n    family_doc.Close(False)\n\n\n# List all files and subdirectories\nall_files_and_dirs = os.listdir(_directory_path)\n\n# Get files in directory\nfiles = [f for f in all_files_and_dirs if os.path.isfile(os.path.join(_directory_path, f))]\nfile_paths = [os.path.join(_directory_path, f) for f in files]\n\n# Run script\nif run:\n    for path in file_paths:\n        assoc_elem_param_to_fam_param(path, _built_in_param_name, _family_param_name)",
+      "language": "python",
+      "author": "colinlsmatthews",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 111,
+  "posts_count": 2,
+  "views": 419
+}

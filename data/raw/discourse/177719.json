@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/export-3mf-file-with-attributes/177719",
+  "topic_id": 177719,
+  "title": "Export 3mf File with Attributes",
+  "question": "Hello\n\n\nI am playing with 3mf filetype export. My goal is to export a mesh with custom attributes attached(not a separate .csv file). There is a nice export dialog window in Rhino, but I was not able to get any information back when re-importing previously exported 3mf object. There are only few information about 3mf file on the forum, so I would like to ask someone for help.\n\n\n\n\nIs it possible to use 3mf export fields for some custom additional information (e.g. string with parameters from GH)?\n\n\nIs it possible to re-import 3mf file into Rhino with all additional information attached?\n\n\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "#! python3\n\nimport math\nimport rhinoscriptsyntax as rs\nimport System\nimport System.Collections.Generic\nimport Rhino\nimport scriptcontext\nimport Rhino\nimport os\n \nif scriptcontext.doc is not None:\n    options = Rhino.FileIO.File3mfWriteOptions()\n    options.Metadata[\"Title\"] = \"2578R\"\n    options.Metadata[\"Designer\"] = \"MyDesign\"\n    options.Metadata[\"Test\"] = \"Star\"\n    options.MoveOutputToPositiveXYZOctant = True;\n    options_dictionary = options.ToDictionary()\n \n #Get the filename to create\n    filter = \"3MF File (*.c3mf)|*.3mf||\"\n    filename = rs.SaveFileName(\"Save 3MF as\", filter)\n\n    if filename is not None:\n        success = scriptcontext.doc.Export(filename, options_dictionary)\n    if success:\n        print(\"Successfully exported sample.3mf\")\n    else:\n        print(\"Error while trying to export sample.3mf\")",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 9,
+  "views": 418
+}

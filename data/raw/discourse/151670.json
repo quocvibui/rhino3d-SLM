@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mimic-the-seldup-command/151670",
+  "topic_id": 151670,
+  "title": "Mimic the SelDup command",
+  "question": "If I have a curve without the GUID, how do I mimic the SelDup command but only find duplicates for that specific curve?  Is there an method that allows me to do this or do I need to iterate through all the document’s objects and do a lengthy comparison of the all the object’s properties?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nfilter = Rhino.DocObjects.ObjectType.Curve\nrc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", True, filter)\n\nco = objref.Curve()\n\nnumObjFound = 0\nobjNbr = 0\nfor obj in sc.doc.ActiveDoc.Objects:\n    o = obj.Geometry\n    objNbr += 1\n    print 'Object # ' + str(objNbr) + ' is a ' + str(o)\n    \n    #if rg.GeometryBase.Equals(co, o):\n    if co.Equals(o):\n        print 'This is the selected object.'\n    \n    if rg.GeometryBase.GeometryEquals(co, o):\n        numObjFound += 1\n\nprint\nprint 'Number of times curve found that are the same as the selected curve including the selected curve itself: ' + str(numObjFound)",
+      "language": "python",
+      "author": "Mike24",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_sel_dup():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return\n    \n    srcId = objref.ObjectId \n    srcGeometry = objref.Geometry()\n    if not srcGeometry:\n        return\n    \n    sc.doc.Objects.UnselectAll()\n    \n    numDuplicates = 0\n    for rhObj in sc.doc.ActiveDoc.Objects:\n        if srcId != rhObj.Id:\n            if Rhino.Geometry.GeometryBase.GeometryEquals(srcGeometry, rhObj.Geometry):\n                numDuplicates += 1\n                rhObj.Select(True, True)\n    \n    if numDuplicates > 0:\n        sc.doc.Views.Redraw()\n    \n    if numDuplicates == 1:\n        print(\"1 duplicate found.\")\n    else:\n        print(\"{0} duplicates found.\".format(numDuplicates))\n\nif __name__ == \"__main__\":\n    test_sel_dup()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_sel_dup():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return\n    \n    srcId = objref.ObjectId \n    srcGeometry = objref.Geometry()\n    if not srcGeometry:\n        return\n    \n    sc.doc.Objects.UnselectAll()\n    \n    print(\"Selected id: {0}, hash: {1}\".format(srcId, srcGeometry.GetHashCode()))\n    numDuplicates = 0\n    for rhObj in sc.doc.ActiveDoc.Objects:\n        if srcId != rhObj.Id:\n            print(\"Object id: {0}, hash: {1}\".format(rhObj.Id, rhObj.Geometry.GetHashCode()))\n            if Rhino.Geometry.GeometryBase.GeometryEquals(srcGeometry, rhObj.Geometry):\n                numDuplicates += 1\n                rhObj.Select(True, True)\n    \n    if numDuplicates > 0:\n        sc.doc.Views.Redraw()\n    \n    if numDuplicates == 1:\n        print(\"1 duplicate found.\")\n    else:\n        print(\"{0} duplicates found.\".format(numDuplicates))\n\nif __name__ == \"__main__\":\n    test_sel_dup()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return\n    \n    geometry = objref.Geometry()\n    if not geometry:\n        return\n    \n    if isinstance(geometry, Rhino.Geometry.LineCurve):\n        print(\"Line curve, length: {0}\".format(geometry.Line.Length))\n\nif __name__ == \"__main__\":\n    test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 13,
+  "views": 703
+}

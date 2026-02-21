@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_fab/blob/431e82c810ea299b9727b010b73a39abc73c5d62/src/compas_fab/ghpython/components/Cf_PlanMotion/code.py",
+  "repo": "compas-dev/compas_fab",
+  "repo_stars": 124,
+  "repo_description": "Robotic fabrication package for the COMPAS Framework.",
+  "license": "MIT",
+  "filepath": "src/compas_fab/ghpython/components/Cf_PlanMotion/code.py",
+  "instruction": "Calculate a motion path.",
+  "code": "\"\"\"\nCalculate a motion path.\n\nCOMPAS FAB v1.0.2\n\"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nfrom scriptcontext import sticky as st\n\nfrom compas_fab.ghpython.components import create_id\n\n\nclass PlanMotion(component):\n    def RunScript(\n        self,\n        robot,\n        target,\n        start_configuration,\n        group,\n        attached_collision_meshes,\n        path_constraints,\n        planner_id,\n        compute,\n    ):\n        key = create_id(self, \"trajectory\")\n\n        path_constraints = list(path_constraints) if path_constraints else None\n        attached_collision_meshes = list(attached_collision_meshes) if attached_collision_meshes else None\n        planner_id = str(planner_id) if planner_id else \"RRTConnect\"\n\n        if robot and robot.client and robot.client.is_connected and start_configuration and target and compute:\n            st[key] = robot.plan_motion(\n                target,\n                start_configuration=start_configuration,\n                group=group,\n                options=dict(\n                    attached_collision_meshes=attached_collision_meshes,\n                    path_constraints=path_constraints,\n                    planner_id=planner_id,\n                ),\n            )\n\n        trajectory = st.get(key, None)\n        return trajectory\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

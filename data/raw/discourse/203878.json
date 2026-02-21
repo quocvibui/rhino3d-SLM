@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-a-revolved-solid-using-rhino-common/203878",
+  "topic_id": 203878,
+  "title": "How to create a revolved solid using Rhino Common",
+  "question": "I’m trying to convert a RevSurface in to a solid Brep. In this instance the revolve happens to be 180 degrees. I’ve tried several combinations of CapPlanarHoles (also tried CreatePlanarBreps from the revolve’s loops), MergeCoplanarFaces, flipping solid orientation, flipping orientation-inverted faces, etc. But the result is always either open, invalid, sometimes totally garbled, or sometimes it is is closed and appears perfect (as in the example I’ll post here) but for some reason can’t be used for boolean operations.\n\n\nInterestingly even though there are several coplanar faces, MergeCoplanarFaces seems to always fail dramatically.\n\n\nI’ll attach a C# script component in case any one cares to take a look. Hopefully there is some common knowledge that I’m just missing here. Thanks!\n\n\nrevolve problem.txt\n (2.3 KB)",
+  "code_blocks": [
+    {
+      "code": "Curve shape = CreateShape(p,radius, out revLine);\n  RevSurface rev = RevSurface.Create(shape, revLine, Math.PI, 2*Math.PI);\n  Brep output = rev.ToBrep();\n\n  output = Solidify(output);\n\n  brep = output;\n}\n    public static Brep Solidify(Brep b)\n    {\n        //b.Faces.SplitKinkyFaces();\n        b = b.CapPlanarHoles(RhinoDoc.ActiveDoc.ModelAbsoluteTolerance);\n        if (b.SolidOrientation != BrepSolidOrientation.Outward) b.Flip();\n        b.Faces.Flip(true);\n        //b.Compact();\n        //b.MergeCoplanarFaces(RhinoDoc.ActiveDoc.ModelAbsoluteTolerance);\n        return b;\n    }\n\n  public static Curve CreateShape(Plane p, double radius, out Line revolveLine)\n  {\n  \tdouble extension = .05;\n\n  \tList<Curve> curves = new List<Curve>();\n  \tcurves.Add(new LineCurve(p.PointAt(-extension,extension), p.PointAt(-extension,-radius))); \n  \trevolveLine = new Line(p.PointAt(-extension,extension), p.PointAt(-extension,-radius));\n  \tcurves.Add(new LineCurve(p.PointAt(-extension,extension), p.PointAt(radius,extension)));\n  \tcurves.Add(new LineCurve(p.PointAt(radius,0),p.PointAt(radius,extension)));\n  \tcurves.Add(new LineCurve(p.PointAt(-extension,-radius),p.PointAt(0,-radius)));\n\n  \tCircle c = new Circle(p,p.PointAt(radius,-radius),radius);\n  \tcurves.Add(new Arc(c,new Interval(Math.PI/2,Math.PI)).ToNurbsCurve());\n  \t\n  \treturn Curve.JoinCurves(curves)[0];\n  }",
+      "language": "csharp",
+      "author": "K119",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "geometry",
+    "nurbs",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 125
+}

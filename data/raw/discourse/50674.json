@@ -1,0 +1,82 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/can-i-control-environment-rotation-with-a-script/50674",
+  "topic_id": 50674,
+  "title": "Can I control Environment rotation with a script?",
+  "question": "Hi, I have tried to find the settings to control an Environment rotation through scripting (Ideally I would like to make a panel with some sliders for fast manipulation, but I can not find it in Rhino Common.\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nre = Rhino.RhinoDoc.CurrentEnvironment\nprint re\nrt = re.FindChild(\"texture\")\nprint rt",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nprint scriptcontext.doc.CurrentEnvironment.ForBackground\nprint scriptcontext.doc.CurrentEnvironment.ForReflectionAndRefraction\nprint scriptcontext.doc.CurrentEnvironment.ForLighting",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport System\nimport rhinoscriptsyntax as rs\n\nprint \"ForBackground= \"+str( scriptcontext.doc.CurrentEnvironment.ForBackground )\nprint \"ForReflectionAndRefraction= \"+str( scriptcontext.doc.CurrentEnvironment.ForReflectionAndRefraction )\nprint \"ForLighting= \"+str( scriptcontext.doc.CurrentEnvironment.ForLighting )\n\nre=scriptcontext.doc.CurrentEnvironment.ForReflectionAndRefraction\n\nrt = re.FindChild(\"texture\")\nprint \"RenderTexture= \"+str( rt )\n\nazimuth = System.Convert.ToDouble( rt.GetParameter(\"azimuth\") )\n\nprint  azimuth\n\nnewAzimuth = 0\n\nRad=6.2831853\nsteps= 20\n\nfor i in range (steps):\n    newAzimuth += Rad/steps\n    rt.SetParameter(\"azimuth\", newAzimuth)\n    rs.Redraw()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "################################################################################\n# SampleEtoModelessForm.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\n\nimport System\nimport Rhino\nimport Rhino.UI\nimport Eto.Drawing as drawing\nimport Eto.Forms as forms\nimport scriptcontext as sc\n\n################################################################################\n# SampleEtoModelessForm class\n################################################################################\nclass SampleEtoModelessForm(forms.Form):\n    \n    # Initializer\n    def __init__(self):",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 23,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport time\n\nCview = rs.CurrentView()\nviews = sc.doc.Views\n\n\nstartTime=time.time()\nfor i in range(100):\n    rs.RotateView(Cview,0,3.6)\n    for view in views:\n        view.Redraw()\n    rs.Sleep(0)\nprint time.time()-startTime\n\nrs.EnableRedraw(False)\n\nstartTime=time.time()\nfor i in range(100):\n    rs.RotateView(Cview,0,3.6)\n    rs.Redraw()\n    rs.Sleep(0)\nprint time.time()-startTime\n\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "None \n              Example:\n                import rhinoscriptsyntax as rs\n                rs.Redraw()\n              See Also:\n                EnableRedraw\n              \"\"\"\n              old = scriptcontext.doc.Views.RedrawEnabled\n              scriptcontext.doc.Views.RedrawEnabled = True\n              scriptcontext.doc.Views.Redraw()\n              Rhino.RhinoApp.Wait()\n              scriptcontext.doc.Views.RedrawEnabled = old\n          \n          \n\n          \ndef RenderAntialias(style=None):\n              \"\"\"Returns or sets render antialiasing style\n              Parameters:\n                style (number, optional): level of antialiasing (0=none, 1=normal, 2=best)\n              Returns:\n                number: if style is not specified, the current antialiasing style\n                number: if style is specified, the previous antialiasing style",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 26,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport time\nimport Rhino\n\nCview = rs.CurrentView()\nviews = sc.doc.Views\n\n### view.Redraw\nstartTime=time.time()\nfor i in range(100):\n    rs.RotateView(Cview,0,3.6)\n    for view in views:\n        view.Redraw()\n    Rhino.RhinoApp.Wait()\nprint time.time()-startTime\n\n\n### rs.Redraw\nrs.EnableRedraw(False)\nstartTime=time.time()\nfor i in range(100):\n    rs.RotateView(Cview,0,3.6)\n    rs.Redraw()\nprint time.time()-startTime\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 27,
+      "is_solution": false
+    },
+    {
+      "code": "def Sleep(milliseconds):\n    \"\"\"Suspends execution of a running script for the specified interval\n    Parameters:\n      milliseconds (number): thousands of a second\n    Returns:\n      None\n    Example:\n      import rhinoscriptsyntax as rs\n      print \"This\"\n      rs.Sleep(2000)\n      print \"is\"\n      rs.Sleep(2000)\n      print \"a\"\n      rs.Sleep(2000)\n      print \"slow\"\n      rs.Sleep(2000)\n      print \"message!\"\n    See Also:\n      \n    \"\"\"\n    time.sleep( milliseconds / 1000.0 )\n    Rhino.RhinoApp.Wait() #keep the message pump alive",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 28,
+      "is_solution": false
+    },
+    {
+      "code": "import time\nimport Rhino\n\nstartTime = time.time()\nfor i in range(1000):\n    time.sleep(0)\n    Rhino.RhinoApp.Wait()\nprint time.time()-startTime\n\nstartTime = time.time()\nfor i in range(1000):\n    time.sleep(0.0001)\n    Rhino.RhinoApp.Wait()\nprint time.time()-startTime\n\nstartTime = time.time()\nfor i in range(1000):\n    time.sleep(0.001)\n    Rhino.RhinoApp.Wait()\nprint time.time()-startTime",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 29,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 29,
+  "views": 2208
+}

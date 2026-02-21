@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-mathematical-surface/133985",
+  "topic_id": 133985,
+  "title": "Mesh Mathematical Surface",
+  "question": "Hi friends, I’m looking to create a script from python and grasshopper but I don’t understand what the error is, I got a “Non_ACIIS” message at first, apparently I located the error but I can’t build the surface, I use rhino 6.\n\n\nsurface_from_math.gh\n (4.9 KB)\n\n\nThanks and good weekend",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rh\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport math \nimport System as sys\nimport scriptcontext as sc\n \nfrom random import random\nfrom scriptcontext import escape_test\n\ndef boySurface(a, r, domainXY, resolutionXY):\n    vertex = []\n    for i in range(resolutionXY[0]+1):\n        u = domainXY[0] + (domainXY[1]-domainXY[0])*i/resolutionXY[0]\n        for j in range(resolutionXY[1]+1):\n            v = domainXY[2] + (domainXY[3]-domainXY[2])*j/resolutionXY[1]\n            b = 2 - r*math.sqrt(2)*math.sin(3*u)*math.sin(2*v) \n            x = a * ( math.sqrt(2) * math.cos(2*u) * math.pow(math.cos(v),2) + math.cos(u) * math.sin(2*v) ) / b\n            y = a * ( math.sqrt(2) * math.sin(2*u) * math.pow(math.cos(v),2) - math.sin(u) * math.sin(2*v) ) / b\n            z = a* 3 *  math.pow(math.cos(v),2) / b\n            vertex.append( (x,y,z) )\n    return vertex\n \ndef createmeshfaces(resolutionXY):\n    nX = resolutionXY[0]\n    nY = resolutionXY[1]\n    f = []\n    for i in range(nX): \n        for j in range(nY):\n            baseindex = i*(nY+1)+j\n            A = baseindex\n            B = baseindex+1\n            C = baseindex+nY+2\n            D = baseindex+nY+1\n            f.append( (A, B, C, D) )\n    return f\n\ndef meshfunction_xy(a, r):\n    domain = (-math.pi, 0, -math.pi, 0)\n    resolutionXY = (30,10)\n    verts = boySurface(a, r, domain, resolutionXY)\n    faces = createmeshfaces(resolutionXY)\n     \n    return rs.AddMesh(verts, faces)\n\na  = meshfunction_xy(x, r)",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 2,
+  "views": 565
+}

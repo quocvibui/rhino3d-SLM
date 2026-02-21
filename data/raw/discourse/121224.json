@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-this-a-sensible-way-to-get-brep-solid-point-grips-and-move-them/121224",
+  "topic_id": 121224,
+  "title": "Is this a sensible way to get brep solid point grips and move them?",
+  "question": "brepobj.GripsOn = True\ngrips = brepobj.GetGrips()\ngrip = grips[n]\n\ngrip.CurrentLocation = Rhino.Geometry.Point3d(x, y, z)\nsc.doc.Objects.GripUpdate(brepobj, True)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino.RhinoMath as rm\nimport scriptcontext as sc\n\ndef test_transform_brep_component():\n    \n    bbox = rg.BoundingBox(rg.Point3d.Origin, rg.Point3d(10.0, 10.0, 10.0))\n    brep = rg.Brep.CreateFromBox(bbox)\n    ci = rg.ComponentIndex(rg.ComponentIndexType.BrepVertex, 1)\n    \n    dir = rg.Vector3d(5.0, 0.0, 0.0)\n    xform = rg.Transform.Translation(dir)\n    tol = sc.doc.ModelAbsoluteTolerance\n    \n    brep.TransformComponent([ci], xform, tol, rm.UnsetValue, False)\n    \n    sc.doc.Objects.AddBrep(brep)\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_transform_brep_component()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "brepobj.GripsOn = True\ngrips = brepobj.GetGrips()\ngrip = grips[n]\n\ngrip.CurrentLocation = Rhino.Geometry.Point3d(x, y, z)\nsc.doc.Objects.GripUpdate(brepobj, True)",
+      "language": "unknown",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 561
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/make-layers-alphabetical-automatically/30612",
+  "topic_id": 30612,
+  "title": "Make layers alphabetical automatically?",
+  "question": "Is there a way to make the layers panel automatically insert new layers alphabetically? Rather than having to click on Name (which for some reason 1st gives me Z to A so I have to click on it twice)?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nfrom scriptcontext import doc\nfrom System import Guid\n\nsorted_layer_names = sorted([layer.FullPath for layer in doc.Layers \n  if layer.ParentLayerId == Guid.Empty], \n  key=lambda s: s.lower(), reverse=True)\n\ntmp_layer_name = rs.AddLayer(Guid.NewGuid().ToString())\ntmp = doc.Layers[doc.Layers.FindByFullPath(tmp_layer_name, False)]\n\nscriptcontext.doc.Views.RedrawEnabled = False\n\nfor fp in sorted_layer_names:\n    l = doc.Layers[doc.Layers.FindByFullPath(fp, False)]\n    l.ParentLayerId = tmp.Id\n    l.CommitChanges()\n    l.ParentLayerId = Guid.Empty\n    l.CommitChanges()\n\ndoc.Layers.Delete(tmp.LayerIndex, True)\n\nscriptcontext.doc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "BrianM",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 10,
+  "views": 3101
+}

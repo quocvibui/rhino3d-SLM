@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/selboundary-rvb-script-to-py-help/29020",
+  "topic_id": 29020,
+  "title": "SelBoundary RVB Script to PY Help",
+  "question": "I have a script \n@Helvetosaur\n kindly made for me that would be awesome if someone could help me with a python version.\n\n\nIt takes a picked curve and selects any curves inside and groups them with the picked curve.\n\n\nOption Explicit\n'Script by Mitch Heynick\n'Version Wednesday, 10 November, 2010\n\n'Call SelBoundaryForRyan()\nSub SelBoundaryForRyan()\n\tDim arrSel,arrObjs,strGroup,msg,strBC\n\tarrSel=Rhino.SelectedObjects\n\tmsg=\"Select closed curve to use as a selection boundary within the viewport\"\n\tstrBC = Rhino.GetObject(msg, 4,, True)\t\n\tIf IsNull(strBC) Then Exit Sub\n\tCall Rhino.EnableRedraw(False)\n\tCall Rhino.UnselectAllObjects\n\n\tCall Rhino.Command(\"_SelBoundary _SelectionMode=_Window _SelID \"&strBC,False)\n\tarrObjs=Rhino.SelectedObjects\n\t\n\tIf IsArray(arrObjs) Then\n\t\tstrGroup=Rhino.AddGroup\n\t\tCall Rhino.AddObjectsToGroup(arrObjs,strGroup)\n\t\tCall Rhino.AddObjectToGroup(strBC,strGroup)\n\t\tCall Rhino.ObjectsByGroup(strGroup,True)\n\t\tIf IsArray(arrSel) Then Call Rhino.SelectObjects(arrSel)\n\tEnd If\n\tCall Rhino.EnableRedraw(True)\nEnd Sub",
+  "code_blocks": [
+    {
+      "code": "def SelBoundForRyan():\n    msg = \"Select closed curve to use as selection boundary within the viewport\"\n    bound = rs.GetObject(msg, 4, True)\n    if not bound: return \n\n    rs.EnableRedraw(False)\n\n    rs.Command(\"_SelBoundary selid \" + str(bound) + \" _Enter\", False)\n    objs = rs.SelectedObjects()\n    rs.UnselectAllObjects()\n\n    if objs:\n        group = rs.AddGroup()\n\n        # Uncomment below to select just curves\n        # res = [c for c in objs if rs.IsCurve(c)]\n        # objs = res\n\n        rs.AddObjectsToGroup(objs, group)\n        rs.AddObjectToGroup(bound, group)\n        rs.ObjectsByGroup(group, True)\n\n    rs.EnableRedraw(True)\n\nSelBoundForRyan()",
+      "language": "python",
+      "author": "cealigbe",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n'Script by Mitch Heynick\n'Version Wednesday, 10 November, 2010\n\n'Call SelBoundaryForRyan()\nSub SelBoundaryForRyan()\n\tDim arrSel,arrObjs,strGroup,msg,strBC\n\tarrSel=Rhino.SelectedObjects\n\tmsg=\"Select closed curve to use as a selection boundary within the viewport\"\n\tstrBC = Rhino.GetObject(msg, 4,, True)\t\n\tIf IsNull(strBC) Then Exit Sub\n\tCall Rhino.EnableRedraw(False)\n\tCall Rhino.UnselectAllObjects\n\n\tCall Rhino.Command(\"_SelBoundary _SelectionMode=_Window _SelID \"&strBC,False)\n\tarrObjs=Rhino.SelectedObjects\n\t\n\tIf IsArray(arrObjs) Then\n\t\tstrGroup=Rhino.AddGroup\n\t\tCall Rhino.AddObjectsToGroup(arrObjs,strGroup)\n\t\tCall Rhino.AddObjectToGroup(strBC,strGroup)\n\t\tCall Rhino.ObjectsByGroup(strGroup,True)\n\t\tIf IsArray(arrSel) Then Call Rhino.SelectObjects(arrSel)\n\tEnd If\n\tCall Rhino.EnableRedraw(True)\nEnd Sub",
+      "language": "unknown",
+      "author": "kleerkoat",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1363
+}

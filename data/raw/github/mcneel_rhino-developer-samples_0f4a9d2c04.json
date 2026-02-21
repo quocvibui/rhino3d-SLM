@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/draw-mesh.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/draw-mesh.py",
+  "instruction": "Draw mesh",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nimport Rhino\nimport System\nimport System.Drawing\n\ndef RunCommand():\n    gs = Rhino.Input.Custom.GetObject()\n    gs.SetCommandPrompt(\"select sphere\")\n    gs.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    gs.DisablePreSelect()\n    gs.SubObjectSelect = False\n    gs.Get()\n    if gs.CommandResult() != Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    b, sphere = gs.Object(0).Surface().TryGetSphere()\n    if sphere.IsValid:\n        mesh = Rhino.Geometry.Mesh.CreateFromSphere(sphere, 10, 10)\n        if mesh == None:\n            return Rhino.Commands.Result.Failure\n\n        conduit = DrawBlueMeshConduit(mesh)\n        conduit.Enabled = True\n        doc.Views.Redraw()\n\n        inStr = rs.GetString(\"press <Enter> to continue\")\n\n        conduit.Enabled = False\n        doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n    else:\n        return Rhino.Commands.Result.Failure\n\nclass DrawBlueMeshConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, mesh):\n        self.mesh = mesh\n        self.color = System.Drawing.Color.Blue\n        self.material = Rhino.Display.DisplayMaterial()\n        self.material.Diffuse = self.color\n        if mesh != None and mesh.IsValid:\n            self.bbox = mesh.GetBoundingBox(True)\n\n    def CalculateBoundingBox(self, calculateBoundingBoxEventArgs):\n        #super.CalculateBoundingBox(calculateBoundingBoxEventArgs)\n        calculateBoundingBoxEventArgs.BoundingBox.Union(self.bbox)\n\n    def PreDrawObjects(self, drawEventArgs):\n        #base.PreDrawObjects(rawEventArgs)\n        gvp = drawEventArgs.Display.Viewport\n        if gvp.DisplayMode.EnglishName.ToLower() == \"wireframe\":\n            drawEventArgs.Display.DrawMeshWires(self.mesh, self.color)\n        else:\n            drawEventArgs.Display.DrawMeshShaded(self.mesh, self.material)\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

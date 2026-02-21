@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/baking-trimmed-surfaces-using-rhinocommon/165796",
+  "topic_id": 165796,
+  "title": "\"Baking\" Trimmed surfaces using Rhinocommon",
+  "question": "Hello everyone,\n\n\nBackground\n: As part of an effort to automate mechanical tasks in our (architecture) office, I am developing a Grasshopper definition that relies on Rhinocommon to bake trimmed surfaces to Rhino, so that the user (my coworkers) can then manually select the ones they want to use for further processing with GH. The problem is that I cannot figure out how to bake the trimmed surfaces and not the underlying, untrimmed rectangles. It seems that if I manually bake the surfaces I get what I want, but I want to automate this part so that non-Rhino colleagues (i.e. most of them) can also use the script without tweaking things.\n\n\nUpstream/Downstream\n: The pipeline starts with a BIM output that contains the elementary building volume as adjacent blocks, specifically one block per floor. These blocks are exploded and their outputs are split into the different types (surfaces, meshes, etc). I need to extract the roof surfaces and groundfloor surfaces for the purpose of casting shadows on a mesh or a plane, but since the exploded elements are kind of complex to handle programmatically I would like to bake all surfaces in Rhino and then let the users pick manually the ones that they want to use.\n\n\nAlready tried\n:\n\n\n\n\nTransforming trimmed surfaces in curves, exploding them and then connecting vertices as polylines. I have surfaces with holes and these don’t seem to work with “explode curve”.\n\n\nUsing ShrinkTrimmedSurface before baking: surfaces with holes cannot be shrunk (says that brep couldn’t be converted to curve/surface) and the ones that do not throw errors are still baked as untrimmed surfaces.\n\n\n\n\nDo you have any suggestions on how to move forward, or where I shoud look to do so? I am stuck at the moment.\n\n\nThank you very much in advance!\n\n\nLeft: what I get with GhPython/Rhinocommon. Right: what I would like to get with GhPython but can only get by manually baking.\n\n\nimage\n1738×1226 133 KB\n\n\n00_question_trimmed_srf_forum.gh\n (238.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nif go_ahead_in:\n    # Set the Rhino document to the active Rhino document\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n\n    rs.AddLayer(\"Default\")\n    rs.CurrentLayer(\"Default\")\n\n    layer_names = rs.LayerNames()\n\n    for layer in layer_names:\n        #print(layer)\n        if layer == \"Default\":\n            continue\n        else:\n            rs.LayerVisible(layer, visible=False)\n\n    rs.AddLayer(\"volume_srf\", color=rs.CreateColor(9, 255, 0))\n\n    srf_ids = []\n    trimmed_srf = []\n\n    for srf in expl_volume_srf:\n        #print(\"Looped once\")\n\n        #Shrink The Surface\n        srf.Faces.ShrinkFaces()\n\n        #Add Shrinked Surface To List\n        trimmed_srf.append(srf)\n\n    for srf in trimmed_srf:\n        # Add each Brep to the Rhino document and get the ID\n        obj_id = sc.doc.Objects.AddBrep(srf)\n        srf_ids.append(obj_id)\n\n        # Set the layer for the added object\n        rs.ObjectLayer(obj_id, \"volume_srf\")\n\n# Set the Rhino document back to the Grasshopper document\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 11,
+  "views": 849
+}

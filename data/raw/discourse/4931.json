@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/does-curvebooleanunion-work/4931",
+  "topic_id": 4931,
+  "title": "Does CurveBooleanUnion work?",
+  "question": "Hi there,\n\n\nI’ve been trying to use CurveBooleanUnion and have run the example as shown in \nthe documentation\n on 2 coplanar rectangular curves which overlap in one corner.\n\n\nThe script appears to run ok, however, I don’t get any resulting union curve. All I end up with are the same curves I started with. None of the exceptions in the def in \ncurve.py\n are raised.\n\n\nAny advice is welcome.\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "def CurveBooleanUnion(curve_id):\n    \"\"\"Calculate the union of two or more closed, planar curves and\n    add the results to the document. Note, curves must be coplanar.\n    Parameters:\n      curve_id = list of two or more close planar curves identifiers\n    Returns:\n      The identifiers of the new objects.\n    \"\"\"\n    in_curves = [rhutil.coercecurve(id,-1,True) for id in curve_id]\n    if len(in_curves)<2: raise ValueException(\"curve_id must have at least 2 curves\")\n    out_curves = Rhino.Geometry.Curve.CreateBooleanUnion(in_curves)\n    curves = []\n    if out_curves:\n        for curve in out_curves:\n            if curve and curve.IsValid:\n                rc = scriptcontext.doc.Objects.AddCurve(curve)\n                curve.Dispose()\n                if rc==System.Guid.Empty: raise Exception(\"unable to add curve to document\")\n                curves.append(rc)\n        scriptcontext.doc.Views.Redraw()\n    return curves",
+      "language": "python",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def CurveBooleanUnion(curve_id):\nprint \"in CurveBooleanUnion\"\n\"\"\"Calculate the union of two or more closed, planar curves and\nadd the results to the document. Note, curves must be coplanar.\nParameters:\n  curve_id = list of two or more close planar curves identifiers\nReturns:\n  The identifiers of the new objects.\n\"\"\"\nin_curves = [rhutil.coercecurve(id,-1,True) for id in curve_id]\nif len(in_curves)<2: raise ValueException(\"curve_id must have at least 2 curves\")\nout_curves = Rhino.Geometry.Curve.CreateBooleanUnion(in_curves)\ncurves = []\n\nprint \"created out_curves\"\n\nif out_curves:\n    print \"parsing out_curves\"\n    for curve in out_curves:\n        print \"checking for valid curve\"\n        if curve and curve.IsValid:\n            print \"adding valid curve\"\n            rc = scriptcontext.doc.Objects.AddCurve(curve)\n            print \"disposing of curve\"\n            curve.Dispose()\n            print \"checking if empty\"\n            if rc==System.Guid.Empty: \n                raise Exception(\"unable to add curve to document\")\n            print \"appending curves with new curve\"\n            curves.append(rc)\n    print \"redrawing view\"\n    scriptcontext.doc.Views.Redraw()\nprint curves\nreturn curves",
+      "language": "python",
+      "author": "andyhunti",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "curve_ids = rs.GetObjects(“Select curves to union”, rs.filter.curve)\nif curve_ids and len(curve_ids)>1:\n    result = rs.CurveBooleanUnion(curve_ids)\n    if result: rs.DeleteObjects(curve_ids)",
+      "language": "python",
+      "author": "andyhunti",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "curve_ids = rs.GetObjects(“Select curves to union”, rs.filter.curve)\nif curve_ids and len(curve_ids)>1:\n    result = rs.CurveBooleanUnion(curve_ids)\n    if result: rs.DeleteObjects(result)",
+      "language": "python",
+      "author": "andyhunti",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1533
+}

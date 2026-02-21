@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-whats-wrong-with-you/79550",
+  "topic_id": 79550,
+  "title": "Python, what's wrong with you?",
+  "question": "image.png\n609×751 15.3 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv=rs.GetObject(\"Select a curve\",4)\nif crv:\n    mp=rs.CurveMidPoint(crv)\n    param=rs.CurveClosestPoint(crv,mp)\n    frame=rs.CurvePerpFrame(crv,param)\n    #frame will be a plane perpendicular to the curve at the midpoint\n    #set the current viewport CPlane to the frame plane:\n    rs.ViewCPlane(rs.CurrentView(),frame)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "lco=rs.LastCreatedObjects()\nif lco:\n    obj=lco[0]",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\n\ndim_style = scriptcontext.doc.DimStyles.CurrentDimensionStyle\ndim_style.TextHeight = 2.0\ndim_style.CommitChanges()\n\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "if (SDL):\n    SDL=SDL[0]\nelse:\n    break\n\n#rs.EnableRedraw(False)\n\nrs.ObjectPrintWidth(SDL,-1)\nrs.ObjectColor(SDL,(105,0,0))\nrs.ReverseCurve(SDL)\nrs.UnselectAllObjects()\nrs.SelectObject(SDL)\nrs.Command(\"_CPlane C _Enter\",False)\nrs.Command(\"_Dimcurvelength 1,2,0 2,2,0 _Enter\",False)\nrs.UnselectAllObjects()\nrs.SelectObject (rs.FirstObject())\nrs.Command(\"_Explode\",False)\ntmpLdr = rs.LastCreatedObjects()\nfor x in range(0,len(tmpLdr)):\n    if rs.IsText(tmpLdr[x]):\n        txHt = rs.TextObjectHeight(tmpLdr[x])\nrs.DeleteObjects(tmpLdr)\nrs.Command(\"-Text 2,2,0.5 F \" + chr(34) + \"Times New Roman\" + chr(34) + \" H \" + str(txHt) + \" Mask=Yes UseBackgroundColor=No MaskColor=255,255,255 MaskMargin=.1 xYz\",False)\nlbl = rs.FirstObject()\nrs.MoveObject(lbl, rs.CurveEndPoint(SDL)-rs.CurveStartPoint(SDL))\nrs.TextObjectText(lbl,\"%<curvelength(\" + chr(34) + str(SDL) + chr(34) + \")>%\")\nrs.TextObjectStyle(lbl,1)\nrs.AddObjectsToGroup((SDL,lbl),rs.AddGroup())\nrs.ViewCPlane(None,OX)\n#rs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "tmp = rs.coercerhinoobject(lbl, True, True)\ntmp.Geometry.TextFormula = \"%<curvelength(\" + chr(34) + str(SDL) + chr(34) + \")>%\"\ntmp.CommitChanges()",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 19,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 26,
+  "views": 2109
+}

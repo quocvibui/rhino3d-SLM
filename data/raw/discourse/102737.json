@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/intersectbreps-without-draw-curves/102737",
+  "topic_id": 102737,
+  "title": "IntersectBreps without draw curves",
+  "question": "There is any away to check the IntersectBreps (trimed surfaces) wihout draw the curves?\n\n\nI have a loop that check and delete it right away, but even with redraw deactivated, it creates a slight delay that I would like to eliminate.\n\n\nAny other away?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n brep1 = rs.GetObject(\"Select the first brep\", rs.filter.surface | rs.filter.polysurface)\n if brep1:\n     brep2 = rs.GetObject(\"Select the second\", rs.filter.surface | rs.filter.polysurface)\n     if brep2: rs.IntersectBreps( brep1, brep2)",
+      "language": "python",
+      "author": "MatrixRatrix",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "face = brep.Faces[0]\n    old_reverse = face.OrientationIsReversed\n    if flip!=None and brep.IsSolid==False and old_reverse!=flip:\n        brep.Flip()\n        surface_id = rhutil.coerceguid(surface_id)\n        if surface_id: scriptcontext.doc.Objects.Replace(surface_id, brep)\n        scriptcontext.doc.Views.Redraw()\n    return old_reverse\n\n\ndef IntersectBreps(brep1, brep2, tolerance=None):\n    \"\"\"Intersects a brep object with another brep object. Note, unlike the\n    SurfaceSurfaceIntersection function this function works on trimmed surfaces.\n    Parameters:\n      brep1 (guid): identifier of first brep object\n      brep2 (guid): identifier of second brep object\n      tolerance (number): Distance tolerance at segment midpoints. If omitted,\n                  the current absolute tolerance is used.\n    Returns:\n      list(guid, ...): identifying the newly created intersection curve and point objects if successful.\n      None: if not successful, or on error.",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 490
+}

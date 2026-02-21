@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Parsons3506/ParticleSystem/blob/79597312ba08a27df1402c625a8d2caeb378dfa2/ParticleSystem.py",
+  "repo": "Parsons3506/ParticleSystem",
+  "repo_stars": 0,
+  "repo_description": "Particle system",
+  "license": "unknown",
+  "filepath": "ParticleSystem.py",
+  "instruction": "Particle system",
+  "code": "import rhinoscriptsyntax as rs\nfrom Particle import Particle\nfrom Particle import Attractor\nfrom curveMaker import CurveMaker\nimport random\nimport Rhino\n\ndef main():\n    #boxs = rs.ObjectsByName(\"box\")\n    #min = rs.ObjectsByName(\"min\")\n    #max = rs.ObjectsByName(\"max\")\n    \n    box = rs.GetBox(prompt1=\"select box\")\n    \n    attrPointIn = rs.GetObjects(\"select attractors\",1)\n    attrs = []\n    for a in attrPointIn:\n        point = rs.coerce3dpoint(a)\n        attrs.append(Attractor(point, -2, 10))\n    \n    minPoint = box[0]\n    maxPoint = box[6]\n    \n    size = 5.0\n    location = [0,0,0]\n    vel = [0,0,0]\n    acc = [0,0,0]\n    \n    particles = []\n    boundingBox = Rhino.Geometry.BoundingBox(minPoint,maxPoint)\n    for i in range(0,500):\n        x = random.uniform(minPoint[0],maxPoint[0])\n        y = random.uniform(minPoint[1],maxPoint[1])\n        z = random.uniform(maxPoint[2],maxPoint[2])\n        \n        acc = random.uniform(-.01,-0.5)\n        #size = random.uniform(.008,0.9)\n        tempParticle = Particle(size, [x,y,z], vel, [0,0,acc])\n        tempParticle.setBoundingBox(boundingBox)\n        particles.append(tempParticle)\n    \n    for i in range(0,100):\n            loop(particles, attrs)\n    \n    curves = [] \n    for particle in particles:\n        curve = particle.drawCurve()\n        if curve !=0 :\n            curves.append(curve)\n    \n    for curve in curves:\n        idx = random.randint(0,len(curves)-1)\n        curve2 = curves[idx]\n        #if(curve != curve2):\n            #curveMaker = CurveMaker (curve, curve2, 20)\n            #curveMaker.drawLinesBetweenCurves()\n    \n    \n    print\"finished\"\n\n\n\ndef loop(particles, attractor):\n    rs.EnableRedraw(False)\n    drawPoints = []\n    for particle in particles:\n        applyRepel(particle,attractor)\n        particle.update()\n        tempPoint = particle.draw()\n        if tempPoint:\n            drawPoints.append(tempPoint)\n    rs.EnableRedraw(True)\n    rs.EnableRedraw(False)\n    rs.DeleteObjects(drawPoints)\n\n\ndef applyRepel(particle, attractors):\n    for attr in attractors:\n        attrVector = attr.attract(particle)\n        if attrVector:\n            particle.applyForce(attrVector)\n        \n\ndef drawSphere(particles):\n    for particle in particles:\n        tempPoint = particle.draw()\n        if tempPoint:\n            rs.AddSphere(rs.coerce3dpoint(tempPoint),particle._size)\n\nif(__name__ == \"__main__\"):\n    main()\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

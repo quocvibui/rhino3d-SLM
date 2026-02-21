@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/beginners-question/6233",
+  "topic_id": 6233,
+  "title": "Beginners question",
+  "question": "Hi,\n\n\nAt last I have some time to pick up on RhinoPython.\n\nMy current challenge: set text to display a detail scale.\n\nWhat I have so far already halts after selecting a detail.\n\nCan anyone help to show me on how to approach this, furthermore any reading to prevent me asking apparent beginners questions like this.\n\n\nThanks\n\n-Willem\n\n\nWhat I have so far:\n\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\ndef DetailScaleToText():\n    # Get the detail\n    DetailID = rs.GetObject(\"Select Detail for scale\", rs.filter.detail, True, False)\n    if( DetailID==None ): return\n    \n    # I understand that DetailID is now a System.GUID\n    # But how to go about getting the ration of that Detail it refers to\n    # per Rhino.Geometry.DetailView.PageToModelRatio\n    \n    DetailObject = ?\n    \n    ratio = DetailObject.PageToModelRatio\n    print ratio\n\n\n    \n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    DetailScaleToText()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef DetailScaleToText():\n    # Get the detail\n    DetailID = rs.GetObject(\"Select Detail for scale\", rs.filter.detail, True, False)\n    if( DetailID==None ): return\n\n    # I understand that DetailID is now a System.GUID\n    # But how to go about getting the ration of that Detail it refers to\n    # per Rhino.Geometry.DetailView.PageToModelRatio\n    \n    \"\"\"You need to find the object that the GUID represents in the document.  \n    For that, you can use scriptcontext which refers to the active document \n    and objects in it. sc.doc.Objects.Find(GUID) will return the object.\"\"\"\n\n    DetailObject = sc.doc.Objects.Find(DetailID)\n    \n    \"\"\"Afterwards set a breakpoint at the line below where I put \"pass\".\n    You will then see all of the properties and atttributes that the object has.\n    In this case, to get at PageToModelRatio, you need to go through object.Geometry\n    \"\"\"\n    pass\n    ratio = DetailObject.Geometry.PageToModelRatio\n    print ratio\n\nif( __name__ == \"__main__\" ):\n    DetailScaleToText()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\ndef DetailScaleToText():\n    # Get the detail\n    DetailID = rs.GetObject(\"Select Detail for scale\", rs.filter.detail, True, False)\n    if( DetailID==None ): return\n    \n    # I understand that DetailID is now a System.GUID\n    # But how to go about getting the ration of that Detail it refers to\n    # per Rhino.Geometry.DetailView.PageToModelRatio\n    \n    DetailObject = ?\n    \n    ratio = DetailObject.PageToModelRatio\n    print ratio\n\n\n    \n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    DetailScaleToText()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1845
+}

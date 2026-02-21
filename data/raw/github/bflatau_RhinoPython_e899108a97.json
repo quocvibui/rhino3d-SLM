@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/bflatau/RhinoPython/blob/035aa866cb2c9042f60df2d7810269bd25b70f7c/samples/DrawParametricCurve.py",
+  "repo": "bflatau/RhinoPython",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "samples/DrawParametricCurve.py",
+  "instruction": "Draw parametric curve",
+  "code": "import rhinoscriptsyntax as rs\nimport math\n\n# Something really interesting about this script is\n# that we are passing a function as a parameter\ndef DrawParametricCurve(parametric_equation):\n    \"Create a interpolated curve based on a parametric equation.\"\n    # Get the minimum parameter\n    t0 = rs.GetReal(\"Minimum t value\", 0.0)\n    if( t0==None ): return\n    \n    # Get the maximum parameter\n    t1 = rs.GetReal(\"Maximum t value\", 1.0)\n    if( t1==None ): return\n\n    # Get the number of sampling points to interpolate through\n    count = rs.GetInteger(\"Number of points\", 50, 2)\n    if count<1: return\n\n    arrPoints = list()\n    #Get the first point\n    point = parametric_equation(t0)\n    arrPoints.append(point)\n\n    #Get the rest of the points\n    for x in xrange(1,count-2):\n        t = (1.0-(x/count))*t0 + (x/count)*t1\n        point = parametric_equation(t)\n        arrPoints.append(point)\n  \n    #Get the last point\n    point = parametric_equation(t1)\n    arrPoints.append(point)\n    \n    #Add the curve\n    rs.AddInterpCurve(arrPoints)\n\n\n#Customizable function that solves a parametric equation\ndef __CalculatePoint(t):\n    x = (4*(1-t)+1*t ) * math.sin(3*6.2832*t)\n    y = (4*(1-t)+1*t ) * math.cos(3*6.2832*t)\n    z = 5*t\n    return x,y,z\n\n##########################################################################\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    #Call the function passing another function as a parameter\n    DrawParametricCurve(__CalculatePoint)\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

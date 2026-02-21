@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pointcount-is-not-defined-in-python/193409",
+  "topic_id": 193409,
+  "title": "PointCount is not defined in python?",
+  "question": "I am facing an error in using the PointCount in python\n\nits giving an error of PointCount is not defined. Any suggestions?\n\n\nimport Rhino\nimport Rhino.Geometry as rg \nfrom random import *\nimport System.Drawing\nimport rhinoscriptsyntax as rs\n\n#step 1 moving vertices \ndef moveVertices(polyline):\n    \n    ptNum = PointCount\n    pts = []\n    planePts = []\n\n    for i in range(ptNum):\n        pts.append(polyline.Point(i))\n        if len(pts) <= 3: \n            planePts.append(pts[i])\n    plane = rg.Plane(planePts[0], planePts[1], planePts[2])\n\n    for i in range(ptNum):\n        scalar = uniform(0.0, 2.0)\n        vec = plane.ZAxis * scalar \n        pts[i] = pts[i] + vec \n    pts[-1] = pts[0]\n\n    return pts, plane\n\na = moveVertices(cells[5])[0]\n[pythontest.gh|attachment](upload://zW2NnEzGTCYgCswP7M2zeJAqEhc.gh) (12.2 KB)\n\n\n\n\npythontest.gh\n (12.2 KB)\n\n\nI found this syntax in the rhino API for c# and vp but it doesn’t contain how to use it in python\n\n\nScreenshot 2024-10-21 020958\n964×484 20.4 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg \nfrom random import *\nimport System.Drawing\nimport rhinoscriptsyntax as rs\n\nseed(1000)\n#step 1 moving vertices \ndef moveVertices(polyline):\n    \n    ptNum = PointCount\n    pts = []\n    planePts = []\n\n    for i in range(ptNum):\n        pts.append(polyline.Point(i))\n        if len(pts) <= 3: \n            planePts.append(pts[i])\n    plane = rg.Plane(planePts[0], planePts[1], planePts[2])\n\n    for i in range(ptNum):\n        scalar = uniform(0.0, 2.0)\n        vec = plane.ZAxis * scalar \n        pts[i] = pts[i] + vec \n    pts[-1] = pts[0]\n\n    return pts, plane\n\n#Step 2: cell type A\ndef divPolygon(vertices, plane):\n    midIdx = len(vertices) //2\n    startPt = vertices[0]\n    endPt = vertices [midIdx]\n    centroid = getCentroid(vertices)\n    return centroid\n\n    xOff = plane.XAxis * uniform(0.0, 2.0)\n    yOff = plane.YAxis * uniform(0.0, 2.0)\n    zOff = plane.ZAxis * uniform(0.5, 2.0)\n\n    centroid[0] += centroid[0] * xOff[0] + yOff[0] + zOff[0]\n    centroid[1] += centroid[0] * yOff+ yOff[1] + zOff[1]\n    centroid[2] = centroid[2] * zOff+ yOff[2] + zOff[2]\n\n    curve = rg.Curve.CreateInterpolatedCurve([startPt, centroid, endPt], 3)\n    curve = japCurve(curve, plane, 24)\n    curve = rg.PolylneCurve(curve)\n\n    halfA = rg.PolylineCurve(vertices[:midIdx+1])\n    halfB = rg.PolylineCurve(vertices[vertices:1])\n    halfB.Reverse()\n\n    return curve, halfA, halfB\n\n#Helper functions \n\ndef getCentroid(vertices):\n    centroid = [0,0,0]\n    for i in range(len(vertices)-1):\n        centroid[0] += vertices[i][0]\n        centroid[1] += vertices[i][1]\n        centroid[2] += vertices[i][2]\n    centroid = [val / (len(vertices) - 1) for val in centroid]\n    return rg.Point3d(centroid[0], centroid[1], centroid[2])\n\n#JagCurve \ndef JagCurve(curve, plane, divisions):\n    totallen = curve.GetLength()\n    lenStep = totallen / divisions\n    \n    ts = curve.DivideByLength(lenStep, True)\n    ts = [t for t in ts]\n\n    offDist = uniform(0.1, 0.3)\n    pts = []\n    for i in range(len(ts)):\n    t = ts[i]\n    newPt = curve.PointAt(t)\n    if i % 2 != 0 and i != (len(ts) -1):\n        vec = curve.CurvatureAt(t)\n        vec.unitize()\n        vec = -plane.ZAxis + vec \n        vec = vec * offDist \n        newPt = newPt + vec \n        pts.append(newPt)\n        return pts\n\n\n\n\n\n\n\ntestPolygon=moveVertices(cells[5])\na = divPolygon(testPolygon[0], testPolygon[1])\nb = testPolygon[0]",
+      "language": "python",
+      "author": "Ahmed_Khairadeen_Ali",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg \nfrom random import *\nimport System.Drawing\nimport rhinoscriptsyntax as rs\n\n#step 1 moving vertices \ndef moveVertices(polyline):\n    \n    ptNum = PointCount\n    pts = []\n    planePts = []\n\n    for i in range(ptNum):\n        pts.append(polyline.Point(i))\n        if len(pts) <= 3: \n            planePts.append(pts[i])\n    plane = rg.Plane(planePts[0], planePts[1], planePts[2])\n\n    for i in range(ptNum):\n        scalar = uniform(0.0, 2.0)\n        vec = plane.ZAxis * scalar \n        pts[i] = pts[i] + vec \n    pts[-1] = pts[0]\n\n    return pts, plane\n\na = moveVertices(cells[5])[0]\n[pythontest.gh|attachment](upload://zW2NnEzGTCYgCswP7M2zeJAqEhc.gh) (12.2 KB)",
+      "language": "python",
+      "author": "Ahmed_Khairadeen_Ali",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 115,
+  "posts_count": 6,
+  "views": 77
+}

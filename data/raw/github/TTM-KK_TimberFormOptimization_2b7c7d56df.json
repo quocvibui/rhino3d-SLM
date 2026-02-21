@@ -1,0 +1,19 @@
+{
+  "source_url": "https://github.com/TTM-KK/TimberFormOptimization/blob/a728057ff3bfbfb7995b309e835a6278a6e86fcc/forGenerate/RhinoCommonOriginalMethods.py",
+  "repo": "TTM-KK/TimberFormOptimization",
+  "repo_stars": 0,
+  "repo_description": "This is a Form Generate Project, using non preform timber.",
+  "license": "unknown",
+  "filepath": "forGenerate/RhinoCommonOriginalMethods.py",
+  "instruction": "Rhino common original methods",
+  "code": "# -*- coding:UTF-8 -*-\nimport rhinoscriptsyntax as rs\nimport time\nimport Rhino\nimport scriptcontext\nimport rhinoscript.utility as rhutil\nimport math\n\n\n#-----------------------------------------------------------------------------------------------------------------------\ndef AddVectorArrow(base, vector):\n    vec_normal = rs.VectorUnitize(vector)\n    vec_scale = rs.VectorScale(vec_normal, 200)\n    p = rs.PointAdd(base, vec_scale)\n    line = rs.AddLine(base, p)\n    rs.CurveArrows(line, 2)\n\n    return p\n\ndef SetPlaneOrigin():\n    plane_origin = rs.PlaneFromPoints((0, 0, 0), (100, 0, 0), (0, 100, 0))\n    rs.ViewCPlane(None, plane_origin)\n\n\ndef GetTimberSectionLenght(tim_srf, base_point):\n    closest_pra = rs.SurfaceClosestPoint(tim_srf.Faces[0], base_point)\n    V = rs.SurfaceDomain(tim_srf.Faces[0], 1)\n\n    if V[0] < 0:\n        divide_V = abs(V[0] / 10)\n    else:\n        divide_V = abs(V[1] / 10)\n\n    list_point = []\n    for i in range(10):\n        point = rs.EvaluateSurface(tim_srf.Faces[0], closest_pra[0], V[0] + divide_V * i)\n        list_point.append(point)\n\n    length = rs.Distance(list_point[0], list_point[5])\n\n    return length\n\ndef GetTimberSectionLength_RhinoCommon(tim_srf, base_point):\n    \"\"\"\n    :param tim_srf: surface of timber , you want to measure the length\n    :param base_point:  base point that Adding Timber having\n    :return: section diameter length\n    \"\"\"\n    rc, u, v = tim_srf.Faces[0].ClosestPoint(base_point)\n    V = tim_srf.Faces[0].Domain(1).T0, tim_srf.Faces[0].Domain(1).T1\n\n    if V[0] < 0:\n        divide_V = abs(V[0] / 10)\n    else:\n        divide_V = abs(V[1] / 10)\n\n    list_point = []\n    for i in range(10):\n        point = tim_srf.Faces[0].PointAt(u, V[0] + divide_V * i)\n        list_point.append(point)\n\n    length = (list_point[0] - list_point[5]).Length\n\n    return length , list_point[0]\n\n\ndef VectorAngle_RhinoCommon(vector1, vector2):\n    \"\"\"\n    RhinoCommon method\n    :param vector1:  3D vector\n    :param vector2:  3D vector\n    :return: 2つのベクトルの角度\n    \"\"\"\n    vector1 = Rhino.Geometry.Vector3d(vector1.X, vector1.Y, vector1.Z)\n    vector2 = Rhino.Geometry.Vector3d(vector2.X, vector2.Y, vector2.Z)\n    if not vector1.Unitize() or not vector2.Unitize():\n        raise ValueError(\"unable to unitize vector\")\n    dot = vector1 * vector2\n    dot = rhutil.clamp(-1,1,dot)\n    radians = math.acos(dot)\n    # return math.degrees(radians)\n    return radians\n#-----------------------------------------------------------------------------------------------------------------------\n\ndef addVector(end_point, start_point):\n    vec = end_point - start_point\n\n    return vec\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "RhinoCommon",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

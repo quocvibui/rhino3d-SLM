@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/zoomboundingbox-error/24645",
+  "topic_id": 24645,
+  "title": "ZoomBoundingBox() Error",
+  "question": "Greetings,\n\nI am attempting to zoom to a set of objects in multiple detail views.\n\nI have constructed a test sample script, the test works as anticipated when I call detail.ZoomExtents(), however when I replace detail.ZoomExtents with detail.ZoomBoundingBox(bb) the detail views are unchanged.  I am creating a BoundingBox object so I’m not sure why this is not functioning.\n\n\ndef Zoom_All(Objs,type):\n    bb=rs.coerceboundingbox(rs.BoundingBox(Objs))\n    for layout in scriptcontext.doc.Views.GetPageViews():       #Get all layouts in document\n        scriptcontext.doc.Views.ActiveView = layout             #Set layout to active view\n        for detail in layout.GetDetailViews():                  #Get all detail in each layout\n            if detail.DetailGeometry.IsProjectionLocked==True:  #Test if deatil is locked\n                detail.DetailGeometry.IsProjectionLocked=False  #Lock detail so we can edit it\n                detail.CommitChanges()                          #Unlock the detail \n            layout.SetActiveDetail(detail.Id)                   #Set detail to active\n            \n            if type==\"ZE\":\n                detail.Viewport.ZoomExtents()\n            elif type==\"ZS\":\n                detail.Viewport.ZoomBoundingBox(bb)\n            \n            detail.CommitViewportChanges()\n            layout.Redraw()\n            Rhino.RhinoApp.Wait()\n\n\n\nIf anyone has come across this error or has other ideas on how to fix this problem that would be excellent.\n\nThanks,\n\n5chmidt",
+  "code_blocks": [
+    {
+      "code": "def Zoom_All(Objs,type):\n    bb=rs.coerceboundingbox(rs.BoundingBox(Objs))\n    for layout in scriptcontext.doc.Views.GetPageViews():       #Get all layouts in document\n        scriptcontext.doc.Views.ActiveView = layout             #Set layout to active view\n        for detail in layout.GetDetailViews():                  #Get all detail in each layout\n            if detail.DetailGeometry.IsProjectionLocked==True:  #Test if deatil is locked\n                detail.DetailGeometry.IsProjectionLocked=False  #Lock detail so we can edit it\n                detail.CommitChanges()                          #Unlock the detail \n            layout.SetActiveDetail(detail.Id)                   #Set detail to active\n            \n            if type==\"ZE\":\n                detail.Viewport.ZoomExtents()\n            elif type==\"ZS\":\n                detail.Viewport.ZoomBoundingBox(bb)\n            \n            detail.CommitViewportChanges()\n            layout.Redraw()\n            Rhino.RhinoApp.Wait()",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1147
+}

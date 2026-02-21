@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/the-gumball-problem/210057",
+  "topic_id": 210057,
+  "title": "The Gumball Problem",
+  "question": "protected override void OnMouseDown(Rhino.Input.Custom.GetPointMouseEventArgs e)\n        {\n\n            starting_point = e.Point;\n\n            //RhinoApp.WriteLine($\"测试打印,{starting_point}\");\n\n            if (m_dc.PickResult.Mode != Rhino.UI.Gumball.GumballMode.None)\n                return; // 如果 Gumball 已经被选中，不做处理\n            m_dc.PickResult.SetToDefault(); // 重置拾取结果\n\n            // 构造一个拾取上下文\n            Rhino.Input.Custom.PickContext pick_context = new Rhino.Input.Custom.PickContext();\n            pick_context.View = e.Viewport.ParentView;               // 设置当前视图\n            pick_context.PickStyle = Rhino.Input.Custom.PickStyle.PointPick; // 点选模式\n\n            // 获取拾取变换矩阵\n            var xform = e.Viewport.GetPickTransform(e.WindowPoint);\n            pick_context.SetPickTransform(xform);\n\n            // 获取射线（视锥线）\n            Rhino.Geometry.Line pick_line;\n            e.Viewport.GetFrustumLine(e.WindowPoint.X, e.WindowPoint.Y, out pick_line);\n            pick_context.PickLine = pick_line; // 设置拾取线\n            pick_context.UpdateClippingPlanes(); // 更新裁剪平面\n\n            //检测是否选中了 Gumball，如果选中则更新约束\n            m_dc.PickGumball(pick_context, this);\n\n            st_bool = true;\n\n            base.OnMouseDown(e);\n        }\n\n\n\nWhen using rays to determine whether Gumball is selected, errors always occur in the perspective view. This has been bothering me. Is there a better way to solve this problem?",
+  "code_blocks": [
+    {
+      "code": "protected override void OnMouseDown(Rhino.Input.Custom.GetPointMouseEventArgs e)\n        {\n\n            starting_point = e.Point;\n\n            //RhinoApp.WriteLine($\"测试打印,{starting_point}\");\n\n            if (m_dc.PickResult.Mode != Rhino.UI.Gumball.GumballMode.None)\n                return; // 如果 Gumball 已经被选中，不做处理\n            m_dc.PickResult.SetToDefault(); // 重置拾取结果\n\n            // 构造一个拾取上下文\n            Rhino.Input.Custom.PickContext pick_context = new Rhino.Input.Custom.PickContext();\n            pick_context.View = e.Viewport.ParentView;               // 设置当前视图\n            pick_context.PickStyle = Rhino.Input.Custom.PickStyle.PointPick; // 点选模式\n\n            // 获取拾取变换矩阵\n            var xform = e.Viewport.GetPickTransform(e.WindowPoint);\n            pick_context.SetPickTransform(xform);\n\n            // 获取射线（视锥线）\n            Rhino.Geometry.Line pick_line;\n            e.Viewport.GetFrustumLine(e.WindowPoint.X, e.WindowPoint.Y, out pick_line);\n            pick_context.PickLine = pick_line; // 设置拾取线\n            pick_context.UpdateClippingPlanes(); // 更新裁剪平面\n\n            //检测是否选中了 Gumball，如果选中则更新约束\n            m_dc.PickGumball(pick_context, this);\n\n            st_bool = true;\n\n            base.OnMouseDown(e);\n        }",
+      "language": "csharp",
+      "author": "tom33",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 78
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/new-version-of-ghpythonlib-components/34619",
+  "topic_id": 34619,
+  "title": "New version of ghpythonlib.components",
+  "question": "Hi all,\n\n\na new version of \nghpythonlib\n, the library performing \nNodeInCode\n, is in the latest version of Rhino 6 / WIP.\n\n\nWe decided to rewrite the library to address a few requests and performance problems that were discovered over two years of intense usage by this community.\n\n\n\n\nIn the new version, on the feature side,\n\n\n\n\n\n\nghpythonlib\n has now support for \nGrasshopper DataTrees\n. It is now possible to feed a tree, and get the computed resulting tree as a result, thereby preserving data origins, and more fully being able to recreate a Grasshopper definition in code. The new  \nghpythonlib.tree.function() \n version of each function does no longer flatten results.\n\n\n\n\nOn the performance side,\n\n\n\n\nwe corrected the behavior for known painful cases from the Grasshopper forum. You can see a series of test on the definitions below here.\n\n\nthen, we tweaked the \nghcomponentlib.parallel\n library to use a new algorithm. While it will not make non-parallelizable computations run faster, this new code showed to improve performance in a series of cases.\n\n\n\n\n\n\n\n\nSome real-world examples\n\n\nWe tested the new library thoughrouly with existing problem cases, and also with normal cases. The first impressions are encouraging:\n\n\ngrasshopper3d.com//1533108\n\n\n\n\nV5 vs V6:   \n16.9” vs 2.1”\n (⅛ the original time)\n\n\nEvery new repetition was making the component slower. The problem is fixed now, and it’s also a lot faster the first time.\n\n\n\n\n\n\n1.PNG\n1455×642 176 KB\n\n\n\n\n\n\ngrasshopper3d.com//multithreading-with-python\n\n\n\n\nV5 vs V6:   \n4.1” vs 0.376”\n (1/11)\n\n\nHere the “parallel” (multi-threaded) version of the script was tested. With this setup (just 3 boxes) I could not have the parallel version run faster than the iterative one; however, as the number of breps increases, the parallel version takes a smaller hit.\n\n\n\n\n\n\nparallel-1.PNG\n1502×637 252 KB\n\n\n\n\n\n\ngrasshopper3d.com//why-ghpythonlib-runs-so-slowly\n\n\n\n\nV5 vs V6:   \n4.2” vs 0.429”\n (1/10)\n\n\nHere the code of the user runs unchanged, exc...",
+  "code_blocks": [
+    {
+      "code": "#import ghpythonlib.components as ghcomp\n#import Grasshopper as gh\n#import Rhino\nimport Rhino.Geometry as rg\n#import rhinoscriptsyntax as rs\n#import scriptcontext as sc",
+      "language": "python",
+      "author": "MarcusStrube",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 21,
+  "views": 35511
+}

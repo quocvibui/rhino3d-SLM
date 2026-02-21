@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/divide-curve-python/98049",
+  "topic_id": 98049,
+  "title": "Divide curve Python",
+  "question": "Hi forum,\n\n\nI would like to ask for help. I’m working on small script and I would like to create geometry as shown in picture number 2. Im stuck projecting points to bottom curve (as shown with blue). I think if i get bottom points, ill be able to create vertical lines (for loop). Can someone please point me right direction?\n\n\nThank you,\n\nDan\n\n\nTie rod.gh\n (5.1 KB)\n\n\n\n\n01\n1075×1068 28 KB\n\n\n \n\n\n02\n1310×799 40 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef vzpinadlo(start, end, height, segments):\n    top_ch_pt = rs.DivideCurve(rs.AddLine(start, end),segments,True,True)\n    top_ch = rs.ExplodeCurves(rs.AddPolyline(top_ch_pt))\n    line = rs.AddLine(start, end)\n    mid_pt = rs.DivideCurve(line , 2, True, True)\n    mid_pt = rs.MoveObject(mid_pt[1], [0,0,-height])\n    curve_pt = (start, mid_pt, end)\n    curve = rs.AddCurve(curve_pt, degree=3)\n    bot_ch = []\n    for pt in top_ch_pt:\n        plane = rs.CurvePerpFrame(line, rs.CurveClosestPoint(line, pt))\n        intersections = rs.PlaneCurveIntersection(plane, curve)\n        if intersections:\n            for intersection in intersections:\n                bot_ch.append(intersection[1])\n    return top_ch, bot_ch, top_ch_pt, curve\n\ntop_ch, bot_ch, top_ch_pt, curve = vzpinadlo(start, end, height, segments)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 2519
+}

@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/code-to-create-an-arrow-preview-in-ghpython/90768",
+  "topic_id": 90768,
+  "title": "Code to create an arrow preview in GhPython",
+  "question": "Hi \n@piac\n\ni try Display.DrawDirectionArrow with the script of \n@dadandroid\n  but i have one problem (i don’t compile the component yet)\n\nwhen i unplug the curve, the arrows still appear until i hit Test again and i want remove the message box.\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\n\nclass PreviewEx(component):\n    \n    def RunScript(self,C):\n\n        if not C: return\n        self.points = []\n        self.tps = []\n        self.tgnt = []\n        pts = rs.DivideCurve(C,2,True)\n        \n        npts = pts\n        npts.insert(2, rs.CurveEndPoint(C))\n        self.points = npts\n        \n        for i in range(3):\n            pt = rs.CurveClosestPoint(C,pts[i])\n            self.tps.append(pt)\n            tg = rs.CurveTangent(C,self.tps[i])\n            self.tgnt.append(tg)\n            \n    def DrawViewportWires(self, args):\n        \n        try:\n            for i in range(3):\n                args.Display.DrawDirectionArrow(self.points[i], self.tgnt[i], System.Drawing.Color.White)\n            \n        except Exception, e:\n            None\n            #System.Windows.Forms.MessageBox.Show(str(e), \"script error\")\n        \n    def IsPreviewCapable(self):\n        return True\n\n\n\n \n\n\n\n\n\n\nhttps://global.discourse-cdn.com/mcneel/uploads/default/original/3X/2/a/2a12f7ef1bcdbce011414f6d87bc6b383cfc3f17.mp4",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\n#import Grasshopper, GhPython\nimport System\n#import Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\n\nclass PreviewEx(component):\n    \n\n    def RunScript(self,C):\n        self.crv = C\n        if not self.crv: return\n        self.points = []\n        self.tps = []\n        self.tgnt = []\n        pts = rs.DivideCurve(self.crv,2,True)\n        npts = pts\n        npts.insert(2, rs.CurveEndPoint(self.crv))\n        self.points = npts\n        \n        for i in range(3):\n            pt = rs.CurveClosestPoint(self.crv,pts[i])\n            self.tps.append(pt)\n            tg = rs.CurveTangent(self.crv,self.tps[i])\n            self.tgnt.append(tg)\n            \n    def DrawViewportWires(self,arg):\n        \n         if not  self.crv: return\n         for i in range(3):\n              arg.Display.DrawDirectionArrow(self.points[i], self.tgnt[i], System.Drawing.Color.White)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def RunScript(self,C):\n    self.crv = C\n    if not self.crv: return\n    self.points = []\n    self.tgnt = []\n    for i in range(len(C)):\n        pts = rs.DivideCurve(self.crv[i],2,True)\n        for j in range(3):\n           pt = rs.CurveClosestPoint(self.crv[i],pts[j])\n           tg = rs.CurveTangent(self.crv[i],pt)\n           self.tgnt.append(tg)\n           self.points.append(pts[j])\n    #print self.points\n    #print self.tgnt\n        \ndef DrawViewportWires(self,arg):\n    \n     if not  self.crv: return\n     for i in range(len(self.crv)):\n        for i in range(3):\n             arg.Display.DrawDirectionArrow(self.points[i], self.tgnt[i], System.Drawing.Color.White)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nclass DisplayDirection(component):\n    \n    def __init__(self):\n        self.pts = []\n        self.bb = Rhino.Geometry.BoundingBox()\n\n    def RunScript(self,C):\n        self.c = C\n        if not self.c: return\n        self.bb = Rhino.Geometry.BoundingBox()\n        self.tps = []\n        self.tgnt = []\n        self.pts = rs.DivideCurve(self.c,2,True)\n        for i in range(len(self.pts)):\n            self.bb.Union(self.pts[i])\n        self.pts.insert(2, rs.CurveEndPoint(self.c))\n\n        for i in range(3):\n            pt = rs.CurveClosestPoint(self.c,self.pts[i])\n            self.tps.append(pt)\n            tg = rs.CurveTangent(self.c,self.tps[i])\n            self.tgnt.append(tg)\n            \n    def DrawViewportWires(self,arg):\n        \n         if not  self.c: return\n         for i in range(3):\n             arg.Display.DrawDirectionArrow(self.pts[i], self.tgnt[i], System.Drawing.Color.White)\n    \n    def get_ClippingBox(self):\n        return self.bb",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass CurvesDirection(component):\n    def __init__(self):\n        self.pts = []\n        self.bb = Rhino.Geometry.BoundingBox()\n        \n    def RunScript(self, C):\n        self.c = C\n        if not self.c: return\n        self.bb = Rhino.Geometry.BoundingBox()\n        lisc = []\n        self.plist = []\n        self.tlist = []\n        \n        for i in range(len(self.c)):\n            lisc.append([self.c[i]])\n        for i in range(len(self.c)):\n            if not self.c[i] : return\n            if rs.IsCurveClosed(self.c[i]) == True:\n                 n = 3\n            elif rs.IsCurveClosed(self.c[i]) == False:\n                 n = 2\n                 \n            for j in range(1):\n               self.pt = rs.DivideCurve(lisc[i][0],n,True)\n               for k in range(len(self.pt)):\n                   self.bb.Union(self.pt[k])\n                   self.pts = rs.CurveClosestPoint(self.c[i],self.pt[k])\n                   self.tg = rs.CurveTangent(self.c[i],self.pts)\n                   self.plist.append(self.pt[k])\n                   self.tlist.append(self.tg)\n\n        parts = len(self.c)\n        self.p = [self.plist[(i*len(self.plist))//parts:((i+1)*len(self.plist))//parts] for i in range(parts)]\n        self.t = [self.tlist[(i*len(self.plist))//parts:((i+1)*len(self.plist))//parts] for i in range(parts)]\n                            \n    def DrawViewportWires(self,arg):                 \n       if not  self.c: return\n       for i in range(len(self.c)):\n           if not self.c[i] : return\n           for j in range(3):\n              arg.Display.DrawDirectionArrow(self.p[i][j],self.t[i][j], System.Drawing.Color.White)\n              \n    def get_ClippingBox(self):\n        return self.bb",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\n\nclass PreviewEx(component):\n    \n    def RunScript(self,C):\n\n        if not C: return\n        self.points = []\n        self.tps = []\n        self.tgnt = []\n        pts = rs.DivideCurve(C,2,True)\n        \n        npts = pts\n        npts.insert(2, rs.CurveEndPoint(C))\n        self.points = npts\n        \n        for i in range(3):\n            pt = rs.CurveClosestPoint(C,pts[i])\n            self.tps.append(pt)\n            tg = rs.CurveTangent(C,self.tps[i])\n            self.tgnt.append(tg)\n            \n    def DrawViewportWires(self, args):\n        \n        try:\n            for i in range(3):\n                args.Display.DrawDirectionArrow(self.points[i], self.tgnt[i], System.Drawing.Color.White)\n            \n        except Exception, e:\n            None\n            #System.Windows.Forms.MessageBox.Show(str(e), \"script error\")\n        \n    def IsPreviewCapable(self):\n        return True",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 26,
+  "views": 4241
+}

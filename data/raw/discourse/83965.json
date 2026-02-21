@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/command-to-change-fit-text-property-of-a-small-dimension/83965",
+  "topic_id": 83965,
+  "title": "Command to Change \"fit text\" property of a small dimension",
+  "question": "Is there a command to run or script that will automatically flip the “fit text” of a dimension from auto to either left or right so it doesnt interfere with adjacent dimensions. Due to the way Rhino6 now displays dimensions, all of our annotation styles have had to be rewritten and now it either overlaps adjacent dimensions or when it pulls the dim from a command, it drops arbitrarily to either side. I have to then select each dim and scroll down in the properties panel and change the text fit on each dim.\n\n\nIf there is a command associated with this property, it could be written into a macro to change the property on multiple selections.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef DimForceLeft():\n    \n    def dim_filter(rhino_object, geometry, component_index):\n        if isinstance(rhino_object, Rhino.DocObjects.LinearDimensionObject):\n            return True\n        return False\n        \n    id = rs.GetObject(\"Select a dimemsion to force left\", filter = 512,  preselect=True , custom_filter = dim_filter)\n\n    obj = rs.coercerhinoobject(id)\n    geo = obj.Geometry\n    \n    geo.ForceTextPosition = Rhino.Geometry.Dimension.ForceText.Left\n    obj.CommitChanges()\n\n    sc.doc.Views.Redraw()\n    pass\n    \nif __name__ == '__main__':DimForceLeft()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef DimForcer():\n    settingList = ['Auto', 'Left','Right', 'Inside']\n\n    fitList = [Rhino.DocObjects.DimensionStyle.TextFit.Auto,\n    Rhino.DocObjects.DimensionStyle.TextFit.TextLeft,\n    Rhino.DocObjects.DimensionStyle.TextFit.TextRight,\n    Rhino.DocObjects.DimensionStyle.TextFit.TextInside]\n    \n    \n    def dim_filter(rhino_object, geometry, component_index):\n        if isinstance(rhino_object, Rhino.DocObjects.LinearDimensionObject):\n            return True\n        return False\n        \n        \n    while True:\n        idx = 0\n        \n        if sc.sticky.has_key('DIM_FORCE'):\n            idx = sc.sticky['DIM_FORCE']\n            \n        go = Rhino.Input.Custom.GetObject()\n        go.SetCustomGeometryFilter (dim_filter)\n        go.AddOptionList(\"Force\", settingList, idx)\n        go.EnablePreSelect(False, False)\n        go.SetCommandPrompt(\"Select a linear dimension\")\n        \n        rc = go.Get()\n        \n        if go.CommandResult()!=Rhino.Commands.Result.Success:\n            return\n            \n        if rc == Rhino.Input.GetResult.Object:\n            obj = go.Object(0)\n            \n        if rc == Rhino.Input.GetResult.Option:\n            idx= go.Option().CurrentListOptionIndex\n            sc.sticky['DIM_FORCE']= idx\n            continue\n        \n        rObj = obj.Object()\n        geo = rObj.Geometry\n        geo.TextFit = fitList[idx]\n\n        rObj.CommitChanges()\n    \n        sc.doc.Views.Redraw()\n\n    \nif __name__ == '__main__':DimForcer()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 9,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 11,
+  "views": 1248
+}

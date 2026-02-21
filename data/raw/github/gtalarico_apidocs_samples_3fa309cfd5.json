@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/py/pick-point.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/py/pick-point.py",
+  "instruction": "Pick point",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\n\ndef RunCommand():\n    # creates a point where the mouse is clicked\n    # using RhinoCommon\n    gp = GetPoint()\n    gp.SetCommandPrompt(\"Click for point\")\n    gp.Get()\n    if gp.CommandResult() != Result.Success:\n        return gp.CommandResult()\n    point3d = gp.Point()\n    doc.Objects.AddPoint(point3d)\n    doc.Views.Redraw()\n\n    # creates a point where the mouse is clicked\n    # using the RhinoScript syntax\n    point3d = rs.GetPoint(\"Click for point\")\n    if point3d == None: return Result.Nothing\n    rs.AddPoint(point3d)\n    doc.Objects.AddPoint(point3d)\n\n\n    # selects a point that already exists\n    # using RhinoCommon\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select point\", False, ObjectType.Point)\n    if rc != Result.Success:\n        return rc\n    point = obj_ref.Point()\n    RhinoApp.WriteLine(\"Point: x:{0}, y:{1}, z:{2}\",\n        point.Location.X,\n        point.Location.Y,\n        point.Location.Z)\n    doc.Objects.UnselectAll()\n\n    # also selects a point that already exists\n    # using RhinoCommon\n    # Used when RhinoGet doesn't provide enough control\n    go = GetObject()\n    go.SetCommandPrompt(\"Select point\")\n    go.GeometryFilter = ObjectType.Point\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Result.Success:\n        return go.CommandResult()\n    for o_ref in  go.Objects():\n        point = o_ref.Point()\n        if point != None:\n            RhinoApp.WriteLine(\"Point: x:{0}, y:{1}, z:{2}\", point.Location.X, point.Location.Y, point.Location.Z)\n    doc.Objects.UnselectAll()\n\n    # selects a point that already exists\n    # using RhinoScript syntax\n    point_id = rs.GetObject(\"Select point\", rs.filter.point)\n    if point_id == None: return Result.Nothing\n    print \"point id: {0}\".format(point_id)\n    rs.UnselectAllObjects()\n\n    # selects multiple points that already exist\n    rc, obj_refs = RhinoGet.GetMultipleObjects(\"Select point\", False, ObjectType.Point)\n    if rc != Result.Success:\n        return rc\n    for o_ref in obj_refs:\n        point = o_ref.Point()\n        RhinoApp.WriteLine(\"Point: x:{0}, y:{1}, z:{2}\", point.Location.X, point.Location.Y, point.Location.Z)\n    doc.Objects.UnselectAll()\n\n    # selects multiple poins that already exists\n    # using the RhinoScript syntax\n    point_ids = rs.GetObjects(\"Select point\", rs.filter.point)\n    for p_id in point_ids:\n        print \"point id: {0}\".format(p_id)\n\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

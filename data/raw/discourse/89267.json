@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/vector-displacement-maps-with-ironpython-in-rhino/89267",
+  "topic_id": 89267,
+  "title": "Vector Displacement Maps with IronPython in Rhino",
+  "question": "I am currently working on bringing in the Vector Displacement functions of Mudbox and Zbrush into Rhino and am encountering quite a few issues. The primary issue is in the compression of a three-dimensional mesh into an unwrapped pattern. This would function similarly to the squish command in order to associate 3D vertexes with their flattened 2D counter parts. Has anyone worked on this issue previously or does anyone have suggestions for tackling some of the conceptual issues associated with Vector Displacements in Python for Rhino? Below are links to Mudbox and Zbrush pages for their Vector Displacement functions. Thanks!\n\n\nAlso, the reason for writing it with Python in Rhino is for the control of specific input and output parameters to work with learning models, which will be integrated at a later time.\n\n\n\n\n\n\n\n\nknowledge.autodesk.com\n\n\n\n\n\n\n\n\nVector displacement maps overview | Mudbox 2019 | Autodesk Knowledge Network\n\n\nA vector displacement map is a 2D image that records height and directional information for points on the model as 32 bit floating point color information. The map stores both the distance a vertex will be displaced (based on the pixel value in the...\n\n\n\n\n\n\n\n\n\n\n\n\nhttp://docs.pixologic.com/user-guide/3d-modeling/exporting-your-model/vector-displacement-maps/",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nfrom Rhino.Geometry import *\nfrom Rhino.Input import RhinoGet\nfrom Rhino.Commands import Result\nfrom Rhino.DocObjects import ObjectType\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, objRef = RhinoGet.GetOneObject(\"Select surface or polysurface to mesh\", True, ObjectType.Surface | ObjectType.PolysrfFilter)\n    if rc != Result.Success:\n        return rc\n    brep = objRef.Brep()\n    if None == brep:\n        return Result.Failure\n\n    jaggedAndFaster = MeshingParameters.Coarse\n    smoothAndSlower = MeshingParameters.Smooth\n    defaultMeshParams = MeshingParameters.Default\n    minimal = MeshingParameters.Minimal",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 1398
+}

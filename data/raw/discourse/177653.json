@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hiddenlinedrawing-compute-with-blocks/177653",
+  "topic_id": 177653,
+  "title": "HiddenLineDrawing.Compute with Blocks",
+  "question": "@rajaa\n I am working along the below example to implement a custom version of \nHiddenLineDrawing.Compute\n.\n\n\n\n\n\n\n\n\n\n\nRhino Bug: HiddenLineDrawing.Compute\n \nRhino Developer\n\n\n\n\n\n    It looks as if all your objects are behind the clipping plane. If you switch the direction of your clipping plane, does that make any difference? \nThe following in an example to Compute HLD that uses ClippingPlanes for your reference. It work at my end with the latest release. \n//HLD Sample with Clipping Planes\n      var _go = new GetObject();\n      _go.SetCommandPrompt(\"Select objects to test Make2D Points\");\n      _go.GeometryFilter = ObjectType.Point | ObjectType.Surface | ObjectType.Polysrf…\n  \n\n\n\n\nRelevant part of example code:\n\n\n    //add objects to hld_param\n    foreach (var obj_ref in _obj_refs)\n    {\n      var obj = obj_ref.Object();\n      _hld_params.AddGeometry(obj.Geometry, Transform.Identity, obj.Id);\n    }\n\n\n\nI am not able to add blocks or any other custom objects (VisualArq objects) to the HDL parameters. \nAddGeometry()\n returns \nnull\n when trying to do so. How would I go about to add those? I assume I have to get to their geometry or is there a faster way?\n\n\nPlease find a demo script and test file below.\n\n\nimport Rhino.Geometry as rhg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n\ndef test_hidden_line():\n    viewport = sc.doc.Views.ActiveView.ActiveViewport\n    \n    # Setup HLD parameters\n    parameters = rhg.HiddenLineDrawingParameters()\n    parameters.AbsoluteTolerance = sc.doc.ModelAbsoluteTolerance\n    parameters.IncludeHiddenCurves = False\n    parameters.IncludeTangentEdges = False\n    parameters.IncludeTangentSeams = False\n    parameters.SetViewport(viewport)\n    \n    # Process all of the document objects\n    rh_obj_guids  = rs.AllObjects(include_references=True)\n    not_added = []\n    added = []\n    for obj_guid in rh_obj_guids:\n        rh_obj = rs.coercerhinoobject(obj_guid)\n        res = parameters.AddGeometry(rh_obj.Geometry, rh_obj.Id)\n        if re...",
+  "code_blocks": [
+    {
+      "code": "# Process all of the document objects\n    for obj_guid in rh_obj_guids:\n        rh_obj = rs.coercerhinoobject(obj_guid)\n        if rh_obj.Geometry.HasBrepForm:\n            parameters.AddGeometry(rhg.Brep.TryConvertBrep(rh_obj.Geometry), rh_obj.Id)\n        elif type(rh_obj) is rhc.DocObjects.CurveObject:\n            parameters.AddGeometry(rh_obj.CurveGeometry, rh_obj.Id)\n        elif type(rh_obj) is rhc.DocObjects.MeshObject:\n            parameters.AddGeometry(rh_obj.MeshGeometry, rh_obj.Id)\n        elif type(rh_obj) is rhc.DocObjects.InstanceObject:\n            instance_geo = deconstruct_instance(rh_obj) \n            for g in instance_geo:\n                # sc.doc.Objects.Add(g, sc.doc.CreateDefaultAttributes()) # DEBUG: Add ref objs to doc\n                parameters.AddGeometry(g, rh_obj.Id)\n        else:\n            print('Type {0} not supported'.format(type(rh_obj)))",
+      "language": "python",
+      "author": "silvano",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rhg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n\ndef test_hidden_line():\n    viewport = sc.doc.Views.ActiveView.ActiveViewport\n    \n    # Setup HLD parameters\n    parameters = rhg.HiddenLineDrawingParameters()\n    parameters.AbsoluteTolerance = sc.doc.ModelAbsoluteTolerance\n    parameters.IncludeHiddenCurves = False\n    parameters.IncludeTangentEdges = False\n    parameters.IncludeTangentSeams = False\n    parameters.SetViewport(viewport)\n    \n    # Process all of the document objects\n    rh_obj_guids  = rs.AllObjects(include_references=True)\n    not_added = []\n    added = []\n    for obj_guid in rh_obj_guids:\n        rh_obj = rs.coercerhinoobject(obj_guid)\n        res = parameters.AddGeometry(rh_obj.Geometry, rh_obj.Id)\n        if res:\n            added.append(obj_guid)\n        else:\n            not_added.append(obj_guid)\n    \n    # DEBUG: Objects not added are selected <--------------- Blocks are ignored\n    rs.UnselectAllObjects()\n    rs.SelectObjects(not_added)\n    \n    # Create the hidden line drawing geometry\n    hld = rhg.HiddenLineDrawing.Compute(parameters, True)\n    \n    # Add hidden line drawing to doc\n    flatten = rhg.Transform.PlanarProjection(rhg.Plane.WorldXY)\n    page_box = hld.BoundingBox(True)\n    delta2D = rhg.Vector2d(0, 0)\n    delta2D = delta2D - rhg.Vector2d(page_box.Min.X, page_box.Min.Y)\n    delta3D = rhg.Transform.Translation(rhg.Vector3d(delta2D.X, delta2D.Y, 0.0))\n    flatten = delta3D * flatten\n    \n    attributes = sc.doc.CreateDefaultAttributes()\n    crvs = []\n    for hld_curve in hld.Segments:\n        if (hld_curve is None \n            or hld_curve.ParentCurve is None \n            or hld_curve.ParentCurve.SilhouetteType == rhg.SilhouetteType.None):\n            continue\n        crv = hld_curve.CurveGeometry.DuplicateCurve()\n        if crv:\n            crv.Transform(flatten)\n            if hld_curve.SegmentVisibility == rhg.HiddenLineDrawingSegment.Visibility.Visible:\n                if hld_curve.ParentCurve.SilhouetteType == rhg.SilhouetteType.SectionCut:\n                    sc.doc.Objects.AddCurve(crv, attributes)\n                else:\n                    sc.doc.Objects.AddCurve(crv, attributes)\n            elif hld_curve.SegmentVisibility == rhg.HiddenLineDrawingSegment.Visibility.Hidden:\n                if hld_curve.ParentCurve.SilhouetteType == rhg.SilhouetteType.SectionCut:\n                    sc.doc.Objects.AddCurve(crv, attributes)\n                else:\n                    sc.doc.Objects.AddCurve(crv, attributes);\n\n\ntest_hidden_line()",
+      "language": "python",
+      "author": "silvano",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 328
+}

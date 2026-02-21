@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/dtbinh/T1_python-exercises/blob/f4710c3dc2ba8ddb3e3e9069ab8d65df674463ab/07_ur_online/shifted_frames_setup/compas/packages/compas_fabrication/fabrication/grasshopper/geometry/xforms.py",
+  "repo": "dtbinh/T1_python-exercises",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "07_ur_online/shifted_frames_setup/compas/packages/compas_fabrication/fabrication/grasshopper/geometry/xforms.py",
+  "instruction": "Xforms",
+  "code": "from __future__ import print_function\nimport sys\n\ntry:\n    import rhinoscriptsyntax as rs\n    import ghpythonlib.components as ghcomp\n    from Rhino.Geometry import Transform\nexcept ImportError:\n    import platform\n    if platform.python_implementation() == 'IronPython':\n        raise\n\nfrom compas.datastructures.mesh import Mesh\n\n# TODO: This file should actually move to compas_rhino\n\ndef xform_from_transformation(transformation):\n    \"\"\"Creates a Rhino Transform instance from a transformation object.\n    \n    Args:\n        transformation (Transformation): the transformation.\n    \n    Returns:\n        Transform: a Rhino class.\n    \"\"\"\n    transform = Transform(1.0)\n    for i in range(0, 4):\n        for j in range(0, 4):\n            transform[i, j] = transformation[i, j]\n    return transform\n\n\ndef xform_from_matrix(matrix):\n    \"\"\"Creates a Transform instance from a matrix represented as a list\n    of 12 float values.\n    \"\"\"\n    transform = Transform(1.0)\n    for i in range(0, len(matrix)):\n        transform[i // 4, i % 4] = matrix[i]\n\n    return transform\n\n# TODO: vrep is very specific, better rename as the return is anyway not a proprietary type\ndef vrep_pose_from_plane(plane):\n    \"\"\"Creates a vrep-compatible transformation matrix from a Rhino/Grasshopper \n    plane.\n\n    This function might need rework as the source of the 90-deg Y rotation\n    need is not entirely clear to me (related to the RFL model mismatch).\n    \"\"\"\n    translation_matrix = rs.XformTranslation(((plane[0][0]), (plane[0][1]), plane[0][2]))\n    plane_start = rs.PlaneFromFrame(rs.AddPoint(0, 0, 0), rs.AddPoint(1, 0, 0), rs.AddPoint(0, 1, 0))\n    plane_end = rs.PlaneFromFrame(rs.AddPoint(0, 0, 0), rs.AddPoint(plane[1][0], (plane[1][1]), plane[1][2]), rs.AddPoint(plane[2][0], plane[2][1], plane[2][2]))\n    rotation_matrix = rs.XformRotation1(plane_start, plane_end)\n    matrix = rs.XformMultiply(translation_matrix, rotation_matrix)\n    return [matrix.M00, matrix.M01, matrix.M02, matrix.M03,\n            matrix.M10, matrix.M11, matrix.M12, matrix.M13,\n            matrix.M20, matrix.M21, matrix.M22, matrix.M23]\n    \n    ",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

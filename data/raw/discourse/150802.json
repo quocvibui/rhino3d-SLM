@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/new-layer-visibility-feature-and-code/150802",
+  "topic_id": 150802,
+  "title": "New layer visibility feature and code",
+  "question": "Hi \n@dale\n,\n\n\nI’ve got a scripts which apply transforms to objects which can be on a hidden layer or sublayer. In Rhino 7 i can just apply the transform and use \nobj.CommitChanges()\n and the transform is applied even when the layer is not visible.\n\n\nRhino 8 WIP (Windows) crashes when i do not enable the objects layer visibility prior transform at the point when i do \nobj.CommitChanges()\n.\n\n\nTherefore i’ve tried to store the layers visibility before object transform, set the layer to visible and do the object transform. If i then re-store the previous visibility of the layer (eg. hidden), i end up with some red light bulbs in the layer’s panel.\n\n\nHow to get rid of this and re-store the normal (gray) light bulb for the hidden state ?\n\n\nthanks,\n\nc.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DoSomething():\n    index = scriptcontext.doc.Layers.FindByFullPath(\"Default\", -1)\n    if index >= 0:\n        layer = scriptcontext.doc.Layers[index]\n        children = layer.GetChildren()\n        if children is not None:\n            for child in children:\n                child.IsVisible = False\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 59,
+  "posts_count": 8,
+  "views": 766
+}

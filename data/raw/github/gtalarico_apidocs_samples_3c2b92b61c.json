@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/determine-normal-direction-of-brep-face.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/determine-normal-direction-of-brep-face.py",
+  "instruction": "Determine normal direction of brep face",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import *\nimport Rhino\nfrom Rhino.Commands import Result\n\ndef RunCommand():\n    # select a surface\n    gs = Rhino.Input.Custom.GetObject()\n    gs.SetCommandPrompt(\"select surface\")\n    gs.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    gs.DisablePreSelect()\n    gs.SubObjectSelect = False\n    gs.Get()\n    if gs.CommandResult() != Result.Success:\n        return gs.CommandResult()\n\n    # get the selected face\n    face = gs.Object(0).Face()\n    if face == None:\n        return\n\n    # pick a point on the surface.  Constain\n    # picking to the face.\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"select point on surface\")\n    gp.Constrain(face, False)\n    gp.Get()\n    if gp.CommandResult() != Result.Success:\n        return gp.CommandResult()\n\n    # get the parameters of the point on the\n    # surface that is clesest to gp.Point()\n    b, u, v = face.ClosestPoint(gp.Point())\n    if b:\n        dir = face.NormalAt(u, v)\n        if face.OrientationIsReversed:\n            dir.Reverse()\n        print \"Surface normal at uv({0:f},{1:f}) = ({2:f},{3:f},{4:f})\".format(\n            u, v, dir.X, dir.Y, dir.Z)\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

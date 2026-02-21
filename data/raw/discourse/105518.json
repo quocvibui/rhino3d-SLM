@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wouldnt-it-be-nice-if/105518",
+  "topic_id": 105518,
+  "title": "Wouldn't it be nice if",
+  "question": "…the rs.Add…  methods returned None if the method was unable to add a valid object to the document instead of simply failing and erroring out the script?  That way you could at least error check the return instead of having to analyze all the input arguments first to see if they will allow a valid result.\n\n\nThis applies to AddLine, AddCircle, AddEllipse, AddArc, etc.\n\n\nPlease note also that the equivalent VB Rhinoscript methods all simply return Null if the function is unable to work with the input, and do not error out the script.  \n@dale\n\n\nFor example, trying to add a zero-length line:\n\n\nimport rhinoscriptsyntax as rs\ntest=rs.AddLine([0,0,0],[0,0,0])\n\n\n\n>>>Message: Unable to add line to document (entire script fails at that point)\n\n\nvs\n\n\nOption Explicit\nCall Main()\nSub Main()\n\tDim test\n\ttest = Rhino.AddLine(Array(0, 0, 0), Array(0, 0, 0))\n\tIf IsNull(test) Then\n\t\tCall Rhino.Print(\"It's Null\")\n\tEnd If\nEnd Sub\n\n\n\n>>> It's Null",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ntry:\n    test=rs.AddLine([0,0,0],[0,0,0])\nexcept:\n    print(\"it's null\")\n    \nprint(\"still runing\")",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ntry:\n    test=rs.AddLine([0,0,0],[0,0,0])\nexcept Exception as e:\n    # Or whatever else you want to do with that exception,\n    # including raising a more precise one or stopping the script execution\n    print(e)",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef TestAddLine(start, end, raise_on_error=False):\n    start = rs.coerce3dpoint(start, True)\n    end = rs.coerce3dpoint(end, True)\n    curve = Rhino.Geometry.LineCurve(start, end)\n    rc, log = curve.IsValidWithLog()\n    if not rc:\n        if raise_on_error: \n            if log:\n                raise Exception(log)\n            else:\n                raise Exception(\"Line is invalid\")\n        else: \n            return System.Guid.Empty\n    id = sc.doc.Objects.AddCurve(curve)\n    if id == System.Guid.Empty:\n        if raise_on_error: \n            raise Exception(\"Unable to add line to document\")\n        else: \n            return System.Guid.Empty\n    sc.doc.Views.Redraw()\n    return id\n\nprint TestAddLine([0,0,0],[0,0,0])\nprint TestAddLine([0,0,0],[0,0,0], True)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "def Copy(geom):\n    if (geom is GeometryBase):\n       return curve(geom).Duplicate()\n    return None\n\ndef Export(geom, path):\n    if (geom is not None):  # bad designed does not throw on None input, just does nothing\n       Serialize(geom, path)\n\ndef Import(path):\n     return Deserialize(path) # bad designed returns None  on failure\n\ndef Main():\n      geomID = GetObject()\n      if (geomID is not None):\n           copy = Copy(geomID) # this is wrong -> Adds id instead of geometrical object\n           Export(copy, path) \n           geom = Import(path)\n           AddObject(geom) # It did nothing because its returning None",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\nCall Main()\nSub Main()\n\tDim test\n\ttest = Rhino.AddLine(Array(0, 0, 0), Array(0, 0, 0))\n\tIf IsNull(test) Then\n\t\tCall Rhino.Print(\"It's Null\")\n\tEnd If\nEnd Sub",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 1042
+}

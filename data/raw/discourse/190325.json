@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-and-unit-tests-with-xunit/190325",
+  "topic_id": 190325,
+  "title": "Grasshopper and Unit tests with XUnit",
+  "question": "Hi,\n\n\nI have been looking for a way how to perform Unit test on .gh files with my on scripts. These scripts contains my custom components which were coded with C# in visual studio. I have created my own plugin. If I run that script in Rhino it works perfectly.\n\n\nI tried to dig into unit testing of that .gh files with my components. I started with this \nrepo\n which I was able to replicate and successfully run. However, If I modify .gh file to use my components and unit test to insert data to a parameter and recompute some of my components it fails. After some investigation I found out few problems which may or may not occurre:\n\n\n\n\nIf I run more then one class with unit tests at once it fails during disposing grasshopper assembly (happens sometimes, few cases)\n\n\nIf I run more then one class with unit tests at once it fails and throw error during redrawing rhino active doc. (I understand that rhino is open in headless mode and active doc == null, my code in the plugin is not ready for this option) (happens sometimes, few cases)\n\n\nIf I run only one class with one test it works. However when, compute my custom component which should produce my own class as a output it do so but some of the output class properties are not correctly set or calculated. That cause some problems in the downstream objects and test result is fail. (happens every time). However, on default components (circle, line, etc.) it works smoothly.\n\n\n\n\nimage\n1313×368 45.5 KB\n\n\nLast issue is most challenging and the worst as it prevents me from using further using of  unit tests.\n\n\nI have also read many of the topics regarding unit testing at this forum. Unfortunately, non of it solve my problem. There are some topics, regarding similar \nproblems\n.\n\n\nI have also found there is a few more test repos\n\n\ntmakin/RhinoCommonUnitTesting: Example of unit testing RhinoCommon from within the Visual Studio test runner on windows (github.com)\n\n\nand\n\n\nmcneel/Rhino.Testing: NUnit dotnet unit testing for Rhino3D (github...",
+  "code_blocks": [
+    {
+      "code": "public class CenterLineFixture : Rhino.Test.GrasshopperFixture\n  {\n      public CenterLineFixture() : base(\"CenterLine.gh\") { }\n  }\n\npublic class CenterLine : IClassFixture<CenterLineFixture>\n{\n  CenterLineFixture fixture { get; set; }\n\n  public CenterLine(CenterLineFixture fixture)\n  {\n      this.fixture = fixture;\n  }\n  /// This test works.\n  [Fact]\n  public void CircleTest()\n  {\n      List<double> doubles = new List<double>() { 1, 2, 3, 4, 5 };\n      foreach (var obj in (fixture.Doc.Objects))\n      {\n          if (obj is Grasshopper.Kernel.IGH_Param param)\n          {\n              if (param.NickName == \"Radii\")\n              {\n                  for (var i = 0; i < doubles.Count; i++)\n                  {\n                      (param as Grasshopper.Kernel.Parameters.Param_Number).AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), i, doubles[i]);\n                  }\n                  param.CollectData();\n                  param.ComputeData();\n\n                  Assert.Equal(doubles.Count, param.VolatileData.DataCount);\n              }\n          }\n      }\n      foreach (var obj in (fixture.Doc.Objects))\n      {\n          if (obj is Grasshopper.Kernel.IGH_Param param)\n          {\n              if (param.NickName == \"Circle\")\n              {\n                  param.CollectData();\n                  param.ComputeData();\n\n                  Assert.Equal(doubles.Count, param.VolatileData.DataCount);\n                  var data = param.VolatileData.AllData(true).GetEnumerator();\n                  data.Reset();\n                  int i = 0;\n                  while (data.MoveNext())\n                  {\n                      var curve = data.Current;\n                      Assert.True(curve.CastTo(out Curve curveToTest), \"Cannot cast curve\");\n                      Assert.True(curveToTest.IsClosed, \"Curve is not closed\");\n                      i++;\n                  }\n                  return;\n              }\n          }\n\n      }\n  }\n  /// This test does not work.\n  [Fact]\n  public void TunnelSectionTest()\n  {\n      foreach (var obj in (fixture.Doc.Objects))\n      {\n          if (obj is Grasshopper.Kernel.IGH_Component param)\n          {\n              /// Just get the custom component\n              if (param.NickName == \"BoredSection\")\n              {\n                  /// Recompute custom component\n                  param.ExpireSolution(true);\n                  param.CollectData();\n                  param.ComputeData();\n\n                  /// Get output data of custom component. Output is custom class with properties. Some of them are not correctly computed.\n                  object sectionClass = param.Params.Output.Last();\n                  Assert.Equal(22, param.Params.Output.Count);\n              }\n          }\n      }\n  }",
+      "language": "csharp",
+      "author": "janotaondrej91",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 203
+}

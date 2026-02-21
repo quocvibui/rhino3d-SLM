@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/reorder-curves-order-in-rhino/105071",
+  "topic_id": 105071,
+  "title": "Reorder curves order in Rhino?",
+  "question": "I do need to export as .dxf some circles that I do created in Rhino and I need to import this dxf files in a CAM program for drilling.\n\n\nThe issue is that this circles are created random and I do need a way to change the order of them according to x-y coordinates to don’t make the machine to jump from one place to other and I can’t find any command in Rhino for reordering the geometry. Please help.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom operator import itemgetter, attrgetter\nimport Rhino\nimport scriptcontext as sc\n\ndef OrderedExport():\n    \n    ids = rs.GetObjects(\"Select objects to export\", preselect=True)\n    if not ids: return\n    \n    itemList = []\n    for id in  ids:\n        geo = rs.coercegeometry(id)\n        pt = geo.GetBoundingBox(True).Center\n        itemList.append( [id, pt.X, pt.Y, pt])\n\n    X = sorted(itemList, key=itemgetter(1,2), reverse=True ) #Reverse Order\n    rs.UnselectAllObjects()\n    count = 0\n    for x in X:\n        #rs.AddTextDot(count,x[3]) #Add text dot in center of geometries (removed, see bellow)\n        geo = rs.coercegeometry(x[0])\n        sc.doc.Objects.Replace(x[0], geo)\n        count += 1\n\n    # create a new layer called \"Dim::Dot\"\n    layer_name = \"Dim::Dot\"\n    if not rs.IsLayer(layer_name):\n        rs.AddLayer(layer_name)\n    \n    # create a new group\n    group_name = \"Text Dots\"\n    group_id = rs.AddGroup(group_name)\n\n    # create a list to store the new text dots\n    dots = []\n    X = sorted(itemList, key=itemgetter(1,2))\n    for i in range(len(X)-1, -1, -1):\n        # V = Count from ONE = rs.AddTextDot(str(i+1), count from ZERO = rs.AddTextDot(str(i)\n        dot_id = rs.AddTextDot(str(i), X[i][3])\n        dots.append(dot_id)\n\n    # add text dots to the group\n    rs.AddObjectsToGroup(dots, group_id)\n\n    # move the text dots to the \"Dim::Dot\" layer\n    rs.ObjectLayer(dots, \"Dim::Dot\")\n    #rs.MoveObjects(dots, \"Dim\")\n    \n    rs.SelectObjects(ids)\n#    rs.Command(\"Export\")\n    \nif __name__ == '__main__':OrderedExport()",
+      "language": "python",
+      "author": "Macuso",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 14,
+  "views": 1692
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-recursive-script-problem/161599",
+  "topic_id": 161599,
+  "title": "Python recursive script problem",
+  "question": "Hi friends,\n\n\nafter a long time I am trying to get back into Rhino / Python. Are there any good recommended tutorials, I am struggling mostly with all the different Classes and Geometry Types in Rhino / Grasshopper / Python.\n\n\nHere is a learning script with a problem, Iam trying to make a recursive “Substrate” style algorithm, simular to the build in one from Grasshopper. I got it going somehow, struggled with “rs.SpiltCurve”, had to use “rs.Coercecurve” and “rg.Interval” to reparametrize the domain and get it going.\n\n\nSomehow some of my new lines get scaled (not the same length anymore as before) in the next iteration. Not every line, not in every iteration. I got no clue whats happening. Any Ideas? Sorry for this noob questions…\n\n\nimport rhinoscriptsyntax as rs\nimport  Rhino.Geometry as rg\nimport random\n\ndef substrate_line(curve_list):\n    rnd_sel = random.randrange(len(curve_list))\n    crv = rs.coercecurve(curve_list[rnd_sel],1)\n    crv.Domain = rg.Interval(0.0, 1.0)\n    rnd_pos = random.uniform(0.40, 0.6)\n    crv_pt = rs.EvaluateCurve(crv, rnd_pos )\n    crv_tan = rs.CurveTangent (crv, rnd_pos )\n    tan_pt = crv_pt + rs.VectorRotate(crv_tan, 90.0, [0,0,1])  \n    my_line = rs.AddLine(crv_pt,tan_pt)\n    rs.ExtendCurve( my_line, 0, 1, curve_list )    \n    split_crvs = rs.SplitCurve(crv, rnd_pos, delete_input=False)  \n    del curve_list[rnd_sel]\n    curve_list.extend(( split_crvs[0], split_crvs[1], my_line ))\n    pt_list.append(crv_pt)\n    return curve_list\n\n# input\ncurve_list = rs.ExplodeCurves(rectangle_curve) \npt_list = []\nrandom.seed(seed)\n\n# function\nfor i in range(count):\n    result = substrate_line(curve_list)\n\n\n\n\n\nSubstrate_Problem_02\n1449×672 25.3 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport  Rhino.Geometry as rg\nimport random\n\ndef substrate_line(curve_list):\n    rnd_sel = random.randrange(len(curve_list))\n    crv = rs.coercecurve(curve_list[rnd_sel],1)\n    crv.Domain = rg.Interval(0.0, 1.0)\n    rnd_pos = random.uniform(0.40, 0.6)\n    crv_pt = rs.EvaluateCurve(crv, rnd_pos )\n    crv_tan = rs.CurveTangent (crv, rnd_pos )\n    tan_pt = crv_pt + rs.VectorRotate(crv_tan, 90.0, [0,0,1])  \n    my_line = rs.AddLine(crv_pt,tan_pt)\n    rs.ExtendCurve( my_line, 0, 1, curve_list )    \n    split_crvs = rs.SplitCurve(crv, rnd_pos, delete_input=False)  \n    del curve_list[rnd_sel]\n    curve_list.extend(( split_crvs[0], split_crvs[1], my_line ))\n    pt_list.append(crv_pt)\n    return curve_list\n\n# input\ncurve_list = rs.ExplodeCurves(rectangle_curve) \npt_list = []\nrandom.seed(seed)\n\n# function\nfor i in range(count):\n    result = substrate_line(curve_list)",
+      "language": "python",
+      "author": "Zinssmeister",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 619
+}

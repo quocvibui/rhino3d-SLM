@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/goodcurry/IncognitoV2/blob/14df6e9582299dfddaab5f82ddec7be4ec5d4e0d/incog/exploit/instances.py",
+  "repo": "goodcurry/IncognitoV2",
+  "repo_stars": 7,
+  "repo_description": "Official and latest source code of IncognitoV2",
+  "license": "unknown",
+  "filepath": "incog/exploit/instances.py",
+  "instruction": "Instances",
+  "code": "from rbx.instance import Instance\r\nfrom rbx.script_context import ScriptContext\r\nfrom rbx.module_script import ModuleScript\r\n\r\nclass Instances:\r\n    game: Instance = None\r\n    core_gui: Instance = None\r\n    core_packages: Instance = None\r\n    script_context: ScriptContext = None\r\n\r\n    player_list_manager: ModuleScript = None\r\n\r\n    lumberyak: ModuleScript = None\r\n    jest_globals: ModuleScript = None\r\n\r\ndef load_instances(data_model: int):\r\n    old_datamodel: Instance = Instances.game\r\n    if old_datamodel is not None and old_datamodel.address == data_model: # if same datamodel dont update.\r\n        return None\r\n\r\n    data_model = Instance(data_model)\r\n    Instances.game = data_model\r\n\r\n    Instances.core_gui = data_model[\"CoreGui-C\"]\r\n    Instances.core_packages = data_model[\"CorePackages-C\"]\r\n    Instances.script_context = ScriptContext(data_model.waitfor_class(\"ScriptContext\", 10))\r\n\r\n    Instances.player_list_manager = ModuleScript(Instances.core_gui[\"RobloxGui\"][\"Modules\"][\"PlayerList\"][\"PlayerListManager\"])\r\n    \r\n    core_packages = Instances.core_packages\r\n    lua_packages = core_packages[\"Workspace\"][\"Packages\"]\r\n\r\n    Instances.lumberyak = ModuleScript(lua_packages[\"Lumberyak\"])\r\n    Instances.jest_globals = ModuleScript(lua_packages[\"_Workspace\"][\"AccountSelector\"][\"Dev\"][\"JestGlobals\"])",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/ksobon/MantisShrimp/blob/9b3d1ef747a04f75f3542c38550c4e29b9d08c8f/Grasshopper/src/Mantis%20Shrimp%20-%20Import%20Mesh.py",
+  "repo": "ksobon/MantisShrimp",
+  "repo_stars": 39,
+  "repo_description": "A interop project for bridging the gap between Rhino/Grasshopper and Revit/Dynamo",
+  "license": "unknown",
+  "filepath": "Grasshopper/src/Mantis Shrimp - Import Mesh.py",
+  "instruction": "This component reads Meshes exported from Dynamo",
+  "code": "#Copyright(c) 2015, Konrad K Sobon\n#@arch_laboratory, http://archi-lab.net\n\n\"\"\"\nThis component reads Meshes exported from Dynamo\n\n    Args:\n        _filePath: path to file to read\n        _import: boolean True or False that will either allow or prevent geometry \\\n            from being imported\n\"\"\"\nghenv.Component.Name = \"Mantis Shrimp - Mesh\"\nghenv.Component.NickName = 'DSMesh'\nghenv.Component.Category = \"Mantis Shrimp\"\n\nimport sys\nimport os\nappDataPath = os.getenv('APPDATA')\nmsPath = appDataPath + r\"\\Dynamo\\0.7\\packages\\Mantis Shrimp\\extra\"\nif msPath not in sys.path:\n    sys.path.append(msPath)\nimport mantisshrimp as ms\nmantis = ms\nreload(mantis)\n\nfrom System import Array\nfrom System.Collections.Generic import *\nimport cPickle as pickle\nimport Rhino as rc\nimport Grasshopper.Kernel as gh\nfrom Grasshopper import DataTree\nfrom Grasshopper.Kernel.Data import GH_Path\nimport scriptcontext as sc\n\nclass SerializeObjects(object):\n\tdef __init__(self, filePath, data = None):\n\t\tself.filePath = filePath\n\t\tself.data = data\n\n\tdef saveToFile(self):\n\t\twith open(self.filePath, 'wb') as outf:\n\t\t\tpickle.dump(self.data, outf)\n\n\tdef readFromFile(self):\n\t\twith open(self.filePath, 'rb') as inf:\n\t\t\tself.data = pickle.load(inf)\n\ndef process_list(_func, _list):\n    return map( lambda x: process_list(_func, x) if type(x)==list else _func(x), _list )\n\ndef toRHObject(item):\n    if type(item) == ms.MSMesh:\n        return item.toRHMesh(sc.doc.ModelUnitSystem.ToString())\n\n\"\"\"Transforms nestings of lists or tuples to a Grasshopper DataTree\"\"\"\n\"\"\"Big thanks to Giulio Piacentino for this function\"\"\"\ndef list_to_tree(input, none_and_holes=False, source=[0]):\n    def proc(input,tree,track):\n        path = GH_Path(Array[int](track))\n        if len(input) == 0 and none_and_holes: tree.EnsurePath(path); return\n        for i,item in enumerate(input):\n            if hasattr(item, '__iter__'): #if list or tuple\n                track.append(i); proc(item,tree,track); track.pop()\n            else:\n                if none_and_holes: tree.Insert(item,path,i)\n                elif item is not None: tree.Add(item,path)\n    if input is not None: t=DataTree[object]();proc(input,t,source[:]);return t\n\nif _import:\n    serializer = SerializeObjects(_filePath)\n    serializer.readFromFile()\n    data = serializer.data\n    dataList = process_list(toRHObject, data)\n    outMesh = list_to_tree(dataList)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

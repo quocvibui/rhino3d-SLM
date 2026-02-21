@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/new-to-python-triangular-prism-roof-command/70437",
+  "topic_id": 70437,
+  "title": "New to python-triangular prism “roof” command",
+  "question": "Hey all, I’m very new to python and am trying to create a simple command that creates a triangular prism, basically a pitched roof.\n\n\nIt’s seems like it would be simple, i want to use getBox to define the volume with three point entry, the first line to define the direction of the pitch, then the base, finally the height.\n\n\nBut it keeps giving me an error when I try to set the mode parameter?\n\n\nAlso getBox always returns the points counter clockwise, and I want to be able to define the direction, so that doesn’t seem helpful.\n\n\nAny ideas?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef TriangularPrism():\n    \n    rc, origin = Rhino.Input.RhinoGet.GetPoint(\"Base point of triangular prism\", False)\n    if rc != Rhino.Commands.Result.Success:\n        return\n    \n    mode = Rhino.Input.GetBoxMode.Corner\n    rc, box = Rhino.Input.RhinoGet.GetBox(mode, origin, None, None, None)\n    if rc != Rhino.Commands.Result.Success:\n        return\n\n    # TODO...",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n\norigin =rs.GetPoint(\"Base point of triangular     prism\")\n\n\nmode = Rhino.Input.GetBoxMode.ThreePoint\nbox = rs.GetBox(mode, origin, None, None, None)\n\nrs.AddTextDot(\"0\", box[0])\nrs.AddTextDot(\"1\", box[1])\nrs.AddTextDot(\"2\", box[2])\nrs.AddTextDot(\"3\", box[3])\nrs.AddTextDot(\"4\", box[4])\nrs.AddTextDot(\"5\", box[5])\nrs.AddTextDot(\"6\", box[6])\nrs.AddTextDot(\"7\", box[7])",
+      "language": "python",
+      "author": "barron.crawford",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\nclr = System.Drawing.Color.Gray\n\ndef pickPoint1(pt0):\n    def dynamicDrawFunc( sender, args):\n        pt = args.CurrentPoint\n        args.Display.DrawLine(pt0, pt, clr, 1)\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.DynamicDraw += dynamicDrawFunc\n    gp.Get()\n    if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n        pt1 = gp.Point()\n        return (pt1)\n\ndef pickPoint2(pt1):\n\n    def dynamicDrawFunc( sender, args):\n\n        pt = args.CurrentPoint\n        args.Display.DrawLine(pt0, pt1, clr, 1)\n        args.Display.DrawLine(pt1, pt, clr, 1)\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Offset point\")\n    gp.DrawLineFromPoint(pt1, True)\n    plane = rs.PlaneFromPoints(pt0, pt1, [pt0.X, pt0.Y, pt0.Z+1])\n    line = Rhino.Geometry.Line(pt1, pt1 + plane.Normal)\n    gp.Constrain(line)\n    gp.DynamicDraw += dynamicDrawFunc\n    gp.Get()\n    if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n        pt2 = gp.Point()\n        return (pt2)\n\ndef pickPoint3(pt2):\n    def dynamicDrawFunc( sender, args):\n        pt = args.CurrentPoint\n        args.Display.DrawLine(pt0, pt1, clr, 1)\n        args.Display.DrawLine(pt1, pt2, clr, 1)\n        args.Display.DrawLine(pt2, pt, clr, 1)\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Offset point\")\n    gp.DrawLineFromPoint(pt2, True)\n    plane = sc.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    line = Rhino.Geometry.Line(pt2, pt2 + plane.Normal)\n    gp.Constrain(line)\n    gp.DynamicDraw += dynamicDrawFunc\n    gp.Get()\n    if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n        pt3 = gp.Point()\n        return (pt3)\n\n\n\npt0 =rs.GetPoint(\"Base Point\")\nif pt0:\n    pt1 = pickPoint1(pt0)\n    if pt1:\n        line = ([0,0,0], [30,2,0])\n        pt2 = pickPoint2(pt1)\n        if pt2:\n            pt3 = pickPoint3(pt2)\n            if pt3:\n                vertex = [(pt1.X+pt2.X)/2, (pt1.Y+pt2.Y)/2, pt3.Z]\n                triPts=[pt1, pt2, vertex, pt1]\n                triangle = rs.AddPolyline(triPts)\n                brep = rs.ExtrudeCurveStraight( triangle, pt1, pt0 )\n                rs.CapPlanarHoles( brep )\n                rs.DeleteObject(triangle)",
+      "language": "python",
+      "author": "barron.crawford",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1266
+}

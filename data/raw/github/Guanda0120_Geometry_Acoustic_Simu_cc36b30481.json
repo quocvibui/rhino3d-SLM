@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Guanda0120/Geometry_Acoustic_Simu/blob/fe0e445521fcfee6406f3605783387410ec1848c/FileIO/im_2_rhino.py",
+  "repo": "Guanda0120/Geometry_Acoustic_Simu",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "FileIO/im_2_rhino.py",
+  "instruction": "Im 2 rhino",
+  "code": "import numpy as np\nimport rhino3dm\nimport pickle\nimport os\nfrom Acoustic.ImageSourceRay import ImageSourceRay\nfrom Acoustic.Receiver import Receiver\n\n\ndef im2rhino(pickle_dir: str, out_sir: str):\n    \"\"\"\n\n    :param pickle_dir:\n    :param out_sir:\n    :return:\n    \"\"\"\n    assert os.path.exists(pickle_dir), ValueError(\"Pickle dir is not exist!\")\n\n    with open(pickle_dir, 'rb') as f:\n        rec = pickle.load(f)\n\n        # Create a Rhino file\n        rh_file = rhino3dm.File3dm()\n        # Layer setting\n        layer_name = ['1st_order', '2nd_order', '3rd_order', '4th_order', '5th_order']\n        layer_color = [(255, 0, 0, 255), (0, 255, 0, 255), (0, 0, 255, 255), (0, 255, 255, 255), (255, 0, 255, 255)]\n\n        for idx in range(len(layer_name)):\n            cur_layer = rhino3dm.Layer()\n            cur_layer.Name = layer_name[idx]\n            cur_layer.Visible = True\n            cur_layer.Color = layer_color[idx]\n            rh_file.Layers.Add(cur_layer)\n\n        # Get layer index\n        layer_index = [each.Index for each in rh_file.Layers]\n\n        # Construct Building Object\n        id_list = []\n        layer_id = []\n\n        if isinstance(rec, Receiver):\n\n            for imray in rec.im_ray:\n                # Point Container\n                point_container = []\n                src_point = rhino3dm.Point3d(imray.src_loc[0], imray.src_loc[1], imray.src_loc[2])\n                point_container.append(src_point)\n                for pt in imray.ref_pt:\n                    tmp_pt = rhino3dm.Point3d(pt[0], pt[1], pt[2])\n                    point_container.append(tmp_pt)\n\n                rec_point = rhino3dm.Point3d(imray.rec_loc[0], imray.rec_loc[1], imray.rec_loc[2])\n                point_container.append(rec_point)\n\n                polyline_rh = rhino3dm.Polyline(point_container)\n                polycur = rhino3dm.Curve.CreateControlPointCurve(polyline_rh, degree=1)\n                id = rh_file.Objects.AddCurve(polycur)\n                # Add Layer\n                cur_obj = rh_file.Objects.FindId(str(id))\n                cur_obj.Attributes.LayerIndex = layer_index[len(point_container)-3]\n\n            rh_file.Settings.ModelUnitSystem = rhino3dm.UnitSystem.Meters\n            rh_file.Write(out_sir, 6)\n\n\nif __name__ == '__main__':\n    pickle_dir = r\"D:\\\\PlanningHall\\\\rec_5.pkl\"\n    rhino_dir = r'C:\\Users\\12748\\Desktop\\PlHa_rec5.3dm'\n    im2rhino(pickle_dir, rhino_dir)\n\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

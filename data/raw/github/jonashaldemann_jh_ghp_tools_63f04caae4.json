@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/volumen_slicen.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/volumen_slicen.py",
+  "instruction": "Volumen slicen",
+  "code": "import ghpythonlib.components as gh\nimport Rhino.Geometry as rg\n\n\ndef volumen_slicen(breps, h_eg, h_og, h_tot):\n    \"\"\"\n    Berechnet Volumen-Schnitte und extrudiert diese basierend auf Eingabe-Breps.\n\n    Args:\n        breps (list): Eingabe-Breps.\n        h_eg (float): Höhe des Erdgeschosses.\n        h_og (float): Höhe eines Obergeschosses.\n        h_tot (float): Gesamthöhe.\n\n    Returns:\n        tuple: (Liste der neuen Breps, Gesamtfläche als String)\n    \"\"\"\n    schnitthoehe = 0.01\n    storeys = int(h_tot / 2.5)\n\n    # Ebenen für jede Etage erstellen\n    storey_base_heights = [schnitthoehe] + [\n        h_eg + schnitthoehe + h_og * i for i in range(storeys)\n    ]\n    planes = [\n        rg.Plane(rg.Point3d(0, 0, height), rg.Vector3d.ZAxis)\n        for height in storey_base_heights\n    ]\n    storeys = [\"EG0\"] + [f\"OG{i}\" for i in range(1, len(storey_base_heights) + 1)]\n\n    # Schnittkurven berechnen\n    x_curves = []\n    areas = []\n    tabelle = []\n    for plane, storey in zip(planes, storeys):\n        storey_curves = []\n        for brep in breps:\n            curves = rg.Brep.CreateContourCurves(brep, plane)\n            if curves:\n                storey_curves.extend(curves)\n\n        storey_area = []\n        for storey_curve in storey_curves:\n            area_props = rg.AreaMassProperties.Compute(storey_curve)\n            if area_props:\n                storey_area.append(area_props.Area)\n\n        storey_area = sum(storey_area)\n        areas.append(storey_area)\n\n        if storey_area > 0:\n            tabelle.append(f\"{storey} {int(storey_area)} m²\")\n\n        if storey_curves:\n            x_curves.extend(storey_curves)\n\n    total_area = sum(areas)\n    total_area_str = f\"ist {round(total_area)} m²\"\n\n    return x_curves, total_area_str, tabelle\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

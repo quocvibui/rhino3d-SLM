@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/color-mesh-faces-no-bleeding-best-practice/60299",
+  "topic_id": 60299,
+  "title": "Color Mesh Faces (No Bleeding) - Best Practice?",
+  "question": "Hi All,\n\n\nI’m revisiting some old code for coloring mesh faces (without them bleeding into each other!), and feel like I might be missing something here. The basic approach I’ve been using is to:\n\n\n\n\nUnweld the mesh, or, make a new mesh and append the faces onto this.\n\n\nColor the face corners of this now unwelded mesh.\n\n\n\n\nNow this approach works just fine.\n\n\n2018-04-12%2012_03_57-Autodesk%20Revit%202018%20-%20%5BStructural%20Plan_%20Level%202%20-%20Project1%5D\n1349×740 745 KB\n\n\nBut both unwelding and setting the colors are pretty heavy processes (at about 280 and 140 ms respetivley in this case). So I am looking to speed this up a bit, and wondering if there might be better/faster overall approaches that I am missing?\n\n\nLeading me to: At least sitting setting the colors can be sped up by calling \nMeshVertexColorList.SetColor\n, however this only appears to set one corner on fully unwelded meshes (but is substantially faster than setting each corner individually):\n\n\n2018-04-12%2012_05_24-Autodesk%20Revit%202018%20-%20%5BStructural%20Plan_%20Level%202%20-%20Project1%5D\n1348×741 569 KB\n\n\nWhile it works as expected on a welded mesh (but of course with colors bleeding across faces):\n\n\n2018-04-12%2012_06_02-Autodesk%20Revit%202018%20-%20%5BStructural%20Plan_%20Level%202%20-%20Project1%5D\n1348×741 769 KB\n\n\nAnd yes, I do realize that writing a compiled C# component (or, eww, a C++ plugin), or threading etc. can speed things up. But I’m asking what I might be missing in terms of the base logics here, and perhaps, also pointing out a bug (i.e. \nMeshVertexColorList.SetColor\n) and/or features that might be missing in RhinoCommon.\n\n\nBest,\n\n\nAnders",
+  "code_blocks": [
+    {
+      "code": "m.VertexColors.SetColor(f.A, c)\nm.VertexColors.SetColor(f.B, c)\nm.VertexColors.SetColor(f.C, c)\nm.VertexColors.SetColor(f.D, c)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 32,
+  "views": 5345
+}

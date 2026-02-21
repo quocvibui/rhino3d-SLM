@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/last-8-sr-broken-rhinocommon-stl-export/212034",
+  "topic_id": 212034,
+  "title": "Last 8 SR broken rhinocommon stl export",
+  "question": "Hi all.\n\nLatest Rhino 8 Service Release (8.24.25281.15001, 2025-10-08) broken stl export through Rhinocommon.\n\n\nRhinoDoc export = RhinoDoc.CreateHeadless(null);\nexport.Objects.Add(mymesh);\nexport.Export(Path.Combine(stlpath));\nexport.Dispose();\n\n\n\nRhino 8 fully crash and close without any warning at all!\n\n\nThis just broke my whole workflow! I’ll probably avoid updating for months now.  \n\nI need to revert to previous version ASAP!\n\nPlease how do I do so?\n\n\n\n\nMy last properly exported .stl this way have this header:\n\n“Rhinoceros Binary STL ( Sep  8 2025 )”\n\n\n\n\nReverted to 8.23.25251.13001, 2025-09-08 same .gh script is working fine.\n\n\n\n\nMy c# is from Rhino 7, but even creating a simple c# with the code above with the new editor in 8 give the same problem:\n\n\n\n\n8.24.25281.15001, 2025-10-08 crash without warning or log\n\n\n8.23.25251.13001, 2025-09-08 everything fine",
+  "code_blocks": [
+    {
+      "code": "[CommandStyle(Rhino.Commands.Style.Hidden)]\n public class TestHeadlessFileExport : Rhino.Commands.Command\n {\n   public TestHeadlessFileExport()\n   {\n     TheCommand = this;\n   }\n\n   /// <summary>The one and only TestHeadlessFileExport object instance</summary>\n   public static TestHeadlessFileExport TheCommand { get; private set; }\n\n   ///<returns>The command name as it appears on the Rhino command line.</returns>\n   public override string EnglishName\n   {\n     get { return \"TestHeadlessFileExport\"; }\n   }\n\n   protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n   {\n     GetObject go = new GetObject();\n     go.GeometryFilter = ObjectType.Mesh;\n     if (GetResult.Object != go.Get())\n       return Result.Cancel;\n\n     Mesh mesh = go.Object(0).Mesh();\n     if (null == mesh)\n       return Result.Failure;\n\n     RhinoDoc export = RhinoDoc.CreateHeadless(null);\n     export.Objects.Add(mesh);\n     export.Export(Path.Combine(\"C:\\\\Users\\\\tim\\\\Desktop\\\\junk.raw\"));\n     export.Dispose();\n     return Result.Success;\n   }\n }",
+      "language": "csharp",
+      "author": "tim",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "RhinoDoc export = RhinoDoc.CreateHeadless(null);\nexport.Objects.Add(mymesh);\nexport.Export(Path.Combine(stlpath));\nexport.Dispose();",
+      "language": "unknown",
+      "author": "maje90",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 91
+}

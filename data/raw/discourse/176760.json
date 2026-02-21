@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/object-dimensions-onselect-script/176760",
+  "topic_id": 176760,
+  "title": "Object Dimensions OnSelect Script",
+  "question": "To see the dimensions of a clicked object without entering a command. Is it possible?\n\n\nSelect Object OnSelect Event\n\nRhino.StatusBarMessage Object.Width Height Length Debth",
+  "code_blocks": [
+    {
+      "code": "bbox = Rhino.Geometry.BoundingBox.Unset\nfor rh_obj in rh_objs: \n    bbox.Union(rh_obj.Geometry.GetBoundingBox(False))\n\nx = abs(bbox.Max.X - bbox.Min.X)\ny = abs(bbox.Max.Y - bbox.Min.Y)\nz = abs(bbox.Max.Z - bbox.Min.Z)",
+      "language": "python",
+      "author": "ska_drivers",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "def MyDimensionInfoEvent(sender, e):\n    rh_objs = list(scriptcontext.doc.Objects.GetSelectedObjects(False, False))\n    if not rh_objs: \n        Rhino.UI.StatusBar.ClearMessagePane()\n        return\n    \n    bbox = Rhino.Geometry.BoundingBox.Unset\n    for rh_obj in rh_objs: \n        bbox.Union(rh_obj.Geometry.GetBoundingBox(True))\n    \n    x = bbox.PointAt(0,0,0).DistanceTo(bbox.PointAt(1,0,0))\n    y = bbox.PointAt(0,0,0).DistanceTo(bbox.PointAt(0,1,0))\n    z = bbox.PointAt(0,0,0).DistanceTo(bbox.PointAt(0,0,1))\n    \n    units = scriptcontext.doc.GetUnitSystemName(True, False, False, False)\n    message = \"DX={0:.3f}  DY={1:.3f}  DZ={2:.3f}  ({3})\".format(x, y, z, units)\n    Rhino.UI.StatusBar.SetMessagePane(message)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "bbox = Rhino.Geometry.BoundingBox.Unset\nfor rh_obj in rh_objs: \n    bbox.Union(rh_obj.Geometry.GetBoundingBox(False))\n\nx = abs(bbox.Max.X - bbox.Min.X)\ny = abs(bbox.Max.Y - bbox.Min.Y)\nz = abs(bbox.Max.Z - bbox.Min.Z)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 18,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 393
+}

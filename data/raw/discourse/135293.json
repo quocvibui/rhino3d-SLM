@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-with-rs-pointarraytransfrom-x-rs-xformmirror/135293",
+  "topic_id": 135293,
+  "title": "Help with rs.pointarraytransfrom(x, rs.xformmirror())",
+  "question": "Hello\n\nsince my script surrounding rs.Pointarraytransform(x, rs.XformMirror()) does not work the way I would like it to, it would be amazing if you can point out the mistake I made. Ive tryed for days, but could not find a solution. Thanks!\n\n\nThe coordinates of a  tetrahedon, need to be mirrored at every cornerpoint using those of its sides, that are meeting in the cornerpoint as mirrorplane defining normals.\n\nFor context, the tetrahedon fits into a rectangle of sidelength( 1,1,1 ), and the final aim is to write a script for conways game of life, in which the existance of an instance depends on its neighbours.\n\n\nBy comparing the coordinates I plan to identify neighboring tetrahedon-cells.\n\n\nUsing rs.InsertBlock(Tetrahedon, xformmirror()), a mirrored tetrahedon is inserted flawlessly.\n\nBut the way I use rs.pointarraytransform() , it does not seem to work. Where did I make a  mistake?\n\n\nThank you very much and with best regards,\n\nAero\n\n\nThis is my code:\n\n\nimport rhinoscriptsyntax as rs\n\nrs.DeleteObjects(rs.AllObjects())\n\n\n##Block\ncoordinates = [ (0,0,0), (1,0,1), (1,1,0), (0,1,1)]\n\n#draw the tetrahedon:\nlines = []\nfor entry in coordinates:\n    aktive_Postition = coordinates.index(entry)\n    for counter in range(len(coordinates)):\n        if counter > aktive_Postition:   #makes every combination of ccordinates. no dublicates with counter\n            line = rs.VectorCreate(entry, coordinates[counter])\n            if rs.VectorLength( line ) >= 2**0.5: lines.append([entry, coordinates[counter]])  #2**0.5 = sidelength of tetrahedon\n rs.AddBlock((rs.AddLine( pair[0], pair[1] ) for pair in lines), (0,0,0), name=\"cell\")\n\nfor p in coordinates:\n    print \"--> {}: \".format(coordinates.index(p)), p\n    for pair in lines:\n        if p in pair:\n            #here starts the problem:\n            print \"!!!{} contains point!!!\".format(pair)\n            mirror = rs.XformMirror( p, rs.VectorCreate(pair[1], pair[0] ))\n            mc = mirrored_coordinates = list(rs.PointArrayTransform(co...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.DeleteObjects(rs.AllObjects())\n\n\n##Block\ncoordinates = [ (0,0,0), (1,0,1), (1,1,0), (0,1,1)]\n\n#draw the tetrahedon:\nlines = []\nfor entry in coordinates:\n    aktive_Postition = coordinates.index(entry)\n    for counter in range(len(coordinates)):\n        if counter > aktive_Postition:   #makes every combination of ccordinates. no dublicates with counter\n            line = rs.VectorCreate(entry, coordinates[counter])\n            if rs.VectorLength( line ) >= 2**0.5: lines.append([entry, coordinates[counter]])  #2**0.5 = sidelength of tetrahedon\n rs.AddBlock((rs.AddLine( pair[0], pair[1] ) for pair in lines), (0,0,0), name=\"cell\")\n\nfor p in coordinates:\n    print \"--> {}: \".format(coordinates.index(p)), p\n    for pair in lines:\n        if p in pair:\n            #here starts the problem:\n            print \"!!!{} contains point!!!\".format(pair)\n            mirror = rs.XformMirror( p, rs.VectorCreate(pair[1], pair[0] ))\n            mc = mirrored_coordinates = list(rs.PointArrayTransform(coordinates, mirror))\n            for (a,b) in zip( coordinates, mc): print( a, \"mirrored {}\".format(b))\n            #print \"mirrored\", mc\n            #V1: - no problems\n            #rs.InsertBlock2(\"cell\", mirror)\n            #V2: - not working properly:\n            #rs.InsertBlock(\"cell\", rs.SortPoints( mc, order=4)[0])\n            \n            #\"\"\"V3 drawing the tetrahedon form mirrored_coorinates:\n            for point in mc:\n                aktive_Postition = mc.index(point)\n                for counter in range(len(mc)):\n                    if counter > aktive_Postition:\n                        laen = rs.VectorLength( rs.VectorCreate(point, mc[counter] ))\n                        if laen >= 2**0.5: \n                            rs.AddLine( point, mc[counter])\n#\"\"\"",
+      "language": "python",
+      "author": "Aero",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 414
+}

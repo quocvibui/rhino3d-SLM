@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-unweldvertices/129289",
+  "topic_id": 129289,
+  "title": "Mesh.UnweldVertices",
+  "question": "Greetings, I have a list of mesh vertices IDs and I would like to unweld mesh at those vertices.\n\n\nhttps://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Mesh_UnweldVertices.htm\n\nSeems like  a perfect solution, except I can’t get it to work.\n\nMy current mesh is completely welded with no creases, if I unweld it it doesn’t change behavior.\n\nI have read the tips for the method and I did TopologyVertices.TopologyVertexIndex() but the provided list has the wrong indexing no matter how I approach it.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\ntopo_edge_indices = []\n\nfor i in range(M.TopologyEdges.Count):\n    if M.TopologyEdges.IsEdgeUnwelded(i):\n        continue\n    line = M.TopologyEdges.EdgeLine(i)\n    pt = line.PointAt(0.5)\n    rc, _ = C.ClosestPoint(pt, t)\n    if rc:\n        topo_edge_indices.append(i)\n\nM.UnweldEdge(topo_edge_indices, False)\n\nsub_meshes = list(M.ExplodeAtUnweldedEdges())  # optional\n\na = sub_meshes",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 715
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-with-python-script/10968",
+  "topic_id": 10968,
+  "title": "Problem with Python Script",
+  "question": "Hi Steve\n\nWith the wip V6 i have problems with pyton scripts.\n\nIn the attached images the script \nViteBrugola3.py\n  load the script Dynamic_Copy_2_rs .\n\nWhen i start ViteBrugola3 i get  the message:\n\nMessage: No module named Dynamic_Copy_2_rs\n\nIn V5 all are OK.\n\nThe Python editor option i have the same setting\n\nCiao Vittorio\n\n\nTraceback:\n\nline 7, in , “C:\\Users\\Angela\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\scripts\\\nViteBrugola3.py\n”",
+  "code_blocks": [
+    {
+      "code": "\"\"\"\n    Return list of curve and edge\n    \"\"\"\n\n.    filter= Rhino.DocObjects.ObjectType.Curve\n    \n    rc, objrefs = Rhino.Input.RhinoGet.GetOneObject(\"Seleziona punto vicino allo spigolo\", False, filter)\n    crv=objrefs.Curve()  \n    \n    print crv    \n    len=rs.CurveLength(crv)\n    lun=len/4\nGetCurve()",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef GetCurve():\n\n    ge = Rhino.Input.Custom.GetObject()\n    ge.SetCommandPrompt(\"Seleziona punto vicino allo spigolo\")\n    ge.SubObjectSelect = False\n    ge.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    ge.DisablePreSelect()\n    \n    get_rc = ge.Get()\n    if get_rc != Rhino.Input.GetResult.Object: return\n\n    objRef = ge.Object(0)\n    crv=objRef.Curve()  \n    print crv    \n    len=rs.CurveLength(crv)\n    lun=len/4\n\nGetCurve()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef TestGetRedCrv():\n\n    allowed_objs = MyFilter(objtype=4, r=255, g=0, b=0)\n    if not allowed_objs: return\n\n    go_ex = rs.GetObjectEx(\"Select\", 0, False, True, allowed_objs)\n    if go_ex:\n        print go_ex[0]\n\ndef MyFilter(objtype=4, r=255, g=0, b=0):\n    objs = rs.ObjectsByType(objtype, False, 1)\n    if objs is not None:\n        allowed = []\n        for o in objs:\n            color = rs.ObjectColor(o)\n            if color:\n                if color.R == r and color.G == g and color.B == b:\n                    allowed.append(o)\n\n    if len(allowed) == 0: return None\n    return allowed\n\nif __name__==\"__main__\":\n    TestGetRedCrv()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 8,
+  "views": 937
+}

@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issues-creating-plugin-from-python-script/29698",
+  "topic_id": 29698,
+  "title": "Issues Creating Plugin From Python Script",
+  "question": "I’m trying to compile my python script into a plugin for Rhino 5 but am running into an issue that I am not able to fix.  When I run my script in the Rhino editor it runs fine, although when compiled into a plugin (Im using the Rhinoscript Compiler) the script will not run all the way through.  It’s really tough to debug when I cannot see an error like when I do in the editor.\n\n\nI’ve tried putting print commands in the script to see exactly when it is failing and ive sort of narrowed it down to a line or to but still cannot see when the issue is when the script is running just fine in the editor.  Here is a snip of the code where I think I am running into the error:\n\n\ndef BuildComponent(MPoints,EPoints,Degree,Components):\n    if Components == 1:\n        Curves = []\n        for CrossSection in range(len(MPoints)):\n            Curves.append(RS.AddCurve(MPoints[CrossSection]))\n    elif Components == 2:\n        Curves = []\n        for Count in [0,1]:\n            for CrossSection in range(len(MPoints[Count])):\n                Curves.append(RS.AddCurve(MPoints[Count][CrossSection]))\n    Sections = [RS.AddLoftSrf(Curves,None,None,Degree)]\n\n\n\nIf there was some way to see the errors python is returning in the rhino command window it would help a lot but I’m sure that there is.\n\n\nI appreciate any help",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSome():\n    A = rs.GetPoints(False, False, \"Pick 3 Points (A)\", False, 3)\n    if not A: return\n\n    B = rs.GetPoints(False, False, \"Pick another 3 Points (B)\", False, 3)\n    if not B: return\n\n    # list of pointlists\n    MPoints = [A,B]\n    rs.AddCurve(MPoints[0][0])\n\nDoSome()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def AddCurve(points, degree=3):\n    points = rhutil.coerce3dpointlist(points, True)\n    curve = Rhino.Geometry.Curve.CreateControlPointCurve(points, degree)\n    if not curve: raise Exception(\"unable to create control point curve from given points\")\n    rc = scriptcontext.doc.Objects.AddCurve(curve)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add curve to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Steven_Elliott",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "if not curve.IsValid:\n        print \"Invalid curve detected\"\n        if not isinstance(points, list): \n            print \"No list\"\n            return\n        for i, p in enumerate(points): rs.AddTextDot(i, p)\n        return",
+      "language": "python",
+      "author": "clement",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as RS, math\nfrom decimal import *\nglobal CambConst, FormConst, XCoor, WXOff, WZOff, HTXOff, HTZOff, VTXOff, VTZOff, Scalar, GXOff, GYOff, GZOff",
+      "language": "python",
+      "author": "Steven_Elliott",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "def BuildComponent(MPoints,EPoints,Degree,Components):\n    if Components == 1:\n        Curves = []\n        for CrossSection in range(len(MPoints)):\n            Curves.append(RS.AddCurve(MPoints[CrossSection]))\n    elif Components == 2:\n        Curves = []\n        for Count in [0,1]:\n            for CrossSection in range(len(MPoints[Count])):\n                Curves.append(RS.AddCurve(MPoints[Count][CrossSection]))\n    Sections = [RS.AddLoftSrf(Curves,None,None,Degree)]",
+      "language": "python",
+      "author": "Steven_Elliott",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 27,
+  "views": 4565
+}

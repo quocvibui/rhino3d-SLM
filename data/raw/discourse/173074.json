@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-by-material-name-with-python-and-or-rhinocommon/173074",
+  "topic_id": 173074,
+  "title": "\"Select by material name\" with python and/or rhinocommon",
+  "question": "I have been trying to perform “select by material” with script in python or rhinocommon.\n\nCouldn’t find anything similar in the doc…\n\n\nThere is a series of findby… methods under Rhino.DocObjects.Tables.ObjectTable\n\nbut I don’t see findbymaterial listed here or anywhere else.\n\n\nAny lead is greatly appreciated!!!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelMaterialName(name):\n    \n    settings = Rhino.DocObjects.ObjectEnumeratorSettings()\n    settings.NormalObjects = True\n    objs = scriptcontext.doc.Objects.GetObjectList(settings)\n    \n    rc = filter(lambda i: i.RenderMaterial and i.RenderMaterial.Name==name, objs)\n    if not rc: return\n    \n    rs.SelectObjects(rc)\n    \nSelMaterialName(name=\"Gem\")",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef MySelMaterialName(name):\n    \n    cmd = \"_-SelMaterialName {}{}{}\".format(chr(34), name, chr(34))\n    rs.Command(cmd, True)\n    \nMySelMaterialName(\"Gem\")",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 333
+}

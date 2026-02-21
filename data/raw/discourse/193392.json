@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-sweep1-broken-in-rhino-geometry-and-grasshopper/193392",
+  "topic_id": 193392,
+  "title": "Is Sweep1 Broken in Rhino.Geometry and Grasshopper?",
+  "question": "It works fine with circlular rails, but you can see that for rectangular rails, I get a crazy result.\n\n\n2024-10-20_6-49-29\n1452×727 128 KB\n\n\nThis is the code:\n\n\nrectangle sweep problem.py\n (855 Bytes)\n\n\nWhat am I doing wrong?\n\n\nUpdate:\n\nIt seems broken in Grasshopper, too. You can see it is sweeping the circle but not the rectangle.\n\n\n2024-10-20_10-40-44\n1920×1080 367 KB\n\n\nsweep1 problem.gh\n (14.8 KB)\n\n\nUpdate2:\n\nEven weirder…it works in GH if I swap the rail and cross-section shape. It’s not giving exactly the result I was expecting, but it is performing the sweep.\n\n\n2024-10-20_10-44-19\n1920×1080 379 KB\n\n\nUpdate3:\n\nSo, if I swap the rail and shape in the Rhino.Geometry.Brep.CreateFromSweep, it starts working (although I was expecting the sweep to flare outward at the bottom all the way around…which is what happens if you manually perform a sweep1 using the Rhino tools.)\n\n\n2024-10-20_10-50-42\n1415×691 50.1 KB\n\n\nUpdate4:\n\nOkay, I just realize that when I swap the rail and cross-section, the sweep is skewed because it it is in fact treating the cross-section shape as the rail. So ignore Update3. I still wonder why it won’t sweep the rectangle in Grasshopper, though.",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport math\n\nradius = 3\nsweepWidth = 2.5\nangle = math.radians(20)\n\ncornerA = rg.Point3d(-radius, radius, 0)\ncornerB = rg.Point3d(radius, -radius, 0)\nrect = rg.Rectangle3d(rg.Plane.WorldXY, cornerA, cornerB).ToPolyline()\nrail = rg.PolylineCurve(rect)\n\nstartPnt = rg.Point3d(radius, 0, 0)\nendPnt = rg.Point3d(radius+sweepWidth, 0, 0)\n\nline = rg.Line(startPnt, endPnt)\nshape = rg.LineCurve(line)\n\nxform = rg.Transform.Rotation(angle, rg.Vector3d.YAxis, startPnt)\nshape.Transform(xform)\n\n# move the rail's seam to the shape's starting point\nrc, t = rail.ClosestPoint(startPnt)\nrail.ChangeClosedCurveSeam(t)\n\nbreps = rg.Brep.CreateFromSweepSegmented(rail, shape, False, sc.doc.ModelAbsoluteTolerance)\n\nsc.doc.Objects.AddCurve(rail)\nsc.doc.Objects.AddCurve(shape)\nfor brep in breps:\n    sc.doc.Objects.AddBrep(brep)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 169
+}

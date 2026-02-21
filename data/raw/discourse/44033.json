@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/custommeshobject-and-python/44033",
+  "topic_id": 44033,
+  "title": "CustomMeshObject and Python",
+  "question": "hello,menno\n\ni followed to experience custommeshobject with python. however, encounter a problem with error message ‘need public constractor’.   can u help to take a look slight_smile:\n\n\ncustommesh.py\n (2.3 KB)\n\n\nfrom System.Reflection import *\nfrom System.Runtime.InteropServices import *\nfrom Rhino.PlugIns import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects.Custom import *\nfrom Rhino.Input.Custom import *\nfrom System import *\nfrom System.Collections.Generic import *\nfrom Rhino import *\nimport rhinoscriptsyntax as rs\nimport clr\nimport scriptcontext,Rhino\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport Rhino,System\ndef drawmeshobject():  \n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select object\", True, Rhino.DocObjects.ObjectType.AnyObject)\n    if rc!=Rhino.Commands.Result.Success: return\n    m = objref.Mesh()\n    my = MyMeshObject(m)    \n    # print my\n    doc.Objects.Replace(objref, my)\n    doc.Views.Redraw()\nclass MyMeshObject(CustomMeshObject):\n    # def __init__():\n        # pass\n    # def MyMeshObject():\n        # pass\n    # def __init__(self):\n        # pass\n    def __init__(self,*args):\n        if len(args)==1:\n            try:\n                # print args[0],type(args[0])\n                # CustomMeshObject.__init__(args[0])\n                # CustomMeshObject(args[0])\n                # super(self,CustomMeshObject).__init__(args[0])\n                # super(self,CustomMeshObject).CustomMeshObject(args[0])\n                # super(self,CustomMeshObject)(args[0])\n                self.SetMesh(args[0])\n                self.__bb=args[0].GetBoundingBox(True)\n                print self.__bb\n                print 'self.Mesh',self.Geometry\n                # self.Attributes=ObjectAttributes()\n                # print 'self.Attributes',self.Attributes.ObjectColor,self.Attributes.LayerIndex ,self.Attributes.Name,self.Attributes.ObjectId  \n            except Exception,e:\n                print(str(e))\n        el...",
+  "code_blocks": [
+    {
+      "code": "from System.Reflection import *\nfrom System.Runtime.InteropServices import *\nfrom Rhino.PlugIns import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects.Custom import *\nfrom Rhino.Input.Custom import *\nfrom System import *\nfrom System.Collections.Generic import *\nfrom Rhino import *\nimport rhinoscriptsyntax as rs\nimport clr\nimport scriptcontext,Rhino\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport Rhino,System\ndef drawmeshobject():  \n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select object\", True, Rhino.DocObjects.ObjectType.AnyObject)\n    if rc!=Rhino.Commands.Result.Success: return\n    m = objref.Mesh()\n    my = MyMeshObject(m)    \n    # print my\n    doc.Objects.Replace(objref, my)\n    doc.Views.Redraw()\nclass MyMeshObject(CustomMeshObject):\n    # def __init__():\n        # pass\n    # def MyMeshObject():\n        # pass\n    # def __init__(self):\n        # pass\n    def __init__(self,*args):\n        if len(args)==1:\n            try:\n                # print args[0],type(args[0])\n                # CustomMeshObject.__init__(args[0])\n                # CustomMeshObject(args[0])\n                # super(self,CustomMeshObject).__init__(args[0])\n                # super(self,CustomMeshObject).CustomMeshObject(args[0])\n                # super(self,CustomMeshObject)(args[0])\n                self.SetMesh(args[0])\n                self.__bb=args[0].GetBoundingBox(True)\n                print self.__bb\n                print 'self.Mesh',self.Geometry\n                # self.Attributes=ObjectAttributes()\n                # print 'self.Attributes',self.Attributes.ObjectColor,self.Attributes.LayerIndex ,self.Attributes.Name,self.Attributes.ObjectId  \n            except Exception,e:\n                print(str(e))\n        else:\n            super(self,CustomMeshObject).CustomMeshObject()\n        # CustomMeshObject\n        # required\n    def OnDuplicate(self, source):\n        other = source\n        if None != other:\n            self.__bb = other._bb\n        super(self,CustomMeshObject).OnDuplicate(source)\n\ndef OnDraw(self, e):\n    if self.__bb.IsValid:\n        e.Display.DrawBox(self.__bb, Color.Red, 2)\n    super(self,CustomMeshObject).OnDraw(e)\nif __name__ == '__main__':\n    drawmeshobject()",
+      "language": "python",
+      "author": "zhangyejun",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 815
+}

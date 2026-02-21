@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/huhuman/rhino-defect-synth/blob/aec9f34c7273f7dcfcfdce7893e8ad91d8771c06/utils_loc/layers.py",
+  "repo": "huhuman/rhino-defect-synth",
+  "repo_stars": 0,
+  "repo_description": "Rhino Python scripts for parametric synthetic defect image generation",
+  "license": "unknown",
+  "filepath": "utils_loc/layers.py",
+  "instruction": "Layers",
+  "code": "import System\nfrom typing import Optional\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n\ndef __color_from_name(name: str) -> System.Drawing.Color:\n    color = getattr(System.Drawing.Color, name, None)\n    if color is None:\n        raise ValueError(f\"Unknown color: {name}\")\n    return color\n\n\ndef create_single_layer(name, color):\n    \"\"\"Create or get a single layer by name and color.\n    Args:\n        name: layer name\n        color: System.Drawing.Color\n    Returns:\n        the created or existing layer\n    \"\"\"\n    if isinstance(color, str):\n        color = __color_from_name(color)\n    layer = sc.doc.Layers.FindByFullPath(name, True)\n    if layer>=0: return sc.doc.Layers[layer]\n    layer_index = sc.doc.Layers.Add(name, color)\n    layer = sc.doc.Layers[layer_index]\n    return layer\n\n\ndef create_layers(\n    layer_color_dict,\n    layer_material_dict: Optional[dict] = None,\n):\n    \"\"\"Create layers for each component with specified material and color.\n    Args:\n        component_material_dict: dict mapping component names to material names\n        component_color_dict: dict mapping component names to System.Drawing.Color\n    \"\"\"\n    if not layer_color_dict:\n        raise ValueError(\"Layer color dictionary is required to create layers.\")\n\n    render_materials = [mat.DisplayName for mat in sc.doc.RenderMaterials]\n\n    currnt_layer = rs.CurrentLayer()\n    for layer in sc.doc.Layers:\n        if layer.Name and layer != currnt_layer:\n            objects = rs.ObjectsByLayer(layer.Name)\n            if objects:\n                rs.DeleteObjects(objects)  # Delete all objects on the layer\n            rs.DeleteLayer(layer.Name)\n\n    for layer_name, color in layer_color_dict.items():\n        layer = create_single_layer(layer_name, color)\n        if layer_material_dict and layer_name in layer_material_dict:\n            layer.RenderMaterial = sc.doc.RenderMaterials[render_materials.index(layer_material_dict[layer_name])]\n\n    first_layer = list(layer_color_dict.keys())[0]\n    first_layer_index = sc.doc.Layers.FindByFullPath(first_layer, True)\n    if first_layer_index >= 0:\n        sc.doc.Layers.SetCurrentLayerIndex(first_layer_index, True)\n    rs.DeleteLayer(currnt_layer)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

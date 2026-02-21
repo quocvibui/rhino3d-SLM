@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_mesh_to_cloud/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_mesh_to_cloud/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport System\n\nimport Rhino\nfrom ghpythonlib.componentbase import executingcomponent as component\n\n\nimport diffCheck\nimport diffCheck.df_cvt_bindings\n\n\n\nclass DFMeshToCloud(component):\n    def RunScript(self,\n            i_meshes: System.Collections.Generic.List[Rhino.Geometry.Mesh],\n            i_points: int) -> Rhino.Geometry.PointCloud:\n\n        if i_meshes is None:\n            return None\n\n        if i_points is None:\n            i_points = 1000\n\n        rh_mesh = i_meshes[0]\n        for i  in range(1, len(i_meshes)):\n            if i_meshes[i] is None:\n                return None\n            rh_mesh.Append(i_meshes[i])\n        rh_mesh.Faces.ConvertQuadsToTriangles()\n\n        df_mesh = diffCheck.df_cvt_bindings.cvt_rhmesh_2_dfmesh(rh_mesh)\n        df_cloud = df_mesh.sample_points_uniformly(i_points)\n        rgpoints = [Rhino.Geometry.Point3d(p[0], p[1], p[2]) for p in df_cloud.points]\n        # convert the df_cloud to a rhino cloud\n        rh_cloud = Rhino.Geometry.PointCloud(rgpoints)\n\n        return [rh_cloud]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

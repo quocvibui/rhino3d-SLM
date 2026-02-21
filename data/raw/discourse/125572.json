@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curve-equal-distance/125572",
+  "topic_id": 125572,
+  "title": "Curve equal distance",
+  "question": "Hello, i read in the old forum a post of \n@DavidRutten\n that \nDivide distance component places spheres on the curve which is very slow\n\n\n\n\nimage\n710×138 10.5 KB\n\n\n\n\nI try another method to make it faster by using arcs and loop.\n\nWhat i need now is help to improve this script to find all equal segments from the start to the end, so the loop will increase distance until the last point will equal or similar to the endpoint and break.\n\nI don’t know if this will be easy or need more complex function?\n\nI use \nk\n value to manually fix the problem\n\n\n\n\nimage\n1650×600 55.5 KB\n\n\n\n\nequal distance.gh\n (13.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\nimport rhinoscriptsyntax as rs\n\ndef intersection(A,B):\n    events = rg.Intersect.Intersection.CurveCurve(A,B,0.001,0.001)\n    for ccx in events:\n        return ccx.PointA,ccx.ParameterB\n\ndef divide(curve,count):\n    der = curve.DerivativeAt(0,1)[1]\n    a = rg.Line(curve.PointAtStart,der).ToNurbsCurve()\n    t = 0\n    dist = 0\n    points = []\n    for i in range(count):\n        dist = (curve.GetLength()/count)+k\n        P = curve.FrameAt(t)[1]\n        cir = rg.Circle(P,dist)\n        intrv = rg.Interval(-math.pi/2,math.pi/2)\n        a = rg.ArcCurve(rg.Arc(cir,intrv))\n        intr = intersection(a ,curve)\n        if not intr:\n            break\n        points.append(intr[0])\n        t = intr[1]\n            \n    points.insert(0,curve.PointAtStart)\n    points.Add(curve.PointAtEnd)\n    return points\n\n#points = divide(c,n)\n\nk = 0\nfor i in range(100):\n    points = divide(c,n+1)\n    if len(points)-n == 2:\n        k += 0.01",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import clr\nimport Grasshopper as gh\nclr.AddReferenceToFileAndPath(gh.Folders.PluginFolder+\"Components\\KangarooSolver.dll\")\nimport KangarooSolver as ks",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 21,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 32,
+  "views": 2693
+}

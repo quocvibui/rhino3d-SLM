@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/meshpoint-not-having-edgeindex/26651",
+  "topic_id": 26651,
+  "title": "MeshPoint not having edgeIndex",
+  "question": "When using closestMeshPoint the meshpoint have the faceIndex and T but no edge info\n\n\nimport Rhino\nimport Rhino.Geometry.Point3f as Point3f\nimport scriptcontext\n\nmesh = Rhino.Geometry.Mesh()\nmesh.Vertices.Add(Point3f(0,0,0))\nmesh.Vertices.Add(Point3f(1,0,0))\nmesh.Vertices.Add(Point3f(0,1,0))\nmesh.Vertices.Add(Point3f(0,0,1))\n\n\nmesh.Faces.AddFace(0, 1, 2)\n\nmesh.Faces.AddFace(3, 1, 0)\nmesh.Faces.AddFace(3, 2, 1)\nmesh.Faces.AddFace(3, 0, 2)\nmesh.Compact()\n\np = Point3f(1,1,0)\n\nmp = mesh.ClosestMeshPoint(p, 1000000000.0)\nprint mp.GetTriangle()\nprint mp.EdgeIndex\nprint mp.T\nprint mp.FaceIndex\nprint mp.EdgeParameter\n\nscriptcontext.doc.Objects.AddMesh(mesh)\nscriptcontext.doc.Views.Redraw()\n\n\n\nThis gives the result\n\n\n(False, -1, -1, -1)\n-1\nArray[float]((0.0, 0.5, 0.5, 0.0))\n2\n0.5\n\n\n\nWhich clearly stats that if found the face, and that it is on a edge but not what edge. Am I missing a Compact call?\n\nIf any one knows how to get the id of the edge of just the id of the face on the other side of the edge then I would be greadfull.\n\n\nbest kasper",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry.Point3f as Point3f\nimport scriptcontext\n\nmesh = Rhino.Geometry.Mesh()\nmesh.Vertices.Add(Point3f(0,0,0))\nmesh.Vertices.Add(Point3f(1,0,0))\nmesh.Vertices.Add(Point3f(0,1,0))\nmesh.Vertices.Add(Point3f(0,0,1))\n\n\nmesh.Faces.AddFace(0, 1, 2)\n\nmesh.Faces.AddFace(3, 1, 0)\nmesh.Faces.AddFace(3, 2, 1)\nmesh.Faces.AddFace(3, 0, 2)\nmesh.Compact()\n\np = Point3f(1,1,0)\n\nmp = mesh.ClosestMeshPoint(p, 1000000000.0)\nprint mp.GetTriangle()\nprint mp.EdgeIndex\nprint mp.T\nprint mp.FaceIndex\nprint mp.EdgeParameter\n\nscriptcontext.doc.Objects.AddMesh(mesh)\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "kasper_steenstrup",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 590
+}

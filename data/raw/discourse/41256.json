@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/com-application-with-rhinocommon-and-python/41256",
+  "topic_id": 41256,
+  "title": "COM application with RhinoCommon and Python",
+  "question": "Hi,\n\nI’ve been looking at some pages of the new \nrhinopython developer pages\n (nice work by the way!!). One of them attracted my attention.\n\nIt’s the \ndeveloper tools diagram\n from Python Primer:\n\n\n\n\nTo be honest I never understood it, even back then when I read the Python Primer.\n\n\nMy question is: is it possible that with regards to Python programming language, COM application can only be accessed with rhinosciptsyntax?\n\nCan it be accessed with Python through RhinoCommon as well?\n\n\nI understand that rhinoscriptsyntax function is only a wrapper around RhinoCommon, but the \nRhinoScript\n in that photo makes me confused. Is it related to VBScript back in time when Rhino did not have Rhino Python Editor (Rhino 4)?\n\n\nThank you for the clarification.",
+  "code_blocks": [
+    {
+      "code": "from System.Runtime.InteropServices import Marshal\nimport clr\nclr.AddReferenceToFileAndPath(\"c:/rstab8/rstab.dll\")\nimport RSTAB\n# gets interface to a running RSTAB\napp = Marshal.GetActiveObject(\"RSTAB.Application\")\n# checks RS-COM license and locks the application for using by COM\napp.LockLicense()\n\n\n\"\"\" call RSTAB classes/methods with the use of RhinoCommon?? Not only rhinoscriptsyntax??\"\"\"\n\n\n# unlocks the application and releases RS-COM license\napp.UnlockLicense()\n# releases COM object\napp = None\n# cleans Garbage Collector for releasing all COM interfaces and objects\nSystem.GC.Collect()\nSystem.GC.WaitForPendingFinalizers()",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 17,
+  "views": 3726
+}

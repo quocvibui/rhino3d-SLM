@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/progress-bar-cancel/101237",
+  "topic_id": 101237,
+  "title": "Progress Bar Cancel?",
+  "question": "Hi,\n\n\nWe are developing a new command that can take a while to execute and so we want to add a progress bar and the \noption to cancel the operation\n. I see that there is the ShowProgressMeter() ( \nhttps://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_UI_StatusBar_ShowProgressMeter.htm\n ) method which can be used to display a progress meter in the status bar, but there doesn’t seem to be a built-in way to cancel a command or display a cancel button (next to the progress meter for example) in the RhinoCommon API.\n\n\nMy question is:\n\nCan the the status bar / progress bar be customized using the Eto framework? Or do we need to create our own dialog with progress bar + cancel button if we want to have the cancel option?\n\n\nThank you.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    Rhino.UI.StatusBar.ShowProgressMeter(0, 5000, \"Processing\", True, True)\n    Rhino.RhinoApp.SetCommandPrompt(\"Hold ESC To cancel\")\n    \n    for i in xrange(5000):\n        if scriptcontext.escape_test(False): \n            Rhino.UI.StatusBar.HideProgressMeter()\n            return\n        \n        if i % 100 == 0: \n            Rhino.UI.StatusBar.UpdateProgressMeter(i, True)\n\n        rs.Sleep(1)\n    \n    Rhino.UI.StatusBar.HideProgressMeter()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "private bool _animate = true;\n\tprivate bool _animating;\n\n\tprivate void StopAnimation(object sender, EventArgs args) => _animating = false;\n\n\tpublic void AnimateSomething() {\n\t\ttry {\n\t\t\t_animating = _animate;\n\n\t\t\tif (_animating) {\n\t\t\t\tRhino.UI.StatusBar.ShowProgressMeter(min, max, \"Animating - hit escape to cancel\", true, true);\n\t\t\t\tRhinoApp.SetCommandPrompt(\"Hold ESC To cancel\");\n\t\t\t\tRhinoApp.EscapeKeyPressed += StopAnimation;\n\t\t\t}\n\n\t\t\tforeach (var item in Work) {\n\n\t\t\t\t// do work \n\n\t\t\t\tif (_animating) {\n\t\t\t\t\tRhinoDoc.ActiveDoc.Views.Redraw();\n\t\t\t\t\tRhino.UI.StatusBar.UpdateProgressMeter(currentProgress, true);\n\t\t\t\t\tRhinoApp.Wait();\n\t\t\t\t\tThread.Sleep(250);\n\t\t\t\t}\n\n\t\t\t}\n\t\t} finally {\n\t\t\tif (_animate) {\n\t\t\t\tRhinoApp.EscapeKeyPressed -= StopAnimation;\n\t\t\t\tRhino.UI.StatusBar.HideProgressMeter();\n\t\t\t}\n\t\t}\n\t}",
+      "language": "csharp",
+      "author": "david.birch.uk",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 1329
+}

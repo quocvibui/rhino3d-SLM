@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-a-serializationexception-when-using-rhino-compute-with-javascript/214154",
+  "topic_id": 214154,
+  "title": "Get a SerializationException when using rhino_compute with javascript",
+  "question": "Hi all,\n\n\nplaying around with rhino compute compiled with VS and running on my local mashine i was able to use compute.rhino3d.py successfully but when i try compute.rhino3d.js a error occured.\n\n\nThis is the simple javascript and html index\n\n\n// Import libraries\n\nimport rhino3dm from 'rhino3dm'\nimport { RhinoCompute } from 'rhinocompute'\n\n\n// Load rhino3dm\nconst rhino = await rhino3dm()\nconsole.log('Loaded rhino3dm.')\n\n// Your code ...\nRhinoCompute.url = \"http://localhost:5000/\"\nRhinoCompute.apiKey = \"\"\n\nconst c1 = new rhino.Circle([0,0,0],10)\nconst c2 = new rhino.Circle([5,0,0],10)\n\nconst curves = [c1,c2]\nconsole.log(curves)\n\nconst ca = RhinoCompute.Curve.createBooleanUnion(curves)\nconsole.log(ca)\n\n\n\n<html>\n  <head>\n  <!-- stuff -->\n  </head>\n  <body>\n      <!-- Import maps polyfill -->\n      <!-- Remove this when import maps will be widely supported -->\n      <script async src=\"https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js\"></script>\n\n      <script type=\"importmap\">\n          {\n              \"imports\": {\n                  \"rhino3dm\":\"https://unpkg.com/rhino3dm@8.4.0/rhino3dm.module.min.js\",\n                  \"rhinocompute\": \"https://www.unpkg.com/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js\"\n              }\n          }\n      </script>\n\n      <script type=\"module\" src=\"./script.js\"></script>\n  </body>\n</html>\n\n\n\nThese are the error messeages from the browser and the server consol.\n\n\nerror_browser\n1918×757 93.7 KB\n\n\nerror_compute_server\n1920×365 97.3 KB\n\n\nRhino 7 is in use.\n\n\nMaybe someone can give a tip to solve the problem.",
+  "code_blocks": [
+    {
+      "code": "// Import libraries\n\nimport rhino3dm from 'rhino3dm'\nimport { RhinoCompute } from 'rhinocompute'\n\n\n// Load rhino3dm\nconst rhino = await rhino3dm()\nconsole.log('Loaded rhino3dm.')\n\n// Your code ...\nRhinoCompute.url = \"http://localhost:5000/\"\nRhinoCompute.apiKey = \"\"\n\nconst c1 = new rhino.Circle([0,0,0],10)\nconst c2 = new rhino.Circle([5,0,0],10)\n\nconst ca = RhinoCompute.Curve.createBooleanUnion([c1.toNurbsCurve(),c2.toNurbsCurve()])\n\nconsole.log(ca)",
+      "language": "csharp",
+      "author": "flokart",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "// Import libraries\n\nimport rhino3dm from 'rhino3dm'\nimport { RhinoCompute } from 'rhinocompute'\n\n\n// Load rhino3dm\nconst rhino = await rhino3dm()\nconsole.log('Loaded rhino3dm.')\n\n// Your code ...\nRhinoCompute.url = \"http://localhost:5000/\"\nRhinoCompute.apiKey = \"\"\n\nconst c1 = new rhino.Circle([0,0,0],10)\nconst c2 = new rhino.Circle([5,0,0],10)\n\nconst curves = [c1,c2]\nconsole.log(curves)\n\nconst ca = RhinoCompute.Curve.createBooleanUnion(curves)\nconsole.log(ca)",
+      "language": "csharp",
+      "author": "flokart",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 90,
+  "posts_count": 2,
+  "views": 30
+}

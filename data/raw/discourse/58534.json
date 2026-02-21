@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trouble-moving-dimension-grips/58534",
+  "topic_id": 58534,
+  "title": "Trouble Moving Dimension Grips",
+  "question": "Background:\n\nWhen a bunch of geometry that includes dimensions is mirrored, the “architectural tick” style arrows become mirrored as well.  I’m writing a script to flip them back.\n\n\nProblem:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndimGuid = rs.GetObject(\"Select dimension\", custom_filter=rs.IsDimension)\nif dimGuid:\n\tdimObj = sc.doc.Objects.Find(dimGuid)\n\trs.EnableObjectGrips(dimGuid, True)\n\tg = rs.ObjectGripLocations(dimGuid)\n\trs.MirrorObject(dimGuid, g[2], g[3])\n\trs.ObjectGripLocation(dimGuid, 0, g[0])\n\trs.EnableObjectGrips(dimGuid, False)\n\n\n\nWhen I run this code, the dimension does not update.  Reading and printing the grip locations before and after shows that the call to rs.ObjectGripLocation at the end has no effect.\n\n\nI’ve tried several different ways to change the grip locations and nothing has worked.  I thought I’d start with this most basic way that I would expect to work and go from there.\n\n\n(Rhino 5)\n\n\nEDIT:\n\nIt appears to work for Radial Dimensions, but not for Linear Dimensions, Aligned Dimensions, or Angular Dimensions.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport math\n\ndef DoSomething():\n    \n    msg = \"Select mirrored linear or aligned dimension\"\n    dim_id = rs.GetObject(msg, rs.filter.annotation)\n    if not dim_id: return\n    \n    dim_obj = rs.coercerhinoobject(dim_id, True, True)\n    if not isinstance(dim_obj, Rhino.DocObjects.LinearDimensionObject): \n        return\n    \n    geo = dim_obj.Geometry\n    point = (geo.Arrowhead1End + geo.Arrowhead2End) * 0.5\n    plane = geo.Plane\n    plane.Origin = geo.Plane.PointAt(point.X, point.Y)\n    plane.Rotate(math.radians(90.0), plane.YAxis)\n    xform = Rhino.Geometry.Transform.Mirror(plane)\n    scriptcontext.doc.Objects.Transform(dim_obj, xform, True)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def MoveGrip(dimGuid, index, p2): # substitute for rs.ObjectGripLocation\n\tif rs.ObjectGripsOn(dimGuid) and index in range(rs.ObjectGripCount(dimGuid)):\n\t\tredraw = rs.EnableRedraw(False)\n\t\tselected = rs.SelectedObjects(include_grips=True)\n\t\trs.UnselectAllObjects()\n\t\tg = rs.ObjectGripLocations(dimGuid)\n\t\trs.SelectObjectGrip(dimGuid, index)\n\t\tp1 = g[index]\n\t\trs.Command(\"_Move {},{},{} {},{},{}\".format(p1.X, p1.Y, p1.Z, p2.X, p2.Y, p2.Z), echo=False)\n\t\trs.UnselectAllObjects()\n\t\trs.SelectObjects(selected)\n\t\trs.EnableRedraw(redraw)",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndimGuid = rs.GetObject(\"Select dimension\", custom_filter=rs.IsDimension)\nif dimGuid:\n\tdimObj = sc.doc.Objects.Find(dimGuid)\n\trs.EnableObjectGrips(dimGuid, True)\n\tg = rs.ObjectGripLocations(dimGuid)\n\trs.MirrorObject(dimGuid, g[2], g[3])\n\trs.ObjectGripLocation(dimGuid, 0, g[0])\n\trs.EnableObjectGrips(dimGuid, False)",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 828
+}

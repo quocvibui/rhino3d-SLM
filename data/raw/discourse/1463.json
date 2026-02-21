@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-texture-mapping/1463",
+  "topic_id": 1463,
+  "title": "RhinoCommon - Texture Mapping",
+  "question": "Are there some examples on how to apply, modify or delete texture mapping on one or many objects?\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "BoundingBox bb = l_mesh.GetBoundingBox(turtle.Plane);\n\nInterval ix = new Interval(bb.Min.X, bb.Max.X);\nInterval iy = new Interval(bb.Min.Y, bb.Max.Y);\nInterval iz = new Interval(bb.Min.Z, bb.Max.Z);\n\n//create texture mapping\nRhino.Render.TextureMapping tm = Rhino.Render.TextureMapping.CreatePlaneMapping(turtle.Plane, ix, iy, iz);\n\nl_mesh.TextureCoordinates.SetTextureCoordinates(tm);\n\n//add the leaf to the document\ndocument.Objects.AddMesh(l_mesh, turtle.Attributes);",
+      "language": "csharp",
+      "author": "TomC",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "// Selection des objects\n Rhino.Input.Custom.GetObject go = new Rhino.Input.Custom.GetObject();\n go.SetCommandPrompt(\"Select object(s)\");\n go.GeometryFilter = Rhino.DocObjects.ObjectType.Brep;\n go.EnablePreSelect(true, true);\n go.GetMultiple(0, 0);\n if (go.CommandResult() != Result.Success) { return go.CommandResult(); }\n\n int obj_count = go.ObjectCount;\n if (obj_count == 0) { return Result.Failure; }\n\nRhino.Geometry.Plane plane = doc.Views.ActiveView.ActiveViewport.ConstructionPlane();\n for (int i = 0; i < obj_count; i++)\n {\n      // Creation du map\n      Rhino.Geometry.BoundingBox obj_bb = go.Object(i).Geometry().GetBoundingBox(false);\n      Interval ix = new Interval(0, 1);\n      Interval iy = new Interval(0, 1);\n      Interval iz = new Interval(0, 1);\n      Rhino.Render.TextureMapping plane_mapping = Rhino.Render.TextureMapping.CreatePlaneMapping(plane, ix, iy, iz);\n      Rhino.Geometry.Mesh[] meshes = go.Object(i).Object().GetMeshes(MeshType.Render);\n      for (int j = 0; j < meshes.Length; j++)\n      {\n          bool done = meshes[j].TextureCoordinates.SetTextureCoordinates(plane_mapping);\n           RhinoApp.WriteLine(\"Set Texture Coordinates : \" + done.ToString());\n      }\n}\ndoc.Views.Redraw();",
+      "language": "csharp",
+      "author": "sideprojek",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "materials",
+    "mesh",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 22,
+  "views": 8283
+}

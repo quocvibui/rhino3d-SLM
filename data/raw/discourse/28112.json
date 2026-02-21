@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-with-getting-my-polyline-script-to-use-osnaps/28112",
+  "topic_id": 28112,
+  "title": "Help with getting my polyline script to use osnaps",
+  "question": "hi I’m very new to scripting so ill be short. after about all night and into the morning I finally found a way to script the poly line tool just like in the program… because its the example that was given by rhino team… but the point is it works and it does use osnaps just not on the lines that are being generated from start of script use until you end the script. how ever running the script again lets you osnap to the prior polyline created from it but not during its creation any help would be appreciated.\n\n\nimport scriptcontext \nimport rhinoscriptsyntax as rs\nimport math \nimport System.Guid, System.Array, System.Enum \n#this is the code that the actuall tool in rhino acesses from but its not entirely the same\ndef AddPolyline(points, replace_id=None): \n     points = rs.coerce3dpointlist(points, True) \n     if replace_id: replace_id = rs.coerceguid(replace_id, True) \n     rc = System.Guid.Empty \n     pl = Rhino.Geometry.Polyline(points) \n     pl.DeleteShortSegments(scriptcontext.doc.ModelAbsoluteTolerance) \n     if replace_id: \n         if scriptcontext.doc.Objects.Replace(replace_id, pl): \n             rc = replace_id \n     else: \n         rc = scriptcontext.doc.Objects.AddPolyline(pl) \n     if rc==System.Guid.Empty: raise Exception(\"Unable to add polyline to document\") \n     scriptcontext.doc.Views.Redraw() \n     return rc        \n     \n     \n#And this is what draws the poly line\npointes = rs.GetPoints(True)\nif pointes: rs.AddPolyline(pointes)",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext \nimport rhinoscriptsyntax as rs\nimport math \nimport System.Guid, System.Array, System.Enum \n#this is the code that the actuall tool in rhino acesses from but its not entirely the same\ndef AddPolyline(points, replace_id=None): \n     points = rs.coerce3dpointlist(points, True) \n     if replace_id: replace_id = rs.coerceguid(replace_id, True) \n     rc = System.Guid.Empty \n     pl = Rhino.Geometry.Polyline(points) \n     pl.DeleteShortSegments(scriptcontext.doc.ModelAbsoluteTolerance) \n     if replace_id: \n         if scriptcontext.doc.Objects.Replace(replace_id, pl): \n             rc = replace_id \n     else: \n         rc = scriptcontext.doc.Objects.AddPolyline(pl) \n     if rc==System.Guid.Empty: raise Exception(\"Unable to add polyline to document\") \n     scriptcontext.doc.Views.Redraw() \n     return rc        \n     \n     \n#And this is what draws the poly line\npointes = rs.GetPoints(True)\nif pointes: rs.AddPolyline(pointes)",
+      "language": "python",
+      "author": "DreamPsi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 824
+}

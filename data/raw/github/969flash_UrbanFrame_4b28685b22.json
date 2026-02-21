@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/969flash/UrbanFrame/blob/0f253b7a73233f7217608b7815c1a99f71e14f35/preview.py",
+  "repo": "969flash/UrbanFrame",
+  "repo_stars": 0,
+  "repo_description": "Generate Urban Frame",
+  "license": "unknown",
+  "filepath": "preview.py",
+  "instruction": "Preview",
+  "code": "import Rhino.Geometry as geo\n\ntry:\n    from typing import List, Optional\nexcept ImportError:\n    pass\nimport utils, units\nimport importlib\n\nimportlib.reload(utils)\nimportlib.reload(units)\nfrom units import Block, RoadNetwork, Node, Edge, Road, Junction\n\n\ndef block_id_preview_tags(blocks: \"List[Block]\", height: float = 10.0):\n    \"\"\"Return list of Rhino.Geometry.TextDot objects (preview only, not baked).\"\"\"\n    if not blocks:\n        return []\n    dots = []\n    for blk in blocks:\n        reg = blk.region\n        center = geo.AreaMassProperties.Compute(reg).Centroid\n        if not utils.is_pt_inside(center, reg):\n            center = utils.get_inside_check_pt(reg)\n\n        label = str(blk.block_id)\n        dot = geo.TextDot(label, center)\n        dots.append(dot)\n    return dots\n\n\nroad_network = globals().get(\"road_network\", None)  # type: Optional[RoadNetwork]\nblocks = globals().get(\"blocks\", [])  # type: List[Block]\nblock_id_tags = block_id_preview_tags(blocks, height=10.0)\nroads = [r.region for r in road_network.roads if r.region]\njunctions = [j.region for j in road_network.junctions if j.region]\nblocks = [b.region for b in blocks]\nnodes = [n.point for n in road_network.nodes]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

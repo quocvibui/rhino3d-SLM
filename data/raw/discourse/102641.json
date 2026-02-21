@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-to-create-some-entities-create-a-block-and-insert/102641",
+  "topic_id": 102641,
+  "title": "Python to create some entities, create a block and insert",
+  "question": "As a newby in Python I have made a function to create a so called BaseLine (for use in Ship designs). I want to create a block directly from the new entities and insert it. I can’t find a example script to help me create a block from generated entities. The examples I found are all based on user selection first and that is not what I want. Can anybody show how to do it with a couple of different entities like a line,a circle and a text?\n\n\nThanks in advance, Erik",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\n\n# create your geometry\nact_doc = Rhino.RhinoDoc.ActiveDoc\npoint_A = Rhino.Geometry.Point3d(0,0,0)\npoint_B = Rhino.Geometry.Point3d(30,0,0)\ngeo_line = Rhino.Geometry.Line(point_A,point_B)\n\n\n\n# add the geometry to the rhino doc to get a rhino object\nobj_Id = Rhino.RhinoDoc.ActiveDoc.Objects.AddLine(geo_line)\ngeo_base = Rhino.DocObjects.ObjRef(obj_Id).Geometry()\nRhino.RhinoDoc.ActiveDoc.Objects.Delete(obj_Id,True)\n\n\n# define attributes\nattr = Rhino.DocObjects.ObjectAttributes()\n\n\n\n# create a block (InstanceDefenition) from your rhino doc object \nRhino.RhinoDoc.ActiveDoc.InstanceDefinitions.Add('Block_test','Nothing to descripe',point_A,geo_base,attr)\n\n\n\n# insert block object geometry to the rhino doc\ntrans = Rhino.Geometry.Transform.Translation(0,0,0)\nfor i in Rhino.RhinoDoc.ActiveDoc.InstanceDefinitions:\n    if i.Name == 'Block_test':\n        Rhino.RhinoDoc.ActiveDoc.Objects.AddInstanceObject(i.Index,trans)",
+      "language": "python",
+      "author": "flokart",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "geometries = []\npt1 = Rhino.Geometry.Point3d(0,0,0)\npt2 = Rhino.Geometry.Point3d(10,0,0)\npt3 = Rhino.Geometry.Point3d(10,10,0)\n\n#you can not cast a point3d to geometrybase, so you have to add a point object instead and give the point3d as an argument\ngeometries.append(Rhino.Geometry.Point(pt1))\ngeometries.append(Rhino.Geometry.Point(pt2))\ngeometries.append(Rhino.Geometry.Point(pt3))\n\nattribute = Rhino.DocObjects.ObjectAttributes()\nindex = Rhino.RhinoDoc.ActiveDoc.InstanceDefinitions.Add('block','description', pt1, geometries,attribute)\n\nRhino.RhinoDoc.ActiveDoc.Objects.AddInstanceObject(index, Rhino.Geometry.Transform.Identity)",
+      "language": "unknown",
+      "author": "rgr",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 1824
+}

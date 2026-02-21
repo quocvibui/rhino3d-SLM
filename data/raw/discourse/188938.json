@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/learning-scripting/188938",
+  "topic_id": 188938,
+  "title": "Learning scripting",
+  "question": "I am trying to learn more about scripting. I downloaded this sample script, and it has an error when i enter 0. Why isn’t it printing something went wrong and can someone fix it?\n\n\n2_1_SomeNumber.py\n (220 Bytes)\n\n\nimage\n926×460 45.4 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nsomenumber = rs.GetReal(\"Line length\")\ntry:\n    line = rs.AddLine( (0,0,0), (somenumber,0,0) )\nexcept Exception as ex:\n    print (ex)\n    print(\"Something went wrong\")\nelse:\n    print(\"Line curve inserted with id\", line)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def AddLine(start, end):\n    \"\"\"Adds a line curve to the current model.\n    Parameters:\n      start, end (point|guid) end points of the line\n    Returns:\n      guid: id of the new curve object\n    Example:\n      import rhinoscriptsyntax as rs\n      start = rs.GetPoint(\"Start of line\")\n      if start:\n          end = rs.GetPoint(\"End of line\")\n          if end: rs.AddLine(start, end)\n    See Also:\n      CurveEndPoint\n      CurveStartPoint\n      IsLine\n    \"\"\"\n    start = rhutil.coerce3dpoint(start, True)\n    end = rhutil.coerce3dpoint(end, True)\n    rc = scriptcontext.doc.Objects.AddLine(start, end)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add line to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Artstep",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nsomenumber = rs.GetReal(\"Line length\")\ntry:\n    line = rs.AddLine( (0,0,0), (somenumber,0,0) )\nexcept Exception as ex:\n    print (ex)\n    print(\"Something went wrong\")\nelse:\n    print(\"Line curve inserted with id\", line)",
+      "language": "python",
+      "author": "Harold1",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 136
+}

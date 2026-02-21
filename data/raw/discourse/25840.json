@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/objectsbyname-in-gh-python/25840",
+  "topic_id": 25840,
+  "title": "ObjectsByName in GH Python",
+  "question": "Hi,\n\n\nI constantly get the Error:\n\n\nRuntime error (MissingMemberException): 'CustomTable' object has no attribute 'GetObjectList'\nTraceback:\n  line 641, in ObjectsByName, \"C:\\Users\\Martin\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\selection.py\"\n  line 3, in script\n\n\n\nWhen executing this script in the GHPython Component\n\n\nimport rhinoscriptsyntax as rs\n\nobjects = rs.ObjectsByName(\"1027\")\n\nprint objects\n\n\n\nIf I execute the same script in “regular” Python - it works.\n\n\nI know, that I cannot select objects in GHPython through User Input, but I would like to select a bunch of objects from a RhinoDocument to make change the input to a GH Document by Script.\n\n\nIs there a way around it with pure “Rhino Common”\n\n\nThanks\n\nMartin",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Grasshopper as gh\nimport Rhino as rh\nsc.doc = rh.RhinoDoc.ActiveDoc\ncurves = rs.GetObjects(\"Select curves\", 4, preselect=True)\nc=[]\nfor obj in curves :\n    c.append(rs.coercecurve(obj))\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "BaptisteC",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Grasshopper as gh\nimport Rhino as rh\nsc.doc = rh.RhinoDoc.ActiveDoc\nobjects = rs.ObjectsByName(\"1027\")\nprint objects\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "BaptisteC",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Runtime error (MissingMemberException): 'CustomTable' object has no attribute 'GetObjectList'\nTraceback:\n  line 641, in ObjectsByName, \"C:\\Users\\Martin\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\selection.py\"\n  line 3, in script",
+      "language": "unknown",
+      "author": "MartinIC",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjects = rs.ObjectsByName(\"1027\")\n\nprint objects",
+      "language": "python",
+      "author": "MartinIC",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 2035
+}

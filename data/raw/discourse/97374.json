@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/clear-custom-display-when-deleting-ghpython-component/97374",
+  "topic_id": 97374,
+  "title": "Clear custom display when deleting GhPython component",
+  "question": "Hello,\n\n\nI created several components which create \ncomponent specific custom display\n using GhPython.\n\nAnd with the help of several users of the forum I’ve been able to manually clear them individually. \n\n\nThe way I’ve done it is by creating component specific entry in the sticky context using UUID. Unfortunately, it means that I can’t clear the entry of a component I just deleted as I don’t know what was the generated UUID\n\n\nI was wondering If anyone knew how to automatically clear custom display when deleting ? Maybe by overriding a method linked to the deletion of the component ? I honestly don’t know \n …\n\n\nThank you in advance !\n\n\n.\n\n\nPs: Here’s an exemple of the type of scripts I’m using to plot a force vector and its magnitude\n\n\n    from ghpythonlib.componentbase import executingcomponent as component\n    import Grasshopper, GhPython\n    import System\n    import Rhino\n    import rhinoscriptsyntax as rs\n\n    from Rhino.Geometry import Line, Vector3d as V3, Point3d as Pt3\n    from Rhino.Display import CustomDisplay\n    from scriptcontext import sticky\n    from System.Drawing.Color import Green\n    import Rhino\n    from uuid import uuid4\n\n    class Forces_component(component):\n        \n        def __init__(self):\n            component.__init__(self)\n            self.ACTIVE_DOC = Rhino.RhinoDoc.ActiveDoc\n            DisplayGuid = \"CustomDisplayForces\" + str(uuid4())\n            self.TextDotGuid = \"TextDot\" + str(uuid4())\n            \n            if DisplayGuid not in sticky:\n                sticky[DisplayGuid] = CustomDisplay(True)\n                self.custom_display = sticky[DisplayGuid]\n            else:\n                self.custom_display = sticky[DisplayGuid]\n            \n            if self.TextDotGuid not in sticky:\n                sticky[self.TextDotGuid] = []\n                \n            self.custom_display.Clear()\n            \n        def RunScript(self, Pt, V, plot):\n            \n            self.custom_display.Clear()\n            self.clear_textdots(st...",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\n    import Grasshopper, GhPython\n    import System\n    import Rhino\n    import rhinoscriptsyntax as rs\n\n    from Rhino.Geometry import Line, Vector3d as V3, Point3d as Pt3\n    from Rhino.Display import CustomDisplay\n    from scriptcontext import sticky\n    from System.Drawing.Color import Green\n    import Rhino\n    from uuid import uuid4\n\n    class Forces_component(component):\n        \n        def __init__(self):\n            component.__init__(self)\n            self.ACTIVE_DOC = Rhino.RhinoDoc.ActiveDoc\n            DisplayGuid = \"CustomDisplayForces\" + str(uuid4())\n            self.TextDotGuid = \"TextDot\" + str(uuid4())\n            \n            if DisplayGuid not in sticky:\n                sticky[DisplayGuid] = CustomDisplay(True)\n                self.custom_display = sticky[DisplayGuid]\n            else:\n                self.custom_display = sticky[DisplayGuid]\n            \n            if self.TextDotGuid not in sticky:\n                sticky[self.TextDotGuid] = []\n                \n            self.custom_display.Clear()\n            \n        def RunScript(self, Pt, V, plot):\n            \n            self.custom_display.Clear()\n            self.clear_textdots(sticky[self.TextDotGuid])\n            \n            if plot:\n                sticky[self.TextDotGuid] = []\n                attr = Rhino.DocObjects.ObjectAttributes()\n                attr.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n                attr.ObjectColor = Green\n                for vector in V:\n                    for point in Pt:\n                        if vector.Length < 50e3:\n                            v = 2*vector/vector.Length\n                        else:\n                            v = 2*vector/50e3\n                        self.custom_display.AddVector(point-v,v,Green)\n                        tdot = self.create_textdot(\"{}kN\".format(vector.Length/1000.), \n                                                                 point-1.3*v, -1)\n                        id = self.ACTIVE_DOC.Objects.AddTextDot(tdot, attr)\n                        sticky[self.TextDotGuid].append(id)\n\n        def create_textdot(self, text, point):\n            textdot = Rhino.Geometry.TextDot(text, point)\n            textdot.FontHeight = 18\n            return textdot\n        \n        def clear_textdots(self, object_ids):\n            for id in object_ids:\n                if self.ACTIVE_DOC.Objects.Delete(id, True):\n                    pass",
+      "language": "python",
+      "author": "alexandre.flamant",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 1282
+}

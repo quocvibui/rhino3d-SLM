@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/invalid-surface-input-ghpython-sine-wave-on-surface/176344",
+  "topic_id": 176344,
+  "title": "Invalid surface input GhPython - Sine wave on surface",
+  "question": "I am trying to write a script to create a sine wave from a surface. I have used ChatGPT to help me write the script. I’ve gone through several back and forths with the AI looking for a solution but it has hit a dead end.\n\n\nI am consistently getting an ‘Input is not a valid surface’ error from the editor. However, I have correctly referenced the surface and confirmed this works by writing another simple script that just references the surface and it can correctly identify the surface as valid.\n\n\nWhat should I change in my script? What am I doing wrong?\n\n\nHere’s my script:\n\n\n\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"pennh\"\n__version__ = \"2024.02.22\"\n\nimport rhinoscriptsyntax as rsimport\nimport Rhino.Geometry as rg\nimport math\n\n# Function to create sine wave points\ndef create_sine_wave(surface, frequency, amplitude, num_divisions):\n    # Get surface domain\n    u_domain = surface.Domain(0)\n    v_domain = surface.Domain(1)\n    \n    # Initialize points list\n    points = []\n    \n    # Generate points on the surface\n    for i in range(num_divisions + 1):\n        u = u_domain.T0 + (u_domain.T1 - u_domain.T0) * i / num_divisions\n        for j in range(num_divisions + 1):\n            v = v_domain.T0 + (v_domain.T1 - v_domain.T0) * j / num_divisions\n            point = surface.PointAt(u, v)\n            \n            # Calculate sine wave offset\n            offset = amplitude * math.sin(frequency * u)\n            point += surface.NormalAt(u, v) * offset\n            \n            # Append point to the list\n            points.append(point)\n    \n    return points\n\n# Main function\ndef main(surface, frequency, amplitude, num_divisions):\n    # Check if surface is valid\n    if not surface or not isinstance(surface, rg.Surface):\n        print(\"Input is not a valid surface.\")\n        return None\n    \n    # Create sine wave points\n    sine_wave_points = creat...",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"pennh\"\n__version__ = \"2024.02.22\"\n\nimport rhinoscriptsyntax as rsimport\nimport Rhino.Geometry as rg\nimport math\n\n# Function to create sine wave points\ndef create_sine_wave(surface, frequency, amplitude, num_divisions):\n    # Get surface domain\n    u_domain = surface.Domain(0)\n    v_domain = surface.Domain(1)\n    \n    # Initialize points list\n    points = []\n    \n    # Generate points on the surface\n    for i in range(num_divisions + 1):\n        u = u_domain.T0 + (u_domain.T1 - u_domain.T0) * i / num_divisions\n        for j in range(num_divisions + 1):\n            v = v_domain.T0 + (v_domain.T1 - v_domain.T0) * j / num_divisions\n            point = surface.PointAt(u, v)\n            \n            # Calculate sine wave offset\n            offset = amplitude * math.sin(frequency * u)\n            point += surface.NormalAt(u, v) * offset\n            \n            # Append point to the list\n            points.append(point)\n    \n    return points\n\n# Main function\ndef main(surface, frequency, amplitude, num_divisions):\n    # Check if surface is valid\n    if not surface or not isinstance(surface, rg.Surface):\n        print(\"Input is not a valid surface.\")\n        return None\n    \n    # Create sine wave points\n    sine_wave_points = create_sine_wave(surface, frequency, amplitude, num_divisions)\n    \n    return sine_wave_points\n\n# Test the script\nif __name__ == \"__main__\":\n    # Define inputs\n    surface = x  # Surface input from Grasshopper\n    frequency = 1.0  # Adjust frequency as needed\n    amplitude = 10.0  # Adjust amplitude as needed\n    num_divisions = 20  # Adjust number of divisions as needed\n    \n    # Call the main function\n    sine_wave_points = main(surface, frequency, amplitude, num_divisions)\n    \n    # Output the points\n    if sine_wave_points:\n        print(\"Sine wave points generated successfully!\")",
+      "language": "python",
+      "author": "Ryan_Penn",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 397
+}

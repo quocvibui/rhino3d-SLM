@@ -1,0 +1,91 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/an-objects-parent-or-children/45626",
+  "topic_id": 45626,
+  "title": "An object's parent or children",
+  "question": "Hi,\n\n\nShow me how to find an object’s parent or children, using Python Script in RhinoCommon.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n    \ndef SelChildren():\n    parent_id = rs.GetObject(\"Select Parent object\", 0, False, True)\n    if not parent_id: return\n    \n    rc = rs.Command(\"_SelChildren _Enter\", echo=False)\n    if rc:\n        rs.UnselectObject(parent_id)\n        child_ids = rs.SelectedObjects(False, False)\n        if not child_ids:\n            print \"No children found\"\n        else:\n            print \"Found {} children\".format(len(child_ids))\n        \nSelChildren()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "rhObjects[i] = go.Object(0).Object()\n    rhObjects[i].Select(False)\n    scriptcontext.doc.Views.Redraw()\n\n    if i == 0: children = GetChildren(rhObjects[i])\n\ngo.Dispose()",
+      "language": "python",
+      "author": "gootzans",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "scriptcontext.doc.Objects.Select(rhObject.Id)\nif Rhino.RhinoApp.RunScript(\"_SelChildren\", False):\n    ids = [rhObj.Id for rhObj in scriptcontext.doc.Objects.GetSelectedObjects(False, False)]\nscriptcontext.doc.Objects.UnselectAll()\n\nreturn ids",
+      "language": "python",
+      "author": "gootzans",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "b = rhObject.ObjectType == Rhino.DocObjects.ObjectType.Brep\nb = b and geometry.Surfaces.Count == 1\nb = b and not rhObject.Id in children\nreturn b",
+      "language": "unknown",
+      "author": "gootzans",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "rhObjects = [None, None]\ngo = Rhino.Input.Custom.GetObject()\ngo.SetCustomGeometryFilter(OneSurf)\nfor i in range(2):\n    go.SetCommandPrompt(\"Select surface \" + str(i + 1))\n    go.Get()\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult()",
+      "language": "python",
+      "author": "gootzans",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "rhObjects[i] = go.Object(0).Object()\n    rhObjects[i].Select(False)\n    scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "gootzans",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "ids = []\nscriptcontext.doc.Objects.Select(rhObject.Id)\nif Rhino.RhinoApp.RunScript(\"_SelChildren\", False):\n    ids = [rhObj.Id for rhObj in scriptcontext.doc.Objects.GetSelectedObjects(False, False)]\nscriptcontext.doc.Objects.UnselectAll()",
+      "language": "python",
+      "author": "gootzans",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "# Rhino WIP only, limit selection to objects without history\n    \nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef myfilter(rhObject, geometry, componentIndex):\n    log =  Rhino.FileIO.TextLog()\n    Rhino.DocObjects.RhinoObject.Description(rhObject, log)\n    if not \"Record index:\" in log.ToString():\n        return True\n    return False\n\ndef CustomGetObjWithoutHistory():\n    id = rs.GetObject(None, 0, True, False, myfilter)\n    if not id: return\n    \nCustomGetObjWithoutHistory()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef CustomGetObjWithoutHistory():\n    \n    rs.EnableRedraw(False)\n    all_objs = rs.AllObjects(True, False, False, False)\n    rc = rs.Command(\"_-What _Clipboard _Enter\", False)\n    result = rs.ClipboardText() if rc else None\n    rs.ClipboardText(\"\")\n    rs.UnselectAllObjects()\n    rs.EnableRedraw(True)\n    \n    if result:\n        descriptions = result.split(\"\\n\\n\")\n        searchlist = zip(all_objs, descriptions)\n        allowed_objs = [n[0] for n in searchlist if not \"Record id:\" in n[1]]\n    else:\n        allowed_objs = rs.NormalObjects(False, False)\n    \n    id = rs.GetObjectEx(\"Select\", 0, False, True, allowed_objs)\n    if not id: return\n    \nCustomGetObjWithoutHistory()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\n\ndef TestRhinoScript():\n    # The RhinoScript plug-in id\n    rs_id = System.Guid('1C7A3523-9A8F-4cec-A8E0-310F580536A7')\n    # Get the RhinoScript COM object\n    rs_obj = Rhino.RhinoApp.GetPlugInObject(rs_id)\n    if rs_obj:\n        rs_obj.Print('Hello from RhinoScript!')\n    \nTestRhinoScript()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 25,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 29,
+  "views": 3624
+}

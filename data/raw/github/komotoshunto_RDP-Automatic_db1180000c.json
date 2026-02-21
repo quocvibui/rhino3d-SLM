@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/komotoshunto/RDP-Automatic/blob/680b2cc9081582547d1b37440ec7ea97a94a14ea/%E9%96%A2%E6%95%B0/%E5%B1%8B%E6%A0%B9%E3%82%92%E5%8B%BE%E9%85%8D%E5%B1%8B%E6%A0%B9%E3%81%A8%E5%8F%97%E6%8C%81%E3%81%A1%E5%B1%8B%E6%A0%B9%E3%81%AB%E5%88%86%E3%81%91%E3%82%8B.py",
+  "repo": "komotoshunto/RDP-Automatic",
+  "repo_stars": 0,
+  "repo_description": "雨水排水計画を自動化するツール",
+  "license": "unknown",
+  "filepath": "関数/屋根を勾配屋根と受持ち屋根に分ける.py",
+  "instruction": "Input geo, List Access, Brep, angle, Item Access, float,",
+  "code": "#Input\n#geo, List Access, Brep, \n#angle, Item Access, float, \n\n#Output\n#face_list, \n#charge_roof, \n#slope_roof, \n#non_roof, \n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as ghcomp\nimport math\n\n#屋根を勾配屋根と受持ち屋根に分ける\n#-1: 雨が当たらない, 0: 受持ち屋根, 1: 勾配屋根\ndef roof_judge(surface, rain_angle):\n    judge_angle = math.cos(math.radians(180 - rain_angle))\n    normal = rg.Surface.NormalAt(surface, 0.5, 0.5)\n    z = round(normal[2], 5) + 0.0\n    print(z)\n    if z == 1:\n        judge = 0\n    elif z <= judge_angle and z != 1:\n        judge = -1\n    else:\n        judge = 1\n    return judge\n\n\n\nChargeRoof_list = []\nSlopeRoof_list = []\nNonRoof_list = []\nfor i in geometry:\n    facelist = i.Faces\n    for k in facelist:\n        judge = roof_judge(k, rain_angle)\n        if judge == 0:\n            ChargeRoof_list.append(k)\n        elif judge == 1:\n            SlopeRoof_list.append(k)\n        elif judge == -1:\n            NonRoof_list.append(k)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

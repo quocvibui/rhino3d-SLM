@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/command-line-option-not-updating/76097",
+  "topic_id": 76097,
+  "title": "Command line option not updating",
+  "question": "Ok so I changed the script from this link: \nAdd command line options\n such that the Getpoint keeps repeating until I Esc out of it. I also removed all options except for the integer option. And I added “intOption.CurrentValue+=1” to make the integer increase by 1 each time you make a point.\n\n\nBut the problem is that it’s not showing the increased integer in the command line until I click on that option. Then it show’s me the current integer.\n\n\nSo it keeps showing me this after each point I place\n\n\n\nuntil I click on the option and then it shows me the updated Integer after placing a few points (4 in this case)\n\n\n\n\nCan anybody help me out here? How do I update the commandline option after placing each point to match that new integer? And perhaps a better question: How do I search and find things like this without having to ask somebody else that knows this?\n\n\nimport Rhino\nimport scriptcontext\n\ndef CommandLineOptions():\n    # For this example we will use a GetPoint class, but all of the custom\n    # \"Get\" classes support command line options.\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"GetPoint with options\")\n\n    # set up the options\n    intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n    \n    gp.AddOptionInteger(\"Integer\", intOption)\n    \n    while True:\n        # perform the get operation. This will prompt the user to\n        # input a point, but also allow for command line options\n        # defined above\n        get_rc = gp.Get()\n        if gp.CommandResult()!=Rhino.Commands.Result.Success:\n            return gp.CommandResult()\n        if get_rc==Rhino.Input.GetResult.Point:\n            point = gp.Point()\n            scriptcontext.doc.Objects.AddPoint(point)\n            scriptcontext.doc.Views.Redraw()\n            intOption.CurrentValue+=1\n        elif get_rc==Rhino.Input.GetResult.Option:\n            if gp.OptionIndex()==opList:\n                listIndex = gp.Option().CurrentListOptionIndex\n            continue\n        if get_rc == Rhino...",
+  "code_blocks": [
+    {
+      "code": "# add a first command line option to enter an integer between 1 and 99\noptInteger = Rhino.Input.Custom.OptionInteger(1, 1, 99)\ngp.AddOptionInteger(\"MyInteger\", optInteger)\n# add another command line option to toggle something\noptToggle = Rhino.Input.Custom.OptionToggle(True, \"No\", \"Yes\")\ngp.AddOptionToggle(\"MyToggle\", optToggle)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "elif get_rc == Rhino.Input.GetResult.Option:\n    # user picked an option, find out which by getting the option name \n    if gp.Option().EnglishName == \"MyInteger\":\n        print \"MyInteger = {}\".format(optInteger.CurrentValue)\n    elif gp.Option().EnglishName == \"MyToggle\":\n        print \"MyToggle = {}\".format(str(optToggle.CurrentValue))",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef CommandLineOptions():\n    # For this example we will use a GetPoint class, but all of the custom\n    # \"Get\" classes support command line options.\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"GetPoint with options\")\n\n    # set up the options\n    intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n    \n    gp.AddOptionInteger(\"Integer\", intOption)\n    \n    while True:\n        # perform the get operation. This will prompt the user to\n        # input a point, but also allow for command line options\n        # defined above\n        get_rc = gp.Get()\n        if gp.CommandResult()!=Rhino.Commands.Result.Success:\n            return gp.CommandResult()\n        if get_rc==Rhino.Input.GetResult.Point:\n            point = gp.Point()\n            scriptcontext.doc.Objects.AddPoint(point)\n            scriptcontext.doc.Views.Redraw()\n            intOption.CurrentValue+=1\n        elif get_rc==Rhino.Input.GetResult.Option:\n            if gp.OptionIndex()==opList:\n                listIndex = gp.Option().CurrentListOptionIndex\n            continue\n        if get_rc == Rhino.Input.GetResult.Cancel:\n            break\n        \n    return Rhino.Commands.Result.Success\n\n\nif __name__ == \"__main__\":\n    CommandLineOptions()",
+      "language": "python",
+      "author": "siemen",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 677
+}

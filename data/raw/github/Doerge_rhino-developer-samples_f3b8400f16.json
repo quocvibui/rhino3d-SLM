@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/Doerge/rhino-developer-samples/blob/beb34e5f5daf7f8da651d732aadf165bdf32a74d/rhinocommon/snippets/py/tight-bounding-boxes-for-breps.py",
+  "repo": "Doerge/rhino-developer-samples",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/tight-bounding-boxes-for-breps.py",
+  "instruction": "Tight bounding boxes for breps",
+  "code": "from scriptcontext import doc\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom System.Collections.Generic import *\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select surface to split\", True, ObjectType.Surface)\n    if rc != Result.Success:\n        return rc\n    brep_face = obj_ref.Surface()\n    if brep_face == None:\n        return Result.Failure\n\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select cutting curve\", True, ObjectType.Curve)\n    if rc != Result.Success:\n        return rc\n    curve = obj_ref.Curve()\n    if curve == None:\n        return Result.Failure\n\n    curves = List[Curve]([curve])\n    split_brep = brep_face.Split(curves, doc.ModelAbsoluteTolerance)\n\n    if split_brep == None:\n        RhinoApp.WriteLine(\"Unable to split surface.\")\n        return Result.Nothing\n\n    meshes = Mesh.CreateFromBrep(split_brep)\n    print type(meshes)\n    for mesh in meshes:\n        bbox = mesh.GetBoundingBox(True)\n        bbox_type = bbox.IsDegenerate(doc.ModelAbsoluteTolerance)\n        if bbox_type == 1: # rectangle\n            # box with 8 corners flattened to rectangle with 4 corners\n            box_corners = bbox.GetCorners()\n            rectangle_corners = []\n            for corner_point in box_corners:\n                if corner_point not in rectangle_corners:\n                    rectangle_corners.append(corner_point)\n            # add 1st point as last to close the loop\n            rectangle_corners.append(rectangle_corners[0])\n            doc.Objects.AddPolyline(rectangle_corners)\n            doc.Views.Redraw()\n        elif bbox_type == 0: # box\n            brep_box = Box(bbox).ToBrep()\n            doc.Objects.AddBrep(brep_box)\n            doc.Views.Redraw()\n        else: # bbox invalid, point, or line\n            return Result.Failure\n\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

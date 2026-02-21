@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-document-list-external-dependencies-installed-plugins-3rd-party-libraries-version-referenced-files/112179",
+  "topic_id": 112179,
+  "title": "Grasshopper document list external dependencies / installed plugins, 3rd party libraries, version, referenced files",
+  "question": "Hello again,\n\n\nmy goal is to document what external dependencies were used for a specific grasshopper document, so the result can be exactly replicated in the future when needed.\n\n\nGoal:\n\n\n\n\nget list of plugins (names) used in the canvaswith version\n\n\nget list of user objects used in the canvas with version\n\n\nexclude preinstalled grasshopper components/plugins\n\n\n\n\nSome of the features are part of the “Pancake” plugin, with the features ‘Portability report’ and ‘Addon Manager’ but these are no grasshopper components and I can’t use them from my gh python component.\n\n\n\nThe Addon manager lists used addons and information about them, like the used version\n\n\n\nThe portability report additionally lists ‘referenced files’ that are used in the canvas.\n\n\nHere is a snippet to get the names and types of the used components (from another forum post):\n\n\nimport Grasshopper as gh\n\nnames = []\ntypes = []\nfor obj in ghenv.Component.OnPingDocument().Objects:\n    if isinstance(obj,gh.Kernel.GH_Component):\n        objName = obj.Name \n        objString = obj.ToString()\n        if objName not in names:\n            names.append(objName)\n            types.append(objString)\n\n\n\nWith this I still don’t know which components were used, at least not in a stable way. Something like \nPufferfish.Components.Components_Point._1_Point.TweenConsecutivePoints\n indicates that a Pufferfish component is used, but how would I get which version of it was used? It is not in the list of plugins as acquired by the following snippet.\n\n\nI could use something like\n\n\nplugin_type = \"Pufferfish.Components.Components_Point._1_Point.TweenConsecutivePoint\"\nplugin_name = plugin_type.split(\".\")[0]\n\n\n\nto know which plugin was used, but what about component types like user objects etc?\n\n\n2020-11-13 10_09_36-Grasshopper - components\n835×654 103 KB\n\n\nGet installed plugin versions (adapted from a forum post)\n\n\nimport Rhino\n\nd = Rhino.PlugIns.PlugIn.GetInstalledPlugIns()\nfor entry in d:\n    plugin = Rhino.PlugIns.PlugIn.Find(ent...",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper as gh\n\nasms = {}\nfor obj in gh.Instances.ComponentServer.ObjectProxies:\n#for obj in ghenv.Component.OnPingDocument().Objects:\n    asm = gh.Instances.ComponentServer.FindAssemblyByObject(obj.Guid)\n    #print(x.IsCoreLibrary)\n    if asm is not None and not asm.IsCoreLibrary:\n        asms[asm.Name]=asm.Version\n\nprint(asms)",
+      "language": "python",
+      "author": "martinborst1",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Grasshopper as gh\n\nnames = []\ntypes = []\nfor obj in ghenv.Component.OnPingDocument().Objects:\n    if isinstance(obj,gh.Kernel.GH_Component):\n        objName = obj.Name \n        objString = obj.ToString()\n        if objName not in names:\n            names.append(objName)\n            types.append(objString)",
+      "language": "python",
+      "author": "martinborst1",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nd = Rhino.PlugIns.PlugIn.GetInstalledPlugIns()\nfor entry in d:\n    plugin = Rhino.PlugIns.PlugIn.Find(entry.Key)\n    if plugin:\n        assembly = plugin.Assembly\n        print(plugin.Name)\n        print(plugin.Version)",
+      "language": "python",
+      "author": "martinborst1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 8,
+  "views": 2444
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/intersection-rayshoot-method/106864",
+  "topic_id": 106864,
+  "title": "Intersection.RayShoot Method",
+  "question": "Looking for an example using Intersection.RayShoot Method in python.\n\n\nI was hoping to find a function that would either select or return back the intersection of a surface.  Not necessarily just looking for the point.  Want point and Id of the intersecting surface.\n\n\nThanks\n\n\nEric",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef ShootOneRayCustom():\n    pt_ids = rs.GetObjects('Select points', filter=rs.filter.point)\n    if not pt_ids: return\n    \n    brep_ids = rs.GetObjects('Select nurbs', filter=rs.filter.polysurface)\n    if not brep_ids: return\n    \n    pts = [rs.PointCoordinates(p) for p in pt_ids]\n    breps = [rs.coercebrep(id) for id in brep_ids]\n    \n    vec = Rhino.Geometry.Vector3d(0,0,-1)\n    tol = scriptcontext.doc.ModelAbsoluteTolerance\n    \n    intersector = Rhino.Geometry.Intersect.Intersection\n    \n    projected = [None] * len(pts)\n    distances = [None] * len(pts)\n    hit_breps = [None] * len(pts)\n    \n    # project each point \n    for i, p in enumerate(pts):\n        # on each brep\n        for j, brep in enumerate(breps):\n            rc = intersector.ProjectPointsToBreps([brep], [p], vec, tol)\n            if rc.Count > 0:\n                # save the closest hit\n                for hit_pt in rc:\n                    if not projected[i]: \n                        projected[i] = hit_pt\n                        distances[i] = p.DistanceTo(hit_pt)\n                        hit_breps[i] = brep_ids[j]\n                    else:\n                        d = p.DistanceTo(hit_pt)\n                        if d < distances[i]:\n                            projected[i] = hit_pt\n                            distances[i] = d\n                            hit_breps[i] = brep_ids[j]\n    hits = 0\n    for i, point in enumerate(projected):\n        if point:\n            hits += 1\n            rs.AddPoint(point)\n            rs.AddLine(point, pts[i])\n    \n    print \"{} point hits, {} missed projections\".format(hits, len(pts)-hits)\n    \nShootOneRayCustom()",
+      "language": "python",
+      "author": "eric.bunn",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 950
+}

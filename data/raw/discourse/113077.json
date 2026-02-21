@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscript-spread-rectangle-pattern-along-irregular-surface/113077",
+  "topic_id": 113077,
+  "title": "Rhinoscript: spread rectangle pattern along irregular surface",
+  "question": "image\n1333×750 124 KB\n\n\n\nAs you see in the image, I am trying to spread rectangles along an irregular surface that was formed by more than 4 curves (lines). The problem is I can spread rectangles in a small area and not through all the surface.\n\nMy script is:\n\n\n# construct rectangle pattern on a floor 2D plan\n# Nabil Mohareb\nimport rhinoscriptsyntax as rs\n\ndef startPattern(surface, pattU, pattV):\n    # dictionary of the points\n    ptMTX = {}\n    # get domain of the surface\n    udomain = rs.SurfaceDomain(surface,0) \n    vdomain = rs.SurfaceDomain(surface,1)\n    # calculate the steps ofr U (X) & V (Y), distance of the grid\n    stepU = (udomain [1] - udomain [0])/pattU\n    stepV = (vdomain [1] - vdomain [0])/pattV\n    \n    #plot points on surface\n    for i in range (pattU+1):\n        for j in range (pattV+1):\n            #define u & v in terms of steps values, i, j\n            u = udomain[0] + stepU*i\n            v = vdomain[0] + stepV*j\n            # diviede the surface and draw points on surfaces \n            point = rs.EvaluateSurface (surface, u, v)\n            if rs.IsPointOnSurface(surface, point) != False:\n                rs.AddPoint(point)\n                # write the points in the dictionary \n                ptMTX [(i,j)] = point\n    #loop to create geometry \n    for i in range (6,12):    #(6,12) # this is the problem, what range should I use?\n        for j in range (6,12):# the numbers are just playing around, but I think this is the problem\n            if i>0 and j>0:\n                curverec= rs.AddPolyline((ptMTX[(i,j)], ptMTX[(i-1,j)],ptMTX[(i-1,j-1)], ptMTX[(i,j-1)], ptMTX[(i,j)]))\n                #add surface to the small rectangles\n                smlSurf= rs.AddPlanarSrf(curverec)\n                # find the center of the small rectangle and add point to it\n                center = rs.SurfaceAreaCentroid(smlSurf)\n                rs.AddPoint( center[0] )\n\ndef main():\n    #select the plan lines\n    plane = rs.GetObjects('select curves please', rs.filter.c...",
+  "code_blocks": [
+    {
+      "code": "# construct rectangle pattern on a floor 2D plan\n# Nabil Mohareb\nimport rhinoscriptsyntax as rs\n\ndef startPattern(surface, pattU, pattV):\n    # dictionary of the points\n    ptMTX = {}\n    # get domain of the surface\n    udomain = rs.SurfaceDomain(surface,0) \n    vdomain = rs.SurfaceDomain(surface,1)\n    # calculate the steps ofr U (X) & V (Y), distance of the grid\n    stepU = (udomain [1] - udomain [0])/pattU\n    stepV = (vdomain [1] - vdomain [0])/pattV\n    \n    #plot points on surface\n    for i in range (pattU+1):\n        for j in range (pattV+1):\n            #define u & v in terms of steps values, i, j\n            u = udomain[0] + stepU*i\n            v = vdomain[0] + stepV*j\n            # diviede the surface and draw points on surfaces \n            point = rs.EvaluateSurface (surface, u, v)\n            if rs.IsPointOnSurface(surface, point) != False:\n                rs.AddPoint(point)\n                # write the points in the dictionary \n                ptMTX [(i,j)] = point\n    #loop to create geometry \n    for i in range (6,12):    #(6,12) # this is the problem, what range should I use?\n        for j in range (6,12):# the numbers are just playing around, but I think this is the problem\n            if i>0 and j>0:\n                curverec= rs.AddPolyline((ptMTX[(i,j)], ptMTX[(i-1,j)],ptMTX[(i-1,j-1)], ptMTX[(i,j-1)], ptMTX[(i,j)]))\n                #add surface to the small rectangles\n                smlSurf= rs.AddPlanarSrf(curverec)\n                # find the center of the small rectangle and add point to it\n                center = rs.SurfaceAreaCentroid(smlSurf)\n                rs.AddPoint( center[0] )\n\ndef main():\n    #select the plan lines\n    plane = rs.GetObjects('select curves please', rs.filter.curve)\n    pattU = rs.GetInteger('write U (x) value', 12)\n    pattV = rs.GetInteger('write V (y) value', 12)\n    #join the plan lines\n    planeJoined= rs.JoinCurves(plane)\n    #convert plane to surface\n    surface =rs.AddPlanarSrf(planeJoined)\n    \n    # call the function\n    startPattern(surface, pattU, pattV)\n\nmain ()",
+      "language": "python",
+      "author": "n.mohareb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 689
+}

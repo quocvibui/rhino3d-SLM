@@ -1,0 +1,72 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/expected-ienumerable-curve-got-list/115887",
+  "topic_id": 115887,
+  "title": "Expected Ienumerable[curve], got list",
+  "question": "hello every body!!!\n\ni search to create a network surface with:\n\n\nRhino.Geometry.NurbsSurface.CreateNetworkSurface(edges,2,0,0,0,0)\n\n\nbut it return an error:\n\nexpected IEnumerable[Curve], got list\n\nhow can i transform a list to an IEnumerable,\n\n\ni searched but what is the difference between an IEnumerable and list?\n\n\nOnly!",
+  "code_blocks": [
+    {
+      "code": "def CreateSurface(edges):\n    \n    ledges=List[Rhino.Geometry.BrepEdge](edges)\n    Rhino.Geometry.NurbsSurface.CreateNetworkSurface(ledges,2,0.1,0.1,0.1,1)",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\nMTOL = sc.doc.ModelAbsoluteTolerance  # document tolerance\n\nedge_indices = list(range(Brep.Edges.Count))  # indices of edges to fillet\nstart_radii = [Radius] * Brep.Edges.Count\nend_radii = [Radius] * Brep.Edges.Count\n\nblend_type = rg.BlendType.Fillet  # or: rg.BlendType.Chamfer, rg.BlendType.Blend\nrail_type = rg.RailType.RollingBall # or: rg.RailType.DistanceFromEdge, rg.RailType.DistanceBetweenRails\n\n# Outputs\nif Radius == 0:\n    a = Brep\nelse:\n    a = rg.Brep.CreateFilletEdges(Brep, edge_indices, start_radii, end_radii, blend_type, rail_type, MTOL)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino \n\n\ndef GetBrepEdges(prompt):\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(prompt)\n    go.EnablePreSelect\n    go.GeometryFilter=Rhino.DocObjects.ObjectType.EdgeFilter\n    go.GetMultiple(1,0)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    objrefs = go.Objects()\n    if not objrefs: return\n    \n    #can have multiple objrefs from same brep object(multiple edges), cull objrefs\n    unique_IDs=[]\n    unique_objrefs=[]\n    objs=[]\n    for objref in objrefs:\n        if not objref.Object().Id in unique_IDs:\n            unique_IDs.append(objref.Object().Id)\n            unique_objrefs.append(objref)\n            objs.append(objref.Object())\n    edge_crvs=[]\n    #need to loop here in case multiple base objs are involved\n    for obj in objs:\n        sub_objs=obj.GetSelectedSubObjects()\n        if sub_objs:\n            trims=[obj.Geometry.Trims[sub_obj.Index] for sub_obj in sub_objs]\n            trim_crvs=[trim.Edge.ToNurbsCurve() for trim in trims]\n            edge_crvs.extend(trim_crvs)\n    #returns selected EDGE curve *GEOMETRY* (Nurbs curves)\n    return edge_crvs\n\n\ndef TestAddNetworkSrfFromBRepEdges():\n    tol=sc.doc.ModelAbsoluteTolerance\n    atol=sc.doc.ModelAngleToleranceRadians\n    curves=GetBrepEdges(\"Pick Brep edges for network surface\")\n    pass\n    surf, err = Rhino.Geometry.NurbsSurface.CreateNetworkSurface(curves,2,tol,tol,atol)\n    if err==0:\n        rc = sc.doc.Objects.AddSurface(surf)\n        sc.doc.Views.Redraw()\nTestAddNetworkSrfFromBRepEdges()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\nMTOL = sc.doc.ModelAbsoluteTolerance\nATOL =  sc.doc.ModelAngleToleranceRadians\n\n\ncurves = []\n\nfor i, brep in enumerate(Breps):\n    for j, edge in enumerate(brep.Edges):\n        edge_start_pt = edge.StartVertex.Location\n        edge_end_pt = edge.EndVertex.Location\n    \n        connected_start = []\n        connected_end = []\n    \n        for k, other_brep in enumerate(Breps):\n            if k == i:\n                continue\n        \n            for l, other_edge in enumerate(other_brep.Edges):\n                other_start_pt = other_edge.StartVertex.Location\n                other_end_pt = other_edge.EndVertex.Location\n            \n                if other_start_pt.DistanceTo(edge_start_pt) < MTOL or other_end_pt.DistanceTo(edge_start_pt) < MTOL:\n                    connected_start.append((k, l))\n                \n                if other_start_pt.DistanceTo(edge_end_pt) < MTOL or other_end_pt.DistanceTo(edge_end_pt) < MTOL:\n                    connected_end.append((k, l))\n    \n        if len(connected_start) > 0 and len(connected_end) > 0:\n            curves.append(edge.ToNurbsCurve())\n\ncontinuity = 0 # 0 = loose, 1 = position, 2 = tan, 3 = curvature\nsurface, rc = rg.NurbsSurface.CreateNetworkSurface(curves, continuity, MTOL, MTOL, ATOL)\n\n\n# Outputs\na = surface",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom System.Collections.Generic import List\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\n\n\n\n\ndef CreateSurface(edges):\n    MTOL = sc.doc.ModelAbsoluteTolerance\n    ATOL =  sc.doc.ModelAngleToleranceRadians\n    curves=[]\n    for edge in edges:\n        curves.append(edge.ToNurbsCurve())\n        \n    continuity = 3 # 0 = loose, 1 = position, 2 = tan, 3 = curvature\n    surface, err = rg.NurbsSurface.CreateNetworkSurface(curves, continuity, MTOL, MTOL, ATOL)\n    if err==0:\n        rc = sc.doc.Objects.AddSurface(surface)\n        sc.doc.Views.Redraw()\n\ndef EdgeFilter(edges,ptcontrol):\n    for edge in edges:\n        crv=edge.ToNurbsCurve()\n        if rs.IsPointOnCurve(crv,ptcontrol):\n                return edge\n                \n\ndef PointInters (borders,breps,i):\n    j=0\n    a=(j+i)%len(borders)\n    b=(j+1+i)%len(borders)\n    c=(j+2+i)%len(borders)\n    inter1=rs.CurveCurveIntersection(borders[a],borders[b])\n    dist=[]\n    dist=rs.Distance(inter1[0][1],breps[a][3])\n    pt1=inter1[0][1]\n    if len(inter1)>1:\n        distcontrol=rs.Distance(inter1[1][1], breps[a][3])\n        if distcontrol<dist: pt1=inter1[1][1]\n    inter1=rs.CurveCurveIntersection(borders[a],borders[c])\n    dist=[]\n    dist=rs.Distance(inter1[0][1],breps[a][3])\n    pt2=inter1[0][1]\n    if len(inter1)>1:\n        distcontrol=rs.Distance(inter1[1][1], breps[a][3])\n        if distcontrol<dist: pt2=inter1[1][1]\n    return (pt1,pt2)\n\n\ndef FiletCorner():\n    #selection des surfaces a limiter\n    breps=[]\n    breps.append(rs.GetSurfaceObject('select surf1'))\n    if not breps[0]:\n        return\n    breps.append(rs.GetSurfaceObject('select surf2'))\n    if not breps[1]:\n        return\n    breps.append(rs.GetSurfaceObject('select surf3'))\n    if not breps[2]:\n        return\n    rs.EnableRedraw(False)\n    #dupliquer les borders\n    borders=[]\n    borders.append(rs.DuplicateSurfaceBorder(breps[0][0],1))\n    borders.append(rs.DuplicateSurfaceBorder(breps[1][0],1))\n    borders.append(rs.DuplicateSurfaceBorder(breps[2][0],1))\n\n    network=[]\n    edges=[]\n\n    for i in range(len(breps)):\n        \n        pts=PointInters(borders,breps,i)\n        line=rs.AddLine(pts[0],pts[1])\n        midpt=rs.CurveMidPoint(line, segment_index=-1)\n        clpt=rs.PointClosestObject(midpt,breps[i])\n        direction=rs.VectorCreate(clpt[1],midpt)\n        rs.SelectObject(line)\n        rs.SelectObject(breps[i][0])\n        proj=rs.ProjectCurveToSurface(line, breps[i], direction)\n        network.append(proj)\n        rs.UnselectAllObjects()\n        plane=rs.PlaneFromPoints(rs.CurveStartPoint(line),rs.CurveEndPoint(line),rs.CurveMidPoint(proj))\n        cutter=rs.AddPlaneSurface(plane,rs.CurveLength(line),rs.CurveLength(line))\n        parts=rs.SplitBrep(breps[i][0],cutter,True)\n        rs.DeleteObject(cutter)\n        for part in parts:\n            if not rs.IsPointOnSurface(part,breps[i][3]):\n                rs.DeleteObject(part)\n            else:\n                surf=rs.coercebrep(part)\n        pass\n        edges.append(EdgeFilter(surf.Edges,clpt[1]))\n        rs.DeleteObject(proj)\n        rs.DeleteObject(line)\n    cap=CreateSurface(edges)\n    rs.DeleteObjects(borders)\n    rs.EnableRedraw(True)\n\nif( __name__ == \"__main__\" ):\n    FiletCorner()",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nfrom System.Collections.Generic import List\n\nmeshList = List[rc.Geometry.Mesh](yourPythonMeshList)",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "crvlist = [y,z]\ncrvenum = Rhino.Collections.CurveList()\nfor i in crvlist:\n    crvenum.Add.Overloads[Rhino.Geometry.Curve](i)\n\n#serves up an Ienumerable-ish object\nmyenum = Rhino.Collections.CurveList.GetEnumerator(crvenum)\n\nmyarray = crvenum.ToArray()\n\nprint type(crvenum)\nprint type(myenum)\nprint type(myarray)",
+      "language": "python",
+      "author": "Jonathan_Hutchinson",
+      "post_number": 24,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 37,
+  "views": 4485
+}

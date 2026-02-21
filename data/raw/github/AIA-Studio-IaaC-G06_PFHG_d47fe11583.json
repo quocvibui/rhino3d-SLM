@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/AIA-Studio-IaaC-G06/PFHG/blob/94ec4ab4be8d720efead20cc409d66aaa8947388/02_FILES/02_CODE/01_HOPS/machinelearning.py",
+  "repo": "AIA-Studio-IaaC-G06/PFHG",
+  "repo_stars": 7,
+  "repo_description": "Prefabricated Home Generator with Artificial Inteligence",
+  "license": "unknown",
+  "filepath": "02_FILES/02_CODE/01_HOPS/machinelearning.py",
+  "instruction": "Machinelearning",
+  "code": "import rhino3dm\nimport numpy as np\nimport pickle\nimport joblib\nfrom tensorflow import keras\n\n\ndef runml(a,b,c):\n   \n    model = keras.models.load_model(r'C:\\Users\\kimky\\Desktop\\tmp\\S4_STUDIO\\ML-GEOMETRY\\ML\\regression_model_V5.h5')\n    model.summary()\n\n    #Load Standardscaler\n    from sklearn.preprocessing import StandardScaler\n    scalerX = joblib.load(r'C:\\Users\\kimky\\Desktop\\tmp\\S4_STUDIO\\ML-GEOMETRY\\ML\\scalerX2.pkl') \n    scalerY = joblib.load(r'C:\\Users\\kimky\\Desktop\\tmp\\S4_STUDIO\\ML-GEOMETRY\\ML\\scalerY2.pkl') \n    print('Scalers loaded')\n\n    #-------------------\n    Newdata = [[a,b,c]]\n    Newdata = np.array((Newdata),dtype=np.float64)\n    Newdata = Newdata.astype(np.float32)\n    Newdata_scaled = scalerX.transform(Newdata)\n\n    predictions = model.predict(Newdata_scaled)\n\n    finalPrediction = scalerY.inverse_transform(predictions)\n\n    list1 = finalPrediction.tolist()\n    flat_list = []\n    for i in list1:\n        flat_list += i\n\n    final_pred = predictions[0]\n    print(flat_list)\n\n    return flat_list[0], flat_list[1],flat_list[2],flat_list[3],flat_list[4],flat_list[5],flat_list[6],flat_list[7], flat_list[8], flat_list[9],flat_list[10],flat_list[11], flat_list[12], flat_list[13:]\n\n#To debug, look at Test2",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

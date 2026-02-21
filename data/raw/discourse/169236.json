@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/load-and-save-into-own-file-format/169236",
+  "topic_id": 169236,
+  "title": "Load and save into own file format",
+  "question": "Hi,\n\n\nwe are developing a c++ rhino7 plugin with a rather complex data structure. We have some non-serializable data and want to save this into an own file format (Basically a container format with our own data and a 3dm file inside). We also want to make it impossible for the user to save as 3dm when data is created with our plugin.\n\n\nIs there a way to modify the load and save process, so we can store in our own data format?\n\n\nI know that you can create import and export plugins for this purpose, but we don’t have our data in a shared DLL and a plugin can only be an Import or export plugin. Restructuring the plugin would be a lot of work, so I am interested if there is another way.\n\n\nThanks for your help,\n\nDaniel",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport json\nimport os\n\ndef create_secretsauce():\n    appdata_path = os.getenv('APPDATA')\n    temp_3dm_path = os.path.join(appdata_path, \"temp_model.3dm\")\n    merged_path = os.path.join(appdata_path, \"merged.secretsauce\")\n    delimiter = b'---SECRETS---'\n    Rhino.RhinoDoc.ActiveDoc.WriteFile(temp_3dm_path, Rhino.FileIO.FileWriteOptions())\n    # Create JSON data for each Brep\n    breps = [obj for obj in rs.AllObjects() if rs.IsBrep(obj)]\n    data_to_save = {str(brep): \"123\" for brep in breps}\n    # Merge .3dm and JSON data into .secretsauce\n    with open(temp_3dm_path, 'rb') as _3dm_file, open(merged_path, 'wb') as merged_file:\n        merged_file.write(_3dm_file.read())\n        merged_file.write(delimiter)\n        merged_file.write(json.dumps(data_to_save).encode('utf-8'))\n\n    os.remove(temp_3dm_path)\n    print(\"Created .secretsauce file at:\", merged_path)\n\ncreate_secretsauce()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\nimport json\ndef load_secretsauce():\n    secretsauce_path = \"C:\\\\Users\\\\admin\\\\AppData\\\\Roaming\\\\merged.secretsauce\"\n    if not secretsauce_path:\n        return\n    delimiter = b'---SECRETS---'\n    with open(secretsauce_path, 'rb') as file:\n        content = file.read()\n    delimiter_index = content.find(delimiter)\n    _3dm_content = content[:delimiter_index]\n    json_content = content[delimiter_index + len(delimiter):]\n    temp_3dm_path = \"temp_loaded_model.3dm\"\n    with open(temp_3dm_path, 'wb') as temp_3dm_file:\n        temp_3dm_file.write(_3dm_content)\n    rs.Command(f\"_-Open {temp_3dm_path}\")\n    data = json.loads(json_content.decode('utf-8'))\n    print(\"JSON Data:\", data)\n\nload_secretsauce()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 395
+}

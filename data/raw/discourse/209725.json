@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-display-conduit-issues/209725",
+  "topic_id": 209725,
+  "title": "Rhino Python Display Conduit Issues",
+  "question": "I’m having issues with nothing from the display conduit showing up. This is copy/pasted from the samples. Some stuff is confusing me including the fact that the class has no constructor. I’m just getting back into this.\n\n\nI’m having similar issues with other samples where I can’t get a dynamic object to show up. I’m seeing different approaches and therefore curious about best practices as well.\n\n\nNote that I’m running this in the script editor. I’m pretty okay getting these to work when they actually throw an error, but but all the coffee in the world won’t allow me to get the display conduits working.\n\n\nfrom Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom System.Drawing import Color\n \ndef RunCommand():\n    gp = GetDrawStringPoint()\n    gp.SetCommandPrompt(\"Point\")\n    gp.Get()\n    return gp.CommandResult()\n \nclass GetDrawStringPoint(GetPoint):\n    def OnDynamicDraw(self, e):\n        xform = e.Viewport.GetTransform(CoordinateSystem.World, CoordinateSystem.Screen)\n \n        current_point = e.CurrentPoint\n        current_point.Transform(xform)\n        screen_point = Point2d(current_point.X, current_point.Y)\n \n        msg = \"screen {0}, {1}\".format(screen_point.X, screen_point.Y)\n        e.Display.Draw2dText(msg, Color.Blue, screen_point, False)\n \nif __name__ == \"__main__\":\n    RunCommand()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry\nimport Rhino.Commands\nimport Rhino.Input.Custom\nimport System.Drawing\nimport scriptcontext\n \ndef RunCommand():\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Center point\")\n    gp.Get()\n    if gp.CommandResult() != Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n    center_point = gp.Point()\n    if center_point == Rhino.Geometry.Point3d.Unset:\n        return Rhino.Commands.Result.Failure\n \n    gcp = GetCircleRadiusPoint(center_point)\n    gcp.SetCommandPrompt(\"Radius\")\n    gcp.ConstrainToConstructionPlane(False)\n    gcp.SetBasePoint(center_point, True)\n    gcp.DrawLineFromPoint(center_point, True)\n    gcp.Get()\n    if gcp.CommandResult() != Rhino.Commands.Result.Success:\n        return gcp.CommandResult()\n \n    radius = center_point.DistanceTo(gcp.Point())\n    cplane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    scriptcontext.doc.Objects.AddCircle(Rhino.Geometry.Circle(cplane, center_point, radius))\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n \nclass GetCircleRadiusPoint (Rhino.Input.Custom.GetPoint):\n    def __init__(self, centerPoint):\n        super().__init__()\n        self.m_center_point = centerPoint\n \n    def OnDynamicDraw(self, e):\n        cplane = e.RhinoDoc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        radius = self.m_center_point.DistanceTo(e.CurrentPoint)\n        circle = Rhino.Geometry.Circle(cplane, self.m_center_point, radius)\n        coords = \"X: {:.2f}, Y: {:.2f}, Z: {:.2f}\".format(e.CurrentPoint.X, e.CurrentPoint.Y, e.CurrentPoint.Z)\n        e.Display.DrawCircle(circle, System.Drawing.Color.Black)\n        e.Display.Draw2dText(coords, System.Drawing.Color.Blue, e.CurrentPoint, False, 16, \"\")\n \nif __name__ == \"__main__\":\n    RunCommand()",
+      "language": "python",
+      "author": "keithscadservices",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Display import *\nfrom Rhino.Geometry import Line, BoundingBox, Point3d\nfrom Rhino.ApplicationSettings import AppearanceSettings\n\nfrom System.Drawing import Color\n\n#! python 3\n\nclass MyConduit(DisplayConduit):\n\n    def __init__(self):\n        super().__init__()\n        self.Enabled = True\n\n    def CalculateBoundingBox(self, e):\n        super(MyConduit, self).CalculateBoundingBox(e)\n        box = BoundingBox(Point3d(-1000, -1000, -1000), Point3d(1000, 1000, 1000))\n        e.IncludeBoundingBox(box)\n\n    def PreDrawObjects(self, e):\n        super(MyConduit, self).PreDrawObjects(e)\n\n        c_plane = e.Display.Viewport.ConstructionPlane()\n        x_color = AppearanceSettings.GridXAxisLineColor\n        y_color = AppearanceSettings.GridYAxisLineColor\n        z_color = AppearanceSettings.GridZAxisLineColor\n\n        e.Display.PushDepthWriting(False)\n        e.Display.PushDepthTesting(False)\n\n        e.Display.DrawPoint(c_plane.Origin, Color.White)\n        e.Display.DrawArrow(Line(c_plane.Origin, c_plane.Origin + c_plane.XAxis * 10.0), x_color)\n        e.Display.DrawArrow(Line(c_plane.Origin, c_plane.Origin + c_plane.YAxis * 10.0), y_color)\n        e.Display.DrawArrow(Line(c_plane.Origin, c_plane.Origin + c_plane.ZAxis * 10.0), z_color)\n\n        e.Display.PopDepthWriting()\n        e.Display.PopDepthTesting()\n\nconduit = MyConduit()\n\n__rhino_doc__.Views.Redraw()",
+      "language": "python",
+      "author": "CallumSykes",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom System.Drawing import Color\n \ndef RunCommand():\n    gp = GetDrawStringPoint()\n    gp.SetCommandPrompt(\"Point\")\n    gp.Get()\n    return gp.CommandResult()\n \nclass GetDrawStringPoint(GetPoint):\n    def OnDynamicDraw(self, e):\n        xform = e.Viewport.GetTransform(CoordinateSystem.World, CoordinateSystem.Screen)\n \n        current_point = e.CurrentPoint\n        current_point.Transform(xform)\n        screen_point = Point2d(current_point.X, current_point.Y)\n \n        msg = \"screen {0}, {1}\".format(screen_point.X, screen_point.Y)\n        e.Display.Draw2dText(msg, Color.Blue, screen_point, False)\n \nif __name__ == \"__main__\":\n    RunCommand()",
+      "language": "python",
+      "author": "keithscadservices",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 149
+}

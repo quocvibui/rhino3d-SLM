@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-7-parallel-viewport-drift-when-reading-cameralocation/214801",
+  "topic_id": 214801,
+  "title": "Rhino 7: Parallel viewport drift when reading CameraLocation",
+  "question": "Hi,\n\n\nI’m \nusing Rhino 7\n and encountering a strange behavior where simply \nreading\n viewport data in GhPython causes \nParallel Viewports\n to shift or drift away. Maybe it might be related to \nRH-53871\n?\n\n\nEven with the most basic script (strictly using getters), the camera in Parallel views moves slightly every time the component solves:\n\n\nimport Rhino\n\n# GetViewList(True, False) gets only standard model views, excluding page views\nall_views = Rhino.RhinoDoc.ActiveDoc.Views.GetViewList(True, False)\nplanes = []\n\nfor v in all_views:\n    success, frame = v.ActiveViewport.GetCameraFrame()\n    \n    if success:\n        planes.append(frame)\n\na = planes\n\n\n\nObservations:\n\n\n\n\nThis only happens in \nParallel\n viewports (Top, Front, Right); the Perspective view remains stable.\n\n\nThe movement occurs even if \nPreview is Disabled\n and no other components are connected to the output.\n\n\nIt feels like a feedback loop where the act of querying the viewport property triggers an internal update.\n\n\n\n\nHas anyone experienced this before? I am looking for a stable way to capture these camera planes for downstream components without causing the view to shift.\n\n\n\n\n\n\n圖片\n281×423 10.8 KB\n\n\nsystemInfo:\n\n\nRhino 7 SR38 2024-12-3 (Rhino 7, 7.38.24338.17001, Git hash:master @ 97e36efa02d7f71638988290bb2d190fcf1b18c5)\nLicense type: Commercial, build 2024-12-03\nLicense details: LAN Zoo Network Node\n\nWindows 10 (10.0.19045 SR0.0) or greater (Physical RAM: 64Gb)\n\nComputer platform: DESKTOP \n\nStandard graphics configuration.\n  Primary display and OpenGL: NVIDIA GeForce RTX 2070 SUPER (NVidia) Memory: 8GB, Driver date: 8-12-2020 (M-D-Y). OpenGL Ver: 4.6.0 NVIDIA 452.06\n    > Accelerated graphics device with 4 adapter port(s)\n        - Windows Main Display attached to adapter port #0\n        - Secondary monitor attached to adapter port #1\n\nOpenGL Settings\n  Safe mode: Off\n  Use accelerated hardware modes: On\n  Redraw scene when viewports are exposed: On\n  Graphics level being used: OpenGL 4.6 (primary GPU's...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\n# GetViewList(True, False) gets only standard model views, excluding page views\nall_views = Rhino.RhinoDoc.ActiveDoc.Views.GetViewList(True, False)\nplanes = []\n\nfor v in all_views:\n    success, frame = v.ActiveViewport.GetCameraFrame()\n    \n    if success:\n        planes.append(frame)\n\na = planes",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino 7 SR38 2024-12-3 (Rhino 7, 7.38.24338.17001, Git hash:master @ 97e36efa02d7f71638988290bb2d190fcf1b18c5)\nLicense type: Commercial, build 2024-12-03\nLicense details: LAN Zoo Network Node\n\nWindows 10 (10.0.19045 SR0.0) or greater (Physical RAM: 64Gb)\n\nComputer platform: DESKTOP \n\nStandard graphics configuration.\n  Primary display and OpenGL: NVIDIA GeForce RTX 2070 SUPER (NVidia) Memory: 8GB, Driver date: 8-12-2020 (M-D-Y). OpenGL Ver: 4.6.0 NVIDIA 452.06\n    > Accelerated graphics device with 4 adapter port(s)\n        - Windows Main Display attached to adapter port #0\n        - Secondary monitor attached to adapter port #1\n\nOpenGL Settings\n  Safe mode: Off\n  Use accelerated hardware modes: On\n  Redraw scene when viewports are exposed: On\n  Graphics level being used: OpenGL 4.6 (primary GPU's maximum)\n  \n  Anti-alias mode: None\n  Mip Map Filtering: Linear\n  Anisotropic Filtering Mode: High\n  \n  Vendor Name: NVIDIA Corporation\n  Render version: 4.6\n  Shading Language: 4.60 NVIDIA\n  Driver Date: 8-12-2020\n  Driver Version: 27.21.14.5206\n  Maximum Texture size: 32768 x 32768\n  Z-Buffer depth: 24 bits\n  Maximum Viewport size: 32768 x 32768\n  Total Video Memory: 8 GB\n\nRhino plugins that do not ship with Rhino\n  C:\\ProgramData\\McNeel\\Rhinoceros\\packages\\7.0\\LadybugTools\\1.39.0\\Ladybug.RH.Loader.rhp\t\"Ladybug.RH.Loader\"\t1.39.0.0\n  C:\\ProgramData\\McNeel\\Rhinoceros\\packages\\7.0\\Pollination\\1.65.9\\Pollination.RH.Loader.rhp\t\"Pollination.RH.Loader\"\t1.65.9.0\n\nRhino plugins that ship with Rhino\n  C:\\Program Files\\Rhino 7\\Plug-ins\\Commands.rhp\t\"Commands\"\t7.38.24338.17001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\rdk.rhp\t\"Renderer Development Kit\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\RhinoRenderCycles.rhp\t\"Rhino Render\"\t7.38.24338.17001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\rdk_etoui.rhp\t\"RDK_EtoUI\"\t7.38.24338.17001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\rdk_ui.rhp\t\"Renderer Development Kit UI\"\t\n  D:\\Users\\xxxxx\\AppData\\Roaming\\McNeel\\Rhinoceros\\packages\\7.0\\PanelingTools\\2021.3.2.446\\PanelingTools.rhp\t\"PanelingTools\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\NamedSnapshots.rhp\t\"Snapshots\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\IronPython\\RhinoDLR_Python.rhp\t\"IronPython\"\t7.38.24338.17001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\RhinoCycles.rhp\t\"RhinoCycles\"\t7.38.24338.17001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\Grasshopper\\GrasshopperPlugin.rhp\t\"Grasshopper\"\t7.38.24338.17001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\Toolbars\\Toolbars.rhp\t\"Toolbars\"\t7.38.24338.17001\n  C:\\Program Files\\Rhino 7\\Plug-ins\\3dxrhino.rhp\t\"3Dconnexion 3D Mouse\"\t\n  C:\\Program Files\\Rhino 7\\Plug-ins\\Displacement.rhp\t\"Displacement\"",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 1,
+  "views": 19
+}

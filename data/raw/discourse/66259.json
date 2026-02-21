@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/solved-reordering-points-in-a-tree-according-to-a-new-index/66259",
+  "topic_id": 66259,
+  "title": "[SOLVED] Reordering points in a tree according to a new index",
+  "question": "Hi,\n\nI’m trying to reorder the points in a tree according to another order (always coming with the same tree structure).\n\n\nI will add some info to better explain the issue.\n\n\nAfter performing a split on a surface to get quadrangular faces the order of the list of the points for each rectangle is not the same. I tried a sort along a curve for each point in order to get the right order for all the faces, but that is not making the difference and the points for some reason are not in the same order, probably because they are in the right direction but not starting always from the same corner.\n\n\nSo basically I calculate the relative position of the points ( of a rectangle ) to the normal plane and then I use the signs (of the x and y coordinates) to get a new order in python to get the a new list with order [ 0,1, 2, 3 ] .\n\nit works pretty good except for those with a strange order, like the one in red in the image\n\n\n\n\nimage.jpg\n1036×852 551 KB\n\n\n\n\nI post the code of the first component taking the relative coordinates of the point to create a new order list:\n\n\nimport ghpythonlib.components as gc\nimport Grasshopper.DataTree as gh_tree #to make operations\nimport Grasshopper.Kernel.Data.GH_Path as gh_path #to create the tree path\nimport Rhino.Geometry as rg\nimport math as m\nimport System\n\nnew_tree = gh_tree[System.Object]()\n\n### the key values for sorting\ntemp_list=[]\n\n###### this creates a list of orders ########\n\nfor i in range(tree.BranchCount):\n    \n    \n    path = tree.Path(i)\n    \n    #########  this iterate through the Elements ########\n    for j,b in enumerate(tree.Branch(i)):\n        \n        ### create a new list of indexes\n        \n        #### 0 #####\n        if x.Branch(i)[j]>=0 and y.Branch(i)[j]<=0:\n            \n            new_tree.Add(0,path) \n        #### 1 #####\n        if x.Branch(i)[j]>=0 and y.Branch(i)[j]>=0:\n            \n            new_tree.Add(1,path) \n            \n        #### 2 #####\n        if x.Branch(i)[j]<=0 and y.Branch(i)[j]>=0:\n          ...",
+  "code_blocks": [
+    {
+      "code": "import ghpythonlib.components as gc\nimport Grasshopper.DataTree as gh_tree #to make operations\nimport Grasshopper.Kernel.Data.GH_Path as gh_path #to create the tree path\nimport Rhino.Geometry as rg\nimport math as m\nimport System\n\n\nnew_tree = gh_tree[System.Object]()\n\n\ntemp_list=[]\n\n\n\nfor i in range(tree.BranchCount):\n    path = tree.Path(i)\n   \n    \n    ordered_list = [x for _,x in sorted(zip(order.Branch(i),tree.Branch(i)))]\n    new_tree.AddRange(ordered_list,path)",
+      "language": "python",
+      "author": "Federico_Giacomarra",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import ghpythonlib.components as gc\nimport Grasshopper.DataTree as gh_tree #to make operations\nimport Grasshopper.Kernel.Data.GH_Path as gh_path #to create the tree path\nimport Rhino.Geometry as rg\nimport math as m\nimport System\n\nnew_tree = gh_tree[System.Object]()\n\n### the key values for sorting\ntemp_list=[]\n\n###### this creates a list of orders ########\n\nfor i in range(tree.BranchCount):\n    \n    \n    path = tree.Path(i)\n    \n    #########  this iterate through the Elements ########\n    for j,b in enumerate(tree.Branch(i)):\n        \n        ### create a new list of indexes\n        \n        #### 0 #####\n        if x.Branch(i)[j]>=0 and y.Branch(i)[j]<=0:\n            \n            new_tree.Add(0,path) \n        #### 1 #####\n        if x.Branch(i)[j]>=0 and y.Branch(i)[j]>=0:\n            \n            new_tree.Add(1,path) \n            \n        #### 2 #####\n        if x.Branch(i)[j]<=0 and y.Branch(i)[j]>=0:\n            \n            new_tree.Add(2,path)\n            \n        #### 3 #####\n        if x.Branch(i)[j]<=0 and y.Branch(i)[j]<=0:\n            \n            new_tree.Add(3,path)",
+      "language": "python",
+      "author": "Federico_Giacomarra",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import ghpythonlib.components as gc\nimport Grasshopper.DataTree as gh_tree #to make operations\nimport Grasshopper.Kernel.Data.GH_Path as gh_path #to create the tree path\nimport Rhino.Geometry as rg\nimport math as m\nimport System\n\nnew_tree = gh_tree[System.Object]()\n\ntemp_list=[]\n\nfor i in range(tree.BranchCount):\n    path = tree.Path(i)\n    temp_l = [ tree.Branch(i)[j] for j in order.Branch(i)]\n    new_tree.AddRange(temp_l,path)",
+      "language": "python",
+      "author": "Federico_Giacomarra",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 802
+}

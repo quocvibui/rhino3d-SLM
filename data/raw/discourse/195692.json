@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/connecting-two-grasshopper-components-through-python/195692",
+  "topic_id": 195692,
+  "title": "Connecting two grasshopper components through python",
+  "question": "I am having issues with figuring out how to connect two grasshopper components programmatically. I want to be able to connect the output of one component to the input of another, which is what I am attempting here:\n\n\nnew_doc = GH_Document()\nguidGem = Guid(\"2f9dce65-e9a1-59c3-8206-e6f2ec1d7a95\")\nguidRing = Guid(\"b94ec479-3909-0aac-69de-1abd3b3ae82a\")\ngem = Grasshopper.Instances.ComponentServer.EmitObject(guidGem)\nring = Grasshopper.Instances.ComponentServer.EmitObject(guidRing)\nif gem and ring:\n\n    # Add the component to the document\n    new_doc.AddObject(gem, False)\n    new_doc.AddObject(ring, False)\n    output_param = gem.Params.Output[0]\n    input_param = ring.Params.Input[0]\n    input_param.AddSource(output_param)\n\n\n    # Save the new document to a file\n    archive = GH_Archive()\n    if archive.AppendObject(new_doc, \"Definition\"):\n        # Write the archive to a file\n        gh_file_path = \"output.ghx\"\n        success = archive.WriteToFile(gh_file_path, True, False)\n        if success:\n            print(f\"Grasshopper file successfully saved to: {gh_file_path}\")\n        else:\n            print(\"Failed to save the Grasshopper file.\")\n    else:\n        print(\"Failed to serialize the Grasshopper document.\")\nelse:\n    print(\"Failed to create the Drakon3D component. Please check the GUID.\")\n\n\n\nI am using Drakon as a plugin, and want to connect the Drakon components I emit through the component server ( I hope that this issue is not Drakon specific ). The code above fails, saying that the IGH_DocumentObject object has no attributes such as Params, which is alright, however I’m failing to find any resources that can point me toward how I can connect components programmatically.\n\n\nCould someone give me at least an example of how this can be performed, or give me an alternative way of doing all of this?\n\n\nEdit:\n\nIt is important for me to mention that I am using RhinoInside here, and I am not executing this python script in a Rhino environment.\n\nThese are my imports:\n\n\nim...",
+  "code_blocks": [
+    {
+      "code": "new_doc = GH_Document()\nguidGem = Guid(\"2f9dce65-e9a1-59c3-8206-e6f2ec1d7a95\")\nguidRing = Guid(\"b94ec479-3909-0aac-69de-1abd3b3ae82a\")\ngem = Grasshopper.Instances.ComponentServer.EmitObject(guidGem)\nring = Grasshopper.Instances.ComponentServer.EmitObject(guidRing)\nif gem and ring:\n\n    # Add the component to the document\n    new_doc.AddObject(gem, False)\n    new_doc.AddObject(ring, False)\n    output_param = gem.Params.Output[0]\n    input_param = ring.Params.Input[0]\n    input_param.AddSource(output_param)\n\n\n    # Save the new document to a file\n    archive = GH_Archive()\n    if archive.AppendObject(new_doc, \"Definition\"):\n        # Write the archive to a file\n        gh_file_path = \"output.ghx\"\n        success = archive.WriteToFile(gh_file_path, True, False)\n        if success:\n            print(f\"Grasshopper file successfully saved to: {gh_file_path}\")\n        else:\n            print(\"Failed to save the Grasshopper file.\")\n    else:\n        print(\"Failed to serialize the Grasshopper document.\")\nelse:\n    print(\"Failed to create the Drakon3D component. Please check the GUID.\")",
+      "language": "python",
+      "author": "Damjan_Avramovski",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load(R\"C:\\Program Files\\Rhino 7\\System\")\nimport Rhino\n\ngh = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\ngh.RunHeadless()\n\nimport Grasshopper\nfrom Grasshopper.Kernel import GH_Document\nfrom GH_IO.Serialization import GH_Archive\nfrom System import Guid",
+      "language": "python",
+      "author": "Damjan_Avramovski",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 1,
+  "views": 72
+}

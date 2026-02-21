@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-best-create-a-circulair-voronoi-with-python-and-matplotlib-r8/181485",
+  "topic_id": 181485,
+  "title": "How to best create a circulair voronoi with python and matplotlib | R8",
+  "question": "How to best create a voronoi pattern inside a circle with Python? I now have this\n\n\nimport numpy as np\nfrom scipy.spatial import Voronoi, voronoi_plot_2d\nimport matplotlib.pyplot as plt\nfrom sklearn.preprocessing import MinMaxScaler\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef poisson_disc_samples(radius, k=30, width=1, height=1):\n    \"\"\"\n    Generate Poisson disc samples with the given radius and k (limit of samples to choose before rejection).\n    \"\"\"\n    def in_circle(point):\n        return np.linalg.norm(point - np.array([0.5, 0.5])) <= 0.5\n    \n    cell_size = radius / np.sqrt(2)\n    grid_width = int(np.ceil(width / cell_size))\n    grid_height = int(np.ceil(height / cell_size))\n    grid = [None] * (grid_width * grid_height)\n    points = []\n    spawns = []\n\n    def grid_coords(p):\n        return int(p[0] / cell_size), int(p[1] / cell_size)\n    \n    def fits(p):\n        return 0 <= p[0] < width and 0 <= p[1] < height and in_circle(p)\n    \n    p0 = np.array([np.random.uniform(), np.random.uniform()]) * np.array([width, height])\n    if not in_circle(p0 + np.array([0.5, 0.5])):\n        return points\n\n    spawns.append(p0)\n    grid_x, grid_y = grid_coords(p0)\n    grid[grid_x + grid_y * grid_width] = p0\n    points.append(p0)\n\n    while spawns:\n        idx = np.random.randint(0, len(spawns))\n        base = spawns[idx]\n        for _ in range(k):\n            angle = np.random.uniform(0, 2 * np.pi)\n            dist = np.random.uniform(radius, 2 * radius)\n            new_point = base + dist * np.array([np.cos(angle), np.sin(angle)])\n            new_grid_x, new_grid_y = grid_coords(new_point)\n            if fits(new_point) and new_grid_x + new_grid_y * grid_width < len(grid) and grid[new_grid_x + new_grid_y * grid_width] is None:\n                grid[new_grid_x + new_grid_y * grid_width] = new_point\n                points.append(new_point)\n                spawns.append(new_point)\n                break\n        else:\n            spawns.pop(idx)\n\n    # Normalize...",
+  "code_blocks": [
+    {
+      "code": "import numpy as np\nfrom scipy.spatial import Voronoi, voronoi_plot_2d\nimport matplotlib.pyplot as plt\nfrom sklearn.preprocessing import MinMaxScaler\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef poisson_disc_samples(radius, k=30, width=1, height=1):\n    \"\"\"\n    Generate Poisson disc samples with the given radius and k (limit of samples to choose before rejection).\n    \"\"\"\n    def in_circle(point):\n        return np.linalg.norm(point - np.array([0.5, 0.5])) <= 0.5\n    \n    cell_size = radius / np.sqrt(2)\n    grid_width = int(np.ceil(width / cell_size))\n    grid_height = int(np.ceil(height / cell_size))\n    grid = [None] * (grid_width * grid_height)\n    points = []\n    spawns = []\n\n    def grid_coords(p):\n        return int(p[0] / cell_size), int(p[1] / cell_size)\n    \n    def fits(p):\n        return 0 <= p[0] < width and 0 <= p[1] < height and in_circle(p)\n    \n    p0 = np.array([np.random.uniform(), np.random.uniform()]) * np.array([width, height])\n    if not in_circle(p0 + np.array([0.5, 0.5])):\n        return points\n\n    spawns.append(p0)\n    grid_x, grid_y = grid_coords(p0)\n    grid[grid_x + grid_y * grid_width] = p0\n    points.append(p0)\n\n    while spawns:\n        idx = np.random.randint(0, len(spawns))\n        base = spawns[idx]\n        for _ in range(k):\n            angle = np.random.uniform(0, 2 * np.pi)\n            dist = np.random.uniform(radius, 2 * radius)\n            new_point = base + dist * np.array([np.cos(angle), np.sin(angle)])\n            new_grid_x, new_grid_y = grid_coords(new_point)\n            if fits(new_point) and new_grid_x + new_grid_y * grid_width < len(grid) and grid[new_grid_x + new_grid_y * grid_width] is None:\n                grid[new_grid_x + new_grid_y * grid_width] = new_point\n                points.append(new_point)\n                spawns.append(new_point)\n                break\n        else:\n            spawns.pop(idx)\n\n    # Normalize the points to [-1, 1] range to fit the circle of radius 1 centered at (0, 0)\n    scaler = MinMaxScaler(feature_range=(-1, 1))\n    points = scaler.fit_transform(points)\n\n    return points\n\ndef main():\n    points = poisson_disc_samples(0.1, width=2, height=2)\n    vor = Voronoi(points)\n\n    # Plotting\n    fig, ax = plt.subplots()\n    voronoi_plot_2d(vor, ax=ax, show_vertices=True, line_colors='orange', line_width=2, line_alpha=0.6, point_size=2)\n    circle = plt.Circle((0, 0), 1, edgecolor='b', facecolor='none')\n    ax.add_artist(circle)\n    ax.set_xlim(-1, 1)\n    ax.set_ylim(-1, 1)\n    ax.set_aspect('equal')\n    plt.show()\n\nif __name__ == \"__main__\":\n    main()",
+      "language": "python",
+      "author": "Chris37",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 1,
+  "views": 251
+}

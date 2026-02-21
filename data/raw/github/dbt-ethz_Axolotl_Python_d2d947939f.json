@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/_old_axolotl-1.0/code/primitives/polypipe.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "_old_axolotl-1.0/code/primitives/polypipe.py",
+  "instruction": "extrudes a star polygon along a curve\nInputs:\n    axis: the axis curve\n    n : the number of points in the polygon (doubles when star)\n    r : the radius of the polygon\n    r2 : second radius to...",
+  "code": "#!/usr/bin/env python2\n# -*- coding: utf-8 -*-\n\n\"\"\"\nextrudes a star polygon along a curve\nInputs:\n    axis: the axis curve\n    n : the number of points in the polygon (doubles when star)\n    r : the radius of the polygon\n    r2 : second radius to create a star polygon\n    sa : rotation angle at start (0 if omitted)\n    ea : rotation angle at end (same as sa if omitted)\n    pts: List of points to query (list)\nOutput:\n    a: Distance values for all points in pts\n\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT / ETH Zurich'\n__license__    = 'MIT License'\n__email__      = '<bernhard@arch.ethz.ch>'\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math\n\n# check input\nif not n:\n\tn=6\nif n<3:\n\tn=3\nif not r:\n\tr = 10\nif r<0:\n\tr = math.abs(r)\nif not sa:\n    sa = 0\nif not ea:\n    ea = sa\n\nif r2:\n\tn*=2\n\ndef get_dist(pt,poly):\n    # find closest point on axis curve\n    param = rs.CurveClosestPoint(axis, pt)\n    # get plane perpendicular to curve\n    ck,pl = axis.PerpendicularFrameAt(param)\n    # part responsible for flat end caps\n    # if distance from point to plane is bigger than 0,\n    # return that distance\n    pp = rs.PlaneClosestPoint(pl,pt)\n    d2 = rs.Distance(pt,pp)\n    if d2>0.01:\n        return d2\n\n    # else change the basis of the polygon from world xy\n    # to that plane to check for distance and inside/outside\n    pm = (param-axis.Domain[0])/(axis.Domain[1]-axis.Domain[0])\n\n    wxy = rs.WorldXYPlane()\n    tf = rg.Transform.PlaneToPlane(wxy,pl)\n    ang = sa + pm*(ea-sa)\n    tr = rg.Transform.Rotation(ang, pl.Normal, pl.Origin)\n    tpts = rs.CurvePoints(poly)\n    for p in tpts:\n        p.Transform(tf)\n        p.Transform(tr)\n    ply = rs.AddPolyline(tpts)\n    prm = rs.CurveClosestPoint(ply,pt)\n    cp = rs.EvaluateCurve(ply,prm)\n    d = rs.Distance(pt,cp)\n    # if the point is inside the curve, reverse the distance\n    bln = rs.PointInPlanarClosedCurve(pt,ply,pl)\n    if bln:\n        d *= -1\n    return d\n\ndef get_polygon():\n\tai = 2*math.pi / n\n\tplpts = []\n\tfor s in range(n+1):\n\t\tif r2:\n\t\t\trt = ((s+1)%2)*r+(s%2)*r2\n\t\telse:\n\t\t\trt = r\n\t\tx = rt * math.cos(s*ai)\n\t\ty = rt * math.sin(s*ai)\n\t\tplpts.append(rg.Point3d(x,y,0))\n\treturn rs.AddPolyline(plpts)\n\nply = get_polygon()\n\na = [get_dist(p,ply) for p in pts]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

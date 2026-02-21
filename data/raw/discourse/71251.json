@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-it-possible-to-control-the-display-on-off-option-using-the-api-python/71251",
+  "topic_id": 71251,
+  "title": "Is it possible to control the display on / off option using the API? [python]",
+  "question": "Hello Please let me know if there is an API that can control the check / uncheck of Clipping Plane in Display mode as shown above. I would appreciate it if you could show me an example too.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n    import scriptcontext\n\n    # The following example demonstrates how to modify advanced display settings\n    # using RhinoCommon. \n\n    def AdvancedDisplay():\n        # Use the display attributes manager to build a list of display modes.\n        # Note, these are copies of the originals...\n        display_modes = Rhino.Display.DisplayModeDescription.GetDisplayModes()\n        if not display_modes: return Rhino.Commands.Result.Failure\n\n        # Construct an options picker so the user can pick which\n        # display mode they want modified\n        go = Rhino.Input.Custom.GetOption()\n        go.SetCommandPrompt(\"Display mode to modify mesh thickness\")\n        opt_list = []\n        for i, mode in enumerate(display_modes):\n            english_name = mode.EnglishName\n            english_name = english_name.translate(None, \"_ -,.\")\n            opt_list.append( go.AddOption(english_name) )\n\n        # Get the command option\n        go.Get()\n        if go.CommandResult()!=Rhino.Commands.Result.Success:\n          return go.CommandResult();\n\n        selected_index = go.Option().Index\n        selected_description = None\n        for i,option in enumerate(opt_list):\n            if option==selected_index:\n                selected_description = display_modes[i]\n                break\n        # Validate...\n        if not selected_description: return Rhino.Commands.Result.Failure\n\n        # Modify the desired display mode to turn off ClippingPlanes display\n        selected_description.DisplayAttributes.ShowClippingPlanes = False\n        # Use the display attributes manager to update the display mode.\n        Rhino.Display.DisplayModeDescription.UpdateDisplayMode(selected_description)\n        # Force the document to regenerate.\n        scriptcontext.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n\n    if __name__==\"__main__\":\n        AdvancedDisplay()",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DisplayModeToggleClippingPlanes():\n    \n    if Rhino.RhinoApp.ExeVersion < 6: return\n    \n    dmd = scriptcontext.doc.Views.ActiveView.ActiveViewport.DisplayMode\n    state = dmd.DisplayAttributes.ShowClippingPlanes\n    dmd.DisplayAttributes.ShowClippingPlanes = not state\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(dmd)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    DisplayModeToggleClippingPlanes()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 530
+}

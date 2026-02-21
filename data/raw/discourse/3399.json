@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/memory-leak-in-brep-trim/3399",
+  "topic_id": 3399,
+  "title": "Memory Leak in Brep.Trim()?",
+  "question": "When I try to perform a high number of trimming operations in Python and Rhino.Common the memory usage of the Rhino processes goes right through the roof. After 100 trimming operations, memory has increased by approx. 1GB.\n\n\nBelow is the code, a Rhino model with a test surface is here: \nTrimLeakTest.zip\n(222.9 KB)\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\nimport random\n\ndef main():\n    \"\"\" This test script takes an input surface, trims it with a number of \n    randomly placed boxes and puts the results back into the model as surfaces.\n    \n    After trimming 100 times the memory usage of Rhino has grown by approx. 1GB.\n    \"\"\"\n    \n    # USER INTEFACE ------------------------------------------------------------\n    \n    # get surface\n    idSurface = rs.GetObject(\"select surface\", 8)\n    if idSurface == None: return\n    # get number of trims to create\n    nTrims = rs.GetInteger(\"number of trims\", 100)\n    if nTrims == None: return\n    # get size of trimming boxes\n    dSize = rs.GetReal(\"size of trim box\", 1000)\n    if dSize == None: return\n    \n    # PREPARATION --------------------------------------------------------------\n\n    # get brep from guid and extract face and domains\n    srfbrep = scriptcontext.doc.Objects.Find(idSurface).BrepGeometry\n    face = srfbrep.Faces[0]\n    domains = [face.Domain(i) for i in [0,1]]\n    boxsize = Rhino.Geometry.Interval(-dSize/2, dSize/2)\n    \n    # EXECUTION ----------------------------------------------------------------\n\n    # execute trims\n    for i in range(nTrims):\n        scriptcontext.escape_test()\n        rs.Prompt(\"processing trim no. %d/%d\" % (i+1, nTrims))\n        # get random point on surface, plane in this point and a box\n        p = face.PointAt(domains[0].ParameterAt(random.random()),\n                         domains[1].ParameterAt(random.random()))\n        plane = Rhino.Geometry.Plane(p, Rhino.Geometry.Vector3d(0,0,1))\n        box = Rhino.Geometry.Box(plane, boxsize, boxsize, boxsize)\n     ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\nimport random\n\ndef main():\n    \"\"\" This test script takes an input surface, trims it with a number of \n    randomly placed boxes and puts the results back into the model as surfaces.\n    \n    After trimming 100 times the memory usage of Rhino has grown by approx. 1GB.\n    \"\"\"\n    \n    # USER INTEFACE ------------------------------------------------------------\n    \n    # get surface\n    idSurface = rs.GetObject(\"select surface\", 8)\n    if idSurface == None: return\n    # get number of trims to create\n    nTrims = rs.GetInteger(\"number of trims\", 100)\n    if nTrims == None: return\n    # get size of trimming boxes\n    dSize = rs.GetReal(\"size of trim box\", 1000)\n    if dSize == None: return\n    \n    # PREPARATION --------------------------------------------------------------\n\n    # get brep from guid and extract face and domains\n    srfbrep = scriptcontext.doc.Objects.Find(idSurface).BrepGeometry\n    face = srfbrep.Faces[0]\n    domains = [face.Domain(i) for i in [0,1]]\n    boxsize = Rhino.Geometry.Interval(-dSize/2, dSize/2)\n    \n    # EXECUTION ----------------------------------------------------------------\n\n    # execute trims\n    for i in range(nTrims):\n        scriptcontext.escape_test()\n        rs.Prompt(\"processing trim no. %d/%d\" % (i+1, nTrims))\n        # get random point on surface, plane in this point and a box\n        p = face.PointAt(domains[0].ParameterAt(random.random()),\n                         domains[1].ParameterAt(random.random()))\n        plane = Rhino.Geometry.Plane(p, Rhino.Geometry.Vector3d(0,0,1))\n        box = Rhino.Geometry.Box(plane, boxsize, boxsize, boxsize)\n        # create box brep\n        boxbrep = Rhino.Geometry.Brep.CreateFromBox(box)\n        \n        # TRIM input surface with box\n        trimresult = srfbrep.Trim(boxbrep, rs.UnitAbsoluteTolerance())\n\n        if trimresult != None and len(trimresult) > 0: \n            # create surface\n            idTrim = scriptcontext.doc.Objects.AddBrep(trimresult[0], \n                                            Rhino.DocObjects.ObjectAttributes())\n    \n    # CLEAN UP -----------------------------------------------------------------\n    \n    \nif __name__== \"__main__\":\n    main()",
+      "language": "python",
+      "author": "fabian",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 1341
+}

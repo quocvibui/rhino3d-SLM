@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cropping-with-scripting/66711",
+  "topic_id": 66711,
+  "title": "Cropping with scripting",
+  "question": "Hello,\n\n\nI am using this piece of code for zooming in an object until its border\n\n\nrs.Command('_-SetZoomExtentsBorder _ParallelView=1 _Enter')\n\n\nand then exporting it to an image\n\n\nrs.Command(\"_-ViewCaptureToFile \" + chr(34) + imagePath +chr(34) + \" _EnterEnd\")\n\n\nthe problem is that it zooms only 2 sides and I would like to zoom all 4 sides of the picture.\n\n\nHow to do that?\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef test():\n    \n    ids = rs.AllObjects()\n    if not ids: return\n    \n    \n    bb = rs.BoundingBox(ids, rs.ViewCameraPlane(),False)\n    \n    bbX = rs.Distance(bb[0], bb[1])\n    bbY = rs.Distance(bb[0], bb[3])\n\n    bbRatio = bbX/bbY\n    \n    size = rs.ViewSize()\n    w = size[0]; h = size[1]\n\n    if bbX > bbY:\n        w = size[0]; h = size[0]/bbRatio\n    elif bbX<bbY:\n        w = size[1]*bbRatio; h = size[1]\n    else:\n        if bbRatio < 1:\n            w = size[0]*bbRatio; h = size[1]\n        elif bbRatio > 1:\n            w = size[0]; h = size[1]*bbRatio\n            \n    rs.Command(\"_-ViewportProperties Size \" + str(int(w)) +\" \" + str(int(h)) + \" _EnterEnd\")\n    rs.ZoomExtents()\n    \ntest()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 5,
+  "views": 517
+}

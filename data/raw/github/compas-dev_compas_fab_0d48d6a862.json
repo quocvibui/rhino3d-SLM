@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_fab/blob/431e82c810ea299b9727b010b73a39abc73c5d62/src/compas_fab/ghpython/components/Cf_RosTopicPublish/code.py",
+  "repo": "compas-dev/compas_fab",
+  "repo_stars": 124,
+  "repo_description": "Robotic fabrication package for the COMPAS Framework.",
+  "license": "MIT",
+  "filepath": "src/compas_fab/ghpython/components/Cf_RosTopicPublish/code.py",
+  "instruction": "Publishes messages to a ROS topic",
+  "code": "\"\"\"\nPublishes messages to a ROS topic\n\nCOMPAS FAB v1.0.2\n\"\"\"\n\nimport time\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nfrom roslibpy import Topic\nfrom scriptcontext import sticky as st\n\nfrom compas_fab.backends.ros.messages import ROSmsg\nfrom compas_fab.ghpython.components import create_id\n\n\nclass ROSTopicPublish(component):\n    def RunScript(self, ros_client, topic_name, topic_type, msg):\n        if not topic_name:\n            raise ValueError(\"Please specify the name of the topic\")\n        if not topic_type:\n            raise ValueError(\"Please specify the type of the topic\")\n\n        key = create_id(self, \"topic\")\n\n        topic = st.get(key, None)\n\n        if ros_client and ros_client.is_connected:\n            if not topic or topic.ros != ros_client:\n                topic = Topic(ros_client, topic_name, topic_type, reconnect_on_close=False)\n                topic.advertise()\n                time.sleep(0.2)\n\n                st[key] = topic\n\n        self.is_advertised = topic and topic.is_advertised\n\n        if msg:\n            msg = ROSmsg.parse(msg, topic_type)\n            topic.publish(msg.msg)\n            self.Message = \"Message published\"\n        else:\n            if self.is_advertised:\n                self.Message = \"Topic advertised\"\n\n        return (topic, self.is_advertised)\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-getrectangle-problem/89140",
+  "topic_id": 89140,
+  "title": "rs.GetRectangle problem",
+  "question": "Hi,\n\n\nI run he script below and pick the points in the order mentioned in the rhino file attached.\n\nThe rectangle gets printed, but when i try to run something on it like areacentroid i get “Parameter must be a Guid or string representing a Guid”. And this is because points 2 and 3 are too close to each other.\n\n\nWhy is this happening? how can i avoid it?\n\n\n190920 getrectangle.3dm\n (76.5 KB) \n190920 getrectangle.py\n (187 Bytes)\n\n\nimport rhinoscriptsyntax as rs\n\nrectangle = rs.GetRectangle (mode=2, base_point=None, prompt1=None, prompt2=None, prompt3=None)\n\nprint rectangle\nprint rs.CurveAreaCentroid(rectangle)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nrectangle = rs.GetRectangle (mode=2, base_point=None, prompt1=None, prompt2=None, prompt3=None)\n\n#make the Array a list\nrect_points = list(rectangle)\n#add first point as last point to get a cloded polyline\nrect_points.append(rect_points[0])\n#add polyine to document\npolyline_id = rs.AddPolyline(rect_points)\n#compute\nc_point, c_vec =  rs.CurveAreaCentroid(polyline_id)\n#add point\nrs.AddPoint(c_point)\n#dispode of polyline\nrs.DeleteObject(polyline_id)\n\n#Note that you can also use geometry for calculations without adding it to the document:\npolyline = Rhino.Geometry.PolylineCurve(rect_points)\nc_point, c_vec =  rs.CurveAreaCentroid(polyline)\n#add a circle to differentiate between the point above\nrs.AddCircle(c_point, 1)\n#no need to delete the polyline as it is not added to the document",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrectangle = rs.GetRectangle (mode=2, base_point=None, prompt1=None, prompt2=None, prompt3=None)\n\nprint rectangle\nprint rs.CurveAreaCentroid(rectangle)",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 371
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/fencing-linetype/85002",
+  "topic_id": 85002,
+  "title": "Fencing Linetype",
+  "question": "Anybody have a Linetype for Fencing? Looks sort of like this :\n\n\nimage\n2020×163 895 Bytes\n\nI got that from a Vectorworks user. It comes in as just a block of crvs.  So that’s another question – how to get Linetypes from other platforms if people are willing to share with you?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\ndef fenceCurve():\n    \"\"\"\n    ---x---x---x---x---x---x---\n    this script divides a curve by length and adds 'crosses' to it, grouped per curve / polyline\n    www.studiogijs.nl\n    \"\"\"\n    curves = rs.GetObjects(\"select curves to change into fence-style\",4, preselect=True)\n    if not curves:\n        return\n    \n    \n    s=sc.sticky['scale'] if sc.sticky.has_key('scale') else 20\n    scale = rs.GetReal(\"scale of the arrow curve\", s, 5, 100)\n     \n    \n    if not scale:\n        return\n    sc.sticky['scale']=scale\n    \n    \n    rs.EnableRedraw(False)    \n    \n    for curve in curves:\n        lines=[]\n        if rs.CurveLength(curve)>scale:\n            pts = rs.DivideCurveLength(curve, scale)\n            for pt in pts:\n                t=rs.CurveClosestPoint(curve, pt)\n                vec = rs.CurveTangent(curve, t)\n                line = rs.AddLine(pt-vec*scale/10, pt+vec*scale/10)\n                rs.RotateObject(line, pt, 45)\n                lines.append(line)\n                line_copy = rs.RotateObject(line, pt, 90, copy=True)\n                lines.append(line_copy)\n            group = rs.AddGroup()\n            rs.AddObjectsToGroup(lines, group)\n            rs.AddObjectsToGroup(curve, group)\n            rs.SelectObjects(lines)\n            rs.SelectObjects(curves)\n    rs.EnableRedraw(True)\n                \nfenceCurve()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 16,
+  "views": 2771
+}

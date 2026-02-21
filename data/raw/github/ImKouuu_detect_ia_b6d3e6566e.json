@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/ImKouuu/detect_ia/blob/55d431db55ebc1289db52facbce001ce604727a1/datasets/ongoing/the_stack/funkchaser_compas/labels.py",
+  "repo": "ImKouuu/detect_ia",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "datasets/ongoing/the_stack/funkchaser_compas/labels.py",
+  "instruction": "Labels",
+  "code": "from __future__ import print_function\nfrom __future__ import absolute_import\nfrom __future__ import division\n\nfrom System.Drawing.Color import FromArgb\nfrom Rhino.Geometry import Point3d\n\nfrom compas.utilities import color_to_rgb\nfrom .base import BaseConduit\n\n\nclass LabelsConduit(BaseConduit):\n    \"\"\"A Rhino display conduit for labels.\n\n    Parameters\n    ----------\n    labels : list of 2-tuple\n        A list of label tuples.\n        Each tuple contains a position and text for the label.\n    color : list of 2-tuple, optional\n        The colors of the labels.\n        Each color is a tuple with a background color and a text color.\n        Default is ``((0, 0, 0), (255, 255, 255))`` for all labels.\n\n    Attributes\n    ----------\n    color : list of RGB colors\n        A color specification per label.\n    labels : list\n        A list of label tuples.\n        Each tuple contains a position and text for the label.\n\n    Examples\n    --------\n    .. code-block:: python\n\n        from random import randint\n        from compas_rhino.conduits import LabelsConduit\n\n        labels = [([1.0 * randint(0, 100), 1.0 * randint(0, 100), 0.0], str(i)) for i in range(100)]\n\n        conduit = LabelsConduit(labels)\n\n        with conduit.enabled():\n            for i in range(100):\n                conduit.labels = [([1.0 * randint(0, 100), 1.0 * randint(0, 100), 0.0], str(i)) for i in range(100)]\n                conduit.redraw(pause=0.1)\n\n    \"\"\"\n    def __init__(self, labels, color=None, **kwargs):\n        super(LabelsConduit, self).__init__(**kwargs)\n        self._default_color = FromArgb(0, 0, 0)\n        self._default_textcolor = FromArgb(255, 255, 255)\n        self._color = None\n        self.labels = labels or []\n        self.color = color\n\n    @property\n    def color(self):\n        return self._colors\n\n    @color.setter\n    def color(self, color):\n        if color:\n            color[:] = [(FromArgb(* color_to_rgb(bgc)), FromArgb(* color_to_rgb(tc))) for bgc, tc in color]\n            l = len(self.labels)  # noqa: E741\n            c = len(color)\n            if c < l:\n                color += [(self._default_color, self._default_textcolor) for i in range(l - c)]\n            elif c > l:\n                color[:] = color[:l]\n            self._color = color\n\n    def DrawForeground(self, e):\n        for i, (pos, text) in enumerate(self.labels):\n            if self.color:\n                color, textcolor = self.color[i]\n                e.Display.DrawDot(Point3d(*pos), text, color, textcolor)\n            else:\n                e.Display.DrawDot(Point3d(*pos), text, self._default_color, self._default_textcolor)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

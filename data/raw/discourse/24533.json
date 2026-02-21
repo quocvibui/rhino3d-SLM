@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-rail-styles/24533",
+  "topic_id": 24533,
+  "title": "Scripting rail styles",
+  "question": "When using the graphical interface, it is possible to select styles for rail in Sweep1 (for instance “Roadlike Top”)\n\nIn RhinoScript,  rs.AddSweep1() does not allow that style option.\n\nI tried to add it, but without success.\n\nAny hint about how to implement that style option successfully ?\n\nThanks !",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef Sweep1():\n    rail = rs.GetObject(\"Select rail curve\", rs.filter.curve)\n    rail_crv = rs.coercecurve(rail)\n    if not rail_crv: return\n    \n    cross_sections = rs.GetObjects(\"Select cross sections\", rs.filter.curve)\n    if not cross_sections: return\n    cross_sections = [rs.coercecurve(crv) for crv in cross_sections]\n    \n    sweep = Rhino.Geometry.SweepOneRail()\n    sweep.AngleToleranceRadians = scriptcontext.doc.ModelAngleToleranceRadians\n    sweep.ClosedSweep = False\n    sweep.SweepTolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    sweep.SetToRoadlikeTop()\n    breps = sweep.PerformSweep(rail_crv, cross_sections)\n    for brep in breps: scriptcontext.doc.Objects.AddBrep(brep)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    Sweep1()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 841
+}

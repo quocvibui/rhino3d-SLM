@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/missing-hideindetail-python-function/24624",
+  "topic_id": 24624,
+  "title": "Missing HideInDetail() python function",
+  "question": "Greetings,\n\nI am attempting to hide multiple objects in multiple details within several layouts of a rhino file.\n\nI have got a test script functions correctly, however I have had to use rs.Command(“_HideInDetail”).\n\nThe problem is, my current method takes a long time to hide large numbers of objects across several layouts and details.  I assume there must a way to gain access to the HideInDetail functionality without using the Rhino command line, but I have not been able to locate it in the docs.\n\n\nAny assistance would be extremely helpful, below is my test code complete with command line functions.\n\nThanks\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef HideInDetails(Objs):\n    for layout in scriptcontext.doc.Views.GetPageViews():       #Get all layouts in document\n        scriptcontext.doc.Views.ActiveView = layout             #Set layout to active view\n        for detail in layout.GetDetailViews():                  #Get all detail in each layout\n            if detail.DetailGeometry.IsProjectionLocked==True:  #Test if deatil is locked\n                detail.DetailGeometry.IsProjectionLocked=False  #Lock detail so we can edit it\n                detail.CommitChanges()                          #Unlock the detail \n            layout.SetActiveDetail(detail.Id)                   #Set detail to active\n            \n            ## Would like to accomplish this in rhino common ##\n            rs.SelectObjects(Objs)                              #Select Items we dont want to see in detail\n            rs.Command(\"_HideInDetail\")                         #Hide everything you dont want to see in the detail\n            rs.Command(\"_SelNone\")                              #Clear selection\n\nobjs=rs.GetObjects(\"Select objects to hide in all details\")\nif objs: HideInDetails(objs)",
+  "code_blocks": [
+    {
+      "code": "def HideInDetails(Objs):\n    s_timer=0\n    h_timer=0\n    for layout in scriptcontext.doc.Views.GetPageViews():       #Get all layouts in document\n        scriptcontext.doc.Views.ActiveView = layout             #Set layout to active view\n        for detail in layout.GetDetailViews():                  #Get all detail in each layout\n            if detail.DetailGeometry.IsProjectionLocked==True:  #Test if deatil is locked\n                detail.DetailGeometry.IsProjectionLocked=False  #Lock detail so we can edit it\n                detail.CommitChanges()                          #Unlock the detail \n            layout.SetActiveDetail(detail.Id)                   #Set detail to active\n            \n            start=time.time()           #Start selection timer\n            rs.SelectObjects(Objs)      #Select objects \n            end=time.time()             #Stop selection timer\n            s_timer+=end-start          #Record selection timer\n            \n            start=time.time()           #Start hide timer\n            rs.Command(\"_HideInDetail\") #HideInDetail\n            end=time.time()             #End hide timer\n            h_timer+=end-start          #Record hide\n            \n            rs.Command(\"_SelNone\")\n    \n    print \"Number of objects:\"+str(len(Objs))\n    print \"HideInDetail timer: \"+str(h_timer)\n    print \"Select objects timer: \"+str(s_timer)\n    print",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "rs.EnableRedraw(False)\nHideInDetails()\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "select_all_objects_except_one(obj)      \n    \n    \n    rs.Command(\"_HideInDetail\")\n    \"\"\" \n    attributes = obj_ref.Attributes\n    if attributes:\n        attributes.AddHideInDetailOverride(obj) == False\n        obj_ref.CommitChanges()\n        \"\"\"\n    \n    rs.SelectObject(obj)\n    rs.ZoomSelected()\n    doc.Views.Redraw()",
+      "language": "python",
+      "author": "lukehickmandesign",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef TestHideInDetail():\n    page_view = sc.doc.Views.ActiveView\n    if not isinstance(page_view, Rhino.Display.RhinoPageView):\n        print('The active view is neither a layout nor a detail view.')\n        return\n    \n    detail_view = page_view.ActiveDetail\n    if not detail_view:\n        print('The active view is not a detail view.')\n        return\n    \n    viewport_id = detail_view.Id\n    \n    filter = Rhino.DocObjects.ObjectType.AnyObject\n    rc, objrefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Select objects to hide\", False, filter)\n    if rc != Rhino.Commands.Result.Success:\n        return\n    \n    for objref in objrefs:\n        obj = objref.Object()\n        if obj:\n            attributes = obj.Attributes.Duplicate()\n            attributes.AddHideInDetailOverride(viewport_id)\n            sc.doc.Objects.ModifyAttributes(obj.Id, attributes, False)\n    page_view.Redraw()\n    \n\nif __name__ == \"__main__\":\n    TestHideInDetail()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef HideInDetails(Objs):\n    for layout in scriptcontext.doc.Views.GetPageViews():       #Get all layouts in document\n        scriptcontext.doc.Views.ActiveView = layout             #Set layout to active view\n        for detail in layout.GetDetailViews():                  #Get all detail in each layout\n            if detail.DetailGeometry.IsProjectionLocked==True:  #Test if deatil is locked\n                detail.DetailGeometry.IsProjectionLocked=False  #Lock detail so we can edit it\n                detail.CommitChanges()                          #Unlock the detail \n            layout.SetActiveDetail(detail.Id)                   #Set detail to active\n            \n            ## Would like to accomplish this in rhino common ##\n            rs.SelectObjects(Objs)                              #Select Items we dont want to see in detail\n            rs.Command(\"_HideInDetail\")                         #Hide everything you dont want to see in the detail\n            rs.Command(\"_SelNone\")                              #Clear selection\n\nobjs=rs.GetObjects(\"Select objects to hide in all details\")\nif objs: HideInDetails(objs)",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 1534
+}

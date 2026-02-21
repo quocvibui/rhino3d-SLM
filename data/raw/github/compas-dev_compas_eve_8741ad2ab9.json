@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_eve/blob/b9dd0110f613291d4fd51c38a53a74e5642da5dd/src/compas_eve/ghpython/components/Ce_Message/code.py",
+  "repo": "compas-dev/compas_eve",
+  "repo_stars": 5,
+  "repo_description": "COMPAS Event Extensions: adds event-based communication infrastructure to the COMPAS framework.",
+  "license": "MIT",
+  "filepath": "src/compas_eve/ghpython/components/Ce_Message/code.py",
+  "instruction": "Create a message.",
+  "code": "# r: compas_eve>=2.1.1\n\"\"\"\nCreate a message.\n\"\"\"\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport System\nfrom compas.geometry import Brep\nfrom compas_rhino import conversions\n\nfrom compas_eve import Message\n\ncomponent = ghenv.Component  # noqa: F821\n\nlocal_values = locals()\ndata = dict()\n\nfor input_param in component.Params.Input:\n    name = input_param.NickName\n    value = local_values[name]\n    if isinstance(value, System.Guid):\n        try:\n            value = rs.coercegeometry(value)\n        except:  # noqa: E722\n            pass\n    if isinstance(value, rg.Point3d):\n        value = conversions.point_to_compas(value)\n    elif isinstance(value, rg.Box):\n        value = conversions.box_to_compas(value)\n    elif isinstance(value, rg.Vector3d):\n        value = conversions.vector_to_compas(value)\n    elif isinstance(value, rg.Arc):\n        value = conversions.arc_to_compas(value)\n    elif isinstance(value, rg.Circle):\n        value = conversions.circle_to_compas(value)\n    elif isinstance(value, rg.Curve):\n        value = conversions.curve_to_compas(value)\n    elif isinstance(value, rg.Cone):\n        value = conversions.cone_to_compas(value)\n    elif isinstance(value, rg.Cylinder):\n        value = conversions.cylinder_to_compas(value)\n    elif isinstance(value, rg.Line):\n        value = conversions.line_to_compas(value)\n    elif isinstance(value, rg.Mesh):\n        value = conversions.mesh_to_compas(value)\n    elif isinstance(value, rg.Plane):\n        value = conversions.plane_to_compas_frame(value)\n    elif isinstance(value, rg.Sphere):\n        value = conversions.sphere_to_compas(value)\n    elif isinstance(value, rg.PolylineCurve):\n        value = conversions.polygon_to_compas(value)\n    elif isinstance(value, rg.Polyline):\n        value = conversions.polyline_to_compas(value)\n    elif isinstance(value, rg.Surface):\n        value = conversions.surface_to_compas(value)\n    elif isinstance(value, rg.Brep):\n        value = Brep.from_native(value)\n\n    data[name] = value\n\nmessage = Message(**data)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

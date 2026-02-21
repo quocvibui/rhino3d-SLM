@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/timing-of-default-template-loading/207855",
+  "topic_id": 207855,
+  "title": "Timing of default template loading",
+  "question": "Hello! I’ve run across a curious issue and was wondering how to solve it.\n\n\nI’m developing a plugin using Rhino 8, rhinocommon, eto, c# on windows 11.\n\n\nMy plugin is a panel that gets loaded and docked automatically while Rhino starts.\n\n\nOne of the first thing the plugin does is checks what the model units are set to using:\n\nmodel_units = doc.ModelUnitSystem.ToString();\n\n\nIt uses this info to populate text boxes with default values that are dependent on the units.\n\n\nI have Rhino setup to use “Small Objects - Millimeters.3dm”  by default if I don’t pick a template on startup.\n\n\nWhen Rhino starts without me selecting a file or template the plugin correctly detects the units as millimeters.\n\n\nWhen Rhino starts, if I quickly select the “Small Objects - Inches.3dm” template, my plugin will incorrectly report the units as millimeters, even though the model units are indeed inches.\n\n\nIf I pause for a few seconds before selecting “Small Objects - Inches.3dm” the plug-in will correctly detect the units as inches.\n\n\nIt’s as though on startup the units are quickly set to millimeters (the default) - then the plugin gets loaded and registers as millimeters and then misses the fact that I’ve selected the inches template unless I hold off selecting the inches template for a few seconds (until it’s further along its startup procedure).\n\n\nI’m guessing my computer’s just too fast … hoping I don’t need to install one of those old Turbo buttons we used to have to slow things down.\n\n\nWhat I’m looking for would be a way to delay load the plugin for a few seconds.",
+  "code_blocks": [
+    {
+      "code": "RhinoDoc.ActiveDocumentChanged += OnRhinoFullyInitialized;\n\nprivate void OnRhinoFullyInitialized(object sender, EventArgs e)\n{\n    // Find the unit you need and load the panel here\n    UIManager.Instance.CreateUI();\n}",
+      "language": "csharp",
+      "author": "yiliang",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 79
+}

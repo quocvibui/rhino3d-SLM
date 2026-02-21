@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curves-through-points-from-a-point-matrix/96569",
+  "topic_id": 96569,
+  "title": "Curves through points from a point matrix",
+  "question": "Hi all,\n\n\nI’m very new to Python in Rhino and have run into a bit of a snag for a script I’m trying to write. In the lines below, I establish a point matrix based on user input via rs.GetInteger, save those to a list (ptList_1) and then try to create a series of individual curves from rows of x or y points so that I can loft a surface from them. The way it is written now, I can get a curve extending through the entire list, but am not sure how to stop it at each new line so that they’re individual. Sorry if this is poorly explained, but any help would be greatly appreciated!\n\n\nimport rhinoscriptsyntax as rs\nimport random\n\n# Empty lists\nptList_1 = []\n\nptList_2 = []\n# For curves to loft surface\ncrvList_1 = []\n# For first set of circles\ncrvList_2 = []\n# For second set of circles\ncrvList_3 = []\n# Point dictionary for first matrix set\nptDict_1 = {}\n# Point dictionary for second matrix set (moved points)\nptDict_2 = {}\n\n# i, j and k values\n\nimax = rs.GetInteger('Choose an x value', 10)\njmax = rs.GetInteger('Choose a y value', 10)\nkmax = rs.GetInteger('Choose a z value', 2)\n\nattPt_1 = rs.AddPoint(random.randrange(1,(imax*5)), random.randrange(1,(jmax*5)), random.randrange(1,30))\n#attPt_2 = rs.AddPoint((random.randrange(1,15)*(imax/4)),(random.randrange(1,15)*(imax/4)),(random.randrange(1,15)*(imax/4)))\n\n# Values for first point matrix loop\n\nfor i in range(imax):\n    for j in range(jmax):\n        \n        x = i * 5\n        y = j * 5\n        \n        point = (x,y,0)\n        # Save points to dictionary for line construction\n        ptDict_1[(i,j)] = point        \n        ptList_1.append(rs.AddPoint(point))\n        \n        #print ptList_1\n\nfor i in range(imax*jmax):\n    distance = rs.Distance(ptList_1[i], attPt_1)\n    move_1 = distance/2\n    #print move_1\n    ptList_2.append(rs.MoveObject(ptList_1[i], (0,0,move_1)))\n\nfor j in range(jmax):\n        crvList_1.append(rs.AddCurve((ptList_1), 2))",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\ncrv_list = [] # stores the curves to loft\n\nimax = rs.GetInteger('Choose an x value', 10)\njmax = rs.GetInteger('Choose a y value', 10)\nkmax = rs.GetInteger('Choose a z value', 2)\n\natt_pt = rs.AddPoint(random.randrange(1,(imax*5)), random.randrange(1,(jmax*5)), random.randrange(1,30))\n\nfor i in xrange(imax):\n    \n    crv_pts = [] # stores all points in x-direction\n    \n    for j in xrange(jmax):\n        pt = [i*5.0, j*5.0, 0.0]\n        dist = rs.Distance(pt, att_pt)\n        pt[2] = dist * 0.5 # change z-value\n        crv_pts.append(pt)\n\n    crv_list.append(rs.AddCurve(crv_pts, 3))\n\nrs.AddLoftSrf(crv_list) # loft curves\n\nrs.DeleteObjects(crv_list) # delete curves from document\n#rs.DeleteObject(att_pt) # delete attractor point from document",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\n# Empty lists\nptList_1 = []\n\nptList_2 = []\n# For curves to loft surface\ncrvList_1 = []\n# For first set of circles\ncrvList_2 = []\n# For second set of circles\ncrvList_3 = []\n# Point dictionary for first matrix set\nptDict_1 = {}\n# Point dictionary for second matrix set (moved points)\nptDict_2 = {}\n\n# i, j and k values\n\nimax = rs.GetInteger('Choose an x value', 10)\njmax = rs.GetInteger('Choose a y value', 10)\nkmax = rs.GetInteger('Choose a z value', 2)\n\nattPt_1 = rs.AddPoint(random.randrange(1,(imax*5)), random.randrange(1,(jmax*5)), random.randrange(1,30))\n#attPt_2 = rs.AddPoint((random.randrange(1,15)*(imax/4)),(random.randrange(1,15)*(imax/4)),(random.randrange(1,15)*(imax/4)))\n\n# Values for first point matrix loop\n\nfor i in range(imax):\n    for j in range(jmax):\n        \n        x = i * 5\n        y = j * 5\n        \n        point = (x,y,0)\n        # Save points to dictionary for line construction\n        ptDict_1[(i,j)] = point        \n        ptList_1.append(rs.AddPoint(point))\n        \n        #print ptList_1\n\nfor i in range(imax*jmax):\n    distance = rs.Distance(ptList_1[i], attPt_1)\n    move_1 = distance/2\n    #print move_1\n    ptList_2.append(rs.MoveObject(ptList_1[i], (0,0,move_1)))\n\nfor j in range(jmax):\n        crvList_1.append(rs.AddCurve((ptList_1), 2))",
+      "language": "python",
+      "author": "jcraig0611",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 488
+}

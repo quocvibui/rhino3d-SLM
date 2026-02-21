@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gramaziokohler/sdsc_data_driven_acoustic_design/blob/4efcd74ba0e7e5cebabccceb919a0b1707bafc95/src/ddad/dataset/generate_images_rhino.py",
+  "repo": "gramaziokohler/sdsc_data_driven_acoustic_design",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "src/ddad/dataset/generate_images_rhino.py",
+  "instruction": "This file generates images of all obj files stored on the scratch server and\nsaves them in the images folder on the server. If the image has already been\ncreated, it is not re-created.",
+  "code": "\"\"\"This file generates images of all obj files stored on the scratch server and\nsaves them in the images folder on the server. If the image has already been\ncreated, it is not re-created.\n\nThis file has to run in Rhino. Before executing it, choose 'Perspective' the\nactive viewport and your preferred display mode.\n\"\"\"\nimport os\nimport glob\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n\n#from ddad.config import RAW_DATA_PATH # not working in Rhino...\nRAW_DATA_PATH = \"W:\"\n\nobj_path = os.path.join(RAW_DATA_PATH, \"OBJ\")\nimage_path = os.path.join(RAW_DATA_PATH, \"IMAGES\")\n\n# Set view to perspective and select preferred display mode\nview = scriptcontext.doc.Views.ActiveView\nviewport = view.MainViewport\nassert(viewport.Name == 'Perspective')\n\ncamera_direction = rg.Vector3d(-0.38, 0.64, -0.66)\ncamera_location = rg.Point3d(799.056803503826, -634.071735290653, 897.079879427254)\ncamera_target = rg.Point3d(311.833284699263, 186.515243748609, 50.8495572930144)\nwidth, height, scale = 1400, 1000, 1\n\nobj_path = os.path.join(RAW_DATA_PATH, \"OBJ\")\nimage_path = os.path.join(RAW_DATA_PATH, \"IMAGES\")\n\nprint(viewport.CameraDirection)\nprint(viewport.CameraLocation)\nprint(viewport.CameraTarget)\n\npanel_filenames = glob.glob(os.path.join(obj_path, 'panel_*.obj'))\nbaseline_filenames = glob.glob(os.path.join(obj_path, 'baseline_*.obj'))\n\nfor filename in panel_filenames + baseline_filenames:\n    name = os.path.splitext(os.path.basename(filename))[0]\n    image_filename = os.path.join(image_path, \"%s.png\" % name)\n    if os.path.isfile(image_filename):\n        print(\"Skipping %s, already generated.\" % name)\n        continue\n    print(\"Generating image for %s\" % name)\n\n    str = \"-import \\\"{}\\\" _Enter\".format(filename)\n    Rhino.RhinoApp.RunScript(str, False)\n    scriptcontext.doc.Objects.UnselectAll()\n    viewport.SetCameraDirection(camera_direction, False)\n    viewport.SetCameraLocation(camera_location, False)\n    viewport.SetCameraTarget(camera_target, False)\n    view.Redraw()\n    str = \"-viewcapturetofile \\\"{}\\\" Width={} Height={} Scale={} DrawGrid=No DrawWorldAxes=No DrawCPlaneAxes=No TransparentBackground=No _Enter\".format(\n        image_filename, width, height, scale)\n    Rhino.RhinoApp.RunScript(str, False)\n\n    object_ids = rs.AllObjects(select=False)\n    rs.DeleteObjects(object_ids)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

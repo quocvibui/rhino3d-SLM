@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/saving-commands/197022",
+  "topic_id": 197022,
+  "title": "Saving commands",
+  "question": "I have a command that takes a value “metals” from an Option List. I would like the index to persist. So if I set the index one time, it would remember the choice.\n\n\nHere is a sample of the code\n\n\nvar go = new GetOption();\n      \n                var go = new GetOption();\n                int metalIndex = 2;\n                int opList = go.AddOptionList(\"Metals\", Densities.metals, metalIndex);\n                go.AcceptNothing(true);\n                go.SetCommandPrompt(\"Please select a material.\");\n                GetResult res = go.Get();\n\n                if (res == GetResult.Option)\n                { \n                    var option = go.Option();\n                    metalIndex = go.Option().CurrentListOptionIndex;\n                }\n\n                //caluclate density\n                Rhino.RhinoApp.WriteLine(\" selection = {0}\", Densities.metals[metalIndex]);\n                double density = Densities.metalDensitites[Densities.metals[metalIndex]];\n\n\n\nI would like to persist metalIndex.",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\n\nunique_string = str(ghenv.Component.Attributes.InstanceGuid)\nLOCAL_KEY_1 = unique_string + \"_KEY_1\"\nLOCAL_KEY_2 = unique_string + \"_KEY_2\"\nGLOBAL_KEY_1 = \"GLOBAL_KEY_1\"\nGLOBAL_KEY_2 = \"GLOBAL_KEY_2\"\n\ndef get_sticky(key, default_value=None):\n    return sc.sticky[key] if sc.sticky.has_key(key) else default_value\n\ndef set_sticky(key, value):\n    sc.sticky[key] = value",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "public class RetrieveMaterialDensity : Command\n{\n    private int _selectedIndex;\n    private string[] _materials = new[] { \"Aluminum\", \"Brass\", \"Gold\" };\n    private double[] _densities = new[] { 2.7, 8.4, 19.32 };\n    public override string EnglishName => \"GetMaterialDensity\";\n\n    protected override Result RunCommand(Rhino.RhinoDoc doc, RunMode mode)\n    {\n        using (var go = new GetOption())\n        {\n            go.SetCommandPrompt(\"Select a material to get its density:\");\n            var materialOptionIndex = go.AddOptionList(\"Materials\", _materials, _selectedIndex);\n            go.AcceptNothing(true);\n            var result = go.Get();\n            if (result == GetResult.Option && go.OptionIndex() == materialOptionIndex)\n            {\n                _selectedIndex = go.Option().CurrentListOptionIndex;\n                Rhino.RhinoApp.WriteLine(\"The density of {0} is {1} g/cm³.\", _materials[_selectedIndex], _densities[_selectedIndex]);\n            }\n            else if (result != GetResult.Nothing)\n                Rhino.RhinoApp.WriteLine(\"No valid material was selected.\");\n        }\n        return Result.Success;\n    }\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "var go = new GetOption();\n      \n                var go = new GetOption();\n                int metalIndex = 2;\n                int opList = go.AddOptionList(\"Metals\", Densities.metals, metalIndex);\n                go.AcceptNothing(true);\n                go.SetCommandPrompt(\"Please select a material.\");\n                GetResult res = go.Get();\n\n                if (res == GetResult.Option)\n                { \n                    var option = go.Option();\n                    metalIndex = go.Option().CurrentListOptionIndex;\n                }\n\n                //caluclate density\n                Rhino.RhinoApp.WriteLine(\" selection = {0}\", Densities.metals[metalIndex]);\n                double density = Densities.metalDensitites[Densities.metals[metalIndex]];",
+      "language": "csharp",
+      "author": "stevescott517",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 109
+}

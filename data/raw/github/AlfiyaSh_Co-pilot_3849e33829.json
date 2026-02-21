@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/AlfiyaSh/Co-pilot/blob/73915a62d84b6191c0495edd36d6b6811644bfaa/DATA/3DGraph/visualize_graph_in_grasshopper.py",
+  "repo": "AlfiyaSh/Co-pilot",
+  "repo_stars": 0,
+  "repo_description": "Master Thesis",
+  "license": "unknown",
+  "filepath": "DATA/3DGraph/visualize_graph_in_grasshopper.py",
+  "instruction": "Visualize graph in grasshopper",
+  "code": "import json\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n# Path to your exported 3D graph JSON file\njson_path = r\"D:\\Carrera\\Maestría\\ITECH\\3 Semestre\\Tesis\\Development\\Copilot\\DATA\\3DGraph\\graphData3D.json\"\n\n# Load the graph data\nwith open(json_path, 'r', encoding='utf-8') as f:\n    graph = json.load(f)\n\nnodes = graph['nodes']\nedges = graph['relationships']\n\n# Create a mapping from node id to 3D point\nnode_points = {}\nGH_levels = []\nGH_walls = []\nGH_doors = []\nGH_rooms = []\nGH_buildings = []\nGH_edges = []\n\nfor node in nodes:\n    center = node.get('center')\n    if center and isinstance(center, str):\n        parts = [v.strip() for v in center.split(',') if v.strip()]\n        if len(parts) == 3:\n            try:\n                x, y, z = map(float, parts)\n                pt = Rhino.Geometry.Point3d(x, y, z)\n                node_points[node['id']] = pt\n                t = node.get('type', '').lower()\n                if t == 'level':\n                    GH_levels.append(pt)\n                elif t == 'wall':\n                    GH_walls.append(pt)\n                elif t == 'door':\n                    GH_doors.append(pt)\n                elif t == 'room':\n                    GH_rooms.append(pt)\n                elif t == 'building':\n                    GH_buildings.append(pt)\n            except Exception as e:\n                print(f\"Error parsing center for node {node['id']}: {e}\")\n        else:\n            print(f\"Warning: Node {node['id']} center does not have 3 values: '{center}'\")\n\nfor edge in edges:\n    source_id = edge['source']\n    target_id = edge['target']\n    if isinstance(source_id, dict):\n        source_id = source_id.get('id') or source_id.get('IntegerValue')\n    if isinstance(target_id, dict):\n        target_id = target_id.get('id') or target_id.get('IntegerValue')\n    try:\n        source_id = int(source_id)\n        target_id = int(target_id)\n    except Exception:\n        continue\n    pt1 = node_points.get(source_id)\n    pt2 = node_points.get(target_id)\n    if pt1 and pt2:\n        GH_edges.append(Rhino.Geometry.Line(pt1, pt2))\n\n# For Grasshopper: assign outputs by type\n# a = GH_levels\n# b = GH_walls\n# c = GH_doors\n# d = GH_rooms\n# e = GH_buildings\n# f = GH_edges\n\na = GH_levels\nb = GH_walls\nc = GH_doors\nd = GH_rooms\ne = GH_buildings\nf = GH_edges\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

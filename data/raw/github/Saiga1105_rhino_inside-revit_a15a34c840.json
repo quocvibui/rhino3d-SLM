@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Saiga1105/rhino.inside-revit/blob/2a644f9cd5ec2c709485bf12827ed9809b7478d7/Autodesk/Revit/src/RhinoInside.Revit/Samples/Sample7.py",
+  "repo": "Saiga1105/rhino.inside-revit",
+  "repo_stars": 1,
+  "repo_description": "fork of rhino.inside",
+  "license": "MIT",
+  "filepath": "Autodesk/Revit/src/RhinoInside.Revit/Samples/Sample7.py",
+  "instruction": "Sample7",
+  "code": "import clr\nclr.AddReference('System.Core')\nclr.AddReference('RhinoInside.Revit')\nclr.AddReference('RevitAPI') \nclr.AddReference('RevitAPIUI')\n\nfrom System.Linq import Enumerable\nfrom Autodesk.Revit.DB import *\nfrom Rhino.Geometry import *\nfrom RhinoInside.Revit import Revit, Convert\n\ndoc = Revit.ActiveDBDocument\n\nwith Transaction(doc, \"Sample7\") as trans:\n    trans.Start()\n    \n    sphere = Sphere(Point3d.Origin, 12 * Revit.ModelUnits)\n    brep = sphere.ToBrep()\n    meshes = Mesh.CreateFromBrep(brep, MeshingParameters.Default)\n\n    category = ElementId(BuiltInCategory.OST_GenericModel)\n    ds = DirectShape.CreateElement(doc, category)\n\n    for geometry in Enumerable.ToList(Convert.ToHost(meshes)):\n        ds.AppendShape(geometry)\n\n    trans.Commit()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

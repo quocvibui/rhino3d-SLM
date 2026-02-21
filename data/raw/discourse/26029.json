@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-a-plane-surface-that-is-more-that-5-points/26029",
+  "topic_id": 26029,
+  "title": "How to create a plane surface that is more that 5 points?",
+  "question": "from Rhino.Geometry import NurbsSurface, Point3d\n\nfrom scriptcontext import doc\n\n\nsurface = NurbsSurface.CreateFromCorners(\n\nPoint3d(5, 0, 0),\n\nPoint3d(5, 5, 5),\n\nPoint3d(0, 5, 0),\n\nPoint3d(0, 0, 0));\n\n\ndoc.Objects.AddSurface(surface);\n\ndoc.Views.Redraw();\n\n\nThis seems to work only up to 5 points only. How can I do more than that? Or create a plane from lines works too, but what I found only script that makes user to pick curves to generate the plane. How to automate the selection without interruption?\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry.Point3d as P3\nimport scriptcontext as sc\n\nptA=P3(0,0,0)\nptB=P3(10,0,0)\nptC=P3(10,10,0)\nptD=P3(0,20,0)\nptE=P3(-10,10,0)\nptF=P3(-10,0,0)\n\npl_crv=Rhino.Geometry.PolylineCurve([ptA,ptB,ptC,ptD,ptE,ptF,ptA])\nbreps=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv)\nobjIDs=[sc.doc.Objects.AddBrep(brep) for brep in breps]\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 973
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/overwriting-layer/30523",
+  "topic_id": 30523,
+  "title": "Overwriting Layer",
+  "question": "Hi everybody,\n\nI’m not an expert in programming with python and I would like to know the procedure to overwriting a layer with some lines, after I run again the script. Otherwise, every time I will modify the reference surfaces I will have always new lines.\n\n\nThank you\n\nAle\n\n\nThis is my script for now:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nsurface_base = rs.GetObject('Select the base surface')\nsurface_top = rs.GetObject('Select the top surface')\npoints1 = rs.SurfaceEditPoints(surface_base)\npoints2 = rs.SurfaceEditPoints(surface_top)\n\nfor point in points1:\n    base_points = rs.AddPoints(points1)\n    for point in points2:\n        top_points = rs.AddPoints(points2)\n    \nfor point1 in points1:\n    for point2 in points2:\n        lines = rs.AddLine(point1,point2)\n        rs.ObjectLayer(lines,'dummy')",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    surface_base = rs.GetObject('Select the base surface')\n    if not surface_base: return\n    surface_top = rs.GetObject('Select the top surface')\n    if not surface_top: return\n    points1 = rs.SurfaceEditPoints(surface_base)\n    points2 = rs.SurfaceEditPoints(surface_top)\n    \n    layer_name = \"dummy\"\n    \n    # clear the dummy layer, or create it if it is not there\n    if rs.IsLayer(layer_name):\n        objs = rs.ObjectsByLayer(layer_name, select=False)\n        if objs: rs.DeleteObjects(objs)\n    else:\n        rs.AddLayer(layer_name)\n    \n    base_points = rs.AddPoints(points1)\n    top_points = rs.AddPoints(points2)\n    rs.ObjectLayer(base_points, layer_name)\n    rs.ObjectLayer(top_points, layer_name)\n    \n    for point1 in points1:\n        for point2 in points2:\n            line = rs.AddLine(point1,point2)\n            rs.ObjectLayer(line, layer_name)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nsurface_base = rs.GetObject('Select the base surface')\nsurface_top = rs.GetObject('Select the top surface')\npoints1 = rs.SurfaceEditPoints(surface_base)\npoints2 = rs.SurfaceEditPoints(surface_top)\n\nfor point in points1:\n    base_points = rs.AddPoints(points1)\n    for point in points2:\n        top_points = rs.AddPoints(points2)\n    \nfor point1 in points1:\n    for point2 in points2:\n        lines = rs.AddLine(point1,point2)\n        rs.ObjectLayer(lines,'dummy')",
+      "language": "python",
+      "author": "alexdell",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 846
+}

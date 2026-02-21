@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/importation-mesh-and-process-it/131962",
+  "topic_id": 131962,
+  "title": "Importation mesh and process it",
+  "question": "Hello,\n\n\nI’m starting to use the Rhino sdk with python.\n\n\nI want to import a mesh from a file with a specific extension (for instance obj) and then apply some process on it. In particular I want to perform the squish command.\n\n\nI did not found in the documentation about these functions (import and squish), so I wanted to know if it’s just missing from it or not yet implemented? If it’s the last, will it be integrated later?\n\n\nHave a good day,\n\n\nBest regards,\n\n\nFlorian Berton",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\nmesh = Rhino.RhinoDoc.Import('test.obj')",
+      "language": "python",
+      "author": "FlorianBerton",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "% load mesh\ndoc = Rhino.RhinoDoc.CreateHeadless(\"\")\nloaded = doc.Import('test.obj') # it's equal to True\nsn_end = Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber\nprint(doc.Objects.Count) # it's equal to 1\nmesh = doc.Objects.Find(sn_end)\n\n% init squish\nsquisher = Rhino.Geometry.Squisher()\nsquisher_params = Rhino.Geometry.SquishParameters()\nsquisher_params.Algorithm = 1\nsquisher_params.PreserveTopology = True\n\n% process mesh\nmesh_output = squisher.SquishMesh(squisher_params,mesh)\n\n% export mesh\ndoc.Export(\"output_test.obj)",
+      "language": "python",
+      "author": "FlorianBerton",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\n# load mesh\ndoc = Rhino.RhinoDoc.CreateHeadless(\"\")\nloaded = doc.Import('test.obj')\n\n# NextRuntimeSerialNumber is not assigned to an object yet, it is the next one that is free\n# Also doc.Object.Find needs a System.UInt32 as input, you need to call it as\n# doc.Objects.Find(System.UInt32(sn_end))\n# Instead, let's dump all objects in the ObjectTable into a Python list\nobjects = []\nfor object in doc.Objects.GetObjectList(None):\n    objects.append(object)\n\n# Get the mesh, it is stored in the Geometry of the MeshObject\nmesh = objects[0].Geometry\nprint(mesh)\n\n# init squish\nsquisher = Rhino.Geometry.Squisher()\nsquisher_params = Rhino.Geometry.SquishParameters()\nsquisher_params.Algorithm = 1\nsquisher_params.PreserveTopology = True\n\n# process mesh\nmesh_output = squisher.SquishMesh(squisher_params, mesh)\n# There is a bug in our code that makes the squished mesh invalid: RH-66087\nmesh_output.Vertices.UseDoublePrecisionVertices = False\n\n# Add the newly created mesh to the doc's objects\ndoc.Objects.AddMesh(mesh_output)\nprint(doc.Objects.Count)  # Should be 2\n\n# export mesh\ndoc.Export(r\"C:\\Users\\Pierre\\Desktop\\output_test.obj\")  # I don't know where this goes with just a filename",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\n# load mesh\ndoc = Rhino.RhinoDoc.CreateHeadless(\"\")\nloaded = doc.Import('test.obj')\n\n# NextRuntimeSerialNumber is not assigned to an object yet, it is the next one that is free\n# Also doc.Object.Find needs a System.UInt32 as input, you need to call it as\n# doc.Objects.Find(System.UInt32(sn_end))\n# Instead, let's dump all objects in the ObjectTable into a Python list\nobjects = []\nfor object in doc.Objects.GetObjectList(None):\n    objects.append(object)\n\n# Get the mesh, it is stored in the Geometry of the MeshObject\nmesh = objects[0].Geometry\nprint(mesh)\n\n# init squish\nsquisher = Rhino.Geometry.Squisher()\nsquisher_params = Rhino.Geometry.SquishParameters()\nsquisher_params.Algorithm = 1\nsquisher_params.PreserveTopology = True\n\n# process mesh\nbrep_mesh = Rhino.Geometry.Brep.CreateFromMesh(mesh,True)\nunroller = Rhino.Geometry.Unroller(brep_mesh)\nbreps_output = System.Collections.Generic.List[Rhino.Geometry.Brep]()\nunroller.PerformUnroll(breps_output)\n\n# Add the newly created mesh to the doc's objects\nfor object in breps_output:\n    doc.Objects.AddBrep(object)\nprint(doc.Objects.Count)  # Should be mesh.Faces + 1\n\n# export mesh\ndoc.Export(r\"C:\\Users\\Pierre\\Desktop\\output_test.obj\")  # I don't know where this goes with just a filename",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 115,
+  "posts_count": 11,
+  "views": 1993
+}

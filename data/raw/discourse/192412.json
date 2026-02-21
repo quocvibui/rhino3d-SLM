@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trying-to-use-rhinocommon-createsolid/192412",
+  "topic_id": 192412,
+  "title": "Trying to use RhinoCommon CreateSolid",
+  "question": "Hi, I’m trying to understand how to use RhinoCommon in Python, in this specific case, Brep.CreateSolid. I’ve got to the point that my code does not produce any errors, but the output is empty? Ive been trying both in GH Python and in RhinoScript, and I can’t even figure how to proceed.\n\n\nAttached is the example - one with couple surfaces, which produces nothing, one with some spheres defined in script, which somehow passes through the original spheres. Does the output of CreateSolid work differently than I think? Am I passing it the list of surfaces incorrectly?\n\n\nThank you for any advice.\n\n\nimport Rhino\nimport Grasshopper\nimport rhinoscriptsyntax as rs\nfrom System import Array\n\nsrfs = [rs.coercebrep(tnurbs),rs.coercebrep(bnurbs),rs.coercebrep(cutsrf)]\n\nlisted = Array[Rhino.Geometry.Brep](srfs)\nimp = Rhino.Geometry.Brep.CreateSolid(listed,Rhino.RhinoMath.UnsetValue)\n\n\n\nCreateSolid.gh\n (11.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ntnurbs = rs.ObjectsByLayer(\"layer_name1\")\nbnurbs = rs.ObjectsByLayer(\"layer_name2\")\ncutsrf = rs.ObjectsByLayer(\"layer_name3\")\n\nsrfs = (rs.coercebrep(tnurbs),rs.coercebrep(bnurbs),rs.coercebrep(cutsrf))\nsc.doc.Objects.AddBrep(Rhino.Geometry.Brep.CreateSolid(srfs, 0.001))\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Martin5",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport Grasshopper\nimport rhinoscriptsyntax as rs\nfrom System import Array\n\nsrfs = [rs.coercebrep(tnurbs),rs.coercebrep(bnurbs),rs.coercebrep(cutsrf)]\n\nlisted = Array[Rhino.Geometry.Brep](srfs)\nimp = Rhino.Geometry.Brep.CreateSolid(listed,Rhino.RhinoMath.UnsetValue)",
+      "language": "python",
+      "author": "Martin5",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 155
+}

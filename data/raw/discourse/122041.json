@@ -1,0 +1,68 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/temporary-split-with-cutplane/122041",
+  "topic_id": 122041,
+  "title": "Temporary Split with CutPlane",
+  "question": "Hello All,\n\n\nI m trying to create an enchanced split command by using temporary cutplanes\n\n\nimport rhinoscriptsyntax as rs\n\nobjs = rs.GetObjects(\"Select objects for cut plane\")\nif objs:\n    point0 = rs.GetPoint(\"Start of cut plane\")\n    if point0:\n        point1 = rs.GetPoint(\"End of cut plane\", point0)\n        if point1: cutplane = rs.AddCutPlane( objs, point0, point1 )\n\n\nrs.Command(\"_Split\")\n\nrs.DeleteObjects(cutplane)\n\n\n\nCan you please tell me how i can pass the obj and cutplane arguments to the split command so that i dont have to reselect them?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjs = rs.GetObjects(\"Select objects for cut plane\",preselect=True,select=True)\nif objs:\n    point0 = rs.GetPoint(\"Start of cut plane\")\n    if point0:\n        point1 = rs.GetPoint(\"End of cut plane\", point0)\n        if point1: cutplane = rs.AddCutPlane( objs, point0, point1 )\n\nrs.EnableRedraw(False)\nrs.Command(\"_Split _SelID {} _Enter\".format(cutplane))\nrs.DeleteObjects(cutplane)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjs = rs.GetObjects(\"Select objects for cut plane\")\ntmp_cutplane = []\nif objs:\n    while True:\n        point0 = rs.GetPoint(\"Start of cut plane\")\n        if point0:\n            point1 = rs.GetPoint(\"End of cut plane\", point0)\n            if point1: \n                cutplane = rs.AddCutPlane( objs, point0, point1 )\n                tmp_cutplane.append(cutplane)\n                rs.ObjectName( cutplane, \"tmp_cutplane\" )\n                del(point0)\n                del(point1)\n        else:\n            break\n\nrs.SelectObjects(objs)\nrs.Command('_Split _-SelName tmp_cutplane _Enter')\nrs.DeleteObjects(tmp_cutplane)",
+      "language": "python",
+      "author": "g.synetos",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjs = rs.GetObjects(\"Select objects for cut plane\",preselect=True,select=True)\nif objs:\n    point0 = rs.GetPoint(\"Start of cut plane\")\n    if point0:\n        point1 = rs.GetPoint(\"End of cut plane\", point0)\n        if point1: cutplane = rs.AddCutPlane( objs, point0, point1 )\n\nrs.EnableRedraw(False)\nrs.Command(\"_Split _SelID {} _Enter\".format(cutplane))\nrs.DeleteObjects(cutplane)",
+      "language": "python",
+      "author": "g.synetos",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ncutplanes=[]\nobjs = rs.GetObjects(\"Select objects for cut plane\",preselect=True,select=True)\nif objs:\n    while True:\n        point0 = rs.GetPoint(\"Start of cut plane\")\n        if point0:\n            point1 = rs.GetPoint(\"End of cut plane\", point0)\n            if point1: \n                cutplanes.append(rs.AddCutPlane( objs, point0, point1 ))\n                del(point0)\n                del(point1)\n        else:\n            break\n            \nrs.EnableRedraw(False)\nfor cutplane in cutplanes:\n    rs.Command(\"_Split _SelID {} _Enter\".format(cutplane))\n    rs.DeleteObjects(cutplane)",
+      "language": "python",
+      "author": "g.synetos",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "for cutplane in cutplanes:\n    rs.Command(\"_Split _SelID {} _Enter\".format(cutplane))\n    rs.DeleteObjects(cutplane)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ngroup_name = \"TempCutPlane\"\ncutplanes = []\nobjs = rs.GetObjects(\"Select objects for cut plane\",preselect=True,select=True)\nif objs:\n    while True:\n        point0 = rs.GetPoint(\"Start of cut plane\")\n        if point0:\n            point1 = rs.GetPoint(\"End of cut plane\", point0)\n            if point1: \n                cutplane = rs.AddCutPlane( objs, point0, point1 )\n                cutplanes.append(cutplane)\n                rs.ObjectName(cutplane, group_name)\n                del(point0)\n                del(point1)\n        else:\n            break\n\nrs.EnableRedraw(False)\nrs.Command(\"_Split _-SelName {} _Enter\".format(group_name))\nrs.DeleteObjects(cutplanes)",
+      "language": "python",
+      "author": "g.synetos",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjs = rs.GetObjects(\"Select objects for cut plane\")\nif objs:\n    point0 = rs.GetPoint(\"Start of cut plane\")\n    if point0:\n        point1 = rs.GetPoint(\"End of cut plane\", point0)\n        if point1: cutplane = rs.AddCutPlane( objs, point0, point1 )\n\n\nrs.Command(\"_Split\")\n\nrs.DeleteObjects(cutplane)",
+      "language": "python",
+      "author": "g.synetos",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 808
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-correctly-construct-a-pbr-material/149790",
+  "topic_id": 149790,
+  "title": "How to correctly construct a PBR Material?",
+  "question": "The \nPhysicallyBasedMaterial\n class doesn’t have a constructor and if I create a normal \nMaterial\n and call \nDefault()\n and then \nToPhysicallyBased()\n it also doesn’t seem to do anything:\n\n\nimage\n799×1029 17.3 KB\n\n\nIn Rhino it then looks like this:\n\n\nimage\n1041×1110 42.6 KB\n\n\nIs there any way to enforce or construct a correct \nPhysicallyBasedMaterial\n instance in Rhino3dm via code?",
+  "code_blocks": [
+    {
+      "code": "Rhino.FileIO.File3dm file3dm = new Rhino.FileIO.File3dm();\n\nvar material = new Rhino.DocObjects.Material();\nmaterial.ToPhysicallyBased();\nmaterial.PhysicallyBased.BaseColor = new Rhino.Display.Color4f(1, 0, 0, 0);\nmaterial.PhysicallyBased.Metallic = 0.7;\nmaterial.PhysicallyBased.Roughness = 0.5;\nfile3dm.AllMaterials.Add(material);\n\nvar oa = new Rhino.DocObjects.ObjectAttributes\n{\n    MaterialIndex = 0,\n    MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n};\n\nvar sphere = new Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, 10);\nfile3dm.Objects.AddSphere(sphere, oa);\n\nfile3dm.Write(\"fileWithMaterial.3dm\", null);",
+      "language": "csharp",
+      "author": "fraguada",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "using Rhino;\nusing Rhino.Render;\n\nRhinoDoc doc = RhinoDoc.ActiveDoc;\n\n// Create new Rhino material and convert to PBR\nvar rMaterial = new Rhino.DocObjects.Material();\nrMaterial.ToPhysicallyBased();\n\n// Create simulated texture from image path\nSimulatedTexture simtex = new SimulatedTexture(doc);\nsimtex.Filename = “C:\\Users\\tsrch\\Documents\\test.jpg”;\n\n// Assign texture to base color\nrMaterial.PhysicallyBased.SetTexture(simtex.Texture(), Rhino.DocObjects.TextureType.PBR_BaseColor);\n\n// Convert to RenderMaterial and add to document, this allows the material to show in the material editor\n// without being assigned to any objects\nvar pbr = RenderMaterial.FromMaterial(rMaterial, doc);\npbr.Name = “testo”;\ndoc.RenderMaterials.Add(pbr);",
+      "language": "csharp",
+      "author": "tsrchapman",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "materials",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 102,
+  "posts_count": 8,
+  "views": 875
+}

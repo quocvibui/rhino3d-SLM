@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/editing-rhino-options-from-python-run-command-on-startup/150400",
+  "topic_id": 150400,
+  "title": "Editing Rhino Options from Python - Run Command on Startup",
+  "question": "Hi all,\n\n\nI’d like to have a Rhino command run every time Rhino starts. I know that I can manually add the command here in options:\n\n\nimage\n981×675 41.2 KB\n\n\nBut I want to add the startup command from a Python script (or rvb script). I am implementing this change on many users’ machines and would like to have the startup commands added or removed from a script.\n\n\nI saw on the forums how to update the PackageManger source setting in python:\n\n\nsettings = Rhino.PlugIns.PlugIn.GetPluginSettings(Rhino.RhinoApp.CurrentRhinoId, False)\ns = settings.GetChild(\"Options\").GetChild(\"PackageManager\")\ns.SetString(\"Sources\",\"https://yak.rhino3d.com;\" + packageFolder)\n\n\n\nBut I cannot figure out how to adapt this code to edit the startup commands. Can anyone help?\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "def addStartupCommand(str_cmd):\n\n    '''Adds a new command to the startup command list.'''\n\n    addedCommand = False\n\n    try:\n\n        if str_cmd:\n\n            str_cmd = str_cmd.lower()\n\n\n\n\n            # Get settings for startup commands\n\n            rhino_id = Rhino.RhinoApp.CurrentRhinoId\n\n            settings = Rhino.PlugIns.PlugIn.GetPluginSettings(rhino_id, False)\n\n            settings = settings.GetChild(\"Options\").GetChild(\"General\")\n\n\n\n\n            # Fetch existing commands and add if not present\n\n            commands = settings.GetString(\"StartupCommands\").splitlines()\n\n            if str_cmd and str_cmd not in commands: \n\n                commands.append(str_cmd)\n\n                settings.SetString(\"StartupCommands\", \"\\n\".join(commands))\n\n                addedCommand = True\n\n    except Exception as e:\n\n        try:\n\n            print(\"Error in addStartupCommand: \" + str(e))\n\n        except Exception:\n\n            print(\"Error in addStartupCommand: An unknown error occurred.\")\n\n    return addedCommand",
+      "language": "python",
+      "author": "Michael_H",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "def deleteRhinoScriptStartupScript(path):\n\n    '''Removes a script from the RhinoScript startup script list.'''\n\n    deletedPath = False\n\n    try:\n\n        if path:\n\n            path = path.lower()\n\n\n\n\n            # Get the RhinoScript plugin object\n\n            rhinoScript_Id = Rhino.PlugIns.PlugIn.IdFromName(\"RhinoScript\")\n\n            rhinoScript = Rhino.RhinoApp.GetPlugInObject(rhinoScript_Id)\n\n\n\n\n            # Remove the script if it exists in the startup list\n\n            if rhinoScript:\n\n                startupList = rhinoScript.StartupScriptList()\n\n                if startupList:\n\n                    for script in startupList:\n\n                        if script.lower() == path:\n\n                            rhinoScript.DeleteStartupScript(script)\n\n                            deletedPath = True\n\n    except Exception as e:\n\n        try:\n\n            print(\"Error in deleteRhinoScriptStartupScript: \" + str(e))\n\n        except Exception:\n\n            print(\"Error in deleteRhinoScriptStartupScript: An unknown error occurred.\")\n\n    return deletedPath",
+      "language": "python",
+      "author": "Michael_H",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "settings = Rhino.PlugIns.PlugIn.GetPluginSettings(Rhino.RhinoApp.CurrentRhinoId, False)\ns = settings.GetChild(\"Options\").GetChild(\"PackageManager\")\ns.SetString(\"Sources\",\"https://yak.rhino3d.com;\" + packageFolder)",
+      "language": "csharp",
+      "author": "Michael_H",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 1393
+}

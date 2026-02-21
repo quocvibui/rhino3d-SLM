@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-for-failed-from-guid-to-surface/130821",
+  "topic_id": 130821,
+  "title": "Help for (failed from Guid to Surface)",
+  "question": "z\n1576×602 103 KB\n\n\n\nHI How can I fix the guid conversion to Surface?\n\n\nThis post-\nIF\n and GH Library created does not actually detect scriptsyntax output\n\n\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\nfrom Rhino.Geometry import *\nif surface:\n    if direction==1 or direction==2:\n       rs.ReverseSurface(surface,direction)\n    elif direction==3:\n       rs.ReverseSurface(surface,4)\n\nif flip:\n    tmp=gh.Flip(surface)[0]\n    surface=tmp\n\n\nrevSrf=surface",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\nif surface:\n    if direction == 0 or direction == 1:\n        surface.Reverse(direction, True)\n\nrevSrf = surface",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\nfrom Rhino.Geometry import *\nimport copy\nif surface:\n    if direction==1 or direction==2:\n       rs.ReverseSurface(surface,direction)\n\n    elif direction==3:\n       rs.ReverseSurface(surface,4)\n\nw=copy.deepcopy(surface)\nif flip:\n    tmp=rs.coercegeometry(w,False)\n    tmp=gh.Flip(tmp)[0]\n    revSrf=tmp\nelse:\n    revSrf=surface",
+      "language": "python",
+      "author": "Rh-3d-p",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nx=rs.coerceguid(b,False)\nrs.ShrinkTrimmedSurface(x)",
+      "language": "python",
+      "author": "Rh-3d-p",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\nfrom Rhino.Geometry import *\nif surface:\n    if direction==1 or direction==2:\n       rs.ReverseSurface(surface,direction)\n    elif direction==3:\n       rs.ReverseSurface(surface,4)\n\nif flip:\n    tmp=gh.Flip(surface)[0]\n    surface=tmp\n\n\nrevSrf=surface",
+      "language": "python",
+      "author": "Rh-3d-p",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1132
+}

@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-extract-multi-subsurf-and-delete-the-originals/178701",
+  "topic_id": 178701,
+  "title": "Rhino Python - Extract multi SubSurf and delete the originals",
+  "question": "Hello everyone,\n\n\nI’ve been looking for a long time, but I can’t find the solution.\n\nI really hope you can help me.\n\n\nI want to delete some subsurfaces from a polysurface. But I want to be able to make a selection of several subsurfaces at the same time.\n\n\nFrom what I understand, Rhinocommon is the best/only tool for the job.\n\nBut rhinocommon’s behavior means that I can’t delete the selected subsurfaces without deleting the whole polysurface.\n\n\nI thought I’d try extracting the sub-surfaces in order to remove them from the polysurface.\n\nBut same thing, the surfaces are extracted, but the originals always remain.\n\n\nWhereas when I use rs.GetObject to select a single subsurface, it is extracted and the original is removed.\n\n\nSo rs.GetObject allows you to select a subsurface, but only one at a time.\n\nAnd I can’t delete the originals subsurfaces, with Rhinocommon.\n\n\nThanks for your help and explanations, I really need them.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef get_brep_faces():\n    sub_surfaces = []\n\n    # Create a GetObject object to prompt the user to select surfaces\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select surfaces\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    go.SubObjectSelect = True\n    go.GetMultiple(1, 0)\n\n    # Check if the user selection was successful\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n\n    # Iterate through the selected objects\n    for objref in go.Objects():\n        # Get the face of the object reference\n        face = objref.Face()\n        # Convert the face to a Brep\n        sub_srf = face.ToBrep()\n        # Append the Brep to the list of sub-surfaces\n        sub_surfaces.append(sub_srf)\n        # Print information about the selected object\n        print(objref.ObjectId)\n        print(objref.GeometryComponentIndex.ComponentIndexType)\n        print(objref.GeometryComponentIndex.Index)\n\n    # Check if any sub-surfaces were selected\n    if sub_surfaces is ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef SelectSubobjects(prompt,filt):\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(prompt)\n    go.GeometryFilter=filt\n    go.SubObjectSelect=True\n    go.ChooseOneQuestion = True\n    go.GetMultiple(1,0)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    objrefs = go.Objects()\n    if not objrefs: return Rhino.Commands.Result.Nothing\n    rc=[]\n    for objref in objrefs:\n        indices=[]\n        for item in objref.Object().GetSelectedSubObjects():\n            #select subobject\n            objref.Object().SelectSubObject(item, True, True, True)\n            #append index to return\n            indices.append(item.Index)\n        rc.append([objref.ObjectId,indices])\n    return rc\n\ndef DeleteBrepFaces():\n    prompt=\"Select brep faces to delete\"\n    #result is a nested list of parent object, subobject index\n    result=SelectSubobjects(prompt,filt=Rhino.DocObjects.ObjectType.Surface)\n    if not result: return\n    \n    tol=sc.doc.ModelAbsoluteTolerance\n    main_brep_ids=set()\n    for item in result:\n        #get the object id's of the parent objects\n        main_brep_ids.add(item[0])\n    #main_brep_ids contains one or more GUID's\n    \n    for main_brep_id in main_brep_ids:\n        to_delete=[]\n        for item in result:\n            #add the indices of the selected faces\n            if item[0]==main_brep_id: to_delete.extend(item[1])\n        to_delete=set(to_delete) #remove duplicates\n        #to_delete now has the indices of the faces to delete\n        \n        to_keep=[]\n        brep=rs.coercebrep(main_brep_id)\n        for i,face in enumerate(brep.Faces):\n            if i not in to_delete:\n                #keep this face\n                to_keep.append(face.DuplicateFace(True))\n        #to_keep has a list of faces to be kept\n        \n        #join the faces back into a new brep\n        joined=Rhino.Geometry.Brep.JoinBreps(to_keep,tol)\n        #joined returns a list of breps\n        if joined:\n            if len(joined)==1:\n                #can replace the original with the brep with faces deleted\n                sc.doc.Objects.Replace(main_brep_id,joined[0])\n            else:\n                #somehow the original brep has been split into multiple pieces\n                #get original object attributes\n                rhobj=rs.coercerhinoobject(main_brep_id)\n                attrs=rhobj.Attributes.Duplicate()\n                #add new breps with original attributes\n                for new_brep in joined:\n                    sc.doc.Objects.AddBrep(new_brep,attrs)\n                sc.doc.Objects.Delete(rhobj)\n    sc.doc.Views.Redraw()\nDeleteBrepFaces()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef get_brep_faces():\n    sub_surfaces = []\n\n    # Create a GetObject object to prompt the user to select surfaces\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select surfaces\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    go.SubObjectSelect = True\n    go.GetMultiple(1, 0)\n\n    # Check if the user selection was successful\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n\n    # Iterate through the selected objects\n    for objref in go.Objects():\n        # Get the face of the object reference\n        face = objref.Face()\n        # Convert the face to a Brep\n        sub_srf = face.ToBrep()\n        # Append the Brep to the list of sub-surfaces\n        sub_surfaces.append(sub_srf)\n        # Print information about the selected object\n        print(objref.ObjectId)\n        print(objref.GeometryComponentIndex.ComponentIndexType)\n        print(objref.GeometryComponentIndex.Index)\n\n    # Check if any sub-surfaces were selected\n    if sub_surfaces is None:\n        print(\"No sub-surfaces selected.\")\n    else:\n        print(\"Sub-surfaces have been selected successfully.\")\n        return sub_surfaces\n\n\n# Call the get_brep_face function to get the sub-surfaces\nsubsurfaces = get_brep_faces()\n\n# If there are sub-surfaces, extract them from their parent surfaces\nif subsurfaces:\n    for obj in subsurfaces:\n        rs.ExtractSurface(obj, 0, False)",
+      "language": "python",
+      "author": "Matthieu_SAMSON",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 219
+}

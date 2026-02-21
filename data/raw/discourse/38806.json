@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-to-rhino-button/38806",
+  "topic_id": 38806,
+  "title": "Python script to Rhino button",
+  "question": "From another thread  jeff_hammond was kind to share a python script [\n! _Line _BothSides\n] . I’m trying to create a button for it. Viewed the script in the Rhino Python editor, but don’t know what to paste in the button window. Have zilch experience with scripts and little in creating my own button.\n\nA bit off topic , but I would also like to create another button for the test commands in Rhino 5 \"  _TestRemoveNakedMicroLoops and _TestRemoveAllNakedMicroLoops \" . Preferably in one one button, left and right click for the 2 commands …Thanks for any help",
+  "code_blocks": [
+    {
+      "code": "! _-RunPythonScript (\n\n\"\"\"Hello test script\"\"\"\nimport rhinoscriptsyntax as rs\n\ndef HiThere(name):\n    if name:\n        return \"Hello {}, this script runs fine.\".format(name)\n\ndef RunMyScript():\n    your_name=rs.StringBox(\"What is your name?\")\n    if your_name:\n        ret_msg=HiThere(your_name)\n    else:\n        ret_msg=\"Sorry, I didn't get your name\"\n    rs.MessageBox(ret_msg)\nRunMyScript()\n\n)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript (\nimport rhinoscriptsyntax as rs\nfrom collections import defaultdict\nfrom collections import Iterable\nimport Rhino\n\n\"\"\"\n# notes\n- doesn't handle laser curf currently.  to do this, simple scale alternating\n  cylinders along the intersection axis\n\n\"\"\"\n\nimport finger\nreload(finger)\n\ndef main():\n  # first, select objects in three orthogonal planes\n  positive = rs.GetObjects(\"select plane 1 objects\", filter=16) # polysurface\n  negative = rs.GetObjects(\"select plane 2 objects\", filter=16)\n\n  subdivisions = rs.GetInteger(message=\"enter subdivisions (odd)\", number=3, minimum=2, maximum=None)\n  finger.make_fingers(positive, negative, subdivisions)\n\n  finger.perform_subtraction()\n\nif __name__ == '__main__':\n  main()\n)",
+      "language": "python",
+      "author": "okeating",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "Ids = rs.GetObjects(\"Select block instances to rotate\", filter = 4096, preselect=True)\nif Ids is None: return\nvec = rs.VectorCreate([0,0,1], [0,0,0])\n\n\nfor Id in Ids:\n    pt = rs.BlockInstanceInsertPoint(Id)\n    ang = random.randrange(-180, 180)\n    rs.RotateObject(Id, pt,ang,vec)",
+      "language": "python",
+      "author": "walther",
+      "post_number": 23,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 23,
+  "views": 7721
+}

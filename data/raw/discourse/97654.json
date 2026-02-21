@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-preview-on-a-layout/97654",
+  "topic_id": 97654,
+  "title": "Grasshopper Preview on a Layout?",
+  "question": "Hi all,\n\n\nI’m wondering if there is an easy way to get Grasshopper geometry to Preview in a Layout (not in a Detail View, onthe Layout Page itself)? For instance, if I generate some text that I’d like to see Previewed for the user (as part my titleblock for instance) - I can’t seem to figure how I’d get that to show up as a Preview?\n\n\nimport Rhino\n\n# Set up Text Object Parameters\nbasePlane_Origin = Rhino.Geometry.Point3d(0,0,0)\nbasePlane_Normal = Rhino.Geometry.Vector3d(0,0,1)\nbasePlane = Rhino.Geometry.Plane(origin=basePlane_Origin, normal=basePlane_Normal)\n\n# Create the Text Object\ntxt_ = Rhino.Geometry.TextEntity()\ntxt_.Plane = basePlane\ntxt_.Text = _txt\n\n# Create Surfaces from the Text for Previewing\ndimStyle = Rhino.DocObjects.DimensionStyle(Name='_temp')\ntxtAsSrfcs = list(txt_.CreateSurfaces(dimStyle))\n\n\n\nI can create and manage the text all fine and GH Preview works in the 3D View of course\n\n\n\n\nScreen Shot 2020-03-05 at 6.36.55 PM\n1540×983 117 KB\n\n\n\n\nBut in a Layout view it doesn’t seem to show up? It \nwill\n show up inside a Detail View of course - but I’m trying to get it to show up on the Layout page itself, not inside a Detail View.\n\n\n\n\nScreen Shot 2020-03-05 at 6.37.33 PM\n1547×998 86.6 KB\n\n\n\n\nIf I ‘Bake’ the text out to the Layout (while in the right Layout view) it will show up just as I want - ultimately that Baked geom is what I’ll use when I print the Layouts…\n\n\n\n\nScreen Shot 2020-03-05 at 6.39.27 PM\n1225×815 98.5 KB\n\n\n\n\nbut in order to set it up correctly the Preview is needed obviously. Any thoughts on what I’m doing wrong here and if there is a better / easier way to do Grasshopper previews on a Layout page but \nnot\n inside a Detail View - on the Layout itself?\n\n\nthanks very much for any input!\n\n-Ed",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nfrom System import Object\nimport System.Drawing\n\nclass CustomConduit(Rhino.Display.DisplayConduit):\n    def DrawForeground(self, e):\n        # Set up Txt Input Params\n        color = System.Drawing.Color.Blue\n        Text3d_Origin = Rhino.Geometry.Point3d(0,0,0)\n        Text3d_Normal = Rhino.Geometry.Vector3d(0,0,1)\n        align = Rhino.DocObjects.TextHorizontalAlignment()\n        Rhino.DocObjects.TextHorizontalAlignment.value__.SetValue(align, 1) #1=Center\n\n        # Create the new 3D Text Entity\n        Text3dEntity = Rhino.Display.Text3d( self.txtToPreview )\n        Text3dEntity.TextPlane = Rhino.Geometry.Plane(origin=Text3d_Origin, normal=Text3d_Normal)\n        Text3dEntity.Height = 1\n        Text3dEntity.HorizontalAlignment = align\n    \n        # Display the new 3D Text\n        e.Display.Draw3dText(Text3dEntity, color)\n\ndef showafterscript(_txtToPreview, _preview):\n    newConduit = None\n    newConduit = CustomConduit()\n    newConduit.txtToPreview = _txtToPreview\n\n    if not _preview:\n        if sc.sticky.has_key('myconduit'):\n            oldConduit = sc.sticky['myconduit']\n            oldConduit.Enabled = False\n            newConduit.Enabled = False\n    else:\n        if sc.sticky.has_key('myconduit'):\n            oldConduit = sc.sticky['myconduit']\n            oldConduit.Enabled = False\n            newConduit.Enabled = True\n            sc.sticky['myconduit'] = newConduit\n        else:\n            newConduit.Enabled = True\n            sc.sticky['myconduit'] = newConduit\n\n    if newConduit.Enabled: print('Conduit Enabled!')\n    else: print('Conduit Disabled!')\n\n    sc.doc.Views.Redraw()\n\n# Text Preview\nif txt: showafterscript(txt, True)\nelse: showafterscript(None, False)",
+      "language": "python",
+      "author": "ed.p.may",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nfrom System import Object\nimport System.Drawing\n\nclass CustomConduit(Rhino.Display.DisplayConduit):\n    def DrawForeground(self, e):\n        # Set up Txt Input Params\n        color = System.Drawing.Color.Red\n        Text3d_Origin = Rhino.Geometry.Point3d(p)\n        Text3d_Normal = Rhino.Geometry.Vector3d(0,0,1)\n        alignH = Rhino.DocObjects.TextHorizontalAlignment()\n        Rhino.DocObjects.TextHorizontalAlignment.value__.SetValue(alignH, 0) #1=Center\n        alignV = Rhino.DocObjects.TextVerticalAlignment()\n        Rhino.DocObjects.TextVerticalAlignment.value__.SetValue(alignV, 3) #0=Bottom\n\n        # Create the new 3D Text Entity\n        Text3dEntity = Rhino.Display.Text3d(self.txtToPreview)\n        Text3dEntity.TextPlane = Rhino.Geometry.Plane(origin=Text3d_Origin, normal=Text3d_Normal)\n        Text3dEntity.Height = 0.05\n        Text3dEntity.HorizontalAlignment = alignH\n        Text3dEntity.VerticalAlignment = alignV\n    \n        # Display the new 3D Text\n        e.Display.Draw3dText(Text3dEntity, color)\n\ndef showafterscript(_txtToPreview, _preview):\n    newConduit = None\n    newConduit = CustomConduit()\n    newConduit.txtToPreview = _txtToPreview\n\n    if not _preview:\n        if sc.sticky.has_key('myconduit'):\n            oldConduit = sc.sticky['myconduit']\n            oldConduit.Enabled = False\n            newConduit.Enabled = False\n    else:\n        if sc.sticky.has_key('myconduit'):\n            oldConduit = sc.sticky['myconduit']\n            oldConduit.Enabled = False\n            newConduit.Enabled = True\n            sc.sticky['myconduit'] = newConduit\n        else:\n            newConduit.Enabled = True\n            sc.sticky['myconduit'] = newConduit\n\n    if newConduit.Enabled: print('Conduit Enabled!')\n    else: print('Conduit Disabled!')\n\n    sc.doc.Views.Redraw()\n\n# Text Preview\nfor t,p in zip(txt,pts):\n        if t: \n            showafterscript(t, run)\n        else: \n            showafterscript(None, False)",
+      "language": "python",
+      "author": "Caleb_Marhoover",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\n# Set up Text Object Parameters\nbasePlane_Origin = Rhino.Geometry.Point3d(0,0,0)\nbasePlane_Normal = Rhino.Geometry.Vector3d(0,0,1)\nbasePlane = Rhino.Geometry.Plane(origin=basePlane_Origin, normal=basePlane_Normal)\n\n# Create the Text Object\ntxt_ = Rhino.Geometry.TextEntity()\ntxt_.Plane = basePlane\ntxt_.Text = _txt\n\n# Create Surfaces from the Text for Previewing\ndimStyle = Rhino.DocObjects.DimensionStyle(Name='_temp')\ntxtAsSrfcs = list(txt_.CreateSurfaces(dimStyle))",
+      "language": "python",
+      "author": "ed.p.may",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 13,
+  "views": 2731
+}

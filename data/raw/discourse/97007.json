@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-schemes-to-load-unload-plugins/97007",
+  "topic_id": 97007,
+  "title": "Using schemes to load / unload plugins",
+  "question": "Dear McNeel-Team - is it still possible to start Rhino3d v6 with different schemes ?\n\nusing Rhino Version 6 SR22\n\n(6.22.20028.13281, 28/01/2020)\n\n\ni tried to set up 2 schemes - one loading Rhinocam 2019, one - the Default without loading Rhinocam following this 2 year old post:\n\n\n- but it did not work for me:\n\n\n\n\n\n\n\n\nSet default scheme\n \nRhino for Windows\n\n\n\n\n\n    Hi, \nI have multiple schemes setup to run Rhino. \nWhat should I do to setup a scheme to be the default when opening a file in Win10 \nOr, is there a way to migrate a scheme to replace the default scheme? \nThanks \n-Willem\n  \n\n\n\n\nAlso this article seams not to be up to date:\n\n\nhttps://wiki.mcneel.com/rhino/schemes\n\n\nA work-arround is shown here:\n\n\n\n\n\n\n\n\nButton script for temporary loading plugin\n \nRhino for Windows\n\n\n\n\n\n    Hi, \nsince I have a problem with crashes caused by an Octane-Vray conflict I disabled Octane and manually load it if needed. Could it be done per button script? My way is: plugin manager: enable “load” -> “load plugin” -> disable “load” (I don’t want an automatic load if I will start Rhino again) for the Octane plugin. I would like to press a button for loading Octane. Maybe someone has an idea. \nBest - \nMicha\n  \n\n\n\n\n\nbut it requires to restart rhino.\n\n\nthanks for any suggestions.\n\nbest - tom",
+  "code_blocks": [
+    {
+      "code": "#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n\n\"\"\"Script written by Mitch Heynick 02.02.15\"\"\"\nimport rhinoscriptsyntax as rs\ndef DisableRhinoCAM():\n    if rs.LocaleID() ==1036:\n        msg = \"RhinoCAM est maintenant  désactivé.\\n\"\n        msg+=\"Vous devez redémarrer Rhino pour que cela prenne effet.\"\n    else:\n        msg = \"RhinoCAM is now disabled.\\n\"\n        msg+=\"You must restart Rhino for this to take effect.\"\n    rs.EnablePlugIn(\"299f02bc35384343aca5d66aaaeb789b\", False)\n    rs.MessageBox(msg, 64, \"RhinoCAM Loader\")\nDisableRhinoCAM()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n\n\"\"\"Script written by Mitch Heynick 02.02.15\"\"\"\nimport rhinoscriptsyntax as rs\ndef EnableRhinoCAM():\n    if rs.LocaleID() ==1036:\n        msg = \"RhinoCAM est maintenant activé.\\n\"\n        msg+=\"Vous devez redémarrer Rhino pour que cela prenne effet.\"\n    else:\n        msg = \"RhinoCAM is now enabled.\\n\"\n        msg+=\"You must restart Rhino for this to take effect.\"\n    rs.EnablePlugIn(\"299f02bc35384343aca5d66aaaeb789b\", True)\n    rs.MessageBox(msg, 64, \"RhinoCAM Loader\")\nEnableRhinoCAM()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 9,
+  "views": 1514
+}

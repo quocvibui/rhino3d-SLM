@@ -1,0 +1,60 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/make-writeline-work-more-like-print-in-eto-forms/199474",
+  "topic_id": 199474,
+  "title": "Make WriteLine() work more like print() in ETO forms",
+  "question": "Since Rhino8, it seems better to use WriteLine() instead of print() to write things to the command line while running an ETO form. However, two things make WriteLine() cumbersome to use in comparison to print(): (1) you can’t pass multiple arguments and (2) you have to explicitly cast non-string objects to strings. Below is a little wrapper script that solves those two issues and allows you to use WriteLine more like print. You can call the function almost anything you want (print2, for example). And you can either put it at the beginning of your script or put it in a utility file.\n\n\n#! python 2\nimport Rhino\nimport Rhino.Geometry as rg\nimport Rhino.RhinoApp as app\n\ndef writeln(*args):\n    txt = \"\"\n    for i in range(len(args)):\n        txt += str(args[i])\n        if i < len(args)-1: txt += ', '\n    Rhino.RhinoApp.WriteLine(txt)\n\nspheres = [rg.Sphere(rg.Point3d.Origin, 1), rg.Sphere(rg.Point3d.Origin, 2).ToBrep()]\nsome_value = 8\n\nwriteln(1, 2, 4.5)\nwriteln(spheres)\nwriteln('some text', some_value)\n\n\n\n.\n\n\nBelow is my original post with my original ideas of how to make WriteLine easier to use by making it shorter to write, but they didn’t solve the more important issues of passing multiple arguments and casting to strings.\n\n.\n\n.\n\n.\n\n+++ ORIGINAL POST +++\n\nI miss how the print statement could give feedback in the command window in pre-8 rhino while running an ETO form, and I’m tired of typing out \nRhino.RhinoApp.WriteLine()\n all the time. So here’s a couple of ways I’m playing around with in an effort to make using \nRhino.RhinoApp.WriteLine()\n a little easier. I’m kinda liking method two.\n\n\n# method 1\nimport Rhino.RhinoApp as rapp\n\nrapp.WriteLine('hello')\n\n\n\n#method 2\nfrom Rhino.RhinoApp import WriteLine as writeln\n\nwriteln('hello')\n\n\n\nHas anyone else played around with something like this? Is doing this problematic somehow?",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport Rhino\nimport Rhino.Geometry as rg\n\ndef writeln(*args):\n    txt = \"\"\n    for i in range(len(args)):\n        txt += str(args[i])\n        if i < len(args)-1: txt += ', '\n    Rhino.RhinoApp.WriteLine(txt)\n\nspheres = [rg.Sphere(rg.Point3d.Origin, 1), rg.Sphere(rg.Point3d.Origin, 2).ToBrep()]\nsome_value = 8\n\nwriteln(1, 2, 4.5)\nwriteln(spheres)\nwriteln('some text', some_value)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino import RhinoApp as app\nprint = app.WriteLine\n\nprint(\"Hello Rhino\")",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "def writeln(*args):\n    txt = \"\"\n    for i in range(len(args)):\n        txt += str(args[i])\n        if i < len(args)-1: txt += ', '\n    Rhino.RhinoApp.WriteLine(txt)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino\nimport Rhino.Geometry as rg\nimport Rhino.RhinoApp as app\n\ndef writeln(*args):\n    txt = \"\"\n    for i in range(len(args)):\n        txt += str(args[i])\n        if i < len(args)-1: txt += ', '\n    Rhino.RhinoApp.WriteLine(txt)\n\nspheres = [rg.Sphere(rg.Point3d.Origin, 1), rg.Sphere(rg.Point3d.Origin, 2).ToBrep()]\nsome_value = 8\n\nwriteln(1, 2, 4.5)\nwriteln(spheres)\nwriteln('some text', some_value)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "# method 1\nimport Rhino.RhinoApp as rapp\n\nrapp.WriteLine('hello')",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "#method 2\nfrom Rhino.RhinoApp import WriteLine as writeln\n\nwriteln('hello')",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 22,
+  "views": 347
+}

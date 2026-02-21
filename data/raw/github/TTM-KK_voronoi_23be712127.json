@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TTM-KK/voronoi/blob/fbd950eda81840c343df12d2c568719577652364/Check.py",
+  "repo": "TTM-KK/voronoi",
+  "repo_stars": 1,
+  "repo_description": "voronoi & GA",
+  "license": "unknown",
+  "filepath": "Check.py",
+  "instruction": "coding: utf-8",
+  "code": "# coding: utf-8\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport Tetrahedron\nimport Point\n\ncrv = rs.GetObject('select crv', rs.filter.curve)\nvoronoi_line = rs.GetObject('select crv', rs.filter.curve)\n\ncrv = [rs.CurveStartPoint(crv), rs.CurveEndPoint(crv)]\nvoronoi_line = [rs.CurveStartPoint(voronoi_line), rs.CurveEndPoint(voronoi_line)]\n\n\na_1 = (crv[1][1] - crv[0][1]) / (crv[1][0] - crv[0][0])\nb_1 = ((crv[0][1] * crv[1][0]) - (crv[1][1] * crv[0][0])) / (crv[1][0] - crv[0][0])\n\nif crv[0][0] > crv[1][0]:\n    x_1 = crv[1][0]\n    x_2 = crv[0][0]\nelse:\n    x_1 = crv[0][0]\n    x_2 = crv[1][0]\n\nif crv[0][1] > crv[1][1]:\n    y_1 = crv[1][1]\n    y_2 = crv[0][1]\nelse:\n    y_1 = crv[0][1]\n    y_2 = crv[1][1]\n\n\na_2 = (voronoi_line[1][1] - voronoi_line[0][1]) / (voronoi_line[1][0] - voronoi_line[0][0])\nb_2 = ((voronoi_line[0][1] * voronoi_line[1][0]) - (voronoi_line[1][1] * voronoi_line[0][0])) / (voronoi_line[1][0] - voronoi_line[0][0])\n\n\nintersect_point_x = (b_2 - b_1) / (a_1 - a_2)  # 傾きが同じだとまずい。\nintersect_point_y = ((a_1 * b_2) - (a_2 * b_1)) / (a_1 - a_2)\n\nif voronoi_line[0][0] > voronoi_line[1][0]:\n    x_3 = voronoi_line[1][0]\n    x_4 = voronoi_line[0][0]\nelse:\n    x_3 = voronoi_line[0][0]\n    x_4 = voronoi_line[1][0]\n\nif voronoi_line[0][1] > voronoi_line[1][1]:\n    y_3 = voronoi_line[1][1]\n    y_4 = voronoi_line[0][1]\nelse:\n    y_3 = voronoi_line[0][1]\n    y_4 = voronoi_line[1][1]\n\nintersect_flag_count = 0\nif (x_1 < intersect_point_x) and (intersect_point_x < x_2):\n    intersect_flag_count += 1\nelse:\n    print('not intersect 1')\nif (x_3 < intersect_point_x) and (intersect_point_x < x_4):\n    intersect_flag_count += 1\nelse:\n    print('not intersect 2')\nif (y_1 < intersect_point_y) and (intersect_point_y < y_2):\n    intersect_flag_count += 1\nelse:\n    print('not intersect 3')\nif (y_3 < intersect_point_y) and (intersect_point_y < y_4):\n    intersect_flag_count += 1\nelse:\n    print('not intersect 4')\n\nif intersect_flag_count == 4:\n    print('y1 : {} y2 : {}'.format(y_1, y_2))\n    print('y3 : {} y4 : {}'.format(y_3, y_4))\n    print('intersect_point : {}'.format(intersect_point_y))\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

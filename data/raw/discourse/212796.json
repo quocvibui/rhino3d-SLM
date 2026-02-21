@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-component-how-to-unsubscribe-document-events/212796",
+  "topic_id": 212796,
+  "title": "Scripting Component - how to unsubscribe Document Events",
+  "question": "(my question is for a \nscripting component\n using c# , \nnot\n a custom plug-in component developed via the grasshopper API)\n\n\nMy starting point was, to  track changes of a clipping-Plane in the RhinoDocument.\n\nThis can by done via a ID/Guid Parameter set to the ClippingPlane.\n\nBut Grasshopper will not track this changes.\n\n\nMy (more general) question: if my \nc# script component\n subscribes:\n\n\nRhinoDoc.ReplaceRhinoObject += OnReplaceObj;\n\n\n\nwhere can i unsubscribe the Event, if the script is updated or unloaded / closed.\n\nattached definition - each time you edit the script will register a new listener to the event.\n\n\nlooks like \nRemovedFromDocument\n and \nDocumentContextChanged\n are not override-able in the scripting component ?\n\n\nfor \nphyton components\n i found “sdk mode” with \nenter\n/\nexit\n\n\nwhat I am missing ?\n\nthanks and kind regards - tom\n\n\ntrackClippingPlane_01.gh\n (6.4 KB)",
+  "code_blocks": [
+    {
+      "code": "private void OnReplaceRhObj(object sender, RhinoReplaceObjectEventArgs args)\n    {\n        Script_Instance currentInstance = RhinoDocument.RuntimeData.TryGetValue<Script_Instance>(Component.InstanceGuid);\n        if (currentInstance == null || currentInstance != this)\n        {\n            if (m_replaceRhObj != null)\n            {\n                RhinoApp.WriteLine($\"{shortId} is unsubscribing\");\n                RhinoDoc.ReplaceRhinoObject -= m_replaceRhObj;\n            }\n            return;\n        }\n        RhinoApp.WriteLine($\"{shortId} is listening to ReplaceObject\");\n        if (args.OldRhinoObject.Id == trackId)\n        {\n            GrasshopperDocument.ScheduleSolution(5,m => {this.Component.ExpireSolution(false);});\n        }\n    }",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 8,
+  "views": 68
+}

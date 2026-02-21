@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-component-scramble-back-the-data-tree-structure-of-input/213333",
+  "topic_id": 213333,
+  "title": "C# Component Scramble Back the Data-tree structure of input",
+  "question": "Hi,\n\n\nI am working to create a component to flip matrix for multilayer branch, this component could pick which level branch should be flip to item .i knew there is a path mapper but it should set manually. so i develop this to flip first branch by default, but something happened. this component that i made with c# scramble the data-tree structure of input and if i turn disable then enable again the output will be different.\n\n\nthe script:\n\n\n// Grasshopper Script Instance\n#region Usings\nusing System;\nusing System.Linq;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Drawing;\n\nusing Rhino;\nusing Rhino.Geometry;\n\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n#endregion\n\npublic class Script_Instance : GH_ScriptInstance\n{\nprivate void RunScript(DataTree<object> data, int swap_index, ref object A)\n{\n  DataTree<object> result = new DataTree<object>();\n\n  // Iterate through every branch in the tree\n  // CHANGED: Use 'BranchCount' instead of 'PathCount'\n  for (int p = 0; p < data.BranchCount; p++)\n  {\n    GH_Path currentPath = data.Path(p);\n    System.Collections.IList branch = data.Branch(p);\n\n    // Safety check: Ensure the branch depth is sufficient for the swap_index\n    if (swap_index >= currentPath.Length)\n    {\n      Print(\"Error: Branch depth is shallower than the requested swap index.\");\n      return;\n    }\n\n    // Iterate through every item in the branch (variable 'i')\n    for (int i = 0; i < branch.Count; i++)\n    {\n      object item = branch[i];\n\n      // Get the current path indices (e.g. {A; B; C})\n      int[] newIndices = currentPath.Indices;\n\n      // Replace the branch index 'A' with the item index 'i'\n      newIndices[swap_index] = i;\n\n      // Create the new path: {i; B; C; ...}\n      GH_Path newPath = new GH_Path(newIndices);\n\n      // Add data to the new tree\n      result.Add(item, newPath);\n    }\n  }\n\n  A = result;\n}\n}\n\n\n\n\nhere is the gh file:\n\n\nC# Component Scrable Ba...",
+  "code_blocks": [
+    {
+      "code": "// Grasshopper Script Instance\n#region Usings\nusing System;\nusing System.Linq;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Drawing;\n\nusing Rhino;\nusing Rhino.Geometry;\n\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n#endregion\n\npublic class Script_Instance : GH_ScriptInstance\n{\nprivate void RunScript(DataTree<object> data, int swap_index, ref object A)\n{\n  DataTree<object> result = new DataTree<object>();\n\n  // Iterate through every branch in the tree\n  // CHANGED: Use 'BranchCount' instead of 'PathCount'\n  for (int p = 0; p < data.BranchCount; p++)\n  {\n    GH_Path currentPath = data.Path(p);\n    System.Collections.IList branch = data.Branch(p);\n\n    // Safety check: Ensure the branch depth is sufficient for the swap_index\n    if (swap_index >= currentPath.Length)\n    {\n      Print(\"Error: Branch depth is shallower than the requested swap index.\");\n      return;\n    }\n\n    // Iterate through every item in the branch (variable 'i')\n    for (int i = 0; i < branch.Count; i++)\n    {\n      object item = branch[i];\n\n      // Get the current path indices (e.g. {A; B; C})\n      int[] newIndices = currentPath.Indices;\n\n      // Replace the branch index 'A' with the item index 'i'\n      newIndices[swap_index] = i;\n\n      // Create the new path: {i; B; C; ...}\n      GH_Path newPath = new GH_Path(newIndices);\n\n      // Add data to the new tree\n      result.Add(item, newPath);\n    }\n  }\n\n  A = result;\n}\n}",
+      "language": "csharp",
+      "author": "osama.fjr",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "grasshopper",
+    "layers",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 43
+}

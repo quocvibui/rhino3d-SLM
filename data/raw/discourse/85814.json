@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/clipping-plane-issue/85814",
+  "topic_id": 85814,
+  "title": "Clipping plane issue",
+  "question": "Hi all,\n\n\nI was trying to automatise the creation of clipping plane with a simple script where:\n\n\n\n\na cube will be selected\n\n\nthe script would add a clipping plane at every face of the cube so to exclude everything which is outside from it\n\nThe idea was that the user could then run the script again on another cube and add further clipping planes.\n\n\n\n\nHowever, it happens to me that sometimes the clipping planes generated for a second cube do not work: they show up in the view, they are active, they don’t exclude geometries. If I save and close the file then when I open it again they seem to work. Any idea on how this could be solved without opening and closing the file?\n\n\nThis issue is present both in Rhino 5 and Rhino 6.\n\n\nThis is how I generate the clipping planes via script\n\n\n\n\n    bounding = rs.BoundingBox(box)\n    \n    [pt1,pt2,pt3,pt4,pt5,pt6,pt7,pt8] = bounding\n    \n    plane1 = rs.PlaneFromPoints(pt1,pt2,pt3)\n    plane2 = rs.PlaneFromPoints(pt1,pt4,pt8)\n    plane3 = rs.PlaneFromPoints(pt1,pt5,pt2)\n    plane4 = rs.PlaneFromPoints(pt4,pt3,pt8)\n    plane5 = rs.PlaneFromPoints(pt6,pt5,pt7)\n    plane6 = rs.PlaneFromPoints(pt2,pt6,pt7)\n    \n    rs.CurrentLayer(clipplanelayer)\n    clip1 = rs.AddClippingPlane(plane1,5,5)\n    clip2 = rs.AddClippingPlane(plane2,5,5)\n    clip3 = rs.AddClippingPlane(plane3,5,5)\n    clip4 = rs.AddClippingPlane(plane4,5,5)\n    clip5 = rs.AddClippingPlane(plane5,5,5)\n    clip6 = rs.AddClippingPlane(plane6,5,5)\n\n\n\n\n\nattached an image of what I see when I run the script twice and a file with the issue (it generates an issue if the box on clip 2 is used before the box on clip 1 and not vice-versa)\n\n\nclipping%20issue%202b\n706×607 24.4 KB\n \nclipping issue 2.3dm\n (527.4 KB)",
+  "code_blocks": [
+    {
+      "code": "bounding = rs.BoundingBox(box)\n    \n    [pt1,pt2,pt3,pt4,pt5,pt6,pt7,pt8] = bounding\n    \n    plane1 = rs.PlaneFromPoints(pt1,pt2,pt3)\n    plane2 = rs.PlaneFromPoints(pt1,pt4,pt8)\n    plane3 = rs.PlaneFromPoints(pt1,pt5,pt2)\n    plane4 = rs.PlaneFromPoints(pt4,pt3,pt8)\n    plane5 = rs.PlaneFromPoints(pt6,pt5,pt7)\n    plane6 = rs.PlaneFromPoints(pt2,pt6,pt7)\n    \n    rs.CurrentLayer(clipplanelayer)\n    clip1 = rs.AddClippingPlane(plane1,5,5)\n    clip2 = rs.AddClippingPlane(plane2,5,5)\n    clip3 = rs.AddClippingPlane(plane3,5,5)\n    clip4 = rs.AddClippingPlane(plane4,5,5)\n    clip5 = rs.AddClippingPlane(plane5,5,5)\n    clip6 = rs.AddClippingPlane(plane6,5,5)",
+      "language": "python",
+      "author": "revink",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 2,
+  "views": 284
+}

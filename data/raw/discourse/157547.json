@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-stop-update-function/157547",
+  "topic_id": 157547,
+  "title": "ghPython stop update function",
+  "question": "Hi all!\n\n\nI have a surface and multiple points that goes down by a move function.\n\nI want to stop them whenever the subtraction of the last two points reaches a value of 0.005.\n\nHow to stop the move and update each of the points in the list individually?\n\n\n\n\nsurface\n1615×341 62.6 KB\n\n\n\n\n\n\n\nCode here\n\n\nimport Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th\nimport random\n\n# CREATING A CLASS CALLED PARTICLE\nclass Particle:\n\n    def __init__(self, point, surface):\n\n        self.pt = point\n        self.srf = surface\n\n        self.vec = rg.Vector3d.Unset\n        self.plane = rg.Plane.Unset\n\n        # A LIST CALLED HISTORY (starts with point self.pt)\n        self.history = [self.pt]\n\n    # A METHOD CALLED UPDATE (updates the position of the particle)\n    def update(self):\n        \n        self.move()\n        self.history.append(self.pt)\n\n    # A NEW METHOD CALLED MOVE\n    def move(self):\n\n        #unpacking the returning values from the function\n        success, U, V = self.srf.ClosestPoint(self.pt)\n\n        if success:\n            self.pt = self.srf.PointAt(U, V)\n            self.plane = self.srf.FrameAt(U, V)[1]\n\n            worldZ = rg.Vector3d.ZAxis\n            localZ = self.plane.ZAxis\n\n            vec1 = rg.Vector3d.CrossProduct( worldZ, localZ)\n            vec2 = rg.Vector3d.CrossProduct( vec1, localZ)\n\n            self.vec = vec2\n            self.vec.Unitize()\n\n            self.vec *= step\n\n     self.pt += self.vec\n\nallParticles = []\nfor pt in pts:\n\n    p = Particle(pt, srf)\n    allParticles.append(p)\n\nallHistory = []\nfor i in range(count):\n    for p in allParticles:\n        p.update()\n        allHistory.append(p.history)\n\na = th.list_to_tree(allHistory)\n\nlastpointsZ = []\nfor p in allParticles:\n    lastpointsZ.append(p.history[-1].Z)\n\nsecondlastpointsZ = []\nfor p in allParticles:\n    secondlastpointsZ.append(p.history[-2].Z)\n\n# SUBTRACT THE SECOND TO LAST POINT FROM THE LAST POINT\nresultingZ = []\nfor i in range(len(lastpointsZ)):\n    resultingZ.append(abs...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th\nimport random\n\n# CREATING A CLASS CALLED PARTICLE\nclass Particle:\n\n    def __init__(self, point, surface):\n\n        self.pt = point\n        self.srf = surface\n\n        self.vec = rg.Vector3d.Unset\n        self.plane = rg.Plane.Unset\n\n        # A LIST CALLED HISTORY (starts with point self.pt)\n        self.history = [self.pt]\n\n    # A METHOD CALLED UPDATE (updates the position of the particle)\n    def update(self):\n        \n        self.move()\n        self.history.append(self.pt)\n\n    # A NEW METHOD CALLED MOVE\n    def move(self):\n\n        #unpacking the returning values from the function\n        success, U, V = self.srf.ClosestPoint(self.pt)\n\n        if success:\n            self.pt = self.srf.PointAt(U, V)\n            self.plane = self.srf.FrameAt(U, V)[1]\n\n            worldZ = rg.Vector3d.ZAxis\n            localZ = self.plane.ZAxis\n\n            vec1 = rg.Vector3d.CrossProduct( worldZ, localZ)\n            vec2 = rg.Vector3d.CrossProduct( vec1, localZ)\n\n            self.vec = vec2\n            self.vec.Unitize()\n\n            self.vec *= step\n\n     self.pt += self.vec\n\nallParticles = []\nfor pt in pts:\n\n    p = Particle(pt, srf)\n    allParticles.append(p)\n\nallHistory = []\nfor i in range(count):\n    for p in allParticles:\n        p.update()\n        allHistory.append(p.history)\n\na = th.list_to_tree(allHistory)\n\nlastpointsZ = []\nfor p in allParticles:\n    lastpointsZ.append(p.history[-1].Z)\n\nsecondlastpointsZ = []\nfor p in allParticles:\n    secondlastpointsZ.append(p.history[-2].Z)\n\n# SUBTRACT THE SECOND TO LAST POINT FROM THE LAST POINT\nresultingZ = []\nfor i in range(len(lastpointsZ)):\n    resultingZ.append(abs(secondlastpointsZ[i]) - abs(lastpointsZ[i]))\n    \nprint lastpointsZ\nprint secondlastpointsZ\n\nprint resultingZ",
+      "language": "python",
+      "author": "almeidaandre",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 347
+}

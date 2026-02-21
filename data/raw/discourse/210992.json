@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-select-subobjects/210992",
+  "topic_id": 210992,
+  "title": "RhinoCommon Select SubObjects",
+  "question": "Hello,\n\n\nI have been trying to do some highlighting and select synching in Rhino via my Modeltree, however i stumpled upon an issue that I cannot get the subobjects selected, only highlighted and thus also the Gumball never activates.\n\n\nI made this quick tester, which is esentially what i am using. My guess is the SelectSubObjects doesnt really work as I am imagining it?\n\nUsing this script, the subobject does not get highlighted nor selected. How can i do that?\n\n\n\n    public override string EnglishName => \"TestSelectBrepFace\";\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n        ObjRef objRef;\n        var rc = RhinoGet.GetOneObject(\"Select a Brep or polysurface\", false, ObjectType.Brep, out objRef);\n        if (rc != Result.Success || objRef == null)\n            return rc;\n\n        var rhObj = objRef.Object();\n        if (rhObj == null) return Result.Failure;\n\n        int faceIndex = 0;\n        rc = RhinoGet.GetInteger(\"Face index (0-based)\", false, ref faceIndex);\n        if (rc != Result.Success) return rc;\n\n        var ci = new ComponentIndex(ComponentIndexType.BrepFace, faceIndex);\n\n        doc.Objects.UnselectAll();\n\n        // I thought this selects and higlights the subojbect.\n        rhObj.SelectSubObject(ci, true, true);\n\n        doc.Views.Redraw();\n\n        RhinoApp.WriteLine($\"Selected BrepFace {faceIndex} on object {rhObj.Id}\");\n        return Result.Success;\n    }\n}",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  var go = new GetObject();\n  go.SetCommandPrompt(\"Select surface\");\n  go.GeometryFilter = ObjectType.Surface;\n  go.SubObjectSelect = true;\n  go.EnableUnselectObjectsOnExit(false);\n  go.Get();\n  if (go.CommandResult() != Result.Success)\n    return go.CommandResult();\n\n  var objRef = go.Object(0);\n  var rhObj = objRef.Object();\n  if (null == rhObj)\n    return Result.Failure;\n\n  var ci = objRef.GeometryComponentIndex;\n\n  rhObj.Select(false);\n  rhObj.SelectSubObject(ci, true, true, true);\n\n  doc.Views.Redraw();\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "public override string EnglishName => \"TestSelectBrepFace\";\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n        ObjRef objRef;\n        var rc = RhinoGet.GetOneObject(\"Select a Brep or polysurface\", false, ObjectType.Brep, out objRef);\n        if (rc != Result.Success || objRef == null)\n            return rc;\n\n        var rhObj = objRef.Object();\n        if (rhObj == null) return Result.Failure;\n\n        int faceIndex = 0;\n        rc = RhinoGet.GetInteger(\"Face index (0-based)\", false, ref faceIndex);\n        if (rc != Result.Success) return rc;\n\n        var ci = new ComponentIndex(ComponentIndexType.BrepFace, faceIndex);\n\n        doc.Objects.UnselectAll();\n\n        // I thought this selects and higlights the subojbect.\n        rhObj.SelectSubObject(ci, true, true);\n\n        doc.Views.Redraw();\n\n        RhinoApp.WriteLine($\"Selected BrepFace {faceIndex} on object {rhObj.Id}\");\n        return Result.Success;\n    }\n}",
+      "language": "csharp",
+      "author": "Benterich",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 107
+}

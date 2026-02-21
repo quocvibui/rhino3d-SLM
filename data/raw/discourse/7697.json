@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mac-osx-addcircle-parameter-exception/7697",
+  "topic_id": 7697,
+  "title": "Mac OSX AddCircle parameter exception",
+  "question": "I can’t get AddCircle to function in python on OSX.\n\nAddCircle wants a plane and a radius as arguments:\n\n\n\n\nPasted image\n846×410 26.3 KB\n\n\n\nand a plane is a four element array of x,y,z arrays for the origin, x axis vector, y axis vector, and z axis vector:\n\n\n\n\nPasted image\n1038×305 38.5 KB\n\n\n\nbut this code:\n\n\n\nthrows this exception:\n\n\n\nIdeas?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nstart_origin=[0.0,5.0,10.0]\nstart_xaxis=[0.0,-1.0,0.0]\nstart_yaxis=[0.0,0.0,1.0]\npipe_radius=1.0\n\nstart_plane=rs.PlaneFromPoints(start_origin,start_xaxis,start_yaxis)\nrs.AddCircle(start_plane, pipe_radius)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def AddCircle(plane_or_center, radius):\n    \"\"\"Adds a circle curve to the document\n    Parameters:\n      plane_or_center = plane on which the circle will lie. If a point is\n        passed, this will be the center of the circle on the active\n        construction plane\n      radius = the radius of the circle\n    Returns:\n      id of the new curve object\n    \"\"\"\n    rc = None\n    plane = rhutil.coerceplane(plane_or_center, False)\n    if plane:\n        circle = Rhino.Geometry.Circle(plane, radius)\n        rc = scriptcontext.doc.Objects.AddCircle(circle)\n    else:\n        center = rhutil.coerce3dpoint(plane_or_center, True)\n        view = scriptcontext.doc.Views.ActiveView\n        plane = view.ActiveViewport.ConstructionPlane()\n        plane.Origin = center\n        circle = Rhino.Geometry.Circle(plane, radius)\n        rc = scriptcontext.doc.Objects.AddCircle(circle)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add circle to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def coerceplane(plane, raise_on_bad_input=False):\n    \"Convert input into a Rhino.Geometry.Plane if possible.\"\n    if type(plane) is Rhino.Geometry.Plane: return plane\n    if type(plane) is list or type(plane) is tuple:\n        length = len(plane)\n        if length==3 and type(plane[0]) is not list:\n            rc = Rhino.Geometry.Plane.WorldXY\n            rc.Origin = Rhino.Geometry.Point3d(plane[0],plane[1],plane[2])\n            return rc\n        if length==9 and type(plane[0]) is not list:\n            origin = Rhino.Geometry.Point3d(plane[0],plane[1],plane[2])\n            xpoint = Rhino.Geometry.Point3d(plane[3],plane[4],plane[5])\n            ypoint = Rhino.Geometry.Point3d(plane[6],plane[7],plane[8])\n            rc     = Rhino.Geometry.Plane(origin, xpoint, ypoint)\n            return rc\n        if length==3 and (type(plane[0]) is list or type(plane[0]) is tuple):\n            origin = Rhino.Geometry.Point3d(plane[0][0],plane[0][1],plane[0][2])\n            xpoint = Rhino.Geometry.Point3d(plane[1][0],plane[1][1],plane[1][2])\n            ypoint = Rhino.Geometry.Point3d(plane[2][0],plane[2][1],plane[2][2])\n            rc     = Rhino.Geometry.Plane(origin, xpoint, ypoint)\n            return rc\n    if raise_on_bad_input: raise TypeError(\"%s can not be converted to a Plane\"%plane)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def coerce3dpoint(point, raise_on_error=False):\n    \"Convert input into a Rhino.Geometry.Point3d if possible.\"\n    if type(point) is Rhino.Geometry.Point3d: return point\n    if hasattr(point, \"__len__\") and len(point)==3 and hasattr(point, \"__getitem__\"):\n        try:\n            return Rhino.Geometry.Point3d(float(point[0]), float(point[1]), float(point[2]))\n        except:\n            if raise_on_error: raise\n    if type(point) is Rhino.Geometry.Vector3d or type(point) is Rhino.Geometry.Point3f or type(point) is Rhino.Geometry.Vector3f:\n        return Rhino.Geometry.Point3d(point.X, point.Y, point.Z)\n    if type(point) is str:\n        point = point.split(',')\n        return Rhino.Geometry.Point3d( float(point[0]), float(point[1]), float(point[2]) )\n    if type(point) is System.Guid:\n        rhobj = coercerhinoobject(point, raise_on_error)\n        if rhobj:\n            geom = rhobj.Geometry\n            if isinstance(geom, Rhino.Geometry.Point): return geom.Location\n    if raise_on_error: raise ValueError(\"Could not convert %s to a Point3d\" % point)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 1586
+}

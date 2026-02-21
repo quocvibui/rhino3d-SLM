@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/move-points.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/move-points.py",
+  "instruction": "Move points",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Geometry import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_refs = RhinoGet.GetMultipleObjects(\"Select points to move\", False, ObjectType.Point)\n    if rc != Result.Success or obj_refs == None:\n        return rc\n\n    gp = GetPoint()\n    gp.SetCommandPrompt(\"Point to move from\")\n    gp.Get()\n    if gp.CommandResult() != Result.Success:\n        return gp.CommandResult()\n    start_point = gp.Point()\n\n    gp.SetCommandPrompt(\"Point to move to\")\n    gp.SetBasePoint(start_point, False)\n    gp.DrawLineFromPoint(start_point, True)\n    gp.Get()\n    if gp.CommandResult() != Result.Success:\n        return gp.CommandResult()\n    end_point = gp.Point()\n\n    xform = Transform.Translation(end_point - start_point)\n\n    for obj_ref in obj_refs:\n        doc.Objects.Transform(obj_ref, xform, True)\n\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

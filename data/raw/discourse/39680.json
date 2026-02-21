@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pulling-the-names-of-layers-from-all-drawings-in-a-directory-in-rhino-for-windows/39680",
+  "topic_id": 39680,
+  "title": "Pulling the names of layers from all drawings in a directory in Rhino for Windows",
+  "question": "Does a script exist for extracting the names of all layers in Rhino .3dm files; those that exist by default and those that are created by the user? If I were to attempt to write such a script, what reference should I consult to know which variables to query?\n\nThanks.\n\nDavid",
+  "code_blocks": [
+    {
+      "code": "import glob\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef ListLayersInFiles():\n    \n    mydirectory = \"C:/Users/UserName/Desktop\"\n    rhino_files = glob.glob(mydirectory + \"/*.3dm\")\n    \n    if len(rhino_files) == 0: return\n    \n    for filename in rhino_files:\n        if scriptcontext.escape_test(False): return\n        f = Rhino.FileIO.File3dm.Read(filename)\n        if not f: \n            print \"Error reading file:\", filename\n        else:\n            print \"Layers in: {}\".format(filename)\n            for layer in f.Layers:\n                print \" \", layer.Name\n            print \"\"\n    \nListLayersInFiles()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1173
+}

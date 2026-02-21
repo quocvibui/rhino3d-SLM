@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/drawable-mouse-events/201541",
+  "topic_id": 201541,
+  "title": "drawable_Mouse_events",
+  "question": "I’m trying to use the mouse event to change the color of the drawable image, but I seem to run into problems on “drawable.mousemove += move” it’s wrong, “drawable.MouseDown += down” is fine, but I seem to have hit a dead end\n\n\n#! python 3\n\nimport Rhino\nimport Eto\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nimport rhinoscriptsyntax as rs\n\n\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        super().__init__()\n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(300, 300)\n        self.Padding = Eto.Drawing.Padding(80)\n        self.MovableByWindowBackground = True\n        self.Location = Eto.Drawing.Point(100, 100)\n\n        self.Button = Eto.Forms.Button()\n        self.Button.Text = \"Close\"\n        self.Button.Click += self.OnButtonClick\n\n        drawable = ef.Drawable()\n        drawable.Width = 40\n        drawable.Height = 40\n        def move(sender, e):\n            cor = True\n        def draw(sender, e):\n            rect = ed.RectangleF(0, 0, 40, 40)\n            if cor:\n                e.Graphics.FillEllipse(ed.Colors.Red, rect)\n            e.Graphics.FillEllipse(ed.Colors.Green, rect)\n        def down(sender, e):\n            rs.Command(\"down_on\")\n        drawable.Paint += draw\n        drawable.MouseDown += down \n        drawable.MouseMove += move #here\n\n        self.layout = Eto.Forms.DynamicLayout()\n        self.layout.AddRow(self.Button, None, drawable)\n\n        self.Content = self.layout\n\n    def OnButtonClick(self, sender, e):\n        self.Close()\n\ndef EstablishForm():\n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\nif __name__ == \"__main__\":\n    EstablishForm()",
+  "code_blocks": [
+    {
+      "code": "#! python 3\n\nimport Rhino\nimport Eto\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nimport rhinoscriptsyntax as rs\n\n\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        super().__init__()\n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(300, 300)\n        self.Padding = Eto.Drawing.Padding(80)\n        self.MovableByWindowBackground = True\n        self.Location = Eto.Drawing.Point(100, 100)\n\n        self.Button = Eto.Forms.Button()\n        self.Button.Text = \"Close\"\n        self.Button.Click += self.OnButtonClick\n\n        drawable = ef.Drawable()\n        drawable.Width = 40\n        drawable.Height = 40\n        def move(sender, e):\n            cor = True\n        def draw(sender, e):\n            rect = ed.RectangleF(0, 0, 40, 40)\n            if cor:\n                e.Graphics.FillEllipse(ed.Colors.Red, rect)\n            e.Graphics.FillEllipse(ed.Colors.Green, rect)\n        def down(sender, e):\n            rs.Command(\"down_on\")\n        drawable.Paint += draw\n        drawable.MouseDown += down \n        drawable.MouseMove += move #here\n\n        self.layout = Eto.Forms.DynamicLayout()\n        self.layout.AddRow(self.Button, None, drawable)\n\n        self.Content = self.layout\n\n    def OnButtonClick(self, sender, e):\n        self.Close()\n\ndef EstablishForm():\n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\nif __name__ == \"__main__\":\n    EstablishForm()",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 123
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/deswaks/space-invader/blob/94e00bff3b5371cfa6999f381461af9af6e0b0ba/ghpython%20component%20source%20code/merge_sets_by_intersection.py",
+  "repo": "deswaks/space-invader",
+  "repo_stars": 0,
+  "repo_description": "Tools for locating and reconstructing analytical building spaces with Rhino Grasshopper",
+  "license": "MIT",
+  "filepath": "ghpython component source code/merge_sets_by_intersection.py",
+  "instruction": "Merges sets of object if they overlap by a minimum of all their objects\nexcept one. By object is meant a tuple consisting of an object from both a and b\nas the objects are paired on a one-to-one...",
+  "code": "\"\"\" Merges sets of object if they overlap by a minimum of all their objects\nexcept one. By object is meant a tuple consisting of an object from both a and b\nas the objects are paired on a one-to-one basis between sets a and b. A merge\nwill only happen if the Pairs objects from list a and list b on a\nInputs:\n    a   Object set collection a\n    b   Object set collection b\nOutputs:\n    a   Merged object set collection a\n    b   Merged object set collection b\n\"\"\"\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as ght\nfrom Grasshopper import DataTree\nfrom Grasshopper.Kernel.Data import GH_Path\n\ndef dataTreeToList(aTree):\n    theList = []\n    for i in range(aTree.BranchCount ):\n        thisListPart = []\n        thisBranch = aTree.Branch(i)\n        for j in range(len(thisBranch)):\n            thisListPart.append( thisBranch[j] )\n        theList.append(thisListPart)\n    return theList\n\na = dataTreeToList(a)\nb = dataTreeToList(b)\n\n\npair_sets = []\nfor i, ai in enumerate(a):\n    pair_set = set()\n    for j,wall in enumerate(ai):\n        pair_set.add((wall,b[i][j]))\n    \n    # If this is the first room\n    if len(pair_sets) <= 0:\n        pair_sets.append(pair_set)\n        continue\n    \n    # Go through existing sets\n    for k in range(len(pair_sets)):\n        #Add if it fits\n        intersections = len(pair_sets[k].intersection(pair_set))\n        if intersections >= 3:\n            pair_sets[k] = pair_sets[k].union(pair_set)\n            continue\n        # Create new if it did not fit and end is reached\n        if k == len(pair_sets)-1:\n            pair_sets.append(pair_set)\n\n# Go through existing sets combining them if they have enough intersection\nfor i in range(len(pair_sets)):\n    for j in range(i):\n        intersections = len(pair_sets[i].intersection(pair_sets[j]))\n        if intersections >= 3:\n            pair_sets[i] = pair_sets[i].union(pair_sets[j])\n            pair_sets[j] = set()\npair_sets = [x for x in pair_sets if len(x)!=0]\n\n# Ready output\nroom_lists = [list(x) for x in list(pair_sets)]\na, b = [], []\nfor s in pair_sets:\n    sub_a = []\n    sub_b = []\n    for x in s:\n        sub_a.append(x[0])\n        sub_b.append(x[1])\n    a.append(sub_a)\n    b.append(sub_b)\na = ght.list_to_tree(a)\nb = ght.list_to_tree(b)",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

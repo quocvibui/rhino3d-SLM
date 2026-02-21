@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/TTM-KK/TimberFormOptimization/blob/a728057ff3bfbfb7995b309e835a6278a6e86fcc/Timber.py",
+  "repo": "TTM-KK/TimberFormOptimization",
+  "repo_stars": 0,
+  "repo_description": "This is a Form Generate Project, using non preform timber.",
+  "license": "unknown",
+  "filepath": "Timber.py",
+  "instruction": "Timber",
+  "code": "# -*- coding:utf-8 -*-\n\nimport random as rnd\nfrom forTimber import RhinoCommonOriginalMethods as rsOri\n\n\nclass Timber:\n\n    # 初期化\n    def __init__(self, center_line, surface, id):\n        self.id = id  # timberのID\n        self.num_joint = 0  # 接合数\n        self.two_mark_line = None  # ロボットアームを使用する際に目印になる2本のライン\n        self.center_line = center_line  # 中心線\n        self.timber_length = None  # 中心線の長さ\n        self.surface = surface  # timberサーフェス\n        self.section_curve = None  # 仮想断面線\n        self.select_domain_list = []  # 接合する際にどの分割サーフェスエリアで接合したかを格納するリスト\n        self.drill_line_list = []  # 接合部のドリルラインを格納するリスト\n        self.center_line_parameter_list = []  # 中心線のパラメータ値を格納するリスト(分割点)\n        self.section_length = None  # timberの断面直径の推定値を格納する。\n\n        self.partner_tim = []  # ttm add 1011\n        self.temp_partner_tim = []  # ttm add\n        self.tim_distance = None  # ttm add 部材間の最小値を計算しリストに格納している。\n\n    def measure_length(self):\n        # curve_domain = self.center_line.Domain\n        # length_timber = (self.center_line.AtPoint(curve_domain[0]) - self.center_line.AtPoint(curve_domain[1])).Length\n        length_timber = self.center_line.GetLength()\n        self.timber_length = length_timber\n        # print(\"length_timber\", length_timber)\n        # return length_timber\n\n    # 断面の直径を取得する. RhinoCommonメソッド。\n    def measure_section_length(self):\n        rc, t = self.center_line.NormalizedLengthParameter(0.5)\n        base_p = self.center_line.PointAt(t)\n        length, list_p = rsOri.GetTimberSectionLength_RhinoCommon(self.surface, base_p)\n        self.section_length = length\n\n    # tim_distanceのリスト初期設定\n    def init_tim_distance(self, tim_number):\n        self.tim_distance = []\n        for i in range(tim_number):\n            self.tim_distance.append([])\n\n    def select_surface_domain(self):\n        selected_domain = []\n        for i in range(len(self.select_domain_list)):\n            selected_domain.append(self.select_domain_list[i][0])\n\n        count = 0\n        while True:\n            count = count + 1\n            select_domain = rnd.randint(1, 8)\n            # もし選んだselect domainが使用していないものであったら\n            if select_domain not in selected_domain:\n                return select_domain\n            if count > 100:\n                # print(\"select_used_domain cuz all domains are used\")\n                # raise Exception('domain is not selected cuz all domain is used')\n                return select_domain\n",
+  "language": "python",
+  "imports": [
+    "RhinoCommon"
+  ],
+  "has_docstring": false
+}

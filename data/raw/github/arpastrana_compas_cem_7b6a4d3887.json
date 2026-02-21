@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/arpastrana/compas_cem/blob/15c9c69fb49971302b5e91be13ab9ad23b7e6f98/src/compas_cem/ghpython/components/CompasCem_Proxy/code.py",
+  "repo": "arpastrana/compas_cem",
+  "repo_stars": 39,
+  "repo_description": "Inverse design of 3D truss networks with automatic differentiation",
+  "license": "MIT",
+  "filepath": "src/compas_cem/ghpython/components/CompasCem_Proxy/code.py",
+  "instruction": "Create an RPC proxy server to solve a constrained form-finding problem via CPython",
+  "code": "\"\"\"\nCreate an RPC proxy server to solve a constrained form-finding problem via CPython\n\"\"\"\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom scriptcontext import sticky\n\nfrom compas.rpc import Proxy\nfrom compas_cem import PROXY_PORT\n\n\nclass CEMProxyComponent(component):\n    def RunScript(self, start, stop):\n\n        if not (start or stop):\n            return\n\n        if start:\n            proxy = Proxy(\"compas_cem.optimization\", port=PROXY_PORT)\n            sticky[\"proxy_cem\"] = proxy\n\n        if stop:\n            proxy = Proxy(port=PROXY_PORT)\n            proxy.stop_server()\n            if \"proxy_cem\" in sticky:\n                del sticky[\"proxy_cem\"]\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

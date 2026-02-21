@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-layer-visibility-issue/27407",
+  "topic_id": 27407,
+  "title": "Set Layer Visibility issue",
+  "question": "Hi,\n\n\nI found that pythons \nrhinoscriptsyntax.LayerVisible\n is doing something wrong when setting sublayers:\n\n\n\n\nPasted image\n719×156 10.1 KB\n\n\n\n\nAs you can see, when I turn the layer of  manually it’s truly off\n\nWith the scripted method, the layer comes in a state it should not even be in with the Parent layer turned ON.\n\nIt causes the layers turned off by the script to pop back on again when an event ‘updates’ the layer visibilities.\n\n\nThanks\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "def LayerVisible(layer, visible=None, force_visible=False):\n    \"\"\"Returns or changes the visible property of a layer.\n    Parameters:\n      layer = name of existing layer\n      visible[opt] = new visible state\n    Returns:\n      if visible is not specified, the current layer visibility\n      if visible is specified, the previous layer visibility\n    \"\"\"\n    layer = __getlayer(layer, True)\n    rc = layer.IsVisible\n    if visible is not None and visible!=rc:\n        if visible and force_visible:\n            scriptcontext.doc.Layers.ForceLayerVisible(layer.Id)\n        else:\n            layer.IsVisible = visible\n            \"\" ** ADD THIS **\n            layer.SetPersistentVisibility(visible)\n            \"\" **************\n            layer.CommitChanges()\n        scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "#------------------------------------------------------\n# A replacement for layer visible  half-lightbulb error\n#------------------------------------------------------\n# for layer light turn off completely\nimport Rhino.DocObjects.Layer\nimport scriptcontext\nimport System.Guid\n\ndef LayerVisible(layer, visible=None, forcevisible_or_donotpersist=False):\n    \"\"\"Returns or changes the visible property of a layer.\n    Parameters:\n      layer (str): name of existing layer\n      visible (bool, optional): new visible state\n      forcevisible_or_donotpersist (bool, optional): if visible is True then turn parent layers on if True.  If visible is False then do not persist if True\n    Returns:\n      bool: if visible is not specified, the current layer visibility\n      bool: if visible is specified, the previous layer visibility\n    Example:\n      import rhinoscriptsyntax as rs\n      layers = rs.LayerNames()\n      if layers:\n      for layer in layers:\n      if rs.LayerVisible(layer)==False:\n      rs.LayerVisible(layer,True)\n    See Also:\n      LayerLocked\n    \"\"\"\n    layer = __getlayer(layer, True)\n    rc = layer.IsVisible\n    if visible is not None:\n        layer.IsVisible = visible\n        if visible and forcevisible_or_donotpersist:\n            scriptcontext.doc.Layers.ForceLayerVisible(layer.Id)\n        if not visible and not forcevisible_or_donotpersist:\n            layer.SetPersistentVisibility(visible)\n        layer.CommitChanges()\n        scriptcontext.doc.Views.Redraw()\n    return rc\ndef __getlayer(name_or_id, raise_if_missing):\n    if not name_or_id: raise TypeError(\"Parameter must be a string or Guid\")\n    id = coerceguid(name_or_id)\n    if id: name_or_id = id\n    else:\n        layer = scriptcontext.doc.Layers.FindByFullPath(name_or_id, True)\n        if layer>=0: return scriptcontext.doc.Layers[layer]\n    layer = scriptcontext.doc.Layers.Find(name_or_id, True)\n    if layer>=0: return scriptcontext.doc.Layers[layer]\n    if raise_if_missing: raise ValueError(\"%s does not exist in LayerTable\" % name_or_id)\ndef coerceguid(id, raise_exception=False):\n    if type(id) is System.Guid: return id\n    if type(id) is str and len(id)>30:\n        try:\n            id = System.Guid(id)\n            return id\n        except:\n            pass\n    if (type(id) is list or type(id) is tuple) and len(id)==1:\n        return coerceguid(id[0], raise_exception)\n    if type(id) is Rhino.DocObjects.ObjRef: return id.ObjectId\n    if isinstance(id,Rhino.DocObjects.RhinoObject): return id.Id\n    if raise_exception: raise TypeError(\"Parameter must be a Guid or string representing a Guid\")\n\n#-----------------------------------",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 4189
+}

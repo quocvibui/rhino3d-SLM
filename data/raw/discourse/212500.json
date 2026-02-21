@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/exporting-from-grasshopper/212500",
+  "topic_id": 212500,
+  "title": "Exporting from Grasshopper",
+  "question": "Hello everyone, I need help with exporting a body from grasshopper. I am working on my optimization thesis, and my plan is to use HEEDS, Ansys, Rhino and Excel to optimize the hull shape of an AUV. I am able to make grasshopper read the parameters of an AUV from an excel file, and output the surface area and volume of the body to the same excel file. I am facing problem in writing the ghpython code to export the body generated in the grasshopper. After some debugging, the main error comes to be:\n\nException occurred:', \"‘module’ object has no attribute ‘AddBrep’\n\n\nmy current code is:\n\nimport System\n\nimport os\n\nimport Rhino\n\nimport rhinoscriptsyntax as rs\n\n\n— Configuration —\n\n\nEXPORT_DIR = r\"D:\\Study\\Name 400\\Parametric Modelling\\Geometry\"\n\nFILE_NAME = “Hull_Optimized_Design.step”\n\nEXPORT_PATH = os.path.join(EXPORT_DIR, FILE_NAME)\n\n\nif ‘run’ not in globals():\n\nrun = False\n\nif ‘x’ not in globals():\n\nx = None\n\n\nprint(“=== DEBUG START ===”)\n\nprint(“Run trigger:”, run)\n\nprint(“Geometry exists:”, x is not None)\n\n\nif x is not None:\n\nprint(“Geometry type:”, x.GetType().Name)\n\nprint(“Geometry is valid:”, x.IsValid)\n\n\ndef ExportBrepToStep(brep_in, run_trigger, export_path):\n\n“”\"\n\nMain export function with detailed debugging\n\n“”\"\n\nprint(“\\n— Inside Export Function —”)\n\nprint(“Run trigger:”, run_trigger)\n\nprint(“Brep exists:”, brep_in is not None)\n\n\nif not run_trigger or brep_in is None:\n    return \"Ready to export. Target: {}\".format(export_path)\n\n# Check 1: Is the BREP valid?\nif not brep_in.IsValid:\n    return \"ERROR: Input BREP geometry is not valid. Check upstream components.\"\n    \n# 2. Create the directory if it doesn't exist\nexport_dir = os.path.dirname(export_path)\nprint(\"Export directory:\", export_dir)\n\ntry:\n    if not os.path.exists(export_dir):\n        print(\"Creating directory...\")\n        os.makedirs(export_dir)\n        print(\"Directory created\")\n    else:\n        print(\"Directory already exists\")\nexcept Exception as e:\n    return \"ERROR: Failed to create directory: ...",
+  "code_blocks": [
+    {
+      "code": "if not run_trigger or brep_in is None:\n    return \"Ready to export. Target: {}\".format(export_path)\n\n# Check 1: Is the BREP valid?\nif not brep_in.IsValid:\n    return \"ERROR: Input BREP geometry is not valid. Check upstream components.\"\n    \n# 2. Create the directory if it doesn't exist\nexport_dir = os.path.dirname(export_path)\nprint(\"Export directory:\", export_dir)\n\ntry:\n    if not os.path.exists(export_dir):\n        print(\"Creating directory...\")\n        os.makedirs(export_dir)\n        print(\"Directory created\")\n    else:\n        print(\"Directory already exists\")\nexcept Exception as e:\n    return \"ERROR: Failed to create directory: {}. Check folder permissions.\".format(e)\n\n# 3. Use rs.Command() to export the geometry\nobject_id = None\ntry:\n    print(\"Adding brep to document...\")\n    # 3a. Add the geometry to the document temporarily\n    object_id = rs.AddBrep(brep_in)\n    print(\"Object ID:\", object_id)\n    \n    if object_id is None:\n        return \"ERROR: Failed to add geometry to Rhino doc (rs.AddBrep failed).\"\n        \n    # 3b. Select the new object\n    print(\"Selecting object...\")\n    rs.SelectObject(object_id)\n    \n    # 3c. Build the export command string\n    command_string = \"_-Export \\\"{}\\\" _Enter _Enter\".format(export_path)\n    print(\"Command:\", command_string)\n    \n    # 3d. Run the command\n    print(\"Executing command...\")\n    success = rs.Command(command_string, True)\n    print(\"Command success:\", success)\n\n    # Check if file was created\n    file_exists = os.path.exists(export_path)\n    print(\"File exists after export:\", file_exists)\n    \n    if success and file_exists:\n        return \"SUCCESS! File created: {}\".format(export_path)\n    elif success and not file_exists:\n        return \"WARNING: Command succeeded but file not found at: {}\".format(export_path)\n    else:\n        return \"FAILURE: Export command failed.\"\n\nexcept Exception as e:\n    print(\"Exception occurred:\", str(e))\n    return \"CRITICAL ERROR: {}\".format(e)\n\nfinally:\n    print(\"Cleaning up...\")\n    if object_id is not None:\n        try:\n            if rs.IsObject(object_id):\n                rs.DeleteObject(object_id)\n                print(\"Temporary object deleted\")\n        except:\n            print(\"Could not delete temporary object\")",
+      "language": "python",
+      "author": "Ekanta",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 106
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/update-class-instance/33645",
+  "topic_id": 33645,
+  "title": "Update class instance",
+  "question": "I’m a beginner in Python and have a trouble in running a python module in Grasshopper.  The code is to create an instance object to randomly walk to the centre point(0,0,0) and it stops at a certain distance to the centre.\n\nIt is a bit lengthy because avoiding an error caused by the problem with Guid  ID, RhinoscriptSyntax and Common. I am still confused with handling this.\n\nAnyway, the code in a Python module is shown as below.  An instance of Agent alone is working well but when I try to dla.update() with Timer in a next python module(which is simply executing “dla.update()”), I got the message saying that there is something wrong in “self.pos = rs.EvaluateCurve(cirCrv, rndNum)” and “self.curAgent = Agent(self.cirCrv, self.cenPt, self.walkDist)”.\n\nIs there a way to make this working ?\n\nMany thanks in advance.\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as gh\nimport random as rnd\n\n\nclass Agent :\ndef __init__(self, cirCrv, cenPt, walkDist):\n    self.cenPt = cenPt\n    self.walkDist = walkDist\n    rndNum = rnd.random()\n    self.pos = rs.EvaluateCurve(cirCrv, rndNum)\n\ndef randWalk(self) :\n    v = rs.VectorSubtract(rs.AddPoint(0,0,0), self.pos)\n    v1 = rs.VectorUnitize(v)\n    v2 = rs.VectorScale(v1, self.walkDist)\n    v3 = rs.VectorSubtract(self.pos, rs.AddPoint(0,0,0))\n    v4 = rs.VectorAdd(v3, gh.UnitZ(1))\n    rotAxis = rs.VectorSubtract(v4, v3)\n    newV1 = rs.VectorRotate(v2, rnd.uniform(-70, 70), rotAxis)\n    self.pos = rs.VectorAdd(self.pos, newV1)\n    \ndef checkDist(self):\n    \n    dist1 = rs.Distance(self.pos, rs.AddPoint(0,0,0))\n    return dist1\n    \n    \nclass dla :\n\ndef __init__(self, cirCrv, cenPt, walkDist):\n    self.Agents = []\n    self.cirCrv = cirCrv\n    self.cenPt = cenPt\n    self.walkDist = walkDist\n    self.curAgent = Agent(self.cirCrv, self.cenPt, self.walkDist)\n    self.pos =self.curAgent.pos \n    \n    \ndef update(self):\n    if self.curAgent.checkDist() < 1:\n       self.Agents.append(self.curAgent)\n  ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as gh\nimport random as rnd\n\n\nclass Agent :\ndef __init__(self, cirCrv, cenPt, walkDist):\n    self.cenPt = cenPt\n    self.walkDist = walkDist\n    rndNum = rnd.random()\n    self.pos = rs.EvaluateCurve(cirCrv, rndNum)\n\ndef randWalk(self) :\n    v = rs.VectorSubtract(rs.AddPoint(0,0,0), self.pos)\n    v1 = rs.VectorUnitize(v)\n    v2 = rs.VectorScale(v1, self.walkDist)\n    v3 = rs.VectorSubtract(self.pos, rs.AddPoint(0,0,0))\n    v4 = rs.VectorAdd(v3, gh.UnitZ(1))\n    rotAxis = rs.VectorSubtract(v4, v3)\n    newV1 = rs.VectorRotate(v2, rnd.uniform(-70, 70), rotAxis)\n    self.pos = rs.VectorAdd(self.pos, newV1)\n    \ndef checkDist(self):\n    \n    dist1 = rs.Distance(self.pos, rs.AddPoint(0,0,0))\n    return dist1\n    \n    \nclass dla :\n\ndef __init__(self, cirCrv, cenPt, walkDist):\n    self.Agents = []\n    self.cirCrv = cirCrv\n    self.cenPt = cenPt\n    self.walkDist = walkDist\n    self.curAgent = Agent(self.cirCrv, self.cenPt, self.walkDist)\n    self.pos =self.curAgent.pos \n    \n    \ndef update(self):\n    if self.curAgent.checkDist() < 1:\n       self.Agents.append(self.curAgent)\n       self.curAgent = Agent(self.cirCrv, self.cenPt, self.walkDist)\n    else:\n        self.curAgent.randWalk()\n\na = dla(cirCrv,cenPt,walkDist)",
+      "language": "python",
+      "author": "lepli",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 1,
+  "views": 776
+}

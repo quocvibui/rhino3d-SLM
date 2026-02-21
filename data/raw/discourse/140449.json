@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/automatic-unweld-vertices/140449",
+  "topic_id": 140449,
+  "title": "Automatic Unweld Vertices",
+  "question": "Hi\n\n\nI’m trying to create the creases in the mesh automatically using a curve as a guide. But creases are created randomly. What might be missing?\n\n\nThe test Rhino file is attached\n\n\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\nfrom System.Drawing import Bitmap\nimport System\nfrom System.Collections.Generic import *\nimport Rhino.Geometry as rg\nfrom System import Array\nimport System.Guid\n\nmesh01 = rs.GetObject(\"Select mesh\", rs.filter.mesh)\nmesha = rs.coercemesh(mesh01)\ncrv = rs.coercecurve(rs.GetObject(\"Select curve\", rs.filter.curve))\n\npts = rs.MeshVertices(mesh01)\nmap = rs.MeshFaceVertices(mesh01)\n\npts_crv = rs.DivideCurve(crv, 100, False, True)\n\ncaps = []\nfor i in range(0, len(pts_crv)):\n\tfor j in range(0, len(pts)):\n\t\tif rs.Distance(pts_crv[i], pts[j]) < 0.2:\n\t\t\tcaps.append(j)\n\ncap = list(set(caps))\n\npythonIntegers = cap\ndotNetIntegers = Array[int](pythonIntegers)\n\nmesh = Rhino.Geometry.Mesh()\n\nfor v in range(0, len(pts)): mesh.Vertices.Add(pts[v])\nfor m in range(0, len(map)): mesh.Faces.AddFace(map[m][0], map[m][1], map[m][2], map[m][3])\n\nmesh.UnweldVertices(dotNetIntegers, False)\nmesh.Normals.ComputeNormals()\nmesh.FaceNormals.ComputeFaceNormals()\nmesh.Compact()\nsc.doc.Objects.AddMesh(mesh)\nrs.HideObject(mesh01)\nsc.doc.Views.Redraw()\n\n\n\nbrecha.3dm\n (76.8 KB)\n\n\ncrease_test.py\n (1.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\nfrom System.Drawing import Bitmap\nimport System\nfrom System.Collections.Generic import *\nimport Rhino.Geometry as rg\nfrom System import Array\nimport System.Guid\n\nmesh01 = rs.GetObject(\"Select mesh\", rs.filter.mesh)\nmesha = rs.coercemesh(mesh01)\ncrv = rs.coercecurve(rs.GetObject(\"Select curve\", rs.filter.curve))\n\npts = rs.MeshVertices(mesh01)\nmap = rs.MeshFaceVertices(mesh01)\n\npts_crv = rs.DivideCurve(crv, 100, False, True)\n\ncaps = []\nfor i in range(0, len(pts_crv)):\n\tfor j in range(0, len(pts)):\n\t\tif rs.Distance(pts_crv[i], pts[j]) < 0.2:\n\t\t\tcaps.append(j)\n\ncap = list(set(caps))\n\npythonIntegers = cap\ndotNetIntegers = Array[int](pythonIntegers)\n\nmesh = Rhino.Geometry.Mesh()\n\nfor v in range(0, len(pts)): mesh.Vertices.Add(pts[v])\nfor m in range(0, len(map)): mesh.Faces.AddFace(map[m][0], map[m][1], map[m][2], map[m][3])\n\nmesh.UnweldVertices(dotNetIntegers, False)\nmesh.Normals.ComputeNormals()\nmesh.FaceNormals.ComputeFaceNormals()\nmesh.Compact()\nsc.doc.Objects.AddMesh(mesh)\nrs.HideObject(mesh01)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "cristiano.pasini",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 115,
+  "posts_count": 1,
+  "views": 320
+}

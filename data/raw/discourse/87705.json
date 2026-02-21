@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/convert-point-cloud-to-regular-points/87705",
+  "topic_id": 87705,
+  "title": "Convert point cloud to regular points?",
+  "question": "I am trying to convert a point cloud object (imported from a .ply) to just regular Rhino points.  Any insight on how to do this?\n\n\n(The goal is to substitute each point with a simple mesh cube.  I have a script to do this, but it doesn’t recognize point cloud objects as “points” and fails.)  Thanks.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "def DoSomething():\n    cloud_id = rs.GetObject(\"Pointcloud\", rs.filter.pointcloud, True, False)\n    if not cloud_id: return\n    \n    cloud  = rs.coercegeometry(cloud_id, True)\n    points = cloud.GetPoints()\n    colors = cloud.GetColors() \n    \n    box_size = 2.0\n    interval = Rhino.Geometry.Interval( -box_size * 0.5, box_size * 0.5)\n    n_plane  = Rhino.Geometry.Plane.WorldXY\n    \n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n    attr.ObjectColor = rs.ObjectColor(cloud_id)\n    \n    for i, pt in enumerate(points):\n        n_plane.Origin = pt\n        box = Rhino.Geometry.Box(n_plane, interval, interval, interval)\n        if colors: attr.ObjectColor = colors[i]\n        scriptcontext.doc.Objects.AddBox(box, attr)\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 12,
+  "views": 6504
+}

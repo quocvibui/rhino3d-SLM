@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpythonremote-scipy-module-object-has-no-attribute-optimize/169854",
+  "topic_id": 169854,
+  "title": "GhPythonRemote - Scipy module object has no attribute 'optimize'",
+  "question": "Greetings everyone.\n\n\nI am trying to use the scipy.optimize.minimize func inside GH using the Remote component but it fails. Here’s the python code for quick reference . The problem that I can’t seem to figure out is how can the matplotlib.pyplot module work but when i attempt to load the scipy.optimize module it doesn’t work? How can I make it work? I have used the conda install scipy in the rhinoremote environment as well as the\n\n\nghpyremote_import_scipy_module_error.gh\n (16.7 KB)\n\n\nimport scriptcontext \nimport rhinoscriptsyntax as rs\n\nnp = scriptcontext.sticky['numpy']\nmpl = scriptcontext.sticky['matplotlib']\nplt = mpl.pyplot #How come the pyplot extension is succesfully imported but scipy isnt\n\narr = np.linspace(-1,1,25)\nplt.plot(-arr, np.sin(arr), c = 'r')\nplt.plot(np.tan(arr), -arr[::-1], c='orange')\nplt.show()\n\n#scipy import\nscipy = scriptcontext.sticky['scipy']\n_minimize = scipy.optimize.minimize\n\n#Objective function\ns = 20000\nl = 40000\ndef objective(arr):\n    x = arr[0]\n    y = arr[1]\n    w = arr[2]\n    o = arr[3]\n    return (o - w / 2) % x + (s - w) % x + (l - y - (o + (l-s)//s*s + w / 2)) % x\ninitial = [1500, 600, 1600, 6000]\nbounds = [(1500,2100), (600, 2350),(1600,2600), (3000,15000)]\nsol = _minimize(fun=objective, x0=initial, bounds=bounds, method='Nelder-Mead')\n\n\n\nAnd Here is the error I get\n\n\nRuntime error (Exception): 'module' object has no attribute 'optimize'\nTraceback:\n  line 102, in value, \"C:\\Users\\dgs\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rpyc\\core\\async_.py\"\n  line 469, in sync_request, \"C:\\Users\\dgs\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rpyc\\core\\protocol.py\"\n  line 76, in syncreq, \"C:\\Users\\dgs\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rpyc\\core\\netref.py\"\n  line 161, in __getattribute__, \"C:\\Users\\dgs\\AppData\\Roaming\\McNeel\\Rhinoce...",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext \nimport rhinoscriptsyntax as rs\n\nnp = scriptcontext.sticky['numpy']\nmpl = scriptcontext.sticky['matplotlib']\nplt = mpl.pyplot #How come the pyplot extension is succesfully imported but scipy isnt\n\narr = np.linspace(-1,1,25)\nplt.plot(-arr, np.sin(arr), c = 'r')\nplt.plot(np.tan(arr), -arr[::-1], c='orange')\nplt.show()\n\n#scipy import\nscipy = scriptcontext.sticky['scipy']\n_minimize = scipy.optimize.minimize\n\n#Objective function\ns = 20000\nl = 40000\ndef objective(arr):\n    x = arr[0]\n    y = arr[1]\n    w = arr[2]\n    o = arr[3]\n    return (o - w / 2) % x + (s - w) % x + (l - y - (o + (l-s)//s*s + w / 2)) % x\ninitial = [1500, 600, 1600, 6000]\nbounds = [(1500,2100), (600, 2350),(1600,2600), (3000,15000)]\nsol = _minimize(fun=objective, x0=initial, bounds=bounds, method='Nelder-Mead')",
+      "language": "python",
+      "author": "Dragos1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 2036
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/i-asked-chatgpt-for-a-gh-component-for-attractors/212661",
+  "topic_id": 212661,
+  "title": "I asked ChatGPT for a gh component for attractors",
+  "question": "It wrote the script for the Python component in 10 seconds. Can be used with several points.\n\n\n\n\n\n\n\"\"\"\nGhPython component: Attractor Points Filter\n\nInputs:\n    Pts      : List of points\n    AttrPts  : List of attractor points\n    Strength : Maximum distance to keep\n\nOutputs:\n    OutPts   : Filtered unique points\n    OutDist  : Averaged distances\n    OutIdx   : Indices in original list\n\"\"\"\n\nimport Rhino\n\n# Prepare outputs\nOutPts = []\nOutDist = []\nOutIdx = []\n\n# Validate inputs (but no return!)\nif not Pts or not AttrPts or Strength is None:\n    pass\nelse:\n\n    # Dictionary mapping:\n    # point index => list of distances to attractors (within Strength)\n    dist_dict = {}\n\n    for ai, a in enumerate(AttrPts):\n        if a is None: \n            continue\n        for pi, p in enumerate(Pts):\n            if p is None:\n                continue\n\n            d = p.DistanceTo(a)\n\n            # Keep only points closer than Strength\n            if d <= Strength:\n                if pi not in dist_dict:\n                    dist_dict[pi] = []\n                dist_dict[pi].append(d)\n\n    # If dictionary is non-empty, merge results\n    if dist_dict:\n        for pi in sorted(dist_dict.keys()):\n            d_list = dist_dict[pi]\n            avg_d = sum(d_list) / float(len(d_list))\n\n            OutPts.append(Pts[pi])\n            OutDist.append(avg_d)\n            OutIdx.append(pi)\n\n\n\n\n251120 ChatGPT Attractors.3dm\n (2.6 MB)\n\n\n251120 ChatGPT Attractors.gh\n (19.8 KB)",
+  "code_blocks": [
+    {
+      "code": "\"\"\"\nGhPython component: Attractor Points Filter\n\nInputs:\n    Pts      : List of points\n    AttrPts  : List of attractor points\n    Strength : Maximum distance to keep\n\nOutputs:\n    OutPts   : Filtered unique points\n    OutDist  : Averaged distances\n    OutIdx   : Indices in original list\n\"\"\"\n\nimport Rhino\n\n# Prepare outputs\nOutPts = []\nOutDist = []\nOutIdx = []\n\n# Validate inputs (but no return!)\nif not Pts or not AttrPts or Strength is None:\n    pass\nelse:\n\n    # Dictionary mapping:\n    # point index => list of distances to attractors (within Strength)\n    dist_dict = {}\n\n    for ai, a in enumerate(AttrPts):\n        if a is None: \n            continue\n        for pi, p in enumerate(Pts):\n            if p is None:\n                continue\n\n            d = p.DistanceTo(a)\n\n            # Keep only points closer than Strength\n            if d <= Strength:\n                if pi not in dist_dict:\n                    dist_dict[pi] = []\n                dist_dict[pi].append(d)\n\n    # If dictionary is non-empty, merge results\n    if dist_dict:\n        for pi in sorted(dist_dict.keys()):\n            d_list = dist_dict[pi]\n            avg_d = sum(d_list) / float(len(d_list))\n\n            OutPts.append(Pts[pi])\n            OutDist.append(avg_d)\n            OutIdx.append(pi)",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 162,
+  "posts_count": 12,
+  "views": 313
+}

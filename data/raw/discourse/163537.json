@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/control-random-colors-hsv-values-particularly-saturation/163537",
+  "topic_id": 163537,
+  "title": "Control Random Color's HSV values - particularly Saturation",
+  "question": "Hey all,\n\n\nWorking on a Python script, and I have a Random Color assigned to a new layer – but I’d like to be able to specify ranges of its HSV values (eg. Set a Pastel-type look with Saturation=15-25)\n\n\nThinking maybe I need to find a way to define the HSV of the color, and then convert to argb…?\n\n\nSnippet of script below.\n\n\nThx,\n\nAlan\n\n\n#Create Random Color\n\ndef randomcolor():\n          red = int(255*random.random())\n          green = int(255*random.random())\n          blue = int(255*random.random())\n          return Color.FromArgb(red,green,blue)\n\n#Define new layers (with names to be used throughout script)\n\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\ncrv_layer_name = rs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nsol_layer_name = rs.AddLayer(\"sol\"+new_element, randomcolor(), parent=new_element)",
+  "code_blocks": [
+    {
+      "code": "import random\nimport Rhino as rc\n\ndef generate_random_colors(C, H, S, V, Se):\n\n    # Assign specific inputs if provided, otherwise use defaults\n    C = C if C is not None else 4\n    H = H if H is not None else .5\n    S = S if S is not None else .5\n    V = V if V is not None else .5\n    Se = Se if Se is not None else 235\n    \n    Rc = []\n\n    if Se is not None:\n        random.seed(Se)\n\n    for i in range(C):\n        rand_S = random.uniform(S, 1.0)\n        rand_V = random.uniform(V, 1.0)\n        hsv = rc.Display.ColorHSV(H, rand_S, rand_V)\n        rgb = hsv.ToArgbColor()\n        Rc.append((rgb, rand_V))  # Store both the RGB color and the corresponding V value\n\n    # Sort Rc by V value in descending order\n    RcS = sorted(Rc, key=lambda x: x[1], reverse=True)\n\n    # Extract the sorted RGB colors from the RcS list\n    RcS = [item[0] for item in RcS]\n    \n    # Get RGB Colors from Rc list\n    Rc = [item[0] for item in Rc]\n\n    return Rc, RcS\n\nRc, RcS = generate_random_colors(C, H, S, V, Se)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "#Create Random Light Color\n\ndef random_color_light():\n    h=random.random()\n    s=random.uniform(0.2,0.3)\n    v=random.uniform(0.3,0.8)\n    rs.LayerColor(layer,Rhino.Display.ColorHSV(h,s,v).ToArgbColor())\n\n#Create Layers named per user-submitted new_element\n\nrs.AddLayer(name=new_element, parent=overall_parent)\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\ncrv_layer_name = rs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nsol_layer_name = rs.AddLayer(\"sol\"+new_element, random_color_light(), parent=new_element)",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "#Create Random Color\n\ndef randomcolor():\n          red = int(255*random.random())\n          green = int(255*random.random())\n          blue = int(255*random.random())\n          return Color.FromArgb(red,green,blue)\n\n#Define new layers (with names to be used throughout script)\n\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\ncrv_layer_name = rs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nsol_layer_name = rs.AddLayer(\"sol\"+new_element, randomcolor(), parent=new_element)",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 21,
+  "views": 1228
+}

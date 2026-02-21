@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/fstwn/cockatoo/blob/d952ac5d2148ec29fba52e8eb75f0f43770c74ca/usrobj_src/Cockatoo_MakeGraphVizGraph.py",
+  "repo": "fstwn/cockatoo",
+  "repo_stars": 38,
+  "repo_description": "Cockatoo is a prototypical open-source software toolkit for generating (3d-)knitting patterns from NURBS surface and mesh geometry directly inside Grasshopper.",
+  "license": "MIT",
+  "filepath": "usrobj_src/Cockatoo_MakeGraphVizGraph.py",
+  "instruction": "Creates a graph suitable for visualisation using GraphViz from a KnitNetwork.\n    Inputs:\n        Toggle: {item, boolean}\n        KnitNetwork: An initialized KnitNetwork. {item, KnitNetwork}\n   ...",
+  "code": "\"\"\"\nCreates a graph suitable for visualisation using GraphViz from a KnitNetwork.\n    Inputs:\n        Toggle: {item, boolean}\n        KnitNetwork: An initialized KnitNetwork. {item, KnitNetwork}\n    Output:\n        GraphVizGraph: A graph prepared for visualisation using GraphViz.\n                       {item, polyline}\n    Remarks:\n        Author: Max Eschenbach\n        License: MIT License\n        Version: 200731\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS\nfrom __future__ import division\n\n# GPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"MakeGraphVizGraph\"\nghenv.Component.NickName =\"MGVG\"\nghenv.Component.Category = \"Cockatoo\"\nghenv.Component.SubCategory = \"08 Visualisation\"\n\n# LOCAL MODULE IMPORTS\ntry:\n    import cockatoo\n    import networkx as nx\nexcept ImportError:\n    errMsg = \"The Cockatoo python module seems to be not correctly \" + \\\n             \"installed! Please make sure the module is in you search \" + \\\n             \"path, see README for instructions!.\"\n    raise ImportError(errMsg)\n\nclass MakeRenderGraph(component):\n    \n    def RunScript(self, Toggle, KN):\n        \n        if Toggle and KN:\n            GraphVizGraph = KN.prepare_for_graphviz()\n        else:\n            GraphVizGraph = Grasshopper.DataTree[object]()\n        \n        # return outputs if you have them; here I try it for you:\n        return GraphVizGraph",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/draw-objects-temporarily-without-adding-them-but-show-as-part-of-scene/204110",
+  "topic_id": 204110,
+  "title": "Draw objects temporarily without adding them, but show as \"part of scene\"",
+  "question": "I’m working on a grasshopper script where we are listening to a signal (via an event listener), and that signal will cause a geometry to be shown on the canvas. I want to avoid expiring a component everytime and use a preview component, but rather just subscribe to the signal and manually add the geometry to the display pipeline.\n\n\nBut I’m very much in doubt how.\n\n\nBelow is a code snippet where I show a sphere, but it, as the function also suggests, is drawn on top of everything. How can I ensure that it is “part of the scene”?\n\n\nimport System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport System.Drawing as sd\n\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, pt: Rhino.Geometry.Point3d, radius, show, clear):\n\n    # Create the conduit once and stash it so it survives across runs\n        if \"sphere_conduit\" not in sc.sticky:\n            sc.sticky[\"sphere_conduit\"] = PersistentSphereConduit()\n        conduit = sc.sticky[\"sphere_conduit\"]\n\n        if clear:\n            conduit.Enabled = False\n            sc.doc.Views.Redraw()\n            return \"Cleared\"\n\n        if show:\n            conduit.update_sphere(pt, radius)\n            return \"Drawing at ({:.1f}, {:.1f}, {:.1f})\".format(pt.X, pt.Y, pt.Z)\n\n        return \"Idle\"\n\n\nclass PersistentSphereConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, colour=sd.Color.CornflowerBlue):\n        super(PersistentSphereConduit, self).__init__()\n        self._mesh = None\n        self._mat  = Rhino.Display.DisplayMaterial(colour, 0.8)\n\n    def update_sphere(self, centre, radius=1.0):\n        sph        = Rhino.Geometry.Sphere(centre, radius)\n        self._mesh = Rhino.Geometry.Mesh.CreateFromSphere(sph, 16, 16)\n        self.Enabled = True\n        sc.doc.Views.Redraw()\n\n    def CalculateBoundingBox(self, e):\n        if self._mesh:\n            e.IncludeBoundingBox(self._mesh.GetBoundingBox(True))\n\n    def DrawForeground(self, e):\n ...",
+  "code_blocks": [
+    {
+      "code": "import System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport System.Drawing as sd\n\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, pt: Rhino.Geometry.Point3d, radius, show, clear):\n\n    # Create the conduit once and stash it so it survives across runs\n        if \"sphere_conduit\" not in sc.sticky:\n            sc.sticky[\"sphere_conduit\"] = PersistentSphereConduit()\n        conduit = sc.sticky[\"sphere_conduit\"]\n\n        if clear:\n            conduit.Enabled = False\n            sc.doc.Views.Redraw()\n            return \"Cleared\"\n\n        if show:\n            conduit.update_sphere(pt, radius)\n            return \"Drawing at ({:.1f}, {:.1f}, {:.1f})\".format(pt.X, pt.Y, pt.Z)\n\n        return \"Idle\"\n\n\nclass PersistentSphereConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, colour=sd.Color.CornflowerBlue):\n        super(PersistentSphereConduit, self).__init__()\n        self._mesh = None\n        self._mat  = Rhino.Display.DisplayMaterial(colour, 0.8)\n\n    def update_sphere(self, centre, radius=1.0):\n        sph        = Rhino.Geometry.Sphere(centre, radius)\n        self._mesh = Rhino.Geometry.Mesh.CreateFromSphere(sph, 16, 16)\n        self.Enabled = True\n        sc.doc.Views.Redraw()\n\n    def CalculateBoundingBox(self, e):\n        if self._mesh:\n            e.IncludeBoundingBox(self._mesh.GetBoundingBox(True))\n\n    def DrawForeground(self, e):\n        if self._mesh:\n            e.Display.DrawMeshShaded(self._mesh, self._mat)",
+      "language": "python",
+      "author": "Timo_Harboe_Nielsen",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 58
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-rs-copyobjects-copies-ends-up-in-the-initial-group/150134",
+  "topic_id": 150134,
+  "title": "Bug: rs.CopyObjects() copies ends up in the initial group",
+  "question": "Hi guys,\n\n\n@pascal\n and \n@stevebaer\n I presume \n\n\nI see that if I use rs.CopyObjects() and select a group with objects to copy then the copies ends up in the same group as the initial objects. Is that by design? And how do I prevent it from happening?\n\n\nJust make some 1x1x1 boxes and group them and try this:\n\n\nimport rhinoscriptsyntax as rs\nrs.CopyObjects(rs.GetObjects(\"select objects to copy\", filter=0, group=True), (10,0,0))\n\n\n\nAnd see how the copied objects is in the same group.\n\n\nI guess I could pull the copies from the group, make a new and put them in there, but it becomes more complex if there are nested groups, because then the copies ends up in those nested groups too.\n\n\nMy best workaround so far is using rs.Command(“_Copy…”) like this:\n\n\nimport rhinoscriptsyntax as rs\nobjs = rs.GetObjects(\"select objects to copy\", filter=0, group=True)\nif objs:\n    origin = rs.coerce3dpoint((0,0,0))\n    destination = rs.coerce3dpoint((10,0,0))\n    rs.SelectObjects(objs)\n    rs.Command(\"_Copy Pause w\"+str(origin)+\" w\"+str(destination)+\" NoEcho Enter\",False)\n\n\n\nBut that is a long workaround and I try to stay away from rs.Command() as much as possible.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nobjs = rs.GetObjects(\"select objects to copy\", filter=0, group=True)\nif objs:\n    origin = rs.coerce3dpoint((0,0,0))\n    destination = rs.coerce3dpoint((10,0,0))\n    rs.SelectObjects(objs)\n    rs.Command(\"_Copy Pause w\"+str(origin)+\" w\"+str(destination)+\" NoEcho Enter\",False)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 484
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/general-philosophy-behind-rhino-python-integration/91151",
+  "topic_id": 91151,
+  "title": "General philosophy behind Rhino - Python integration?",
+  "question": "Hi,\n\n\nwhile I am further setting foot into the unknown grounds of the Rhino-Python integration I quite often feel that I stumble, because I am lacking the knowledge of some general principles of the Rhino-Python integration.\n\n\nFor example:\n\n\nThe SporphSpaceMorph creator requires point2D types as input for some parameters. However, I couldn’t find a creator for point2D. I used a workaround by creating a point3D and then rs.coerce2Dpoint(…) to make it work. So, either I just didn’t find the creator for the point2D (which means that some explanation would be helpful where to find what, i.e. the general philosophy of the class structure) or the creator is simply missing.\n\n\nAnother example:\n\nI want to set the color of object I created. By default they have the color of the layer they’re placed in. Then you set the .Attributes.ObjectColor = System.Drawing.Color. and - nothing happens, because one has to set the ColorSource as well (which isn’t really obvious seen from outside). Then the search starts for the pre-defined property “ColorFromObject” which I finally found in Rhino.DocObjectsObjectAttributes.ColorSource.PropertyType.ColorFromObject.\n\nThis took a lot of guess work because the class tree in the Rhino online documentation doesn’t properly reflect the class structure in Python. In general: Quite often there are useful examples in C# but when I try to translate them into Python, the class structure doesn’t match.\n\n\nOr another one:\n\nWhen do I have to use .CommitChanges() to make changes visible after I changed something? Always after each change? Or possibly only after multiple changes to the same object? Do I always have to CommitChanges() for each object separately? Is there a general “CommitAll()”?\n\n\nAnd:\n\nIs a Brep, for example, a RhinoObject? In some respect it appears to be (it has the attributes, for example), but with the geometry property I had difficulties. (The Python for Rhino5 introduction say that RhinoObjects have Object data, Object Attributes and Ob...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\nmy_point2d = Rhino.Geometry.Point2d(x,y)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\n\nrhino_objects = sc.doc.Groups.GroupMembers(0) #assuming  group present and not empty\n\nfor rhino_object in rhino_objects:\n    geometry = rhino_object.Geometry\n    print geometry",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 1640
+}

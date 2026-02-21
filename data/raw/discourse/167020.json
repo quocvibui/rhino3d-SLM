@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-or-wish-selection-command-and-scripting-inconsistencies/167020",
+  "topic_id": 167020,
+  "title": "Bug or Wish, Selection Command and Scripting Inconsistencies",
+  "question": "@BrianJ\n We had some pretty bad errors happening due to inconsistencies in how some of the selection commands select across layout views.\n\n\nSelect only in active layout view\n\n\n\n\nSelAll\n\n\nSelLayer\n\n\n\n\nSelect across layout views\n\n\n\n\nSelName\n\n\nScripting: rhinoscriptsyntax.ObjectsByLayer(guid, True)\n\n\n\n\nI did not check other selection commands yet.\n\n\nI think this should be unified. We had texts and dimensions wiped across layouts because of this when: User wants to delete some unnamed objects on a layout: Executes command SelName on active layout, chooses “No name”, hits delete. Error is detected only days later, when other layouts are printed which are now missing text/dims/etc. → disaster because file is many revisions ahead.\n\n\nGenerally speaking, I think one should never be able to select things beyond the currently active view/layout, or only be allowed to do so after a warning.\n\n\n(\nEDIT: In some files but not all SelName also reaches from model space to layout space, see other posts below with video\n)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\ndef main():\n    obj = rs.GetObject(\"Select object\", preselect=True)\n    res_objs = rs.ObjectsByLayer(rs.ObjectLayer(obj), False)\n    \n    # Filter\n    view = rs.CurrentView()\n    res_objs = [o for o in res_objs if rs.IsVisibleInView(o, view)]\n    \n    # Test\n    print(\"View name: {0}\".format(view))\n    for o in res_objs:\n        print(\"Object name: {0}, Visible: {1}\".format(\n                rs.ObjectName(o), rs.IsVisibleInView(o, view)))\n\n    rs.UnselectAllObjects()\n    rs.SelectObjects(res_objs)\n\n\nif __name__=='__main__':\n    main()",
+      "language": "python",
+      "author": "silvano",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 7,
+  "views": 321
+}

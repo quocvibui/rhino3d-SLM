@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/not-much-love-for-curve-weight-in-r6/42475",
+  "topic_id": 42475,
+  "title": "Not much love for curve weight in R6",
+  "question": "This works just fine in R5\n\nCreate curve, adjust weight of control points and try to split this curve with point…no? OK let’s try something different.\n\nExtrude this curve and split the edge of this surface…So far so good. Try to blend surface from two edges we just created…interesting isn’t it?\n\n\n\n\ncurve_weight_issue.3dm\n (81.0 KB)\n\n\nSide question:\n\nHow to construct a curve in RhinoCommon from a list of points,weights and knots? I looked up API documentation but couldn’t find anything.\n\nAsking because I have a gh curve connected to control points component which gives you P,W,K…I want to modify Weights and construct a new curve.",
+  "code_blocks": [
+    {
+      "code": "def AddNurbsCurve(points, knots, degree, weights=None):\n    \"\"\"Adds a NURBS curve object to the document\n    Parameters:\n      points = list containing 3D control points\n      knots = Knot values for the curve. The number of elements in knots must\n          equal the number of elements in points plus degree minus 1\n      degree = degree of the curve. must be greater than of equal to 1\n      weights[opt] = weight values for the curve. Number of elements should\n          equal the number of elements in points. Values must be greater than 0\n    \"\"\"\n    points = rhutil.coerce3dpointlist(points, True)\n    cvcount = len(points)\n    knotcount = cvcount + degree - 1\n    if len(knots)!=knotcount:\n        raise Exception(\"Number of elements in knots must equal the number of elements in points plus degree minus 1\")\n    if weights and len(weights)!=cvcount:\n        raise Exception(\"Number of elements in weights should equal the number of elements in points\")\n    rational = (weights!=None)\n    \n    nc = Rhino.Geometry.NurbsCurve(3,rational,degree+1,cvcount)\n    for i in xrange(cvcount):\n        cp = Rhino.Geometry.ControlPoint()\n        cp.Location = points[i]\n        if weights: \n            cp.Weight = weights[i]\n        else:\n            cp.Weight = 1.0\n        nc.Points[i] = cp\n    for i in xrange(knotcount): nc.Knots[i] = knots[i]\n    rc = scriptcontext.doc.Objects.AddCurve(nc)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add curve to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 3,
+  "views": 835
+}

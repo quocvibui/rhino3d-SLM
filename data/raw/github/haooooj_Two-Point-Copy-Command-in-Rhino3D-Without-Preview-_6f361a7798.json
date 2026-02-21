@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/haooooj/Two-Point-Copy-Command-in-Rhino3D-Without-Preview-/blob/fc92d8d2911e979452d77acdb81261c8d58f0b72/two_point_copy.py",
+  "repo": "haooooj/Two-Point-Copy-Command-in-Rhino3D-Without-Preview-",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "two_point_copy.py",
+  "instruction": "Two point copy",
+  "code": "import rhinoscriptsyntax as rs\r\nimport scriptcontext as sc\r\n\r\ndef two_point_copy():\r\n    \"\"\"Copy selected geometry from point 1 to point 2 (2-point copy).\"\"\"\r\n    objs = rs.GetObjects(\"Select objects to copy\", preselect=True)\r\n    if not objs:\r\n        return                       # user cancelled\r\n\r\n    p1 = rs.GetPoint(\"Pick base point (point 1)\")\r\n    if not p1:\r\n        return\r\n\r\n    p2 = rs.GetPoint(\"Pick target point (point 2)\")\r\n    if not p2:\r\n        return\r\n\r\n    vec = rs.VectorCreate(p2, p1)    # translation vector\r\n\r\n    rs.EnableRedraw(False)\r\n    undo_id = sc.doc.BeginUndoRecord(\"Two-Point Copy\")\r\n\r\n    rs.CopyObjects(objs, vec)\r\n\r\n    sc.doc.EndUndoRecord(undo_id)\r\n    rs.EnableRedraw(True)\r\n\r\nif __name__ == \"__main__\":\r\n    two_point_copy()\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

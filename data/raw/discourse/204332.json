@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/q-csharp-example-for-viewcapturesettings-and-capturetobitmap/204332",
+  "topic_id": 204332,
+  "title": "Q: CSharp-Example for ViewCaptureSettings(), and CaptureToBitmap()?",
+  "question": "Hi…,\n\n\nit seams ViewCaptureSettings() isn’t working in Python at the moment: \nhttps://mcneel.myjetbrains.com/youtrack/issue/RH-85062\n\n\nI assume ViewCaptureSettings() is only working in the ScriptEditor with CSharp.\n\n\nIs there a little example in CSharp for the ScriptEditor, which shows how ViewCaptureSettings() with CaptureToBitmap() works?\n\n\nThanks\n\n\nMichael",
+  "code_blocks": [
+    {
+      "code": "﻿using Rhino;\nusing Rhino.Commands;\nusing Rhino.Display;\nusing System;\nusing System.IO;\n\nnamespace SampleCsCommands\n{\n  public class SampleCsViewCapture : Command\n  {\n    public override string EnglishName => \"SampleCsViewCapture\";\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      RhinoView view = doc.Views.ActiveView;\n      if (null == view)\n        return Result.Failure;\n\n      ViewCapture view_capture = new ViewCapture\n      {",
+      "language": "csharp",
+      "author": "11159",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "using Rhino;\nusing Rhino.Display;\nusing System;\nusing System.IO;\n\nvar settings = new Rhino.Display.ViewCaptureSettings( RhinoDoc.ActiveDoc.Views.ActiveView, new System.Drawing.Size( 1024, 1024 ), 300);\nsettings.RasterMode = true;\nsettings.ViewArea = ViewCaptureSettings.ViewAreaMapping.Extents;\nSystem.Drawing.Bitmap bitmap = Rhino.Display.ViewCapture.CaptureToBitmap(settings);\n\nif (null != bitmap)\n{\n    string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);\n    string filename = Path.Combine(path, \"Snapshot_1024x1024.png\");\n    bitmap.Save(filename, System.Drawing.Imaging.ImageFormat.Png);\n}",
+      "language": "csharp",
+      "author": "Michael_Meyer",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "// #! csharp\nusing Rhino;\nusing Rhino.Display;\nusing System;\nusing System.IO;\n\nvar settings = new Rhino.Display.ViewCaptureSettings( RhinoDoc.ActiveDoc.Views.ActiveView, new System.Drawing.Size( 1024, 1024 ), 300);\nsettings.SetWindowRect(new Rhino.Geometry.Point3d(0,0,0), new Rhino.Geometry.Point3d(10,10,0));\nSystem.Drawing.Bitmap bitmap = Rhino.Display.ViewCapture.CaptureToBitmap(settings);\n\nif (null != bitmap)\n{\n    string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);\n    string filename = Path.Combine(path, \"Snapshot_1024x1024.png\");\n    bitmap.Save(filename, System.Drawing.Imaging.ImageFormat.Png);\n}",
+      "language": "csharp",
+      "author": "nathanletwory",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "// #! csharp\nusing Rhino;\nusing Rhino.Display;\nusing System;\nusing System.IO;\n\nvar settings = new Rhino.Display.ViewCaptureSettings( RhinoDoc.ActiveDoc.Views.ActiveView, new System.Drawing.Size( 1024, 1024 ), 300);\nsettings.RasterMode = true;\nsettings.DrawBackground = false; // doesn't work\nsettings.DrawAxis = false;       // doesn't work\nsettings.DrawGrid = false;       // doesn't work\nsettings.SetWindowRect(new Rhino.Geometry.Point3d(0,0,0), new Rhino.Geometry.Point3d(10,10,0));\nSystem.Drawing.Bitmap bitmap = Rhino.Display.ViewCapture.CaptureToBitmap(settings);\n\nif (null != bitmap)\n{\n    string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);\n    string filename = Path.Combine(path, \"Snapshot_1024x1024.png\");\n    bitmap.Save(filename, System.Drawing.Imaging.ImageFormat.Png);\n}",
+      "language": "csharp",
+      "author": "Michael_Meyer",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "var settings = new Rhino.Display.ViewCaptureSettings( RhinoDoc.ActiveDoc.Views.ActiveView, new System.Drawing.Size( png_size, png_size ), 300);\n\nsettings.RasterMode = true;",
+      "language": "csharp",
+      "author": "Michael_Meyer",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "using Rhino.ApplicationSettings;\n\nvar antialiasing_global_backup = OpenGLSettings.AntialiasLevel;\nOpenGLSettings.AntialiasLevel = 0; // None Antialiasing\n\n// CaptureToBitmap\n\nOpenGLSettings.AntialiasLevel = antialiasing_global_backup;",
+      "language": "csharp",
+      "author": "Michael_Meyer",
+      "post_number": 17,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 300
+}

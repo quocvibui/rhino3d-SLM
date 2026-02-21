@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ZacZhangzhuo/3d_printing_teamwork/blob/1ae8e701e83329eb292170fc8bc483fa912b639b/working_file_joe/material_tests/from_zac.py",
+  "repo": "ZacZhangzhuo/3d_printing_teamwork",
+  "repo_stars": 1,
+  "repo_description": "This is the 3D Printing teamwork repository of team 4 of MAS dfab 2023",
+  "license": "MIT",
+  "filepath": "working_file_joe/material_tests/from_zac.py",
+  "instruction": "From zac",
+  "code": "import sys\n\npath = r\"C:\\Users\\josep\\OneDrive\\Desktop\\GIT-HUB_Do-Not-MOVE\"\nif path not in sys.path:\n    sys.path.append(path)\n\nimport math\nimport mola\nfrom mola import module_rhino\nfrom ghpythonlib import treehelpers\nimport csv\n\nwith open(r'positions.csv', encoding='utf-8')as f:\n    Values = csv.reader(f)\n\n\n\ndim = int(math.floor(len(Values) ** (1 / 3) + 0.0001))\n# ! Too tree\nfacesArray = []\nlineArray = []\nfor i in range(dim):\n    facesArray.append(Values[dim*dim * i : dim*dim * (i + 1)])\n\nfor face in facesArray:\n    tempArray = []\n    for i in range(dim):\n        tempArray.append(face[dim * i : dim * (i + 1)])\n    lineArray.append(tempArray)\n# ! End to tree\n\nfor i in range(dim):\n    for j in range(dim):\n        for k in range(dim):\n            lineArray[0][j][k]=0\n            lineArray[-1][j][k] =0\n            lineArray[i][0][k]=0\n            lineArray[i][-1][k] =0\n            lineArray[i][j][0]=0\n            lineArray[i][j][-1] =0\n\n\n# ! Too list\nvalues = []\nfor i in range(dim):\n    for j in range(dim):\n        for k in range(dim):\n            values.append(lineArray[i][j][k] )\n# x = treehelpers.list_to_tree(lineArray)\n\n# print (len(values))\ncubes = mola.mesh_marching_cubes(dim, dim, dim, values, 0.5)\ncubes.update_topology()\nmola.color_faces_by_vertical_angle(cubes.faces)\n\noutTemp = module_rhino.display_mesh(cubes)",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

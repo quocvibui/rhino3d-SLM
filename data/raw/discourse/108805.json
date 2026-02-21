@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-c-brep-createplanarbreps/108805",
+  "topic_id": 108805,
+  "title": "RhinoCommon C# Brep.CreatePlanarBreps",
+  "question": "// Hello C# World!\n\n/*\n\nOne question : Someone knows how to fix this error : Error (CS0029): Cannot implicitly convert type ‘Rhino.Geometry.Brep\n’ to ‘Rhino.Geometry.Brep’ (line 90)\nforLoop-GridOfBreps.gh\n (10.1 KB) \n/\n\n/\n\n\nI will appreciate any explanation about how to use this method, thanks in advance!\n\n\n\n\n\n\n\n\ndeveloper.rhino3d.com\n\n\n\n\n\n\n\n\nBrep.CreatePlanarBreps Method (IEnumerable(Curve))\n\n\n\n\n\n\n\n\n\n\n\n\n*/\n\n\nprivate void RunScript(double x, double y, double z, int n, double w, double h, double g, ref object A, ref object B, ref object C, ref object D)\n\n{\n\n//Global variables\n\n// x, y, z // Position\n\nint nCells = n; // how many Breps\n\nif (nCells < 1){nCells = 1;}\n\ndouble width = w;\n\ndouble height = width;\n\ndouble gap = g; // space between\n\n\n// Empty List to collect our geometry\nList <Rectangle3d> gridRectangles = new List <Rectangle3d>();\nList<NurbsCurve> myCurves = new List<NurbsCurve>();\nList<Brep> myBrepSurfaces = new List<Brep>();\nList<Extrusion> collectBreps = new List<Extrusion>();\n\n// for loop to generete a 2D grid of Breps\nfor (int i = 0; i < nCells; i++)\n{\n  Point3d point = new Point3d((x + i * (width + gap)), y, z);\n  Vector3d vectNormal = new Vector3d(Vector3d.ZAxis);\n  Plane myPlane = new Plane(point, vectNormal);\n\n  // Grid of of Rectangles\n  Rectangle3d myRect = new Rectangle3d(myPlane, width, height);\n  gridRectangles.Add(myRect);\n\n  // Convert the Rectangles to Nurbs\n  // https://developer.rhino3d.com/5/api/RhinoCommon/html/M_Rhino_Geometry_Rectangle3d_ToNurbsCurve.htm\n  NurbsCurve myCurve = gridRectangles[i].ToNurbsCurve();\n  myCurves.Add(myCurve);\n\n  // Create a Planar Brep Surface\n  // Brep.CreatePlanarBreps Method\n  // https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Brep_CreatePlanarBreps_5.htm\n  Brep myBrepSurface = Brep.CreatePlanarBreps(myCurve, 0.001); // Why this line does not work?\n  myBrepSurfaces.Add(myBrepSurface);\n\n  // Extrude NurbsCurve to a Closed Brep\n  // https://developer.rhino3d.com/5/api/RhinoCommon/html/M_Rhi...",
+  "code_blocks": [
+    {
+      "code": "// Empty List to collect our geometry\nList <Rectangle3d> gridRectangles = new List <Rectangle3d>();\nList<NurbsCurve> myCurves = new List<NurbsCurve>();\nList<Brep> myBrepSurfaces = new List<Brep>();\nList<Extrusion> collectBreps = new List<Extrusion>();\n\n// for loop to generete a 2D grid of Breps\nfor (int i = 0; i < nCells; i++)\n{\n  Point3d point = new Point3d((x + i * (width + gap)), y, z);\n  Vector3d vectNormal = new Vector3d(Vector3d.ZAxis);\n  Plane myPlane = new Plane(point, vectNormal);\n\n  // Grid of of Rectangles\n  Rectangle3d myRect = new Rectangle3d(myPlane, width, height);\n  gridRectangles.Add(myRect);\n\n  // Convert the Rectangles to Nurbs\n  // https://developer.rhino3d.com/5/api/RhinoCommon/html/M_Rhino_Geometry_Rectangle3d_ToNurbsCurve.htm\n  NurbsCurve myCurve = gridRectangles[i].ToNurbsCurve();\n  myCurves.Add(myCurve);\n\n  // Create a Planar Brep Surface\n  // Brep.CreatePlanarBreps Method\n  // https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Brep_CreatePlanarBreps_5.htm\n  Brep myBrepSurface = Brep.CreatePlanarBreps(myCurve, 0.001); // Why this line does not work?\n  myBrepSurfaces.Add(myBrepSurface);\n\n  // Extrude NurbsCurve to a Closed Brep\n  // https://developer.rhino3d.com/5/api/RhinoCommon/html/M_Rhino_Geometry_Extrusion_Create.htm\n  double extrudeHeight = h;//1.0;\n  Extrusion myExtrusion = Extrusion.Create(myCurve, extrudeHeight, true);\n  collectBreps.Add(myExtrusion);\n}\n\nA = gridRectangles;\nB = myCurves;\nC = myBrepSurfaces;\nD = collectBreps;",
+      "language": "csharp",
+      "author": "andresobregonlopez",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "nurbs",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1671
+}

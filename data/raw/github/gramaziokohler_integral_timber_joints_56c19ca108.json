@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gramaziokohler/integral_timber_joints/blob/d543a28ccfaeb8a56ff692a29d5510c3e649477f/src/integral_timber_joints/rhino/debug_movements_FK_mismatch.py",
+  "repo": "gramaziokohler/integral_timber_joints",
+  "repo_stars": 11,
+  "repo_description": "Robotic Assembled Timber Structures with Integral Timber Joints",
+  "license": "MIT",
+  "filepath": "src/integral_timber_joints/rhino/debug_movements_FK_mismatch.py",
+  "instruction": "Debug movements fk mismatch",
+  "code": "import Rhino  # type: ignore\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport re\nfrom integral_timber_joints.rhino.load import get_process, get_process_artist, process_is_none\nfrom integral_timber_joints.geometry import JointHalfLap\nfrom integral_timber_joints.rhino.assembly_artist import AssemblyNurbsArtist\nfrom integral_timber_joints.rhino.process_artist import ProcessArtist, RobotClampAssemblyProcess, Assembly\nfrom integral_timber_joints.process import RoboticMovement, ObjectState\nfrom compas_rhino.utilities import clear_layer, delete_objects, draw_mesh\n\n\nfrom compas_rhino.utilities import draw_polylines\nfrom compas.geometry import Frame, Transformation, Cylinder, Point, transform_points, transpose_matrix, multiply_matrices\n\ntry:\n    from typing import Any, Dict, List, Optional, Tuple, Type\nexcept:\n    pass\n\n\nif __name__ == '__main__':\n    process = get_process()\n    artist = get_process_artist()\n    movements = process.movements\n    robot = process.robot_model\n    # print (len(movements))\n    # for movement in movements:\n    #     if isinstance(movement, RoboticMovement):\n    #         if movement.target_configuration is not None:\n    #             print (movement.movement_id, movement.tag)\n    #             target_frame = movement.target_frame\n    #             target_frame_from_FK = robot.forward_kinematics(movement.target_configuration.scaled(1000), process.ROBOT_END_LINK)\n    #             print (\"tg_frame: %s\" % target_frame)\n    #             print (\"fk_frame: %s\" % target_frame_from_FK)\n\n    movement = process.get_movement_by_movement_id(\"A308_M2\")\n    print (movement)\n    end_state = process.get_movement_end_scene(movement)\n    print (\"%s End State\" % movement.movement_id)\n    print (end_state[('robot', 'c')])\n    print (robot.forward_kinematics(end_state[('robot', 'c')].scaled(1000), process.ROBOT_END_LINK))\n    print (end_state[('robot', 'f')])\n    print (end_state[('tool_changer', 'f')])\n\n    movement = process.get_movement_by_movement_id(\"A311_M0\")\n    start_state = process.get_movement_start_scene(movement)\n    print (\"%s Start State\" % movement.movement_id)\n    print (start_state[('robot', 'c')])\n    print (start_state[('robot', 'f')])\n    print (start_state[('tool_changer', 'f')])\n\n    end_state = process.get_movement_end_scene(movement)\n    print (\"%s End State\" % movement.movement_id)\n    print (end_state[('robot', 'c')])\n    print (robot.forward_kinematics(end_state[('robot', 'c')].scaled(1000), process.ROBOT_END_LINK))\n    print (end_state[('robot', 'f')])\n    print (end_state[('tool_changer', 'f')])\n\n    movement = process.get_movement_by_movement_id(\"A311_M1\")\n    start_state = process.get_movement_start_scene(movement)\n    print (\"%s Start State\" % movement.movement_id)\n    print (start_state[('robot', 'f')])\n    print (start_state[('tool_changer', 'f')])\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

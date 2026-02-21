@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/struggle-with-python-code/210358",
+  "topic_id": 210358,
+  "title": "Struggle with python code",
+  "question": "hello:) i have a struggle with my python code. as you can see on the picture i tried to replace the functions of the pink surrounded Component ‘Surfaces’ with a python3 component and a code i wrote. now i have the problem that my code is not incorrect but it does not change anything of my surface i modelled in rhino so it looks empty there and no picture is generated. i think the problem is that out of the untrimmed surfaces (see panel) it gets to only (lists). i dont know how to change - can someone please explain ? and help me with my code! THX \n\n\nBildschirmfoto 2025-09-29 um 23.47.06\n642×984 183 KB\n\n\nBildschirmfoto 2025-09-29 um 19.01.21\n1920×1058 146 KB\n\n\nimport Rhino.Geometry as rg\nimport math\n\n# --- Eingaben in Listen umwandeln ---\nif not isinstance(G, list):\n    G = [G]\nif not isinstance(A, list):\n    A = [A]\n\n# --- Achse vorbereiten ---\nif hasattr(AX, \"PointAtStart\") and hasattr(AX, \"PointAtEnd\"):\n    start = AX.PointAtStart\n    end = AX.PointAtEnd\n    axis_vector = end - start\nelse:\n    raise ValueError(\"AX muss eine Curve sein\")\n\nresult = []\n\nfor geom in G:\n    if geom is None:\n        continue\n\n    # --- GH-kompatible Objekte ---\n    geo = None\n    if isinstance(geom, rg.Curve):\n        geo = geom\n    elif isinstance(geom, rg.Surface):\n        geo = geom.ToBrep()  # WICHTIG: Surfaces als Brep\n    elif isinstance(geom, rg.Point3d):\n        geo = geom\n    else:\n        # Falls GH Brep direkt\n        try:\n            geo = rg.Brep.TryConvertBrep(geom)[0]\n        except:\n            geo = None\n\n    if geo is None:\n        continue\n\n    # --- Für jeden Winkel kopieren und rotieren ---\n    for angle in A:\n        rad = math.radians(angle)\n        xform = rg.Transform.Rotation(rad, axis_vector, start)\n        dup = geo.Duplicate()\n        if dup is not None:\n            dup.Transform(xform)\n            result.append(dup)\n\nT = result",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\n# --- Eingaben in Listen umwandeln ---\nif not isinstance(G, list):\n    G = [G]\nif not isinstance(A, list):\n    A = [A]\n\n....\n\nT = result",
+      "language": "python",
+      "author": "martinsiegrist",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\n# --- Eingaben in Listen umwandeln ---\nif not isinstance(G, list):\n    G = [G]\nif not isinstance(A, list):\n    A = [A]\n\n# --- Achse vorbereiten ---\nif hasattr(AX, \"PointAtStart\") and hasattr(AX, \"PointAtEnd\"):\n    start = AX.PointAtStart\n    end = AX.PointAtEnd\n    axis_vector = end - start\nelse:\n    raise ValueError(\"AX muss eine Curve sein\")\n\nresult = []\n\nfor geom in G:\n    if geom is None:\n        continue\n\n    # --- GH-kompatible Objekte ---\n    geo = None\n    if isinstance(geom, rg.Curve):\n        geo = geom\n    elif isinstance(geom, rg.Surface):\n        geo = geom.ToBrep()  # WICHTIG: Surfaces als Brep\n    elif isinstance(geom, rg.Point3d):\n        geo = geom\n    else:\n        # Falls GH Brep direkt\n        try:\n            geo = rg.Brep.TryConvertBrep(geom)[0]\n        except:\n            geo = None\n\n    if geo is None:\n        continue\n\n    # --- Für jeden Winkel kopieren und rotieren ---\n    for angle in A:\n        rad = math.radians(angle)\n        xform = rg.Transform.Rotation(rad, axis_vector, start)\n        dup = geo.Duplicate()\n        if dup is not None:\n            dup.Transform(xform)\n            result.append(dup)\n\nT = result",
+      "language": "python",
+      "author": "Olivia_Lötscher",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 121
+}

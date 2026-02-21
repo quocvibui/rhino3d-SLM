@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-common-subd-createfrommesh-does-not-keep-texture-uvs/214443",
+  "topic_id": 214443,
+  "title": "Rhino Common: SubD.CreateFromMesh does not keep texture UVs",
+  "question": "Hi everyone!\n\n\nI discovered a bug or at least I can no get this to work\n\n\nBelow you see on he left twice the same mesh with a UV mapped texture.\n\n\nThe lower one circled in blue is a SubD created by the Rhino command “_ToSubd”.\n\nThe upper one circled in red is a SubD created with Rhino.Geometry.CreateFromMesh() method.\n\n\nIn he one created with Rhino Common method, he UV mapping seems to be parametrized and does no keep as on the original mesh.\n\n\nI also found this and tried to implement it, but it did not seem to help:\n\n\nhttps://developer.rhino3d.com/api/rhinocommon/rhino.geometry.subdcreationoptions.texturecoordinateoption\n\n\nimage\n1765×1171 205 KB\n\n\nThis is the python script I used to create the Subd from a mesh\n\n\n#! python 3\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nimport System\n\ndef mesh_to_subd():\n    # Select a mesh\n    mesh_id = rs.GetObject(\"Select mesh to convert to SubD\", rs.filter.mesh, preselect=True)\n    \n    if not mesh_id:\n        print(\"No mesh selected\")\n        return\n    \n    # Get the mesh object\n    mesh = rs.coercemesh(mesh_id)\n    \n    if not mesh:\n        print(\"Invalid mesh\")\n        return\n    \n    # Create SubD creation options\n    options = rg.SubDCreationOptions()\n    # Set to 1 for CopyMapping (0=Unset, 1=None, 2=Automatic, 3=Packed, CopyMapping=4, CopyCoordinates=5)\n    # https://developer.rhino3d.com/api/rhinocommon/rhino.geometry.subdcreationoptions.texturecoordinateoption\n    \n    options.TextureCoordinateOption = 5\n    \n    # Convert mesh to SubD with options\n    subd = rg.SubD.CreateFromMesh(mesh, options)\n    \n    if subd:\n        # Add the SubD to the document\n        subd_id = sc.doc.Objects.AddSubD(subd)\n\n        rs.SelectObject(subd_id)\n        sc.doc.Views.Redraw()\n\n\n# Run the function\nif __name__ == \"__main__\":\n    mesh_to_subd()\n\n\n\nIn general the Rhino Common SubD generation API is very limited currently it seems.\n\n\nWould be great if someone could help wih this.\n\nDo I miss somethi...",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nimport System\n\ndef mesh_to_subd():\n    # Select a mesh\n    mesh_id = rs.GetObject(\"Select mesh to convert to SubD\", rs.filter.mesh, preselect=True)\n    \n    if not mesh_id:\n        print(\"No mesh selected\")\n        return\n    \n    # Get the mesh object\n    mesh = rs.coercemesh(mesh_id)\n    \n    if not mesh:\n        print(\"Invalid mesh\")\n        return\n    \n    # Create SubD creation options\n    options = rg.SubDCreationOptions()\n    # Set to 1 for CopyMapping (0=Unset, 1=None, 2=Automatic, 3=Packed, CopyMapping=4, CopyCoordinates=5)\n    # https://developer.rhino3d.com/api/rhinocommon/rhino.geometry.subdcreationoptions.texturecoordinateoption\n    \n    options.TextureCoordinateOption = 5\n    \n    # Convert mesh to SubD with options\n    subd = rg.SubD.CreateFromMesh(mesh, options)\n    \n    if subd:\n        # Add the SubD to the document\n        subd_id = sc.doc.Objects.AddSubD(subd)\n\n        rs.SelectObject(subd_id)\n        sc.doc.Views.Redraw()\n\n\n# Run the function\nif __name__ == \"__main__\":\n    mesh_to_subd()",
+      "language": "python",
+      "author": "CGr",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 75
+}

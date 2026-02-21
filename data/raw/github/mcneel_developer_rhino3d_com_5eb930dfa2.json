@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcneel/developer.rhino3d.com/blob/6e9b91820175abba93f399fbd04f6459343091cf/content/en/samples/rhinopython/rhinopython101/5_3_IterateCurveScaling.py",
+  "repo": "mcneel/developer.rhino3d.com",
+  "repo_stars": 88,
+  "repo_description": "The developer.rhino3d.com website contents",
+  "license": "unknown",
+  "filepath": "content/en/samples/rhinopython/rhinopython101/5_3_IterateCurveScaling.py",
+  "instruction": "Iteratively scale down a curve until it becomes shorter than a certain length",
+  "code": "# Iteratively scale down a curve until it becomes shorter than a certain length\nimport rhinoscriptsyntax as rs\n\n\ndef fitcurvetolength():\n    curve_id = rs.GetObject(\"Select a curve to fit to length\", 4, True, True)\n    if curve_id is None: return\n    \n    length = rs.CurveLength(curve_id)\n\n    length_limit = rs.GetReal(\"Length limit\", 0.5 * length, 0.01 * length, length)\n    if length_limit is None: return\n\n    while True:\n        if rs.CurveLength(curve_id)<=length_limit: break\n        curve_id = rs.ScaleObject(curve_id, (0,0,0), (0.95, 0.95, 0.95))\n        if curve_id is None:\n            print(\"Something went wrong...\")\n            return\n\n    print(\"New curve length: \", rs.CurveLength(curve_id))\n\n\nif __name__==\"__main__\":\n    fitcurvetolength()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

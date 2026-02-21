@@ -1,0 +1,99 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/export-import-path-and-file-name-to-clipboard/181061",
+  "topic_id": 181061,
+  "title": "Export/Import. Path and file name to clipboard",
+  "question": "Hello.\n\nI often work in Rhino_8 and Rhino_5 at the same time.\n\nUnfortunately, it is impossible to paste objects to Rhino5 from the clipboard Rhino8.\n\nTherefore I have to Export or Save as Rhino 5.\n\nFor convenience, I use this script by Mitch:\n\n\n\"\"\"\nExports selected objects as Rhino version V5. Any SubD objects are converted\nto NURBS for export.  Script by Mitch Heynick 11.01.22\n\"\"\"\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ConvertSubDToNurbs(subd_obj):\n    subd=rs.coercegeometry(subd_obj)\n    brep=subd.ToBrep(Rhino.Geometry.SubDToBrepOptions.DefaultPacked)\n    return brep\n\ndef ExportAsV5ConvPackedSubD():\n    msg=\"Select objects to export as V5\"\n    obj_ids=rs.GetObjects(msg,preselect=True,select=True)\n    if not obj_ids: return\n    \n    rs.EnableRedraw(False)\n    subd_count=0\n    subd_exp_error=0\n    subd_obj_ids=[]\n    conv_brep_objs=[]\n    for obj_id in obj_ids:\n        if rs.ObjectType(obj_id)==262144:\n            #object is a sub-d\n            brep=ConvertSubDToNurbs(obj_id)\n            if brep:\n                subd_obj_ids.append(obj_id)\n                rs.UnselectObject(obj_id)\n                conv_brep_obj=sc.doc.Objects.AddBrep(brep)\n                conv_brep_objs.append(conv_brep_obj)\n                rs.SelectObject(conv_brep_obj)\n                subd_count+=1\n            else:\n                subd_exp_error+=1\n                \n    filename=rs.SaveFileName(\"Save V5 file\",\"Rhino Files|.3dm||\")\n    if filename:\n        export_count=len(rs.SelectedObjects())\n        comm_str='_-Export _Version=5 \"{}\"'.format(filename)\n        rs.Command(comm_str)\n    if conv_brep_objs: rs.DeleteObjects(conv_brep_objs)\n    if subd_obj_ids: rs.SelectObjects(subd_obj_ids)\n    msg=\"{} objects exported as V5\".format(export_count)\n    if subd_count:\n        msg+=\" including {} SubD objects\".format(subd_count)\n    if subd_exp_error:\n        msg+=\". {} SubD objects unable to be exported\".format(subd_exp_error)\n    msg+=\".\"\n    print msg\n        \nExpo...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nfilepath=rs.ClipboardText()\nif filepath.endswith(\".3dm\"):\n    sc.doc.Open(rs.ClipboardText())\nelse:\n    print(\"Clipboard text is not a path to a Rhino .3dm file!\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nfilepath=rs.ClipboardText()\nif filepath.endswith(\".3dm\"):\n    sc.doc.OpenFile(rs.ClipboardText())\nelse:\n    print(\"Clipboard text is not a path to a Rhino .3dm file!\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nfilepath=rs.ClipboardText()\nif filepath.endswith(\".3dm\"):\n    sc.doc.Import(rs.ClipboardText())\nelse:\n    print(\"Clipboard text is not a path to a Rhino .3dm file!\")",
+      "language": "python",
+      "author": "leex",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nfr_opts=Rhino.FileIO.FileReadOptions()\nfr_opts.ImportMode=True\nfr_opts.ScaleGeometry=True\nfr_opts.UseScaleGeometry=True\n\nfilepath=rs.ClipboardText()\nif filepath.endswith(\".3dm\"):\n    sc.doc.ReadFile(rs.ClipboardText(),fr_opts)\nelse:\n    print(\"Clipboard text is not a path to a Rhino .3dm file!\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "...\nfilename=rs.SaveFileName(\"Save V5 file\",\"All Files\" \"Rhino Files\" \".3dm\")\n    if filename:\n...",
+      "language": "python",
+      "author": "leex",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfilter = \"Rhino Files (*.3dm)|*.3dm||\"\nfilename=rs.SaveFileName(\"Save V5 file\", filter, extension=\".3dm\")\nrs.ClipboardText(filename)\n\nprint(rs.ClipboardText())",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nfr_opts=Rhino.FileIO.FileReadOptions()\nfr_opts.ImportMode=True\nfr_opts.ScaleGeometry=True\nfr_opts.UseScaleGeometry=True\n\nfilepath=rs.ClipboardText()\nif filepath.endswith(\".3dm\"):\n    sc.doc.ReadFile(rs.ClipboardText(),fr_opts)\n    print(rs.ClipboardText())\nelse:\n    print(\"Clipboard text is not a path to a Rhino .3dm file!\")",
+      "language": "python",
+      "author": "leex",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfilter = \"Rhino Files (*.3dm)|*.3dm||\"\nfilename=rs.SaveFileName(\"Save V5 file\", filter, extension=\".3dm\")\nrs.ClipboardText(filename)\n\nprint(rs.ClipboardText())",
+      "language": "python",
+      "author": "leex",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"\nExports selected objects as Rhino version V5. Any SubD objects are converted\nto NURBS for export.  Script by Mitch Heynick 11.01.22\n\"\"\"\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ConvertSubDToNurbs(subd_obj):\n    subd=rs.coercegeometry(subd_obj)\n    brep=subd.ToBrep(Rhino.Geometry.SubDToBrepOptions.DefaultPacked)\n    return brep\n\ndef ExportAsV5ConvPackedSubD():\n    msg=\"Select objects to export as V5\"\n    obj_ids=rs.GetObjects(msg,preselect=True,select=True)\n    if not obj_ids: return\n    \n    rs.EnableRedraw(False)\n    subd_count=0\n    subd_exp_error=0\n    subd_obj_ids=[]\n    conv_brep_objs=[]\n    for obj_id in obj_ids:\n        if rs.ObjectType(obj_id)==262144:\n            #object is a sub-d\n            brep=ConvertSubDToNurbs(obj_id)\n            if brep:\n                subd_obj_ids.append(obj_id)\n                rs.UnselectObject(obj_id)\n                conv_brep_obj=sc.doc.Objects.AddBrep(brep)\n                conv_brep_objs.append(conv_brep_obj)\n                rs.SelectObject(conv_brep_obj)\n                subd_count+=1\n            else:\n                subd_exp_error+=1\n                \n    filename=rs.SaveFileName(\"Save V5 file\",\"Rhino Files|.3dm||\")\n    if filename:\n        export_count=len(rs.SelectedObjects())\n        comm_str='_-Export _Version=5 \"{}\"'.format(filename)\n        rs.Command(comm_str)\n    if conv_brep_objs: rs.DeleteObjects(conv_brep_objs)\n    if subd_obj_ids: rs.SelectObjects(subd_obj_ids)\n    msg=\"{} objects exported as V5\".format(export_count)\n    if subd_count:\n        msg+=\" including {} SubD objects\".format(subd_count)\n    if subd_exp_error:\n        msg+=\". {} SubD objects unable to be exported\".format(subd_exp_error)\n    msg+=\".\"\n    print msg\n        \nExportAsV5ConvPackedSubD()",
+      "language": "python",
+      "author": "leex",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport_path = rs.OpenFileName(\"file to import\")\nif import_path:\n    FileReadOptions = Rhino.FileIO.FileReadOptions()\n    FileReadOptions.ScaleGeometry = True\n    FileData = Rhino.RhinoDoc.ReadFile(import_path, FileReadOptions)",
+      "language": "python",
+      "author": "leex",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os\n\nfilepath=rs.DocumentPath()\nif filepath:\n    fullpath=os.path.join(filepath,rs.DocumentName())\n    rs.ClipboardText(fullpath)\n    print (\"File path+name copied to clipboard\")\nelse:\n    print (\"File has not been saved, no document path available\")",
+      "language": "python",
+      "author": "leex",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 323
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dividealongcreases-in-script/214926",
+  "topic_id": 214926,
+  "title": "DivideAlongCreases in script",
+  "question": "Hi \n@dale\n\n\nHow do I get the functionality of \nDivideAlongCreases\n command from RhinoCommon or rhinoscriptsyntax?",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\nimport System\n\ndef DivideAlongCreases():\n\n    # Divides surfaces at tangent locations\n    split_at_kinks = True\n    # Divides surfaces at kinks\n    split_at_tangents = True\n\n    obj_type = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, obj_ref = Rhino.Input.RhinoGet.GetOneObject(\"Select surfaces or polysurfaces to divide along creases\", False, obj_type)\n    if rc != Rhino.Commands.Result.Success: \n        return\n\n    brep = obj_ref.Brep()\n    if brep is None: \n        return\n\n    brep_copy = brep.DuplicateBrep()\n    face_count = brep_copy.Faces.Count\n    if split_at_kinks:\n        brep_copy.Faces.SplitKinkyFaces(System.Math.PI / 180.0, False)\n    if split_at_tangents:\n        brep_copy.Faces.SplitFacesAtTangents()\n    if brep_copy.Faces.Count != face_count:\n        brep_copy.Compact()\n        sc.doc.Objects.AddBrep(brep_copy, None, None, False, False)\n        sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    DivideAlongCreases()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 38
+}

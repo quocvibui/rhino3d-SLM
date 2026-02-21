@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dhardestylewis/rhino_helper_scripts/blob/1902d7840da7adb94549860d6b6369a4f9856314/get_buildings_analigned.py",
+  "repo": "dhardestylewis/rhino_helper_scripts",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "get_buildings_analigned.py",
+  "instruction": "Get buildings analigned",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef extract_buildings_within_bounding_box_and_save():\n    # Define the bounding box coordinates\n    min_x = min(1026747.722, 1026944.545, 1027687.389, 1027465.610)\n    max_x = max(1026747.722, 1026944.545, 1027687.389, 1027465.610)\n    min_y = min(189233.367, 188605.482, 188896.548, 189497.249)\n    max_y = max(189233.367, 188605.482, 188896.548, 189497.249)\n\n    # Get all objects from the relevant layers\n    all_objects = rs.ObjectsByLayer(\"Building_Facade\") + rs.ObjectsByLayer(\"Building_FootPrint\")\n    \n    # Filter objects within the bounding box\n    filtered_objects = []\n    for obj in all_objects:\n        bbox = rs.BoundingBox(obj)\n        if bbox:\n            obj_min_x = min(point.X for point in bbox)\n            obj_max_x = max(point.X for point in bbox)\n            obj_min_y = min(point.Y for point in bbox)\n            obj_max_y = max(point.Y for point in bbox)\n            \n            # Check if object's bounding box intersects with our bounding box\n            if (obj_min_x <= max_x and obj_max_x >= min_x and\n                obj_min_y <= max_y and obj_max_y >= min_y):\n                filtered_objects.append(obj)\n    \n    # Check if any objects were found\n    if not filtered_objects:\n        print(\"No Building_Facade or Building_FootPrint objects found within the bounding box.\")\n        return\n    \n    # Select the filtered objects\n    rs.SelectObjects(filtered_objects)\n    \n    # Report results\n    print(\"Selected {} objects within the specified bounding box.\".format(len(filtered_objects)))\n    \n    # Save selected objects to a new file\n    save_path = rs.SaveFileName(\"Save selected objects\", \"Rhino 3D Models (*.3dm)|*.3dm\")\n    if save_path:\n        rs.SelectObjects(filtered_objects)  # Ensure objects are selected\n        rs.Command('_-Export \"{}\" _Enter'.format(save_path))\n        print(\"Selected objects saved to: {}\".format(save_path))\n    else:\n        print(\"Save operation cancelled.\")\n\n# Run the main function\nif __name__ == \"__main__\":\n    extract_buildings_within_bounding_box_and_save()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/adding-a-blend-surface-using-rhinoscriptsyntax/78362",
+  "topic_id": 78362,
+  "title": "Adding a blend surface using rhinoscriptsyntax",
+  "question": "How can I add a blend surface between two edges of two different surfaces using rhinoscriptsyntax module?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsrf_A_GUID = rs.AddSrfPt(([-5,-5,0],[5,-5,0],[5,5,0],[-5,5,0]))\nsrf_B_GUID = rs.AddSrfPt(([15,5,5],[25,5,5],[25,-5,5],[15,-5,5]))\n\nbrep_A = rs.coercebrep(srf_A_GUID)\nbrep_B = rs.coercebrep(srf_B_GUID)\n\nface_A = brep_A.Faces[0]\nedge_A = brep_A.Edges[1]\nival_A = edge_A.ToNurbsCurve().Domain\ncont_A = Rhino.Geometry.BlendContinuity.Curvature\n\nface_B = brep_B.Faces[0]\nedge_B = brep_B.Edges[2]\nival_B = edge_B.ToNurbsCurve().Domain\ncont_B = Rhino.Geometry.BlendContinuity.Curvature\n\nrcs = Rhino.Geometry.Brep.CreateBlendSurface(face_A, edge_A, ival_A, True, cont_A, face_B, edge_B, ival_B, True, cont_B)\nfor rc in rcs:\n    sc.doc.Objects.AddBrep(rc)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 904
+}

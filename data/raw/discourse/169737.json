@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/macro-for-selbrushcurves/169737",
+  "topic_id": 169737,
+  "title": "Macro for _SelBrushCurves?",
+  "question": "I wonder if it’s possible to make a macro similar to how the \n_SelBrushPoints\n command works, except that it will filter out the object types to be able to brush-select only curves, then (after a right-click to confirm the selection) switch back to the previous selection filter?\n\n\nThe following commands in Rhino would help a lot, but they don’t exist:\n\n\n_SelBrushCurves\n\n\n_SelBrushSurfaces\n\n\n_SelBrushPolysurfaces\n\n\n_SelBrushMeshes\n\n\n_SelBrushSubD\n\n\nOr, what about upgrading the existing \n_SelBrush\n tool to be able to pick the type of geometry to be brush-selected? Rhino should remember that during the current session.\n\nI use the following settings for the \n_SelBrush\n tool now, but unfortunately it will select any type of geometry.\n\n( Curve  SelectionMode=Crossing  BrushWidth=40  Polyline=No  SelectThroughObjects=No  RealTimeSelection=Yes )",
+  "code_blocks": [
+    {
+      "code": "! -RunPythonScript (\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nx = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\ny = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\n\nx.GlobalGeometryFilter = Rhino.DocObjects.ObjectType.Curve\n\nRhino.ApplicationSettings.SelectionFilterSettings.UpdateFromState(x)\n\nrs.Command(\"SelBrush\")\n\nRhino.ApplicationSettings.SelectionFilterSettings.UpdateFromState(y)\n\n)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nx = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\ny = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\ntypes = [Rhino.DocObjects.ObjectType.Point,\nRhino.DocObjects.ObjectType.PointSet,\nRhino.DocObjects.ObjectType.Grip,\nRhino.DocObjects.ObjectType.Curve,",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nx = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\ny = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\ntypes = [Rhino.DocObjects.ObjectType.Point,\nRhino.DocObjects.ObjectType.PointSet,\nRhino.DocObjects.ObjectType.Grip,\nRhino.DocObjects.ObjectType.Curve,",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "! -RunPythonScript (\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nx = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\ny = Rhino.ApplicationSettings.SelectionFilterSettings.GetCurrentState()\ntypes = [Rhino.DocObjects.ObjectType.Point,\nRhino.DocObjects.ObjectType.PointSet,\nRhino.DocObjects.ObjectType.Grip,\nRhino.DocObjects.ObjectType.Curve, \nRhino.DocObjects.ObjectType.Brep,\nRhino.DocObjects.ObjectType.Mesh,\nRhino.DocObjects.ObjectType.SubD,\nRhino.DocObjects.ObjectType.InstanceReference,\nRhino.DocObjects.ObjectType.Annotation,\nRhino.DocObjects.ObjectType.Hatch,\nRhino.DocObjects.ObjectType.Light,\nRhino.DocObjects.ObjectType.ClipPlane\n]\ntypeList = [\"Point\", \"PointCloud\", \"ControlPoint\",\n\"Curve\",\"SurfaceOrPolysurface\",\n\"Mesh\", \"SubD\",\"Block\",\n \"Annotation\", \"Hatch\",\n \"Light\",\"ClippingPlane\"]\n\nidx = 3\nif 'SELECTION_INDEX' in sc.sticky:\n    idx = sc.sticky['SELECTION_INDEX']\n\ngo = Rhino.Input.Custom.GetOption()\ngo.SetCommandPrompt(\"Set a filter. Press Enter to accept the current default.\")\ngo.AddOptionList(\"Filter\", typeList, idx)\n\nrc = go.Get()\nprint(rc)\nif rc==Rhino.Input.GetResult.Option:\n    idx = go.Option().CurrentListOptionIndex\n    sc.sticky[\"SELECTION_INDEX\"] = idx\n\nx.GlobalGeometryFilter = types[idx]\n\nRhino.ApplicationSettings.SelectionFilterSettings.UpdateFromState(x)\nrs.Command(\"_SelBrush\")\n\nRhino.ApplicationSettings.SelectionFilterSettings.UpdateFromState(y)\n\nrs.Command(\"SelectionFilter\")\n)",
+      "language": "python",
+      "author": "Rhino_Bulgaria",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 12,
+  "views": 401
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/capitalize-first-letter-leave-rest-alone/149882",
+  "topic_id": 149882,
+  "title": "Capitalize first letter + Leave rest alone?",
+  "question": "I have this script, and I’m trying to output the sublayers as camel-case, where the parent layer is named by the user input, and the sublayers use that string as a suffix, but capitalizes the first letter, like this (Note: the indents arent coming through, so I’m using “……”)\n\n\nnewElement\n\n……crvNewElement\n\n……lightNewElement\n\n\nSeems using capitalize() and title() both return\n\n\nnewElement\n\n……crvNewelement\n\n……lightNewelement\n\n\nAlso, I’ll have to re-create it, but I seem to remember that before I used the color settings, it worked fine. Hm…\n\nThoughts?\n\n\naddLayerAsTree_v01.py\n (899 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n\nnew_element = rs.GetString(\"New Element?\")\n\n\nrs.AddLayer(new_element)\nnew_element = new_element[0].upper()+new_element[1:]\nrs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nrs.AddLayer(\"bbox\"+new_element, Color.Gray, parent=new_element)\nrs.AddLayer(\"light\"+new_element, Color.Cyan, parent=new_element)\nrs.AddLayer(\"glass\"+new_element, Color.FromArgb(25, 105, 105, 105), parent=new_element)\nrs.AddLayer(\"sol\"+new_element, Color.Green, parent=new_element)\nrs.AddLayer(\"ref\"+new_element, Color.Black, parent=new_element)\nrs.AddLayer(\"SM_\"+new_element, Color.White, parent=new_element)\n\nlayers = rs.LayerNames(new_element)\nif layers:\n    for layer in layers:\n        black = rs.CreateColor((0,0,0))\n        if rs.LayerPrintColor(layer)!=black:\n            rs.LayerPrintColor(layer, black)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 907
+}

@@ -1,0 +1,66 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/stuck-in-grasshopper-python-recursion/66651",
+  "topic_id": 66651,
+  "title": "Stuck in Grasshopper-Python Recursion",
+  "question": "Hi everyone,\n\nReally appreciate it if anyone could help me with this.\n\nThe attached code includes \n3\n parts.\n\nThis image is done by \n#\n1\n  (which is obviously not a smart solution!)\n\n\n\n\n2.JPG\n724×676 57.4 KB\n\n\n\nI’m trying to do the recursion by  code \n#2\n  where I’m stuck!\n\nI have also come across two issues while doing code \n#2\n:\n\n\n\n\nWhy Python does not have access to rhinoscript “addPolygon” method?\n\n\nHow to make a “Degree 1” interpolated curve Periodic in python?\n\n\n\n\nMy last question is about chunk \n#3\n where the python code does not do anything as opposed to the same code when implemented in Rhino Python Editor.\n\nHere is the code:\n\n\ntest.gh\n (32.7 KB)\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\namp = 4\namt = 12\ncrv = rs.GetObject()\n\ndef squares(crv,amp,amt):\n\n    if amt > 0:\n        pts = rs.PolylineVertices(crv,-1)\n        pts = rs.AddPoints(pts)\n        knots = rs.CurveKnots(crv)\n        ptlist = []\n\n        for k in range(0, len(knots) - 1):\n\n            vec = rs.CurveTangent(crv, knots[k])\n            vec = rs.VectorScale(vec, amp)\n            newpt = rs.MoveObject(pts[k],vec)\n            ptlist.append(newpt)\n\n        ptlist.append(ptlist[0])\n        crv = rs.AddPolyline(ptlist)\n        amt = amt - 1\n        squares(crv,amp,amt)\n\nsquares(crv,amp,amt)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"RecursionThing: A classic recursion thing. \n    Inputs:\n        C: (Curve) Boundary Curves\n        L: (int) Number of internal offsets, (loops)\n        t: (float) Interior curve parameter for offset\n        D: (float) If making 3D offset distance in Z relative to World XY\n        B: (bool) Boolean, Make 3D\n    Output:\n        IC: Interior Curves\"\"\"\n\nimport Rhino\nimport Grasshopper\nimport sys\n\ndef SpiroGraph2():\n    current_crv = C\n    results = []\n    \n    for i in xrange(L+1):\n        segments = current_crv.DuplicateSegments()\n        if len(segments) < 2: return\n        mid_points = []\n        for segment in segments:\n            mid_pt = segment.PointAtNormalizedLength(t)\n            if B == True:\n                newmid_pt = Rhino.Geometry.Point3d(mid_pt[0], mid_pt[1], mid_pt[2]+D)\n                mid_points.append(newmid_pt)\n            else:\n                mid_points.append(mid_pt)\n        mid_points.append(mid_points[0])\n        new_crv = Rhino.Geometry.Polyline(mid_points)\n        results.append(new_crv)\n        current_crv = new_crv.ToNurbsCurve()\n    return results\n\ntry:\n    IC = SpiroGraph2()\nexcept:\n    ghenv.Component.AddRuntimeMessage(Grasshopper.Kernel.GH_RuntimeMessageLevel.Warning,str(sys.exc_info()[1]))",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\namp = 1\namt = 12\nnewCrvs = [] #need to store the curves somewhere\ndef squares(crv, amp, amt):\n    if amt > 0:\n        pts = rs.PolylineVertices(crv) #yields list of points\n        knots = rs.CurveKnots(crv)\n        pts.pop() # get rid of last point in list (which is a duplicate.. start and end points)\n        ptList = [] \n        for k in range(0, len(knots)-1):\n            vec = rs.CurveTangent(crv, knots[k])\n            vec = rs.VectorScale(vec, amp)\n            newpts = rs.MoveObject(pts[k],vec)\n            ptList.append(newpts)\n        ptList.append(ptList[0])\n        crv = rs.AddPolyline(ptList)\n\n        newCrvs.append(crv)\n        amt = amt -1\n        b= squares(crv,amp,amt)\n\ntry:\n    squares(crv,amp,amt)\nexcept:\n    pass\nb = newCrvs",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv = rs.GetObject()\n\namp = 6\namt = 11\ncpt = (rs.CurveAreaCentroid(crv))[0]\n\ndef RecursivePolygon(crv, amp, amt):\n\n    if amt > 0:\n        pt1 = rs.CurveStartPoint(crv)\n        pt2 = rs.EvaluateCurve(crv,amp)\n        crv = rs.OrientObject(crv,[cpt,pt1],[cpt,pt2],1|2)\n        amt = amt - 1\n        RecursivePolygon(crv, amp, amt)\n\nRecursivePolygon(crv, amp, amt)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 12,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncpt = (rs.CurveAreaCentroid(crv))[0]\ncount = 1\n\ndef RecursivePolygon(crv, amp, amt, count):\n\n    if amt > 0:\n\n        pt1 = rs.CurveStartPoint(crv)\n        pt2 = rs.EvaluateCurve(crv,amp)\n        crv = rs.OrientObject(crv,[cpt,pt1],[cpt,pt2],2)\n\n        ang = (rs.Angle2((cpt, pt1), (cpt,pt2)))[0]\n        radius = rs.Distance(cpt,pt2)\n\n        angle = ang * count\n        amt = amt - 1\n        count = count + 1\n\n        print radius\n        print angle\n\n        RecursivePolygon(crv, amp, amt, count)\n\nRecursivePolygon(crv, amp, amt, count)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 12,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#you need to store the geometry that GH creates somewhere\ncircles = []\n\ndef RecursiveCircle(pt, r):\n    if r == 0:\n        pass\n    else:\n        #recursion loop starts here\n        #do something: make circle and add to list (Grasshopper document)\n        circles.append(rs.AddCircle(pt, r))\n        #change your variable by something\n        r -=1\n        #call your function again with updated variable\n        RecursiveCircle(pt, r)\n        #do this until your if statement/condition is met\n\ntry:\n    #call your function\n    RecursiveCircle(pt, r)\nexcept:\n    pass\n\na = circles",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 16,
+  "views": 3953
+}

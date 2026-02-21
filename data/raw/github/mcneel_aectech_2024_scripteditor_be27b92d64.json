@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/aectech_2024_scripteditor/blob/b5819597cd2af38a428cb7d60c302a9591e3927c/samples/part1/MakeRandomPointsAndClustering_rhinocommon.py",
+  "repo": "mcneel/aectech_2024_scripteditor",
+  "repo_stars": 13,
+  "repo_description": "AECTech 2024 Barcelona ScriptEditor workshop repository",
+  "license": "MIT",
+  "filepath": "samples/part1/MakeRandomPointsAndClustering_rhinocommon.py",
+  "instruction": "requirements: numpy, scikit-learn",
+  "code": "#! python3\n# requirements: numpy, scikit-learn\n\nimport Rhino\nimport Rhino.DocObjects\nimport numpy as np\nimport System \nfrom sklearn.cluster import KMeans\n\ndef create_random_points():\n    # Ask the user for minimum and maximum limits\n    min_limit = 0.0\n    max_limit = 10\n    sc1, min_limit = Rhino.Input.RhinoGet.GetNumber(\"Enter the min bound\", False, min_limit)\n    sc1, max_limit = Rhino.Input.RhinoGet.GetNumber(\"Enter the max bound\", False, max_limit)\n\n    print(f\"Min limit {min_limit}\")\n    print(f\"Max limit {max_limit}\")\n\n    # # Generate random coordinates within the given bounds\n    num_points = 100  # You can change this to the desired number of points\n    x_coords = np.random.uniform(min_limit, max_limit, num_points)\n    y_coords = np.random.uniform(min_limit, max_limit, num_points)\n    z_coords = np.random.uniform(min_limit, max_limit, num_points)\n\n    # Create Point3d objects and add them to Rhino\n    points = []\n    for i in range(num_points):\n        point = Rhino.Geometry.Point3d(x_coords[i], y_coords[i], z_coords[i])\n        points.append(point)\n    \n    # for p in points:\n    #     Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint(p)\n\n    # Convert points to numpy array for clustering\n    data = np.array([[point.X, point.Y, point.Z] for point in points])\n\n    # Perform K-means clustering\n    num_clusters = 3\n    kmeans = KMeans(num_clusters)\n    kmeans.fit(data)\n    centroids = kmeans.cluster_centers_\n    labels = kmeans.labels_\n\n    for i in range(num_clusters):\n        color = [0, 0, 0]\n        color[i] = 255\n        layer_name = f\"Cluster {i+1}\"\n        layer_color = System.Drawing.Color.FromArgb(255, color[0], color[1], color[2])\n        layer_index = Rhino.RhinoDoc.ActiveDoc.Layers.Add(layer_name, layer_color)\n        print(f\"Layer index {layer_name}: {layer_index}\")\n\n        cluster_points = []\n        for j in range(labels):\n            if labels[j] == i:\n                cluster_points.append(points[j])\n        print(f\"Points in cluster {i + 1}: {len(cluster_points)}\")\n\n        object_attributes = Rhino.DocObjects.ObjectAttributes()\n        object_attributes.LayerIndex = Rhino.RhinoDoc.ActiveDoc.Layers.FindName(layer_name).LayerIndex\n\n        for p in cluster_points:\n            Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint(p, object_attributes)\n\n    # Redraw Rhino viewport\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    create_random_points()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

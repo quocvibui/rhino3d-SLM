@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-an-arc-with-3-inputs-end-points-and-radius-only/85614",
+  "topic_id": 85614,
+  "title": "Create an Arc with 3 inputs (End points and radius only)",
+  "question": "I need to plot an arc with endpoints and radius (3 inputs only), however this function does no exist within rhinoscriptsyntax or rhino.geometry but only as an actual built-in tool. I would sincerely appreciate if anybody has created this function of could assist me with this matter.\n\n\nRegards,\n\n\nHMR",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\npt1 = rs.GetPoint(\"Start of arc\")\npt2 = rs.GetPoint(\"End of arc\")\nr = rs.GetReal(\"Radius of arc\")\nd = pt1.DistanceTo(pt2)\nx = (r**2 - (d**2)/4)**0.5\nmidPt = (pt1+pt2)*0.5\nnormalVector = rs.CurveNormal(rs.AddLine(pt1,pt2))\nvector = rs.VectorCrossProduct(pt2-pt1, normalVector)\nvector.Unitize()\nvector *= x\ncenter = midPt - vector\npt3 = ((center-pt1)*2)+pt1\nrs.AddArc3Pt(pt1,pt2,pt3)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "StartPoint = TR[0] #(x,y)\nEndPoint = TR[1] #(x,y)\nRadius = TR[2][0]  #radius value\n#if both y coordinates are the same plot line\nif StartPoint[1] == EndPoint[1]:\n    TRC = rs.AddLine(StartPoint,EndPoint)\n#plot curves\nif StartPoint[1] != EndPoint[1]:\n    TRC = ArcCreation(StartPoint, EndPoint, Radius)\n    \nStartPoint = BR[0] #(x,y)\nEndPoint = BR[1] #(x,y)\nRadius = BR[2][0] #radius value\n\nif StartPoint[1] == EndPoint[1]:\n    BRC = rs.AddLine(StartPoint,EndPoint)\nif StartPoint[1] != EndPoint[1]:\n    BRC = ArcCreation(StartPoint, EndPoint, Radius)\nreturn (TRC, BRC)",
+      "language": "python",
+      "author": "horacio.monesruiz",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\ndef ArcSER(pt1,pt2,r):\n    d = rs.VectorLength(rs.VectorCreate(pt1,pt2))\n    x = (r**2 - (d**2)/4)**0.5\n    midPt = rs.VectorScale(rs.VectorAdd(pt1,pt2),0.5)\n    normalVector = rs.CurveNormal(rs.AddLine(pt1,pt2))\n    vector = rs.VectorCrossProduct(rs.VectorSubtract(pt2,pt1), normalVector)\n    vector.Unitize()\n    vector *= x\n    center = rs.VectorSubtract(midPt,vector)\n    pt3 = rs.VectorAdd(rs.VectorScale(rs.VectorSubtract(center,pt1),2),pt1)\n    rs.AddArc3Pt(pt1,pt2,pt3)\n\nArcSER([0,0,0],[0,10,0], 10)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1138
+}

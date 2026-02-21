@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brepbrep-intersection-not-threadsafe-in-rhino-5-64bit/29384",
+  "topic_id": 29384,
+  "title": "BrepBrep intersection not threadsafe in Rhino 5 64bit?",
+  "question": "Using the Grasshopper python component I wrote a code that intersects lots of breps with each other.\n\nTo make it faster I used parallel processing wich worked fine under Rhino 5 32bit, on a 64bit Rhino the component crashes my whole Rhino instantly.\n\n\nThe function used was Rhino.Geometry.Intersect.Intersection.BrepBrep()\n\n\nIs this function not threadsafe?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\nimport System.Threading.Tasks as tasks\nimport itertools \n\ndef DoSomething():\n    ids = rs.GetObjects(\"Select breps\", 8+16, True, False)\n    if not ids: return \n    \n    breps = [rs.coercebrep(id, True) for id in ids]\n    pairs = list(itertools.combinations(breps, 2))\n    curves = [None] * len(pairs)\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    intersector = Rhino.Geometry.Intersect.Intersection\n    \n    def MyWorker(w): \n        rc, c, p = intersector.BrepBrep(pairs[w][0], pairs[w][1], tolerance)\n        if rc: curves[w] = c\n    tasks.Parallel.ForEach(xrange(len(pairs)), MyWorker)\n    \n    flatten = list(itertools.chain(*curves))\n    crv_ids = [scriptcontext.doc.Objects.AddCurve(c) for c in flatten]\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 29,
+  "views": 4887
+}

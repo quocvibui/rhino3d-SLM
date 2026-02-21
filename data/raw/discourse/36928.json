@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/detect-update-change-in-input-geometry-c/36928",
+  "topic_id": 36928,
+  "title": "Detect update/change in input geometry - c#",
+  "question": "I have a list of referenced objects in GH that feed into a C# component. (they exist in the document)\n\n\nNow lets say i move / rotate / edit one of the referenced objects, can my C# component detect that? How?\n\nThe idea would be that the processes inside the component at the first execution calculate for all (as it does now anyway), and only updates the modified objects?\n\n\nTo give a real example - I have a ‘Mesh-pipe’ c# component, that stores the meshes it generates, and Outputs them back into GH. Now if i move one of the input curves, i could skip all the calculations, but the one that changed.\n\n\nHow to do that?\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "Dim count As New Integer\n    For i As Int32 = 0 To _InputData.BranchCount - 1\n        For j As Int32 = 0 To _InputData.Branch(i).Count - 1\n            Cache.Add(_InputData.Branch(i)(j).Duplicate(), _InputData.Path(i))\n            Paths(count) = _InputData.Path(i)\n            count += 1\n        Next\n    Next\nEnd Sub\n\n\nPrivate Function AreEquals(ByVal A As DataTree(Of GeometryBase), ByVal B As DataTree(Of GeometryBase)) As Boolean\n    If (A.DataCount <> B.DataCount) Then\n        ' Rhino.RhinoApp.WriteLine(\"Distinto DataCount\")\n        Return False\n        Exit Function\n    End If\n    If (A.BranchCount <> B.BranchCount) Then\n        ' Rhino.RhinoApp.WriteLine(\"Distinto BranchCount\")\n        Return False\n        Exit Function\n    End If",
+      "language": "unknown",
+      "author": "Dani_Abalde",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "geometry",
+    "mesh",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 3250
+}

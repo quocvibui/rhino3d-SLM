@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/append-text-to-end-of-selected-layer/115772",
+  "topic_id": 115772,
+  "title": "Append text to end of selected layer",
+  "question": "I want to create a button that will add some text to the end of whichever layer is highlighted.\n\n\nKeyshot lets you apply materials by layer using an automated tool based on layer name. So I figured that would help speed up how layers are named.\n\nSelect the layer, click my “chrome” button and it adds “_chrome” to the end of that layer. Select next layer and click my “chrome rough” button and it adds “_chromeRough” to the end of that layer.\n\nJust a couple examples. I’d make a Bunch of buttons to apply common names.\n\n\nI’m not sure where to start with that.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DoSomething():\n    # text to append to layer name\n    suffix = \"_Chrome\"\n    \n    # get selected layers or exit if none found\n    rc, indices = scriptcontext.doc.Layers.GetSelected()\n    if not rc: return\n    \n    # try to apply suffix to layer names\n    for index in indices:\n        layer = scriptcontext.doc.Layers[index]\n        new_name = layer.Name + suffix\n        \n        # skip if invalid name\n        if not Rhino.DocObjects.Layer.IsValidName(new_name): continue\n        \n        # assign suffix only if not already assigned\n        if not layer.Name.endswith(suffix):\n            layer.Name = new_name\n        \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 603
+}

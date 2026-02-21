@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/seldup-equivalent-in-python/42520",
+  "topic_id": 42520,
+  "title": "SelDup equivalent in python",
+  "question": "Pretty new to rhino python. Wonder if there is a way to eliminate duplicates.\n\nI have a recursion that essentially copies an object along three directions, like a tripod. After each leg reaches a number of units, it starts a new branch. Problem is that there are many duplicates in this recursive branching. I used lists of 3 vectors as identifier of location and then oriented my object to every location. The 3 vector list help me with the individual posture of units. Python can’t tell if a list of 3 vectors is already in the larger list/set, to which I’m orienting my object in the end of the script.\n\nAny suggestions to avoid duplicates? I learned that i could use \nrs.command(’_SelDup’)\n and \nrs.command(’_delete’)\n to manually clean up at the end but the script wastes so much time on placing those duplicate units.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nvectorOne = rs.VectorCreate((0,0,0),(3,4,5))\nvectorTwo = rs.VectorCreate((1,1,1),(6,8,10))\nvectorThree = rs.VectorCreate((2,2,2),(9,12,15))\nvectorFour = rs.VectorCreate((2.0,2.0,2.0),(9.0,12.0,15.0))\n\ntupleOne = (vectorOne, vectorTwo)\ntupleTwo = (vectorOne, vectorThree)\ntupleDup = (vectorOne, vectorTwo)\ntupleDup2 = (vectorOne, vectorFour)\n\n\nsetOne = set([tupleOne, tupleTwo])\nsetTwo = set([tupleOne, tupleTwo, tupleDup, tupleDup2])\n\nprint(setOne == setTwo)",
+      "language": "python",
+      "author": "owen",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nvectorOne = rs.VectorCreate((0,0,0),(3,4,5))\nvectorTwo = rs.VectorCreate((1,1,1),(6,8,10))\nvectorThree = rs.VectorCreate((2,2,2),(9,12,15))\nvectorFour = rs.VectorCreate((2.0,2.0,2.0),(9.0,12.0,15.0))\n\nepsilon = 1E-12\nvectorFive = rs.VectorCreate((2+epsilon,2,2),(9,12,15))\n\ntinyEpsilon = 1E-16\nvectorSix = rs.VectorCreate((2+tinyEpsilon,2,2),(9,12,15))\n\ntupleOne = (vectorOne, vectorTwo)\ntupleTwo = (vectorOne, vectorThree)\ntupleDup = (vectorOne, vectorTwo)\ntupleDup2 = (vectorOne, vectorFour)\ntupleDupClose = (vectorOne, vectorFive)\ntupleDupSuperClose = (vectorOne, vectorSix)\n\nsetOne = set([tupleOne, tupleTwo])\nsetTwo = set([tupleOne, tupleTwo, tupleDup, tupleDup2])\nsetThree = set([tupleOne, tupleTwo, tupleDup, tupleDup2, tupleDupClose])\nsetFour = set([tupleOne, tupleTwo, tupleDup, tupleDupSuperClose])\n\nprint(setOne == setTwo)     # I get True\nprint(setOne == setThree)   # I get False\nprint(setOne == setFour)    # I get True",
+      "language": "python",
+      "author": "owen",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n import Rhino.Geometry\n \n #copy these 3 functions:\n def vector_round(vec, tolerance = 2):\n     return Rhino.Geometry.Vector3d(\n         round(vec.X,tolerance),\n         round(vec.Y, tolerance),\n         round(vec.Z, tolerance))\n     \n def tuple_3_vectors_rounded(tup):\n     return (vector_round(tup(0)), vector_round(tup(1)), vector_round(tup(2)))\n     \n \n def append_rounded_tuple(workingSet, newTuple, tolerance = 2):\n     workingSet.add( (vector_round(newTuple[0], tolerance),\n                         vector_round(newTuple[1], tolerance),\n                         vector_round(newTuple[2], tolerance) ) )\n                         \n #these are placeholders for your vectors                        \n vectorOne = Rhino.Geometry.Vector3d(1,1,1)\n vectorTwo = Rhino.Geometry.Vector3d(2,2,2)\n vectorThree = Rhino.Geometry.Vector3d(1,0,0)\n \n #this is where you'll store your tuples of vectors\n output = set([])\n \n #do some stuff: this is a placeholder\n for i in range(6):\n     vectorThree = rs.VectorRotate(vectorThree, 90, [0,0,1])  \n\n     #once you do your operations, call this function to add the new output to the set\n     append_rounded_tuple(output, (vectorOne, vectorTwo, vectorThree))\n     print(i, \": \", len(output))\n \n #a few tests:\n\n vectorOne = rs.VectorCreate((1,1,1),(0,0,0))\n \n #vectorTwo is created by rotating vectorOne 360 degrees\n vectorTwo = rs.VectorRotate(vectorOne, 360, [0,0,1])\n \n #vectorThree is created by rotating vectorOne .1 degrees, 3600 times\n #introduces small rounding error\n vectorThree = vectorOne\n for i in range(3600):\n     vectorThree = rs.VectorRotate(vectorThree, .1, [0,0,1])\n \n vectorFour = Rhino.Geometry.Vector3d(6,6,6)\n \n print(rs.VectorCrossProduct(vectorOne, vectorTwo))     #0,0,0\n print(rs.VectorCrossProduct(vectorOne, vectorThree))   #3 small numbers\n \n print(len(set([vectorOne, vectorTwo, vectorThree])))  # 2 (rounding error from 3)\n print(len(set([vector_round(vectorOne),vector_round(vectorTwo),vector_round(vectorThree)])))  # 1 (differences rounded off)",
+      "language": "python",
+      "author": "owen",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 3328
+}

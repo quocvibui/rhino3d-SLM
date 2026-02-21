@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/bsamiee/Parametric_Arsenal/blob/54ec3f5a7fc2c671cb7bc4601772820e625a1904/rhino/plugins/ArchBuilder/commands/CatenaryArch.py",
+  "repo": "bsamiee/Parametric_Arsenal",
+  "repo_stars": 0,
+  "repo_description": "Rhino 8 Plugins and Scripts - A comprehensive monorepo for architectural automation, parametric design, and creative workflows",
+  "license": "MIT",
+  "filepath": "rhino/plugins/ArchBuilder/commands/CatenaryArch.py",
+  "instruction": "Title         : CatenaryArch.py\nAuthor        : Bardia Samiee\nProject       : Parametric Forge\nLicense       : MIT\nPath          : rhino/plugins/ArchBuilder/commands/CatenaryArch.py",
+  "code": "# r: numpy\n\"\"\"\nTitle         : CatenaryArch.py\nAuthor        : Bardia Samiee\nProject       : Parametric Forge\nLicense       : MIT\nPath          : rhino/plugins/ArchBuilder/commands/CatenaryArch.py\n\nDescription\n----------------------------------------------------------------------------\nCommand for creating catenary arches.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom typing import Any\n\nimport Rhino.Geometry as rg\nfrom libs.command_base import ArchCommandBase\nfrom libs.geometry.profiles import ProfileSegments, catenary_profile\nfrom libs.specs import ArchFamily, ArchSpec, EmptyArchOptions\nfrom libs.ui import ProfileSelection\nfrom libs.utils import ArchBuilderUtils\n\nimport Rhino\n\n\n# --- Command Implementation -------------------------------------------------\nclass CatenaryArchCommand(ArchCommandBase):\n    \"\"\"Catenary arch command using shared profile builders.\"\"\"\n\n    options_type = EmptyArchOptions\n\n    def __init__(self) -> None:\n        super().__init__(ArchFamily.CATENARY, self.build_catenary)\n\n    def collect_parameters(self, profile: ProfileSelection) -> dict[str, Any] | None:\n        \"\"\"Catenary arch has no additional parameters.\"\"\"\n        return self.options_type().to_metadata()\n\n    def build_catenary(self, spec: ArchSpec) -> rg.Curve:  # noqa: PLR6301\n        \"\"\"Return the closed catenary profile for the requested spec.\"\"\"\n        tolerance = ArchBuilderUtils.model_absolute_tolerance()\n        profile: ProfileSegments = catenary_profile(spec.half_span, spec.rise, tolerance)\n        return ArchBuilderUtils.close_with_baseline(\n            profile.segments,\n            profile.start,\n            profile.end,\n            tolerance,\n        )\n\n\n# --- Command Entry Points -------------------------------------------------\ndef CatenaryArch() -> None:\n    \"\"\"Execute the CatenaryArch command.\"\"\"\n    command = CatenaryArchCommand()\n    if command.execute():\n        Rhino.RhinoApp.WriteLine(\"ArchBuilder: CatenaryArch created.\")\n\n\ndef RunCommand(is_interactive: bool) -> int:\n    try:\n        CatenaryArch()\n        return 0  # noqa: TRY300\n    except RuntimeError as exc:\n        Rhino.RhinoApp.WriteLine(f\"ArchBuilder cancelled: {exc}\")\n        return 0\n\n\nif __name__ == \"__main__\":\n    CatenaryArch()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

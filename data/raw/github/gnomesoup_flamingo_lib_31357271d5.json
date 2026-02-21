@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/gnomesoup/flamingo.lib/blob/a0700f05f78a2ec391850c47190740d3a283299b/flamingo/rhino.py",
+  "repo": "gnomesoup/flamingo.lib",
+  "repo_stars": 1,
+  "repo_description": "Library for the Flaming pyRevit plugin",
+  "license": "GPL-3.0",
+  "filepath": "flamingo/rhino.py",
+  "instruction": null,
+  "code": "from pyrevit import script\nimport clr\n\n# Get logger and output from script\nLOGGER = script.get_logger()\nOUTPUT = script.get_output()\n\n# Add references to Rhino libraries\nclr.AddReference(\"RhinoCommon\")\nclr.AddReference(\"RhinoInside.Revit\")\nfrom Rhino import RhinoDoc, DocObjects\n\n# Function to find or add a layer in Rhino\ndef FindOrAddRhinoLayer(layerFullPath, rhinoDoc=None):\n    # Log the function call\n    LOGGER.debug(\n        \"FindOrAddRhinoLayer(layerFullPath={}, rhinoDoc={})\".format(\n            layerFullPath, rhinoDoc\n        )\n    )\n    # If no document is provided, use the active document\n    rhinoDoc = rhinoDoc or RhinoDoc.ActiveDoc\n    # Try to find the layer by its full path\n    layerIndex = rhinoDoc.Layers.FindByFullPath(layerFullPath, -1)\n    # If the layer is found, return its index\n    if not layerIndex < 0:\n        LOGGER.debug(\"Layer Found: layerIndex = {}\".format(layerIndex))\n        return layerIndex\n    # If the layer is not found, split the full path into individual layer names\n    layerNameSplit = layerFullPath.split(\"::\")\n    parentLayerId = None\n    # Iterate over the layer names\n    for i, layerName in enumerate(layerNameSplit):\n        # Construct the current path\n        currentPath = \"::\".join(layerNameSplit[0 : i + 1])\n        LOGGER.debug(\"currentPath = {}\".format(currentPath))\n        # Try to find the layer by the current path\n        layerIndex = rhinoDoc.Layers.FindByFullPath(currentPath, -1)\n        LOGGER.debug(\"parentLayerId = {}\".format(parentLayerId))\n        # If the layer is found, get its parent layer\n        if not layerIndex < 0:\n            LOGGER.debug(\"Matched: layerIndex = {}\".format(layerIndex))\n            parentLayer = rhinoDoc.Layers.FindIndex(layerIndex)\n            LOGGER.debug(\"type(parentLayer) = {}\".format(type(parentLayer)))\n            LOGGER.debug(\"parentLayer.Id = {}\".format(parentLayer.Id))\n            # Set the parent layer id for the next iteration\n            parentLayerId = parentLayer.Id\n            continue\n        # If the layer is not found, create a new layer\n        childLayer = DocObjects.Layer()\n        childLayer.Name = layerName\n        # If there is a parent layer, set its id as the parent layer id of the new layer\n        if parentLayerId:\n            childLayer.ParentLayerId = parentLayerId\n        # Add the new layer to the document\n        layerIndex = rhinoDoc.Layers.Add(childLayer)\n        # Get the new layer from the document\n        childLayer = rhinoDoc.Layers.FindIndex(layerIndex)\n        # Assert that the layer was added successfully\n        assert layerIndex >= 0\n        # Set the id of the new layer as the parent layer id for the next iteration\n        parentLayerId = childLayer.Id\n    # Return the index of the last layer added\n    return layerIndex",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon"
+  ],
+  "has_docstring": false
+}

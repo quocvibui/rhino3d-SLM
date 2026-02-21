@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multiple-chamfers/76728",
+  "topic_id": 76728,
+  "title": "Multiple chamfers",
+  "question": "Hello, do you know how can I achieve something like this:\n\n\n\n\n1\n1418×704 57 KB\n\n\n \n\n\n2\n1418×704 56.6 KB\n\n\n\n\nI mean: chamfer over chamfer to create faceted round-like edges. But automatically. A macro maybe?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext\n\nfrom threading import Thread\nfrom time import sleep\n\nREPEAT = 3\nWAIT = 1 #secs\n\n#Selection\nedgeSelection = rs.GetEdgeCurves(\"Select Brep edges\",1,1)[0]\n\nCURVE_ID = edgeSelection[0]\nPARENT_ID = edgeSelection[1]\nSELECTIONPOINT = edgeSelection[2]\nBREP = None\n\ndef findTwoClosestEdges(searchpoint):\n    global BREP,PARENT_ID \n    \n    ##rs.AddPoint(searchpoint)\n    #searching adjacent edges\n    minDis = float.MaxValue\n    secondMinDis = float.MaxValue\n    index = [-1,-1]\n    ##mes = \"\\n\\n\"\n    for edgeNode in BREP.Edges: \n        edge = edgeNode.EdgeCurve\n        \n        t = edge.ClosestPoint(searchpoint)[1]\n        cp = edge.PointAt(t)\n        dis = cp.DistanceTo(searchpoint)\n        ##scriptcontext.doc.Objects.AddPoint(cp)\n        ##mes +=\"  %f \\n\" %(dis)\n       \n        if dis < minDis:\n            secondMinDis = minDis\n            minDis = dis\n            index[1] = index[0] \n            index[0] = edgeNode\n        elif dis < secondMinDis:\n            secondMinDis = dis\n            index[1] = edgeNode\n    ##mes += \"\\n\\n\"\n    ##print mes\n    ##print \"%f %f\" % (minDis,secondMinDis)\n    # Unselect\n    rs.UnselectAllObjects()\n    # reselect relative\n    robj = Rhino.RhinoDoc.ActiveDoc.Objects.Find(PARENT_ID)\n    robj.SelectSubObject(index[0].ComponentIndex(),True,True)\n    robj.SelectSubObject(index[1].ComponentIndex(),True,True)\n    #redraw\n    scriptcontext.doc.Views.Redraw()  \n    # return selected edges\n    ptA = index[0].EdgeCurve.PointAt(index[0].EdgeCurve.Domain.Mid)\n    ptB = index[1].EdgeCurve.PointAt(index[1].EdgeCurve.Domain.Mid)\n    return (ptA,ptB)\n\n\nSEARCHPOINTS = None\ndef asyncSelection(edge):\n    global SEARCHPOINTS\n    sleep(WAIT)\n    SEARCHPOINTS = findTwoClosestEdges(edge)\n    sleep(0.3)\n    \ndef recursiveChamfer(level,searchpoint):\n    global SEARCHPOINTS, BREP,PARENT_ID, CURVE_ID\n    BREP = rs.coercebrep(PARENT_ID)\n    level+=1  \n    if level >= REPEAT:\n        return\n    elif level == 0: # initial chamfer\n        rs.SelectObject(CURVE_ID)\n        Rhino.RhinoApp.RunScript(\"_ChamferEdge _Enter _Enter\",True) \n        recursiveChamfer(level,searchpoint)\n        \n    else: \n\n        thread = Thread(target = asyncSelection, args = (searchpoint,))\n        thread.start()\n        thread.join()\n        Rhino.RhinoApp.RunScript(\"_ChamferEdge _Enter _Enter\",True)\n\n        \n        if SEARCHPOINTS != None:\n            searchpointA = SEARCHPOINTS[0]\n            searchpointB = SEARCHPOINTS[1]   \n            recursiveChamfer(level,searchpointA)\n            recursiveChamfer(level,searchpointB)\n\n\nrecursiveChamfer(-1,SELECTIONPOINT)",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 9,
+  "views": 1659
+}

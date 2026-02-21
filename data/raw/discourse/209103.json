@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-exclude-a-filetype-in-a-filter-to-an-eto-form-openfiledialog/209103",
+  "topic_id": 209103,
+  "title": "How to exclude a filetype in a filter to an Eto.Form.OpenFileDialog()",
+  "question": "Hi there,\n\n\nI am trying to implement an OpenFileDialog in Eto C#.\n\nThis works fine, but…\n\nIt will include \n.3dmbak\n as well, which I’d like to avoid.\n\n\nHow would I solve this?\n\n\nFileFilter filter = new Eto.Forms.FileFilter();\nfilter.Name = \"3dm\";\nfilter.Extensions = new string[] {\".3dm\" };\n\n\n\nThanks,\n\nT.",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  Eto.Forms.OpenFileDialog dialog = new Eto.Forms.OpenFileDialog\n  {\n    MultiSelect = false,\n    Title = \"Open\",\n    Filters =\n    {\n      new FileFilter\n      {\n        Name = \"Rhino 3D Models (*.3dm)\",\n        Extensions = new[] { \".3dm\" }\n      },\n    },\n  };\n\n  DialogResult result = dialog.ShowDialog(RhinoEtoApp.MainWindow);\n\n  if (result != DialogResult.Ok)\n    return Result.Cancel;\n\n  string filename = dialog.FileName;\n  if (string.IsNullOrEmpty(filename))\n    return Result.Nothing;\n\n  if (!File.Exists(filename))\n    return Result.Failure;\n\n  RhinoApp.WriteLine(filename);\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 68
+}

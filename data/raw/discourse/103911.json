@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extendsrf-and-preselect-edges/103911",
+  "topic_id": 103911,
+  "title": "ExtendSrf and preselect edges",
+  "question": "Hi,\n\n\nI am facing an issue that the usual Rhino ExtendSrf command supports trimmed surfaces while the one in RhinoCommon and Python Script does not. When I use it script the surface will be untrimmed so I need to use rs.Command(“_ExtrudeSrf”) and the edge need to be preselected.\n\n\nI have found some resources that gives idea however it does not work. I found the following topic and the last message from clement includes a solution when the user select the surface-edge.\n\n\n\n\n\n\n\n\n\n\nRhinoCommon - Pre-and Post- select subobjects\n \nScripting\n\n\n\n\n\n    Yeah, that looks similar to the sample from here: \n \n \nI wasn’t able to get it working with subobjects, but I will try again…\n  \n\n\n\n\nIn my situation, the script will sleect the edge by a given Index number. I came up with the following script steps however the edge remains unselected.\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n# Get object:\nge = Rhino.Input.Custom.GetObject()\nge.SetCommandPrompt(\"Select edges\")\nge.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\nge.EnableUnselectObjectsOnExit(False)\nge.SubObjectSelect = False\nge.EnableUnselectObjectsOnExit(False)\nge.EnablePreSelect(True, True)\nge.Get()\n\n# ObjRef -> RhinoObject\nrh_object = ge.Object(0).Object()\nnumber = 2\n\nindex_type = Rhino.Geometry.ComponentIndexType.BrepEdge\ncomp_index = Rhino.Geometry.ComponentIndex(index_type, number)\nrh_object.SelectSubObject(comp_index, True, True)\nrs.Command(\"_ExtendSrf \" + \"1\")\n\n\n\nIdea 2:\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n# Get object:\nge = Rhino.Input.Custom.GetObject()\nge.SetCommandPrompt(\"Select edges\")\nge.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\nge.EnableUnselectObjectsOnExit(False)\nge.SubObjectSelect = False\nge.Get()\n\n# Return -> ObjRef\nobj_ref = ge.Object(0)\n# ObjRef -> Return: RhinoObject\nrh_object = obj_ref.Object()\nnumber = 2\nedge = obj_ref.Brep().Edges[number]\nedge_index = edge.EdgeIndex\n\nindex_type = Rhino.Geometry.ComponentIndexType.BrepEdge\ncomp_ind...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nimport Rhino.Geometry as rg\nid = rs.GetSurfaceObject()[0]\nbrep = doc.Objects.FindId(id)\ncomponent_index = rg.ComponentIndex(rg.ComponentIndexType.BrepEdge, 1)\nbrep.SelectSubObject(component_index, True, True, True)\nrs.Command(\"_ExtendSrf 5 _Enter\")",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nfrom collections import defaultdict\n\n\nge = Rhino.Input.Custom.GetObject()\nge.SetCommandPrompt(\"Select edges\")\nge.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\nge.EnableUnselectObjectsOnExit(False)\nge.EnablePreSelect(True, True)\nge.SubObjectSelect = True\nge.Get()\nnumber = 3\nobj_ref = ge.Object(0)\nedge = obj_ref.Edge()\nedge_index = edge.EdgeIndex\nrh_object = obj_ref.Object()\nindex_type = Rhino.Geometry.ComponentIndexType.BrepEdge\ncomp_index = Rhino.Geometry.ComponentIndex(index_type, number)\nrs.UnselectAllObjects()\nrh_object.SelectSubObject(comp_index, True, True)\nrs.Command(\"_ExtendSrf \" + \"1\")",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n# Get object:\nge = Rhino.Input.Custom.GetObject()\nge.SetCommandPrompt(\"Select edges\")\nge.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\nge.EnableUnselectObjectsOnExit(False)\nge.SubObjectSelect = False\nge.EnableUnselectObjectsOnExit(False)\nge.EnablePreSelect(True, True)\nge.Get()\n\n# ObjRef -> RhinoObject\nrh_object = ge.Object(0).Object()\nnumber = 2\n\nindex_type = Rhino.Geometry.ComponentIndexType.BrepEdge\ncomp_index = Rhino.Geometry.ComponentIndex(index_type, number)\nrh_object.SelectSubObject(comp_index, True, True)\nrs.Command(\"_ExtendSrf \" + \"1\")",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n# Get object:\nge = Rhino.Input.Custom.GetObject()\nge.SetCommandPrompt(\"Select edges\")\nge.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\nge.EnableUnselectObjectsOnExit(False)\nge.SubObjectSelect = False\nge.Get()\n\n# Return -> ObjRef\nobj_ref = ge.Object(0)\n# ObjRef -> Return: RhinoObject\nrh_object = obj_ref.Object()\nnumber = 2\nedge = obj_ref.Brep().Edges[number]\nedge_index = edge.EdgeIndex\n\nindex_type = Rhino.Geometry.ComponentIndexType.BrepEdge\ncomp_index = Rhino.Geometry.ComponentIndex(index_type, number)\nrh_object.SelectSubObject(comp_index, True, True)\nrs.Command(\"_ExtendSrf \" + \"1\")",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 669
+}

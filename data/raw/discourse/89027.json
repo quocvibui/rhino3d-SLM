@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-it-possible-to-have-a-py-script-always-running/89027",
+  "topic_id": 89027,
+  "title": "Is it possible to have a py script always running?",
+  "question": "Hi,\n\n\nSimple example: Let’s say I have one polyline and each time I change it the script will create an offset of it.\n\n\nAlmost as grasshopper does it, but I don’t want to do it with gh, I want to have a pyscript always running in the background - so I won’t have to run it each time I change the polyline (it will always be running and offsetting live)\n\n\nIs it possible? this could be useful for other things also.\n\n\nThank you!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\n######################\n### EVENT HANDLERS ###\n######################\ndef object_added_event(sender, e):\n    try:\n        print \"Object Added, Id =\", e.ObjectId\n    except Exception, ex:\n        print ex\n\ndef object_selected_event(sender, e):\n    try:\n        for obj in e.RhinoObjects:\n            obj_type = type(obj)\n            #if \n            print \"Selected Object Type =\", obj_type\n    except Exception, ex:\n        print ex\n\ndef mouse_enter_viewport_event(sender,e):\n    try:\n        print \"mouse entered \",e.view\n    except Exception, ex:\n        print ex\n\n##############################\n### EVENT HELPER FUNCTIONS ###\n##############################\n\ndef obj_event_helper_func(event,sticky_key,event_name):\n    #Event trigger helper function\n    if sc.sticky.has_key(sticky_key):\n        print \"removing the callback \"+event_name+\".\"\n        stky = sc.sticky[sticky_key]\n        #Rhino.RhinoDoc.AddRhinoObject -= stky\n        exec(\"Rhino.RhinoDoc.\"+event_name+\" -= stky\")\n        sc.sticky.Remove(sticky_key)\n    else:\n        print \"adding the callback \"+event_name+\".\"\n        stky = event\n        sc.sticky[sticky_key] = stky\n        #Rhino.RhinoDoc.AddRhinoObject += stky\n        exec(\"Rhino.RhinoDoc.\"+event_name+\" += stky\")\n\nif __name__==\"__main__\":\n    obj_event_helper_func(object_added_event,\"object_added_event\",\"AddRhinoObject\")\n    #obj_event_helper_func(object_selected_event,\"object_selected_event\",\"SelectObjects\")",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 54,
+      "is_solution": false
+    },
+    {
+      "code": "import System.Threading as st\nimport Rhino \nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n# Script to demonstrate EventHandling from Rhino Python Script Component\n# ******************************\n# Rhino 6 only\n# ******************************\n\n#active doc\nrhinoDoc = Rhino.RhinoDoc.ActiveDoc\n\n# print to console whenever a curve is added\ndef PrintCurvesToConsoleAfterAddingANewCurve():\n    # get all docs curves wrapped in a RhinoObject\n    rObjs = rhinoDoc.Objects.GetObjectList(Rhino.DocObjects.ObjectType.Curve) \n    for rObj in rObjs:\n        # Write to Commandline that we found a curve and its ID\n        Rhino.RhinoApp.WriteLine(\"Curve found\")\n        Rhino.RhinoApp.WriteLine(str(rObj.Id) )\n\n# The handler subscribing to the add event\ndef OnRhinoDocAdded(sender, e):\n    # Invoke our logic in the UI Thread\n    Rhino.RhinoApp.InvokeOnUiThread(\n       PrintCurvesToConsoleAfterAddingANewCurve()    \n    )\n\n# Unsubscribe if there is another handler already active\nif \"AddedCurveHandler\" in sc.sticky:\n    rhinoDoc.AddRhinoObject -= sc.sticky[\"AddedCurveHandler\"]\n\n# Subscribe our Handler and store it in the Rhino global dictionary\n# so that we can unsubscribe it on a later script invocation\nsc.sticky[\"AddedCurveHandler\"] = OnRhinoDocAdded\nrhinoDoc.AddRhinoObject += sc.sticky[\"AddedCurveHandler\"]",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 31,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 79,
+  "views": 2753
+}

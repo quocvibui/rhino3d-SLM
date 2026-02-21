@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/req-python-get-real-boolean/15627",
+  "topic_id": 15627,
+  "title": "REQ - python get real / boolean",
+  "question": "just a request for a UI element in rhinoscriptsyntax which combines GetReal and GetBoolean in one shot…\n\nscripting with that rhinocommon stuff is too much for me… (ie- frustrating/ boring / loss of interest / etc \n )\n\n\nbasically, a dialog (or, i guess it’s command line options… i just call it a dialog because of how it looks on mac) which has some checkboxes and will also accept numbers.\n\n\ni don’t really have ideas for how exactly it should be implemented but i wish it was nonetheless.\n\n\nthanks",
+  "code_blocks": [
+    {
+      "code": "\"\"\"ExtrudePlanarCurves -- note* if using BothSides option, the overall extrusion\nwill be the entered distance.. this is different than bothSides in typical\nRhino Commands in which the distance entered will be 1/2 overall extrusion\"\"\"\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\n\ndef extrudePlanar(crv, opts, distance):\n\n    for i in range (len(crv)):\n        curve = crv[i]\n        plane = rs.CurvePlane(curve)\n        origin = plane[0]\n        vec = plane[3]\n        \n        direction = rs.VectorScale(vec, distance)\n        point = rs.PointAdd(origin, direction)\n\n        if opts[1]:\n            bsdir = rs.VectorScale(vec, distance/2)\n            bspoint = rs.PointAdd(origin, bsdir)\n            trans = (origin - bspoint)\n            newcrv = rs.CopyObject(curve, trans)\n            ext = rs.ExtrudeCurveStraight(newcrv, origin, point)\n            rs.DeleteObject(newcrv)\n        else:\n            ext= rs.ExtrudeCurveStraight(curve, origin, point)\n    \n        if opts[0]:\n            rs.CapPlanarHoles(ext)\n        if opts[2]:\n            rs.DeleteObject(curve)\n\n\ndef getnumbools( prompt, default, boolnames, boolvals ):\n    while True:\n        scriptcontext.escape_test()\n        gnu = Rhino.Input.Custom.GetNumber()\n        gnu.SetCommandPrompt( prompt )\n        gnu.SetDefaultNumber( default )\n        indexlist = []\n        optionlist = []\n        for ix in range( len( boolnames ) ):\n            index, option = gnu.AddOptionToggle( boolnames[ ix ],\n                Rhino.Input.Custom.OptionToggle( boolvals[ ix ], 'No', 'Yes' ) )\n            indexlist.append( index )\n            optionlist.append( option )\n        gnu.Get()\n        if gnu.CommandResult() == Rhino.Commands.Result.Cancel:\n            return []\n        res = gnu.Result()\n        if res == Rhino.Input.GetResult.Option:\n            opind = gnu.OptionIndex()\n            ix = indexlist.index( opind )\n            option = optionlist[ ix ]\n            boolvals[ ix ] = option.CurrentValue\n        elif res == Rhino.Input.GetResult.Number:\n            number = gnu.Number()\n            break\n    result = [ number ] + boolvals\n    return result\n\n\n\ndef input():\n\n    crv= rs.GetObjects('Select planar curves to extrude', 4, True, True)\n    if not crv: return\n    for i in range (len(crv)):\n        if not rs.IsCurvePlanar(crv[i]):\n            print 'All curves must be planar'\n            return\n\n    nas = [ 'Solid', 'BothSides', 'DeleteInput' ]\n    vas = [ True, False, False ]\n    dft = .75\n\n    tp = getnumbools( 'Extrusion Distance', dft, nas, vas )\n    if not tp: return\n\n    distance = tp.pop(0)\n    if distance == 0:\n        return\n\n    extrudePlanar(crv, tp, distance)\n\ninput()",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 2949
+}

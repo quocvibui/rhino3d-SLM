@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/viewcapturetofile-named-views-doesnt-update-clipping-planes/192343",
+  "topic_id": 192343,
+  "title": "ViewCaptureToFile + Named Views doesn't update clipping planes",
+  "question": "I have found a couple other threads noting a similar issue, but they aren’t using clipping planes and do not appear to have a resolution. I have a python script that uses ViewCaptureToFile for multiple Named Views. The script works just fine when the named views are just different camera locations, but if the views are clipped, they don’t update correctly before the output.\n\n\nI tried adding rs.Redraw() and rs.Sleep() to increase my chances of making it work, but still does not update the clipping planes before exporting the view.\n\n\nimport rhinoscriptsyntax as rs\nimport os\n\nall_views = rs.NamedViews() # a list of names (strings)\nselected_views= rs.MultiListBox(all_views, message = \"select views to save\", defaults = all_views)\nrs.EnableRedraw(True)\n\nfilename_base = rs.GetString(\"base file name\",\"View_\")\n#savepath = r\"/Users/User_Name/Desktop\"\nsavepath = rs.BrowseForFolder(rs.DocumentPath(), \"destination directory\")\nfilepath = os.path.join(savepath, filename_base)\n\nfor view_name in selected_views:\n    rs.RestoreNamedView(view_name)\n    rs.Redraw()\n    rs.Sleep(2000)\n    rs.Command('-_ViewCaptureToFile '+chr(34)+filepath+view_name+'.png'+chr(34)+' _EnterEnd')\n\n\nSimilar topics:\n\n\nViewCaptureToFile saves the wrong mode - Scripting - McNeel Forum\n\n\nCycle through layers and namedviews using python rhinoscriptsyntax - Scripting - McNeel Forum",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os\n\nall_views = rs.NamedViews() # a list of names (strings)\nselected_views= rs.MultiListBox(all_views, message = \"select views to save\", defaults = all_views)\nrs.EnableRedraw(True)\n\nfilename_base = rs.GetString(\"base file name\",\"View_\")\n#savepath = r\"/Users/User_Name/Desktop\"\nsavepath = rs.BrowseForFolder(rs.DocumentPath(), \"destination directory\")\nfilepath = os.path.join(savepath, filename_base)\n\nfor view_name in selected_views:\n    rs.RestoreNamedView(view_name)\n    rs.Redraw()\n    rs.Sleep(2000)\n    rs.Command('-_ViewCaptureToFile '+chr(34)+filepath+view_name+'.png'+chr(34)+' _EnterEnd')",
+      "language": "python",
+      "author": "jcparks",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 153
+}

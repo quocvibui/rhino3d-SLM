@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/what-is-rhino-geometry-point3d/189560",
+  "topic_id": 189560,
+  "title": "What is Rhino.Geometry.Point3d[]",
+  "question": "Hello,\n\n\nI am using rs.ProjectPointToSurface and it is returning a\n Rhino.Geometry.Point3d[]\n object.\n\nIt does not act like a list because object[0] causes an error.\n\nIt does not act like a Rhino.Geometry.Point3d object because object.X() causes an error.  So it is completely unusable.  This code used to work in version 7 but not is version 8.\n\n\nHere is a chunk of code with an abundance of print statements:\n\n\nRhino Error 1\n755×312 16.4 KB\n\n\nHere are the print statements:\n\n\n\n\nIt seems like this \nRhino.Geometry.Point3d[]\n  object is some mystery object that doesn’t act like anything usable.\n\n\nAm I missing something obvious?\n\n\nHenry",
+  "code_blocks": [
+    {
+      "code": "above = rs.ProjectPointToSurface([PointOnSurface], [nominalMeshId], Direction)\nif above:\n  for p in above:\n    x = p.X\n    y = p.Y\n    z = p.Z",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\npts = rs.GetObjects(\"select points\")\nsrfs = rs.GetObjects(\"select srfs\")\ndir = Rhino.Geometry.Vector3d(1, 1, -1)\nresult = rs.ProjectPointToSurface(pts, srfs, dir)\nprint (result[0][0])\nprint (result[0].X)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 12,
+  "views": 282
+}

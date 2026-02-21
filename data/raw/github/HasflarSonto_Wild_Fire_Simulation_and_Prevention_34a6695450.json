@@ -1,0 +1,19 @@
+{
+  "source_url": "https://github.com/HasflarSonto/Wild_Fire_Simulation_and_Prevention/blob/4408ce1c860a8f7823953dc12ea05d197e2db8bf/CentralSimulationModule/ImportFuelModel.py",
+  "repo": "HasflarSonto/Wild_Fire_Simulation_and_Prevention",
+  "repo_stars": 1,
+  "repo_description": "Parametric algorithm which simulates how wild fires grow and then suggests infrastructural improvements to combat fire",
+  "license": "unknown",
+  "filepath": "CentralSimulationModule/ImportFuelModel.py",
+  "instruction": "Import fuel model",
+  "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport clr\nclr.AddReference(\"Grasshopper\")\nclr.AddReference(\"RhinoCommon\")\nfrom Grasshopper import DataTree\nfrom Grasshopper.Kernel.Data import GH_Path\nfrom Rhino.Geometry import Point3d\n\ndef scale_to_fit(points, max_size=100):\n    \"\"\"Scales all points proportionally to fit within a max_size x max_size bounding box while preserving relative proportions.\"\"\"\n    min_x = min(p[0] for p in points)\n    max_x = max(p[0] for p in points)\n    min_y = min(p[1] for p in points)\n    max_y = max(p[1] for p in points)\n    \n    range_x = max_x - min_x\n    range_y = max_y - min_y\n    scale_factor = max_size / max(range_x, range_y)\n    \n    scaled_points = [\n        ((p[0] - min_x) * scale_factor, (p[1] - min_y) * scale_factor, 0)\n        for p in points\n    ]\n    return scaled_points\n\n# Raw input data as a list of strings\nfuel_data = [\n    \"X,Y,Fuel_Model,Burn_Probability\",\n    \"-2010645.0,2765325.0,10.0,0.5\",\n    \"-2010615.0,2765325.0,9.0,0.4\"\n]\n\n# Extract valid fuel model points\nfuel_data.pop(0)  # Remove header\nvalid_points = []\nburn_probs = []\nfor line in fuel_data:\n    x, y, fuel_model, burn_prob = map(float, line.split(\",\"))\n    valid_points.append((x, y, fuel_model))\n    burn_probs.append(burn_prob)\n\nif not valid_points:\n    a = \"No valid points found.\"\nelse:\n    # Scale all points proportionally to fit within 100x100\n    scaled_points = scale_to_fit(valid_points, max_size=100)\n\n    # Create Rhino points for Grasshopper\n    rhino_points = [Point3d(x, y, 0) for x, y, _ in scaled_points]\n    \n    a = rhino_points  # List of points\n    b = burn_probs  # Corresponding burn probabilities\n\nprint(\"Fuel Model Data Processed and Scaled Successfully!\")\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "RhinoCommon",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dogbone-script/159119",
+  "topic_id": 159119,
+  "title": "Dogbone script?",
+  "question": "Hi,\n\n\nDoes anyone have or know of a script that will make these in this way?\n\n\nScreenshot 2023-04-28 at 11.07.36 PM\n1962×1704 321 KB\n\n\nI’ve probably modeled that 4000 times by now and I’m sick of doing it \n\n\n\n\nmaybe for Rhino itself, it seems like what should/could happen if entering a negative number for a fillet (?)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndiameter = .13\nrad = diameter/2\n\n   \np1 = rs.GetPoint(\"Base Point\")\nd1 = rs.AddTextDot(\"1\", p1)\np2 = rs.GetPoint(\"2nd point\")\nd2 = rs.AddTextDot(\"2\", p2)\np3 = rs.GetPoint(\"3rd point\")\nd3 = rs.AddTextDot(\"3\", p3)\np4 = rs.GetPoint(\"Height\")\nd4 = rs.AddTextDot(\"4\", p4)\n\nheight = rs.Distance(p1,p4)\n\nvec1 = rs.VectorCreate(p2,p1)\nvec2 = rs.VectorCreate(p3,p1)\n\nvec1 = rs.VectorUnitize(vec1)\nvec2 = rs.VectorUnitize(vec2)\n\nvec3 = rs.VectorCreate(p4,p1)\n  \nbis = rs.VectorAdd(vec1, vec2)\nbis = rs.VectorUnitize(bis)\n\nbis = bis * rad\n\ncpt = rs.MoveObject(p1,bis)\ncptC = rs.PointCoordinates(cpt)\n\nbisplane = rs.PlaneFromNormal(cptC, vec3, bis)\n\ncutter = rs.AddCylinder(bisplane, height, rad, True)\n\nrs.DeleteObjects([d1, d2, d3, d4, cpt])",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "# -*- coding: utf-8 -*-\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\n\n# --- Persistent remembered bit diameter ---\n# Load previous value if available\nif \"dogbone_bit_diameter\" in sc.sticky:\n    cyl_diameter = sc.sticky[\"dogbone_bit_diameter\"]\nelse:\n    cyl_diameter = 0.13   # default first-run value\n\n# --- Ask user for bit diameter ---\nget_diam = Rhino.Input.Custom.GetNumber()\nget_diam.SetCommandPrompt(\"Bit diameter\")\nget_diam.SetDefaultNumber(cyl_diameter)\nget_diam.SetLowerLimit(0.001, False)\n\nif get_diam.Get() == Rhino.Input.GetResult.Number:\n    cyl_diameter = get_diam.Number()\n    sc.sticky[\"dogbone_bit_diameter\"] = cyl_diameter  # remember for this session\nelse:\n    print(\"Using previous bit diameter:\", cyl_diameter)\n\ninset = cyl_diameter / 2.0\nradius = cyl_diameter / 2.0\n\n\n# --- Select edges ---\ngo = Rhino.Input.Custom.GetObject()\ngo.SetCommandPrompt(\"Select edges for dogbones\")\ngo.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\ngo.SubObjectSelect = True\ngo.GetMultiple(1, 0)\n\nif go.CommandResult() != Rhino.Commands.Result.Success:\n    print(\"No edges selected\")\n    exit()\n\n\n# --- Process edges ---\nfor i in range(go.ObjectCount):\n    objref = go.Object(i)\n    sel_curve = objref.Curve()\n    if sel_curve is None:\n        print(\"Skipping selection {}\".format(i))\n        continue\n\n    # Find Brep object\n    obj = sc.doc.Objects.Find(objref.ObjectId)\n    if obj is None or not isinstance(obj.Geometry, rg.Brep):\n        print(\"Skipping selection {}: not a Brep\".format(i))\n        continue\n\n    brep = obj.Geometry\n\n    # Match selected curve to BrepEdge\n    matched_edge = None\n    sel_start = sel_curve.PointAtStart\n    sel_end   = sel_curve.PointAtEnd\n\n    for e in brep.Edges:\n        e_start = e.PointAt(e.Domain.T0)\n        e_end   = e.PointAt(e.Domain.T1)\n        if (sel_start.DistanceTo(e_start) < 1e-8 and sel_end.DistanceTo(e_end) < 1e-8) or \\\n           (sel_start.DistanceTo(e_end)   < 1e-8 and sel_end.DistanceTo(e_start) < 1e-8):\n            matched_edge = e\n            break\n\n    if matched_edge is None:\n        print(\"Skipping selection {}: no matching edge found\".format(i))\n        continue\n\n    start_pt = matched_edge.PointAt(matched_edge.Domain.T0)\n    end_pt   = matched_edge.PointAt(matched_edge.Domain.T1)\n\n    # Determine bisector direction\n    vectors = []\n    for e in brep.Edges:\n        if e == matched_edge:\n            continue\n        e_start = e.PointAt(e.Domain.T0)\n        e_end   = e.PointAt(e.Domain.T1)\n        if e_start.DistanceTo(start_pt) < 1e-8:\n            v = e_end - start_pt\n        elif e_end.DistanceTo(start_pt) < 1e-8:\n            v = e_start - start_pt\n        else:\n            continue\n        v.Unitize()\n        vectors.append(v)\n\n    if vectors:\n        bisector = vectors[0]\n        for v in vectors[1:]:\n            bisector += v\n        bisector.Unitize()\n    else:\n        bisector = end_pt - start_pt\n        bisector.Unitize()\n\n    # Cylinder center\n    cyl_center = start_pt + bisector * inset\n\n    # Cylinder axis (along the edge)\n    edge_vec = end_pt - start_pt\n    edge_vec.Unitize()\n    edge_len = start_pt.DistanceTo(end_pt)\n\n    # Local plane for circle\n    x_axis = rg.Vector3d(bisector)\n    x_axis.Unitize()\n\n    z_axis = rg.Vector3d(edge_vec)\n    y_axis = rg.Vector3d.CrossProduct(z_axis, x_axis)\n    y_axis.Unitize()\n\n    x_axis = rg.Vector3d.CrossProduct(y_axis, z_axis)\n    x_axis.Unitize()\n\n    plane = rg.Plane(cyl_center, x_axis, y_axis)\n\n    if not plane.IsValid:\n        print(\"Skipping edge {}: invalid plane\".format(i))\n        continue\n\n    # Build cylinder\n    circle = rg.Circle(plane, radius)\n    cylinder = rg.Cylinder(circle, edge_len)\n    cyl_brep = cylinder.ToBrep(True, True)\n\n    sc.doc.Objects.AddBrep(cyl_brep)\n\n\nsc.doc.Views.Redraw()\nprint(\"Dogbone cylinders created for {} edges using bit diameter {}.\".format(go.ObjectCount, cyl_diameter))",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 22,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 32,
+  "views": 2283
+}

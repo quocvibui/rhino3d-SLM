@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/300x-speedup-by-porting-python-code-to-c-dll-with-ctypes-interface/63791",
+  "topic_id": 63791,
+  "title": "300X Speedup by Porting Python code to C++ DLL with ctypes interface",
+  "question": "@dale\n, \n@Helvetosaur\n\nI have a large mesh with 4.4 million faces.  It is a 3D model of a map created from 400 drone images.  I have colored the mesh using a Python script but it takes time to generate the vertex colors before I can apply the colors using:\n\n\nmeshVertexColors(mesh, colors)\n\n\nThe results look nice:\n\n\n\n\nDroneMap\n1276×783 504 KB\n\n\n\n\nbut can be painfully slow to iterate in order to bring focus on an area of interest:\n\n\n\n\nDrainageGuide\n1006×940 281 KB\n\n\n\n\nIf I moved generation of the colors array to C-code I think this could be much faster, perhaps less than a second.  I have read about using ctypes for interfacing to C-code from Python.  My question is, can I use the method you outlined in “Creating your first C/C++ plugin for Rhino” \nRhino - Creating your first C/C++ plugin for Rhino\n to compile my C-code and create a C-code dll library which I can then call from Python using a ctypes interface?\n\n\nI am worried about starting along the path of using your guide since it is targeted towards creation of a stand-alone C-code plugin.  But this seems like overkill if all I need is the dll which I can reference in Python using:\n\n\nimport ctypes\n# Load the shared library into c types.\nlibc = ctypes.CDLL(\"./myclib.so\")\n\n\n\nAny guidance you can provide would be much appreciated as I have not done any C-code work in the Rhino environment (or any other environment for that matter).  But I have programmed in many other languages and written 100,000+ lines of code.  So I am not too worried about the C-code it self but I am definitely concerned about getting the C-code complied and linked into a dll library which I can call from Python.\n\n\nI also have many other map types that could benefit from using a fast C-code function so learning how to do this would be of significant benefit.  My Drone Maps Python script is now 7300+ lines, works quite well and has a nice GUI:\n\n\n\n\nGUI\n338×707 166 KB\n\n\n\nBut it is painfully slow for some operations.\n\n\nI have already exploited the par...",
+  "code_blocks": [
+    {
+      "code": "\"\"\"\nMake a ShapeOp solver and solve a whole bunch of constraints!\n-\nAuthors: Anders Holden Deleuran (CITA/KADK), Mario Deuss (LGG/EPFL) \nGithub: github.com/AndersDeleuran/ShapeOpGHPython\nUpdated: 150402\n    Args:\n        ConstraintSigs: Signatures used for adding and editing constaints.\n        Points: Points which the solver will operate on. ConstraintSigs should be constructed using the indices of this list.\n        Settings: A list of settings which will be used to set up and run the solver..\n    Returns:\n        Iterations: The number of iterations the solver has run.\n        ConstraintCount: The total number of contraints which are being solved.\n        Points: The constrained points after solving.\n\"\"\"\n\nimport Rhino as rc\nimport ctypes as ct\nimport Grasshopper as gh\nfrom scriptcontext import sticky as st",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 4111
+}

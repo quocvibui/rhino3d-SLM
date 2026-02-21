@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rotate-modelgroups/212419",
+  "topic_id": 212419,
+  "title": "Rotate modelgroups",
+  "question": "Hello all, I generated modelgroups from grasshopper to revit, but after I generate it I want to rotate it?\n\n\nFirst I used the element location node but I hope it is possible to do it quicker.\n\n\nCan anybody help me?\n\n\nimage\n855×187 27.1 KB",
+  "code_blocks": [
+    {
+      "code": "import clr\nclr.AddReference(“RhinoCommon”)\nclr.AddReference(“RevitAPI”)\nclr.AddReference(“RevitAPIUI”)\nclr.AddReference(“RhinoInside.Revit”)\n\nfrom Rhino.Geometry import *\nfrom RhinoInside.Revit import Revit\nfrom Autodesk.Revit import DB\nfrom RhinoInside.Revit.Convert.Geometry import GeometryEncoder\n\ndoc = Revit.ActiveDBDocument\n\n# ---- Inputs provided by Grasshopper ----\n\n# Execute : bool\n\n# GroupType : DB.GroupType\n\n# Location : Point (Type Hint Point 3d)\n\nif not Execute:\nResult = None\nelse:\nt = DB.Transaction(doc, “Place Model Group”)\nt.Start()\ntry:\nResult =\n\n\n    # Convert Rhino point to Revit XYZ\n    xyz = GeometryEncoder.ToXYZ(Location)\n\n    # Place the model group at the specified location\n    group = doc.Create.PlaceGroup(xyz, GroupType)\n\n    # Output the created Group element\n    Result.append(group)\n\n    t.Commit()\nexcept Exception as e:\n    t.RollBack()\n    Result = str(e)",
+      "language": "python",
+      "author": "Muhammad_Saqlain_Awa",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 111,
+  "posts_count": 31,
+  "views": 171
+}

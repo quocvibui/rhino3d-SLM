@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_dotnetmovepointobjects.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_dotnetmovepointobjects.py",
+  "instruction": "Ex dotnetmovepointobjects",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Geometry import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  rc, obj_refs = RhinoGet.GetMultipleObjects(\"Select points to move\", False, ObjectType.Point)\n  if rc <> Result.Success or obj_refs == None:\n    return rc\n\n  gp = GetPoint()\n  gp.SetCommandPrompt(\"Point to move from\")\n  gp.Get()\n  if gp.CommandResult() <> Result.Success:\n    return gp.CommandResult()\n  start_point = gp.Point()\n\n  gp.SetCommandPrompt(\"Point to move to\")\n  gp.SetBasePoint(start_point, False)\n  gp.DrawLineFromPoint(start_point, True)\n  gp.Get()\n  if gp.CommandResult() <> Result.Success:\n    return gp.CommandResult()\n  end_point = gp.Point()\n\n  xform = Transform.Translation(end_point - start_point)\n\n  for obj_ref in obj_refs:\n    doc.Objects.Transform(obj_ref, xform, True)\n\n  doc.Views.Redraw()\n  return Result.Success\n  \nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

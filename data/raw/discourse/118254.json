@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-hatch-pattern-on-multiple-objects/118254",
+  "topic_id": 118254,
+  "title": "Python Hatch pattern on multiple objects",
+  "question": "Hi!  I’m very new to python and running into a probably simple error if anyone could help.  I’m trying to make a script to duplicate a hatch and assign layers and a new hatch pattern for the duplicate.  I’ve got the below worked out and it works great for a single hatch (ie I only hatch one square)  For some reason if I hatch multiple objects the last command rs.hatchpattern does not work, everything else functions but the hatchpattern does not seem to run on multiple inputs.\n\n\nThanks!  I’m probably missing something simple…\n\n\nimport rhinoscriptsyntax as rs\n\nrs.Command(\"_hatch\")\n\nhatches = rs.LastCreatedObjects()\n\nif hatches:\n\nrs.ObjectLayer(hatches, “NC_DRAFTING::HATCH::Hatch”)\n\nrs.CopyObject(hatches)\n\npoche = rs.LastCreatedObjects()\n\nrs.ObjectLayer(hatches, “NC_DRAFTING::HATCH::Poche-Light”)\n\nrs.HatchPattern(poche, “Solid”)\n\n\nthis is the error I get:\n\n\nMessage: Parameter must be a Guid or string representing a Guid\n\n\nTraceback:\n\nline 890, in coerceguid, “C:\\Users\\Nick_Work\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py”\n\nline 1062, in coercerhinoobject, “C:\\Users\\Nick_Work\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py”\n\nline 237, in HatchPattern, “C:\\Users\\Nick_Work\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\hatch.py”\n\nline 12, in , “C:\\Users\\Nick_Work\\AppData\\Local\\Temp\\TempScript.py”",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.Command(\"_Hatch\")\nhatches = rs.LastCreatedObjects()\nif hatches:\n    rs.ObjectLayer(hatches, \"NC_DRAFTING::HATCH::Hatch\")\n    rs.CopyObject(hatches)  #wrong\n    poche = rs.LastCreatedObjects()\n    rs.ObjectLayer(hatches, \"NC_DRAFTING::HATCH::Poche-Light\")\n    rs.HatchPattern(poche, \"Solid\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ncrvs=rs.GetObjects(\"Select curves to hatch\",rs.filter.curve,preselect=True)\nif crvs:\n    hatches=rs.AddHatches(crvs)\n    if hatches:\n        rs.ObjectLayer(hatches, \"NC_DRAFTING::HATCH::Hatch\")\n        poche=rs.CopyObjects(hatches)\n        rs.ObjectLayer(poche, \"NC_DRAFTING::HATCH::Poche-Light\")\n        for hatch in poche:\n            rs.HatchPattern(hatch,\"Solid\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.Command(\"_Hatch\")\nhatches = rs.LastCreatedObjects()\nif hatches:\n    rs.ObjectLayer(hatches, \"NC_DRAFTING::HATCH::Hatch\")\n    poche=rs.CopyObjects(hatches)\n    rs.ObjectLayer(poche, \"NC_DRAFTING::HATCH::Poche-Light\")\n    for hatch in poche: rs.HatchPattern(hatch, \"Solid\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#double hatch - poche and hatch\nimport rhinoscriptsyntax as rs\nif not rs.IsLayer(\"NC_DRAFTING::HATCH::Hatch\"): rs.AddLayer(\"NC_DRAFTING::HATCH::Hatch\")\nif not rs.IsLayer(\"NC_DRAFTING::HATCH::Poche-Light\"): rs.AddLayer(\"NC_DRAFTING::HATCH::Poche-Light\") \nrs.LayerColor(\"NC_DRAFTING::HATCH::Poche-Light\", (190,190,190))\nrs.Command(\"_hatch\")\nrs.EnableRedraw(False)\nhatches = rs.LastCreatedObjects()\nif hatches:\n    rs.ObjectLayer(hatches, \"NC_DRAFTING::HATCH::Hatch\")\n    poche = rs.CopyObjects(hatches)\n    rs.ObjectLayer(poche, \"NC_DRAFTING::HATCH::Poche-Light\")\n    for hatches in poche: rs.HatchPattern(hatches, \"Solid\")\n    rs.EnableRedraw(True)",
+      "language": "python",
+      "author": "nscross",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 493
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-recursively-split-curve-while-keeping-splits-and-removing-curves/86063",
+  "topic_id": 86063,
+  "title": "Ghpython recursively split curve while keeping splits and removing curves",
+  "question": "ghPythonRecursiveCurveSplit.gh\n (6.9 KB) I have a python script component that recursively splits a curve until the resulting curve segments are below a minimum limit. I am so close but am not sure how to take the final step. What I have now keeps all line segments. What I want is to only keep the last segments of each recursion, if that makes sense.\n\n\nNormalize the Curve.Domain to 0 to 1.0.\n\nSplit an curve at a given parameter.\n\nFor each of the resulting curves,\n\nif each is longer than the minimum,\n\nremove the curve from the list and split it at the parameter.\n\nadd results to list of curves to be split\n\nif each is shorter than the minimum, add them to the final result and do not add them to the list to be split.\n\n\n\n\nghPythonRecursiveCurveSplit\n1406×710 105 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport  Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th \n\ndef splitCurveByRatio(Curve,Ratio, Limit, outputCurves):\n    crv = rs.coercecurve(Curve,1)\n    if crv in outputCurves:\n        print(\"Removing\")\n        outputCurves.remove(crv)\n    crv.Domain = rg.Interval(0.0, 1.0)\n    cL = rs.CurveLength(crv)\n    newCrvs = rs.SplitCurve(crv, Ratio, delete_input=False)\n    #print splitCurves\n    if newCrvs:\n        for i in newCrvs:\n            if rs.CurveLength(i) >= Limit:\n                #print rs.CurveLength(i)\n                outputCurves.append(i)\n                splitCurveByRatio(i, Ratio, Limit, outputCurves)\n            else:\n                \n                return\n\nif r > 1.0:\n    r = 1.0/r\noutputList = []\nsplitCurveByRatio(C,r,L,outputList)",
+  "code_blocks": [
+    {
+      "code": "def splitCurveByRatio(Curve,Ratio, Limit, outputCurves):\n    crv = rs.coercecurve(Curve,1)\n    crv.Domain = rg.Interval(0.0, 1.0)\n    if crv.GetLength() >= Limit:\n        newCrvs = rs.SplitCurve(crv, Ratio, delete_input=False)\n        if rs.CurveLength(newCrvs[0])<Limit and rs.CurveLength(newCrvs[1])<Limit:\n            outputCurves.append(crv)\n            return\n        if rs.CurveLength(newCrvs[0])>=Limit:\n            splitCurveByRatio(newCrvs[0], Ratio, Limit, outputCurves)\n        if rs.CurveLength(newCrvs[1])>=Limit:\n            splitCurveByRatio(newCrvs[1], Ratio, Limit, outputCurves)",
+      "language": "python",
+      "author": "Will_Wang",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport  Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th \n\ndef splitCurveByRatio(Curve,Ratio, Limit, outputCurves):\n    crv = rs.coercecurve(Curve,1)\n    if crv in outputCurves:\n        print(\"Removing\")\n        outputCurves.remove(crv)\n    crv.Domain = rg.Interval(0.0, 1.0)\n    cL = rs.CurveLength(crv)\n    newCrvs = rs.SplitCurve(crv, Ratio, delete_input=False)\n    #print splitCurves\n    if newCrvs:\n        for i in newCrvs:\n            if rs.CurveLength(i) >= Limit:\n                #print rs.CurveLength(i)\n                outputCurves.append(i)\n                splitCurveByRatio(i, Ratio, Limit, outputCurves)\n            else:\n                \n                return\n\nif r > 1.0:\n    r = 1.0/r\noutputList = []\nsplitCurveByRatio(C,r,L,outputList)",
+      "language": "python",
+      "author": "jonahhawk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 2,
+  "views": 1118
+}

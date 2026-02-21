@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-fastest-move-camera-and-update-view-and-rs-redraw-bug/82052",
+  "topic_id": 82052,
+  "title": "Help: Fastest move camera and update view and rs.Redraw() bug?",
+  "question": "Hi guys, I am working on Holomark3 and really want a good way to manually control the camera and target and update the view in the same speed as rs.\n\n\nHere are my results from this test:\n\n\nTurn on/off EnableRedraw: 3.43\n\n\nUsing rs.Redraw(): 10.14\n\n\nUsing Rhino.Display.RhinoView Redraw: 3.33\n\n\nViewSpeedTest 1 frame at a time: 3.33\n\n\nAs you can see it is much (3x!) faster to turn redraw off and on than to just call redraw, is that a bug?\n\nNote: I’m on a laptop with a 750m on this test. Simple cube in wireframe.\n\n\nAnd the built in testmaxspeed is done in 1.6 seconds…\n\nCould I achive something similar in Python if I moved the camera along a path?\n\n(I can get good results with rs.ViewSpeedTest() by setting the target and only moving a segment of a circle, but I would like even more freedom \n )\n\n\nAnd here is the code:\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport time\nimport scriptcontext\n\nview=rs.CurrentView()\n\ncamera1=(50,-50,50)\ncamera2=(-50,-50,50)\ntarget1=(0,0,0)\ntarget2=(0,0,0)\n\ntime1=time.time()\nfor i in range(100):\n    rs.EnableRedraw(False)\n    rs.ViewCameraTarget(view,camera1, target1)\n    rs.EnableRedraw(True)\n    rs.EnableRedraw(False)\n    rs.ViewCameraTarget(view,camera2, target2)\n    rs.EnableRedraw(True)\ntime2=time.time()\nprint \"Turn on/off EnableRedraw:\",round(time2-time1,2)\n\ntime1=time.time()\nfor i in range(100):\n    rs.ViewCameraTarget(view,camera1, target1)\n    rs.Redraw()\n    rs.ViewCameraTarget(view,camera2, target2)\n    rs.Redraw()\ntime2=time.time()\nprint \"Using rs.Redraw():\",round(time2-time1,2)\n\nview2 = scriptcontext.doc.Views.ActiveView\n\ntime1=time.time()\nfor i in range(100):\n    rs.ViewCameraTarget(view,camera1, target1)\n    rs.Sleep(0)\n    Rhino.Display.RhinoView.Redraw(view2)\n    rs.ViewCameraTarget(view,camera2, target2)\n    rs.Sleep(0)\n    Rhino.Display.RhinoView.Redraw(view2)\ntime2=time.time()\nprint \"Using Rhino.Display.RhinoView Redraw:\",round(time2-time1,2)\n\ntime1=time.time()\nfor i in range(100):\n    rs.ViewSpeedTest(view, frames=1,...",
+  "code_blocks": [
+    {
+      "code": "Turn on/off EnableRedraw: 5.13\nUsing rs.Redraw(): 16.0\nUsing Rhino.Display.RhinoView Redraw: 3.33\nViewSpeedTest 1 frame at a time: 3.33",
+      "language": "unknown",
+      "author": "Jarek",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport inspect\n\nprint inspect.getsource(rs.Redraw)\nprint inspect.getsource(rs.EnableRedraw)",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "def Redraw():\n    \"Redraws all views\"\n    old = scriptcontext.doc.Views.RedrawEnabled\n    scriptcontext.doc.Views.RedrawEnabled = True\n    scriptcontext.doc.Views.Redraw()\n    Rhino.RhinoApp.Wait()\n    scriptcontext.doc.Views.RedrawEnabled = old\n\ndef EnableRedraw(enable=True):\n    \"\"\"Enables or disables screen redrawing\n    Returns: previous screen redrawing state\n    \"\"\"\n    old = scriptcontext.doc.Views.RedrawEnabled\n    if old!=enable: scriptcontext.doc.Views.RedrawEnabled = enable\n    return old",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport time\nimport scriptcontext as sc\n\nrs.Command(\"_-TestMaxSpeed VerticalSync=Disabled FrameCount=1 _Enter\")\n\nsegments=100\n\ndef CameraAlongCurve(segments):\n    \n    curve=rs.GetObject(\"Select CameraCurve\",rs.filter.curve)\n    if not curve: return\n    \n    rs.HideObject(curve)\n    \n    target=(0,0,0)\n    camPts=rs.DivideCurve(curve,segments)\n    view=rs.CurrentView()\n    view2 = sc.doc.Views.ActiveView\n    \n    initCamTarPos=rs.ViewCameraTarget(view)\n    \n    time1=time.time()\n    for i in range(segments):\n        rs.ViewCameraTarget(view,camPts[i], target)\n        rs.Sleep(0)\n        Rhino.Display.RhinoView.Redraw(view2)\n    \n    time2=time.time()\n    \n    rs.ViewCameraTarget(view,initCamTarPos[0],initCamTarPos[1])\n    rs.ShowObject(curve)\n    \n    return round(time2-time1,2)\n\nrunTime=CameraAlongCurve(segments)\n\nprint \"Redrawing\",segments,\"frames took\",runTime,\"seconds @\",round(segments/runTime,1),\"FPS\"",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport time\nimport scriptcontext\n\nview=rs.CurrentView()\n\ncamera1=(50,-50,50)\ncamera2=(-50,-50,50)\ntarget1=(0,0,0)\ntarget2=(0,0,0)\n\ntime1=time.time()\nfor i in range(100):\n    rs.EnableRedraw(False)\n    rs.ViewCameraTarget(view,camera1, target1)\n    rs.EnableRedraw(True)\n    rs.EnableRedraw(False)\n    rs.ViewCameraTarget(view,camera2, target2)\n    rs.EnableRedraw(True)\ntime2=time.time()\nprint \"Turn on/off EnableRedraw:\",round(time2-time1,2)\n\ntime1=time.time()\nfor i in range(100):\n    rs.ViewCameraTarget(view,camera1, target1)\n    rs.Redraw()\n    rs.ViewCameraTarget(view,camera2, target2)\n    rs.Redraw()\ntime2=time.time()\nprint \"Using rs.Redraw():\",round(time2-time1,2)\n\nview2 = scriptcontext.doc.Views.ActiveView\n\ntime1=time.time()\nfor i in range(100):\n    rs.ViewCameraTarget(view,camera1, target1)\n    rs.Sleep(0)\n    Rhino.Display.RhinoView.Redraw(view2)\n    rs.ViewCameraTarget(view,camera2, target2)\n    rs.Sleep(0)\n    Rhino.Display.RhinoView.Redraw(view2)\ntime2=time.time()\nprint \"Using Rhino.Display.RhinoView Redraw:\",round(time2-time1,2)\n\ntime1=time.time()\nfor i in range(100):\n    rs.ViewSpeedTest(view, frames=1, direction=0, angle_degrees=45)\n    rs.ViewSpeedTest(view, frames=1, direction=1, angle_degrees=45)\ntime2=time.time()\nprint \"ViewSpeedTest 1 frame at a time:\",round(time2-time1,2)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 22,
+  "views": 1701
+}

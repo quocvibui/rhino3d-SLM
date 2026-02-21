@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sdk-rhino-inside-c-executecommand-and-headless-mode/208135",
+  "topic_id": 208135,
+  "title": "SDK Rhino.Inside C++: ‘ExecuteCommand()’ and headless mode",
+  "question": "Hello there!\n\n\nI am running an executable that fires commands locally with Rhino.Inside for C++ in headless mode (with the hope of deploying it in CI server):\n\n\nCRhinoCreateDocumentOptions options;\noptions.SetCreateHeadless(true);\nint doc_runtime_serial_number = CRhinoDoc::CreateDocument(nullptr, &options);\nCRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(doc_runtime_serial_number);\n\n\n\nNow, I noticed that if I run my commands with:\n\n\npDoc->ExecuteCommand(cmdName);\n\n\n\nIt works, but if I run with:\n\n\npDoc->RunScript(cmdName, 1);\n\n\n\nIt throws an error. \nHow come?\n\n\nIn the SDK interface it’s also written that the \nExecutedCommand()\nwill be dropped in future..",
+  "code_blocks": [
+    {
+      "code": "CRhinoCommand::result CCommandcmake4rhino::RunCommand(const CRhinoCommandContext& context)\n{\n  ...\n\n  // Testing text input\n  CRhinoGetString gs;\n  gs.SetCommandPrompt(L\"Testing input\");\n  gs.GetString();\n  if (gs.CommandResult() != CRhinoCommand::success)\n    return gs.CommandResult();\n  ON_wString block_name = gs.String();\n  block_name.TrimLeftAndRight();\n  if (block_name.IsEmpty())\n    return CRhinoCommand::cancel;\n\n\n  // add a simple curve circle to test geometries\n  ON_3dPoint center(0, 0, 0);\n  double radius = 10.0;\n  ON_Circle circle( center, radius );\n  ON_ArcCurve arc_curve( circle );\n  CRhinoCurveObject* curve_object = context.m_doc.AddCurveObject( arc_curve );\n  context.m_doc.Redraw();\n\n  ...\n}",
+      "language": "csharp",
+      "author": "andrea.settimi",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#include <gtest/gtest.h>\n\n#include \"pch.h\"\n#include \"RhinoCore.h\"\n\nTEST(TEST_INTEGRATION_CommandsSuite, MyIntegrationTest) {\n    CRhinoCreateDocumentOptions options;\n    options.SetCreateHeadless(true);\n    int doc_runtime_serial_number = CRhinoDoc::CreateDocument(nullptr, &options);\n    CRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(doc_runtime_serial_number);\n\n    const wchar_t* cmdName = L\"!_cmake4rhino \\\"test\\\" _Enter\";\n    bool resCmd = pDoc->ExecuteCommand(cmdName);\n\n    ASSERT_TRUE(resCmd);\n}",
+      "language": "csharp",
+      "author": "andrea.settimi",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "CRhinoCreateDocumentOptions options;\noptions.SetCreateHeadless(true);\nint doc_runtime_serial_number = CRhinoDoc::CreateDocument(nullptr, &options);\nCRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(doc_runtime_serial_number);",
+      "language": "unknown",
+      "author": "andrea.settimi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 118
+}

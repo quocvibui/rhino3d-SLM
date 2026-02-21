@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/chamfer-two-untouched-curves-with-python/85427",
+  "topic_id": 85427,
+  "title": "Chamfer two untouched curves with python",
+  "question": "Hi, i’m trying to make a script for chamfer with sharp corner between two untouched curves (Linear Curve), so my thought is to first extend the curves with recursion until they touch and have the intersection parameter to split and keep the wanted curves.\n\n\nSo far i’m trying to get the CurveCurveIntersection() point with no luck, i’m a starter in python so maybe i’m doing something wrong with recursion, the code is this:\n\n\nimport rhinoscriptsyntax as rs\n\n\nif crvA and crvB:\n\n\ndef extCrv(d):\n\textCrvA = rs.ExtendCurveLength(crvA, 0, 2, d)\n\textCrvB = rs.ExtendCurveLength(crvB, 0, 2, d)\n\tintPnt = rs.CurveCurveIntersection(extCrvA, extCrvB, tolerance=0)\n\tlenCrvA = rs.CurveLength(extCrvA)\n\tlenCrvB = rs.CurveLength(extCrvB)\n\t\n\tif intPnt == None:\n\t\tprint(d)\n\t\tprint(lenCrvA)\n\t\tprint(lenCrvB)\n\t\textCrv(d+1)\n\t\n\tres = [extCrvA, extCrvB, intPnt, lenCrvA, lenCrvB]\n\treturn res\n\ncrv = extCrv(0)\n\n\n\nThe problem is that the crv output give me the two correct extended curves but not the intersection point (“null”), and for demonstration purposes, the curve lengths are wrong to.\n\nI’m not sure if recursion is the right way to do it because i try loops and if statements and can’t find the way.\n\nIt seems that the intersection point and lengths are not updating to the last recursion  operation but why does the curves geometry are?\n\n\nCan anyone help with the right way to code it?\n\nThanks!\n\n\nChamferTest.gh\n (10.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef extend_lines(line_a, line_b):\n    \"\"\"Extends two lines to a common intersection point.\n    \n    Args:\n      line_a: A first line to extend.\n      line_b: A second line to extend.\n    \n    Returns:\n      The extended lines, or None is both input lines are parallel.\n    \"\"\"\n    # Intersect both lines\n    intersect = rs.LineLineIntersection(line_a, line_b)\n    if intersect != None:\n        # Get the intersection points on both lines\n        int_pt_a = rs.AddPoint(intersect[0])\n        int_pt_b = rs.AddPoint(intersect[1])\n        # Find the line a end point that is not extended\n        dist_a1 = rs.Distance(int_pt_a, rs.CurveStartPoint(line_a))\n        dist_a2 = rs.Distance(int_pt_a, rs.CurveEndPoint(line_a))\n        if dist_a1 > dist_a2:\n            start_pt_a = rs.CurveStartPoint(line_a)\n        else:\n            start_pt_a = rs.CurveEndPoint(line_a)\n        # Find the line b end point that is not extended\n        dist_b1 = rs.Distance(int_pt_b, rs.CurveStartPoint(line_b))\n        dist_b2 = rs.Distance(int_pt_b, rs.CurveEndPoint(line_b))\n        if dist_b1 > dist_b2:\n            start_pt_b = rs.CurveStartPoint(line_b)\n        else:\n            start_pt_b = rs.CurveEndPoint(line_b)\n        # Construct the new lines\n        ext_line_a = rs.AddLine(start_pt_a, int_pt_a)\n        ext_line_b = rs.AddLine(start_pt_b, int_pt_b)\n        return ext_line_a, ext_line_b\n        \n  \nLines = extend_lines(LineA, LineB)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def extCrv(d):\n\textCrvA = rs.ExtendCurveLength(crvA, 0, 2, d)\n\textCrvB = rs.ExtendCurveLength(crvB, 0, 2, d)\n\tintPnt = rs.CurveCurveIntersection(extCrvA, extCrvB, tolerance=0)\n\tlenCrvA = rs.CurveLength(extCrvA)\n\tlenCrvB = rs.CurveLength(extCrvB)\n\t\n\tif intPnt == None:\n\t\tprint(d)\n\t\tprint(lenCrvA)\n\t\tprint(lenCrvB)\n\t\textCrv(d+1)\n\t\n\tres = [extCrvA, extCrvB, intPnt, lenCrvA, lenCrvB]\n\treturn res\n\ncrv = extCrv(0)",
+      "language": "python",
+      "author": "constructoradicons",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 1255
+}

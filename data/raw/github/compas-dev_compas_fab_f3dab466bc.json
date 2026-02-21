@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_fab/blob/431e82c810ea299b9727b010b73a39abc73c5d62/src/compas_fab/ghpython/components/Cf_FrameTargetFromPlane/code.py",
+  "repo": "compas-dev/compas_fab",
+  "repo_stars": 124,
+  "repo_description": "Robotic fabrication package for the COMPAS Framework.",
+  "license": "MIT",
+  "filepath": "src/compas_fab/ghpython/components/Cf_FrameTargetFromPlane/code.py",
+  "instruction": "Create a fully constrained pose target for the robot's end-effector using a GH Plane or compas Frame.",
+  "code": "\"\"\"\nCreate a fully constrained pose target for the robot's end-effector using a GH Plane or compas Frame.\n\nCOMPAS FAB v1.0.2\n\"\"\"\n\nimport math\n\nfrom compas_rhino.conversions import plane_to_compas_frame\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom compas.geometry import Frame\nfrom compas_fab.robots import FrameTarget\n\n\nclass FrameTargetFromPlaneComponent(component):\n    def RunScript(\n        self, plane, tolerance_position, tolerance_xaxis, tolerance_yaxis, tolerance_zaxis, tool_coordinate_frame\n    ):\n        target = None\n        if plane:\n            # Convert Rhino geometry to COMPAS geometry\n            frame = plane\n            if not isinstance(frame, Frame):\n                frame = plane_to_compas_frame(frame)\n            if not isinstance(tool_coordinate_frame, Frame):\n                tool_coordinate_frame = plane_to_compas_frame(tool_coordinate_frame)\n\n            # Tolerance values\n            DEFAULT_TOLERANCE_METERS = 0.001\n            DEFAULT_TOLERANCE_RADIANS = math.radians(1)\n            tolerance_position = tolerance_position or DEFAULT_TOLERANCE_METERS\n            tolerance_xaxis = tolerance_xaxis or DEFAULT_TOLERANCE_RADIANS\n            tolerance_yaxis = tolerance_yaxis or DEFAULT_TOLERANCE_RADIANS\n            tolerance_zaxis = tolerance_zaxis or DEFAULT_TOLERANCE_RADIANS\n            tolerance_orientation = [\n                (tolerance_xaxis),\n                (tolerance_yaxis),\n                (tolerance_zaxis),\n            ]\n\n            target = FrameTarget(frame, tolerance_position, tolerance_orientation, tool_coordinate_frame)\n\n        return target\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

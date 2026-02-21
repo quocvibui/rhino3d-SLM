@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/JonasWard/rrreefs_coral_feet/blob/77bba94e384d86412ef3d63e638b56c408737270/grasshopper/design/volume.py",
+  "repo": "JonasWard/rrreefs_coral_feet",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "grasshopper/design/volume.py",
+  "instruction": "Volume",
+  "code": "from Rhino.Geometry import Point3d, Mesh, Transform, Plane\n\n# class VertexFaceMesh():\n#     def __init__(self, vs, fs):\n#         self.vs = vs\n#         self.fs = fs\n\n#     def rhino_mesh(self):\n#         msh = Mesh()\n\ndef pedistle(top_box_side = 500., side_h = 150., side_w = 150., top_shift = 0.):\n    msh = Mesh()\n    h_l = top_box_side * .5\n\n    half_pi = 1.5707963268\n\n    pts = [\n        Point3d(h_l + side_w, h_l + side_w, 0.),\n        Point3d(h_l - top_shift, h_l - top_shift, side_h - top_shift),\n        Point3d(h_l - top_shift, h_l - top_shift, top_box_side + side_h - top_shift)\n    ]\n\n    for i in range(4):\n        angle = half_pi * i\n\n        t_matrix = Transform.Rotation(angle, Point3d.Origin)\n\n        for pt in pts:\n            loc_pt = Point3d(pt)\n            loc_pt.Transform(t_matrix)\n            msh.Vertices.Add(loc_pt)\n\n    cnt = len(msh.Vertices)\n\n    for i in range(4):\n        # print(i*3+0, i*3+1, ((i+1)*3+1)%len(pts), ((i+1)*3+0)%len(pts))\n        msh.Faces.AddFace(i*3+0, i*3+1, ((i+1)*3+1)%cnt, ((i+1)*3+0)%cnt)\n        msh.Faces.AddFace(i*3+1, i*3+2, ((i+1)*3+2)%cnt, ((i+1)*3+1)%cnt)\n\n    msh.Faces.AddFace(0, 3, 6, 9)\n    msh.Faces.AddFace(11, 8, 5, 2)\n\n    return msh\n\ndef top_box(top_box_side = 500., side_h = 150., side_w = 150., top_shift = 0.):\n    return box(\n        top_box_side - top_shift * 2.0,\n        side_h - top_shift,\n        top_box_side + side_h - top_shift\n    )\n\ndef box(w, b_0, b_1):\n    msh = Mesh()\n    h_l = w * .5\n\n    half_pi = 1.5707963268\n\n    pts = [\n        Point3d(h_l, h_l, b_0),\n        Point3d(h_l, h_l, b_1)\n    ]\n\n    for i in range(4):\n        angle = half_pi * i\n\n        t_matrix = Transform.Rotation(angle, Point3d.Origin)\n\n        for pt in pts:\n            loc_pt = Point3d(pt)\n            loc_pt.Transform(t_matrix)\n            msh.Vertices.Add(loc_pt)\n\n    for i in range(4):\n        msh.Faces.AddFace(i*2+0, i*2+1, ((i+1)*2+1)%8, ((i+1)*2+0)%8)\n\n    msh.Faces.AddFace(0, 2, 4, 6)\n    msh.Faces.AddFace(7, 5, 3, 1)\n\n    return msh\n\ndef pedistle_with_tolerance(top_box_side = 500., side_w = 150., side_h = 150., extra_b_h = 100., top_shift = 0.):\n    total_b_h = side_h+extra_b_h\n    total_w = side_w*total_b_h/side_h\n\n    return (\n        pedistle(top_box_side, total_b_h, total_w, top_shift),\n        box(top_box_side+2.*side_w, extra_b_h, total_b_h+top_box_side+side_h)\n    )\n\ndef print_mesh(msh):\n    str_list = [\"Vertices:\"]\n    for v in msh.Vertices:\n        str_list.append('\\t'+str(v))\n    \n    str_list.append(\"Faces:\")\n    for f in msh.Faces:\n        str_list.append('\\t'+str(f))\n\n    return '\\n'.join(str_list)\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

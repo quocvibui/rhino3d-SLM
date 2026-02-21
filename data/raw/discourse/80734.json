@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/animate-rhino-viewport-with-rhino-python/80734",
+  "topic_id": 80734,
+  "title": "Animate Rhino Viewport with Rhino Python?",
+  "question": "Hi everybody,\n\n\nIs it possible to animate the Rhino viewport with Python in order to run, for example a simulation that you can follow in real time, instead of seeing just the outcome. I’m currently looking for a Rhino Python solution without grasshopper!\n\n\nA simple example would be a moving point that is - each frame or iteration - randomly displaced, and its movement can be seen live in the Rhino viewport.\n\n\nI tried this, but it didn’t really work:\n\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport random\nimport time\n\nrun_time = 10\n\npt = rg.Point3d(0.0, 0.0, 0.0)\n\nfor t in range(run_time):\n    vec = rg.Vector3d(random.random(), random.random(), 0.0)\n    pt += vec\n    pt_id = rs.AddPoint(pt)\n    time.sleep(.25)\n    if t < run_time - 1:\n        rs.DeleteObject(pt_id)\n\n\n\nGetting the timing right is nearly impossible and creating, then deleting objects each frame is probably not very clever either!\n\n\nAny suggestions?\n\n\nUpdate (March 25th, 2019):\n\n\nWindows:\n\n\nThe \nscript\n, kindly provided by \n@clement\n below, mostly works on Rhino v5 and v6 for Windows.\n\n\nmacOS:\n\n\nForced\n viewport animations are currently not possible in Rhino for Mac v5 (5.5.3 or lower). They seems to be working in the current v6 (WIP), though.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\nclass MyConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, index, points):\n        self.index = index\n        self.points = points\n        self.color = System.Drawing.Color.Red\n\n    def PostDrawObjects(self, e):\n        e.Display.DrawPoint(self.points[self.index], self.color)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "def DoSomething():\n    \n    crv_id = rs.GetObject(\"Select a curve\", 4, True, False)\n    if not crv_id: return\n    \n    points = rs.DivideCurve(crv_id, 100, False, True)\n    \n    conduit = MyConduit(0, points)\n    conduit.Enabled = True\n    \n    for i in xrange(len(points)):\n        if scriptcontext.escape_test(False): break\n        \n        rs.Prompt(\"Frame {}\".format(i))\n        \n        conduit.index = i\n        scriptcontext.doc.Views.ActiveView.Redraw()\n        \n        rs.Sleep(25)\n    \n    conduit.Enabled = False\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport System\nimport Rhino\n\nclass MyConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, index, points):\n        self.index = index\n        self.points = points\n\n    def PostDrawObjects(self, e):\n        e.Display.DrawPoint(self.points[self.index], System.Drawing.Color.Red)\n\ndef DoSomething():\n\n    crv_id = rs.GetObject(\"Select a curve\", 4, True, False)\n    if not crv_id: return\n\n    points = rs.DivideCurve(crv_id, 100, False, True)\n\n    conduit = MyConduit(0, points)\n    conduit.Enabled = True\n\n    for i in xrange(len(points)):\n        if scriptcontext.escape_test(False): break\n\n        #rs.Prompt(\"Frame {}\".format(i)) # does not work somehow\n        print \"Frame {}\".format(i) # this works instead\n\n        conduit.index = i\n        scriptcontext.doc.Views.ActiveView.Redraw()\n\n        rs.Sleep(25)\n\n    conduit.Enabled = False\n\nDoSomething()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 24,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\nprint \"Hello World\"",
+      "language": "python",
+      "author": "clement",
+      "post_number": 30,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport random\nimport time\n\nrun_time = 10\n\npt = rg.Point3d(0.0, 0.0, 0.0)\n\nfor t in range(run_time):\n    vec = rg.Vector3d(random.random(), random.random(), 0.0)\n    pt += vec\n    pt_id = rs.AddPoint(pt)\n    time.sleep(.25)\n    if t < run_time - 1:\n        rs.DeleteObject(pt_id)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 45,
+  "views": 2947
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/chirs/scripting/blob/034149e72701259a18ec5a34208a294dba6a9b7b/src/py/lightning.py",
+  "repo": "chirs/scripting",
+  "repo_stars": 1,
+  "repo_description": "an exploration into the borders of computing and architecture ->  computational geometry, scripting culture and parametrics",
+  "license": "unknown",
+  "filepath": "src/py/lightning.py",
+  "instruction": "Lightning",
+  "code": "import math\nimport random\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\n\nif seed is not None:\n\trandom.seed(seed)\n\nstart = rg.Point3d(0,0,0)\n\npoints = [start]\ncurve_list = []\nthicknesses = []\ncircles = []\n\ndegrees = 180\n\n\ndef point_from_vector(start, direction, scale):\n\tx, y = [scale * op(direction) for op in (math.sin, math.cos)]\n\treturn rs.PointAdd(start, rg.Point3d(x, 0, y))\n\t\n\t\ndef split_thickness(t):\n\treturn [t / 2.0, t / 2.0]\n\t\n\ndef scale_vector(v, scale):\n\treturn [scale * e for e in v] \n\ndef get_new_point(p):\n\tradians = (2 * math.pi) * degrees / 360.0\n\tdirection = random.uniform(-1/2.0 * radians, radians / 2.0)\n\tnp = point_from_vector(p, direction, stride)\n\treturn np\n\t\ndef get_circle(p, steps):\n\t\n\tstep = xsteps - steps\n\t\n\theight = step * stride\n\t\n\tif step == 0:\n\t\tscaled_radius = .01\n\telse:\n\t\tscaled_radius = step * radius\n\t\n\tcenter = rg.Point3d(0,0, height)\n\t\n\t\n\t\n\trotation = random.uniform(0, 2 * math.pi)\n\t\n\tnormal_vector= rs.PointSubtract(rg.Point3d(0,0,1), rg.Point3d(0,0,0))\n\tnormal_plane = rs.PlaneFromNormal(center, normal_vector)\n\tcircle = rs.AddCircle(normal_plane, scaled_radius)\n\tcircles.append(circle) \n\treturn circle\n\t\n\t\n\n\ndef loop(steps, parent, thickness):\n\t\n\tif steps == 0:\n\t\treturn\n\t\t\n\tnew_point = get_new_point(parent)\n\tget_circle(parent, steps)\n\t\t\n\tc = rs.AddCurve([parent, new_point])\n\tcurve_list.append(c)\n\tthicknesses.append(thickness)\n\tpoints.append(new_point)\n\t\t\n\tif random.random() < split:\n\t\tt1, t2 = split_thickness(thickness)\n\t\tloop(steps - 1, new_point, t1)\n\t\tloop(steps - 1, rg.Point3d(new_point), t2)\n\telse:\n\t\tloop(steps - 1, new_point, thickness)\n\t\t\nloop(xsteps, start, 1.0)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

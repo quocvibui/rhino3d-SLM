@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-an-object-through-rhino-module-like-rhinoscriptsyntax-selectobject/78426",
+  "topic_id": 78426,
+  "title": "Select an object through Rhino module like rhinoscriptsyntax.SelectObject()",
+  "question": "I want to select an object I have in brep format. How can I do this using Rhino module or rhinoscriptsyntax module?\n\n\n@pascal",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\n\n    \ndef SelectAnEdge():\n    \n    go = Rhino.Input.Custom.GetObject()\n    go.DisablePreSelect()\n    go.SetCommandPrompt(\"Select an edge\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.EdgeFilter\n    \n    result = go.Get()\n    \n    if( go.CommandResult() != Rhino.Commands.Result.Success ):\n        return\n        \n    if result == Rhino.Input.GetResult.Object:\n        objref = go.Object(0)\n        idx = objref.GeometryComponentIndex.Index\n        Id = objref.ObjectId\n        brep = objref.Brep()\n        edge = brep.Edges[idx]\n        edgeCrv = edge.ToNurbsCurve()\n        \n        \nSelectAnEdge()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsrf_A_GUID = rs.AddSrfPt(([-5,-5,0],[5,-5,0],[5,5,0],[-5,5,0]))\nsrf_B_GUID = rs.AddSrfPt(([15,5,5],[25,5,5],[25,-5,5],[15,-5,5]))\n\nedgeGuid_A = rs.AddLine([5,-5,0], [5,5,0]) \nedgeGuid_B = rs.AddLine([15,-5,5], [15,5,5])\n\nbrep_A = rs.coercebrep(srf_A_GUID)\nbrep_B = rs.coercebrep(srf_B_GUID)\n\nface_A = brep_A.Faces[0]\nfor edge in brep_A.Edges:\n    edgeMid = edge.ToNurbsCurve().PointAtNormalizedLength(0.5)\n    edgeGuidMid = rs.CurveMidPoint(edgeGuid_A)\n    if edgeMid.DistanceTo(edgeGuidMid) == 0:\n        edge_A = edge\nival_A = edge_A.ToNurbsCurve().Domain\ncont_A = Rhino.Geometry.BlendContinuity.Curvature\n\nface_B = brep_B.Faces[0]\nfor edge in brep_B.Edges:\n    edgeMid = edge.ToNurbsCurve().PointAtNormalizedLength(0.5)\n    edgeGuidMid = rs.CurveMidPoint(edgeGuid_B)\n    if edgeMid.DistanceTo(edgeGuidMid) == 0:\n        edge_B = edge\nival_B = edge_B.ToNurbsCurve().Domain\ncont_B = Rhino.Geometry.BlendContinuity.Curvature\n\nrcs = Rhino.Geometry.Brep.CreateBlendSurface(face_A, edge_A, ival_A, True, cont_A, face_B, edge_B, ival_B, True, cont_B)\nfor rc in rcs:\n    sc.doc.Objects.AddBrep(rc)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 9,
+  "views": 1082
+}

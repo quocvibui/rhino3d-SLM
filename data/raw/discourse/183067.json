@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pdf-by-python-script-ignores-japanese-text-in-rhino-8/183067",
+  "topic_id": 183067,
+  "title": "PDF by python script ignores Japanese text in Rhino 8",
+  "question": "Hi. I have a Python script to export a Rhino layout to PDF.\n\nIn the script, I add some text to PDF page.\n\nIt works fine in Rhino7 both with alphabet and with Japanese font.\n\nHowever, in Rhino8 Japanese text is ignored while English one comes out as is.\n\n\nIn Rhino7:\n\n\nimage\n1584×1123 11.7 KB\n\nIn Rhino8:\n\n\nimage\n1587×1124 3.52 KB\n\n\nIf I place a Japanese text object in the layout, it is exported properly.\n\nThat is to say, font is not the problem and issue seems to be in PDF creation in Python.\n\n\nHere is my code.\n\nYou can test with Rhino 3dm which has A3 size layout named “Main Layout”\n\n\n# -*- coding: utf-8 -*-\n\n# RhinoPythonコードを使用してレイアウトのPDFファイルをエクスポートする\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport System.Drawing\nimport scriptcontext as sc\n\n\n# レイアウトをPDFとしてエクスポートする関数\ndef export_layout_as_pdf(layout_name, file_path, dpi=300):\n    # レイアウトを取得\n    layout = sc.doc.Views.Find(layout_name, False)\n    if layout is None:\n        print(\"指定されたレイアウトが見つかりません: \" + layout_name)\n        return\n\n    # PDFファイルを作成\n    pdf = Rhino.FileIO.FilePdf.Create()\n    size = System.Drawing.Size(16.53 * dpi, 11.69 * dpi)  # A3サイズ\n\n    # レイアウトの設定\n    view_settings = Rhino.Display.ViewCaptureSettings(layout, size, dpi)\n    view_settings.RasterMode = True\n    view_settings.OutputColor = Rhino.Display.ViewCaptureSettings.ColorMode.DisplayColor\n    # PDFにページを追加\n    pdf.AddPage(view_settings)\n\n    text_font = Rhino.DocObjects.Font(\"Meiryo\")\n    text_holizontal_alignment = Rhino.DocObjects.TextHorizontalAlignment(1)\n    text_display_alignment = Rhino.DocObjects.TextVerticalAlignment(4)\n    clr = rs.CreateColor(0,0,0)\n    pdf.DrawText(\n            1, \"ENGLISH 日本語\", 16.53*dpi/2, 11.69*dpi*(92/100), 36, text_font,\n            clr, clr, 0, 0, text_holizontal_alignment,\n            text_display_alignment\n    )\n\n    # PDFファイルを書き出し\n    pdf.Write(file_path)\n    print(\"PDFがエクスポートされました: \" + file_path)\n\n\n# 使用例\nexport_layout_as_pdf(\"Main Layout\", \"C:/Users/vicc_ishihara/Desktop/output.pdf\")",
+  "code_blocks": [
+    {
+      "code": "# -*- coding: utf-8 -*-\n\n# RhinoPythonコードを使用してレイアウトのPDFファイルをエクスポートする\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport System.Drawing\nimport scriptcontext as sc\n\n\n# レイアウトをPDFとしてエクスポートする関数\ndef export_layout_as_pdf(layout_name, file_path, dpi=300):\n    # レイアウトを取得\n    layout = sc.doc.Views.Find(layout_name, False)\n    if layout is None:\n        print(\"指定されたレイアウトが見つかりません: \" + layout_name)\n        return\n\n    # PDFファイルを作成\n    pdf = Rhino.FileIO.FilePdf.Create()\n    size = System.Drawing.Size(16.53 * dpi, 11.69 * dpi)  # A3サイズ\n\n    # レイアウトの設定\n    view_settings = Rhino.Display.ViewCaptureSettings(layout, size, dpi)\n    view_settings.RasterMode = True\n    view_settings.OutputColor = Rhino.Display.ViewCaptureSettings.ColorMode.DisplayColor\n    # PDFにページを追加\n    pdf.AddPage(view_settings)\n\n    text_font = Rhino.DocObjects.Font(\"Meiryo\")\n    text_holizontal_alignment = Rhino.DocObjects.TextHorizontalAlignment(1)\n    text_display_alignment = Rhino.DocObjects.TextVerticalAlignment(4)\n    clr = rs.CreateColor(0,0,0)\n    pdf.DrawText(\n            1, \"ENGLISH 日本語\", 16.53*dpi/2, 11.69*dpi*(92/100), 36, text_font,\n            clr, clr, 0, 0, text_holizontal_alignment,\n            text_display_alignment\n    )\n\n    # PDFファイルを書き出し\n    pdf.Write(file_path)\n    print(\"PDFがエクスポートされました: \" + file_path)\n\n\n# 使用例\nexport_layout_as_pdf(\"Main Layout\", \"C:/Users/vicc_ishihara/Desktop/output.pdf\")",
+      "language": "python",
+      "author": "takahiro.ishihara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 322
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-transparency-for-objects-individually/29149",
+  "topic_id": 29149,
+  "title": "Set transparency for objects individually",
+  "question": "Lets say I have a complex closed polysrf that defines a region and I want to manipulate/move objects within it while making sure that the objects stay within the region. Is there any way to ghost out closed polysrf so that it is still there as a reference, but transparent enough to see through it (so I can see and select the objects). It is also preferable that when I click on an object that the region is not possible to select, since I don’t want to deal with the selection menu every time I select the objects.\n\n\nI know there is a transparency option in the display options, but I don’t want everything to be transparent.\n\n\nI know that I could apply a transparent material, but I’m looking for something closer to the hide/unhide function.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef LockAndGhost():\n    objects = rs.GetObjects(\"Select object to lock\",0 , True, True)\n    if objects is None: \n        return\n    else:\n        rs.EnableRedraw(False)\n        for object in objects:\n            rs.SelectObject(object)\n            rs.Command(\"_SetObjectDisplayMode Mode=Ghost\", False)\n            rs.LockObject(object)\n        rs.EnableRedraw(True)\n\nif __name__ == \"__main__\":\n    LockAndGhost()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef UnLockAndUnghost():\n    objects = rs.AllObjects()\n    if objects is None:\n        return\n    else:\n        rs.EnableRedraw(False)\n        for object in objects:\n            if rs.IsObjectLocked(object):\n                rs.UnlockObject(object)\n                rs.SelectObject(object)\n                rs.Command(\"_SetObjectDisplayMode _Mode=UseView _Enter\", False)\n        rs.EnableRedraw(True)\n    rs.UnselectAllObjects()\n\nif __name__ == \"__main__\":      \n    UnLockAndUnghost()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 5,
+  "views": 19865
+}

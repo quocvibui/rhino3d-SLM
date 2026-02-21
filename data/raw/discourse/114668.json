@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino7-ghpython-runtime-error-unable-to-add-line/114668",
+  "topic_id": 114668,
+  "title": "Rhino7 GHPython Runtime Error: Unable to add line",
+  "question": "I’m new to GHPython and getting the following error:\n\n\nRuntime error (PythonException): Unable to add line to document\n\n\nTraceback:\n\nline 482, in AddLine, “C:\\Users\\Leo\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\curve.py”\n\nline 70, in script\n\n\nThe problematic line of code:\n\n\n\npath = rs.AddLine(point_last, point_current)\n\n\n\nAny suggestions?\n\n\nI’ve searched forums, but not found any solutions.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nline = rs.AddLine((1, 2, 3), (10, 11, 12))\na = line",
+      "language": "python",
+      "author": "LeoPedersen",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\nline = rs.AddLine((1, 2, 3), (10, 11, 12))\na = line\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "christopher.ho",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport inspect\n\nprint inspect.getsource(rs.AddLine)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "def AddLine(start, end):\n    \"\"\"Adds a line curve to the current model.\n    Parameters:\n      start, end (point|guid) end points of the line\n    Returns:\n      guid: id of the new curve object\n    Example:\n      import rhinoscriptsyntax as rs\n      start = rs.GetPoint(\"Start of line\")\n      if start:\n          end = rs.GetPoint(\"End of line\")\n          if end: rs.AddLine(start, end)\n    See Also:\n      CurveEndPoint\n      CurveStartPoint\n      IsLine\n    \"\"\"\n    start = rhutil.coerce3dpoint(start, True)\n    end = rhutil.coerce3dpoint(end, True)\n    rc = scriptcontext.doc.Objects.AddLine(start, end)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add line to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\npt1 = rg.Point3d(0, 1, 0)\npt2 = rg.Point3d(0, 1, 0)\nline = rg.Line(pt1, pt2)\n\nif not line.IsValid:\n    raise RuntimeError(\"This is not a valid line\")\n\n# Output\na = rg.LineCurve(line)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 2930
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/can-automate-selection-be-divided-by-grid-line-centre/204302",
+  "topic_id": 204302,
+  "title": "Can Automate selection be divided by Grid Line Centre?",
+  "question": "There are so many commands of Selection [Sel],such  as  “sel block , sel volume, sel polsrf” etc.Is it possible  to select left sided or right sided objects of the grid line centre,or above or bottom objects of the grid line[C Plane]?",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# deselect all objects\nrs.UnselectAllObjects()\n\n# allow user to select some objects\nguids = rs.GetObjects('Select objects')\n\n# get bounding box for each object\n# (note: each bounding box is a list of points)\nbboxes = []\nfor guid in guids:\n    bbox = rs.BoundingBox(guid)\n    bboxes.append(bbox)\n\n# see if each bounding box's points are on left side of Y axis\n# and collect the corresponding GUIDs so that those objects can be selected later\n# (note: an object on the left side of the Y axis will have an X value less than zero)\ngood_guids = []\nfor i in range(len(bboxes)):\n    bbox = bboxes[i]\n    on_wrong_side = False\n    for point in bbox:\n        if point[0] >= 0:\n            # point is on wrong side of axis\n            on_wrong_side = True\n            break\n    # collect object if not on wrong side of axis\n    if not on_wrong_side:\n        good_guids.append(guids[i])\n\n# select the \"good\" objects (the objects that passed the test above)\nrs.SelectObjects(good_guids)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef select_direction():\n\tpoint = rs.GetPoint(\"base point\")\n\tif not point:\n\t\tprint(\"Cancel\")\n\t\treturn\n\tdirection = rs.GetPoint(\"direction\", point)\n\tif not direction:\n\t\tprint(\"Cancel\")\n\t\treturn\n\t\n\torigin = point\n\tnormal = rs.ViewCPlane().ZAxis\n\txaxis = direction - point\n\tplane = rs.PlaneFromNormal(origin, normal, xaxis)\n\n\trs.SelectObjects([obj for obj in rs.NormalObjects() if rs.BoundingBox(obj, plane, False)[0].X >= 0])\n\nselect_direction()",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef select_direction():\n    point = rs.GetPoint(\"base point\")\n    if not point:\n        print(\"Cancel\")\n        return\n    direction = rs.GetPoint(\"direction\", point)\n    if not direction:\n        print(\"Cancel\")\n        return\n    \n    origin = point\n    normal = rs.ViewCPlane().ZAxis\n    xaxis = direction - point\n    plane = rs.PlaneFromNormal(origin, normal, xaxis)\n\n    rs.SelectObjects([obj for obj in rs.NormalObjects() if rs.BoundingBox(obj, plane, False)[0].X >= 0])\n\nselect_direction()",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 7,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 153
+}

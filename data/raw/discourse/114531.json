@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/efficient-and-stable-way-to-compute-moments-of-nurbs-curve/114531",
+  "topic_id": 114531,
+  "title": "Efficient and stable way to compute moments of NURBS curve",
+  "question": "Good morning everyone,\n\n\nI’m currently working on something, where I’d like to make use of the rhinoinside for python from Rhino 7.\n\n\n\n\n\n\nWhat do I want to do\n\nModelling a 2D - NURBS - Curve starting from the cartesian origin at (0.00,0.00), going on in the (x,y)-plane and integrating it from x = 0 to a variable upperBound x to get the area and the centroid (1st moment). A *.gh script is attached for reference. \nintegrateNurbsCurveFromZeroToUpperBound.gh\n (17.2 KB)\n\n\n\n\n\n\nHow do I do it\n\nSince RhinoCommon only provides AreaMassProperties for closed curves, the intersection of a vertical Line at the upperBound x starting from the x - axis with the NURBS curve is computed via an optimization problem. While I am totally aware of the CurveLineIntersection capabilities of RhinoCommon, this is the easier way for this application. After determining the point of intersection and projecting it down to the x-axis, a horizontal Line from the origin to the upperBound is created. The NURBS - Curve is trimmed after obtaining the curve parameter, where the intersection takes place. All Curves are put into a list and joined subsequently, allowing me to obtain the moments.\n\n\n\n\n\n\nWhere is the problem?\n\nWhile above mentioned approach works for polynomial degree = 1 perfectly fine, the joinCuves() method does not seem to work properly when degree > 1 returning an empty array. Hence computing the AreaMassProperties fails. The point of Intersection on the curve still seems correct, but joining fails.\n\n\n\n\n\n\nRemarks on the code attached\n\n\n\n\n\n\n\n\nStrain is the x - axis, Stress is the y - axis, parametricStrain is the curve parameter\n\n\nIntersection is computed with scipy and brentq()\n\n\nRun it with degree = 1, it returns the correct area = 2.5 for integration between 0 and x = 2.00\n\n\nRun it with degree = 2, it returns     print(‘areaMassProperties.Area:\\t\\t’,areaMassProperties2.Area) AttributeError: ‘NoneType’ object has no attribute ‘Area’\n\n\n\n\n\n\nWhat would I like to know?\n\n\n\n\n\n\nWhat is the bes...",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\nx = [0.00,0.00,2.00 ]\ny = [0.00,2.00,2.00 ]\nw = [1.00,1.00,1.00 ]\n\npointCount  = 3\ndegree      = 1\n\nnumAllKnots = pointCount + degree - 1\nnumExtKnots = degree\nnumIntKnots = numAllKnots - 2 * degree\n\nif degree >= pointCount:\n    raise ValueError('curveDegree must be less than numberControlPoints')\n\nnc = Rhino.Geometry.NurbsCurve(dimension = 2, rational = True, order =  degree + 1, pointCount = pointCount)\nnc.Knots.CreateUniformKnots(1/(numIntKnots+1))\n\nfor i in range(nc.Points.Count):\n    nc.Points.SetPoint(index = i, x = x[i], y = y[i], z = 0.0)\n    nc.Points.SetWeight(index = i, weight = w[i])\n\npts0 = Rhino.Collections.Point3dList(initialCapcity = 3)\nref = nc.PointAt(nc.Domain.Max)\npts0.Add(ref.X, ref.Y, 0.0)\npts0.Add(ref.X, 0.0,  0.0)\npts0.Add(0.0, 0.0, 0.0)\n\npl0 = Rhino.Geometry.PolylineCurve(pts0)\n\notherList = Rhino.Collections.CurveList(initialCapacity = 2)\notherList.Add(nc)\notherList.Add(pl0)\n\njoinedCurve = Rhino.Geometry.Curve.JoinCurves(otherList, tolerance = 1E-6, preserveDirection = False)\nprint(joinedCurve)\nprint(joinedCurve[0])",
+      "language": "python",
+      "author": "dn.aur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino.Geometry as rg\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom scipy import optimize as opt\nimport datetime\nplt.close('all')\n\n\n\nx = [0.00, 1.00, 2.00,  3.0,  4.0,  5.0]\ny = [0.00, 2.00, 1.00 ,15.0, 10.0, 20.0]\n\npointCount  = 5\ndegree      = 1 #change this to 2\n\nnc = rg.NurbsCurve(dimension = 2, rational = True, order =  degree + 1, pointCount = pointCount)\n\nnumAllKnots = pointCount + degree - 1\nnumExtKnots = degree\nnumIntKnots = numAllKnots - 2 * degree\ndidSucceed = nc.Knots.CreateUniformKnots(1/(numIntKnots+1))\n\nfor k in nc.Knots:\n    print(k)\n\nfor i in range(nc.Points.Count):\n    nc.Points.SetPoint(index = i, x = x[i], y = y[i], z = 0.0)\n    nc.Points.SetWeight(index = i, weight = 1.0)\n\nprint('nc.Domain.Min:\\t', nc.Domain.Min)\nprint('nc.Domain.Max:\\t', nc.Domain.Max)\nprint('nc.IsValid:\\t', nc.IsValid)\nprint('nc.SpanCount:\\t', nc.SpanCount)\n\nt = np.linspace(nc.Domain.Min, nc.Domain.Max,101)\nfor i in t:\n    pt = nc.PointAt(t = i)\n    plt.scatter(x = pt.X, y = pt.Y)\n\n#----------------------------------------------------------------------\ndef getParametricStrain(realStrain):\n    def checkParametricStrain(assumedParametricStrain):\n        return realStrain - nc.PointAt(assumedParametricStrain).X #realStrainResidual\n    parametricStrain = opt.brentq(checkParametricStrain, a = nc.Domain.Min, b = nc.Domain.Max)\n    return parametricStrain\n\n#------------------------------------------------------------------------\nrealStrain = 2.00\n\nparametricStrain = getParametricStrain(realStrain)\nresidualStrain = realStrain - nc.PointAt(parametricStrain).X\nrealStress = nc.PointAt(parametricStrain).Y\n\ncurrentDomain = rg.Interval(0.0,parametricStrain)\ncurrentNurbsCurve = nc.Trim(currentDomain)\n\npointOnCurve = rg.Point3d(realStrain,realStress,0.0)\nprojectedPoint = rg.Point3d(realStrain,0.0,0.0)\norigin = rg.Point3d(0.0,0.0,0.0)\n\nauxVertical   = rg.LineCurve(pointOnCurve, projectedPoint)\nauxHorizontal   = rg.LineCurve(projectedPoint, origin)\n\ncrv = System.Collections.Generic.List\\[rg.Curve\\]() \ncrv.Add(currentNurbsCurve)\ncrv.Add(auxVertical.ToNurbsCurve())\ncrv.Add(auxHorizontal.ToNurbsCurve())\n\njoinedCurve = rg.Curve.JoinCurves(crv)\nareaMassProperties2 = rg.AreaMassProperties.Compute(joinedCurve, area = True, firstMoments = True, secondMoments = False, productMoments = False)\n\nprint('----------------------------------------------------------------------')\nprint('areaMassProperties.Area:\\t\\t',areaMassProperties2.Area)\nprint('areaMassProperties.AreaError:\\t\\t',areaMassProperties2.AreaError)\nprint('areaMassProperties.Centroid:\\t\\t',areaMassProperties2.Centroid.X)\nprint('areaMassProperties.CentroidError:\\t',areaMassProperties2.CentroidError.X)\nprint('----------------------------------------------------------------------')",
+      "language": "python",
+      "author": "dn.aur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 927
+}

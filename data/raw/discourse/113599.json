@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-and-working-with-kinks-in-rhinocommon/113599",
+  "topic_id": 113599,
+  "title": "Creating and Working with Kinks in RhinoCommon",
+  "question": "I’m interested in implementing a similar functionality to Rhino’s InsertKink command.  However, I’d like to be able to nominate an existing row of controls points as a kink, rather than inserting three new rows of control points, the middle of which is the kink.\n\n\nIs there a way in RhinoCommon to detect if a control point / grip (or row of them) is a kink?  Is there a way to create a kink in RhinoCommon?  In my searching the API docs I have not found this yet.\n\n\nI am aware you can create a kink one by piling three control points on top of each other, but I’d like to minimize the number of control points in the surfaces I’m working with.\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.DocObjects\nimport Rhino.Geometry as RG\nimport Rhino.Input as RI\nimport rhinoscriptsyntax as rs\n\ndoc = Rhino.RhinoDoc.ActiveDoc\n\n# Create a base surface to mess with\nsrf1 = RG.NurbsSurface.CreateFromPoints([\n    RG.Point3d(0,0,0),\n    RG.Point3d(0,1,0),\n    RG.Point3d(0,1,1),\n    \n    RG.Point3d(0.5,0,0),\n    RG.Point3d(0.5,1,0),\n    RG.Point3d(0.5,1,1.5),\n    \n    RG.Point3d(1,0,0),\n    RG.Point3d(1,1,0),\n    RG.Point3d(1,1,2)\n    ], 3, 3, 2, 2)   \n\nguid = doc.Objects.AddBrep(srf1.ToBrep(), None, None, False, False )\ndoc.Views.Redraw()\n\n# Rebuild it\nsuccess = rs.RebuildSurface(guid, (3,3), (11,11))\nif not success:\n    print('Rats')\n\nrhobj = Rhino.RhinoDoc.ActiveDoc.Objects.FindId(guid)\n\nbrep = rhobj.Geometry\nsrf1 = brep.Faces[0].ToNurbsSurface()\nsrf = brep.Faces[0].ToNurbsSurface()\n\nprint('yay')\n\n# ---------------------------------------\n# Modify the knot vector\nvv = 5 # index of parameter to turn into a kink\nsrf.KnotsV[vv - 1] = vv - 3\nsrf.KnotsV[vv] = vv - 3\nsrf.KnotsV[vv + 1] = vv - 3\n\n# Decrement knot values to the right of the one we are looking at\nfor i in range(vv + 2, srf.KnotsV.Count):\n    srf.KnotsV[i] -= 2\n# ---------------------------------------\n\nprint(\"U Knot Vector: \", \" \".join(srf.KnotsU[i].ToString() for i in range(srf.KnotsU.Count)))\n\nprint(\"Old V Knot Vector: \", \" \".join(srf1.KnotsV[i].ToString() for i in range(srf1.KnotsV.Count)))\nprint(\"New V Knot Vector: \", \" \".join(srf.KnotsV[i].ToString() for i in range(srf.KnotsV.Count)))\n\ndoc.Objects.AddBrep(srf.ToBrep(), None, None, False, False )\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "bradlcampbell",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 564
+}

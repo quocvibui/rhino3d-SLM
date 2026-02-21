@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/instancedefinition-nested-blocks/210797",
+  "topic_id": 210797,
+  "title": "InstanceDefinition & nested blocks",
+  "question": "Hi there,\n\n\nJust starting to use Rhino3d .net package to parse 3dm files. Later, my goal will be to develop a Rhino plugin (with Rhino.Common) to get the tree structure of the active model. I don’t know if a such plugin exists.\n\n\nRhino3d .net package works quite fine, but I still encounter some problems :\n\n\n\n\n\n\nI can’t see how to match an object (in AllObjects) with his block \nInstanceDefinition\n. Each object.Attributes has a \nbool IsInstanceDefinitionObject\n, but i can’t see any InstanceDefinitionIndex. The goal is to “assemble” objects by block.\n\n\n\n\n\n\nMoreover i can’t see how to explore blocks recursively when it comes with nested blocks. The Instance definition object need to have a \nInstanceDefinitionIndex\n to be able to rebuild the hiearchy.\n\n\n\n\n\n\nI can’t see how to get the xform transformation of an InstanceDefinition. I can see xform object when debugging, but the attribute is not accessible !\n\n\n\n\n\n\nHow to get the group index of an object ? I can see \nAttributes.GetGroupList()\n, why a list ? A solid can be in more than one group ?\n\n\n\n\n\n\ngroup.Name\n does’t not match the right name set in Rhino, I always get “GroupXX”. I figure out the group name is on the solid. The name of the group is on its objects, so that the real object’s name is replaced by the group’s name.\n\n\n\n\n\n\nHow to deal with groups inside blocks…?\n\n\nThanks for helping.",
+  "code_blocks": [
+    {
+      "code": "﻿using Rhino;\nusing Rhino.Commands;\nusing Rhino.DocObjects;\n\nnamespace SampleCsCommands\n{\n  public class SampleCsDumpBlockTree : Command\n  {\n    public override string EnglishName => \"SampleCsDumpBlockTree\";\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      Rhino.DocObjects.Tables.InstanceDefinitionTable idef_table = doc.InstanceDefinitions;\n      int idef_count = idef_table.ActiveCount;\n      if (0 == idef_count)\n      {\n        RhinoApp.WriteLine(\"SampleDumpBlockTree\");\n        return Result.Success;\n      }",
+      "language": "csharp",
+      "author": "nathanletwory",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 102,
+  "posts_count": 7,
+  "views": 142
+}

@@ -1,0 +1,54 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-use-rhino-ui-progressbar-in-rhino-8/212016",
+  "topic_id": 212016,
+  "title": "How to use Rhino.UI.ProgressBar in Rhino 8",
+  "question": "Hi,\n\n\nWe are in the progress of upgrading our plugin from Rhino 7 to Rhino 8. There seem to be some differences in how the Rhino.UI.ProgressBar works in Rhino 8.\n\n\nFor example, the code below works just fine in Rhino 7. Basically it will show an update message and pause for 500ms so you can see it.\n\n\nRhino.UI.StatusBar.HideProgressMeter();\nvar count = 100;\nvar message = \"Test\";\nvar result = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" (0/{count})\", true, true);\n\nfor (int i = 0; i < count; i++)\n{\n\tSystem.Threading.Thread.Sleep(500);\n\tRhino.UI.StatusBar.HideProgressMeter(); // The line below won't work unless you hide the current message first.\n\tresult = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" ({i + 1}/{count})\", true, true);\n\tresult = Rhino.UI.StatusBar.UpdateProgressMeter(i + 1, true);\n\t\n}\nRhino.UI.StatusBar.HideProgressMeter();\n\n\n\nHowever, in Rhino 8 this code doesn’t work at all. Reviewed the latest RhinoCommon documentation and \ndeveloper guides\n for some clues. It seems that using \nRhinoApp.Wait()\n or \nEto.Forms.Application.Instance.RunInstance()\n are need in order to update the correct thread. I’m guessing that something changed to how UI updates are handled in Rhino 8.\n\n\nThe code below has been updated so it works again.\n\n\nRhino.UI.StatusBar.HideProgressMeter();\nvar count = 100;\nvar message = \"Test\";\nvar result = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" (0/{count})\", true, true);\n\nfor (int i = 0; i < count; i++)\n{\n\tSystem.Threading.Thread.Sleep(500);\n\tRhino.UI.StatusBar.HideProgressMeter(); // The line below won't work unless you hide the current message first.\n\tresult = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" ({i + 1}/{count})\", true, true);\n\tresult = Rhino.UI.StatusBar.UpdateProgressMeter(i + 1, true);\n\tEto.Forms.Application.Instance?.RunIteration(); // RhinoApp.Wait() has a similar effect.\n\n}\nRhino.UI.StatusBar.HideProgressMeter();\n\n\n\nThis does bring the progress panel back again. But the...",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\nimport System\n\ndef test_progressbar():\n    sn = sc.doc.RuntimeSerialNumber\n    low = 0\n    high = 100\n    percent = False\n    Rhino.UI.StatusBar.ShowProgressMeter(sn, low, high, \"Starting\", True, percent)\n    for i in range(low, high + 1):\n        Rhino.RhinoApp.Wait()\n        System.Threading.Thread.Sleep(100)\n        if i == 25:\n            Rhino.UI.StatusBar.UpdateProgressMeter(\"Calculating\", i, True)\n        elif i == 50:\n            Rhino.UI.StatusBar.UpdateProgressMeter(\"Processing\", i, True)\n        elif i == 75:\n            Rhino.UI.StatusBar.UpdateProgressMeter(\"Finishing\", i, True)\n        else:\n            Rhino.UI.StatusBar.UpdateProgressMeter(i, True)\n    System.Threading.Thread.Sleep(1000)\n    Rhino.UI.StatusBar.HideProgressMeter(sn)\n\nif __name__ == \"__main__\":\n    test_progressbar()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\nimport System\n\ndef test_progressbar():\n    low = 0\n    high = 100\n    count = 100;\n    message = \"Test\";\n    result = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + f\" (0/{count})\", True, True);\n    for i in range(low, high + 1):\n        System.Threading.Thread.Sleep(500);\n        Rhino.UI.StatusBar.HideProgressMeter();\n        Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + f\" ({i + 1}/{count})\", True, True);\n        Rhino.UI.StatusBar.UpdateProgressMeter(i + 1, True);\n        Rhino.RhinoApp.Wait();\n    System.Threading.Thread.Sleep(1000)\n    Rhino.UI.StatusBar.HideProgressMeter()\n\nif __name__ == \"__main__\":\n    test_progressbar()",
+      "language": "python",
+      "author": "SK-Structurecraft",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport System\n\ndef test_progressbar():\n    low = 0\n    high = 100\n    message = \"Test\";\n    result = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + f\" (0/{high})\", True, True)\n    for i in range(low, high):\n        System.Threading.Thread.Sleep(100)\n        Rhino.UI.StatusBar.UpdateProgressMeter(message + f\" ({i + 1}/{high})\", i + 1, True)\n        Rhino.RhinoApp.Wait();\n    System.Threading.Thread.Sleep(500)\n    Rhino.UI.StatusBar.HideProgressMeter()\n\nif __name__ == \"__main__\":\n    test_progressbar()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 9,
+      "is_solution": true
+    },
+    {
+      "code": "var count = 100;\nvar message = \"Test\";\nvar result = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" (0/{count})\", true, true);\n\nfor (int i = 0; i < count; i++)\n{\n\tSystem.Threading.Thread.Sleep(500);\n\tRhino.UI.StatusBar.HideProgressMeter(); // The line below won't work unless you hide the current message first.\n\tresult = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" ({i + 1}/{count})\", true, true);\n\tresult = Rhino.UI.StatusBar.UpdateProgressMeter(i + 1, true);\n\tEto.Forms.Application.Instance?.RunIteration(); // RhinoApp.Wait() has a similar effect.\n\n}\nRhino.UI.StatusBar.HideProgressMeter();",
+      "language": "csharp",
+      "author": "SK-Structurecraft",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino.UI.StatusBar.HideProgressMeter();\nvar count = 100;\nvar message = \"Test\";\nvar result = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" (0/{count})\", true, true);\n\nfor (int i = 0; i < count; i++)\n{\n\tSystem.Threading.Thread.Sleep(500);\n\tRhino.UI.StatusBar.HideProgressMeter(); // The line below won't work unless you hide the current message first.\n\tresult = Rhino.UI.StatusBar.ShowProgressMeter(0, 100, message + @$\" ({i + 1}/{count})\", true, true);\n\tresult = Rhino.UI.StatusBar.UpdateProgressMeter(i + 1, true);\n\tEto.Forms.Application.Instance?.RunIteration(); // RhinoApp.Wait() has a similar effect.\n\n}\nRhino.UI.StatusBar.HideProgressMeter();",
+      "language": "csharp",
+      "author": "SK-Structurecraft",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 195
+}

@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-xformchangebasis-returning-wrong-transform/108121",
+  "topic_id": 108121,
+  "title": "rs.XformChangeBasis() returning wrong transform",
+  "question": "Hi there,\n\n\nI have the following model…\n\n\ngrafik\n1388×737 26.8 KB\n\n\nNow maybe I completely misunderstand the concept of rs.XformChangeBasis(), because when I try this:\n\n\nobj = rs.ObjectsByName(\"test\")[0]\nx = rs.WorldXYPlane()[1]\ny = rs.WorldXYPlane()[2]\nz = rs.WorldXYPlane()[3]\n\npt = [0,0,0]\npln1 = rs.PlaneFromFrame(pt, y, z)\npln2 = rs.PlaneFromFrame(pt, x, y)\n\nplane_transform = rs.XformChangeBasis(pln2, pln1)\ntransformed = rs.TransformObject(obj, plane_transform, copy=False)\n\n\n\nthe output is the following:\n\n\ngrafik\n1381×738 28.7 KB\n\nSo far this is what I wanna achieve.\n\n\nBut when I try to transform it ot another plane like that:\n\n\nobj = rs.ObjectsByName(\"test\")[0]\n\nx = rs.WorldXYPlane()[1]\ny = rs.WorldXYPlane()[2]\nz = rs.WorldXYPlane()[3]\npt = [0,0,0]\n\npln1 = rs.PlaneFromFrame(pt, y, z)\npln2 = rs.PlaneFromFrame(pt, x, z)\n\nplane_transform = rs.XformChangeBasis(pln2, pln1)\ntransformed = rs.TransformObject(obj, plane_transform, copy=False)\n\n\n\nIt seems to orient it to a completely other plane (y/reverse x).\n\n\ngrafik\n1384×743 29.4 KB\n\n\nWhat am I missing or what do I understand the wrong way?\n\n\nThanks in advance,\n\nT.",
+  "code_blocks": [
+    {
+      "code": "obj = rs.ObjectsByName(\"test\")[0]\nx = rs.WorldXYPlane()[1]\ny = rs.WorldXYPlane()[2]\nz = rs.WorldXYPlane()[3]\npt = [0,0,0]\n\npln0 = rs.PlaneFromFrame(pt, x, y)\npln1 = rs.PlaneFromFrame(pt, y, z)\npln2 = rs.PlaneFromFrame(pt, x, z)\n\nplane_transform = rs.XformChangeBasis(pln0, pln1)\ntransformed = rs.TransformObject(obj, plane_transform, copy=False)\n\nplane_transform = rs.XformChangeBasis(pln2, pln0)\ntransformed = rs.TransformObject(transformed, plane_transform, copy=False)",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\ntransformed = rg.Transform.PlaneToPlane(pln1, frm)\nresult = rs.TransformObject(obj, transformed, copy=True)",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "obj = rs.ObjectsByName(\"test\")[0]\nx = rs.WorldXYPlane()[1]\ny = rs.WorldXYPlane()[2]\nz = rs.WorldXYPlane()[3]\n\npt = [0,0,0]\npln1 = rs.PlaneFromFrame(pt, y, z)\npln2 = rs.PlaneFromFrame(pt, x, y)\n\nplane_transform = rs.XformChangeBasis(pln2, pln1)\ntransformed = rs.TransformObject(obj, plane_transform, copy=False)",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "obj = rs.ObjectsByName(\"test\")[0]\n\nx = rs.WorldXYPlane()[1]\ny = rs.WorldXYPlane()[2]\nz = rs.WorldXYPlane()[3]\npt = [0,0,0]\n\npln1 = rs.PlaneFromFrame(pt, y, z)\npln2 = rs.PlaneFromFrame(pt, x, z)\n\nplane_transform = rs.XformChangeBasis(pln2, pln1)\ntransformed = rs.TransformObject(obj, plane_transform, copy=False)",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 1026
+}

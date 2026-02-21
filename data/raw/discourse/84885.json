@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-check-if-a-group-has-been-deleted/84885",
+  "topic_id": 84885,
+  "title": "How to check if a group has been deleted?",
+  "question": "I’m using \nsc.doc.ActiveDoc.Groups\n to get the group table.\n\n\nthen I want to check if the user has deleted a group, but:\n\n\nsc.doc.ActiveDoc.Groups.IsDeleted(sc.doc.ActiveDoc.Groups.Find(group.Name))\n\n\nwill not mark the groups as deleted, unless I purge the groups.\n\n\nIs there another way to do this?\n\n\nEventually my goal is to add numbered groups to the document, but if the user deletes or undo the operation, I want this to affect my counter. So the idea is to get the list of groups and check the numbers if there is a free ‘slot’. For example: if user adds 3 groups and deletes nr. 2, the next number should 2 instead of 4",
+  "code_blocks": [
+    {
+      "code": "if scriptcontext.doc.Groups.GroupObjectCount(group_index) == 0:\n    is_deleted = True\nelse:\n    is_deleted = False",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\n\ndef DoSomething():\n    for group in scriptcontext.doc.Groups:\n        rc = scriptcontext.doc.Groups.FindId(group.Id)\n        print rc\n        \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nif sc.doc.Groups.Count > 0:\n    sc.doc.Groups.Delete(0)\n    for index in range(sc.doc.Groups.Count):\n        group = sc.doc.Groups.FindIndex(index)\n        rc = sc.doc.Groups.IsDeleted(index)\n        if rc:\n            print \"Deleted Name:\", group.DeletedName\n        else:\n            print \"Name:\", group.Name",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 16,
+  "views": 1533
+}

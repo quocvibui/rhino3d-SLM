@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_sweep1.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_sweep1.py",
+  "instruction": "Ex sweep1",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef Sweep1():\n    rail = rs.GetObject(\"Select rail curve\", rs.filter.curve)\n    rail_crv = rs.coercecurve(rail)\n    if not rail_crv: return\n\n    cross_sections = rs.GetObjects(\"Select cross section curves\", rs.filter.curve)\n    if not cross_sections: return\n    cross_sections = [rs.coercecurve(crv) for crv in cross_sections]\n\n    sweep = Rhino.Geometry.SweepOneRail()\n    sweep.AngleToleranceRadians = scriptcontext.doc.ModelAngleToleranceRadians\n    sweep.ClosedSweep = False\n    sweep.SweepTolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    sweep.SetToRoadlikeTop()\n    breps = sweep.PerformSweep(rail_crv, cross_sections)\n    for brep in breps: scriptcontext.doc.Objects.AddBrep(brep)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    Sweep1()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

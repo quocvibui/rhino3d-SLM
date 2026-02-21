@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rc-makedeformable-question/208427",
+  "topic_id": 208427,
+  "title": "RC MakeDeformable() question",
+  "question": "I assumed that \nMakeDeformable\nwould be able to be applied to any kind of geometry - as that is its purpose and it inherits from \nGeometryBase\n:\n\n\nhttps://developer.rhino3d.com/api/rhinocommon/rhino.geometry.geometrybase/makedeformable#()\n\n\nHowever, that does not appear to be the case for objects such as arcs, circles and ellipses.  Running this simple code on the circle object in the file below does not make it deformable.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ncrv_id=rs.GetObject(\"Select curve\",4,preselect=True)\nif crv_id:\n    crv=rs.coercecurve(crv_id)\n    plane=Rhino.Geometry.Plane.WorldXY\n    xform=Rhino.Geometry.Transform.PlanarProjection(plane)\n    check=crv.MakeDeformable()\n    crv.Transform(xform)\n    sc.doc.Objects.AddCurve(crv)\n    sc.doc.Views.Redraw()\n    print(\"Result of MakeDeformable={}\".format(check))\n\n\n\nMakeDeformable-Not.3dm\n (2.8 MB)\n\n\nI can of course convert the circle \nToNurbsCurve\n or use some other workaround, but that defeats the purpose. I then have to special-case arcs, circles, ellipses etc. in my code - which should run on any curve.  Why isn’t \nMakeDeformable\n designed to work correctly in this case?\n\n\nPlus, of course, \nMakeDeformable\n is listed as a method under \nArcCurve\n…\n\n\nimage\n1114×429 42.4 KB",
+  "code_blocks": [
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino;\nusing Rhino.Geometry;\nusing Rhino.DocObjects;\n\nvoid AddTransformedGeometryBase(GeometryBase geo, Transform xform, string info)\n{\n    if (! geo.IsDeformable)\n    {\n        RhinoApp.WriteLine(\"{0} is not deformable\",info);\n        if (!geo.MakeDeformable())\n        {\n            RhinoApp.WriteLine(\"{0} could not make deformable\",info);\n            return;\n        } else\n        {\n            RhinoApp.WriteLine(\"{0} made deformable\",info);\n        }\n    }\n    // isDeformable\n    if (geo.Transform(xform))\n    {\n        RhinoDoc.ActiveDoc.Objects.Add(geo);\n    } else \n    {\n        RhinoApp.WriteLine(\"{0} transform failed\", info);\n    }\n}\n\nPlane plXY = Plane.WorldXY;\nSphere sphere = new Sphere(plXY,10);\nTransform xform = Transform.Scale(plXY,1,2,3);\n// via brep\nBrep brepSphere = sphere.ToBrep();\nAddTransformedGeometryBase(brepSphere,xform,\"brepSphere\");\n\n// via surface of revolution\nRevSurface revSrfSphere = RevSurface.CreateFromSphere(sphere);\nAddTransformedGeometryBase(revSrfSphere,xform,\"revSrfSphere\");",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino;\nusing Rhino.Geometry;\nusing Rhino.DocObjects;\n\nCircle circ = new Circle(Plane.WorldXY, 10);\nArcCurve arc = new ArcCurve(circ);\n\nPolyCurve pCrv = new PolyCurve();\npCrv.AppendSegment(arc);\nRhinoDoc.ActiveDoc.Objects.AddCurve(pCrv);\nif (pCrv.MakeDeformable())\n{\n    RhinoApp.WriteLine(\"made PolyCurve deformable\");\n}\nif (arc.MakeDeformable())\n{\n    RhinoApp.WriteLine(\"made ArcCurve deformable\");\n} else\n{\n    RhinoApp.WriteLine(\"ArcCurve NOT deformable\");\n}",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ncrv_id=rs.GetObject(\"Select curve\",4,preselect=True)\nif crv_id:\n    crv=rs.coercecurve(crv_id)\n    plane=Rhino.Geometry.Plane.WorldXY\n    xform=Rhino.Geometry.Transform.PlanarProjection(plane)\n    check=crv.MakeDeformable()\n    crv.Transform(xform)\n    sc.doc.Objects.AddCurve(crv)\n    sc.doc.Views.Redraw()\n    print(\"Result of MakeDeformable={}\".format(check))",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 104
+}

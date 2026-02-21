@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/measure-curve-curve-overlap/33548",
+  "topic_id": 33548,
+  "title": "Measure curve-curve overlap",
+  "question": "Given large curves (red) and smaller curves (blue) I want to return only blue curves that overlap red curves by more than 99% of its area. Blue curves that have more than 1% area outside of red curves are ignored. My script utilizes Rhino.Geometry.Curve.CreateBooleanDifference() to find if the excess area is more than 1%. My question is: how do you get the area of a closed planar curve via rhinocommon? And/or is there a better way of approaching this?\n\n\n\n\n160616_1.PNG\n1257×431 19.2 KB\n\n\n\n\nThe red curves start out as un-joined halves, so I join them in the script\n\n\n\n\n160616_2.PNG\n928×614 44.3 KB\n\n\n\n\nimport Rhino.Geometry as rg\n\nredclosed=rg.Curve.JoinCurves(red)[0]\nbluelist=[]\narealist=[]\nfor i in blue:\n    temp1=rg.Curve.CreateBooleanDifference(i,redclosed)\n    if len(temp1)==0:\n        arealist.append(0)\n    else:\n        area=0\n        for j in temp1:\n            area+=#get area of j\n        arealist.append(area)\n    if arealist[-1]/ #area of i<.01:\n        bluelist.append(i)\na=bluelist\nb=arealist\n\n\n\nI’ve attached a model and a grasshopper script.\n\n\n160616 Temp.3dm\n (72.7 KB)<a class=“attachment” \n160616 Area Analysis.gh\n (7.9 KB)",
+  "code_blocks": [
+    {
+      "code": "#crv is a closed planar curve object\nimport Rhino\namp=Rhino.Geometry.AreaMassProperties.Compute(crv)\nif amp: crv_area=amp.Area",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\nredclosed=rg.Curve.JoinCurves(red)[0]\nbluelist=[]\narealist=[]\nfor i in blue:\n    temp1=rg.Curve.CreateBooleanDifference(i,redclosed)\n    if len(temp1)==0:\n        arealist.append(0)\n    else:\n        area=0\n        for j in temp1:\n            area+=#get area of j\n        arealist.append(area)\n    if arealist[-1]/ #area of i<.01:\n        bluelist.append(i)\na=bluelist\nb=arealist",
+      "language": "python",
+      "author": "lawrenceyy",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 2502
+}

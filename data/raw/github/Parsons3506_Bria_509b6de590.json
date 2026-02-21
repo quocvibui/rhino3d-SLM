@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Parsons3506/Bria/blob/7cfffa9229da831dab4dedf44fd02ac1595495b1/Class%204.3.15.py",
+  "repo": "Parsons3506/Bria",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Class 4.3.15.py",
+  "instruction": "Two ways to makes loops: for x in Pts: x OR",
+  "code": "#Two ways to makes loops:\n#for x in Pts:\n#    x\n#OR\n\n#for i in range (0,Len(pts))\n#    pts[i]\n\nimport rhinoscriptsyntax as rs\n\n\ndef main ():\n    objectIn = rs.GetObject(\"select a point\", 1)\n    object = rs.coerce3dpoint(objectIn)\n    print str(object.X) + \",\" + str(object.Y) + \",\" + str(object.Z)\n\n    curveIn = rs.GetObject(\"select a curve\", 4)\n    curve = rs.coercecurve(curveIn)\n    #print \"curve with\" + str(curve.PointCount-1) + \"points\"\n\n    boundingBox = curve.GetBoundingBox(True)\n    center = boundingBox.Center\n    #print \"center of curve at\" + str(object.X) + \",\" + str(object.Y) + \",\" + str(object.Z)\n\n    #rs.AddPoint(center)\n\n    newCurves = rs.ExplodeCurves(curveIn)\n\n    for curve in newCurves:\n        pts = []\n        pts.append(rs.CurveStartPoint(curve))\n        pts.append(rs.CurveEndPoint(curve))\n        pts.append(center)\n        pts.append(rs.CurveStartPoint(curve))\n\n        triangleCurve = rs.AddCurve(pts,1)\n        roundCurve = rs.AddCurve(pts,3)\n        surface = rs.AddPlanarSrf(triangleCurve)\n\n        newSrfs = trimSurfaceWithCurves(surface,roundCurves)\n        rs.DeleteObject(surface)\n\n\ndef trimSurfaceWithCurves():\n    centroid = rs.SurfaceAreaCentroid(surface)\n    domain_u = rs.SurfaceDomain(surface, 0)\n    domain_v = rs.SurfaceDomain(surface, 0)\n    normal = rs.SurfaceNormal(surface, [domain_u[0],domain_v[0]])\n    tempLine = rs.AddLine(centroid[0],rs.PointAdd(normal,centroid[0]))\n\n    extrudeSrf = rs.ExtrudeCurve(curve,tempLine)\n    rs.DeleteObject(tempLine)\n\n    newSrfs = rs.SplitBrep(surface,extrudeSrf)\n    rs.DeleteObject(extrudeSrf)\n    maxArea = 0\n    minArea = 99999999\n\n    for srf in newSrfs:\n        area = rs.Area(srf)\n        if area>maxArea:\n            deleteSrf = srf\n            maxArea = area\n        if area < minArea:\n            returnSrf = srf\n            minArea = area\n\n    rs.DeleteObject(surface)\n    return returnSrf\n\n\n\n\n\n\nif __name__==\"__main__\":\n    main()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

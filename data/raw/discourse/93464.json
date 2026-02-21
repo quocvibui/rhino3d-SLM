@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/split-brep-with-curves/93464",
+  "topic_id": 93464,
+  "title": "Split Brep with curves",
+  "question": "Having a brain block here…  I am trying to create a function that splits a brep with any number of curves (that might or might not actually split the brep).\n\n\nTest file:\n\n\nSplit_Brep_Test.3dm\n (37.7 KB)\n\n\nThe following fails when selecting the surface and all 4 curves:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\nfrom System.Collections.Generic import IEnumerable\n\ndef SplitBrepWCrvs(brepID,crvIDs,tol,del_orig=True):\n    brep=rs.coercebrep(brepID)\n    crvs=[rs.coercecurve(crvID) for crvID in crvIDs]\n    splits=brep.Split.Overloads[IEnumerable[Rhino.Geometry.Curve],System.Double](crvs, tol)\n    if splits and len(splits)>1:\n        sc.doc.Objects.Delete(brepID,True)\n        return [sc.doc.Objects.AddBrep(brep) for brep in splits]\n\nbrepID=rs.GetObject(\"Select brep to split\",8+16)\ncrvIDs=rs.GetObjects(\"Select splitting curves\",4)\nresult=SplitBrepWCrvs(brepID,crvIDs,sc.doc.ModelAbsoluteTolerance,True)\n\n\n\nbecause of \nthis bug\n I previously reported, which will not be fixed until V7.  Interestingly enough if you use only one of the two green curves and the red one which lies on the surface, it still does not do what it is supposed to do - it also looks like it fails if any curves cross each other.  Only the two green ones work together.\n\n\nSo, I thought I’d try to “roll my own” , but I’m still not succeeding completely - I am still not getting \nall\n the splits I am supposed to, even though it is better.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\nfrom System.Collections.Generic import IEnumerable\n\ndef SplitBrepWCrvs(brepID,crvIDs,tol,del_orig=True):\n    orig_brep=rs.coercebrep(brepID)\n    crvs=[rs.coercecurve(crvID) for crvID in crvIDs]\n    split_parts=[orig_brep]\n    for crv in crvs:\n        for brep in split_parts:\n            splits=brep.Split.Overloads[IEnumerable[Rhino.Geometry.Curve],System.Double]([crv], tol)\n            if splits and len(splits)>1:\n                split_parts.remove(brep)\n      ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\nfrom System.Collections.Generic import IEnumerable\n\ndef SplitBrepWCrvs(brepID,crvIDs,tol,del_orig=True):\n    orig_brep=rs.coercebrep(brepID)\n    crvs=[rs.coercecurve(crvID) for crvID in crvIDs]\n    split_parts=[orig_brep]\n    for crv in crvs:\n        new_splits = [] # collect split results in this container\n        for brep in split_parts:\n            splits = brep.Split.Overloads[IEnumerable[Rhino.Geometry.Curve],System.Double]([crv], tol)\n            if splits :\n                new_splits.extend(splits)\n            else:\n                new_splits.append(brep)\n        \n        split_parts = new_splits[:] #copy new_splits as split_parts\n        \n        sc.doc.Objects.Delete(brepID,True)\n        return [sc.doc.Objects.AddBrep(brep) for brep in split_parts]\n\nbrepID=rs.GetObject(\"Select brep to split\",8+16)\ncrvIDs=rs.GetObjects(\"Select splitting curves\",4)\nresult=SplitBrepWCrvs(brepID,crvIDs,sc.doc.ModelAbsoluteTolerance,True)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\nfrom System.Collections.Generic import IEnumerable\n\ndef SplitBrepWCrvs(brepID,crvIDs,tol,del_orig=True):\n    orig_brep=rs.coercebrep(brepID)\n    crvs=[rs.coercecurve(crvID) for crvID in crvIDs]\n    split_parts=[orig_brep]\n    for crv in crvs:\n        for brep in split_parts[:]:\n            splits=brep.Split.Overloads[IEnumerable[Rhino.Geometry.Curve],System.Double]([crv], tol)\n            if splits and len(splits)>1:\n                split_parts.remove(brep)\n                for split in splits:\n                    split_parts.append(split)\n    if split_parts:\n        sc.doc.Objects.Delete(brepID,True)\n        return [sc.doc.Objects.AddBrep(brep) for brep in split_parts]\n\nbrepID=rs.GetObject(\"Select brep to split\",8+16)\ncrvIDs=rs.GetObjects(\"Select splitting curves\",4)\nresult=SplitBrepWCrvs(brepID,crvIDs,sc.doc.ModelAbsoluteTolerance,True)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\nfrom System.Collections.Generic import IEnumerable\n\ndef SplitBrepWCrvs(brepID,crvIDs,tol,del_orig=True):\n    brep=rs.coercebrep(brepID)\n    crvs=[rs.coercecurve(crvID) for crvID in crvIDs]\n    splits=brep.Split.Overloads[IEnumerable[Rhino.Geometry.Curve],System.Double](crvs, tol)\n    if splits and len(splits)>1:\n        sc.doc.Objects.Delete(brepID,True)\n        return [sc.doc.Objects.AddBrep(brep) for brep in splits]\n\nbrepID=rs.GetObject(\"Select brep to split\",8+16)\ncrvIDs=rs.GetObjects(\"Select splitting curves\",4)\nresult=SplitBrepWCrvs(brepID,crvIDs,sc.doc.ModelAbsoluteTolerance,True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\nfrom System.Collections.Generic import IEnumerable\n\ndef SplitBrepWCrvs(brepID,crvIDs,tol,del_orig=True):\n    orig_brep=rs.coercebrep(brepID)\n    crvs=[rs.coercecurve(crvID) for crvID in crvIDs]\n    split_parts=[orig_brep]\n    for crv in crvs:\n        for brep in split_parts:\n            splits=brep.Split.Overloads[IEnumerable[Rhino.Geometry.Curve],System.Double]([crv], tol)\n            if splits and len(splits)>1:\n                split_parts.remove(brep)\n                for split in splits:\n                    split_parts.append(split)\n    if split_parts:\n        sc.doc.Objects.Delete(brepID,True)\n        return [sc.doc.Objects.AddBrep(brep) for brep in split_parts]\n\nbrepID=rs.GetObject(\"Select brep to split\",8+16)\ncrvIDs=rs.GetObjects(\"Select splitting curves\",4)\nresult=SplitBrepWCrvs(brepID,crvIDs,sc.doc.ModelAbsoluteTolerance,True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 847
+}

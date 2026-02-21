@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/hezronkimutai/editor/blob/6c9dd01ec03c167d4eb0e0611cb788cf69d37460/app.py",
+  "repo": "hezronkimutai/editor",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "app.py",
+  "instruction": null,
+  "code": "import viktor as vkt\nimport json\nimport rhino3dm\nfrom pathlib import Path\n\n\nclass Parametrization(vkt.Parametrization):\n    intro = vkt.Text(\"## Grasshopper app \\n This app parametrically generates and visualizes a 3D model of a box using a Grasshopper script. \\n\\n Please fill in the following parameters:\")\n\n    # Input fields\n    width = vkt.NumberField('Width', default=5)\n    length = vkt.NumberField('Length', default=6)\n    height = vkt.NumberField('Height', default=7)\n\n\nclass Controller(vkt.Controller):\n    parametrization = Parametrization\n\n    @vkt.GeometryView(\"Geometry\", duration_guess=10, x_axis_to_right=True, update_label='Run Grasshopper')\n    def run_grasshopper(self, params, **kwargs):\n        grasshopper_script_path = Path(__file__).parent / \"sample_box_grasshopper.gh\"\n        script = vkt.File.from_path(grasshopper_script_path)\n        input_parameters = dict(params)\n\n        # Run the Grasshopper analysis and obtain the output data\n        analysis = vkt.grasshopper.GrasshopperAnalysis(script=script, input_parameters=input_parameters)\n        analysis.execute(timeout=30)\n        output = analysis.get_output()\n        \n        # Convert output data to mesh\n        file3dm = rhino3dm.File3dm()\n        obj = rhino3dm.CommonObject.Decode(json.loads(output[\"values\"][0][\"InnerTree\"]['{0}'][0][\"data\"]))\n        file3dm.Objects.Add(obj)\n        \n        # Write to geometry_file\n        geometry_file = vkt.File()\n        file3dm.Write(geometry_file.source, version=7)\n        return vkt.GeometryResult(geometry=geometry_file, geometry_type=\"3dm\")\n        ",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/object-color/114464",
+  "topic_id": 114464,
+  "title": "Object Color",
+  "question": "import Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport rhinoscriptsyntax as rs\nimport System.Drawing as sd\n\nclass ZPoint:\n    def __init__(self,x,y,z):\n        self.Zx=x\n        self.Zy=y\n        self.Zz=z\n    def createPoint(self):\n        self.pt=rg.Point3d(self.Zx,self.Zy,self.Zz)\n        return self.pt\n    def clr(self,Alpha,red,green,blue):\n        self.A=Alpha\n        self.r=red\n        self.g=green\n        self.b=blue\n        if \"display\" not in globals():\n            global display\n            display=rd.CustomDisplay(True)\n        display.Clear()\n        if displayColor==False:\n            display.Dispose()\n            del display\n        else:\n            self.color=sd.Color.FromArgb(self.A,self.r,self.g,self.b)\n            return display.AddPoint(self.pt,self.color,rd.PointStyle.X,5)\n\na=[]\nfor i in range(3):\n    obj=ZPoint(i,0,0)\n    obj.createPoint()\n    a.append(obj.clr(100,i,0,50))\n\n\n\ni try to display all objects color but it appears on of them in my point list.what is my mistake in my code_?\n\n\ncode\n1557×642 91.1 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport rhinoscriptsyntax as rs\nimport System.Drawing as sd\nfrom scriptcontext import sticky\n\n\nclass ZPoint:\n    def __init__(self, *pos):\n        self.pt = rg.Point3d(*pos)\n\n    def clr(self, alpha, red, green, blue, display):\n        color = sd.Color.FromArgb(alpha, red, green, blue)\n        return display.AddPoint(self.pt, color, rd.PointStyle.X, 5)\n\ndisplay = sticky.get(\"display\", rd.CustomDisplay(True))\nif not display.IsDisposed:\n    display.Dispose()\ndisplay = rd.CustomDisplay(True)\nsticky[\"display\"] = display\n\nif not displayColor:\n    display.Dispose()\nelse:\n    for i in range(3):\n        obj = ZPoint(i, 0, 0)\n        obj.clr(100, i * 50, 250 - i * 50, 50, display)",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport rhinoscriptsyntax as rs\nimport System.Drawing as sd\n\nclass ZPoint:\n    def __init__(self,x,y,z):\n        self.Zx=x\n        self.Zy=y\n        self.Zz=z\n    def createPoint(self):\n        self.pt=rg.Point3d(self.Zx,self.Zy,self.Zz)\n        return self.pt\n    def clr(self,Alpha,red,green,blue):\n        self.A=Alpha\n        self.r=red\n        self.g=green\n        self.b=blue\n        if \"display\" not in globals():\n            global display\n            display=rd.CustomDisplay(True)\n        display.Clear()\n        if displayColor==False:\n            display.Dispose()\n            del display\n        else:\n            self.color=sd.Color.FromArgb(self.A,self.r,self.g,self.b)\n            return display.AddPoint(self.pt,self.color,rd.PointStyle.X,5)\n\na=[]\nfor i in range(3):\n    obj=ZPoint(i,0,0)\n    obj.createPoint()\n    a.append(obj.clr(100,i,0,50))",
+      "language": "python",
+      "author": "may_arch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 5,
+  "views": 2272
+}

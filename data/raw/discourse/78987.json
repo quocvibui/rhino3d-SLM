@@ -1,0 +1,157 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-inside-python/78987",
+  "topic_id": 78987,
+  "title": "Rhino inside Python",
+  "question": "Here’s a new toy for the python crowd.\n\n\n\n\npypi.org\n\n\n\n\n\n\nClient Challenge\n\n\n\n\n\n\n\n\n\n\n\n\nYou’ll need to have the Rhino 7 WIP installed on Windows.\n\n\nThis allows you to embed and get access to RhinoCommon from inside of CPython.\n\n\nYou must be running a 64-bit version of Python\n\n\n\n\nYou can use either Python 2.7 or Python 3.7\n\n\n\n\nimport rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\n# for now, you need to explicitly use floating point\n# numbers in Point3d constructor\npts = System.Collections.Generic.List[Rhino.Geometry.Point3d]()\npts.Add(Rhino.Geometry.Point3d(0.0,0.0,0.0))\npts.Add(Rhino.Geometry.Point3d(1.0,0.0,0.0))\npts.Add(Rhino.Geometry.Point3d(1.5,2.0,0.0))\n\ncrv = Rhino.Geometry.Curve.CreateInterpolatedCurve(pts,3)\nprint (crv.GetLength())",
+  "code_blocks": [
+    {
+      "code": "Traceback (most recent call last):\n  File \"...\", line 9, in <module>\n    pts = System.Collections.List[Rhino.Geometry.Point3d]()\nAttributeError: List",
+      "language": "unknown",
+      "author": "nathancoatney",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport Rhino\n\npt = Rhino.Geometry.Point3d(0., 0., 0.)\n...",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport Rhino\nimport pathlib\n\npath = pathlib.Path(__file__).parent.absolute()\n\ninput_file = f\"{path}\\Line-With-User-Data.3dm\"\n\nrhino_doc = Rhino.RhinoDoc.CreateHeadless(None) \nrhino_doc.Import(input_file)  \nrhino_objs = rhino_doc.Objects\n\nfor rhino_obj in rhino_objs:\n    # get data by user dictionary\n    archivable_dictionary = rhino_obj.Attributes.UserDictionary \n    archivable_dictionary_count = archivable_dictionary.Count #returns 0\n\n    # get data by user data\n    user_data_list = rhino_obj.Attributes.UserData \n    user_data_list_count = user_data_list.Count #returns 2\n    archivable_dictionary2 = user_data_list.get_Item(0).Dictionary #returns archivable dictionary\n    archivable_dictionary2_count = archivable_dictionary2.Count #returns 0\n\nrhino_doc.Dispose()",
+      "language": "python",
+      "author": "guus.gooskens",
+      "post_number": 62,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load(r\"C:/Program Files/Rhino 7/System\")\nSystem.IO.FileLoadException: The given assembly name or codebase was invalid. (Exception from HRESULT: 0x80131047)\n   at System.Reflection.AssemblyName.nInit(RuntimeAssembly& assembly, Boolean forIntrospection, Boolean raiseResolveEvent)\n   at System.Reflection.AssemblyName..ctor(String assemblyName)\n   at System.Reflection.Assembly.LoadWithPartialName(String partialName)\n   at IronPython.Runtime.ClrModule.LoadAssemblyByPartialName(String name)\n   at IronPython.Runtime.ClrModule.AddReference(CodeContext context, String name)\n   at IronPython.Runtime.ClrModule.AddReference(CodeContext context, Object[] references)\n   at Microsoft.Scripting.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\n   at Microsoft.Scripting.Interpreter.Interpreter.Run(InterpretedFrame frame)\n   at Microsoft.Scripting.Interpreter.LightLambda.Run4[T0,T1,T2,T3,TRet](T0 arg0, T1 arg1, T2 arg2, T3 arg3)\n   at System.Dynamic.UpdateDelegates.UpdateAndExecute3[T0,T1,T2,TRet](CallSite site, T0 arg0, T1 arg1, T2 arg2)\n   at Microsoft.Scripting.Interpreter.DynamicInstruction`4.Run(InterpretedFrame frame)\n   at Microsoft.Scripting.Interpreter.Interpreter.Run(InterpretedFrame frame)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 78,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino",
+      "language": "python",
+      "author": "soccerbatman",
+      "post_number": 91,
+      "is_solution": false
+    },
+    {
+      "code": "gh = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\ngh.RunHeadless()\ngh.OpenDocument(path_to_file)",
+      "language": "unknown",
+      "author": "stevebaer",
+      "post_number": 124,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\n\nrhinoinside.load(R\"C:\\Program Files\\Rhino 7\\System\")\nimport Rhino\n\ngh = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\ngh.RunHeadless()\ngh.OpenDocument(R\"C:\\Users\\johan\\Desktop\\test\\test.gh\")",
+      "language": "python",
+      "author": "Johan_Lund_Pedersen",
+      "post_number": 130,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load(r\"C:\\Program Files\\Rhino 8\\System\", 'net7.0')\nimport System\nimport Rhino",
+      "language": "python",
+      "author": "peter.zock",
+      "post_number": 135,
+      "is_solution": false
+    },
+    {
+      "code": "à UnsafeNativeMethods.RHC_RhinoMeshObjectsWithTransform(IntPtr pArrayConstCRhinoObject, Int32& uiStyle, Transform& xform, IntPtr pMeshParameters, IntPtr pArrayMeshes, IntPtr pArrayAttributes)\n   à Rhino.DocObjects.RhinoObject.MeshObjects(IEnumerable`1 rhinoObjects, MeshingParameters& parameters, Int32& uiStyle, Transform xform, Mesh[]& meshes, ObjectAttributes[]& attributes)\n   à Rhino.FileIO.FileObjWriter.GetMeshObjects(FileObjWriteOptions options, List`1 rhinoObjects, MeshingParameters& parameters, Int32& uiStyle, Transform xform, Mesh[]& meshes, ObjectAttributes[]& attributes)\n   à Rhino.FileIO.FileObjWriter.WriteMeshesToFile(List`1 rhinoObjects, FileObjWriteOptions options)\n   à Rhino.FileIO.FileObjWriter.WriteFile(StreamWriter file, RhinoDoc doc, FileObjWriteOptions options)",
+      "language": "unknown",
+      "author": "thomas.pitiot",
+      "post_number": 49,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\n  rhinoinside.load('C:\\Program Files\\Rhino 7\\System')\n  import Rhino\n  import os\n  \n  # current path\n  \n  path = os.path.dirname(__file__)\n  \n  # input file path\n  inputFile = path + '\\Test_Lines.3dm'\n  \n  # get the template file path\n  templateFile = Rhino.ApplicationSettings.FileSettings.TemplateFile\n  \n  # create a new rhino document from the template\n  rhinoDoc = Rhino.RhinoDoc.CreateHeadless(templateFile)\n  rhinoDoc.Import(inputFile)",
+      "language": "python",
+      "author": "moritz.niebler",
+      "post_number": 65,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\n\nimport Rhino\nimport System\nimport Rhino.Geometry\n\n# rhino 3dm import\n# from rhino3dm import *\nimport rhino3dm as r3d\nimport random\nimport compute_rhino3d\nimport compute_rhino3d.Util\nimport compute_rhino3d.Curve\nimport compute_rhino3d.Mesh\nimport compute_rhino3d.Intersection\nimport compute_rhino3d.Brep\n\n# general pyhthon libs import\nimport base64\nimport json\nimport requests\n# import \n\n# Rhino compute by default launches on port 6500\ncompute_url = \"http://localhost:6500//\"\n\n# set the URL\ncompute_rhino3d.Util.url = compute_url\n# no auth token required\ncompute_rhino3d.Util.authToken = \"\"\n\n# test, should return version object\nversion_test = requests.get(compute_url + '/version')\njson.loads(version_test.content)",
+      "language": "unknown",
+      "author": "Aakk",
+      "post_number": 115,
+      "is_solution": false
+    },
+    {
+      "code": "# create one reactanble surface\nsurface1 = Rhino.Geometry.Brep.CreateFromCornerPoints(\n    Rhino.Geometry.Point3d(0.0,0.0,0.0), \n    Rhino.Geometry.Point3d(10.0,0.0,0.0),\n    Rhino.Geometry.Point3d(10.0,10.0,0.0),\n    Rhino.Geometry.Point3d(0.0,10.0,0.0),\n    3\n    )\nsurface1",
+      "language": "unknown",
+      "author": "Aakk",
+      "post_number": 115,
+      "is_solution": false
+    },
+    {
+      "code": "---------------------------------------------------------------------------\nNotLicensedException                      Traceback (most recent call last)\nCell In[104], line 1\n----> 1 surface1.DuplicateEdgeCurves(True)\n\nNotLicensedException: Exception of type 'Rhino.Runtime.NotLicensedException' was thrown.\n   at Rhino.Runtime.HostUtils.ExecuteNamedCallbackHelper(IntPtr name, IntPtr ptrNamedParams)\n   at UnsafeNativeMethods.ON_Brep_DuplicateEdgeCurves(IntPtr pConstBrep, IntPtr pOutCurves, Boolean nakedOnly, Boolean nakedOuter, Boolean nakedInner)\n   at Rhino.Geometry.Brep.DuplicateEdgeCurves(Boolean nakedOnly)",
+      "language": "unknown",
+      "author": "Aakk",
+      "post_number": 115,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport Rhino\nmesh = Rhino.Geometry.Mesh()\n# mesh.Append(plyFilePath)\nprint(mesh.IsValid, mesh.ObjectType, mesh.Vertices.Count)\npara = Rhino.Geometry.QuadRemeshParameters()\npara.TargetQuadCount=202\npara.AdaptiveQuadCount=True\nnewMesh= mesh.QuadRemesh(para)\nprint(newMesh)",
+      "language": "python",
+      "author": "taha",
+      "post_number": 73,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\n# for now, you need to explicitly use floating point\n# numbers in Point3d constructor\npts = System.Collections.Generic.List[Rhino.Geometry.Point3d]()\npts.Add(Rhino.Geometry.Point3d(0.0,0.0,0.0))\npts.Add(Rhino.Geometry.Point3d(1.0,0.0,0.0))\npts.Add(Rhino.Geometry.Point3d(1.5,2.0,0.0))\n\ncrv = Rhino.Geometry.Curve.CreateInterpolatedCurve(pts,3)\nprint (crv.GetLength())",
+      "language": "python",
+      "author": "mwickerson",
+      "post_number": 94,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\ndummy_out = System.Int32(0)\n...\nsurface, error= Rhino.Geometry.NurbsSurface.CreateNetworkSurface(top_u_curves,2,2,top_v_curves,2,2,tolerance,tolerance,tolerance,dummy_out)",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 44,
+      "is_solution": false
+    },
+    {
+      "code": "File \".\\app-rhinside.py\", line 3, in <module>\n    rhinoinside.load()\nFile \"C:\\Users\\Anaconda3\\envs\\grasshopper\\lib\\site-packages\\rhinoinside\\__init__.py\", line 41, in load\n    __rhino_core = Rhino.Runtime.InProcess.RhinoCore()\nSystem.Runtime.InteropServices.COMException: Error HRESULT E_FAIL has been returned from a call to a COM component.\n   at Rhino.Runtime.InProcess.RhinoCore.InternalStartup(Int32 argc, String[] argv, StartupInfo& info, IntPtr hostWnd)\n   at Rhino.Runtime.InProcess.RhinoCore..ctor(String[] args, WindowStyle windowStyle, IntPtr hostWnd)",
+      "language": "unknown",
+      "author": "vhoang",
+      "post_number": 74,
+      "is_solution": false
+    },
+    {
+      "code": "2021-02-24 09:18:39.218763: Unhandled Exception: System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt.\n2021-02-24 09:18:40.850448: at UnsafeNativeMethods.CRhinoDoc_Delete(UInt32 serialNumber)\n2021-02-24 09:18:41.933765: at Rhino.RhinoDoc.Finalize()\n2021-02-24 09:18:43.065226: Execution failed",
+      "language": "unknown",
+      "author": "Daan",
+      "post_number": 60,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\n# for now, you need to explicitly use floating point\n# numbers in Point3d constructor\npts = System.Collections.Generic.List[Rhino.Geometry.Point3d]()\npts.Add(Rhino.Geometry.Point3d(0.0,0.0,0.0))\npts.Add(Rhino.Geometry.Point3d(1.0,0.0,0.0))\npts.Add(Rhino.Geometry.Point3d(1.5,2.0,0.0))\n\ncrv = Rhino.Geometry.Curve.CreateInterpolatedCurve(pts,3)\nprint (crv.GetLength())",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 110,
+  "posts_count": 138,
+  "views": 24985
+}

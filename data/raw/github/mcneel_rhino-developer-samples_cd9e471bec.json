@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_customundo.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_customundo.py",
+  "instruction": "Ex customundo",
+  "code": "﻿import Rhino\nimport scriptcontext\n\n\ndef OnUndoFavoriteNumber(sender, e):\n    \"\"\"!!!!!!!!!!\n    NEVER change any setting in the Rhino document or application.  Rhino\n    handles ALL changes to the application and document and you will break\n    the Undo/Redo commands if you make any changes to the application or\n    document. This is meant only for your own private plug-in data\n    !!!!!!!!!!\n\n    This function can be called either by undo or redo\n    In order to get redo to work, add another custom undo event with the\n    current value.  If you don't want redo to work, just skip adding\n    a custom undo event here\n    \"\"\"\n    current_value = scriptcontext.sticky[\"FavoriteNumber\"]\n    e.Document.AddCustomUndoEvent(\"Favorite Number\", OnUndoFavoriteNumber, current_value)\n\n    old_value = e.Tag\n    print \"Going back to your favorite =\", old_value\n    scriptcontext.sticky[\"FavoriteNumber\"]= old_value;\n\n\ndef TestCustomUndo():\n    \"\"\"Rhino automatically sets up an undo record when a command is run,\n       but... the undo record is not saved if nothing changes in the\n       document (objects added/deleted, layers changed,...)\n    \n       If we have a command that doesn't change things in the document,\n       but we want to have our own custom undo called then we need to do\n       a little extra work\n    \"\"\"\n    current_value = 0\n    if scriptcontext.sticky.has_key(\"FavoriteNumber\"):\n        current_value = scriptcontext.sticky[\"FavoriteNumber\"]\n    rc, new_value = Rhino.Input.RhinoGet.GetNumber(\"Favorite number\", True, current_value)\n    if rc!=Rhino.Commands.Result.Success: return\n\n    scriptcontext.doc.AddCustomUndoEvent(\"Favorite Number\", OnUndoFavoriteNumber, current_value);\n    scriptcontext.sticky[\"FavoriteNumber\"] = new_value\n\nif __name__==\"__main__\":\n    TestCustomUndo()\n\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

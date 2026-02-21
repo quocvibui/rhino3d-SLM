@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-an-object-as-argument-in-runscript/53949",
+  "topic_id": 53949,
+  "title": "Using an object as argument in RunScript",
+  "question": "Hi,\n\nI 'm using this function to find all controlpoints within a closed curve on a mesh surface.\n\nIt works ok, but the command asks the user to select the closing curve. I already have the curve as a RhinoObject “region”. Is there a way to pass this in the RunScript so that the user do not have to click it?\n\n\nThanks\n\n\n    private ArrayList getMeshGripsWithinRegion(RhinoObject mesh, RhinoObject region)\n    {\n        RhinoApp.RunScript(\"_-CullControlPolygon Cull=Yes\", false); \n        RhinoApp.RunScript(\"_-SelBoundary\", false);\n\n        var grips = mesh.GetGrips();\n        var selectedGrips = new ArrayList();\n        foreach (var g in grips)\n        {\n            if (g.IsSelected(true) > 0)\n            {\n                selectedGrips.Add(g);\n            }\n        }\n\n        return selectedGrips;\n    }",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    msg = \"Select closed polyline to use as a selection boundary\"\n    id = rs.GetObject(msg, 4, True, False)\n    if not id: return\n    \n    curve = rs.coercecurve(id, -1, True)\n    rc, polyline = curve.TryGetPolyline()\n    if not rc: return\n    \n    view = scriptcontext.doc.Views.ActiveView.ActiveViewport\n    obj_filter = Rhino.DocObjects.ObjectType.Grip\n    inside = True\n    \n    finder = scriptcontext.doc.Objects.FindByCrossingWindowRegion\n    result = finder(view, polyline, inside, obj_filter)\n    if result.Count != 0: \n        for grip in result: \n            grip.Select(True)\n    \n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "private ArrayList getMeshGripsWithinRegion(RhinoObject mesh, RhinoObject region)\n    {\n        RhinoApp.RunScript(\"_-CullControlPolygon Cull=Yes\", false); \n        RhinoApp.RunScript(\"_-SelBoundary\", false);\n\n        var grips = mesh.GetGrips();\n        var selectedGrips = new ArrayList();\n        foreach (var g in grips)\n        {\n            if (g.IsSelected(true) > 0)\n            {\n                selectedGrips.Add(g);\n            }\n        }\n\n        return selectedGrips;\n    }",
+      "language": "csharp",
+      "author": "arne1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1218
+}

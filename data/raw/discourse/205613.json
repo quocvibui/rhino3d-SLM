@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/object-made-out-of-tetrahedrons/205613",
+  "topic_id": 205613,
+  "title": "Object made out of tetrahedrons",
+  "question": "Here’s a video demonstrating how my script works:\n\n\n\n\n\n\n\n\n\n\n\n\nThe tetrahedron that is being created is a pre-set block called “tetra”\n\n\n\n\nHere’s the script itself:\n\n\n# -*- coding: utf-8 -*-\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef insert_tetra_block_precisely():\n    pts = rs.GetPoints(\"Выберите 3 точки (A, B, C)\", max_points=3)\n    if not pts or len(pts) != 3:\n        return\n\n    A, B, C = pts\n    O = [(A[i] + B[i] + C[i]) / 3.0 for i in range(3)]\n\n    vecAB = rs.VectorCreate(B, A)\n    vecAC = rs.VectorCreate(C, A)\n    normal = rs.VectorCrossProduct(vecAB, vecAC)\n    normal = rs.VectorUnitize(normal)\n\n    y_vec = rs.VectorCreate(B, O)\n    y_vec = rs.VectorUnitize(y_vec)\n\n    perp_in_plane = rs.VectorCrossProduct(normal, y_vec)\n    perp_in_plane = rs.VectorUnitize(perp_in_plane)\n\n    ray_end = [O[i] + perp_in_plane[i] * 1000 for i in range(3)]\n    intersection = rs.LineLineIntersection((O, ray_end), (B, C))\n    if not intersection:\n        return\n    Q = intersection[0]\n\n    x_vec = rs.VectorCreate(Q, O)\n    x_vec = rs.VectorUnitize(x_vec)\n\n    z_vec = rs.VectorCrossProduct(x_vec, y_vec)\n    z_vec = rs.VectorUnitize(z_vec)\n\n    y_vec = rs.VectorCrossProduct(z_vec, x_vec)\n    y_vec = rs.VectorUnitize(y_vec)\n\n    origin = Rhino.Geometry.Point3d(*O)\n    plane = Rhino.Geometry.Plane(origin, x_vec, y_vec)\n\n    xform = Rhino.Geometry.Transform.PlaneToPlane(\n        Rhino.Geometry.Plane.WorldXY, plane)\n\n    block_name = \"tetra\"\n    if rs.IsBlock(block_name):\n        rs.InsertBlock2(block_name, xform)\n\ninsert_tetra_block_precisely()\n\n\n\nMy goal is to upgrade the script and make it create a new tetrahedron based on surface, not on 3 points. On a video, you can see the problem when I select points counterclockwise: the new tetrahedron just flips inside another one. I’m still not sure how to control that, so the thing with worrking based on existing surface makes things harder.\n\n\nHow do I make script work using the surface-based creation? I was thinging about making it o...",
+  "code_blocks": [
+    {
+      "code": "# -*- coding: utf-8 -*-\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef insert_tetra_block_precisely():\n    pts = rs.GetPoints(\"Выберите 3 точки (A, B, C)\", max_points=3)\n    if not pts or len(pts) != 3:\n        return\n\n    A, B, C = pts\n    O = [(A[i] + B[i] + C[i]) / 3.0 for i in range(3)]\n\n    vecAB = rs.VectorCreate(B, A)\n    vecAC = rs.VectorCreate(C, A)\n    normal = rs.VectorCrossProduct(vecAB, vecAC)\n    normal = rs.VectorUnitize(normal)\n\n    y_vec = rs.VectorCreate(B, O)\n    y_vec = rs.VectorUnitize(y_vec)\n\n    perp_in_plane = rs.VectorCrossProduct(normal, y_vec)\n    perp_in_plane = rs.VectorUnitize(perp_in_plane)\n\n    ray_end = [O[i] + perp_in_plane[i] * 1000 for i in range(3)]\n    intersection = rs.LineLineIntersection((O, ray_end), (B, C))\n    if not intersection:\n        return\n    Q = intersection[0]\n\n    x_vec = rs.VectorCreate(Q, O)\n    x_vec = rs.VectorUnitize(x_vec)\n\n    z_vec = rs.VectorCrossProduct(x_vec, y_vec)\n    z_vec = rs.VectorUnitize(z_vec)\n\n    y_vec = rs.VectorCrossProduct(z_vec, x_vec)\n    y_vec = rs.VectorUnitize(y_vec)\n\n    origin = Rhino.Geometry.Point3d(*O)\n    plane = Rhino.Geometry.Plane(origin, x_vec, y_vec)\n\n    xform = Rhino.Geometry.Transform.PlaneToPlane(\n        Rhino.Geometry.Plane.WorldXY, plane)\n\n    block_name = \"tetra\"\n    if rs.IsBlock(block_name):\n        rs.InsertBlock2(block_name, xform)\n\ninsert_tetra_block_precisely()",
+      "language": "python",
+      "author": "Archeed",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 132
+}

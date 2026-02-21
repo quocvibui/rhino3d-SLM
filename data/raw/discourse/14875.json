@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-objects-by-key-value/14875",
+  "topic_id": 14875,
+  "title": "Select objects by key/value",
+  "question": "Select objects by key/value\n_\n\ni’m writing a little script in python to manage user string.\n\n-i want to create a selection list box of key/value:\n\nexample:\n\nfirst listbox: all the keys of the active doc\n\n----------listBox-------------\n\nselect on key:\n\n“material”\n\n“zone”\n\n“type”\n\n----------------ok-----------------\n\n\nafter clicking on the key: “material”, the items of the listbox will be all the values related to that key (eg. “material”)\n\n--------listBox------------\n\nselect values of “material”:\n\n-any-\n\n“steel”\n\n“glass”\n\n“wood”\n\n------------ok-------------\n\n\nclicking by clicking the objects will be selected until i will click the buttom “ok” going back to keys in order to select others key/values or clicking again “ok” in order to get that selection.\n\n\ni need some commands i cannot find:\n\n\ngetkeys list of the active document\n\ngetvalues list related to a key\n\n\nsome body knows those commands?",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rh\nimport rhinoscriptsyntax as rs\nkeys = []\nvalues =[]\nobjsId = rs.AllObjects()\nfor i in objsId:\n    keys_i = rs.GetUserText(i, None, False)\n    if len(keys_i) > 0:\n        for k in keys_i:\n            value = rs.GetUserText(i, k, False)\n            if k in keys:\n                index_k = keys.index(k)\n                if not (value in values[index_k]):\n                    values[index_k].append(value)\n            else:\n                keys.append(k)\n                values.append([value])\nkList = rs.ListBox(keys, \"Keys to select:\", \"Select Objs by Key/Value\")\nif kList in keys:\n    index_kList = keys.index(kList)\n    vList = rs.ListBox([\"all\"] + values[index_kList], \"Values of \" + kList , \"Select Objs by Key/Value\")\n    if vList == \"all\":\n        vList = \"*\"\n    if vList:\n        objs = rh.RhinoDoc.ActiveDoc.Objects.FindByUserString(kList, vList, True, True, True, rh.DocObjects.ObjectType.AnyObject)\n        rs.SelectObjects(objs)",
+      "language": "python",
+      "author": "Davide_Scialo",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 4454
+}

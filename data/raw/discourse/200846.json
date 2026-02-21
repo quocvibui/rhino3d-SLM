@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-loft-between-circles-in-gh-python/200846",
+  "topic_id": 200846,
+  "title": "How to Loft Between Circles in GH-Python",
+  "question": "Hi everyone,\n\nI am trying to create a lofted surface between 4 circles using GH-Python in Grasshopper. However, instead of a single continuous loft between the circles, the script is currently creating individual lofts for each circle, as shown in the first image.\n\nI would like to achieve a result similar to the second image, where all the circles are smoothly connected into a single lofted surface.\n\n\nimage\n447×649 37.9 KB\n\n\nimage\n520×704 65.3 KB\n\n\nHere is my code:\n\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport System\nimport System.Collections.Generic as sg\nimport ghpythonlib.treehelpers as th  # ✅ Convert Data Tree to Python List\n\n# Convert DataTree to list of point lists\npoints_list = th.tree_to_list(points_list)\nprint(f\"🔍 Number of point lists: {len(points_list)}\")\n\n# Create curves from point lists\ncurves = []\nfor i, points in enumerate(points_list):\n    real_points = []\n\n    for p in points:\n        if isinstance(p, rg.Curve):  \n            print(f\"✅ List {i} is already a curve - keeping it.\")\n            curves.append(p)\n            break  \n\n        if isinstance(p, rg.Point3d):\n            real_points.append(p)\n        elif isinstance(p, System.Guid):\n            obj = Rhino.RhinoDoc.ActiveDoc.Objects.Find(p)\n            if obj and hasattr(obj.Geometry, \"Location\"):\n                real_points.append(obj.Geometry.Location)\n            elif isinstance(obj.Geometry, rg.Point):\n                real_points.append(obj.Geometry.Location)\n\n    print(f\"🔍 List {i}: {len(real_points)} points converted.\")\n\n    if len(real_points) < 3:\n        print(f\"⚠️ Skipping - List {i} is too short for a circle.\")\n        continue  \n\n    if real_points[0].DistanceTo(real_points[-1]) > 0.01:\n        real_points.append(real_points[0])  \n\n    point_list = sg.List[rg.Point3d]()\n    for p in real_points:\n        point_list.Add(rg.Point3d(p.X, p.Y, p.Z))\n\n    nurbs_curve = rg.PolylineCurve(point_list)\n    curves.append(nurbs_curve)\n\nprint(f\"✅ {len(curves)} curves created.\")\n\nif len(curv...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport System\nimport System.Collections.Generic as sg\nimport ghpythonlib.treehelpers as th  # ✅ Convert Data Tree to Python List\n\n# Convert DataTree to list of point lists\npoints_list = th.tree_to_list(points_list)\nprint(f\"🔍 Number of point lists: {len(points_list)}\")\n\n# Create curves from point lists\ncurves = []\nfor i, points in enumerate(points_list):\n    real_points = []\n\n    for p in points:\n        if isinstance(p, rg.Curve):  \n            print(f\"✅ List {i} is already a curve - keeping it.\")\n            curves.append(p)\n            break  \n\n        if isinstance(p, rg.Point3d):\n            real_points.append(p)\n        elif isinstance(p, System.Guid):\n            obj = Rhino.RhinoDoc.ActiveDoc.Objects.Find(p)\n            if obj and hasattr(obj.Geometry, \"Location\"):\n                real_points.append(obj.Geometry.Location)\n            elif isinstance(obj.Geometry, rg.Point):\n                real_points.append(obj.Geometry.Location)\n\n    print(f\"🔍 List {i}: {len(real_points)} points converted.\")\n\n    if len(real_points) < 3:\n        print(f\"⚠️ Skipping - List {i} is too short for a circle.\")\n        continue  \n\n    if real_points[0].DistanceTo(real_points[-1]) > 0.01:\n        real_points.append(real_points[0])  \n\n    point_list = sg.List[rg.Point3d]()\n    for p in real_points:\n        point_list.Add(rg.Point3d(p.X, p.Y, p.Z))\n\n    nurbs_curve = rg.PolylineCurve(point_list)\n    curves.append(nurbs_curve)\n\nprint(f\"✅ {len(curves)} curves created.\")\n\nif len(curves) < 2:\n    raise ValueError(f\"❌ Only {len(curves)} curves found. Need at least 2 for Loft!\")\n\n# Move curves to different heights\nmoved_curves = []\nfor i, curve in enumerate(curves):\n    translation = rg.Transform.Translation(0, 0, i * height)\n    moved_curve = curve.DuplicateCurve()\n    moved_curve.Transform(translation)\n    moved_curves.append(moved_curve)\n\nprint(\"✅ All circles moved to their respective heights!\")\n\n# Ensure all curves are in a single list\nflat_curves = list(moved_curves)\nprint(f\"🔍 Number of curves in flat_curves: {len(flat_curves)}\")\nfor i, curve in enumerate(flat_curves):\n    print(f\"  - Curve {i}: Type {type(curve).__name__}, Start Point {curve.PointAtStart}, Length {curve.GetLength()}\")\n\n# **Perform Loft**\nloft = rg.Brep.CreateFromLoft(\n    flat_curves,\n    rg.Point3d.Unset,\n    rg.Point3d.Unset,\n    rg.LoftType.Normal,  # Try switching between Tight / Loose / Normal\n    False\n\nif loft and len(loft) > 0:\n    loft_surface = loft[0]\n    print(\"✅ Loft surface successfully created!\")\nelse:\n    loft_surface = None\n    print(\"❌ Loft failed! Check if curves are correct.\")\n\n# Output\na = loft_surface  # Lofted surface\nb = moved_curves  # Transformed circles",
+      "language": "python",
+      "author": "eden_maman",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 100
+}

@@ -1,0 +1,70 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-8-wip-python-get-geometry-from-model-object/161797",
+  "topic_id": 161797,
+  "title": "Rhino 8 WIP - Python - Get Geometry From Model Object?",
+  "question": "Hello,\n\n\nI have a simple python script that returns the curve degree from the input curves.\n\n\nI am primarily passing geometry as “Model Objects” throughout the script.\n\n\nIf I use the G output of the Model Objects node and feed that into python or put a geometry type node such as “Curve” between the Model Object O output and the Python input, the script functions as expected.\n\n\nI am stuck on how to, inside python, extract the geometry from a Model Object so that I don’t need an intermediary node between the Model Object and the Python script.\n\n\nPlease see the snip below noting that the G output of the MO node, or a Curve node after the O, solves the input needs of the python component. (I would like to skip this step and feed the O straight into python)\n\n\nGraph Space:\n\n\nimage\n841×576 48.9 KB\n\n\nThanks for your help!\n\n\nScript:\n\n\nimport rhinoscriptsyntax as rs\n\nif C is None:\n    D = C\nelif rs.IsCurve(C):\n    degree = rs.CurveDegree(C)\n    print \"Curve degree:\", degree\n\n    D = degree",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Grasshopper Script\"\"\"\nimport Rhino.Geometry as RG\nimport Grasshopper.Kernel.Types as GT\n\nres, a = x.CastTo[GT.GH_Brep]()",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Grasshopper Script\"\"\"\nimport Rhino\nimport Grasshopper\n\nrh_obj_list = []\n\nrh_objs = Rhino.RhinoDoc.ActiveDoc.Objects.FindByLayer(x)\n\nfor obj in rh_objs:\n   refobj = Rhino.DocObjects.ObjRef(obj)\n   goo = Grasshopper.Kernel.GH_Convert.ObjRefToGeometry(refobj)\n   rh_obj_list.append(goo)\n\na = rh_obj_list",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 12,
+      "is_solution": true
+    },
+    {
+      "code": "from Rhino import FileIO, RhinoDoc\n\ndoc = RhinoDoc.CreateHeadless(None)\n\nfor obj in objects: # objects are GH ModelObjects\n    doc.Objects.Add(obj)\n\nopt = FileIO.FileWriteOptions()\ndoc.WriteFile(path, opt)\ndoc.Dispose();",
+      "language": "python",
+      "author": "jlp",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Grasshopper Script\"\"\"\nimport Rhino.Geometry as RG\nimport Grasshopper.Kernel.Types as GT\n\nres, a = x.CastTo[GT.GH_Brep]()",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as RG\nimport Grasshopper.Kernel.Types as GT\nfrom Rhino import FileIO, RhinoDoc\n\ndoc = RhinoDoc.CreateHeadless(None)\n\nfor obj in modelObj: # objects are GH ModelObjects\n    res, gh_obj = obj.CastTo[GT.GH_Brep]()\n    att = obj.ToAttributes()\n    doc.Objects.Add(gh_obj,att)\n\nopt = FileIO.FileWriteOptions()\ndoc.WriteFile(path, opt)\ndoc.Dispose();",
+      "language": "python",
+      "author": "Johan_Lund_Pedersen",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as RG\nimport Grasshopper.Kernel as GK\nfrom Rhino import FileIO, RhinoDoc\n\n# Create a headless document\ndoc = RhinoDoc.CreateHeadless(None)\ntry:\n    # Copy units & tolerances from active doc\n    doc.ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem\n    doc.ModelAbsoluteTolerance = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n    doc.ModelAngleToleranceRadians = RhinoDoc.ActiveDoc.ModelAngleToleranceRadians\n\n    # Bake ModelObjects into the headless document\n    for obj in modelObj:\n        guid = GK.IGH_BakeAwareData(obj).BakeGeometry(doc, None)\n\n    # Save the headless document\n    opt = FileIO.FileWriteOptions()\n    doc.WriteFile(path, opt)\nfinally:\n    doc.Dispose();",
+      "language": "python",
+      "author": "kike",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nif C is None:\n    D = C\nelif rs.IsCurve(C):\n    degree = rs.CurveDegree(C)\n    print \"Curve degree:\", degree\n\n    D = degree",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 1539
+}

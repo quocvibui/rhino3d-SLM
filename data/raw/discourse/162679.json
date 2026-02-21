@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-use-handlebar-editor-hbar-from-python/162679",
+  "topic_id": 162679,
+  "title": "How to use Handlebar Editor (HBar) from Python",
+  "question": "Hello,\n\n\nWe’ve been successful in moving the control points of a surface using Python - but we were discussing how helpful it would be to pick any point on a surface and make adjustments directly (not just where a CP is).  Along comes the handlebar editor command under the Edit > Control Points menu!  It does exactly what we want to do, but I have not found anything in the documentation about how to do this from a script.\n\n\nIs there a way to accomplish something similar via Python?\n\n\nThanks for your help.\n\n\nScreenshot 2023-07-11 141440\n1070×506 61.1 KB",
+  "code_blocks": [
+    {
+      "code": "SurfaceId = rs.GetObject(\"Pick a surface\", rs.filter.surface)\nSurfaceObject = rs.coercegeometry(SurfaceId)\nprint( type(SurfaceObject) ) \nRhinoSurface = rg.NurbsSurface(SurfaceObject)\nSomePoint = RhinoSurface.NurbsSurfacePointList.GetControlPoint(0.5, 0.5)",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    srf_id = rs.GetObject(\"Select surface\", rs.filter.surface, True, False)\n    if not srf_id: return\n    \n    brep = rs.coercegeometry(srf_id)\n    if brep.Faces.Count != 1: return\n\n    surface = brep.Faces[0].ToNurbsSurface()\n    control_pt = surface.Points.GetControlPoint(0, 0)\n    \n    scriptcontext.doc.Objects.AddPoint(control_pt.Location)\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "def DoSomething():\n    \n    srf_id = rs.GetObject(\"Select surface\", rs.filter.surface, True, False)\n    if not srf_id: return\n    \n    brep = rs.coercegeometry(srf_id)\n    if brep.Faces.Count != 1: return\n\n    surface = brep.Faces[0].ToNurbsSurface()\n    control_pt = surface.Points.GetControlPoint(0, 0)\n    \n    rc, u, v, n = surface.Points.UVNDirectionsAt(0, 0)\n    xform = Rhino.Geometry.Transform.Translation(n * 5.0)\n    new_pt = Rhino.Geometry.Point3d(control_pt.Location)\n    new_pt.Transform(xform)\n    surface.Points.SetPoint(0, 0, new_pt)\n    \n    scriptcontext.doc.Objects.AddSurface(surface)\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 783
+}

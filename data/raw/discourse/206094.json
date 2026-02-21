@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/selecting-sub-components-from-on-instance-reference/206094",
+  "topic_id": 206094,
+  "title": "Selecting sub components from ON::instance_reference",
+  "question": "Hi,\n\n\nI try to select an ON::Curve inside an ON::instance_reference. I have the object UUID and the ON_COMPONENT_INDEX from the curve. My code works when selecting curves inside breps, but I can not select any subobject from an instance_reference.\n\n\nI tried using “obj->SelectSubObject(index, true, true, true);” and also the following code:\n\n\nobj = CRhinoObject::FromId(0, uuid);\nconst CRhinoInstanceObject* iref = CRhinoInstanceObject::Cast(obj);\nconst CRhinoObject* sub_obj = iref->SubObjectFromComponentIndex(index); (I get an ON::Curve object here)\n\nsub_obj->Select(true, true);\n\n\n\nBut none of this works. Are there any hints how to select a subobject of an instance_reference?\n\n\nI use this as a preselection for a “CRhinoGetObject” so the User can change his previous selection.\n\n\nThanks,\n\nDaniel",
+  "code_blocks": [
+    {
+      "code": "// setup GetObject\nCRhinoGetObject gc;\ngc.SetCommandPrompt(prompt.c_str());\ngc.SetGeometryFilter(geometry_type_filter);\ngc.SetGeometryAttributeFilter(geometry_attribute_filter);\ngc.EnableSubObjectSelect(true, true);\n// options required to include pre-selected objects from uuid-list\ngc.EnableClearObjectsOnEntry(false);\ngc.EnableUnselectObjectsOnExit(false);\ngc.EnableDeselectAllBeforePostSelect(false);\ngc.EnableAlreadySelectedObjectSelect(true);\n\ngc.GetObjects(min_objects, max_objects);",
+      "language": "csharp",
+      "author": "Daniel_kronos",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 158
+}

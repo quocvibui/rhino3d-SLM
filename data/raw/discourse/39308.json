@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/apparent-memory-leaks-after-multiple-mesh-rotations/39308",
+  "topic_id": 39308,
+  "title": "Apparent memory leaks after multiple mesh rotations",
+  "question": "Hi,\n\n\nI’m running a test I have written in pythonscript, which involve a high number of translations and rotations of a mesh. After 2 minutes, I run out of memory, and I think the problem is located at line 1141 of file object.py:\n\n\n\n\nid = scriptcontext.doc.Objects.Transform(object_id, xform, not copy)\n\n\n\n\nI show you here a simple script which reproduces the problem:\n\n\n\n\nimport Rhino\n\nimport rhinoscriptsyntax as rs\n\nimport math\n\n\n\n\n\n\nrs.Command(\"_-Open \" + “teapot.obj” + \" _Enter \")\n\nMeshes = rs.ObjectsByLayer(“Default”, 32)\n\n\n\n\n\n\nx_axis = Rhino.Geometry.Vector3f(1,0,0)\n\ncenter_point = Rhino.Geometry.Vector3f(0,0,0)\n\n\n\n\n\n\nfor i in xrange(0,100000):\n\nrs.RotateObject( Meshes[0], center_point, 1.1, axis=x_axis, copy=False)\n\n\n\n\nI think my post may be related to this one: \nhttps://discourse.mcneel.com/t/scripting-lots-of-rotations-and-memory-consumption/7933\n\n\nAny idea of what this may be?\n\n\nThank you,\n\n\nAlexandre\n\n\n(I’m running Windows 7 Pro 64 bits, 16GB RAM, Rhino Version 5 SR13 32-bit)\n\n\nteapot.3dm\n (126.0 KB)\n\n\nTestCrash.py\n (358 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nfrom math import radians\n\ndef DoSomething():\n    \n    id = rs.GetObject(\"Select Mesh to rotate\")\n    if not id: return\n    \n    mesh = rs.coercemesh(id, True)\n    axis = Rhino.Geometry.Vector3d(1, 0, 0)\n    center = Rhino.Geometry.Point3d(0, 0, 0)\n\n    for i in xrange(0, 10000):\n        angle = radians(0.1)\n        xform = Rhino.Geometry.Transform.Rotation(angle, axis, center)\n        mesh.Transform(xform)\n        # do your fitting calculation here\n    \n    scriptcontext.doc.Objects.Replace(id, mesh)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 1508
+}

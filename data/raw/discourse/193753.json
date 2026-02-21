@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/performance-of-namedselections/193753",
+  "topic_id": 193753,
+  "title": "Performance of NamedSelections",
+  "question": "I need to create >80 NamedSelections and do other NamedSelections operations like list and delete for my parametrized models. Usually, I try to do everything in RhinoCommon, but unfortunately, NamedSelections is not implemented in RhinoCommon, yet. I wrote a small IronPython layer around the RhinoScript interface using \nrs.Command()\n to get it working for now. The entire IronPython script takes now > 60s. If I comment out the \nrs.Command(-_NamedSelections ...)\n commands the code takes only <0.1s, therefore I started to investigate the performance a bit.\n\nAt first I tried to create 80 NamedSelections using pure RhinoScript with a constant preselection within the MacroEditor:\n\n\n-_SetRedrawOff\n-_NoEcho\n-_NamedSelections _Save Selection_1\n-_NamedSelections _Save Selection_2\n-_NamedSelections _Save Selection_3\n...\n-_NamedSelections _Save Selection_80\n-_Echo\n-_SetRedrawOn \n\n\n\nThis takes approx. 17 seconds, if I have only 6 edges in my selection. Adding more entities to the selection prior to the macro execution will increase the time substantially. Rhino crashed after a while when I tried to run this Macro with preselected >190 objects and subobjects.\n\n\nAfterwards I tried the same within IronPython:\n\n\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport time\n\ndef main():\n    t1 = time.time()\n    rs.EnableRedraw(False)\n    for i in range(1,81):\n        rs.Command('-_NamedSelections _Save Selection_{}'.format(i), echo=False)\n    rs.EnableRedraw(True)\n    print \"total time: t={}s\".format(round(time.time()-t1, 2))\n\nif __name__=='__main__':\n    main()\n\n\n\nThe performance was nearly identical to the pure RhinoScript version.\n\n\nDuring both implementations the GUI NamedSelections tree updates after each command. I tried and compared \nrs.AddLayer(\"Layer_*\")\n versus \nrs.Command(\"-_Layer _New Layer_* _Enter\")\n. The first one does not update the GUI tree in between commands. I can create 80 layers within <0.05s. Running the command version of layer creation takes approx. 17 seco...",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\nimport time\n\ndef main():\n    t1 = time.time()\n    rs.EnableRedraw(False)\n    for i in range(1,81):\n        rs.Command('-_NamedSelections _Save Selection_{}'.format(i), echo=False)\n    rs.EnableRedraw(True)\n    print \"total time: t={}s\".format(round(time.time()-t1, 2))\n\nif __name__=='__main__':\n    main()",
+      "language": "python",
+      "author": "daniel.kowollik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 267
+}

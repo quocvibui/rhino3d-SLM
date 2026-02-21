@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcneel/developer.rhino3d.com/blob/6e9b91820175abba93f399fbd04f6459343091cf/content/en/samples/rhinopython/rhinopython101/6_5_AddVectorExample.py",
+  "repo": "mcneel/developer.rhino3d.com",
+  "repo_stars": 88,
+  "repo_description": "The developer.rhino3d.com website contents",
+  "license": "unknown",
+  "filepath": "content/en/samples/rhinopython/rhinopython101/6_5_AddVectorExample.py",
+  "instruction": "This script will compute a bunch of cross-product vector based on a pointcloud",
+  "code": "# This script will compute a bunch of cross-product vector based on a pointcloud\nimport rhinoscriptsyntax as rs\n\n\ndef vectorfield():\n    cloud_id = rs.GetObject(\"Input pointcloud\", 2, True, True)\n    if cloud_id is None: return\n\n    points = rs.PointCloudPoints(cloud_id)\n    base_point = rs.GetPoint(\"Vector field base point\")\n    if base_point is None: return\n\n    for point in points:\n        vecbase = rs.VectorCreate(point, base_point)\n        vecdir = rs.VectorCrossProduct(vecbase, (0,0,1))\n        if vecdir:\n            vecdir = rs.VectorUnitize(vecdir)\n            vecdir = rs.VectorScale(vecdir, 2.0)\n            AddVector(vecdir, point)\n\n\ndef AddVector(vecdir, base_point):\n    tip_point = rs.PointAdd(base_point, vecdir)\n    line = rs.AddLine(base_point, tip_point)\n    if line: rs.CurveArrows(line, 2)\n\n\nif __name__==\"__main__\":\n    vectorfield()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

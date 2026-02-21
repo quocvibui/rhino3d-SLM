@@ -1,0 +1,19 @@
+{
+  "source_url": "https://github.com/HasflarSonto/Wild_Fire_Simulation_and_Prevention/blob/4408ce1c860a8f7823953dc12ea05d197e2db8bf/CentralSimulationModule/PointtoMatrix.py",
+  "repo": "HasflarSonto/Wild_Fire_Simulation_and_Prevention",
+  "repo_stars": 1,
+  "repo_description": "Parametric algorithm which simulates how wild fires grow and then suggests infrastructural improvements to combat fire",
+  "license": "unknown",
+  "filepath": "CentralSimulationModule/PointtoMatrix.py",
+  "instruction": "Pointto matrix",
+  "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport clr\nclr.AddReference(\"Grasshopper\")\nclr.AddReference(\"RhinoCommon\")\nfrom Grasshopper import DataTree\nfrom Grasshopper.Kernel.Data import GH_Path\nfrom Rhino.Geometry import Point3d\n\ndef create_burn_probability_matrix(coords_list, burn_prob_list):\n    \"\"\"\n    Converts a list of coordinates and burn probabilities into a structured 2D matrix.\n    \n    Parameters:\n    - coords_list (list): List of coordinate strings in format \"{X, Y, Z}\".\n    - burn_prob_list (list): List of burn probabilities (same length as coords_list).\n    \n    Returns:\n    - list: A structured 2D matrix of burn probabilities.\n    \"\"\"\n\n    # Parse coordinates into numerical format\n    parsed_coords = [tuple(map(float, coord.strip(\"{} \").split(\",\"))) for coord in coords_list]\n    burn_probs = [float(prob) for prob in burn_prob_list]\n\n    # Extract unique sorted X and Y values to form the grid\n    unique_x = sorted(set(p[0] for p in parsed_coords))\n    unique_y = sorted(set(p[1] for p in parsed_coords), reverse=True)  # Reverse for top-down ordering\n\n    # Create index mappings for X and Y\n    x_index_map = {x: i for i, x in enumerate(unique_x)}\n    y_index_map = {y: j for j, y in enumerate(unique_y)}\n\n    # Initialize matrix\n    burn_matrix = [[None for _ in range(len(unique_x))] for _ in range(len(unique_y))]\n\n    # Fill the matrix with burn probabilities\n    for (x, y, _), burn_prob in zip(parsed_coords, burn_probs):\n        row = y_index_map[y]  # Y corresponds to row index\n        col = x_index_map[x]  # X corresponds to column index\n        burn_matrix[row][col] = burn_prob  # Assign burn probability\n\n    return burn_matrix\n\n# Example Usage\ncoords_list = [\"{20.238095, 57.142857, 7.02381}\", \"{21.428571, 57.142857, 7.460317}\", \"{22.619048, 57.142857, 8.333333}\", \"{23.809524, 57.142857, 8.849206}\", \"{25, 57.142857, 9.166667}\"]\nburn_prob_list = [\"0.4\", \"0.3\", \"0.3\", \"0.3\", \"0.4\"]\n\nburn_matrix = create_burn_probability_matrix(coords_list, burn_prob_list)\n\n# Assign matrix to Grasshopper output\na = burn_matrix",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "RhinoCommon",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

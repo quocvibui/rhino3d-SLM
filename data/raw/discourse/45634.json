@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extracting-object-data-based-on-layer-python/45634",
+  "topic_id": 45634,
+  "title": "Extracting object data based on layer python",
+  "question": "Hey, I’m getting a little hung up. I am trying to extract the point data from various objects in a layer (all simple rectangles). so I am trying to choose the layer by name(there will be multiple with the same naming format…i.e Ballast_1), identify the objects in the layer, and extract all the point coordinates. it would be cool if it could just cycle through the layers based on the naming format. anything can help.\n\n\nthanks, Chris",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n \n##Start Evaluation\ndef main():\n    response=rs.MessageBox( \"Evaluate Classroom?\",  4)\n    if response !=7:\n        #Select a layer    \n        layer = rs.GetLayer(\"Please select a layer\")\n\n        #If a layer is chosen:\n        if layer:\n            #Gets objID\n            obj = rs.ObjectsByLayer(layer)\n\n            #Selects objects\n            rs.SelectObjects(obj)\n            ObjId=rs.SelectedObjects(include_lights=False, include_grips=False)\n            for obj in ObjId:\n                cent=rs.SurfaceAreaCentroid(obj)\n                print cent[0]\n                rs.AddPoint(cent[0])\n\n    else:\n        rs.MessageBox(\"Evaluation Aborted\")\n\nmain()",
+      "language": "python",
+      "author": "Christopher_Gornall",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext \nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    # define something as layer name to search for\n    search_string = \"Ballast\"\n    # iterate over all layers\n    for layer in scriptcontext.doc.Layers:\n        # check if search string appears in layer name\n        if search_string.lower() in layer.Name.lower():\n            # iterate all objects on that layer \n            for rh_obj in scriptcontext.doc.Objects.FindByLayer(layer):\n                # only process surfaces\n                if rs.IsSurface(rh_obj.Id):\n                    # get the area centroid\n                    rc = rs.SurfaceAreaCentroid(rh_obj.Id)\n                    if rc:\n                        # add a point on this layer\n                        attr = Rhino.DocObjects.ObjectAttributes()\n                        attr.LayerIndex = layer.LayerIndex\n                        scriptcontext.doc.Objects.AddPoint(rc[0], attr)\n    # refresh views\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1941
+}

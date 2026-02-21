@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/import-one-files-objects-into-another/149222",
+  "topic_id": 149222,
+  "title": "Import one files objects into another",
+  "question": "Hi,\n\n\nCan anyone recommend and easy way to import one file into another? I have the following and want to import all objects from a different file into an existing open file. My code is as follows but I’m getting a ‘parameter must be a Guid’ error.\n\n\nimport rhinoscriptsyntax as rs\n\nimport scriptcontext as sc\n\nimport Rhino\n\nimport os\n\n\nimport_path = “insert path…”\n\n\nrhino_file = Rhino.FileIO.File3dm().Read(import_path)\n\n\nrh_objects = rhino_file.Objects\n\nrs.SelectObjects(rh_objects)\n\nsc.doc.Objects.Add(rh_objects)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport_path = rs.OpenFileName(\"file to import\")\nif import_path:\n    FileReadOptions = Rhino.FileIO.FileReadOptions()\n    FileReadOptions.ScaleGeometry = True\n    FileData = Rhino.RhinoDoc.ReadFile(import_path, FileReadOptions)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nobjects = sc.doc.ActiveDoc.Objects\nobjects_before = []\nfor o in objects:\n    objects_before.append(o.Id)\n\nimport_path = rs.OpenFileName(\"file to import\")\nif import_path:\n    FileReadOptions = Rhino.FileIO.FileReadOptions()\n    FileReadOptions.ScaleGeometry = True\n    FileData = Rhino.RhinoDoc.ReadFile(import_path, FileReadOptions)\n\nobjects = sc.doc.ActiveDoc.Objects\nnewObjects = []\nfor o in objects:\n    if not o.Id in objects_before:\n        newObjects.append(o.Id)\n\nif len(newObjects)>0:\n    rs.SelectObjects(newObjects)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\n\n# get most recent object in document\nobj = scriptcontext.doc.Objects.MostRecentObject()\n\n# use ReadFile \n# TODO\n\n# get all new rhino objects \nrh_objs = scriptcontext.doc.Objects.AllObjectsSince(obj.RuntimeSerialNumber)\nif rh_objs: rs.SelectObjects(rh_objs)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 1496
+}

@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-use-closestparameter-function-on-rhino-inside-cpython/132005",
+  "topic_id": 132005,
+  "title": "How to use ClosestParameter function on rhino inside cpython",
+  "question": "Screenshot 2021-10-21 022655\n483×582 31.4 KB\n\n\n\n\n\n\nScreenshot 2021-10-21 022840\n936×433 43.6 KB\n\n\n\n\nI’m trying to get closest point projected to the sphere and it’s plane(frame) and ultimately get the vector out of it. Which should be something like above in grasshopper\n\n\nI have to implement this into cpython for some reason but I’m stuck at even getting the closest parameter work in \nrhinoinside\n cpython.\n\n\nI’m mostly new to using rhino common and obviously also the rhino inside cpython so I might be doing something wrong.\n\n\nimport rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino.Geometry as rg\n\norigin = rg.Point3d(0.0,0.0,0.0)\np = rg.Point3d(1.0, 0.0, 1.732051) # Polar Point (0.0, 60, 2.0)\ns = rg.Sphere(origin,1.0)\ns2 = s.ToNurbsSurface()\ns4 = s.ToRevSurface()\n\npr = s.ClosestParameter(p)\n>>> TypeError: No method matches given arguments for ClosestParameter: (<class 'Rhino.Geometry.Point3d'>)\n\nu1 = 0 # should have got this from clsptparam\nv1 = 1.047198 # should have got his from clsptparam\n\nfr2 = s2.FrameAt(u1,v1)\nfr4 = s4.FrameAt(u1,v1)\n\n>>> TypeError: No method matches given arguments for ClosestParameter: (<class 'Rhino.Geometry.Point3d'>)\n\n\n\n\nin the \nghpython\n this works so I’m wondering what is wrong with my code…\n\n\nimport Rhino.Geometry as rg\n\norigin = rg.Point3d(0,0,0)\np = rg.Point3d(1.0, 0.0, 1.732051) #Polar Point (0.0, 60, 2.0)\n\ns = rg.Sphere(origin,1.0) \n\nc1 = s.ClosestPoint(p) # sphere\np1 = s.ClosestParameter(p)\n\nu1 = p1[1]\nv1 = p1[2]\n\n\n\nI could instead use \nrhino3dm\n but now the \nClosestPoint\n doesn’t work if I turn the sphere into \nToNurbsSurface\n which I need to get the \nFrameAt\n function.\n\n\nimport rhino3dm\n\norigin = rhino3dm.Point3d(0,0,0)\np = rhino3dm.Point3d(1.0, 0.0, 1.732051)\ns = rhino3dm.Sphere(origin,1.0)\n\ns1 = s\nc1 = s1.ClosestPoint(p)\np1 = s1.ClosestParameter(p)\n\nu1 = p1[1]\nv1 = p1[2]\n\nn1 =s1.NormalAt(u1,v1)\n\n\n\n\nIn the end I was able to make this work by passing the uv from sphere’s \nClosestParameter\n to the one converted into Nurbs...",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino.Geometry as rg\n\norigin = rg.Point3d(0.0,0.0,0.0)\np = rg.Point3d(1.0, 0.0, 1.732051) # Polar Point (0.0, 60, 2.0)\ns = rg.Sphere(origin,1.0)\nu = 0.\nv = 0.\n\npr = s.ClosestParameter(p, u, v)\nprint(pr, u, v)\n>>> (True, 0.0, 1.0471975993043745) 0.0 0.0",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino.Geometry as rg\n\norigin = rg.Point3d(0.0,0.0,0.0)\np = rg.Point3d(1.0, 0.0, 1.732051) # Polar Point (0.0, 60, 2.0)\ns = rg.Sphere(origin,1.0)\ns2 = s.ToNurbsSurface()\ns4 = s.ToRevSurface()\n\npr = s.ClosestParameter(p)\n>>> TypeError: No method matches given arguments for ClosestParameter: (<class 'Rhino.Geometry.Point3d'>)\n\nu1 = 0 # should have got this from clsptparam\nv1 = 1.047198 # should have got his from clsptparam\n\nfr2 = s2.FrameAt(u1,v1)\nfr4 = s4.FrameAt(u1,v1)\n\n>>> TypeError: No method matches given arguments for ClosestParameter: (<class 'Rhino.Geometry.Point3d'>)",
+      "language": "python",
+      "author": "alphadog278",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\norigin = rg.Point3d(0,0,0)\np = rg.Point3d(1.0, 0.0, 1.732051) #Polar Point (0.0, 60, 2.0)\n\ns = rg.Sphere(origin,1.0) \n\nc1 = s.ClosestPoint(p) # sphere\np1 = s.ClosestParameter(p)\n\nu1 = p1[1]\nv1 = p1[2]",
+      "language": "python",
+      "author": "alphadog278",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhino3dm\n\norigin = rhino3dm.Point3d(0,0,0)\np = rhino3dm.Point3d(1.0, 0.0, 1.732051)\ns = rhino3dm.Sphere(origin,1.0)\n\ns1 = s\nc1 = s1.ClosestPoint(p)\np1 = s1.ClosestParameter(p)\n\nu1 = p1[1]\nv1 = p1[2]\n\nn1 =s1.NormalAt(u1,v1)",
+      "language": "python",
+      "author": "alphadog278",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhino3dm\n\norigin = rhino3dm.Point3d(0,0,0)\np = rhino3dm.Point3d(1.0, 0.0, 1.732051)\ns = rhino3dm.Sphere(origin,1.0)\n\ns1 = s\ns2 = s1.ToNurbsSurface()\n\nc1 = s1.ClosestPoint(p)\np1 = s1.ClosestParameter(p)\n\nu1 = p1[1]\nv1 = p1[2]\n\nn1 =s1.NormalAt(u1,v1)\n\nWXY = rhino3dm.Plane.WorldXY()\n\nf2 = s2.FrameAt(u1,v1,WXY)\nf2p = f2[1]\n\nPO = f2p.Origin\nPX = f2p.XAxis\nPY = f2p.YAxis\nPZ = f2p.ZAxis",
+      "language": "python",
+      "author": "alphadog278",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 115,
+  "posts_count": 5,
+  "views": 545
+}

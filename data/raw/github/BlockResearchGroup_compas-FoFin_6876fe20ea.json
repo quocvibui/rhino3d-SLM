@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas-FoFin/blob/9ce50ac0bb4d9785fe387fba6b2edcfcf16665e1/commands/FF.py",
+  "repo": "BlockResearchGroup/compas-FoFin",
+  "repo_stars": 7,
+  "repo_description": "Rhino plugin for form finding of tension-only, compression-only, and mixed tension-compression structures with axial forces, using constrained force-density and dynamic relaxation solvers.",
+  "license": "NOASSERTION",
+  "filepath": "commands/FF.py",
+  "instruction": "venv: brg-csd",
+  "code": "#! python3\n# venv: brg-csd\n\nimport pathlib\n\nimport Eto.Drawing  # type: ignore\nimport Eto.Forms  # type: ignore\nimport Rhino  # type: ignore\nimport Rhino.UI  # type: ignore\nimport System  # type: ignore\n\npluginfile = Rhino.PlugIns.PlugIn.PathFromId(System.Guid(\"5df3b821-822e-49e0-b24e-aebbe671c3d1\"))\nshared = pathlib.Path(str(pluginfile)).parent / \"shared\"\n\n\nclass SplashForm(Eto.Forms.Dialog[bool]):\n    def __init__(self, title, url, width=800, height=400):\n        super().__init__()\n\n        self.Title = title\n        self.Padding = Eto.Drawing.Padding(0)\n        self.Resizable = False\n        self.ClientSize = Eto.Drawing.Size(width, height)\n        self.WindowStyle = Eto.Forms.WindowStyle.NONE  # type: ignore\n\n        webview = Eto.Forms.WebView()\n        webview.Size = Eto.Drawing.Size(width, height)\n        webview.Url = System.Uri(url)\n        webview.BrowserContextMenuEnabled = False\n        webview.DocumentLoading += self.action\n\n        layout = Eto.Forms.DynamicLayout()\n        layout.BeginVertical()\n        layout.AddRow(webview)\n        layout.EndVertical()\n        self.Content = layout\n\n    def action(self, sender, e):\n        if e.Uri.Scheme == \"action\" and e.Uri.Host == \"close\":\n            self.Close()\n\n    def show(self):\n        return self.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)\n\n\ndef RunCommand():\n    form = SplashForm(title=\"FormFinder\", url=str(shared / \"index.html\"))\n    form.show()\n\n\n# =============================================================================\n# Main\n# =============================================================================\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": true
+}

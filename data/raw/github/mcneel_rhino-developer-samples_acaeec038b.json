@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_arclengthpoint.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_arclengthpoint.py",
+  "instruction": "Ex arclengthpoint",
+  "code": "import Rhino\nimport scriptcontext\n\ndef ArcLengthPoint():\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", True, Rhino.DocObjects.ObjectType.Curve)\n    if rc!=Rhino.Commands.Result.Success: return rc\n    crv = objref.Curve()\n    if not crv: return Rhino.Commands.Result.Failure\n    crv_length = crv.GetLength()\n    length = 0\n    rc, length = Rhino.Input.RhinoGet.GetNumber(\"Length from start\", True, length, 0, crv_length)\n    if rc!=Rhino.Commands.Result.Success: return rc\n    pt = crv.PointAtLength(length)\n    if pt.IsValid:\n        scriptcontext.doc.Objects.AddPoint(pt)\n        scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    ArcLengthPoint()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

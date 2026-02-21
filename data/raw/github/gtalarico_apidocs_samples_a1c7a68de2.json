@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_splitbrepwithplane.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_splitbrepwithplane.py",
+  "instruction": "Ex splitbrepwithplane",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Geometry import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  #First, collect all the breps to split\n  rc, obj_refs = RhinoGet.GetMultipleObjects(\"Select breps to split\", False, ObjectType.Brep)\n  if rc <> Result.Success or obj_refs == None:\n    return rc\n\n  # Get the final plane\n  rc, plane = RhinoGet.GetPlane()\n  if rc <> Result.Success:\n    return rc\n\n  #Iterate over all object references\n  for obj_ref in obj_refs:\n    brep = obj_ref.Brep()\n    bbox = brep.GetBoundingBox(False)\n\n    #Grow the boundingbox in all directions\n    #If the boundingbox is flat (zero volume or even zero area) \n    #then the CreateThroughBox method will fail.\n    min_point = bbox.Min\n    min_point.X -= 1.0\n    min_point.Y -= 1.0\n    min_point.Z -= 1.0\n    bbox.Min = min_point\n    max_point = bbox.Max\n    max_point.X += 1.0\n    max_point.Y += 1.0\n    max_point.Z += 1.0\n    bbox.Max = max_point\n\n    plane_surface = PlaneSurface.CreateThroughBox(plane, bbox)\n    if plane_surface == None:\n      #This is rare, it will most likely not happen unless either the plane or the boundingbox are invalid\n      RhinoApp.WriteLine(\"Cutting plane could not be constructed.\")\n    else:\n      breps = brep.Split(plane_surface.ToBrep(), doc.ModelAbsoluteTolerance)\n      if breps == None or breps.Length == 0:\n        RhinoApp.Write(\"Plane does not intersect brep (id:{0})\", obj_ref.ObjectId)\n        continue\n      for brep_piece in breps:\n        doc.Objects.AddBrep(brep_piece)\n      doc.Objects.AddSurface(plane_surface)\n      doc.Objects.Delete(obj_ref, False)\n\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

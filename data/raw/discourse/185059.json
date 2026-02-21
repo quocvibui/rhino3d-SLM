@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-createboolean-performances-v8-vs-v7/185059",
+  "topic_id": 185059,
+  "title": "Brep.CreateBoolean... performances V8 vs. V7",
+  "question": "Create the model with this Python 2 script.\n\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\ndef main():\n    \n    points = rs.coerce3dpointlist((\n        ( 0.0,  0.0,  0.0),\n        ( 0.0,  5.0,  0.0),\n        ( 0.0, 10.0,  0.0),\n        ( 5.0,  0.0,  0.0),\n        ( 5.0,  5.0, 10.0),\n        ( 5.0, 10.0,  0.0),\n        (10.0,  0.0,  0.0),\n        (10.0,  5.0,  0.0),\n        (10.0, 10.0,  0.0),\n        ))\n    \n    ns = rg.NurbsSurface.CreateFromPoints(\n        points,\n        uCount=3,\n        vCount=3,\n        uDegree=2,\n        vDegree=2)\n    \n    brep = ns.ToBrep()\n    \n    breps = []\n    for i in range(100):\n        for j in range(100):\n            brep_Trans = brep.DuplicateBrep()\n            brep_Trans.Translate(rg.Vector3d(10.0*i, 10.0*j, 0.0))\n            breps.append(brep_Trans)\n    \n    brep_Joined = rg.Brep.JoinBreps(breps, tolerance=2*sc.doc.ModelAbsoluteTolerance)[0]\n    \n    sc.doc.Objects.AddBrep(brep_Joined)\n    \n    sc.doc.Views.RedrawEnabled = False\n    \n    rs.AddCylinder((5,5,0), height=10, radius=2, cap=True)\n    \n    sc.doc.Views.RedrawEnabled = True\n\n\nif __name__ == '__main__': main()\n\n\n\n\n\n\n\n\nTest the model with this Python 2 script.\n\n\nfrom \nfuture\n import absolute_import, division, print_function, unicode_literals\n\n\nimport Rhino\n\nimport Rhino.Geometry as rg\n\nimport rhinoscriptsyntax as rs\n\nimport scriptcontext as sc\n\n\nfrom System.Diagnostics import Stopwatch\n\n\ndef main():\n\n\ngA = rs.GetObject(\"Select brep A\", filter=rs.filter.polysurface, preselect=True)\nif gA is None: return\n\ngB = rs.GetObject(\"Select brep B\", filter=rs.filter.polysurface)\nif gB is None: return\n\nrgA_In = rs.coercebrep(gA)\nrgB_In = rs.coercebrep(gB)\n\nRhino.RhinoApp.SetCommandPrompt(\"Working ...\")\n\nsw = Stopwatch()\n\nsMethods = (\n    \"rg.Brep.CreateBooleanUnion([rgA_In, rgB_In], tolerance=2.0*sc.doc.ModelAbsoluteTolerance)\",\n    \"rg.Brep.CreateBooleanDifference(rgA_In, rgB_In, tolerance=2.0*sc.doc.ModelAbsoluteTolerance)\",\n    \"rg.Brep.Cr...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\ndef main():\n    \n    points = rs.coerce3dpointlist((\n        ( 0.0,  0.0,  0.0),\n        ( 0.0,  5.0,  0.0),\n        ( 0.0, 10.0,  0.0),\n        ( 5.0,  0.0,  0.0),\n        ( 5.0,  5.0, 10.0),\n        ( 5.0, 10.0,  0.0),\n        (10.0,  0.0,  0.0),\n        (10.0,  5.0,  0.0),\n        (10.0, 10.0,  0.0),\n        ))\n    \n    ns = rg.NurbsSurface.CreateFromPoints(\n        points,\n        uCount=3,\n        vCount=3,\n        uDegree=2,\n        vDegree=2)\n    \n    brep = ns.ToBrep()\n    \n    breps = []\n    for i in range(100):\n        for j in range(100):\n            brep_Trans = brep.DuplicateBrep()\n            brep_Trans.Translate(rg.Vector3d(10.0*i, 10.0*j, 0.0))\n            breps.append(brep_Trans)\n    \n    brep_Joined = rg.Brep.JoinBreps(breps, tolerance=2*sc.doc.ModelAbsoluteTolerance)[0]\n    \n    sc.doc.Objects.AddBrep(brep_Joined)\n    \n    sc.doc.Views.RedrawEnabled = False\n    \n    rs.AddCylinder((5,5,0), height=10, radius=2, cap=True)\n    \n    sc.doc.Views.RedrawEnabled = True\n\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "gA = rs.GetObject(\"Select brep A\", filter=rs.filter.polysurface, preselect=True)\nif gA is None: return\n\ngB = rs.GetObject(\"Select brep B\", filter=rs.filter.polysurface)\nif gB is None: return\n\nrgA_In = rs.coercebrep(gA)\nrgB_In = rs.coercebrep(gB)\n\nRhino.RhinoApp.SetCommandPrompt(\"Working ...\")\n\nsw = Stopwatch()\n\nsMethods = (\n    \"rg.Brep.CreateBooleanUnion([rgA_In, rgB_In], tolerance=2.0*sc.doc.ModelAbsoluteTolerance)\",\n    \"rg.Brep.CreateBooleanDifference(rgA_In, rgB_In, tolerance=2.0*sc.doc.ModelAbsoluteTolerance)\",\n    \"rg.Brep.CreateBooleanIntersection(rgA_In, rgB_In, tolerance=2.0*sc.doc.ModelAbsoluteTolerance)\",\n    )\n\nfor sMethod in sMethods:\n    sw.Restart()\n    \n    rgB_Res = eval(sMethod)\n    \n    sw.Stop()\n    \n    print(\"{} ms for {}\".format(sw.ElapsedMilliseconds, sMethod.split('(')[0]))\n    \n    if rgB_Res is None:\n        print(\"{} failed.\".format(sMethod.split('(')[0]))",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 272
+}

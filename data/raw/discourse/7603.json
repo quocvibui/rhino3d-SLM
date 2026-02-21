@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-move-mesh-vertices-in-script/7603",
+  "topic_id": 7603,
+  "title": "How to move mesh vertices in script?",
+  "question": "I am working on a script that makes a road based on a spline, on a mesh terrain.\n\nI could not find a move vertices function, so the only way I found to do this was to make a new mesh based on the unchanged and changed vertices.\n\n\n\n\nroad by spline on terrain.jpeg\n860×309 25.6 KB\n\n\n \n\n\nIt works ok, but is there a move vertices function that I could use instead, so I don’t have to duplicate the object properties? (material, unweld value, display modes etc.)\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\ndef DirectMeshVertexSet():\n    #get mesh object\n    mesh_id = rs.GetObject(\"select mesh\",rs.filter.mesh)\n    if (mesh_id == None) : return\n    #get mesh object in document\n    mesh_obj = rs.coercemesh(mesh_id)\n    #direct link to the vertex list of the object\n    vertices = mesh_obj.Vertices\n    \n    #create a set of frames\n    for frame in range(100):\n        #for each frame loop through the vertices and set the Z value accordingly\n        for index, vertex in enumerate(vertices):\n            vertex.Z = math.sin((vertex.X**2+vertex.Y**2)**0.5-frame/5)\n            # set the new vertex \n            vertices.SetVertex(index,vertex)\n        #clearing Previous Normals\n        mesh_obj.Normals.Clear()\n        mesh_obj.FaceNormals.Clear()\n        #replace intial mesh with the edited mesh object \n        sc.doc.Objects.Replace(mesh_id,mesh_obj)\n        \n        #Sleep to catch view manipulations\n        rs.Sleep(0)\n        #Redraw the viewports\n        rs.Redraw()\n\nDirectMeshVertexSet()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\nfrom Rhino.Geometry import Point3f\ndef getGeo(id):\n    obj = doc.Objects.Find(id)\n    return obj.Geometry\n\nmeshGeo = getGeo(mesh)\nmeshGeo.Vertices.SetVertex(index, Point3f(x,y,z))\ndoc.Objects.Replace(mesh, meshGeo)",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef getGeo(id): return doc.Objects.Find(id).Geometry\n# To get meshes displayed in Rhino you can use this:\nmeshes = rs.ObjectsByType(32)\n# To get the first mesh on the list use this:\nmesh = meshes[0]\n# To see the type and ID of mesh use this:\nprint type(mesh), 'ID = ', mesh\n# To get the geometry of the mesh use this:\nmeshGeo = getGeo(mesh)\n# To get the vertices of the mesh do this:\nvertices = meshGeo.Vertices\n# To see the XYZ values of the first vertex do this:\nvertex0= vertices[0]\nprint vertex0.X , vertex0.Y , vertex0.Z\n# To get the number vertices in the mesh do this:\nvcount = vertices.Count\nprint vcount",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 25,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 26,
+  "views": 5921
+}

@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/explode-mesh/19911",
+  "topic_id": 19911,
+  "title": "Explode Mesh",
+  "question": "Hello\n\n\nIs there any function in the Rhino SDK that I could use to ‘explode’ meshes they way Rhino does when using the Explode command?\n\n\nIt will also be useful to have an idea of the logic by which the Explode command explodes meshes?\n\n\nThank you.\n\n\nStratos",
+  "code_blocks": [
+    {
+      "code": "def ExplodeMeshes(mesh_ids, delete=False):\n    \"\"\"Explodes a mesh object, or mesh objects int submeshes. A submesh is a\n    collection of mesh faces that are contained within a closed loop of\n    unwelded mesh edges. Unwelded mesh edges are where the mesh faces that\n    share the edge have unique mesh vertices (not mesh topology vertices)\n    at both ends of the edge\n    Parameters:\n      mesh_ids = list of mesh identifiers\n      delete[opt] = delete the input meshes\n    Returns:\n      List of identifiers\n    \"\"\"\n    id = rhutil.coerceguid(mesh_ids)\n    if id: mesh_ids = [mesh_ids]\n    rc = []\n    for mesh_id in mesh_ids:\n        mesh = rhutil.coercemesh(mesh_id, True)\n        if mesh:\n            submeshes = mesh.ExplodeAtUnweldedEdges()\n            if submeshes:\n                for submesh in submeshes:\n                    id = scriptcontext.doc.Objects.AddMesh(submesh)\n                    if id!=System.Guid.Empty: rc.append(id)\n    if rc: scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 6733
+}

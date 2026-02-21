@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-is-it-possible-to-edit-editpoints-in-rhino-common/182914",
+  "topic_id": 182914,
+  "title": "How is it possible to edit editpoints in Rhino common?",
+  "question": "Hi \n@pascal\n and \n@stevebaer\n\nI am working on a script where I make a simplified offset of a 3D curve and I need to adjust the location of the new curve editpoints, but I have not figured out how, so I hack around it.\n\n\nHere is what I do:\n\n\n\n\nproject 3D curve to xy-plane\n\n\noffset the 2D curve\n\n\nfind closest point of each editpoint of the offset\n\n\nmove each editpoint to corresponding height of 3D curve\n\n\n\n\nIn the workaround I add the offsetcurve to document, turn on editpoints and move them with rs.ObjectGripLocations() and then coerce the result and delete the temporary curve.\n\nBut this slows down the process and makes the code more messy, is it possible to do it in Common directly?\n\n\nThanks.\n\n\n### Offset_2.5D_curve by Holo 2024\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport Rhino.Geometry.Curve as curve\nimport scriptcontext as sc\n\ndef offset3dcurve(curve):\n    plane = rs.WorldXYPlane()\n    curve2D = Rhino.Geometry.Curve.ProjectToPlane(curve, plane)\n    distance = 1\n    tolerance = 0.05\n    cornerstyle = Rhino.Geometry.CurveOffsetCornerStyle(1)\n    offset2D = Rhino.Geometry.Curve.Offset(curve2D, plane, distance, tolerance, cornerstyle)\n    offset_id = sc.doc.Objects.AddCurve(offset2D[0])\n    \n    rs.SelectObject(offset_id)\n    rs.Command(\"_NoEcho _PointsOff _EditPtOn\", False)\n    grips = rs.ObjectGripLocations(offset_id, points=None)\n    \n    for i in range(len(grips)):\n        param = curve2D.ClosestPoint(grips[i],0)\n        closepoint = curve.PointAt(param[1])\n        point = rs.coerce3dpoint((grips[i].X,grips[i].Y, closepoint.Z))\n        rs.ObjectGripLocation(offset_id, i, point)\n    \n    offsetcurve = rs.coercecurve(offset_id)\n    rs.DeleteObject(offset_id)\n    return offsetcurve\n\n\ncurve_id = rs.GetObject(\"curve to offset\", rs.filter.curve, preselect=True)\nif curve_id:\n    rs.EnableRedraw(False)\n    curve = rs.coercecurve(curve_id)\n    offsetcurve = offset3dcurve(curve)\n    sc.doc.Objects.AddCurve(offsetcurve)\n    sc.doc.Views.Redraw()\n    rs.EnableRedraw(T...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nid = rs.GetObject(preselect=True)\ncrv = rs.coercecurve(id)\ngrvs = crv.GrevillePoints(False)\n\nfor i in range(len(grvs)): \n    pt = grvs[i]\n    grvs[i] = Rhino.Geometry.Point3d(pt.X, pt.Y, 10)\n    \nprint crv.SetGrevillePoints(grvs)\n\nsc.doc.Objects.Replace(id, crv)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "### Offset_2.5D_curve by Holo 2024\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport Rhino.Geometry.Curve as curve\nimport scriptcontext as sc\n\ndef offset3dcurve(curve):\n    plane = rs.WorldXYPlane()\n    curve2D = Rhino.Geometry.Curve.ProjectToPlane(curve, plane)\n    distance = 1\n    tolerance = 0.05\n    cornerstyle = Rhino.Geometry.CurveOffsetCornerStyle(1)\n    offset2D = Rhino.Geometry.Curve.Offset(curve2D, plane, distance, tolerance, cornerstyle)\n    offset_id = sc.doc.Objects.AddCurve(offset2D[0])\n    \n    rs.SelectObject(offset_id)\n    rs.Command(\"_NoEcho _PointsOff _EditPtOn\", False)\n    grips = rs.ObjectGripLocations(offset_id, points=None)\n    \n    for i in range(len(grips)):\n        param = curve2D.ClosestPoint(grips[i],0)\n        closepoint = curve.PointAt(param[1])\n        point = rs.coerce3dpoint((grips[i].X,grips[i].Y, closepoint.Z))\n        rs.ObjectGripLocation(offset_id, i, point)\n    \n    offsetcurve = rs.coercecurve(offset_id)\n    rs.DeleteObject(offset_id)\n    return offsetcurve\n\n\ncurve_id = rs.GetObject(\"curve to offset\", rs.filter.curve, preselect=True)\nif curve_id:\n    rs.EnableRedraw(False)\n    curve = rs.coercecurve(curve_id)\n    offsetcurve = offset3dcurve(curve)\n    sc.doc.Objects.AddCurve(offsetcurve)\n    sc.doc.Views.Redraw()\n    rs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 256
+}

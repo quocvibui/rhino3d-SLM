@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/irw-udel/dev-lattice-generation/blob/6f71e27d2ac6638d6d12643e0040cd4c26a21b29/sdk-scripts/logging_combine_json.py",
+  "repo": "irw-udel/dev-lattice-generation",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "sdk-scripts/logging_combine_json.py",
+  "instruction": "Combines a list of JSON inputs into a single JSON object for output.\n    Inputs:\n        input_json: JSON objects to combine\n    Output:\n       combined_json: Combined inputs",
+  "code": "\"\"\"Combines a list of JSON inputs into a single JSON object for output.\n    Inputs:\n        input_json: JSON objects to combine\n    Output:\n       combined_json: Combined inputs\"\"\"\n\n__author__ = \"irw\"\n__version__ = \"20220126\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport json\nfrom collections import OrderedDict\n\ndef combine_inputs(input_json):\n    m = OrderedDict()\n    for item in input_json:\n        if item:\n            item = str(item).replace(\"\\n\", \"\")\n            m.update(json.loads(item, object_pairs_hook=OrderedDict))\n    return m\n\nclass CombineJson(component):\n    def RunScript(self, input_json):\n        merged = combine_inputs(input_json)\n        combined_json = json.dumps(merged, sort_keys=False, indent=4, separators=(',', ': '))\n\n        return combined_json",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

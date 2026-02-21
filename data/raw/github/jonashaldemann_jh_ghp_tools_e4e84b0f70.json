@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/instant_huesli.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/instant_huesli.py",
+  "instruction": "Instant huesli",
+  "code": "import math\nimport scriptcontext as sc\nimport Rhino\nimport ghpythonlib.components as gh\n\n\ndef instant_huesli(curve, giebelhoehe, flip, giebelposition, dachwinkel, bake):\n    angle = 0.5 * math.pi if flip else 0.0\n\n    # Solid\n    extr_vec = gh.UnitZ(giebelhoehe)\n    solid = gh.CapHoles(gh.Extrude(curve, extr_vec))\n\n    # Vertikale Plane unter dem Giebel\n    segments, _ = gh.Explode(curve, False)\n    longest_segment = max(segments, key=lambda seg: gh.Length(seg))\n    start, end = gh.EndPoints(longest_segment)\n    vector, _ = gh.Rotate(\n        gh.Vector2Pt(start, end, False),\n        angle,\n        gh.XYPlane(gh.ConstructPoint(0.0, 0.0, 0.0)),\n    )\n    plane, _ = gh.AlignPlane(gh.XYPlane(gh.ConstructPoint(0.0, 0.0, 0.0)), vector)\n    bbox, _ = gh.BoundingBox(solid, plane)\n    diagonal = gh.Line(gh.BoxCorners(bbox)[4], gh.BoxCorners(bbox)[6])\n    giebelpunkt, _, _ = gh.EvaluateLength(diagonal, giebelposition, True)\n    giebelplane = gh.ConstructPlane(giebelpunkt, vector, plane.ZAxis)\n\n    # Dachschräge\n    dach_planes = [\n        gh.Rotate3D(giebelplane, math.radians(90 - dachwinkel), giebelpunkt, vector)[0],\n        gh.Mirror(\n            gh.Rotate3D(\n                giebelplane, math.radians(90 - dachwinkel), giebelpunkt, vector\n            )[0],\n            giebelplane,\n        )[0],\n    ]\n\n    # Schneiden\n    for plane in dach_planes:\n        crv, _ = gh.BrepXPlane(solid, plane)\n        breps = gh.CapHoles(gh.SplitBrep(solid, crv))\n        solid = max(breps, key=lambda brep: gh.Volume(brep)[0])\n\n    # Baken\n    if bake:\n        sc.doc = Rhino.RhinoDoc.ActiveDoc\n        attributes = Rhino.DocObjects.ObjectAttributes()\n        sc.doc.Objects.AddBrep(solid, attributes)\n        sc.doc = sc.sticky.get(\n            \"ghdoc\", None\n        )  # Retrieve ghdoc from scriptcontext's sticky dictionary\n\n    return solid\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

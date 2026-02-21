@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/atom-on-mac-not-autocompleting-when-rhino-is-not-running/26085",
+  "topic_id": 26085,
+  "title": "Atom on Mac not autocompleting when Rhino is not running?",
+  "question": "Hey guys, I’ve got it all running, executed the terminal commands and have checked if all the packages are correctly installed.\n\n\nI’m using Yosemite and Atom for Mac and installed the Rhino-Python package correctly as shown here:\n\n\n\n\n\n\n\n\nAtom\n\n\n\n\n\n\n\n\nrhino-python\n\n\nEditor support for writting python scripts that are executed by Rhinoceros (http://www.rhino3d.com).\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSomehow for example when typing rs.Add it doesn’t show me the option to autocomplete to AddCircle, it doesn’t matter it I add more words. Also, it doesn’t show the bar at the bottom where it shows which parameters belong to the AddCircle command.\n\n\nCan it be that Atom is buggy with Yosemite or are there known common issues with Atom and the Rhino autocomplete?\n\n\n\n\nScreen Shot 2015-10-26 at 23.50.45.png\n772×352 10.1 KB\n\n\n\n\nI am guessing this is because I didn’t use the ‘StartAtomEditorListener’ why do I have to have that active? Isn’t there a way so that I can script while Rhino isn’t running in the background?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SurfaceSplitter():\n    SelectedSurfaces = rs.GetObjects(\"Select objects\")\n    if (SelectedSurfaces==None): return\n\n    rs.UnselectObjects(SelectedSurfaces)\n    rs.DuplicateSurfaceBorder(SelectedSurfaces)\n    rs.MeshPolyline(SelectedSurfaces)\n    rs.MeshToNurb(trimmed_triangles=False, delete_input=True)\n    rs.LastObject(SelectedSurfaces)\n    rs.DeleteObject(SelectedSurfaces)\n#call function defined above\n    SurfaceSplitter()",
+      "language": "python",
+      "author": "ohmarinus",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SurfaceSplitter():\n    #limit your choice to surfaces, allow preselection\n    SelectedSurfaces = rs.GetObjects(\"Select objects\",8,preselect=True)\n    if (SelectedSurfaces==None): return\n\n    #rs.UnselectObjects(SelectedSurfaces) #you don't need this\n    #we're going to temporarily suspend redrawing of the screen (goes faster)\n    rs.EnableRedraw(False)\n\n    #we need to create a loop in order to work on each surface individually\n    for srf in SelectedSurfaces:\n        #get the border\n        bord=rs.DuplicateSurfaceBorder(srf)\n        #get the corner points (there will be 5, first/last are repeats!)\n        pts=rs.CurvePoints(bord)\n\n        #check diagonals, find shortest, create triangular surfaces\n        if rs.Distance(pts[0],pts[2])<rs.Distance(pts[1],pts[3]):\n            tri1=rs.AddSrfPt([pts[0],pts[1],pts[2]])\n            tri2=rs.AddSrfPt([pts[0],pts[2],pts[3]])\n        else:\n            tri1=rs.AddSrfPt([pts[0],pts[1],pts[3]])\n            tri2=rs.AddSrfPt([pts[1],pts[2],pts[3]])\n\n        #delete unneeded objects\n        rs.DeleteObject(srf)\n        rs.DeleteObject(bord)\n\n        #now loop on to the next surface, until all have been done\nSurfaceSplitter()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SurfaceSplitter():\n    #limit your choice to surfaces, allow preselection\n    SelectedSurfaces = rs.GetObjects(\"Select objects\",8,preselect=True)\n    if (SelectedSurfaces==None): return\n\n    #rs.UnselectObjects(SelectedSurfaces) #you don't need this\n    #we're going to temporarily suspend redrawing of the screen (goes faster)\n    rs.EnableRedraw(False)\n\n    planars = rs.IsSurfacePlanar(SelectedSurfaces)\n    if (planars==False):\n        #we need to create a loop in order to work on each surface individually\n        for srf in SelectedSurfaces:\n            #get the border\n            bord=rs.DuplicateSurfaceBorder(srf)\n            #get the corner points (there will be 5, first/last are repeats!)\n            pts=rs.CurvePoints(bord)\n\n            #check diagonals, find shortest, create triangular surfaces\n            if rs.Distance(pts[0],pts[2])<rs.Distance(pts[1],pts[3]):\n                tri1=rs.AddSrfPt([pts[0],pts[1],pts[2]])\n                tri2=rs.AddSrfPt([pts[0],pts[2],pts[3]])\n            else:\n                tri1=rs.AddSrfPt([pts[0],pts[1],pts[3]])\n                tri2=rs.AddSrfPt([pts[1],pts[2],pts[3]])\n\n            #delete unneeded objects\n            rs.DeleteObject(srf)\n            rs.DeleteObject(bord)\n\n        #now loop on to the next surface, until all have been done\nSurfaceSplitter()",
+      "language": "python",
+      "author": "ohmarinus",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "for srf in SelectedSurfaces:\n        if not rs.IsSurfacePlanar(srf,tol):  #tol is optional\n            #get the border\n            bord=rs.DuplicateSurfaceBorder(srf)\n            #get the corner points (there will be 5, first/last are repeats!)\n            pts=rs.CurvePoints(bord)\n            #etc.",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 1903
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/worksession-manipulation-from-grasshopper/73032",
+  "topic_id": 73032,
+  "title": "Worksession manipulation from Grasshopper?",
+  "question": "So I decided to try messing around with Worksessions from Grasshopper, and I was looking for a way to switch Active model, adding models, removing models etc, but RhinoCommon doesn’t seem to provide much help on this:\n\n\nhttps://developer.rhino3d.com/api/RhinoCommon/html/T_Rhino_DocObjects_Worksession.htm\n\n\nIs Worksessions something that isn’t really covered or am I just not searching hard enough?\n\n\n// Rolf",
+  "code_blocks": [
+    {
+      "code": "\"\"\"attaches a list of files to the current worksession\n    Inputs:\n        P: file paths to attach to worksession\n    Output:\n        R: True if no errors\"\"\"\n\n__author__ = \"Dharman.Gersch\"\n__version__ = \"2018.08.22\"\n\nghenv.Component.Name = \"Worksession.Attach\"\nghenv.Component.NickName = 'WS.Attach'\n    ghenv.Component.Message = \"\" #'VER ALPHA 0.0.1\\n 2018_07_11'\n    ghenv.Component.Category = \"worksession\"\nghenv.Component.SubCategory = \"1\"\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n#P is a list of filepaths to attach to worksession\nfor p in P:\n    #command must be surrounded with '' so that file path can e surrounded with \"\"\n    #this ensures that paths with spaces still work\n    rs.Command('-Worksession Attach \"{}\" _Enter'.format(p))\n\n#useful stuff here: Rhino.DocObjects.Worksession\ndoc = Rhino.RhinoDoc.ActiveDoc\nWS = doc.Worksession\npaths = WS.ModelPaths\n\n#R is used downstream. only continue if all worksessions are attached\nR = all([p in paths])",
+      "language": "python",
+      "author": "dharman",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Saves the current worksession, creates one if it doesn't already exist\n        Inputs:\n            P: paths to asave the worksession in\n            N: name of the worksession file\n            S: set to true to save WARNING: grasshopper canvas may freeze if you use a button\n        OUtputs:\n            R: result boolean\n    \"\"\"\n\n    __author__ = \"Dharman.Gersch\"\n    __version__ AUR_= \"2018.08.22\"\n\nghenv.Component.Name = \"Worksession.Save\"\nghenv.Component.NickName = 'WS.Save'\nghenv.Component.Message = \"\" #'VER ALPHA 0.0.1\\n 2018_07_11'\nghenv.Component.Category = \"worksession\"\nghenv.Component.SubCategory = \"1\"\n\n\nimport rhinoscriptsyntax as rs\nimport os\n\nEXT = \"rws\"\nresults = []\n\n\n\n#command must be surrounded with '' so that file path can e surrounded with \"\"\n#this ensures that paths with spaces still work\npath = os.path.join(P, N+\".rws\")\nif S:\n    if os.path.exists(path):\n        R = rs.Command('-Worksession Save \"{}\" _Enter'.format(path))\n    else:\n        R = rs.Command('-Worksession SaveAs \"{}\" _Enter'.format(path))\nR = os.path.exists(path)",
+      "language": "python",
+      "author": "dharman",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 17,
+  "views": 3571
+}

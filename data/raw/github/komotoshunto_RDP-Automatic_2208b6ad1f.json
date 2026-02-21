@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/komotoshunto/RDP-Automatic/blob/680b2cc9081582547d1b37440ec7ea97a94a14ea/%E9%96%A2%E6%95%B0/%E7%85%A7%E5%B0%84%E7%82%B9%E3%82%92mesh%E3%81%8B%E3%82%89%E6%B3%95%E7%B7%9A%E6%96%B9%E5%90%91%E3%81%AB%E3%81%9A%E3%82%89%E3%81%99.py",
+  "repo": "komotoshunto/RDP-Automatic",
+  "repo_stars": 0,
+  "repo_description": "雨水排水計画を自動化するツール",
+  "license": "unknown",
+  "filepath": "関数/照射点をmeshから法線方向にずらす.py",
+  "instruction": "照射点をmeshから法線方向にずらす",
+  "code": "import Rhino.Geometry as rg\nimport ghpythonlib.components as ghcomp\n\n#ProjectPointに引っかからないように照射点をmeshから法線方向にずらす\ndef MovePoint(point, vector, length):\n    rg.Vector3d.Unitize(vector)\n    normal = vector * length\n    transform = rg.Transform.Translation(normal)\n    rg.Point3d.Transform(point, transform)\n    return point\n\n#ずらす長さ\nlength = 0.1\ndef NormalOffset_FromMesh(mesh):\n    point_list = []\n    result = ghcomp.FaceNormals(mesh)\n    points = result[0]\n    if isinstance(points, list):\n        for num in range(len(points)):\n            point = points[num]\n            normal_unit = result[1][num]\n            point = MovePoint(normal_unit, length, point)\n            point_list.append(point)\n    else:\n        point = points\n        normal_unit = result[1]\n        point = MovePoint(normal_unit, length, point)\n        point_list.append(point)\n    return point_list\n\na = []\nfor mesh in mesh_list:\n    point_list = NormalOffset_FromMesh(mesh)\n    for point in point_list:\n        a.append(point)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

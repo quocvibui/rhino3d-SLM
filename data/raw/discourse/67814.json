@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dividebylengthpoints-script-question/67814",
+  "topic_id": 67814,
+  "title": "DivideByLengthPoints script question",
+  "question": "I started comparing the two languages C# and Python and there is something strange.\n\n\nHow does Python know the type of variable:\n\n\ncrv = objref.Curve()\n\nwhile in C# we properly specified it;\n\n\nRhino.Geometry.Curve crv = objref.Curve();\n\nWhy do we need to use the (dot) .Curve as we already used the Curve filter before.\n\n\nC# - version\n\nusing Rhino.DocObjects;\n\n\n    partial class Examples\n    {\n      public static Rhino.Commands.Result DivideByLengthPoints(Rhino.RhinoDoc doc)\n      {\n        const ObjectType filter = Rhino.DocObjects.ObjectType.Curve; \n        Rhino.DocObjects.ObjRef objref;\n        Rhino.Commands.Result rc = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to divide\", false, filter, out objref);\n        if (rc != Rhino.Commands.Result.Success || objref == null)\n          return rc;\n\n        **Rhino.Geometry.Curve crv = objref.Curve();**\n        if (crv == null || crv.IsShort(Rhino.RhinoMath.ZeroTolerance))\n          return Rhino.Commands.Result.Failure;\n\n        double crv_length = crv.GetLength();\n        string s = string.Format(\"Curve length is {0:f3}. Segment length\", crv_length);\n\n        double seg_length = crv_length / 2.0;\n        rc = Rhino.Input.RhinoGet.GetNumber(s, false, ref seg_length, 0, crv_length);\n        if (rc != Rhino.Commands.Result.Success)\n          return rc;\n\n        Rhino.Geometry.Point3d[] points;\n        crv.DivideByLength(seg_length, true, out points);\n        if (points == null)\n          return Rhino.Commands.Result.Failure;\n\n        foreach (Rhino.Geometry.Point3d point in points)\n          doc.Objects.AddPoint(point);\n\n        doc.Views.Redraw();\n        return Rhino.Commands.Result.Success;\n      }\n    } \n\n\n\nPython - version\n\nimport Rhino\n\nimport scriptcontext\n\n\ndef DivideByLengthPoints():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to divide\", False, filter)\n    if not objref or rc!=Rhino.Commands.Result.Success: return rc\n\n    **crv = objref.Curve()...",
+  "code_blocks": [
+    {
+      "code": "partial class Examples\n    {\n      public static Rhino.Commands.Result IntersectCurves(Rhino.RhinoDoc doc)\n      {\n        // Select two curves to intersect\n        var go = new Rhino.Input.Custom.GetObject();\n        go.SetCommandPrompt(\"Select two curves\");\n        go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve;\n        go.GetMultiple(2, 2);\n        if (go.CommandResult() != Rhino.Commands.Result.Success)\n          return go.CommandResult();\n\n    // Validate input\n    var curveA = go.Object(0).Curve();\n    var curveB = go.Object(1).Curve();\n    if (curveA == null || curveB == null)\n      return Rhino.Commands.Result.Failure;\n\n    // Calculate the intersection\n    const double intersection_tolerance = 0.001;\n    const double overlap_tolerance = 0.0;\n    var events = Rhino.Geometry.Intersect.Intersection.CurveCurve(curveA, curveB, intersection_tolerance, overlap_tolerance);\n\n    // Process the results\n    if (events != null)\n    {\n      for (int i = 0; i < events.Count; i++)\n      {\n        var ccx_event = events[i];\n        doc.Objects.AddPoint(ccx_event.PointA);\n        if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)\n        {\n          doc.Objects.AddPoint(ccx_event.PointB);\n          doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);\n        }\n      }\n      doc.Views.Redraw();\n    }\n    return Rhino.Commands.Result.Success;\n  }\n}",
+      "language": "csharp",
+      "author": "onrender",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "...\n            var curveA = go.Object(0).Curve();  Type: Rhino.Geometry.Curve\n            var curveB = go.Object(1);          Type: Rhino.DocObject.ObjRef",
+      "language": "csharp",
+      "author": "onrender",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "partial class Examples\n    {\n      public static Rhino.Commands.Result DivideByLengthPoints(Rhino.RhinoDoc doc)\n      {\n        const ObjectType filter = Rhino.DocObjects.ObjectType.Curve; \n        Rhino.DocObjects.ObjRef objref;\n        Rhino.Commands.Result rc = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to divide\", false, filter, out objref);\n        if (rc != Rhino.Commands.Result.Success || objref == null)\n          return rc;\n\n        **Rhino.Geometry.Curve crv = objref.Curve();**\n        if (crv == null || crv.IsShort(Rhino.RhinoMath.ZeroTolerance))\n          return Rhino.Commands.Result.Failure;\n\n        double crv_length = crv.GetLength();\n        string s = string.Format(\"Curve length is {0:f3}. Segment length\", crv_length);\n\n        double seg_length = crv_length / 2.0;\n        rc = Rhino.Input.RhinoGet.GetNumber(s, false, ref seg_length, 0, crv_length);\n        if (rc != Rhino.Commands.Result.Success)\n          return rc;\n\n        Rhino.Geometry.Point3d[] points;\n        crv.DivideByLength(seg_length, true, out points);\n        if (points == null)\n          return Rhino.Commands.Result.Failure;\n\n        foreach (Rhino.Geometry.Point3d point in points)\n          doc.Objects.AddPoint(point);\n\n        doc.Views.Redraw();\n        return Rhino.Commands.Result.Success;\n      }\n    }",
+      "language": "csharp",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "def DivideByLengthPoints():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to divide\", False, filter)\n    if not objref or rc!=Rhino.Commands.Result.Success: return rc\n\n    **crv = objref.Curve()** \n    if not crv or crv.IsShort(Rhino.RhinoMath.ZeroTolerance):\n        return Rhino.Commands.Result.Failure\n\n    crv_length = crv.GetLength()\n    s = \"Curve length is {0:.3f}. Segment length\".format(crv_length)\n    seg_length = crv_length / 2.0\n    rc, length = Rhino.Input.RhinoGet.GetNumber(s, False, seg_length, 0, crv_length)\n    if rc!=Rhino.Commands.Result.Success: return rc\n    t_vals = crv.DivideByLength(length, True)\n    if not t_vals:\n        return Rhino.Commands.Result.Failure\n\n    [scriptcontext.doc.Objects.AddPoint(crv.PointAt(t)) for t in t_vals]\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    DivideByLengthPoints()",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 680
+}

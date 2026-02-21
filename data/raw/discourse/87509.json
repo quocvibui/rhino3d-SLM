@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/importing-layers-via-rhino-fileio/87509",
+  "topic_id": 87509,
+  "title": "Importing layers via Rhino.FileIO",
+  "question": "Hi there,\n\n\nI’m toying around with an “import layers from file” function.  I am able to successfully import layers (including tree hierarchy, which is good) using the following code:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ImportLayersFromFileTest():\n    filename=rs.OpenFileName(\"Choose file to import layers\")\n    if not filename: return\n    #optional, doesn't change much\n    #tbl_filt=Rhino.FileIO.File3dm.TableTypeFilter.None\n    #no_obj=Rhino.FileIO.File3dm.ObjectTypeFilter.None\n    #read_file=Rhino.FileIO.File3dm.Read(filename,tbl_filt,no_obj)\n    read_file=Rhino.FileIO.File3dm.Read(filename)\n    if read_file:\n        layer_list=read_file.AllLayers\n        for layer in layer_list:\n            sc.doc.Layers.Add(layer)\n\nImportLayersFromFileTest()\n\n\n\nThis does work to import the layer arrangement without objects, which is what I want.  But, some of the layer characteristics are \nnot\n imported - notably the layer material assignment if any the linetype.  OTOH, layer print color and print width \nare\n imported.\n\n\nSo the question is this:  is there some easy trick I’m missing or do I also need to get the material table separately, add the materials to the file if they do not already exist, and then re-assign them to the imported layers?  Same for the linetypes?\n\n\nI also understand that I will need to do some checking for existing layers and possible conflict resolution, but that’s for later…",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ImportLayersFromFileTest():\n    filename=rs.OpenFileName(\"Choose file to import layers\")\n    if not filename: return\n    #optional, doesn't change much\n    #tbl_filt=Rhino.FileIO.File3dm.TableTypeFilter.None\n    #no_obj=Rhino.FileIO.File3dm.ObjectTypeFilter.None\n    #read_file=Rhino.FileIO.File3dm.Read(filename,tbl_filt,no_obj)\n    read_file=Rhino.FileIO.File3dm.Read(filename)\n    if read_file:\n        layer_list=read_file.AllLayers\n        for layer in layer_list:\n            sc.doc.Layers.Add(layer)\n\nImportLayersFromFileTest()",
+      "language": "python",
+      "author": "carvecream",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ImportLayersFromFileTest():\n    filename=rs.OpenFileName(\"Choose file to import layers\")\n    if not filename: return\n    #optional, doesn't change much\n    #tbl_filt=Rhino.FileIO.File3dm.TableTypeFilter.None\n    #no_obj=Rhino.FileIO.File3dm.ObjectTypeFilter.None\n    #read_file=Rhino.FileIO.File3dm.Read(filename,tbl_filt,no_obj)\n    read_file=Rhino.FileIO.File3dm.Read(filename)\n    if read_file:\n        layer_list=read_file.AllLayers\n        for layer in layer_list:\n            sc.doc.Layers.Add(layer)\n\nImportLayersFromFileTest()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 1777
+}

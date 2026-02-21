@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_triangle/blob/1a097ec2f2328269d04e8cfc3a3df5bc7cfa333e/src/compas_triangle/rhino.py",
+  "repo": "compas-dev/compas_triangle",
+  "repo_stars": 2,
+  "repo_description": "COMPAS bindings for the triangle library.",
+  "license": "NOASSERTION",
+  "filepath": "src/compas_triangle/rhino.py",
+  "instruction": null,
+  "code": "import compas_rhino.conversions\nimport compas_rhino.objects\nimport rhinoscriptsyntax as rs  # type: ignore\nfrom compas.geometry import Curve\n\n\ndef guid_to_compas_curve(guid) -> Curve:\n    return compas_rhino.conversions.curveobject_to_compas(compas_rhino.objects.find_object(guid))\n\n\ndef discretise_boundary(guids, length):\n    boundary = []\n    for guid in guids:\n        rs.EnableRedraw(False)\n\n        segments = rs.ExplodeCurves(guid)\n        for segment in segments:\n            curve: Curve = guid_to_compas_curve(segment)\n            N = int(curve.length() / length)\n            _, points = curve.divide_by_count(N, return_points=True)\n            boundary.extend(points)\n\n        rs.DeleteObjects(segments)\n        rs.EnableRedraw(True)\n    return boundary\n\n\ndef discretise_constraints(guids, length):\n    polylines = []\n    if guids:\n        for guid in guids:\n            curve: Curve = guid_to_compas_curve(guid)\n            N = int(curve.length() / length)\n            _, points = curve.divide_by_count(N, return_points=True)\n            polylines.append(points)\n    return polylines\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

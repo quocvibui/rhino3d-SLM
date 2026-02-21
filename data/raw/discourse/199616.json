@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rendered-view-clipping-from-top-view/199616",
+  "topic_id": 199616,
+  "title": "Rendered View Clipping From Top View",
+  "question": "Hello together, I’m working on a component where I display custom meshes. Now I figured out that i need to use the code below to get no clipping when I’m in shaded mode:\n\n\n   public override BoundingBox ClippingBox\n   {\n       get\n       {\n           var boundingBox = BoundingBox.Empty;\n           foreach (var brep in _allBrepFaces)\n                   boundingBox.Union(brep.GetBoundingBox(false));\n           return boundingBox;\n       }\n   }\n\n\n\nimage\n992×987 21.1 KB\n\n\nNow when I go into rendered view I get a clipping as soon as the object is z < 0\n\n\nimage\n843×885 2.62 KB\n\n\nIs there an override for this as well.\n\n\n    public override void DrawViewportWires(IGH_PreviewArgs args)\n    {\n        base.DrawViewportWires(args);\n\n        if (_displaySheets == null) return;\n        var currMode = Instances.ActiveCanvas.Document.PreviewMode;\n\n        foreach (var displaySheet in _displaySheets)\n        {\n            var displayNodes = displaySheet.DisplayNodes;\n\n            foreach (var displayNode in displayNodes)\n            {\n                var color = displayNode.DisplayColor;\n                var point = displayNode.DisplayPoint;\n                var text = displayNode.DisplayInfo;\n                var displayFace = displayNode.DisplayFace;\n                var id = displayNode.FaceId;\n                var textColor = displayNode.TextColor;\n\n                var material = new DisplayMaterial(color);\n\n                if (currMode == GH_PreviewMode.Shaded)\n                {\n                    args.Display.DrawBrepShaded(displayFace, material);\n                }\n                else\n                {\n                    var edges = displayFace.Edges;\n                    foreach (var edge in edges)\n                    {\n                        args.Display.DrawCurve(edge, color, 2);\n                    }\n                }\n\n                if (_displayTextInfo)\n                {\n                    var textPoint = new Point3d(point.X, point.Y, point.Z + 0.1);\n                    ...",
+  "code_blocks": [
+    {
+      "code": "public override void DrawViewportWires(IGH_PreviewArgs args)\n    {\n        base.DrawViewportWires(args);\n\n        if (_displaySheets == null) return;\n        var currMode = Instances.ActiveCanvas.Document.PreviewMode;\n\n        foreach (var displaySheet in _displaySheets)\n        {\n            var displayNodes = displaySheet.DisplayNodes;\n\n            foreach (var displayNode in displayNodes)\n            {\n                var color = displayNode.DisplayColor;\n                var point = displayNode.DisplayPoint;\n                var text = displayNode.DisplayInfo;\n                var displayFace = displayNode.DisplayFace;\n                var id = displayNode.FaceId;\n                var textColor = displayNode.TextColor;\n\n                var material = new DisplayMaterial(color);\n\n                if (currMode == GH_PreviewMode.Shaded)\n                {\n                    args.Display.DrawBrepShaded(displayFace, material);\n                }\n                else\n                {\n                    var edges = displayFace.Edges;\n                    foreach (var edge in edges)\n                    {\n                        args.Display.DrawCurve(edge, color, 2);\n                    }\n                }\n\n                if (_displayTextInfo)\n                {\n                    var textPoint = new Point3d(point.X, point.Y, point.Z + 0.1);\n                    args.Display.Draw2dText(text, textColor, textPoint, true, 14);\n                    args.Display.DrawPoint(point, PointStyle.RoundSimple, 5, DisplayHelpers.AdjustColorBrightness(color, 1.2f, 1f));\n                }\n            }\n        }\n    }",
+      "language": "csharp",
+      "author": "felix.brunold",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 1,
+  "views": 23
+}

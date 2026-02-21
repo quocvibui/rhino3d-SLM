@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/programmatically-stop-object-selection/210621",
+  "topic_id": 210621,
+  "title": "Programmatically stop object selection",
+  "question": "Hello,\n\n\nI’d like to know if it is possible to stop object selection when using CRhinoGetObject. I mean, I know that to ask the user selecting an object I can use the following code:\n\n\nCRhinoGetObject gc;\ngc.SetCommandPrompt(L\"Select Part to be deposed\");\ngc.SetGeometryFilter(CRhinoGetObject::mesh_object);\n//gc.SetGeometryAttributeFilter(CRhinoGetObject::open_curve);\ngc.EnableDeselectAllBeforePostSelect(false);\ngc.GetObjects(1, 1);\nif (gc.ObjectCount() != 1)\n{\n\t// Nothing selected or too many object selected -> Error\n\treturn 1;\n}\n\n\n\nHowever, I’d like to know how I could stop asking for section programmtaitcally. I’m asking this since I have an user interface where I have a button that must be clicked to select geometry, but I need also to give the possibility to stop selection (since I do not know how many objects the user will select and I’d like not to need pressing esc to stop selection). Thank you for your attention!",
+  "code_blocks": [
+    {
+      "code": "int minimum_number = 4;\nint maximum_number = 4;\ngc.GetObjects(minimum_number, maximum_number);",
+      "language": "unknown",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "void CMyCancelButton::OnLButtonDown(UINT nFlags, CPoint point)\n{\n  CRhinoDoc* pDoc = RhinoApp().ActiveDoc();\n  if (pDoc && pDoc->InGetObject())\n    pDoc->RunScript(L\"!\", 0);\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "CRhinoGetObject gc;\ngc.SetCommandPrompt(L\"Select Part to be deposed\");\ngc.SetGeometryFilter(CRhinoGetObject::mesh_object);\n//gc.SetGeometryAttributeFilter(CRhinoGetObject::open_curve);\ngc.EnableDeselectAllBeforePostSelect(false);\ngc.GetObjects(1, 1);\nif (gc.ObjectCount() != 1)\n{\n\t// Nothing selected or too many object selected -> Error\n\treturn 1;\n}",
+      "language": "csharp",
+      "author": "g_v_c",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 147
+}

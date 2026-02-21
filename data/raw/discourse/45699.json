@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-mitertype-do-not-work-with-multiple-sections/45699",
+  "topic_id": 45699,
+  "title": "Bug MiterType do not work with multiple sections",
+  "question": "Hello,\n\n\nCould you please have a look at my code as it seems Sweep One Rail / Miter type does not work if I select multiple sections.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef Sweep1():\n    rail = rs.GetObject(\"Select rail curve\", rs.filter.curve)\n    rail_crv = rs.coercecurve(rail)\n    if not rail_crv: return\n\n    cross_sections = rs.GetObjects(\"Select cross section curves\", rs.filter.curve)\n    if not cross_sections: return\n    cross_sections = [rs.coercecurve(crv) for crv in cross_sections]\n\nsweep = Rhino.Geometry.SweepOneRail()\nsweep.AngleToleranceRadians = scriptcontext.doc.ModelAngleToleranceRadians\nsweep.ClosedSweep = False\nsweep.SweepTolerance = scriptcontext.doc.ModelAbsoluteTolerance\nsweep.MiterType = 1\n#sweep.SetToRoadlikeTop()\nbreps = sweep.PerformSweep(rail_crv, cross_sections)\nfor brep in breps: scriptcontext.doc.Objects.AddBrep(brep)\nscriptcontext.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\nSweep1()\n\n\n\nMiterType.3dm\n (26.7 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef Sweep1():\n    rail = rs.GetObject(\"Select rail curve\", rs.filter.curve)\n    rail_crv = rs.coercecurve(rail)\n    if not rail_crv: return\n\n    cross_sections = rs.GetObjects(\"Select cross section curves\", rs.filter.curve)\n    if not cross_sections: return\n    cross_sections = [rs.coercecurve(crv) for crv in cross_sections]\n\nsweep = Rhino.Geometry.SweepOneRail()\nsweep.AngleToleranceRadians = scriptcontext.doc.ModelAngleToleranceRadians\nsweep.ClosedSweep = False\nsweep.SweepTolerance = scriptcontext.doc.ModelAbsoluteTolerance\nsweep.MiterType = 1\n#sweep.SetToRoadlikeTop()\nbreps = sweep.PerformSweep(rail_crv, cross_sections)\nfor brep in breps: scriptcontext.doc.Objects.AddBrep(brep)\nscriptcontext.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\nSweep1()",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 608
+}

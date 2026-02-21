@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_curveboundingbox.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_curveboundingbox.py",
+  "instruction": "Ex curveboundingbox",
+  "code": "import Rhino\nimport scriptcontext\n\ndef CurveBoundingBox():\n    # Select a curve object\n    rc, rhobject = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, Rhino.DocObjects.ObjectType.Curve)\n    if rc!=Rhino.Commands.Result.Success: return\n\n    # Validate selection\n    curve = rhobject.Curve()\n    if not curve: return\n\n    ## Get the active view's construction plane\n    view = scriptcontext.doc.Views.ActiveView\n    if not view: return\n    plane = view.ActiveViewport.ConstructionPlane()\n\n    # Compute the tight bounding box of the curve in world coordinates\n    bbox = curve.GetBoundingBox(True)\n    if not bbox.IsValid: return\n\n    # Print the min and max box coordinates in world coordinates\n    print \"World min:\", bbox.Min\n    print \"World max:\", bbox.Max\n\n    # Compute the tight bounding box of the curve based on the \n    # active view's construction plane\n    bbox = curve.GetBoundingBox(plane)\n\n    # Print the min and max box coordinates in cplane coordinates\n    print \"CPlane min:\", bbox.Min\n    print \"CPlane max:\", bbox.Max\n\nif __name__==\"__main__\":\n    CurveBoundingBox()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

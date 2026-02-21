@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-polysurface-filter-also-accepts-single-surfaces/98303",
+  "topic_id": 98303,
+  "title": "Rhinoscriptsyntax polysurface filter also accepts single surfaces",
+  "question": "If I run the following:\n\n\nrs.GetObjects(\"Select a polysurface\",rs.filter.polysurface)\n\n\nit will also select a single surface object.  The mechanism is clear, in selection.py we have:\n\n\n\n\nType 16 is a polysurface - but the filter accepts any brep, including a single face.\n\n\nThis is NOT the case with VB Rhinoscript, a type 16 \nexcludes\n single faced breps.\n\n\nCurrently, if I want to filter correctly for a polysurface, I need to add a custom filter:\n\n\ndef real_ps_filt(rhino_object, geometry, component_index):\n    if geometry.Faces.Count>1: return True\n\nrs.GetObjects(\"Select a polysurface\",rs.filter.polysurface,custom_filter=real_ps_filt)\n\n\n\nMethinks this needs ‘adjustment’…",
+  "code_blocks": [
+    {
+      "code": "def real_ps_filt(rhino_object, geometry, component_index):\n    if geometry.Faces.Count>1: return True\n\nrs.GetObjects(\"Select a polysurface\",rs.filter.polysurface,custom_filter=real_ps_filt)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 332
+}

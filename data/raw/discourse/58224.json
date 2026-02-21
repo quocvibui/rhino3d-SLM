@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/where-is-rs-filter-surface-coming-from/58224",
+  "topic_id": 58224,
+  "title": "Where is rs.filter.surface coming from",
+  "question": "Hi,\n\n\nI have seen somewhere on the forum the rs.GetObject with rs.filter.surface.\n\nWhere rs.filter.surface come from?\n\n\nThanks,\n\nAndras",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#filter solid breps + closed meshes\ndef clsd_vol_filt(rhino_object, geometry, component_index):\n    if rs.IsMesh(geometry): return rs.IsMeshClosed(geometry)\n    if rs.IsBrep(geometry): return rs.IsObjectSolid(geometry)\n\nmsg='Select closed surfaces, polysurfaces or meshes to process'\nobjIDs=rs.GetObjects(msg,8+16+32,preselect=True,custom_filter=clsd_vol_filt)\nprint '{} objects selected'.format(len(objIDs) if objIDs else 'No')",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#solid breps + closed meshes\ndef clsd_vol_filt(rhino_object, geometry, component_index):\n    if rs.IsMesh(geometry): return rs.IsMeshClosed(geometry)\n    if rs.IsBrep(geometry): return rs.IsObjectSolid(geometry)\n\nobjIDs=rs.GetObjects('Select closed surfaces, polysurfaces or meshes to process' \n,rs.filter.surface | rs.filter.polysurface | rs.filter.mesh, \npreselect=True,custom_filter=clsd_vol_filt)\n\nprint '{} objects selected'.format(len(objIDs) if objIDs else 'No')",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 2446
+}

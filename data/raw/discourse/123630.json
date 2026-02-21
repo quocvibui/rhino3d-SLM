@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/obj-max-post-r5-is-unusable-my-findings/123630",
+  "topic_id": 123630,
+  "title": "Obj -> Max post r5 is unusable... My findings",
+  "question": "Hi there,\n\n\nI receive rhino models for pretty much every project from my clients and we are forced to use r5 for exporting to obj because the exporter from version 6 onward behaves differently and gives unusable results.\n\n\nI have been trying different combinations of export settings all day long and have come to the conclusion that I cannot recreate an exact copy of an obj in both r5 and r7.\n\n\nWhat r5 seems to do that r7 seems to not do, is insert the group name before each object definition. Allow me to demonstrate.\n\nI have exported several meshes on a layer named _WORK and the r5 export will insert “g __WORK” before the material definition for each mesh in the exported file. A snippet from the export:\n\nf 34//34 36//36 25//25\n\nf 30//30 33//33 34//34\n\nf 34//34 31//31 30//30\n\nf 29//29 30//30 31//31\n\ng __WORK\n\nusemtl Default\n\nv 54866.33011621276 25125.31875220094 446.1393826848947\n\nv 54899.18431753635 25149.29469307091 446.1393826848947\n\nv 54882.26804695473 25188.61901136499 446.1393826848947\n\nv 54851.11617113972 25192.6964048331 446.1393826848947\n\n\nIf I take the very same lines from an export of the very same objects from r7, it will appear thusly:\n\nf 34//34 36//36 25//25\n\nf 30//30 33//33 34//34\n\nf 34//34 31//31 30//30\n\nf 29//29 30//30 31//31\n\nusemtl diffuse_0\n\nv 54797.08701107337 25150.42174506201 446.1393826848947\n\nv 54771.56930919119 25118.75013039109 446.1393826848947\n\nv 54798.0993518269 25085.1537160373 446.1393826848947\n\nv 54829.24354881148 25089.28935365121 446.1393826848947\n\nv 54846.37885934678 25132.1411031307 446.1393826848947\n\n\nAs you can see the  “g __WORK” line no longer exists and the results are catastrophic.\n\nBelow you can see the two results. They are completely different.\n\n\n\n\nr5\n1224×816 23.8 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nfrom time import gmtime, strftime\n\ntime = strftime(\"%Y-%m-%d---%H-%M-%S\", gmtime())\npath = \"./shape-\" + time +\".obj\"\n\nuseGroups = True\n\ndef SaveObj(path):\n    print \"Saving obj to \" + path\n\n    doc = Rhino.RhinoDoc.ActiveDoc\n   \n    with open(path,'w') as f:\n        f.write(\"# Custom obj writer\\n\") \n        lastVertCnt = 0\n        offset = 1\n        for obj in doc.Objects:\n            if type(obj.Geometry) != rg.Mesh:\n                continue            \n            mesh = obj.Geometry\n            # write vertices\n            for v in mesh.Vertices:\n                f.write(\"v {0:f} {1:f} {2:f}\\n\".format(v.X,v.Y,v.Z))\n                f.flush()\n            # write group\n            if useGroups:\n                # get layername\n                layerIndex = obj.Attributes.LayerIndex\n                layer = doc.Layers.FindIndex(layerIndex)\n                layerName = layer.Name       \n                #replace problematic chars\n                #=> parent::child::layer to parent_child_layer\n                layerName = layerName.Replace(':','_')\n                f.write(\"g {0}\\n\".format(layerName))            \n            \n            # write faces            \n            offset += lastVertCnt\n            for face in mesh.Faces:\n                if face.IsQuad:\n                    f.write(\"f {0} {1} {2} {3}\\n\".format(face.A+offset,face.B+offset,face.C+offset,face.D+offset))\n                elif face.IsTriangle:\n                    f.write(\"f {0} {1} {2}\\n\".format(face.A+offset,face.B+offset,face.C+offset))\n                f.flush()\n            lastVertCnt=mesh.Vertices.Count\nSaveObj(path)",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 11,
+  "views": 713
+}

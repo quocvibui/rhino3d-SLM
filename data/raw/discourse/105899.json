@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-select-wire-frame-items-only-at-z-0/105899",
+  "topic_id": 105899,
+  "title": "How to select wire frame items only at Z = 0",
+  "question": "I have extracted a wire frame from a 3d model, and I want to select only the wire frame items which are at Z:0 and discard the other items below that, and I’m wondering if this is possible? ( or the other option is select the items below Z:0 and delete them )\n\n\nI have tried just going to a front view and drawing a selection square for the items below Z:0 and deleting these items hoping to leave just the items at Z:0 and this works fairly well, but there are still some items that are just slightly below the Z:0 that are hard to pick using this process.\n\n\nI’m using this process to create and export a selection group that will be used for my CNC Cam tool paths\n\n\nThank You…\n\n\nKent",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nfrom scriptcontext import doc\ntol = doc.ModelAbsoluteTolerance\nfor obj in doc.Objects:\n    bbx = obj.Geometry.GetBoundingBox(False)\n    if bbx.IsDegenerate(tol):\n        if rg.Plane.WorldXY.DistanceTo(bbx.Center) < tol:\n            doc.Objects.Select(obj.Id)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SelectCurvesInActiveCPlane():\n    \n    # unselect all objects\n    rs.UnselectAllObjects()\n    \n    # get all selectable curves\n    crv_ids = rs.ObjectsByType(rs.filter.curve, False, 1)\n    \n    # get cplane of the current view\n    plane = rs.ViewCPlane()\n    \n    # select curves in plane\n    for crv_id in crv_ids:\n        if rs.IsCurveInPlane(crv_id, plane):\n            rs.SelectObject(crv_id, redraw=False)\n    \n    # redraw all viewports\n    rs.Redraw()\n    \nSelectCurvesInActiveCPlane()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 7,
+  "views": 589
+}

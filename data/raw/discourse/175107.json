@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/usertext-vs-userstring-vs-userdictionary/175107",
+  "topic_id": 175107,
+  "title": "UserText vs UserString vs UserDictionary",
+  "question": "Hello all,\n\n\nI am trying to work with \n‘Attribute User Text’\n via python in grasshopper.\n\nI can get and set these Key and Value pairs with rhinoscriptsyntax as below,\n\nMy first question is, is there a way to do the same with rhinocommon?\n\nI have managed to read the Values for existing Keys via Rhino.Runtime namespace, but this only seems to allow me to read values for existing Keys, rather than get and set Keys and Values.\n\n\nWhich leads me to my second question, I have looked at alternatives in rhinocommon and understand that I can get and set Keys/Values for UserString or UserDictionary in the code, but it seems these have nothing to do with the UserText values shown in the properties panel in Rhino, is that right?\n\nEg. working with the UserDictionary, can have no effect on the Attributes that are displayed in the Rhino properties panel?\n\n\nAll of this means I am wondering what the difference is between these three things (UserText, UserString and UserDictionary). And when and why to try and use which one. Im purposely not mentioning UserData, which appears even more complex!\n\n\nI am quite confused by all of this but hopefully the questions come across in a clear enough way for someone to offer some advice, I would greatly appreciate it!\n\n\nrhinoscriptsyntax / UserText:\n\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nscriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n\nk = rs.GetUserText(iGeometry) \nv = []\nfor i in k:\n    v.append(rs.GetUserText(iGeometry,i))\n\nscriptcontext.doc = ghdoc\n\n\n\nRuntime / UserText:\n\n\nimport Rhino\n\nv = Rhino.Runtime.TextFields.UserText(str(iGeometry),\"TestKey1\")\n\n\n\nUserDictionary - setting Key/Value, not affecting Rhino object:\n\n\nimport Rhino\nimport Rhino.Geometry as rg\n\niGeometry.UserDictionary.Set(\"TestKey1\",rg.Plane.WorldXY)\nk = iGeometry.UserDictionary.Keys\nv = iGeometry.UserDictionary.Values",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ndef set_user_text(object_id, key, value):\n\n    # find object\n    active_doc = Rhino.RhinoDoc.ActiveDoc\n    doc_object = active_doc.Objects.FindId(object_id)\n\n    # make copy of attributes\n    new_attributes = doc_object.Attributes.Duplicate()\n    \n    # set new user text\n    new_attributes.SetUserString(key, value)\n\n    # modify attributes\n    active_doc.Objects.ModifyAttributes(doc_object, new_attributes, True)\n\nobject_id = i_geometry_id\nkey = \"TestKey2028\"\nvalue = \"TestValue2028\"\nset_user_text(object_id, key, value)",
+      "language": "python",
+      "author": "Tom_D",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\ndef set_user_text(object_id, key, value):\n\n    # find object\n    active_doc = Rhino.RhinoDoc.ActiveDoc\n    doc_object = active_doc.Objects.FindId(object_id)\n\n    # set new user text\n    doc_object.Attributes.SetUserString(key, value)\n    \n    # commit\n    doc_object.CommitChanges()\n\n    # redraw\n    active_doc.Views.Redraw()\n    \nobject_id = i_geometry_id\nkey = \"TestKey2080\"\nvalue = \"TestValue2085\"\nset_user_text(object_id, key, value)",
+      "language": "python",
+      "author": "Tom_D",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\nscriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n\nk = rs.GetUserText(iGeometry) \nv = []\nfor i in k:\n    v.append(rs.GetUserText(iGeometry,i))\n\nscriptcontext.doc = ghdoc",
+      "language": "python",
+      "author": "Tom_D",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nv = Rhino.Runtime.TextFields.UserText(str(iGeometry),\"TestKey1\")",
+      "language": "python",
+      "author": "Tom_D",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\n\niGeometry.UserDictionary.Set(\"TestKey1\",rg.Plane.WorldXY)\nk = iGeometry.UserDictionary.Keys\nv = iGeometry.UserDictionary.Values",
+      "language": "python",
+      "author": "Tom_D",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 478
+}

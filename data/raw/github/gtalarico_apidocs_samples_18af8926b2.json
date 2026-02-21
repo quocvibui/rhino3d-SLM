@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_displayorder.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_displayorder.py",
+  "instruction": "Ex displayorder",
+  "code": "from System.Collections.Generic import *\nfrom System.Drawing import *\nfrom Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Display import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom scriptcontext import doc\n\nm_line_objects = []\n\ndef RunCommand():\n  # make lines thick so draw order can be easily seen\n  wfdm = [dm for dm in DisplayModeDescription.GetDisplayModes() if dm.EnglishName == \"Wireframe\"][0]\n  original_thikcness = wfdm.DisplayAttributes.CurveThickness\n  wfdm.DisplayAttributes.CurveThickness = 10\n  DisplayModeDescription.UpdateDisplayMode(wfdm)\n\n  AddLine(Point3d.Origin, Point3d(10,10,0), Color.Red, doc)\n  AddLine(Point3d(10,0,0), Point3d(0,10,0), Color.Blue, doc)\n  AddLine(Point3d(8,0,0), Point3d(8,10,0), Color.Green, doc)\n  AddLine(Point3d(0,3,0), Point3d(10,3,0), Color.Yellow, doc)\n  doc.Views.Redraw()\n  Pause(\"draw order: 1st line drawn in front, last line drawn in the back.  Any key to continue ...\")\n\n  #all objects have a DisplayOrder of 0 by default so changing it to 1 moves it to the front.  Here we move the 2nd line (blue) to the front\n  m_line_objects[1].Attributes.DisplayOrder = 1\n  m_line_objects[1].CommitChanges()\n  doc.Views.Redraw()\n  Pause(\"Second (blue) line now in front.  Any key to continue ...\")\n\n  for i in range(0, m_line_objects.Count - 1):\n    m_line_objects[i].Attributes.DisplayOrder = i\n    m_line_objects[i].CommitChanges()\n\n  doc.Views.Redraw()\n  Pause(\"Reverse order of original lines, i.e., Yellow 1st and Red last.  Any key to continue ...\")\n\n  # restore original line thickness\n  wfdm.DisplayAttributes.CurveThickness = original_thikcness\n  DisplayModeDescription.UpdateDisplayMode(wfdm)\n\n  doc.Views.Redraw()\n  return Result.Success\n\ndef Pause(msg):\n  rc, obj_ref = RhinoGet.GetOneObject(msg, True, ObjectType.AnyObject)\n\ndef AddLine(from_pt, to_pt, color, doc):\n  guid = doc.Objects.AddLine(from_pt, to_pt)\n  obj = doc.Objects.Find(guid)\n  m_line_objects.Add(obj)\n  obj.Attributes.ObjectColor = color\n  obj.Attributes.ColorSource = ObjectColorSource.ColorFromObject\n  obj.CommitChanges()\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

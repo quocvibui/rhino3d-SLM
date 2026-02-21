@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/extrabold-inc/AnalyzingSound_Rice/blob/97eeecf05c34997ad5b6d1dc56cf5294c184f1dc/gh_PolyLines/convert_values_to_poliline.py",
+  "repo": "extrabold-inc/AnalyzingSound_Rice",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "gh_PolyLines/convert_values_to_poliline.py",
+  "instruction": "Convert values to poliline",
+  "code": "# gh の中身\r\n\r\nimport random\r\nimport rhinoscriptsyntax as rs\r\n\r\n\r\na = []\r\nzigzag = []\r\npl_off = []\r\n\r\n\r\n# convert values to poliline\r\ndef wave_line(values, r, in_d):\r\n\r\n    ### interpolation dist\r\n    # inter_dist = 4 * 0.5\r\n    inter_dist = in_d\r\n\r\n    for i in xrange(len(values)):\r\n        tmp_pt = rs.AddPoint(values[i], i*r, 0)\r\n        tmp_pt_m = rs.MirrorObject(tmp_pt, (0,0,0), (0,10,0), True)\r\n\r\n        # zigzag\r\n        if i%2 == 0:\r\n            tmp_pt_0 = rs.CopyObject(tmp_pt)\r\n            tmp_pt_0 = rs.MoveObject(tmp_pt_0, (0,-1*(inter_dist),0))\r\n            tmp_pt_1 = rs.CopyObject(tmp_pt)\r\n            tmp_pt_1 = rs.MoveObject(tmp_pt_1, (0,1*(inter_dist),0))\r\n            zigzag.append(tmp_pt_0)\r\n            zigzag.append(tmp_pt_1)\r\n        else:\r\n            tmp_pt_0 = rs.CopyObject(tmp_pt_m)\r\n            tmp_pt_0 = rs.MoveObject(tmp_pt_0, (0,-1*(inter_dist),0))\r\n            tmp_pt_1 = rs.CopyObject(tmp_pt_m)\r\n            tmp_pt_1 = rs.MoveObject(tmp_pt_1, (0,1*(inter_dist),0))\r\n            zigzag.append(tmp_pt_0)\r\n            zigzag.append(tmp_pt_1)\r\n\r\n    tmp_polyline = rs.AddPolyline(zigzag)\r\n    return zigzag, tmp_polyline\r\n\r\n\r\n# test data\r\nrand_values = []\r\nrand_count = 240\r\nfor i in xrange(rand_count):\r\n    tmp_value = random.randrange(5, 100)\r\n    rand_values.append(tmp_value)\r\n\r\n\r\n\r\npts, pl = wave_line(rand_values, 10, 2)\r\n\r\na = pl\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

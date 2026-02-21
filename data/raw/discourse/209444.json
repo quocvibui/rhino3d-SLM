@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getpoint-addoptioninteger-fails-when-option-name-contains-angle-brackets/209444",
+  "topic_id": 209444,
+  "title": "GetPoint.AddOptionInteger fails when option name contains angle brackets",
+  "question": "Description\n\n\nWhen using \nGetPoint.AddOptionInteger()\n with an option name that contains angle brackets (\n<\n and \n>\n), the option is not properly added to the GetPoint options list and does not appear in the command prompt.\n\n\nEnvironment\n\n\n\n\n\n\nRhinoCommon Version\n: 8.21.25188.17001\n\n\n\n\n\n\nRhino Version\n: 8.x\n\n\n\n\n\n\nPlatform\n: Windows\n\n\n\n\n\n\nSteps to Reproduce\n\n\n\n\n\n\nCreate a GetPoint instance\n\n\n\n\n\n\nTry to add an integer option with angle brackets in the name\n\n\n\n\n\n\nRun the GetPoint.Get() method\n\n\n\n\n\n\nObserve that the option does not appear in the command prompt\n\n\n\n\n\n\nCode Example\n\n\nusing var gp = new GetPoint();\nOptionInteger startIndex = new OptionInteger(0, true, 0);\n\n// This fails - option doesn't appear\nvar idxStart = gp.AddOptionInteger(\"StarIndex<ZeroNo>\", ref startIndex);\n\n// This works fine\nvar idxStart2 = gp.AddOptionInteger(\"StarIndexZeroNo\", ref startIndex);\n\ngp.SetCommandPrompt(\"Click a point\");\nvar result = gp.Get();\n\n\n\n\nExpected Behavior\n\n\nOption names containing various special characters should either:\n\n\n\n\n\n\nBe properly supported and appear in the command prompt, OR\n\n\n\n\n\n\nThrow a clear exception with documentation about supported character sets\n\n\n\n\n\n\nActual Behavior\n\n\nOptions with unsupported special characters silently fail to be added to the options list. No error or exception is thrown, making it difficult to debug.\n\n\nAdditional Notes\n\n\n\n\n\n\nOnly a limited set of special characters appear to be supported (underscore, hyphen, etc.)\n\n\n\n\n\n\nMost common special characters (\n<>\n, \n[]\n, \n{}\n, \n@\n, \n#\n, \n%\n, etc.) are silently rejected\n\n\n\n\n\n\nNo documentation exists specifying which characters are allowed\n\n\n\n\n\n\nThis behavior affects all GetPoint.AddOption* methods\n\n\n\n\n\n\nSilent failure makes debugging difficult - developers may not realize the option wasn’t added\n\n\n\n\n\n\nRequest\n\n\nPlease either:\n\n\n\n\n\n\nExpand character support\n to include commonly used special characters, OR\n\n\n\n\n\n\nDocument the allowed character set\n clearly in the API documentation, AND\n\n\n\n\n\n\nThrow ...",
+  "code_blocks": [
+    {
+      "code": "using var gp = new GetPoint();\nOptionInteger startIndex = new OptionInteger(0, true, 0);\n\n// This fails - option doesn't appear\nvar idxStart = gp.AddOptionInteger(\"StarIndex<ZeroNo>\", ref startIndex);\n\n// This works fine\nvar idxStart2 = gp.AddOptionInteger(\"StarIndexZeroNo\", ref startIndex);\n\ngp.SetCommandPrompt(\"Click a point\");\nvar result = gp.Get();",
+      "language": "csharp",
+      "author": "yangf85",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 60
+}

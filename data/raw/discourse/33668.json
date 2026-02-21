@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/renaming-objects-by-layer/33668",
+  "topic_id": 33668,
+  "title": "Renaming objects by layer",
+  "question": "I need a script to rename  objects by the layer that they are in.\n\nCan anybody help?\n\nThanks !",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nobjList = rs.GetObjects(\"Select objects to name\")\nfor obj in objList:\n    layer = rs.ObjectLayer(obj)\n    layerName = rs.LayerName(layer)\n    rs.ObjectName(obj, layerName)",
+      "language": "python",
+      "author": "BaptisteC",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nobjList = rs.GetObjects(\"Select objects to name\")\nfor obj in objList:\n    layer = rs.ObjectLayer(obj)\n    layerName = rs.LayerName(layer)\n    subLayerNameList = layerName.split(\"::\")\n    newName = subLayerNameList[-1]\n    rs.ObjectName(obj, newName)",
+      "language": "python",
+      "author": "BaptisteC",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nobjList = rs.GetObjects(\"Select objects to name\")\nfor obj in objList:\n    layer = rs.ObjectLayer(obj)\n    layerName = rs.LayerName(layer, False)\n    rs.ObjectName(obj, layerName)",
+      "language": "python",
+      "author": "BaptisteC",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\ndef nameObjectsFromLayerName():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects to name\")\n    boolOption = Rhino.Input.Custom.OptionToggle(True, \"Off\", \"On\")\n    opList = go.AddOptionToggle(\"fullPath\", boolOption)\n    while True:\n        getResult = go.GetMultiple(1,0)\n        if getResult == Rhino.Input.GetResult.Cancel:\n            return Rhino.Commands.Result.Cancel\n        elif getResult == Rhino.Input.GetResult.Option:\n            go.EnablePreSelect(False, True)\n            print \"fullPath =\", boolOption.CurrentValue\n        elif getResult == Rhino.Input.GetResult.Object:\n            ids = [go.Object(i).ObjectId for i in range(go.ObjectCount)]        \n            break \n    fullPath = boolOption.CurrentValue\n    for obj in go.Objects():\n        layer = rs.ObjectLayer(obj)\n        layerName = rs.LayerName(layer, fullPath)\n        rs.ObjectName(obj, layerName)\nnameObjectsFromLayerName()",
+      "language": "python",
+      "author": "BaptisteC",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 2042
+}

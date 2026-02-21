@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-obj-guid-onmousehover-advanced-rhino-options/182230",
+  "topic_id": 182230,
+  "title": "Get Obj.GUID OnMouseHover (Advanced Rhino Options)",
+  "question": "Hello,\n\n\nI’ve been loving the hover highlighting exposed in the Rhino → Document Properties → Advanced tab.\n\n\nMy question is, how can I get the GUID of the object being hovered over by the mouse?\n\n\nThe option is called:\n\n\nRhino.Options.ChooseOneObject.DynamicHighlight\n\n\n\nWhich I have paired with the Silhouette Highlight for a more “Blender/Unreal Engine” style highlighting that I prefer:\n\n\nExample here when hovered:\n\n\n\n\nExample here when selected:\n\n\n\n\nI am assuming that the hover highlight has to have some kind of method for detecting what object is being hovered on. Is this a method exposed in the API and if it is not, can it be please?\n\n\nThere’s so much one can do with this information.\n\n\nI love the idea of being able to hover over objects, get the GUID, and then spawn contextual UI summary information or display conduits with info about the object near the object in screen space while the hover is active and then removing said visual elements when the hover ends.\n\n\nThanks for your response and help!",
+  "code_blocks": [
+    {
+      "code": "def OnMouseMove(self, e):\n    obj_ref = e.Source.PointOnObject()\n    if obj_ref:\n        self.Text = obj_ref.Object().Id.ToString()\n    else:\n        self.Text = \"\"\n        \n    Rhino.Input.Custom.GetPoint.OnMouseMove(self, e)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python2\n\nimport Rhino\nimport Rhino.UI\nimport scriptcontext\n\nclass HoverMouseCallback(Rhino.UI.MouseCallback):\n    def __init__(self):\n        self.original_position = None\n        self.mouse_moved = False\n\n    def OnMouseMove(self, e):\n        # current_position = Rhino.UI.MouseCursor.Location\n        # Rhino.RhinoApp.WriteLine(current_position)\n        obj_ref = e.Source.PointOnObject()\n        if obj_ref:\n            self.Text = obj_ref.Object().Id.ToString()\n        else:\n            self.Text = \"\"\n\n        Rhino.RhinoApp.WriteLine(self.Text)\n        print self.Text\n\n        Rhino.Input.Custom.GetPoint.OnMouseMove(self, e)\n\n\ndef SetupMouseCallback():\n    if scriptcontext.sticky.has_key('HoverMouseCallback'):\n        callback = scriptcontext.sticky['HoverMouseCallback']\n        if callback:\n            callback.Enabled = False\n            callback = None\n            scriptcontext.sticky.Remove('HoverMouseCallback')\n            Rhino.RhinoApp.WriteLine(\"Callback Removed\")\n    else:\n        callback = HoverMouseCallback()\n        callback.Enabled = True\n        scriptcontext.sticky['HoverMouseCallback'] = callback\n        Rhino.RhinoApp.WriteLine(\"Hover over object to get info...\")\n\nif __name__ == \"__main__\":\n    SetupMouseCallback()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 386
+}

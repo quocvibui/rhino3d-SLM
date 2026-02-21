@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/best-practises-for-handling-newer-custom-component-versions/199137",
+  "topic_id": 199137,
+  "title": "Best practises for handling newer custom component versions",
+  "question": "I am wondering what the best practises for handling custom components in newer plugin versions are. If a custom component was placed in an existing script and in a later plugin version this component has been modified, for example its name, some parameter descriptions etc, this component will show exactly the same as before unless it is deleted and replaced manually by the user. This does not make for solid user experience.\n\n\nWhat I would like to find out is:\n\n\n\n\n\n\nI know it is possible to query the plugin’s version in GH, but is it possible to query a component’s version? If not, I am thinking it may be a good idea to persistently store the plugin’s version on every component so that it can recognise if a newer plugin version was released so it can \ndo something to update itself\n.\n\n\n\n\n\n\nWhat would \nthat something\n be? At the very least it could be a warning message stating that the component placed on the canvas needs to be manually replaced so that the newer version will properly show. Even better would be to have the component automatically replace itself on the canvas, which might however open a whole other can of worms.\n\n\n\n\n\n\nCould you share your thoughts / experience on this issue?",
+  "code_blocks": [
+    {
+      "code": "public class Upgrade_Component : IGH_UpgradeObject\n{\n  public DateTime Version => new DateTime(2025, 2, 27, 13, 49, 00);\n\n  public Guid UpgradeFrom => new Guid(\"22832f04-c384-49fe-a262-d2ccacdf9661\");\n\n  public Guid UpgradeTo => new Guid(\"2600f01d-b196-4967-83f1-414c7f7cf82f\");\n\n  public IGH_DocumentObject Upgrade(IGH_DocumentObject target, GH_Document document) {\n      IGH_Component component = target as IGH_Component;\n      if (component is null) { return null; }\n\n      IGH_Component upgradedComponent = GH_UpgradeUtil.SwapComponents(component, UpgradeTo);\n\n      var proxy = Grasshopper.Instances.ComponentServer.EmitObject(UpgradeTo);\n      if (proxy is null) return null;\n      if (proxy is IGH_Component proxyComponent) {\n          var newParam = proxyComponent.Params.Input[2];\n          upgradedComponent.Params.RegisterInputParam(newParam);\n      }\n      else {\n          return null;\n      }\n      return upgradedComponent;\n  }\n}",
+      "language": "csharp",
+      "author": "Christos_Tsaridis",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 106
+}

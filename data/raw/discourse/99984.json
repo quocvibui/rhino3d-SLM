@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-wip-crash-edit-also-rhino-6/99984",
+  "topic_id": 99984,
+  "title": "Rhino Wip Crash (edit: also Rhino 6)",
+  "question": "Hi,\n\nthe next piece of code is systematically crashing my Rhino WIP\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\nimport System\n\nfor layer in Rhino.RhinoDoc.ActiveDoc.Layers:\n    matIndex = layer.RenderMaterialIndex\n    Rhino.RhinoDoc.ActiveDoc.RenderMaterials[matIndex] #this lookup seems to be the culprit\n\n\n\n\nRhino 7 SR0 2020-4-7 (Public Build, 7.0.20098.14255, Git hash:master @ 722815a2cc6d608c61fa901937505fe0bb80df0f)\n\nLicense type: Commercial, build 2020-04-07\n\nLicense details: Cloud Zoo\n\nExpires on: 2020-05-22\n\n\nWindows 10.0 SR0.0 or greater (Physical RAM: 32Gb)\n\n\nNon-hybrid graphics.\n\nPrimary display and OpenGL: NVIDIA Quadro RTX 5000 (NVidia) Memory: 16GB, Driver date: 1-31-2020 (M-D-Y). OpenGL Ver: 4.6.0 NVIDIA 442.23\n\n\nOpenGL Settings\n\nSafe mode: Off\n\nUse accelerated hardware modes: On\n\nRedraw scene when viewports are exposed: On\n\n\nAnti-alias mode: 4x\n\nMip Map Filtering: Linear\n\nAnisotropic Filtering Mode: Height\n\n\nVendor Name: NVIDIA Corporation\n\nRender version: 4.6\n\nShading Language: 4.60 NVIDIA\n\nDriver Date: 1-31-2020\n\nDriver Version: 26.21.14.4223\n\nMaximum Texture size: 32768 x 32768\n\nZ-Buffer depth: 24 bits\n\nMaximum Viewport size: 32768 x 32768\n\nTotal Video Memory: 16 GB\n\n\nRhino plugins that do not ship with Rhino\n\nC:\\Program Files\\Chaos Group\\V-Ray\\V-Ray for Rhinoceros\\V7\\VRayForRhino.rhp\t“V-Ray for Rhino”\n\n\nRhino plugins that ship with Rhino\n\nC:\\Program Files\\Rhino 7 WIP\\Plug-ins\\Commands.rhp\t“Commands”\t7.0.20098.14255\n\nC:\\Program Files\\Rhino 7 WIP\\Plug-ins\\rdk.rhp\t“Renderer Development Kit”\t\n\nC:\\Program Files\\Rhino 7 WIP\\Plug-ins\\RhinoRenderCycles.rhp\t“Rhino Render”\t7.0.20098.14255\n\nC:\\Program Files\\Rhino 7 WIP\\Plug-ins\\rdk_etoui.rhp\t“RDK_EtoUI”\t7.0.20098.14255\n\nC:\\Program Files\\Rhino 7 WIP\\Plug-ins\\rdk_ui.rhp\t“Renderer Development Kit UI”\t\n\nC:\\Program Files\\Rhino 7 WIP\\Plug-ins\\NamedSnapshots.rhp\t“Snapshots”\t\n\nC:\\Program Files\\Rhino 7 WIP\\Plug-ins\\IronPython\\RhinoDLR_Python.rhp\t“IronPython”\t7.0...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\nimport System\n\nfor layer in Rhino.RhinoDoc.ActiveDoc.Layers:\n    matIndex = layer.RenderMaterialIndex\n    if matIndex >=0:\n        Rhino.RhinoDoc.ActiveDoc.RenderMaterials[matIndex]",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nfor layer in sc.doc.Layers:\n    rmi = layer.RenderMaterialIndex\n    print rmi\n    if rmi >= 0 and rmi < sc.doc.RenderMaterials.Count:\n        rm = sc.doc.RenderMaterials[rmi]\n        print rm",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\nimport System\n\nfor layer in Rhino.RhinoDoc.ActiveDoc.Layers:\n    matIndex = layer.RenderMaterialIndex\n    Rhino.RhinoDoc.ActiveDoc.RenderMaterials[matIndex] #this lookup seems to be the culprit",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 563
+}

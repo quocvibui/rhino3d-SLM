@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jesterKing/import_3dm/blob/b3c680c3fe049bae8e421fac9da7f13c6c9cd927/import_3dm/converters/pointcloud.py",
+  "repo": "jesterKing/import_3dm",
+  "repo_stars": 372,
+  "repo_description": "Blender importer script for Rhinoceros 3D files",
+  "license": "MIT",
+  "filepath": "import_3dm/converters/pointcloud.py",
+  "instruction": "MIT License",
+  "code": "# MIT License\n\n# Copyright (c) 2018-2024 Nathan Letwory, Joel Putnam, Tom Svilans, Lukas Fertig\n\n# Permission is hereby granted, free of charge, to any person obtaining a copy\n# of this software and associated documentation files (the \"Software\"), to deal\n# in the Software without restriction, including without limitation the rights\n# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n# copies of the Software, and to permit persons to whom the Software is\n# furnished to do so, subject to the following conditions:\n\n# The above copyright notice and this permission notice shall be included in all\n# copies or substantial portions of the Software.\n\n# THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n# SOFTWARE.\n\nimport rhino3dm as r3d\nfrom . import utils\n\n\ndef import_pointcloud(context, ob, name, scale, options):\n\n    og = ob.Geometry\n    oa = ob.Attributes\n\n    # add points as mesh vertices\n\n    # The following line crashes. Seems rhino3dm does not like iterating over pointclouds.\n    #vertices = [(p.X * scale, p.Y * scale, p.Z * scale) for p in og]\n\n    vertices = [(og[v].X * scale, og[v].Y * scale, og[v].Z * scale) for v in range(og.Count)]\n\n    pointcloud = context.blend_data.meshes.new(name=name)\n    pointcloud.from_pydata(vertices, [], [])\n\n    return pointcloud\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

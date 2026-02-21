@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problems-with-booleans-and-creating-closed-meshes-using-rhinocommon/75457",
+  "topic_id": 75457,
+  "title": "Problems with booleans and creating closed meshes using Rhinocommon",
+  "question": "I’am struggling for days with some apparently simple boolean substractions.\n\n\ni’am using brep.CreateBooleanSubstraction() under rhinocommon using ironpython in grasshopper.\n\n\nthe operation is being a substraction to a sphere of some closed solid, created revolving a curve.\n\n\n9 or 10 substraction are being applied recursively to each sphere. Each time one brep vs brep. Tolerance used for the method is 1.\n\n\nFinally a closed mesh object needs to be obtained. I’am using mesh.CreateFromBrep(brep,meshParam)\n\n\nThe process is working fine in 95% percent of the time. But in some cases, strange things happens.\n\n\nWhen everything goes ok, the result looks like this:\n\n\n\n\ncorrect.png\n565×527 122 KB\n\n\n\n\nbut there are some cases that some little mosters appears, and rhino is considering them as “valid objects”\n\n\n\n\nvalidMonster.png\n1145×656 125 KB\n\n\n\n\nthe resulting mesh appears like this:\n\n\n\n\nmonsterMesh.png\n706×713 163 KB\n\n\n\n\nSometime the brep is closed, and apparently the geometry is visually ok and passed rhino check, but the resulting mesh using  mesh.CreateFromBrep(brep,meshParam) with meshParam.JaggedSeam = False and meshParam.ClosedObjectPostProcess = True, gives as result an open mesh.\n\n\nIf I bake the brep and then manually convert to meshes, then all brep are converted to closed Meshes, except those brep that appear like the monster above.\n\nUnfortunately, manual conversion is not a option. I could alternatively add brep objects to the document, use _Mesh command to convert them as long as this is the only secure manner to obtain closed meshes, and finally continue the operation in rhinocommon. But still the moster-like breps are misserably failling when converted to meshes, as shown in the image above.\n\n\nAll this is not making any sense to me. My nerves are almost done. Is this a bug? am I missing something?\n\n\nAny help would be appreciated.\n\n\nthanks",
+  "code_blocks": [
+    {
+      "code": "def createNodes(sefl,nodeId):\n\n            #I omit the first part as is basically recolectin the mesh in list of meshes called boolOperatorList\n            \n            diam = float(node.diam) # custom component\n            ptOrig = node.getPoint()\n            sphere = rg.Sphere(ptOrig,diam/2)\n            sphere = sphere.ToBrep()\n            try:\n                newList = copy.deepcopy(boolOperatorList)\n                result = self.substractBrep(sphere,newList) \n            except:\n                rotate = rg.Transform.Rotation(random.random(),rg.Vector3d.ZAxis,ptOrig)\n                sphere.Transform(rotate) #The reason of this operation was becasuse sometimes the brep \n                                         #substraction miserably failed, so i discovered that when this happens, a little \n                                         #rotation of the sphere helps to give the method a new opportunity. It just works.\n                result = self.substractBrep(sphere,newList)\n\n\n            meshParam = rg.MeshingParameters.Coarse\n            meshParam.JaggedSeams = False\n            meshParam.ClosedObjectPostProcess = True\n            meshArray = rg.Mesh.CreateFromBrep(result,meshParam)\n            brepMesh = rg.Mesh()\n            brepMesh.Append(meshArray)\n            return brepMesh\n\n    def substractBrep(self,brep1,brepList): #recursion function for brep substraction method\n        brep2 = brepList.pop()\n        brepArray = rg.Brep.CreateBooleanDifference(brep1,brep2,1)\n        brep3 = rg.Brep()\n        for brep in brepArray:\n            brep3.Append(brep)\n  \n        if len(brepList)>0:\n            return self.substractBrep(brep3,brepList)\n        else:\n            return brep3",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 905
+}

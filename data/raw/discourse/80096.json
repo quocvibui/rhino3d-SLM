@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/iterate-over-list-of-guids-error/80096",
+  "topic_id": 80096,
+  "title": "Iterate over list of guids error",
+  "question": "I’m trying to convert all polysurfaces to blocks for export to sketchup but the code exits with error “iteration over non-sequence of type Guid”.\n\n\nimport rhinoscriptsyntax as rs\nimport System.Guid\n\n#objs = rs.GetObjects(\"Select Objects\") #, filter = rs.filter.surface)\n\nobjs = rs.ObjectsByType(16, False)\nprint(\"Types\", type(objs), type(objs[0]), objs[0] == System.Guid, objs[0] == str)\n\nfor obj in objs:\n    point = (0, 0, 0)  # rs.GetPoint(\"Block base point\")\n    #objGuid = rs.coerceguid(obj)\n    #print(\"type GUID: \", type(ogjGuid), objGuid == System.Guid)\n    #objList = list(obj)\n    block = rs.AddBlock(obj, point, None, True)\n    rs.InsertBlock(block, point)\n\n\n\n\nThe script works when passing \nobjs\n as a list of Guids (without for loop) to the \naddBlock\n function, turning all polysurfaces into a single block. The \naddblock\n definition\n actually says that the function takes an array as first parameter but trying to put the Guid into list within the for loop ends also with error “Guid is not iterable”\n\nHints are much appreciated, thanks.\n\n\nrhino for mac 5.5\n\nmacOS 10.14.3\n\nPython 2.7.10",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nobjs = rs.ObjectsByType(16, False)\nfor obj in objs:\n    point = (0, 0, 0)\n    block = rs.AddBlockForSingleObject(obj, point, None, True)  # my rewritten function\n    rs.InsertBlock(block, point)",
+      "language": "python",
+      "author": "jackshaftoe",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "def AddBlockForSingleObject(id, base_point, name=None, delete_input=False):\n    base_point = rhutil.coerce3dpoint(base_point, True)\n    if not name:\n        name = scriptcontext.doc.InstanceDefinitions.GetUnusedInstanceDefinitionName()\n    found = scriptcontext.doc.InstanceDefinitions.Find(name, True)\n    objects = []\n\n    obj = rhutil.coercerhinoobject(id, True)\n    if obj.IsReference: return\n    ot = obj.ObjectType\n    if ot==Rhino.DocObjects.ObjectType.Light: return\n    if ot==Rhino.DocObjects.ObjectType.Grip: return\n    if ot==Rhino.DocObjects.ObjectType.Phantom: return\n    if ot==Rhino.DocObjects.ObjectType.InstanceReference and found:\n        uses, nesting = obj.UsesDefinition(found.Index)\n        if uses: return\n    objects.append(obj)\n\n    if objects:\n        geometry = [obj.Geometry for obj in objects]\n        attrs = [obj.Attributes for obj in objects]\n        rc = 0\n        if found:\n          rc = scriptcontext.doc.InstanceDefinitions.ModifyGeometry(found.Index, geometry, attrs)\n        else:\n          rc = scriptcontext.doc.InstanceDefinitions.Add(name, \"\", base_point, geometry, attrs)\n        if rc>=0:\n            if delete_input:\n                for obj in objects: scriptcontext.doc.Objects.Delete(obj, True)\n            scriptcontext.doc.Views.Redraw()\n    return name",
+      "language": "python",
+      "author": "jackshaftoe",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System.Guid\n\n#objs = rs.GetObjects(\"Select Objects\") #, filter = rs.filter.surface)\n\nobjs = rs.ObjectsByType(16, False)\nprint(\"Types\", type(objs), type(objs[0]), objs[0] == System.Guid, objs[0] == str)\n\nfor obj in objs:\n    point = (0, 0, 0)  # rs.GetPoint(\"Block base point\")\n    #objGuid = rs.coerceguid(obj)\n    #print(\"type GUID: \", type(ogjGuid), objGuid == System.Guid)\n    #objList = list(obj)\n    block = rs.AddBlock(obj, point, None, True)\n    rs.InsertBlock(block, point)",
+      "language": "python",
+      "author": "jackshaftoe",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1368
+}

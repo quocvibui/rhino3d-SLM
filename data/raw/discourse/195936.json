@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/tangents-to-circle-from-point-and-intersection-line-circle/195936",
+  "topic_id": 195936,
+  "title": "Tangents to circle from point and intersection line/circle",
+  "question": "I am trying to create an animation showing a collision avoidance system. To do it, I need to find and display the evasion courses at every point in the animation. For that reason, I would like to have, if possible, the logic encapsulated in a single C# component.\n\n\nThe procedure is straightforward geometrically. It is shown in the following diagram:\n\n\ndiagram\n2267×1275 193 KB\n\n\nIn essence, you need to find the two tangents from the target to a circle that represents the minimum desired distance centered on our ship. Then determine the intersection of these tangent lines with a circle that has as a radius our ship’s speed and is placed at the end point of the target ship velocity vector.\n\n\nI have not been able to find suitable RhinoCommon functions, and my analytic geometry skills are not what they used to be.\n\n\nAny tips will be most welcomed.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\ntarget_start = Rhino.Geometry.Point3d(T0)\ntarget_end = Rhino.Geometry.Point3d(T1)\nself_start = Rhino.Geometry.Point3d(S0)\nself_end = Rhino.Geometry.Point3d(S1)\nmin_distance = float(D)\n\ndef curve_intersection(curve1, curve2):\n    results = rs.CurveCurveIntersection(curve1, curve2)\n    points = []\n    for result in results:\n        event, location = result[:2]\n        if event == 1: points.append(location)\n    return points\n\ncircle_distance = rs.AddCircle(self_start, min_distance)\nmidpoint = (self_start + target_start)/2\nseparation = self_start.DistanceTo(target_start)\ncircle_separation = rs.AddCircle(midpoint, separation/2)\ntangent_points = curve_intersection(circle_distance, circle_separation)\ntangent_lines = [rs.AddLine(target_start, Rhino.Geometry.Point3d(pt)) for pt in tangent_points]\nself_speed = self_start.DistanceTo(self_end)\ncircle_speed = rs.AddCircle(target_end, self_speed)\nintersect_points = sum([curve_intersection(circle_speed, line) for line in tangent_lines], start=[])\nevasion_points = sorted(intersect_points, key=lambda pt: pt.DistanceTo(self_start))[:2]\nevasion_points = [self_start + target_end - pt for pt in evasion_points]\n\nEP = evasion_points",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "Circle velCircle = new Circle(tgtVel, ownSpeed / 15);\n        circles.Add(velCircle);\n        Double t1, t2;\n        Point3d p1, p2, p3, p4;\n        Rhino.Geometry.Intersect.Intersection.LineCircle(tangent1, velCircle, \n            out t1, out p1, out t2, out p2);\n\n        Rhino.Geometry.Intersect.Intersection.LineCircle(tangent2, velCircle, \n            out t1, out p3, out t2, out p4);",
+      "language": "unknown",
+      "author": "Gonzalo4",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 6,
+  "views": 252
+}

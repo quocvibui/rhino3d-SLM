@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-convert-an-rgb-color-value-to-grayscale-in-python-inside-gh/29325",
+  "topic_id": 29325,
+  "title": "How to convert an RGB color value to grayscale in python inside GH?",
+  "question": "Hi!\n\nAlthough I finally found that someone said “grayscale = RGB.R\n0.3+RGB.G\n0.59+RGB.B*0.11”, but it seems not work. I had tomultiply 0.007 and got a result that seems grayscale was form 0 to 1. Here is my code:\n\n\nimport rhinoscriptsyntax as rs\nimport math\nimport System as sys\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\npath = path\nbitmap = sys.Drawing.Bitmap.FromFile(path)\nwidth = bitmap.Width\nheight = bitmap.Height\n\nunum = 20\nvnum = 20\nuinc = 1.0/unum\nvinc = 1.0/vnum\n\nimageW=width/unum\nimageH=height/vnum\n\npanels=[]\ntemp=[]\nfor i in range(unum):\n    for j in range(vnum):\n        valRGB = sys.Drawing.Bitmap.GetPixel(bitmap,i*imageW,j*imageH)\n        _**val = (valRGB.R*0.3+valRGB.G*0.59+valRGB.B*0.11)*0.007**_\n        \n        pt1 = srf.PointAt(i*uinc,j*vinc)\n        pt2 = srf.PointAt((i+1)*uinc,j*vinc)\n        pt3 = srf.PointAt(i*uinc,(j+1-val)*vinc)\n        pt4 = srf.PointAt((i+1)*uinc,(j+1-val)*vinc)\n        \n        panel = rg.NurbsSurface.CreateFromCorners(pt1,pt2,pt4,pt3)\n        panel2= rg.NurbsSurface.CreateFromCorners(pt1,pt2,pt4,pt3)\n        center = srf.PointAt((i+0.5)*uinc, (j+0.5)*vinc)\n        normal = srf.NormalAt((i+0.5)*uinc, (j+0.5)*vinc)\n        \n        panel = rs.RotateObject(sc.doc.Objects.AddSurface(panel),center,val*math.pi*4,normal)\n        \n        panels.append(panel)\n\n        \na = panels",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\nrgb=rs.GetColor()\ncolor=System.Drawing.Color.FromArgb(*rgb)\ngray_value=color.GetBrightness()\nprint gray_value",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\nimport System as sys\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\npath = path\nbitmap = sys.Drawing.Bitmap.FromFile(path)\nwidth = bitmap.Width\nheight = bitmap.Height\n\nunum = 20\nvnum = 20\nuinc = 1.0/unum\nvinc = 1.0/vnum\n\nimageW=width/unum\nimageH=height/vnum\n\npanels=[]\ntemp=[]\nfor i in range(unum):\n    for j in range(vnum):\n        valRGB = sys.Drawing.Bitmap.GetPixel(bitmap,i*imageW,j*imageH)\n        _**val = (valRGB.R*0.3+valRGB.G*0.59+valRGB.B*0.11)*0.007**_\n        \n        pt1 = srf.PointAt(i*uinc,j*vinc)\n        pt2 = srf.PointAt((i+1)*uinc,j*vinc)\n        pt3 = srf.PointAt(i*uinc,(j+1-val)*vinc)\n        pt4 = srf.PointAt((i+1)*uinc,(j+1-val)*vinc)\n        \n        panel = rg.NurbsSurface.CreateFromCorners(pt1,pt2,pt4,pt3)\n        panel2= rg.NurbsSurface.CreateFromCorners(pt1,pt2,pt4,pt3)\n        center = srf.PointAt((i+0.5)*uinc, (j+0.5)*vinc)\n        normal = srf.NormalAt((i+0.5)*uinc, (j+0.5)*vinc)\n        \n        panel = rs.RotateObject(sc.doc.Objects.AddSurface(panel),center,val*math.pi*4,normal)\n        \n        panels.append(panel)\n\n        \na = panels",
+      "language": "python",
+      "author": "daizhuo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 2355
+}

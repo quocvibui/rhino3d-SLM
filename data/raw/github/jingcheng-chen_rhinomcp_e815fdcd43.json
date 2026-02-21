@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/jingcheng-chen/rhinomcp/blob/615f0eae092d3d129f07fde519b28ca10d31dd6e/rhino_mcp_server/static/linetype.py",
+  "repo": "jingcheng-chen/rhinomcp",
+  "repo_stars": 299,
+  "repo_description": "RhinoMCP connects Rhino 3D to AI Agent through the Model Context Protocol (MCP)",
+  "license": "Apache-2.0",
+  "filepath": "rhino_mcp_server/static/linetype.py",
+  "instruction": "Linetype",
+  "code": "import Rhino\n\nimport scriptcontext\n\nimport rhinocompat as compat\nfrom rhinoscript import utility as rhutil\n\n\ndef __getlinetype(name_or_id):\n    id = rhutil.coerceguid(name_or_id)\n    if id: return scriptcontext.doc.Linetypes.FindId(id)\n    return scriptcontext.doc.Linetypes.FindName(name_or_id)\n\n\ndef IsLinetype(name_or_id):\n    \"\"\"Verifies the existance of a linetype in the document\n    Parameters:\n      name_or_id (guid|str): The name or identifier of an existing linetype.\n    Returns: \n      bool: True or False\n    Example:\n      import rhinoscriptsyntax as rs\n      name = rs.GetString(\"Linetype name\")\n      if rs.IsLinetype(name): print(\"The linetype exists.\")\n      else: print(\"The linetype does not exist\")\n    See Also:\n      IsLinetypeReference\n    \"\"\"\n    lt = __getlinetype(name_or_id)\n    return lt is not None\n\n\ndef IsLinetypeReference(name_or_id):\n    \"\"\"Verifies that an existing linetype is from a reference file\n    Parameters:\n      name_or_id (guid|str): The name or identifier of an existing linetype.\n    Returns: \n      bool: True or False\n    Example:\n      import rhinoscriptsyntax as rs\n      name = rs.GetString(\"Linetype name\")\n      if rs.IsLinetype(name):\n          if rs.IsLinetypeReference(name):\n              print(\"The linetype is a reference linetype.\")\n          else:\n              print(\"The linetype is not a reference linetype.\")\n      else:\n          print(\"The linetype does not exist.\")\n    See Also:\n      IsLinetype\n    \"\"\"\n    lt = __getlinetype(name_or_id)\n    if lt is None: raise ValueError(\"unable to coerce %s into linetype\"%name_or_id)\n    return lt.IsReference\n\n\ndef LinetypeCount():\n    \"\"\"Returns number of linetypes in the document\n    Returns:\n      number: the number of linetypes in the document\n    Example:\n      import rhinoscriptsyntax as rs\n      count = rs.LinetypeCount()\n      print(\"There are {} linetypes\".format(count))\n    See Also:\n      LinetypeNames\n    \"\"\"\n    return scriptcontext.doc.Linetypes.Count\n\n\ndef LinetypeNames(sort=False):\n    \"\"\"Returns names of all linetypes in the document\n    Parameters:\n      sort (bool, optional): return a sorted list of the linetype names\n    Returns:\n      list(str, ...): list of linetype names if successful\n    Example:\n      import rhinoscriptsyntax as rs\n      names = rs.LinetypeNames()\n      if names:\n          for name in names: print(name)\n    See Also:\n      LinetypeCount\n    \"\"\"\n    count = scriptcontext.doc.Linetypes.Count\n    rc = []\n    for i in compat.RANGE(count):\n        linetype = scriptcontext.doc.Linetypes[i]\n        if not linetype.IsDeleted: rc.append(linetype.Name)\n    if sort: rc.sort()\n    return rc\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/eto-onkeydown-issue/214162",
+  "topic_id": 214162,
+  "title": "Eto OnKeyDown issue",
+  "question": "My KeyDown seems to be ineffective. It seems that I have done something wrong.\n\n\n#! python 3\n\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nimport Rhino as rh\n\n\nclass From(ef.Form):\n\n    def __init__(self):\n        super().__init__()\n        self.Size = ed.Size(200,200)\n\n        self.KeyDown += self.OnKeyDownEvent\n\n    def OnKeyDownEvent(self,sender, e):\n        try:\n            print(f\"Test:{e.Key}\")\n        except Exception as ex:\n            rh.RhinoApp.WriteLine(f\"Error in OnKeyDown: {ex}\")\n\n\nif __name__ == \"__main__\":\n    form = From()\n    form.Show()",
+  "code_blocks": [
+    {
+      "code": "#! python 3\n\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nimport Rhino as rh\n\nclass From(ef.Form):\n    def __init__(self):\n        super().__init__()\n        self.Size = ed.Size(200,200)\n        self.Focus()\n\n        self.KeyDown += self.OnKeyDownEvent\n        self.MouseEnter += self.OnMouseEnterEvent\n\n    def OnKeyDownEvent(self,sender, e):\n        try:\n            print(f\"Test:{e.Key}\")\n\n        except Exception as ex:\n            rh.RhinoApp.WriteLine(f\"Error in OnKeyDown: {ex}\")\n\n    def OnMouseEnterEvent(self,sender, e):\n        try:\n            print(\"MouseEnter\")\n            self.Focus()\n\n        except Exception as ex:\n            rh.RhinoApp.WriteLine(f\"MouseEnter: {ex}\")\n\nif __name__ == \"__main__\":\n    form = From()\n    form.Show()",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Eto.Forms as ef\nimport Eto.Drawing as ed\nimport Rhino\n\nclass MyForm(ef.Form):\n\n    def __init__(self):\n        super(MyForm, self).__init__()\n        self.Title = \"Key Test\"\n        self.Size = ed.Size(200, 200)\n        \n        drawable = ef.Drawable()\n        drawable.CanFocus = True\n        drawable.KeyDown += self.OnKeyDownEvent\n        self.Content = drawable\n\n    def OnKeyDownEvent(self, sender, e):\n        Rhino.RhinoApp.WriteLine(\"Key pressed: {0}\".format(e.Key))\n        e.Handled = True\n\nif __name__ == \"__main__\":\n    form = MyForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\n\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nimport Rhino as rh\n\n\nclass From(ef.Form):\n\n    def __init__(self):\n        super().__init__()\n        self.Size = ed.Size(200,200)\n\n        self.KeyDown += self.OnKeyDownEvent\n\n    def OnKeyDownEvent(self,sender, e):\n        try:\n            print(f\"Test:{e.Key}\")\n        except Exception as ex:\n            rh.RhinoApp.WriteLine(f\"Error in OnKeyDown: {ex}\")\n\n\nif __name__ == \"__main__\":\n    form = From()\n    form.Show()",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 109
+}

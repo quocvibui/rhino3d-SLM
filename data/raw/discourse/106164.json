@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/move-start-and-end-points-of-line-segment/106164",
+  "topic_id": 106164,
+  "title": "Move start and end points of line segment",
+  "question": "Hi.\n\n\nI have managed to gain access to the line segments that make up a polyline by using this code:\n\n\npline = Rhino.Geometry.PolylineCurve.ToPolyline(curve)\nsegments = Rhino.Geometry.Polyline.GetSegments(pline)\n\n\n\nIs there a way to move the start and end point of the line segment to a new location?  I see that there are From and To properties and I can change them to a new point but the line segment does not update.  I’m sure this is more complicated than it appears to be.\n\n\nEric",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom scriptcontext import doc\n\n# let user pick a curve\npicked_crv = rs.GetCurveObject(\"Please select a curve for moving endpoint\",True,False)\n\n# new endpoint\nnewPt = Rhino.Geometry.Point3d(12, 0, 0)\n\n# coerce GUID to get the curve geometry\nrg_crv = rs.coercecurve(picked_crv[0])\n\npline = Rhino.Geometry.PolylineCurve.ToPolyline(rg_crv)\npline[0] = newPt\n\nid2 = doc.Objects.Add(rg_crv)",
+      "language": "python",
+      "author": "eric.bunn",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom scriptcontext import doc\nimport scriptcontext\n\nply_thick = .75\n\ndef movePoints(pNum,name):\n    #Move base line to Ply Thickness\n    picked_crv = rs.ObjectsByName(name,False)\n\n    # coerce GUID to get the curve geometry\n    rg_crv = rs.coercecurve(picked_crv[0])\n\n    #Get PolylineCurve\n    pCurve = rg_crv.ToPolyline(scriptcontext.doc.ModelAbsoluteTolerance,scriptcontext.doc.ModelAngleToleranceRadians,0,0)\n    \n    #Get Polyline\n    pLine = Rhino.Geometry.PolylineCurve.ToPolyline(pCurve)\n\n    #Cycle through pNum and move points (Ex:  pline[3] = Rhino.Geometry.Point3d(pline[3].X,ply_thick,pline[3].Z))\n    for i in pNum:\n        pLine[i[0]] = Rhino.Geometry.Point3d(  float(i[1][0])  ,  float(i[1][1])  ,  float(i[1][2]))\n        \n    #Replace Original with New One (uses same id)\n    scriptcontext.doc.Objects.Replace(picked_crv[0],pLine)\n\n    #Refresh Screen\n    rs.Redraw()\n\n#Move Base Line to Ply Thickness\n\n#Define a list of new point locations (Ex: [point2,[90,0,0]]\npNum = list()\npNum.append(  [2,[0.000,ply_thick,0.000]]  )\npNum.append(  [3,[5.354,ply_thick,0.000]]  )\npNum.append(  [6,[16.866,ply_thick,0.000]]  )\npNum.append(  [7,[20.720,ply_thick,0.000]]  )\n\n#pNum = [[2,[0.000,ply_thick,0.000]],[3,[5.354,ply_thick,0.000]],[6,[16.866,ply_thick,0.000]],[7,[20.720,ply_thick,0.000]]]\nmovePoints(pNum,'Side')",
+      "language": "python",
+      "author": "eric.bunn",
+      "post_number": 7,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 2141
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/vb-python-rhinoscriptsyntax-errors-with-extrusions/2502",
+  "topic_id": 2502,
+  "title": "VB+Python rhinoscriptsyntax errors with extrusions",
+  "question": "This was an issue I raised a long time ago, and I thought it had been fixed in vbRhinoscript, but I see not (or the fix has been backed out again):\n\n\nObjectsByType(8) (surfaces) does not get single-surface extrusion objects\n\nObjectsByType(16) (polysurfaces) does not get multi-surface extrusion objects\n\nType 1073741824 extrusion can be added to the list to force this, but it should not be necessary, IMO\n\n\nPython rhinoscriptsyntax only:\n\nType 1073741824 extrusion is not included in the Python rhinoscriptsyntax Help for ObjectsByType\n\nrs.IsExtrusion() method does not exist.\n\nThings like rs.IsObjectSolid() fail for extrusion objects -\n\nlooks like they simply did not get added in object.py in this case, there may be others as well…\n\n\nThe problem is that Extrusions are not being considered as BReps.  This means they are not “transparent”.\n\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef IsExtrusion(objID):\n    return rs.ObjectType(obj)==1073741824\n\n#test\nobj=rs.GetObject()\nif IsExtrusion(obj):\n    print \"Object is an extrusion\"\nelse:\n    print \"Object is not an extrusion\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 16,
+  "views": 2622
+}

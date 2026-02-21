@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/move-end-point-of-curve-to-make-it-close-rhino-python/7607",
+  "topic_id": 7607,
+  "title": "Move end point of curve to make it close [Rhino, Python]",
+  "question": "For NOT closed curve, any ways to just move the end point of it to the start point to make it close, while the rest of the curve is the same?\n\n\nThanks a lot!!!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv = rs.GetObject(\"pick up your curve\")\ncrv_degree = rs.CurveDegree(crv)\nstPt = rs.CurveStartPoint(crv)\n\npts = rs.CurvePoints(crv)\npts[-1] = stPt\n\nrs.AddCurve(pts, crv_degree)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef CloseCrvMoveEndPt():\n    crvID=rs.GetObject(\"Select curve to close\",4,True)\n    if not crvID: return\n    if rs.IsCurveClosed(crvID):\n        print \"Curve is already closed!\" ; return\n        \n    if rs.CurvePointCount(crvID)>=3:    \n        crvGeo=sc.doc.Objects.Find(crvID).Geometry\n        sPt=crvGeo.PointAtStart\n        crvGeo.SetEndPoint(sPt)\n        sc.doc.Objects.Replace(crvID,crvGeo)\n        sc.doc.Views.Redraw()\n    \nCloseCrvMoveEndPt()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv = rs.GetObject(\"pick up the curve\")\nstPt = rs.CurveStartPoint(crv)\nendPt = rs.CurveEndPoint(crv)\nline = rs.AddLine(stPt, endPt)\nrs.JoinCurves([crv,line])\nrs.DeleteObjects([crv,line])",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv = rs.GetObject(\"pick up the curve\")\nrs.Command(\"_CloseCrv SelId %s _Enter\" % crv)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 3616
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-a-surface-of-a-filleted-rectangle-via-rhinocommon/163629",
+  "topic_id": 163629,
+  "title": "How to get a surface of a filleted rectangle via RhinoCommon?",
+  "question": "Actually, I’d like to build a flat rectangular surface with all corners filleted to the same radius. What would be the proper way to achieve this? While reviewing the Surface class, I couldn’t find a fillet option. Perhaps I should first fillet the polyline (rectangle) and then create the surface from it, but I’m not sure how to do that. Can someone help me?\n\n\nScreenshot 2023-08-04 at 10.31.13 AM\n1562×1092 6.81 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    plane = Rhino.Geometry.Plane.WorldXY\n    rect = Rhino.Geometry.Rectangle3d(plane, 40, 20)\n    \n    crv = rect.ToNurbsCurve()\n    tol = scriptcontext.doc.ModelAbsoluteTolerance\n    ang_tol = scriptcontext.doc.ModelAngleToleranceRadians\n    \n    pc = Rhino.Geometry.Curve.CreateFilletCornersCurve(crv, 5.0, tol, ang_tol)\n    breps = Rhino.Geometry.Brep.CreatePlanarBreps(pc)\n    \n    scriptcontext.doc.Objects.AddBrep(breps[0])\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 529
+}

@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cplane-vs-world-coordinates/150768",
+  "topic_id": 150768,
+  "title": "Cplane vs World Coordinates",
+  "question": "Hi, This seems like a very basic question but for some reason I cannot find the right answer on this forum.\n\n\nmy problem is as follows: I want to draw geometry using rhinoscriptsyntax addpoints() and addpolyline() methods based on a user-defined starting point.\n\n\nMy set-up is as follows:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\norigin = rs.GetPoint(\"Set Origin\")\nif origin:\n    plane = rs.ViewCPlane()\n    plane = rs.MovePlane(plane,origin)\n    rs.ViewCPlane(None,plane)\n\np0 = rs.AddPoint(0, 0, 0)\np1 = rs.AddPoint(2, 0, 0)\nrs.AddPolyline([p0,p1])\n\n\n\n\nBut, when the points are drawn, they are drawn based on world plane coordiantes, not on the cplane I just defined. What am I doing wrong :)?\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#make your points in CPlane coordinates\npt1=rs.coerce3dpoint([0,0,0])\npt2=rs.coerce3dpoint([10,0,0])\n\n#get your \"from\" plane\nplane=rs.ViewCPlane()\n\n#transform each point\npt1_cp=rs.XformCPlaneToWorld(pt1,plane)\npt2_cp=rs.XformCPlaneToWorld(pt2,plane)\n\n#add your line\nrs.AddLine(pt1_cp,pt2_cp)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#10x10x10 cube's corner points\npt1=rs.coerce3dpoint([0,0,0])\npt2=rs.coerce3dpoint([10,0,0])\npt3=rs.coerce3dpoint([10,10,0])\npt4=rs.coerce3dpoint([0,10,0])\npt5=rs.coerce3dpoint([0,0,10])\npt6=rs.coerce3dpoint([10,0,10])\npt7=rs.coerce3dpoint([10,10,10])\npt8=rs.coerce3dpoint([0,10,10])\n\n#add box in world coordinates\nbox=rs.AddBox([pt1,pt2,pt3,pt4,pt5,pt6,pt7,pt8])\n\nplane=rs.ViewCPlane()\n\n#create your transform - \"Rotation1\" is plane-to-plane\n#rs.XformRotation1(from_plane, to_plane)\nxform=rs.XformRotation1(rs.WorldXYPlane(),plane)\n\n#transform the world aligned cube to the active view's CPlane (without copying)\nrs.TransformObject(box,xform,False)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\norigin = rs.GetPoint(\"Set Origin\")\nif origin:\n    plane = rs.ViewCPlane()\n    plane = rs.MovePlane(plane,origin)\n    rs.ViewCPlane(None,plane)\n\np0 = rs.AddPoint(0, 0, 0)\np1 = rs.AddPoint(2, 0, 0)\nrs.AddPolyline([p0,p1])",
+      "language": "python",
+      "author": "Terribel",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 562
+}

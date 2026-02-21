@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/looping-to-make-serial-points/141415",
+  "topic_id": 141415,
+  "title": "Looping to make serial points",
+  "question": "Hello, I have this simple definition to move a point.\n\n\nHowever, instead of giving me 100 points spread out at 1 increment, it gave me 100 points in 1 location (p3)\n\n\nDoes anyone know how to fix this?\n\n\n>def movepoint(point,distance):\n    p = rs.PointCoordinates(point)\n    px , py , pz = p[0] , p[1] , p[2]\n    p2x = px + distance\n    p2y = py\n    p2z = pz\n    p2 = p2x , p2y , p2z\n    pt2 = rs.AddPoint(p2)\n    return (pt2)\n\nn = 20\npoint = rs.GetObject('')\n\np2 = movepoint(point,1)\n\ncount = 0\nwhile count < 100:\n    count += 1\n    p3 = movepoint(p2,1)\n    p2.append(p3)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\npoint = Rhino.Geometry.Point3d.Origin\nsc.doc.Objects.AddPoint(point)\nfor i in range(0, 99):\n    point.X += 1.0\n    sc.doc.Objects.AddPoint(point)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": ">def movepoint(point,distance):\n    p = rs.PointCoordinates(point)\n    px , py , pz = p[0] , p[1] , p[2]\n    p2x = px + distance\n    p2y = py\n    p2z = pz\n    p2 = p2x , p2y , p2z\n    pt2 = rs.AddPoint(p2)\n    return (pt2)\n\nn = 20\npoint = rs.GetObject('')\n\np2 = movepoint(point,1)\n\ncount = 0\nwhile count < 100:\n    count += 1\n    p3 = movepoint(p2,1)\n    p2.append(p3)",
+      "language": "python",
+      "author": "Pieter_Prasetya",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 353
+}

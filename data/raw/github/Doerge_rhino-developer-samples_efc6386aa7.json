@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/Doerge/rhino-developer-samples/blob/beb34e5f5daf7f8da651d732aadf165bdf32a74d/rhinocommon/snippets/from_rhinocommon/py/ex_projectpointstobreps.py",
+  "repo": "Doerge/rhino-developer-samples",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_projectpointstobreps.py",
+  "instruction": "Ex projectpointstobreps",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import *\nfrom Rhino.Geometry import *\n\ndef RunCommand():\n  srfid = rs.GetObject(\"select surface\", rs.filter.surface | rs.filter.polysurface)\n  if not srfid: return\n  brep = rs.coercebrep(srfid)\n  if not brep: return\n  \n  pts = Intersect.Intersection.ProjectPointsToBreps(\n      [brep], # brep on which to project\n      [Point3d(0, 0, 0), Point3d(3,0,3), Point3d(-2,0,-2)], # points to project\n      Vector3d(0, 1, 0), # project on Y axis\n      doc.ModelAbsoluteTolerance)\n\n  if pts != None and pts.Length > 0:\n    for pt in pts:\n      doc.Objects.AddPoint(pt)\n\n  doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

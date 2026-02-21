@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-recursion-simple-error/33999",
+  "topic_id": 33999,
+  "title": "Python recursion simple error",
+  "question": "Hi,\n\nI am confused as to why this code is not working. I believe it has to do with the fact that Rhino draws circles with radii rather than diameter. I am simply trying a simple recursion where circles are scaled by half the diameter and moved by half of the diameter. Attached is an image I made in processing. \n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\na = []\n\nx = 2\ny = 0\np1 = rs.coerce3dpoint([x,y,0]) \n\n\ndef recursiveCircle(p1, r, num): #input variables\n        r = 3\n        print r/2\n        p2 = rs.AddPoint(x + r, 0, 0)\n        a.append(p2)\n        cir1 = rs.AddCircle(p1, r)\n        a.append(cir1)  \n\n        if (num > 1):\n             #counter\n            \n            #recursive function ; needs to be diameter\n            recursiveCircle(p1 + rg.Point3d(x + r*.5, y, 0), r*.5, num-1) \n            \n \n      \nrecursiveCircle(p1, r, 2) #input parameters\n\n\n\nI am sure that I am missing something silly. I just don’t totally understand the hierarchy of the recursive functions.\n\n\n\n\ndeclare the function with the variables\n\n\ncall the function outside the function with parameters\n\n\npass the outside parameters through the insider recursive function.\n\n\n\n\nThank you for the help!\n\nErik",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\na = []\nx = 2\ny = 0\np1 = rs.coerce3dpoint([x,y,0]) \nr = 3 #this needs to be outside the recursion, it's an initial value\n\ndef recursiveCircle(p1, r, num): #input variables\n        print r/2\n        p2 = rs.AddPoint(x + r, 0, 0)\n        a.append(p2)\n        cir1 = rs.AddCircle(p1, r)\n        a.append(cir1)  \n\n        if (num > 1):\n            #counter\n            #recursive function ; needs to be diameter\n            p1=rg.Point3d(p1.X+r,p1.Y,p1.Z)\n            #p1=rg.Point3d(p1.X+r*0.5,p1.Y,p1.Z) #tangent inside\n            #p1=rg.Point3d(p1.X+r*1.5,p1.Y,p1.Z) #tangent outside\n            recursiveCircle(p1, r*.5, num-1)\n            \nrecursiveCircle(p1, r, 10) #input parameters",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nrad = 25\nnum = 3\nx = 0\ny = 0\n\npt = rs.AddPoint(x, y, 0)\nptlist = [pt]\nrs.AddCircle(pt, rad)\n\ndef quads(rad, num, ptlist):\n    temp = ptlist\n    ptlist = []\n\n    if num > 0:\n        for i in range(len(temp)):\n\n            pt1 = rs.CopyObject(temp[i], (rad, 0, 0))\n            pt2 = rs.CopyObject(temp[i], (0, rad, 0))\n            pt3 = rs.CopyObject(temp[i], (-rad, 0, 0))\n            pt4 = rs.CopyObject(temp[i], (0, -rad, 0))\n\n            ptlist.extend([pt1, pt2, pt3, pt4])\n\n        rad = rad / 2\n        num = num - 1\n        for i in range(len(ptlist)):\n            rs.AddCircle(ptlist[i], rad)\n        quads(rad, num, ptlist)\n\nquads(rad, num, ptlist)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\na = []\nnum = 6\n\ndef vicsek(CRVGUID,num):\n   \n    crvGUID = CRVGUID\n    \n    if (num > 1):\n        num -= 1\n        #explodeLines\n        lines = rs.ExplodeCurves(crvGUID)\n        #evaluate paramaters\n        parameter = rs.CurveParameter(lines[0],(1.0/3.0))\n        parameterA = rs.CurveParameter(lines[0],(0))\n        length = rs.CurveLength(lines[0])\n        #addPTs\n        p0 = rs.EvaluateCurve(lines[0], parameterA)\n        p1 = rs.EvaluateCurve(lines[0], parameter)\n        p2 = rg.Point3d(p1.X,p1.Y+length/3,0)\n        #createRects\n        rectComp1 = rs.AddRectangle(rg.Plane(p0,rg.Vector3d(0,0,1)),length/3,length/3)\n        rectComp2 = rs.CopyObject(rectComp1, rg.Vector3d(length*2/3,0,0))\n    \n        transCtr2 = rs.VectorSubtract(p2,p0)\n        rectCompCtr = rs.CopyObject(rectComp1, transCtr2)\n\n        rectComp3 = rs.CopyObject(rectComp1, rg.Vector3d(0,length*2/3,0))\n        rectComp4 = rs.CopyObject(rectComp2, rg.Vector3d(0,length*2/3,0))\n        \n        \n        a.extend([rectComp1,rectComp2,rectCompCtr,rectComp3,rectComp4])\n        \n        \n        #recursion\n        vicsek(rectComp1,num)\n        vicsek(rectComp2,num)\n        vicsek(rectCompCtr,num)\n        vicsek(rectComp3,num)\n        vicsek(rectComp4,num)\n        \n        \n\ndef Main():\n    \n    crvGUID = rs.AddRectangle(rs.WorldXYPlane(),20,20)\n    vicsek(crvGUID,num)  \n    \nMain()",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\na = []\n\nx = 2\ny = 0\np1 = rs.coerce3dpoint([x,y,0]) \n\n\ndef recursiveCircle(p1, r, num): #input variables\n        r = 3\n        print r/2\n        p2 = rs.AddPoint(x + r, 0, 0)\n        a.append(p2)\n        cir1 = rs.AddCircle(p1, r)\n        a.append(cir1)  \n\n        if (num > 1):\n             #counter\n            \n            #recursive function ; needs to be diameter\n            recursiveCircle(p1 + rg.Point3d(x + r*.5, y, 0), r*.5, num-1) \n            \n \n      \nrecursiveCircle(p1, r, 2) #input parameters",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 3047
+}

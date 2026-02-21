@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-extruding-planar-surface-with-rhino-python/25667",
+  "topic_id": 25667,
+  "title": "Problem extruding planar surface with Rhino Python",
+  "question": "Hi all,\n\n\ni want to create a 3D Extrusion of a text element.\n\nMy script does NOT raise any errors, it just does not show me an extruded 3d Object in Rhino, the text stays a flat planar surface…\n\nThanks in advance.\n\n\nGreets\n\nMr. Sinter\n\n\nCode:\n\n\n    import rhinoscriptsyntax as rs\nimport Rhino as rhi\n\n#CREATE TEXT AS PLANAR SRF\nzero = (0,0,0)\ntext_guid = rs.AddText(\"NAME\", zero, height=20.0, font=\"Arial\")\ntext_in_curves = rs.ExplodeText(text_guid, delete=True)\ntext_as_srf = rs.AddPlanarSrf(text_in_curves)\n#CREATE TEXT AS PLANAR SRF\n\n#DELETE TEXT OUTLINE CURVES\nfubar = 0\nfor element in text_in_curves:\n rs.DeleteObject(text_in_curves[fubar])\n fubar = fubar + 1\n#DELETE TEXT OUTLINE CURVES\n\n#CREATE EXTRUDE PATH\nextrude_path = rs.AddLine((0,0,0), (0,0,10))\nobjectref_path = rhi.DocObjects.ObjRef(extrude_path)\npath_curve = rhi.DocObjects.ObjRef.Curve(objectref_path)\n#CREATE EXTRUDE PATH\n\n#EXTRUDE SRF ALONG PATH\nfoo = 0\nfor element in text_as_srf:\n object_reference = rhi.DocObjects.ObjRef(text_as_srf[foo])\n brep_face = rhi.DocObjects.ObjRef.Face(object_reference)\n print \"%s\"%brep_face\n brep_extrude = rhi.Geometry.BrepFace.CreateExtrusion(brep_face, path_curve, True)\n print \"%s\"%brep_extrude\n foo = foo + 1\n#EXTRUDE SRF ALONG PATH\n\n#DELETE EXTRUDE PATH\nrs.DeleteObject(extrude_path)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rhi\nimport scriptcontext as sc\n\n#CREATE TEXT AS PLANAR SRF\nzero = (0,0,0)\ntext_guid = rs.AddText(\"NAME\", zero, height=20.0, font=\"Arial\")\ntext_in_curves = rs.ExplodeText(text_guid, delete=True)\ntext_as_srf = rs.AddPlanarSrf(text_in_curves)\n#CREATE TEXT AS PLANAR SRF\n\n#DELETE TEXT OUTLINE CURVES\nfubar = 0\nfor element in text_in_curves:\n rs.DeleteObject(text_in_curves[fubar])\n fubar = fubar + 1\n#DELETE TEXT OUTLINE CURVES\n\n#CREATE EXTRUDE PATH\nextrude_path = rs.AddLine((0,0,0), (0,0,10))\nobjectref_path = rhi.DocObjects.ObjRef(extrude_path)\npath_curve = rhi.DocObjects.ObjRef.Curve(objectref_path)\n#CREATE EXTRUDE PATH\n\n#EXTRUDE SRF ALONG PATH\nfoo = 0\nfor element in text_as_srf:\n object_reference = rhi.DocObjects.ObjRef(text_as_srf[foo])\n brep_face = rhi.DocObjects.ObjRef.Face(object_reference)\n print \"%s\"%brep_face\n brep_extrude = rhi.Geometry.BrepFace.CreateExtrusion(brep_face, path_curve, True)\n print \"%s\"%brep_extrude\n #******************************************\n #add your object to the document here\n sc.doc.Objects.AddBrep(brep_extrude)\n\n #Delete the surface object\n rs.DeleteObject(element)\n #******************************************\n foo = foo + 1\n#EXTRUDE SRF ALONG PATH\n\n#DELETE EXTRUDE PATH\nrs.DeleteObject(extrude_path)\n\n#Redraw the screen\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rhi\n\n#CREATE TEXT AS PLANAR SRF\nzero = (0,0,0)\ntext_guid = rs.AddText(\"NAME\", zero, height=20.0, font=\"Arial\")\ntext_in_curves = rs.ExplodeText(text_guid, delete=True)\ntext_as_srf = rs.AddPlanarSrf(text_in_curves)\n#CREATE TEXT AS PLANAR SRF\n\n#DELETE TEXT OUTLINE CURVES\nfubar = 0\nfor element in text_in_curves:\n rs.DeleteObject(text_in_curves[fubar])\n fubar = fubar + 1\n#DELETE TEXT OUTLINE CURVES\n\n#CREATE EXTRUDE PATH\nextrude_path = rs.AddLine((0,0,0), (0,0,10))\nobjectref_path = rhi.DocObjects.ObjRef(extrude_path)\npath_curve = rhi.DocObjects.ObjRef.Curve(objectref_path)\n#CREATE EXTRUDE PATH\n\n#EXTRUDE SRF ALONG PATH\nfoo = 0\nfor element in text_as_srf:\n object_reference = rhi.DocObjects.ObjRef(text_as_srf[foo])\n brep_face = rhi.DocObjects.ObjRef.Face(object_reference)\n print \"%s\"%brep_face\n brep_extrude = rhi.Geometry.BrepFace.CreateExtrusion(brep_face, path_curve, True)\n print \"%s\"%brep_extrude\n foo = foo + 1\n#EXTRUDE SRF ALONG PATH\n\n#DELETE EXTRUDE PATH\nrs.DeleteObject(extrude_path)",
+      "language": "python",
+      "author": "Mr_Sinter",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 3657
+}

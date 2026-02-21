@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_dividecurvestraight.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_dividecurvestraight.py",
+  "instruction": "Ex dividecurvestraight",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Geometry.Intersect import *\n\ndef nextIntersectParamAndPoint(overlapCurves, intersectPoints, curve):\n    intersectParamsAndPoints = [(curve.ClosestPoint(point)[1], point) \n                                for point in intersectPoints]\n    for overlapCurve in overlapCurves:\n        intersectParamsAndPoints.append(\n          (overlapCurve.Domain.Min, overlapCurve.PointAt(overlapCurve.Domain.Min)))\n        intersectParamsandPoints.append(\n          (overlapCurve.Domain.Max, overlapCurve.PointAt(overlapCurve.Domain.max)))\n    return min(intersectParamsAndPoints, key =  lambda t: t[0])\n    \ndef divide_curve():\n    # get user input\n    res, obj_refs = RhinoGet.GetMultipleObjects(\"Curves to divide\",\n        False, ObjectType.EdgeFilter | ObjectType.Curve)\n    if res <> Result.Success: return res\n    curves = [obj_ref.Curve() for obj_ref in obj_refs]\n    \n    distance_between_divisions = rs.GetReal(\n      message = \"Distance between divisions\",\n      number = 5.0, minimum = 1.0)\n    if distance_between_divisions == None: return\n    \n    # generate the points\n    points = []\n    for curve in curves:\n      t0 = curve.Domain.Min\n      points.append(curve.PointAt(t0))\n      \n      sphere_center = curve.PointAt(t0)\n      t = t0\n      rest_of_curve = curve\n      while True:\n        sphere = Sphere(sphere_center, distance_between_divisions)\n        b, overlapCurves, intersectPoints = Intersection.CurveBrep(\n                               rest_of_curve, sphere.ToBrep(), 0.0)\n        if b == False or (overlapCurves.Length == 0 and intersectPoints.Length == 0): \n          break\n        t, point = nextIntersectParamAndPoint(\n          overlapCurves, intersectPoints, rest_of_curve)\n        points.append(point)\n        sphere_center = point\n        rest_of_curve = curve.Split(t)[1]\n          \n    rs.AddPoints(points)\n    rs.Redraw()\n   \nif __name__ == \"__main__\":\n    divide_curve()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

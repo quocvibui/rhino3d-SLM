@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bouding-box-for-each-selected-group/80437",
+  "topic_id": 80437,
+  "title": "Bouding Box for Each Selected Group",
+  "question": "Hi everyone,\n\n\nI am working with multiple models on the same file composed of many individual parts.\n\n\nI was wondering if there was a way to automatically generate an individual bounding box for each selected group. And by this I mean the higher level group, as sometimes there can be a group within a group.\n\n\nThanks in advance,\n\nShynn",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nobjects = rs.GetObjects(\"Pick a group\")\nif(objects):\n    boundingbox = rs.BoundingBox(objects)\n    box = rs.AddBox(boundingbox)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\ngroupTable =  Rhino.RhinoDoc.ActiveDoc.Groups.GroupNames(True)\nselectedGroupNames = Rhino.UI.Dialogs.ShowMultiListBox(\"Select as many group as you like\", \"Select Group\", groupTable, None)\n\nfor name in selectedGroupNames:\n    index = Rhino.RhinoDoc.ActiveDoc.Groups.Find(name)\n    objects = Rhino.RhinoDoc.ActiveDoc.Groups.GroupMembers(index)\n    ids = []\n    for obj in objects:\n        ids.append(obj.Id)\n    rs.AddBox(rs.BoundingBox(ids))",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 472
+}

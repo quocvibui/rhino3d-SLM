@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sweep-2-rails-fails-in-rhinocommon-code/101899",
+  "topic_id": 101899,
+  "title": "Sweep 2 Rails fails in RhinoCommon code",
+  "question": "Our code for a RhinoCommon plugin command does not give the desired sweep 2 rails behavior in Rhino 6 (Version 6 SR26 (6.26.20126.12201, 5/5/2020).\n\n\nErrant sweep using RhinoCommon:\n\n\nimage\n1556×716 88.9 KB\n\nCorrect sweep using GUI (manual rail/shape selection):\n\n\nimage\n1556×716 57.7 KB\n\n\nCode:\n\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            Curve curve1 = null;\n            Curve curve2 = null;\n            Curve line1 = null;\n\n            var curveObjs = doc.Objects.GetObjectList(Rhino.DocObjects.ObjectType.Curve);\n            foreach (Rhino.DocObjects.RhinoObject crvObj in curveObjs)\n            {\n                Rhino.DocObjects.ObjRef objref = new Rhino.DocObjects.ObjRef(crvObj.Id);\n                Curve crv = objref.Curve();\n                switch (crvObj.Attributes.Name)\n                {\n                    case \"trimCL\":\n                        curve1 = crv;\n                        break;\n                    case \"intCrv\":\n                        curve2 = crv;\n                        break;\n                    case \"line1\":\n                        line1 = crv;\n                        break;\n                }\n            }\n\n            double tolerance = doc.ModelAbsoluteTolerance;\n\n            if (curve1 !=null && curve2 != null && line1 != null)\n            {\n                Brep[] botmSweep = Brep.CreateFromSweep(curve1, curve2, line1, false, tolerance);\n\n                doc.Objects.AddBrep(botmSweep[0]);\n            }\n\n            return Result.Success;\n        }\n\n\n\nWe’ve also tried the CreateFromSweep overrides and the SweepTwoRail class.  Any additional suggestions would be appreciated.",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            Curve curve1 = null;\n            Curve curve2 = null;\n            Curve line1 = null;\n\n            var curveObjs = doc.Objects.GetObjectList(Rhino.DocObjects.ObjectType.Curve);\n            foreach (Rhino.DocObjects.RhinoObject crvObj in curveObjs)\n            {\n                Rhino.DocObjects.ObjRef objref = new Rhino.DocObjects.ObjRef(crvObj.Id);\n                Curve crv = objref.Curve();\n                switch (crvObj.Attributes.Name)\n                {\n                    case \"trimCL\":\n                        curve1 = crv;\n                        break;\n                    case \"intCrv\":\n                        curve2 = crv;\n                        break;\n                    case \"line1\":\n                        line1 = crv;\n                        break;\n                }\n            }\n\n            double tolerance = doc.ModelAbsoluteTolerance;\n\n            if (curve1 !=null && curve2 != null && line1 != null)\n            {\n                Brep[] botmSweep = Brep.CreateFromSweep(curve1, curve2, line1, false, tolerance);\n\n                doc.Objects.AddBrep(botmSweep[0]);\n            }\n\n            return Result.Success;\n        }",
+      "language": "csharp",
+      "author": "jmmorgan",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 553
+}

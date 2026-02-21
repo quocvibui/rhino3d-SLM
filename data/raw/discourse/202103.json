@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/runtime-error-unboundnameexception-namecurve-is-not-defined/202103",
+  "topic_id": 202103,
+  "title": "Runtime error(UnboundNameException):name'curve' is not defined",
+  "question": "i am using this script to divide line to several points but get error when i try to compile.\n\n\nimport Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th\n\ndef divide_curve(curve, num_segments):\n    if not curve or num_segments <= 0:\n        return None  # Ensure valid input\n\n    total_length = curve.GetLength()\n    offset = 160  # Fixed offset from both ends\n    \n    if total_length <= 2 * offset:\n        return None  # Avoid errors if the curve is too short\n\n    remaining_length = total_length - 2 * offset\n    segment_length = remaining_length / num_segments\n\n    # Generate division points along the curve\n    params = [curve.Domain.T0]  # Start point\n    for i in range(1, num_segments):\n        success, param_at_length = curve.LengthParameter(offset + i * segment_length)\n        if success:  # Only append if the parameter is valid\n            params.append(param_at_length)\n    params.append(curve.Domain.T1)  # End point\n\n    points = [curve.PointAt(param) for param in params]\n    \n    return th.list_to_tree(points)\n\n# Ensure 'curve' is defined in Grasshopper inputs\ndivision_points = divide_curve(curve, num_segments)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th\n\ndef divide_curve(curve, num_segments):\n    if not curve or num_segments <= 0:\n        return None  # Ensure valid input\n\n    total_length = curve.GetLength()\n    offset = 160  # Fixed offset from both ends\n    \n    if total_length <= 2 * offset:\n        return None  # Avoid errors if the curve is too short\n\n    remaining_length = total_length - 2 * offset\n    segment_length = remaining_length / num_segments\n\n    # Generate division points along the curve\n    params = [curve.Domain.T0]  # Start point\n    for i in range(1, num_segments):\n        success, param_at_length = curve.LengthParameter(offset + i * segment_length)\n        if success:  # Only append if the parameter is valid\n            params.append(param_at_length)\n    params.append(curve.Domain.T1)  # End point\n\n    points = [curve.PointAt(param) for param in params]\n    \n    return th.list_to_tree(points)\n\n# Ensure 'curve' is defined in Grasshopper inputs\ndivision_points = divide_curve(curve, num_segments)",
+      "language": "python",
+      "author": "KARHI",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 1,
+  "views": 43
+}

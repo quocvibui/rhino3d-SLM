@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-conditional-points-segregation/156049",
+  "topic_id": 156049,
+  "title": "Ghpython Conditional Points Segregation",
+  "question": "conditiooal points.gh\n (6.3 KB)\n\nHi All\n\n\nI am a novice in ghpython and jsut started doing some tutorials. The one attached is where I got stuck at \n#16\n of the script where it says\n\n\nelif x%num1==0 or y%num2==0:\n\n\nto my understanding this means if the x number of the loop is divided by num1 (in this case 6) and equals to 0, then append these points to pt2 variable. (same for y%num2)\n\nThe question is when the x values in the loop say when x=4 or 5, then 4%6=2,5%6=1 (pls correct me if I am wrong!!)\n\nHowever, having said that, points x4, x5 are still being appeneded to pt2 (shown in red)\n\nPlease also see my mark up if it shows what I mean a bit better.\n\n\nso can anyone guide me through as to why x4 and x5 are in list pt2 when Num1 is 6?\n\nthank you so much!\n\nregards\n\n\nYutaka\n\n\n\n\nimage\n1671×1014 47.9 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nimport Rhino.Geometry as gh\n\npt1=[]\npt2=[]\npt3=[]\n\nfor x in range(0,100,1):\n    for y in range(0,100,1):\n        pt=rs.AddPoint(x,y,0)\n        if x%num1==0 and y%num2==0:\n            pt1.append(pt)\n        elif x%num1==0 or y%num2==0: # but num1: 4%6=2,5%6=1 \n            pt2.append(pt)\n        else:\n            pt3.append(pt)",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as gh\n\npt1=[]\npt2=[]\npt3=[]\n\nptsX=[]\nfor x in range(0,xSize,1):\n    ptsY=[]\n    for y in range(0,ySize,1):\n        pt=rs.AddPoint(x,y,0)\n        if y==0:\n            ptsX.append(pt)\n        ptsY.append(pt)\n        if x%numX==0 and y%numY==0:\n            pt1.append(pt)\n        elif x%numX==0 or y%numY==0: # but num1: 4%6=2,5%6=1 \n            pt2.append(pt)\n        else:\n            pt3.append(pt)",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as gh\n\npt1=[]\npt2=[]\npt3=[]\nptsX=[]\nptsY=[]\n\nfor x in range(0,xSize,1):\n    for y in range(0,ySize,1):\n        pt=rs.AddPoint(x,y,0)\n        if x==0:\n            ptsY.append(pt)\n        if y==0:\n            ptsX.append(pt)\n        if x%numX==0 and y%numY==0:\n            pt1.append(pt)\n        elif x%numX==0 or y%numY==0: # but num1: 4%6=2,5%6=1 \n            pt2.append(pt)\n        else:\n            pt3.append(pt)",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as gh\n\npts_White = []\npts_Red = []\npts_Black = []\n\n# trace points\nptsX=[]\nptsY=[]\n\nfor x in range(0,xSize,1):\n    for y in range(0,ySize,1):\n        pt=rs.AddPoint(x,y,0)\n        X_evenly = x % numX == 0\n        Y_evenly = y % numY == 0\n        if X_evenly and Y_evenly:\n            pts_White.append(pt)\n        elif X_evenly or Y_evenly:\n            pts_Red.append(pt)\n        else:\n            pts_Black.append(pt)\n\n        # trace points\n        if x==0:\n            ptsY.append(pt)\n        if y==0:\n            ptsX.append(pt)",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 11,
+  "views": 356
+}

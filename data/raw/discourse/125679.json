@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multithreading-in-rhinocommon-contour/125679",
+  "topic_id": 125679,
+  "title": "Multithreading in Rhinocommon - Contour",
+  "question": "Hello,\n\n\nis it possible to apply parallel computing in Rhinocommon and benefit from it using \nBrep.CreateContourCurves\n (with interval defined), or is it only possible for some custom loops?\n\n\nŁukasz",
+  "code_blocks": [
+    {
+      "code": "import System.Threading.Tasks as tasks\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport time, math\nimport scriptcontext\n\n\ndef radial_contour(brep, parallel, slice_count=360):\n    \"\"\"Generate series of curve slices through a brep by rotating a plane\n    multiple times and intersecting that plane with the brep. This function\n    demonstrates the use of .NET Parallel.For in order to run the function\n    in parallel\n    Parameters:\n        brep = the Brep to contour\n        parallel = If True, this function will compute intersections in multiple\n          threads using Parallel.For. If False, all intersections will be performed\n          on a single thread\n        slice_count = number of slices to generate. Slices are evenly distributed\n          over a full circle\n    \"\"\"\n    if not brep: return\n    \n    results = range(slice_count)\n    rotation_axis = Rhino.Geometry.Vector3d(0,1,0)\n    intersect_tol = scriptcontext.doc.ModelAbsoluteTolerance\n    # local function that does the intersection work. This function is called\n    # once for each angle in \"slice_count\" and needs to be thread-safe\n    def slice_brep_at_angle(i):\n        try:\n            angle_rad = i/slice_count * 2.0 * math.pi\n            plane = Rhino.Geometry.Plane.WorldXY\n            plane.Rotate(angle_rad, rotation_axis, Rhino.Geometry.Point3d.Origin)\n            rc, crvs, pts = Rhino.Geometry.Intersect.Intersection.BrepPlane(brep, plane, intersect_tol)\n            if rc: results[i] = crvs\n            else: results[i] = None\n        except:\n            pass\n\n    if parallel:\n        tasks.Parallel.ForEach(xrange(slice_count), slice_brep_at_angle)\n    else:\n        for i in xrange(slice_count): slice_brep_at_angle(i)\n\n    return results\n\n\nif __name__==\"__main__\":\n    brep = rs.GetObject(\"Select Brep\", rs.filter.polysurface)\n    brep = rs.coercebrep(brep)\n    if brep:\n        # Make sure the Brep is not under the control of the document. This is\n        # just done so we know we have a quick to access local copy of the brep\n        # and nothing else can interfere while performing calculations\n        brep.EnsurePrivateCopy()\n        #run the function on a sinlge thread\n        start = time.time()\n        slices1 = radial_contour(brep, False)\n        end = time.time()\n        print \"serial = \", end-start\n        \n        #run the function on mulitple threads\n        start = time.time()\n        slices2 = radial_contour(brep, True)\n        end = time.time()\n        print \"parallel = \", end-start\n    \n        if slices2:\n            for curveset in slices2:\n                if curveset:\n                    for curve in curveset: scriptcontext.doc.Objects.AddCurve(curve)\n            scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "public static Curve[] ParallelContourCurves(Brep brepToContour, Point3d contourStart, Point3d contourEnd, double interval)\n    {\n        Vector3d normaldirection = new Vector3d(contourEnd - contourStart);\n        double distance = normaldirection.Length;\n        int numberofintersections = (int)(distance / Math.Abs(interval) + 1);\n        Plane[] cuttingPlanes = new Plane[numberofintersections];\n        Curve[] curves = null;\n        Curve[][] tempcurves = new Curve[numberofintersections][];\n        Point3d[][] temppoints = new Point3d[numberofintersections][];\n        bool first = true;\n        var rangePartitioner = Partitioner.Create(0, numberofintersections);\n\n        Parallel.ForEach(rangePartitioner, new ParallelOptions { MaxDegreeOfParallelism = 2 }, (range, loopState) =>\n        {\n            for (int i = range.Item1; i < range.Item2; i++)\n            {\n                cuttingPlanes[i] = new Plane(contourStart, normaldirection);\n                if (i == 0)\n                {\n                    Rhino.Geometry.Intersect.Intersection.BrepPlane(brepToContour, cuttingPlanes[i], Tolerance, out tempcurves[i], out temppoints[i]);\n                }\n                else\n                {\n                    cuttingPlanes[i].Transform(Transform.Translation(normaldirection / (numberofintersections - 1) * i));\n                    Rhino.Geometry.Intersect.Intersection.BrepPlane(brepToContour, cuttingPlanes[i], Tolerance, out tempcurves[i], out temppoints[i]);\n                }\n            }\n        });\n\n        foreach (Curve[] arrcurves in tempcurves)\n        {\n            if (!first)\n            {\n                curves = curves.Concat(arrcurves).ToArray();\n            }\n            else\n            {\n                curves = arrcurves;\n                first = false;\n            }\n        }\n\n        return curves;\n    }",
+      "language": "csharp",
+      "author": "mlukasz87",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1466
+}

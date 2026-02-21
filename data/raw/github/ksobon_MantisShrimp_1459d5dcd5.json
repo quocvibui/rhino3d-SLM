@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ksobon/MantisShrimp/blob/9b3d1ef747a04f75f3542c38550c4e29b9d08c8f/Dynamo/src/Get%20Rhino%20Object%20Name.py",
+  "repo": "ksobon/MantisShrimp",
+  "repo_stars": 39,
+  "repo_description": "A interop project for bridging the gap between Rhino/Grasshopper and Revit/Dynamo",
+  "license": "unknown",
+  "filepath": "Dynamo/src/Get Rhino Object Name.py",
+  "instruction": "Copyright(c) 2015, Konrad Sobon @arch_laboratory, http://archi-lab.net",
+  "code": "# Copyright(c) 2015, Konrad Sobon\n# @arch_laboratory, http://archi-lab.net\n\nimport clr\nimport sys\n\npyt_path = r'C:\\Program Files (x86)\\IronPython 2.7\\Lib'\nsys.path.append(pyt_path)\n\nimport os\n\nappDataPath = os.getenv('APPDATA')\nrhDllPath = appDataPath + r'\\Dynamo\\0.8\\packages\\Mantis Shrimp\\bin\\Rhino3dmIO.dll'\nclr.AddReferenceToFileAndPath(rhDllPath)\n\nimport Rhino as rc\n\n#The inputs to this node will be stored as a list in the IN variable.\ndataEnteringNode = IN\n\nif isinstance(IN[0], list):\n\trhObjects = IN[0]\nelse:\n\trhObjects = [IN[0]]\n\ndef GetObjectName(obj):\n\treturn obj.Attributes.Name\n\ndef ProcessList(_func, _list):\n\treturn map( lambda x: ProcessList(_func, x) if type(x)==list else _func(x), _list )\n\n#extract object type\ntry:\n\terrorReport = None\n\trhNames = ProcessList(GetObjectName, rhObjects)\nexcept:\n\t# if error accurs anywhere in the process catch it\n\timport traceback\n\terrorReport = traceback.format_exc()\n\n#Assign your output to the OUT variable\nif errorReport == None:\n\tOUT = rhNames\nelse:\n\tOUT = errorReport\n",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": true
+}

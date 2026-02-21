@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-nested-blocks-as-nested-lists/80303",
+  "topic_id": 80303,
+  "title": "[python] Nested blocks as nested lists?",
+  "question": "Is there a way I can get the nested blocks as nested lists?\n\n\nSo far I see I can get all blocks as a single list.",
+  "code_blocks": [
+    {
+      "code": "while True:\n    if scriptcontext.escape_test(False): return\n    # your stuff below this...",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport time\n\nblocks_ids = rs.GetObjects(\"Select Block(s): \",rs.filter.instance)\n\nts = time.time()\nrs.EnableRedraw(False)\n\ndef step_layerizator(block_id):\n    block_name = rs.ObjectName(block_id)\n    rs.AddLayer(block_name)\n    sub_blocks_ids = rs.BlockObjects(block_name)\n    print sub_blocks_ids\n    if len(sub_blocks_ids) > 0:\n        for sub_block_id in sub_blocks_ids:\n            if sub_block_id != \"\":\n                sub_block_name = rs.BlockInstanceName(sub_block_id)\n                \n                sub_sub_blocks_ids = rs.BlockObjects(sub_block_name)\n                print sub_block_name\n                \n                rs.AddLayer(name=sub_block_name, color=None, visible=True, locked=False, parent=block_name)\n                step_layerizator(sub_block_id)\n\nfor block_id in blocks_ids:\n    iterations = 0\n    while True :\n        step_layerizator(block_id)\n        iterations += 1\n        if iterations > 250:\n            break\n\n\"\"\"\nfor block_id in block_uuid:\n    block_name = rs.ObjectName(block_id)\n    rs.AddLayer(block_name)\n    sub_blocks_ids = rs.BlockObjects(block_name)\n    print sub_blocks_ids\n    if len(sub_blocks_ids) > 0:\n        for sub_block_id in sub_blocks_ids:\n            if sub_block_id != \"\":\n                sub_block_name = rs.BlockInstanceName(sub_block_id)\n                \n                sub_sub_blocks_ids = rs.BlockObjects(sub_block_name)\n                print sub_block_name\n                \n                rs.AddLayer(name=sub_block_name, color=None, visible=True, locked=False, parent=block_name)\n                if len(sub_sub_blocks_ids) > 0:\n                    for sub_sub_block_id in sub_sub_blocks_ids:\n                        if sub_sub_block_id != \"\":\n                            print sub_sub_block_id\n                            sub_sub_block_name = rs.BlockInstanceName(sub_sub_block_id)\n                            sub_sub_sub_blocks_ids = rs.BlockObjects(sub_sub_block_name)\n                            print sub_sub_block_name\n                        \n                            rs.AddLayer(name=sub_sub_block_name, color=None, visible=True, locked=False, parent=sub_block_name)\n\"\"\"\n\n\nte = time.time()\nprint \"Elapsed time is {:.2f}\".format(te-ts)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DoSomething():\n    counter = 0\n    message = \"Hold ESC to stop: {}\"\n    \n    while True:\n        if scriptcontext.escape_test(False): break\n        Rhino.RhinoApp.SetCommandPrompt(message.format(counter))\n        counter += 1\n        if counter > 10000: return\n        \n    print \"ESC pressed at {}\".format(counter)\n    \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 27,
+  "views": 2429
+}

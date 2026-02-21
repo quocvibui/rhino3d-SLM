@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/errors-running-python-component-with-hops-rhinoinside/181732",
+  "topic_id": 181732,
+  "title": "Errors running python component with Hops & rhinoinside",
+  "question": "The definition in the following picture used to work (although very slowly) until I added a bunch of necessary data to it and it ran out of memory.\n\n\nimage\n798×452 59.6 KB\n\n\nThis is a very complex & long definition. I need to find a way around it, I’m trying to run the definition directly on a Hops module using rhinoinside, but it doesn’t seem to work.\n\nWhen I isolate one of the definitions in that code, and I try to run it:\n\n\nimport rhinoinside\nimport ghhops_server as hs\n\nrhinoinside.load()\n# register hops app as middleware\\\nimport System\nimport Rhino\nfrom Rhino import Geometry as rg\nimport math\n\nhops = hs.Hops(app=rhinoinside)\n\n\n@hops.component(\n    \"/test\",\n    name=\"Test\",\n    description=\"Test Hops functionality\",\n    inputs=[\n        hs.HopsPoint(\"Corner\", \"corner_pts\", \"Corner Points\"),\n        hs.HopsCurve(\"Edges\", \"edges\", \"Front Facades\"),\n    ],\n    outputs=[\n        hs.HopsCurve(\"Test 1\", \"test1\", \"bleh\"),\n        hs.HopsInteger(\"Test 2\", \"test2\", \"bleh2\"),\n    ],\n)\n\ndef testdef(corner_pts, edges):\n    ''' Find Secondary Edges '''\n\n    def secondary_edges(edges, corner_pts_list):\n        all_add_crvs = []\n        all_add_angle = []\n        edges = [edges]\n        for crv in edges:\n            print(crv)\n            end_t = rg.Curve.DivideByCount(crv, 1, True)\n            print(end_t)\n            end_pt = [rg.Curve.PointAt(crv, x) for x in end_t]\n            print(end_pt)\n            crv_line = rg.Line(end_pt[0], end_pt[1])\n\n            ...\n\n    sec_def = secondary_edges(edges, corner_pts)\n\n    test = sec_def[0]\n    test2 = sec_def[1]\n\n    return test, test2\n\n\n\nWhat I get out of the \nend_t = rg.Curve.DivideByCount(crv, 1, True)\n is \nSystem.Double[]\n, which is empty. It obviously should have 2 values, and that creates the following error:\n\n\n[DEBUG] Exception occured in handler: list index out of range\n\n\nIn the meantime, it’s creating this Error:\n\n\n{'InnerTree': {'{1}': [{'data': '{\"version\":10000,\"archive3dm\":70,\"opennurbs\":-1903130291,\"data\":\"+n8CAIkAAAAA...",
+  "code_blocks": [
+    {
+      "code": "{'InnerTree': {'{1}': [{'data': '{\"version\":10000,\"archive3dm\":70,\"opennurbs\":-1903130291,\"data\":\"+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAACKmF2nbn0vA8ygQoNJOk8AAAAAAAAAAAEhML9K2PznAINShs7iJk8AAAAAAAAAAAAIAAAAAAAAAAAA+QFRV3kybtU9AAwAAAN/JKtL/fwKAAAAAAAAAAAA=\"}',\n                        'type': 'Rhino.Geometry.PolylineCurve'}]},\n 'ParamName': 'Edges'}\n[INFO] Solving using legacy API: <HopsComponent /testhops2 [Edges -> Test -> Test 1,Test 2] >\n----------------------------------------\nException occurred during processing of request from ('127.0.0.1', 50683)\nTraceback (most recent call last):\n\n(...)\n\nFile \"C:\\Users\\ ... \\venv\\lib\\site-packages\\ghhops_server\\params.py\", line 210, in from_input\n    for param_value_item in input_data[\"InnerTree\"][\"{0}\"]:\nKeyError: '{0}'\n----------------------------------------",
+      "language": "csharp",
+      "author": "l.zhitnik",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nimport ghhops_server as hs\n\nrhinoinside.load()\n# register hops app as middleware\\\nimport System\nimport Rhino\nfrom Rhino import Geometry as rg\nimport math\n\nhops = hs.Hops(app=rhinoinside)\n\n\n@hops.component(\n    \"/test\",\n    name=\"Test\",\n    description=\"Test Hops functionality\",\n    inputs=[\n        hs.HopsPoint(\"Corner\", \"corner_pts\", \"Corner Points\"),\n        hs.HopsCurve(\"Edges\", \"edges\", \"Front Facades\"),\n    ],\n    outputs=[\n        hs.HopsCurve(\"Test 1\", \"test1\", \"bleh\"),\n        hs.HopsInteger(\"Test 2\", \"test2\", \"bleh2\"),\n    ],\n)\n\ndef testdef(corner_pts, edges):\n    ''' Find Secondary Edges '''\n\n    def secondary_edges(edges, corner_pts_list):\n        all_add_crvs = []\n        all_add_angle = []\n        edges = [edges]\n        for crv in edges:\n            print(crv)\n            end_t = rg.Curve.DivideByCount(crv, 1, True)\n            print(end_t)\n            end_pt = [rg.Curve.PointAt(crv, x) for x in end_t]\n            print(end_pt)\n            crv_line = rg.Line(end_pt[0], end_pt[1])\n\n            ...\n\n    sec_def = secondary_edges(edges, corner_pts)\n\n    test = sec_def[0]\n    test2 = sec_def[1]\n\n    return test, test2",
+      "language": "python",
+      "author": "l.zhitnik",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "{'InnerTree': {'{1}': [{'data': '{\"version\":10000,\"archive3dm\":70,\"opennurbs\":-1903130291,\"data\":\"+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAACKmF2nbn0vA8ygQoNJOk8AAAAAAAAAAAEhML9K2PznAINShs7iJk8AAAAAAAAAAAAIAAAAAAAAAAAA+QFRV3kybtU9AAwAAAN/JKtL/fwKAAAAAAAAAAAA=\"}',\n                        'type': 'Rhino.Geometry.PolylineCurve'}]},\n 'ParamName': 'Edges'}\n[INFO] Solving using legacy API: <HopsComponent /testhops2 [Edges -> Test -> Test 1,Test 2] >\n----------------------------------------\nException occurred during processing of request from ('127.0.0.1', 50683)\nTraceback (most recent call last):\n\n(...)\n\nFile \"C:\\Users\\ ... \\venv\\lib\\site-packages\\ghhops_server\\params.py\", line 210, in from_input\n    for param_value_item in input_data[\"InnerTree\"][\"{0}\"]:\nKeyError: '{0}'\n----------------------------------------",
+      "language": "csharp",
+      "author": "l.zhitnik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 7,
+  "views": 329
+}

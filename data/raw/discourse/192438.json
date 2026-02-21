@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/realtimerenderpasses-in-the-viewcapture/192438",
+  "topic_id": 192438,
+  "title": "RealtimeRenderPasses in the ViewCapture",
+  "question": "Hey all, what does the RealtimeRenderPasses mean in the ViewCapture? I noticed that the CaptureToBitmap is finished immediately. How do I get the high quality output as if I’m using the render button in the UI? Thanks!\n\n\n        rhinoscriptsyntax.EnableRedraw(True)\n        rhinoscriptsyntax.ViewDisplayMode(viewport_name, \"Rendered\")\n        rhinoscriptsyntax.ShowGrid(viewport_name, show=False)\n        rhinoscriptsyntax.ShowGridAxes(viewport_name, show=False)\n        rhinoscriptsyntax.ShowWorldAxes(viewport_name, show=False)\n\n        view_capture = Rhino.Display.ViewCapture()\n        view_capture.Width = selected_view.ActiveViewport.Size.Width\n        view_capture.Height = selected_view.ActiveViewport.Size.Height\n        view_capture.ScaleScreenItems = False\n        view_capture.DrawAxes = False\n        view_capture.DrawGrid = False\n        view_capture.DrawGridAxes = False\n        view_capture.TransparentBackground = True\n        view_capture.RealtimeRenderPasses = rendering_pass\n        bitmap = view_capture.CaptureToBitmap(selected_view)\n        if bitmap:\n            temp_dir = tempfile.gettempdir()\n            random_filename = str(uuid.uuid4()) + '.png'\n            file_path = os.path.join(temp_dir, random_filename)\n\n            bitmap.Save(file_path, System.Drawing.Imaging.ImageFormat.Png)\n            print(file_path)",
+  "code_blocks": [
+    {
+      "code": "#! python3\nimport Rhino\n\npath_to_file = \"Generate path file name here\"\n# Note, create a path to a filename ending in .png when\n# you want to save with alpha channel.\n\nRhino.RhinoApp.RunScript(\"_Render\", True)\nRhino.RhinoApp.RunScript(f'_SaveRenderWindowAs \"{path_to_file}\" ')\nRhino.RhinoApp.RunScript('_CloseRenderWindow')",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "rhinoscriptsyntax.EnableRedraw(True)\n        rhinoscriptsyntax.ViewDisplayMode(viewport_name, \"Rendered\")\n        rhinoscriptsyntax.ShowGrid(viewport_name, show=False)\n        rhinoscriptsyntax.ShowGridAxes(viewport_name, show=False)\n        rhinoscriptsyntax.ShowWorldAxes(viewport_name, show=False)\n\n        view_capture = Rhino.Display.ViewCapture()\n        view_capture.Width = selected_view.ActiveViewport.Size.Width\n        view_capture.Height = selected_view.ActiveViewport.Size.Height\n        view_capture.ScaleScreenItems = False\n        view_capture.DrawAxes = False\n        view_capture.DrawGrid = False\n        view_capture.DrawGridAxes = False\n        view_capture.TransparentBackground = True\n        view_capture.RealtimeRenderPasses = rendering_pass\n        bitmap = view_capture.CaptureToBitmap(selected_view)\n        if bitmap:\n            temp_dir = tempfile.gettempdir()\n            random_filename = str(uuid.uuid4()) + '.png'\n            file_path = os.path.join(temp_dir, random_filename)\n\n            bitmap.Save(file_path, System.Drawing.Imaging.ImageFormat.Png)\n            print(file_path)",
+      "language": "python",
+      "author": "Steven_Nie",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 108
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/simple-sweep/159677",
+  "topic_id": 159677,
+  "title": "Simple sweep",
+  "question": "Is there a RhinoCommon method that will create a fully-defined simple sweep as such?\n\n\n\n\nThe rail is a border isocurve.\n\n\nThe shapes are all the isocurves intersecting the rail at its Greville points.\n\n\n_Sweep1 and _Sweep2 (with default options) produce the same result.\n\n\n\n\nBelow is a script with both the CreateFromSweep method and SweepOneRail class.  Neither produce the same result as _Sweep1 for the example geometry below.\n\n\n\n\n\nPython script\n\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef addBreps(rgBreps):\n    if not rgBreps:\n        print \"Sweep failed.\"\n        return\n    else:\n        for rgB in rgBreps:\n            gB_Out = sc.doc.Objects.AddBrep(rgB)\n\ndef main():\n    \n    gRail = rs.GetObject(\"Select rail\", filter=rs.filter.curve)\n    if not gRail: return\n    \n    gShapes = rs.GetObjects(\"Select sweep shapes\", filter=rs.filter.curve)\n    if not gShapes: return\n    \n    rail = rs.coercecurve(gRail)\n    shapes = [rs.coercecurve(g) for g in gShapes]\n    \n    addBreps(rg.Brep.CreateFromSweep(\n        rail,\n        shapes,\n        closed=rail.IsClosed,\n        tolerance=sc.doc.ModelAbsoluteTolerance))\n    \n    #    addBreps(rg.Brep.CreateFromSweep(\n    #        rail,\n    #        shapes,\n    #        startPoint=rg.Point3d.Unset,\n    #        endPoint=rg.Point3d.Unset,\n    #        frameType=rg.SweepFrame.Freeform,\n    #        roadlikeNormal=rg.Vector3d.ZAxis,\n    #        closed=rail.IsClosed,\n    #        blendType=rg.SweepBlend.Local,\n    #        miterType=rg.SweepMiter.None,\n    #        tolerance=sc.doc.ModelAbsoluteTolerance,\n    #        rebuildType=rg.SweepRebuild.None,\n    #        rebuildPointCount=0,\n    #        refitTolerance=0.0))\n    \n    #    addBreps(rg.Brep.CreateFromSweepSegmented(\n    #        rail,\n    #        shapes,\n    #        closed=rail.IsClosed,\n    #        tolerance=sc.doc.ModelAbsoluteTolerance))\n    \n    rgSweep1 = rg.SweepOneRail()\n    rgSweep1.ClosedSweep = rail.IsClosed\n    rgSweep...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef addBreps(rgBreps):\n    if not rgBreps:\n        print \"Sweep failed.\"\n        return\n    else:\n        for rgB in rgBreps:\n            gB_Out = sc.doc.Objects.AddBrep(rgB)\n\ndef main():\n    \n    gRail = rs.GetObject(\"Select rail\", filter=rs.filter.curve)\n    if not gRail: return\n    \n    gShapes = rs.GetObjects(\"Select sweep shapes\", filter=rs.filter.curve)\n    if not gShapes: return\n    \n    rail = rs.coercecurve(gRail)\n    shapes = [rs.coercecurve(g) for g in gShapes]\n    \n    addBreps(rg.Brep.CreateFromSweep(\n        rail,\n        shapes,\n        closed=rail.IsClosed,\n        tolerance=sc.doc.ModelAbsoluteTolerance))\n    \n    #    addBreps(rg.Brep.CreateFromSweep(\n    #        rail,\n    #        shapes,\n    #        startPoint=rg.Point3d.Unset,\n    #        endPoint=rg.Point3d.Unset,\n    #        frameType=rg.SweepFrame.Freeform,\n    #        roadlikeNormal=rg.Vector3d.ZAxis,\n    #        closed=rail.IsClosed,\n    #        blendType=rg.SweepBlend.Local,\n    #        miterType=rg.SweepMiter.None,\n    #        tolerance=sc.doc.ModelAbsoluteTolerance,\n    #        rebuildType=rg.SweepRebuild.None,\n    #        rebuildPointCount=0,\n    #        refitTolerance=0.0))\n    \n    #    addBreps(rg.Brep.CreateFromSweepSegmented(\n    #        rail,\n    #        shapes,\n    #        closed=rail.IsClosed,\n    #        tolerance=sc.doc.ModelAbsoluteTolerance))\n    \n    rgSweep1 = rg.SweepOneRail()\n    rgSweep1.ClosedSweep = rail.IsClosed\n    rgSweep1.SweepTolerance = sc.doc.ModelAbsoluteTolerance\n    addBreps(rgSweep1.PerformSweep(\n        rail=rail,\n        crossSections=shapes))\n    \n    sc.doc.Views.Redraw()\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 400
+}

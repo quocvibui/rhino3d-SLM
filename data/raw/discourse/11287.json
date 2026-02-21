@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/best-way-to-script-interactive-extrusion-python-py-rhinocommon/11287",
+  "topic_id": 11287,
+  "title": "Best way to script interactive extrusion ? (Python / Py+Rhinocommon)",
+  "question": "Hi All\n\nI would like to crate my own script for extruding objects but I would like to try to understand better how to get display interaction so I’m asking if you could, please, post an example on how to get interactive extrusion.\n\n\nJust a simple one, select a curve, drag a mouse, while dragging the object update by extruding, pick a point and the object it’s created.\n\n\nThanks for answering me",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\nclass SampleGetTextDotPoint(Rhino.Input.Custom.GetPoint):\n    def OnDynamicDraw(self, e):\n        e.Display.DrawDot(e.CurrentPoint, e.CurrentPoint.ToString())\n\ndef SampleTextDot():\n    gp = SampleGetTextDotPoint();\n    gp.Get()\n    if (gp.CommandResult() == Rhino.Commands.Result.Success):\n        rs.AddTextDot(gp.Point().ToString(), gp.Point())\n        rs.Redraw()\n \nif __name__==\"__main__\":\n    SampleTextDot()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\ndef FormatPointString(p):\n        x = p.X.ToString(\"0.00\")\n        y = p.Y.ToString(\"0.00\")\n        z = p.Z.ToString(\"0.00\")\n        s = \"{0},{1},{2}\".format(x, y, z)\n        return s\n\nclass SampleGetTextDotPoint(Rhino.Input.Custom.GetPoint):\n    def OnDynamicDraw(self, e):\n        p = e.CurrentPoint\n        s = FormatPointString(p)\n        e.Display.DrawDot(p, s)\n \ndef SampleTextDot():\n    gp = SampleGetTextDotPoint();\n    gp.Get()\n    if (gp.CommandResult() == Rhino.Commands.Result.Success):\n        p = gp.Point()\n        s = FormatPointString(p)\n        rs.AddTextDot(s, p)\n        rs.Redraw()\n \nif __name__==\"__main__\":\n    SampleTextDot()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2122
+}

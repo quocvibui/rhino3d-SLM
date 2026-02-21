@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/-selname-from-rs-getobjects-not-returning-expected-results/5046",
+  "topic_id": 5046,
+  "title": "_SelName from rs.GetObjects not returning expected results",
+  "question": "Hi all,\n\nI wrote a rhinopython script where I use rs.GetObjects:\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nObj_Ids=rs.GetObjects(message=“Select objects”,filter=0)\n\n[…] other stuff\n\n\n\n\nDuring testing, when I’m asked to select objects, for ease of selection, I want to have the possibility of using _SelName.\n\nI tried, and _SelName pops the window up with objects’ names. However, when I select object by names from the window coming from _SelName, the output to the list Obj_Ids if often not correct.\n\n\nIn some cases objects ids appears twice. In some other cases I get ids of object which should not be in the list of selected objects, and they seems to be there only because they have a name which was temporarily clicked in the _selname window (right click, or shift+right click, or ctrl+right click), but which was not selected finally.  Duplicated ids would not be a big issue. But in some cases objects are selected which have a name not selected in the window from _selname.\n\n\nNote that direct selection of objects from the drawing, works perfectly. So the issue seems to be in the use of _selname.\n\n\nThe following script can be used to make a check:\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nObjIds=rs.GetObjects(message=“Select objects”,filter=0)\n\nprint(“Number of ids %d” % len(ObjIds))\n\nprint(“Number of unique ids %d” % len(list(set(ObjIds))))\n\n\nAm I doing something wrong, or is there actually something not working when calling _selname after rs.GetObjects ?\n\n\nThanks,\n\nGabriele",
+  "code_blocks": [
+    {
+      "code": "name = rs.GetString(\"objects of what name do you want?\")\nids = rs.ObjectsByName(name, True)\nprint ids",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.Command(\"_SelName \")   # choose one or multiple Names\n\nids = rs.GetObjects(\"\",preselect=True)\nprint ids",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.Command(\"_SelName \")   # choose one or multiple Names\n\nids = rs.GetObjects(\"\",preselect=True)\nprint ids\n\nfor id in ids:\n    rs.ObjectColor(id, [255,0,0])",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1959
+}

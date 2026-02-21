@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-options-for-xyz-import-with-script-and-path-only/133200",
+  "topic_id": 133200,
+  "title": "Set options for .xyz-import with script and path \\\\ only",
+  "question": "Hello guys\n\n1st: i’m wondering what’s the rigth wording to define the “delimiter = space” and activate the “create point cloud” option. I tried this and other stuff, but the points are never loaded when I run the script. It works of course when I import them normally.\n\n2nd: The file is only found when the path is written with double-backslashes (“C:\\\\Users\\\\admin\\…\\\\filename”) when I use the os.path or pathlib methods to get the full path I got a windows error in rhino when running the script. I tried every kind of path I could come up with, but nothing else seems to work. Thanks for helping!\n\n\nfor filename in os.listdir(targets_path):\n   delim = \" _Delimiters=_Space \"\n   pc = \"_CreatePointcloud=_Yes\"\n   settings = [delim, pc]\n      if filename.lower().endswith(\".xyz\"):           \n         fullpath=os.path.join(targets_path,filename).lower()\n         rs.EnableRedraw(False)\n         rs.Command(\"_-Import {0} {1} _Enter\".format(fullpath, settings))\n rs.EnableRedraw(True)\n\n\n\nthe script follows another one to start rhino and is  launched in vscode. I get the points but they are all in one place at 0,0,0.\n\n\nrhino returns this:\n\nCommand: _-RunPythonScript\n\nC:\\Users\\admin\\Desktop\\LSH\\Programmierung\\xyz_swisstopo_api\\py_modules\\import_xyz.py\n\n_-Import\n\nc:\\users\\admin\\desktop\\lsh\\programmierung\\xyz_swisstopo_api\\import_files\\swissalti3d_0.5_xyz_chlv95_ln02_2680_1249.xyz\n\n_Delimiters=_Space\n\nSuccessfully read file “c:\\users\\admin\\desktop\\lsh\\programmierung\\xyz_swisstopo_api\\import_files\\swissalti3d_0.5_xyz_chlv95_ln02_2680_1249.xyz”\n\n_CreatePointcloud=_Yes\n\nUnknown command: _CreatePointcloud=_Yes",
+  "code_blocks": [
+    {
+      "code": "for filename in os.listdir(targets_path):\n    if filename.lower().endswith(\".xyz\"):           \n        fullpath=os.path.join(targets_path,filename).lower()\n        rs.EnableRedraw(False)\n        #Open file to convert\n        rs.Command(\"_-Import {0} _Delimiters=_Space _CreatePointcloud=_Yes _Enter\".format(fullpath))\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "pierreschild",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "# import_xyz.py : Imports a simple XZY-file as individual points or point cloud into Rhino\n\n__author__ = \"diff-arch (https://diff-arch.xyz)\"\n__version__ = \"0.0.1 (2021-11-14)\"\n\n\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport os\n\n\ndef read_lines(fpath, empty=True):\n    \"\"\"Reads the contents of a file line by line.\n    \n    Args:\n      fpath (str): An absolute path to a file to read\n      empty (bool): By default True to remove empty lines\n    \n    Raises:\n      OSError: '<fpath>' is not a valid file path\n      RuntimeError: Unable to read 'fname'\n    \n    Returns:\n      The individual lines of data in a list.\"\"\"\n    \n    lines = []\n    if not os.path.exists(fpath) or not os.path.isfile(fpath):\n        raise OSError(\"'{}' is not a valid file path\".format(fpath))\n    try:\n        with open(fpath) as f:\n            for line in f:\n                if empty and (line == '\\n' or line == '\\r\\n'):\n                    continue\n                lines.append(line)\n    except:\n        basedir, fname = os.path.split(fpath)\n        raise RuntimeError(\"Unable to read '{}'\".format(fname))\n    return lines\n\n\ndef parse_xyz(fpath, delimiter=\",\", as_point_cloud=False, verbose=False):\n    \"\"\"Parses an XYZ-file to Rhino geometry types.\n    \n    Args:\n      fpath (str): An absolute path to a XYZ-file to read\n      delimiter (str): Optional delimiter, by default a comma (\",\")\n      as_point_cloud (bool): Optionally True to return a Rhino.Geometry.PointCloud, \n        by default False to return a list of Rhino.Geometry.Point3d's instead\n      verbose (bool): Optionally True to output parsing information, by default False\n    \n    Raises:\n      ValueError: The file '<os.path.basename(fpath)>' doesn't seem to a XYZ-file\n      RuntimeError: Unable to parse any points from file '<os.path.basename(fpath)>'\n    \n    Returns:\n      The list of Rhino.Geometry.Point3d's or the Rhino.Geometry.PointCloud.\"\"\"\n    \n    fname = os.path.basename(fpath)\n    if os.path.splitext(fname)[-1].lower() != \".xyz\":\n        raise ValueError(\"The file '{}' doesn't seem to a XYZ-file\".format(fname))\n        \n    data = read_lines(fpath, False)\n    points = []\n    for i, line in enumerate(data):\n        if line == '\\n' or line == '\\r\\n':\n            continue # skip empty lines\n        line = line.strip('\\n').strip('\\r\\n')\n        coords = []\n        for item in line.split(delimiter):\n            try:\n                num = float(item.strip())\n                coords.append(num)\n            except ValueError:\n                if verbose:\n                    print \"Line {}: non digit '{}' found and skipped\".format(i+1, item.strip())\n        if len(coords) < 3:\n            if verbose:\n                print \"Line {}: fewer than 3 coordinates found and skipped\".format(i+1)\n            continue\n        elif len(coords) > 3:\n            if verbose:\n                print \"Line {}: more than 3 coordinates found, only first 3 will be used\".format(i+1)\n        x, y, z = coords[:3]\n        points.append(rg.Point3d(x, y, z))\n    if len(points) < 1:\n        raise RuntimeError(\"Unable to parse any points from file '{}'\".format(fname))\n    if not as_point_cloud:\n        return points\n    pt_cloud = rg.PointCloud()\n    for pt in points:\n        pt_cloud.Add(pt)\n    return pt_cloud\n    \n\nif __name__ == \"__main__\":\n    result = parse_xyz(\"/your/path/to/file.xyz\", delimiter=\" \", as_point_cloud=True, verbose=True)\n\n    if isinstance(result, rg.PointCloud):\n        rc = sc.doc.Objects.AddPointCloud(result)\n    else:\n        rc = [sc.doc.Objects.AddPoint(pt) for pt in result]\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 16,
+      "is_solution": true
+    },
+    {
+      "code": "for filename in os.listdir(targets_path):\n   delim = \" _Delimiters=_Space \"\n   pc = \"_CreatePointcloud=_Yes\"\n   settings = [delim, pc]\n      if filename.lower().endswith(\".xyz\"):           \n         fullpath=os.path.join(targets_path,filename).lower()\n         rs.EnableRedraw(False)\n         rs.Command(\"_-Import {0} {1} _Enter\".format(fullpath, settings))\n rs.EnableRedraw(True)",
+      "language": "python",
+      "author": "pierreschild",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 1263
+}

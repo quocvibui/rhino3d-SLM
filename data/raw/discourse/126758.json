@@ -1,0 +1,60 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/add-rendercontent-to-texture-color-slot/126758",
+  "topic_id": 126758,
+  "title": "Add RenderContent to Texture (Color) slot",
+  "question": "Hi \n@nathanletwory\n,\n\n\ni try to create a new RenderMaterial from scratch using the \nCustom\n shader type. The material should use a \nBlend\n shader in the Texture (Color) slot to which i want to assign parameters (textures) later.\n\n\nFrom your post on how to add a double sided material \nhere\n i’ve found that i should save an rmtl file and look at the guids. This worked to create the Custom material eg. like so:\n\n\n# create Custom material (works)\nrm = Rhino.Render.RenderContent.Create(\n            System.Guid(\"BA51C000-BA51-C000-BA51-C0BA51C00000\"),\n            Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n            scriptcontext.doc\n                                           )\nrm.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program)\nrm.Name = \"MyMaterial\"\nrm.SetParameter(\"diffuse\", Rhino.Display.Color4f(0.274, 0.274, 0.275, 1.0))\nrm.EndChange()\n\n\n\nNext i gathered the Guid of the \nBlend\n shader from the rmtl file and created it sucessfully like so:\n\n\n# create Blend Texture\nblend_material = Rhino.Render.RenderContent.Create(\n           System.Guid(\"3FA30F00-4C3F-4AFE-88AB-D713B0BE2FD8\"),\n           rm, \n           \"Blend Texture\",\n           Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n           scriptcontext.doc\n           )\n\n\n\nIt creates the Blend Texture below the RenderMaterial in the materials tree, but i am unsure how i can set this as the \nColor\n Texture of the RenderMaterial ? Below is what i want to create (“CustomMaterialTest”) and what i have (“MyMaterial”) in the Materials tab as image:\n\n\n\n\nThe material i would like to create: \nCustomMaterialTest.rmtl\n (88.0 KB)\n\n\nIs this possible using python ?\n\n\nthanks,\n\nc.",
+  "code_blocks": [
+    {
+      "code": "# create Blend Texture\nblend_material = Rhino.Render.RenderContent.Create(\n           System.Guid(\"3FA30F00-4C3F-4AFE-88AB-D713B0BE2FD8\"),\n           rm, \n           \"Blend Texture\",\n           Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n           scriptcontext.doc\n           )",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "simple_bitmap_material = Rhino.Render.RenderContent.Create(\n                System.Guid(\"CFB368A4-FFB2-404A-BBA9-497203B5053A\"),\n                blend_material,\n                \"blend-texture\",\n                Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n                scriptcontext.doc\n                )",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "bt = Rhino.Render.RenderContent.Create(\n                System.Guid(\"57E0ED08-1907-4529-B01B-0C4A242455FD\"),\n                blend_material,\n                \"blend-texture\",\n                Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n                scriptcontext.doc\n                )",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "# Simple Bitmap Texture\nsbt = Rhino.Render.RenderContentType.NewContentFromTypeId(\n                             System.Guid(\"CFB368A4-FFB2-404A-BBA9-497203B5053A\"), \n                             scriptcontext.doc\n                             )\n    \nsbt.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program)\nsbt.Name = \"Mask\"\nsbt.SetParameter(\"filename\", r\"D:\\Temp\\Mask.png\")\nsbt.SetParameter(\"filter\", False)\nsbt.SetParameter(\"mirror-alternate-tiles\", False)\nsbt.EndChange()\n    \n# set as child to blend material \nblend_material.SetChild(sbt, \"blend-texture\")\nblend_material.EndChange()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "# create Custom material (works)\nrm = Rhino.Render.RenderContent.Create(\n            System.Guid(\"BA51C000-BA51-C000-BA51-C0BA51C00000\"),\n            Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n            scriptcontext.doc\n                                           )\nrm.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program)\nrm.Name = \"MyMaterial\"\nrm.SetParameter(\"diffuse\", Rhino.Display.Color4f(0.274, 0.274, 0.275, 1.0))\nrm.EndChange()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "# create Blend Texture\nblend_material = Rhino.Render.RenderContent.Create(\n           System.Guid(\"3FA30F00-4C3F-4AFE-88AB-D713B0BE2FD8\"),\n           rm, \n           \"Blend Texture\",\n           Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n           scriptcontext.doc\n           )",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 15,
+  "views": 1159
+}

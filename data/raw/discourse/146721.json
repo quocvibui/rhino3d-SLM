@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-copyobject-with-a-group-issue-possible-bug/146721",
+  "topic_id": 146721,
+  "title": "rs.CopyObject with a Group Issue / Possible Bug",
+  "question": "Using RhinoScript (Python).\n\n\nWhen using the CopyObject or CopyObjects commands on a group of object, the newly created objects end up being part of that original group.  Is this the way the developers intended RhinoScript to work?\n\n\nSee the attached Rhino and Python files.  Run the script selecting Curve 1 which is not grouped.  You will see the new object is not part of any group.  Now run the script selecting Curve 2 which is grouped.  You will see the new object is part of the original group.\n\n\nCopyObject Group Issue.3dm\n (33.6 KB)\n\n\nCopyObject Group Issue.py\n (205 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_copyobjects():\n    # Select objects\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects to copy\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.AnyObject\n    go.GroupSelect = True\n    go.SubObjectSelect = False\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n    \n    # Simple transformation\n    direction = Rhino.Geometry.Vector3d(10.0, 0.0, 0.0)\n    xform = Rhino.Geometry.Transform.Translation(direction)\n    \n    dictionary = {} # group remap dictionary\n    \n    # Iterate selection\n    for objref in go.Objects():\n        obj = objref.Object()\n        if obj:\n            # Transform geometry\n            geometry = obj.Geometry.Duplicate()\n            geometry.Transform(xform)\n            # Remap group, if needed\n            attributes = obj.Attributes.Duplicate()\n            if attributes.GroupCount > 0:\n                groups = attributes.GetGroupList()\n                top_group = groups[len(groups) - 1]\n                if not dictionary.has_key(top_group):\n                    dictionary[top_group] = sc.doc.Groups.Add()\n                attributes.RemoveFromAllGroups()\n                attributes.AddToGroup(dictionary[top_group])\n            # Add new object\n            sc.doc.Objects.Add(geometry, attributes)\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_copyobjects()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef Main():\n    crvobj = rs.GetCurveObject()\n    print 'Selected curve guid: ' + str(crvobj[0])\n\n    print 'Curve belongs to: ' + str(rs.ObjectGroups(crvobj[0]))\n    \n    v = rs.CreateVector(100, 0, 0)\n    \n    newcrvobj = rs.CopyObject(crvobj[0], v)\n\n    # CopyObject for whatever reason automatically groups the new object with all groups that the copyied object belongs to.\n    # Need to remove the new object from all the groups.\n    print ''\n    print 'New curve group membership count: ' + str(len(rs.ObjectGroups(newcrvobj)))\n\n    print 'New curve is part of the group(s): ' + str(rs.ObjectGroups(newcrvobj))\n\n    for i in range(len(rs.ObjectGroups(newcrvobj))):\n        rs.RemoveObjectFromGroup(newcrvobj, rs.ObjectGroups(newcrvobj)[0])\n\nMain()",
+      "language": "python",
+      "author": "Mike24",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "x = rs.GetObject()\nmatrix = Rhino.Geometry.Transform.Identity\nxform = rhutil.coercexform(matrix, True)\nold_id = rhutil.coerceguid(x, False)\nid = sc.doc.Objects.Transform(old_id, xform, False)",
+      "language": "python",
+      "author": "Mike24",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 15,
+  "views": 1011
+}

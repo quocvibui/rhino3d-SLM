@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-with-python-recognizing-each-selected-object-in-a-list/42650",
+  "topic_id": 42650,
+  "title": "Help with python recognizing each selected object in a list",
+  "question": "Hi!\n\n\nI’m currently working on a project that has to do with generating blocks based on the number of blocks around them. I have a working script that generates the first state randomly giving values of 1 (on) or 0 (off) for each point on a grid so that the rest of the script can react to it using the logic that I insert (Kind of like cellular automata if you know what that is).\n\n\nAnyways, now instead of randomly generating the first form, I want to be able to start out with a geometry that I manually put into rhino, and then have the logic work from there.\n\n\ncurrently I have something like this\n\n\nobj = rs.GetObjects (\"select objects\")\n\ndef SelectedObjects (xDimension, yDimension, zDimension, obj):\n   arrStates = []\n   for i in range (0, xDimension):\n     for j in range (0, yDimension):\n       for k in range (0, zDimension):\n         for v in (obj):\n           centroid = rs.CurveAreaCentroid (v)\n           if centroid:\n            print centroid\n\nobj = rs.GetObjects (\"select objects\")\nxDimension = 5\nyDimension = 5\nzDimension = 5\n\n\n\nSorry if this doesn’t make sense. But what I want the script to do is spit out a list of centroids for each object in the list so that eventually I can say something like:\n\n\nif centroid == 1\n  arrv.append (1)\n\n\n\nand do that for the other values i,j,k. This all leads up to eventually having logic like:\n\n\nif vals[i][j][k] == 1\n  (draw a cube here)\n\n\n\nafter this the logic for the rest of the script \nshould\n work.\n\n\nBut from what I currently have I’m not getting anything… no bugs, no text, nothing.\n\nI assume I have some text misplaced but I’m not sure where… I’m kind of new to python.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SelectedObjects (xDimension, yDimension, zDimension, obj):\n    #arrStates = []\n    #for i in range (0, xDimension):\n    #for j in range (0, yDimension):\n    #for k in range (0, zDimension):\n    for v in obj:\n        if rs.IsCurve(v):\n            if rs.CurveArea(v) is not None:\n                centroid = rs.CurveAreaCentroid(v)\n                print(centroid)\n\nobj = rs.GetObjects(\"Select Curves\", filter = rs.filter.curve)\n\nif obj is not None:\n    SelectedObjects(5,5,5, obj)",
+      "language": "python",
+      "author": "owen",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "obj = rs.GetObjects (\"select objects\")\n\ndef SelectedObjects (xDimension, yDimension, zDimension, obj):\n   arrStates = []\n   for i in range (0, xDimension):\n     for j in range (0, yDimension):\n       for k in range (0, zDimension):\n         for v in (obj):\n           centroid = rs.CurveAreaCentroid (v)\n           if centroid:\n            print centroid\n\nobj = rs.GetObjects (\"select objects\")\nxDimension = 5\nyDimension = 5\nzDimension = 5",
+      "language": "python",
+      "author": "Noah_Medley",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1119
+}

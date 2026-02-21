@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/not-getting-a-prompt-from-getoption-get/197405",
+  "topic_id": 197405,
+  "title": "Not getting a prompt from GetOption.Get()",
+  "question": "I am trying to get a response from the user by calling go.Get() . But there is no prompt? The command begins but there is no prompt.\n\n\n    public class RingSizeCommand : Command\n    {\n        //if you want the value metalIndex to persist, you need to define it at the class level here, not inside the RunCommand method.\n        private string ringSize = \"6\";\n        private int ringIndex = 6;\n        public RingSizeCommand()\n        {\n            // Rhino only creates one instance of each command class defined in a\n            // plug-in, so it is safe to store a refence in a static property.\n            Instance = this;\n        }\n\n        ///<summary>The only instance of this command.</summary>\n        public static RingSizeCommand Instance { get; private set; }\n\n        ///<returns>The command name as it appears on the Rhino command line.</returns>\n        public override string EnglishName => \"RingSize\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n\n            using (var go = new GetOption())\n            {\n                RhinoApp.WriteLine(\"Select a ring size\");\n\n                var opt = go.AddOptionList(\"ring sizes\", RingSizes.ringSizeList, ringIndex);\n                go.SetCommandPrompt(\"Select a ring size\");\n                //prompt for an option from the user.\n                var res = go.Get();\n\n                 if (res == GetResult.Option)\n                {\n                    RhinoApp.WriteLine(\"Option index: {0}\", go.Option().CurrentListOptionIndex);\n                    var option = go.Option();\n                    ringIndex = go.Option().CurrentListOptionIndex;\n                }\n                else\n                {\n                    RhinoApp.WriteLine(\"No option selected.\");\n                    return Result.Failure;\n                }\n\n                //write the ring size to the command line\n                RhinoApp.WriteLine(\"{0}, {1}\", RingSizes.ringSizeList[ringIndex], RingSizes.ringSizeDict[RingSizes.ringS...",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  const string materialKey = \"Material\";\n  var materialList = new string[] { \"Brass\", \"Bronze\", \"Gold_14k\", \"Gold_18K\", \"Gold_24K\", \"Platinum\", \"Paladium\", \"SterlingSilver\" };\n\n  // Get persistent settings\n  var materialIndex = Settings.GetInteger(materialKey, 0);\n\n  var getOption = new GetOption();\n  getOption.SetCommandPrompt(\"Choose command option\");\n  getOption.AcceptNothing(true);\n  while (true)\n  {\n    getOption.ClearCommandOptions();\n    var materialOption = getOption.AddOptionList(materialKey, materialList, materialIndex);\n    var res = getOption.Get();\n    if (res == GetResult.Option)\n    {\n      var option = getOption.Option();\n      if (option.Index == materialOption)\n        materialIndex = option.CurrentListOptionIndex;\n      continue;\n    }\n    else if (res == GetResult.Nothing)\n    {\n      break;\n    }\n    else\n    {\n      return Result.Cancel;\n    }\n  }\n\n  // Set persistent settings\n  Settings.SetInteger(materialKey, materialIndex);\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "public class RingSizeCommand : Command\n    {\n        //if you want the value metalIndex to persist, you need to define it at the class level here, not inside the RunCommand method.\n        private string ringSize = \"6\";\n        private int ringIndex = 6;\n        public RingSizeCommand()\n        {\n            // Rhino only creates one instance of each command class defined in a\n            // plug-in, so it is safe to store a refence in a static property.\n            Instance = this;\n        }\n\n        ///<summary>The only instance of this command.</summary>\n        public static RingSizeCommand Instance { get; private set; }\n\n        ///<returns>The command name as it appears on the Rhino command line.</returns>\n        public override string EnglishName => \"RingSize\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n\n            using (var go = new GetOption())\n            {\n                RhinoApp.WriteLine(\"Select a ring size\");\n\n                var opt = go.AddOptionList(\"ring sizes\", RingSizes.ringSizeList, ringIndex);\n                go.SetCommandPrompt(\"Select a ring size\");\n                //prompt for an option from the user.\n                var res = go.Get();\n\n                 if (res == GetResult.Option)\n                {\n                    RhinoApp.WriteLine(\"Option index: {0}\", go.Option().CurrentListOptionIndex);\n                    var option = go.Option();\n                    ringIndex = go.Option().CurrentListOptionIndex;\n                }\n                else\n                {\n                    RhinoApp.WriteLine(\"No option selected.\");\n                    return Result.Failure;\n                }\n\n                //write the ring size to the command line\n                RhinoApp.WriteLine(\"{0}, {1}\", RingSizes.ringSizeList[ringIndex], RingSizes.ringSizeDict[RingSizes.ringSizeList[ringIndex]]);\n                double diameter = RingSizes.ringSizeDict[RingSizes.ringSizeList[ringIndex]];\n                RhinoApp.WriteLine(\"Diameter: {0}\", diameter);\n                Circle circle = new Circle(Plane.WorldZX, diameter / 2.0);\n                doc.Objects.AddCircle(circle);\n                doc.Views.Redraw();\n                return Result.Success;\n\n            }\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "stevescott517",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 60
+}

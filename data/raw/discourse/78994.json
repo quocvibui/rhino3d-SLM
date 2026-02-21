@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/block-from-external-3dm-file-without-insert-command/78994",
+  "topic_id": 78994,
+  "title": "Block from external 3DM file without Insert command",
+  "question": "Hi!\n\nI want to get a block from external 3DM file without Insert command in python.(Not block instance)\n\n\nAny idea?",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport Rhino\nimport System.Guid\n\nfilename = \"d:/path/to/box.3dm\"\nf3dm = Rhino.FileIO.File3dm.Read(filename)\n\nobjs = [obj for obj in f3dm.Objects.GetEnumerator()]\ngeometry = [obj.Geometry for obj in objs]\nattrs = [obj.Attributes for obj in objs]\nbase_point = Rhino.Geometry.Point3d(0,0,0)\n\nblock_name = \"box\"\nfound = scriptcontext.doc.InstanceDefinitions.Find(block_name)\nif found:\n    rc = scriptcontext.doc.InstanceDefinitions.ModifyGeometry(found.Index, geometry, attrs)\nelse:\n    rc = scriptcontext.doc.InstanceDefinitions.Add(block_name, \"\", base_point, geometry, attrs)\n\n#\n\nidef = scriptcontext.doc.InstanceDefinitions.Find(block_name)\nxform = Rhino.Geometry.Transform.Translation(10,0,0)\n\nid = scriptcontext.doc.Objects.AddInstanceObject(idef.Index, xform )\nif id!=System.Guid.Empty:\n    scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "t-munemura",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 447
+}

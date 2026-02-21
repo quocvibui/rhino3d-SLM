@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/evdanil/cn-tool/blob/d83b0c68efb5aaf10f09f1b77ddd5c992157f4af/utils/auth.py",
+  "repo": "evdanil/cn-tool",
+  "repo_stars": 1,
+  "repo_description": "Utility allowing to receive information from Infoblox API",
+  "license": "unknown",
+  "filepath": "utils/auth.py",
+  "instruction": null,
+  "code": "import os\nfrom typing import Optional, Tuple\nfrom core.base import ScriptContext\nfrom utils.gpg import get_gpg_credentials\nfrom utils.user_input import read_user_input\nfrom utils.display import console, get_global_color_scheme\nfrom utils.app_lifecycle import exit_now\n\n\ndef get_auth_creds(ctx: ScriptContext) -> Tuple[Optional[str], Optional[str]]:\n    \"\"\"\n    Retrieves user credentials from environment variables, GPG file, or interactive prompt.\n    The credentials are also stored in the context object.\n    \"\"\"\n    logger = ctx.logger\n    colors = get_global_color_scheme(ctx.cfg)\n\n    username = os.getenv(\"USER\")\n    password = os.getenv(\"TACACS_PW\")\n\n    if not password:\n        logger.info(\"Auth - TACACS_PW not set, checking GPG credentials\")\n        creds = get_gpg_credentials(ctx)\n        if creds:\n            username, password = creds\n            logger.info(\"Auth - GPG credentials obtained\")\n        else:\n            logger.info(\"Auth - GPG credentials not available, requesting credential from user\")\n            while not password:\n                console.clear()\n                console.print(f\"\\n[{colors['description']}]Set up the '[{colors['error']}]TACACS_PW[/]' environment variable to avoid typing credentials.[/]\\n\")\n                password = read_user_input(ctx, f\"[{colors['header']} {colors['bold']}]Provide security credential:[/]\", True)\n\n    if not username:\n        logger.info(\"Auth - USER not set, requesting username\")\n        username = read_user_input(ctx, f\"[{colors['header']} {colors['bold']}]Provide username:[/]\")\n        if not username:\n            logger.error(\"Auth - username is required but not provided\")\n            exit_now(ctx, 1, \"Username is required for authentication.\")\n            return (None, None)\n\n    if username:\n        ctx.username = str(username)\n    if password:\n        ctx.password = str(password)\n\n    return (username, password)\n",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

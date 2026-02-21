@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/textentity-createcurves-doesnt-use-textheight/91079",
+  "topic_id": 91079,
+  "title": "TextEntity.CreateCurves doesn't use TextHeight",
+  "question": "Hi,\n\nI am trying to create text curves using TextEntity directly in Python. The snipped from my Python script looks as follows:\n\ntexttainer = Rhino.Geometry.TextEntity()\n\ntexttainer.Text = “Some Text”\n\ntexttainer.Plane = Rhino.Geometry.Plane.WorldXY\n\ntexttainer.Justification = Rhino.Geometry.TextJustification.BottomLeft\n\ntexttainer.TextHeight = 100.0\n\ntexttainer.FontIndex = scriptcontext.doc.Fonts.FindOrCreate(“MecSoft_Font-1”, False, False)\n\ntextcurves = texttainer.CreateCurves(scriptcontext.doc.DimStyles.BuiltInStyles.CurrentDimensionStyle , True)\n\n\n    for textcurve in textcurves:\n       scriptcontext.doc.Objects.AddCurve(rs.coercecurve(textcurve))\n\n\n\nWorks, but all the text is exactly as high as the base unit of the model (1mm in my case) and the text resides at the world coordinate system’s origin.\n\n\nI suspect, that TextHeight doesn’t set the height in the CurrentDimensionStyle properly or I need to use a different DimensionStyle.\n\n\nAlso I am wondering if there is a simple way to place the text curves at a specific position in the XY plane?\n\n\nAny help would be appreciated (I know that I could script that using the Rhino command interface, but that’s not the point here).\n\n\nThanks a lot,\n\nB.",
+  "code_blocks": [
+    {
+      "code": "pt=rs.GetPoint() #or some other point method for determining your insertion point\nplane=Rhino.Geometry.Plane.WorldXY\nplane.Origin=pt\ntexttainer.Plane=plane\n#etc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 454
+}

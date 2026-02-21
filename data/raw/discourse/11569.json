@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/open-and-close-a-3dm-file-with-python-on-mac/11569",
+  "topic_id": 11569,
+  "title": "Open and close a 3dm file with python on mac",
+  "question": "I would like to create a script that opens a 3dm file, performs a simple operation (add a box), save the model and close the model. This should be repeated for a list of files, that are in different paths.\n\n\nI tried to use this command to open the file but it doesn’t work:\n\n\nrhinoFile = '/my/path/file.3dm'\nrs.Command('_-Open' + rhinoFile + ' _-Enter')\n\n\n\nAny suggestions?\n\n\nThanks in advance\n\nM",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\n\n# hard coded list of files\nfiles = ['C:\\\\Users\\\\rhino\\\\Documents\\\\__file1.3dm',\n    'C:\\\\Users\\\\rhino\\\\Documents\\\\__file2.3dm',\n    'C:\\\\Users\\\\rhino\\\\Documents\\\\__file3.3dm']\n\n# or all files in a common root directory\nfiles = System.IO.Directory.GetFiles(\n    'C:\\\\Users\\\\rhino\\\\Documents\\\\filestoedit', \n    '*.3dm', \n    System.IO.SearchOption.AllDirectories)\n\nfor file in files:\n    rs.Command('_-Open ' + file)\n    rs.AddBox([(-5,-5,-5), (5,-5,-5), (5,5,-5), (-5,5,-5), (-5,-5,5), (5,-5,5), (5,5,5), (-5,5,5)])\n    print \"file:{0}\".format(file)\n    rs.Command('_-Save _Enter')\n\nrs.Command('_-New None')",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import sys\nimport clr\nfrom System.IO import *\n\n# directory where Rhino3dmIO.dll and rhino3dmio_native are located\nsys.path.append('/Users/rhino/opennurbsbin')\nclr.AddReference('Rhino3dmIO')\n\nfrom Rhino.FileIO import *\nfrom Rhino.Geometry import *\n\nfile_names = Directory.GetFiles(\n    '/Users/rhino/Documents/filestoedit', \n    '*.3dm', SearchOption.AllDirectories)\n\nfor fn in file_names:\n    file = File3dm.Read(fn)\n    id = file.Objects.AddSphere(Sphere(Point3d.Origin, 5.0))\n    print \"id:{0} added to file:{1}\".format(id, fn)\n    file.Write(fn, File3dmWriteOptions())",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os\nimport Rhino\nimport System\nimport datetime\nimport time\n\n# or all files in a common root directory\nfiles = System.IO.Directory.GetFiles(\n    \"C:\\Users\\Wayne-2018\\Desktop\\RhinoEdit\", \n    '*.3dm',\n   System.IO.SearchOption.AllDirectories)\n\n\nfor file in files:\n    rs.Command(\"_-Open \" + file )\n    \n    time.sleep(3) \n    \n#    rs.AddBox([(-5,-5,-5), (5,-5,-5), (5,5,-5), (-5,5,-5), (-5,-5,5), (5,-5,5), (5,5,5), (-5,5,5)])\n#    print \"file:{0}\".format(file)\n    \n    rs.Command(\"'_4View ZEA\")\n    rs.Command(\"'_4View ZEA\")\n    rs.Command(\"_setdisplaymode v m r\")\n    \n    rs.Command('_-Save _Enter')\n\n#rs.Command('_-New none')",
+      "language": "python",
+      "author": "smithw636",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport rhinoscriptsyntax as rs\n\npath = str(Rhino.RhinoDoc.ActiveDoc.Path)\nrs.Command(\"_-Close \" + path )",
+      "language": "python",
+      "author": "dan",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "internal static void Close(RhinoDoc doc)\n{\n    if (doc == null) { return; }\n\n    doc.Modified = false;\n\n    string path = doc.Path;\n\n    RhinoApp.RunScript($\"_-Close \\\"{path}\\\" _Enter\", false);\n }",
+      "language": "csharp",
+      "author": "m_dev",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 5222
+}

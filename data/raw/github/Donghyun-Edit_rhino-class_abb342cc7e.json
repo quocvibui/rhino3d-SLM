@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Donghyun-Edit/rhino-class/blob/7df8a730d15f1aaa485b522ea971ca574c5781ed/develop/module_watcher.py",
+  "repo": "Donghyun-Edit/rhino-class",
+  "repo_stars": 0,
+  "repo_description": "강의에서 사용되는 라이노와 파이썬 세팅",
+  "license": "MIT",
+  "filepath": "develop/module_watcher.py",
+  "instruction": "Module watcher",
+  "code": "import clr  # pylint:disable=import-error\n\n# pylint:disable=wrong-import-position\nclr.AddReference(\"System.Core\")\n\n# pylint:disable=wrong-import-order\nimport os\nimport time\nfrom typing import Any\n\nimport System\nimport scriptcontext as sc\nfrom Grasshopper.Kernel import GH_FileWatcher\nfrom Grasshopper.Kernel import GH_FileWatcherEvents\n\nfrom .constants import ROOT_DIR\nfrom .module_reloader import perform_reload, RELOAD_FOLDERS\n\n\nWATCHER_KEY = \"module_watcher\"\nRELOAD_TIME_KEY = \"module_watcher_reloaded_at\"\n\n\nclass ModuleWatcher:\n    def __init__(self):\n        # type: () -> None\n        self.watcher_list = []\n        self.collect_watcher_list()\n\n    def collect_watcher_list(self):\n        # type: () -> None\n        for reload_folder in (ROOT_DIR / f for f in RELOAD_FOLDERS):\n            self.watcher_list.append(self.create_python_watcher(str(reload_folder)))\n            for subdir, dirs, _ in os.walk(reload_folder):\n                for d in dirs:\n                    dir_name = subdir + os.sep + d\n                    self.watcher_list.append(self.create_python_watcher(dir_name))\n\n    def dispose(self):\n        # type: () -> None\n        for w in self.watcher_list:\n            w.Dispose()\n\n    def create_python_watcher(self, dir_name):\n        # type: (str) -> Any\n        return GH_FileWatcher.CreateDirectoryWatcher.Overloads[  # type: ignore\n            System.String,\n            System.String,\n            GH_FileWatcherEvents,\n            GH_FileWatcher.FileChanged,  # type: ignore\n        ](\n            dir_name,\n            \"*.py\",\n            GH_FileWatcherEvents.All,\n            lambda *args: self.reload_all(),\n        )\n\n    def reload_all(self):\n        # type: () -> None\n        reloaded_at = sc.sticky[RELOAD_TIME_KEY]\n        current_time = time.time()\n\n        # 1초 내의 재시도는 무시한다.\n        if current_time < reloaded_at + 1:\n            return\n\n        perform_reload()\n\n        sc.sticky[RELOAD_TIME_KEY] = time.time()\n\n\ndef watch_modules(enable):\n    # type: (bool) -> None\n\n    sc.sticky[RELOAD_TIME_KEY] = time.time()\n\n    if not enable:\n        if WATCHER_KEY in sc.sticky:\n            previous_watcher = sc.sticky.pop(WATCHER_KEY)  # type: ModuleWatcher\n            previous_watcher.dispose()\n        print(\"Module watcher is disabled\")\n    else:\n        sc.sticky[WATCHER_KEY] = ModuleWatcher()\n        print(\"Module watcher is enabled\")\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

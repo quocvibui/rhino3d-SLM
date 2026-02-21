@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpythonlib-components-methods-are-not-accepting-inputs/167447",
+  "topic_id": 167447,
+  "title": "Ghpythonlib.components methods are not accepting inputs",
+  "question": "Hi all, I added this to a previous thread on this subject from August, but thought I’d better raise it as a separate post. In the latest Rhino Beta (8.0.23286.1003, 2023-10-13) and Grasshopper (1.0.0007 from Friday 13/10/23 ).\n\n\nghpythonlib.components methods are not accepting inputs in python\n\n\n\nimport ghpythonlib.components as ghcomp\nimport Rhino.Geometry as rg\n\nmove_vec = rg.Vector3d(10,3,5)\nnew_geom = rg.Sphere(rg.Point3d(0,0,0), 3.0)\n\n\ngeom_moved, transf = ghcomp.Move(geometry = new_geom, motion = move_vec)\n\n\n\n\nGhcomp is unhappy with either ordered args or named keyword inputs. So the code below doesn’t work either, which used to…\n\n\n\ngeom_moved, transf = ghcomp.Move( new_geom, move_vec)\n\n\n\n\nThe resulting error:\n\n\nTraceback (most recent call last):\n  File \"rhinocode:///grasshopper/1/cbaba2cd-c296-4f63-acb2-eeb5e81bcf39/f5a25331-884d-4b26-be9f-9040a0a1007c\", line 11, in <module>\n  File \"C:\\Users\\brian\\.rhinocode\\py39-rh8\\site-rhinoghpython\\ghpythonlib\\components.py\", line 163, in component_function\n    elif len(result) > 1: result = __namedtuple(outputnames, result)\n  File \"C:\\Users\\brian\\.rhinocode\\py39-rh8\\site-rhinoghpython\\ghpythonlib\\components.py\", line 61, in __init__\n    raise TypeError(\nTypeError: Expected type Array[str] for input 'attributes', got IReadOnlyList[String].\n\n\n\n\nIs this something to do with the Ironpython implementation behind the scenes?\n\n\nI realise I was being lazy making extensive use of the components library instead of rhinocommon, so if this doesn’t work in Rhino 8 I’'m looing at an extensive re-write of my code. The big shame would be to lose access to kangaroo components though.\n\n\nVery grateful if anyone has any pointers or work arounds to this,\n\n\nCheers,\n\n\nBrian",
+  "code_blocks": [
+    {
+      "code": "import ghpythonlib.components as ghcomp\nimport Rhino.Geometry as rg\n\nmove_vec = rg.Vector3d(10,3,5)\nnew_geom = rg.Sphere(rg.Point3d(0,0,0), 3.0)\n\n\ngeom_moved, transf = ghcomp.Move(geometry = new_geom, motion = move_vec)",
+      "language": "python",
+      "author": "brian9",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Traceback (most recent call last):\n  File \"rhinocode:///grasshopper/1/cbaba2cd-c296-4f63-acb2-eeb5e81bcf39/f5a25331-884d-4b26-be9f-9040a0a1007c\", line 11, in <module>\n  File \"C:\\Users\\brian\\.rhinocode\\py39-rh8\\site-rhinoghpython\\ghpythonlib\\components.py\", line 163, in component_function\n    elif len(result) > 1: result = __namedtuple(outputnames, result)\n  File \"C:\\Users\\brian\\.rhinocode\\py39-rh8\\site-rhinoghpython\\ghpythonlib\\components.py\", line 61, in __init__\n    raise TypeError(\nTypeError: Expected type Array[str] for input 'attributes', got IReadOnlyList[String].",
+      "language": "python",
+      "author": "brian9",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 6,
+  "views": 819
+}

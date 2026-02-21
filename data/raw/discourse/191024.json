@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/duplicating-rhino-breps-in-python/191024",
+  "topic_id": 191024,
+  "title": "Duplicating rhino breps in python",
+  "question": "Edit: This question is based on a mistake and the assumptions in it abut which methods work are not true. Duplicate() does work for breps. DuplicateGeometry() works specifically for docobjects. Python copy not working might be a bug.\n\n\nI am trying to perform the seemingly simple task of copying a brep using Rhino.Geometry in python so I can perform a simple mirror transform and union. I managed to do it by deconstructing the brep into individual surfaces, duplicating them and using them to make a new brep. The new brep for some reason did not work with a boolean union, though, despite it working fine if I output it to grasshopper and performed the union there. No idea about the second part, but duplicating a brep in python is hard, I do not know about other objects.\n\n\nMethods I have tried:\n\nDuplicate() - does not actually duplicate the object, transformations to the new object apply to the original.\n\nDuplicateBrep() - same\n\nDuplicateGeometry() - Brep object has no attribute DuplicateGeometry\n\npython copy() and deepcopy() - do not work because the brep object cannot be pickled\n\n\nWould rather not touch rhinoscriptsyntax and its indirect way of referencing objects, but if I have to, I will.",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport scriptcontext as sc\nimport Rhino\n\nplane=Rhino.Geometry.Plane.WorldXY\nsph=Rhino.Geometry.Sphere(plane,10)\nsph_brep=sph.ToBrep()\ndup_sph_brep=sph_brep.Duplicate()\nxform=Rhino.Geometry.Transform.Scale(plane,2,2,2)\nsph_brep.Transform(xform)\nsc.doc.Objects.AddBrep(sph_brep)\nsc.doc.Objects.AddBrep(dup_sph_brep)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "#! python 3\nimport scriptcontext as sc\nimport Rhino\n\nplane=Rhino.Geometry.Plane.WorldXY\nsph=Rhino.Geometry.Sphere(plane,10)\nsph_brep=sph.ToBrep()\ndup_sph_brep=sph_brep.Duplicate()\nxform=Rhino.Geometry.Transform.Scale(plane,2,2,2)\ndup_sph_brep.Transform(xform)\nsc.doc.Objects.AddBrep(sph_brep)\nsc.doc.Objects.AddBrep(dup_sph_brep)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 203
+}

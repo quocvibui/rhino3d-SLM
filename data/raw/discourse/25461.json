@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/access-all-points-of-a-list/25461",
+  "topic_id": 25461,
+  "title": "Access all points of a list",
+  "question": "Hello,\n\n\nI am trying to add sphere to a grid of points, but I can only seem to add one sphere rather than to the entire grid.\n\n\nI am sure this is simple.\n\n\nThank you, Erik\n\n\nimport rhinoscriptsyntax as rs\n\n    color01 = [255,0,255]\n    color02 = [0,255,255]\n    color03 = [125,38,205]\n    #radius \n\n    rs.EnableRedraw(False)\n\n    for x in range (0,100,5):\n            for y in range(0,100,5):\n                pt = rs.AddPoint(x,y,0)\n                if x % 4 and y % 9 == 0:\n                    rs.ObjectColor(pt, color01)\n                elif x % 3 == 0 or y % 6 == 0:\n                    rs.ObjectColor(pt, color02)\n                else:\n                    rs.ObjectColor(pt, color03)\n\n\n\n    rs.AddSphere(pt, .25)\n    rs.EnableRedraw()",
+  "code_blocks": [
+    {
+      "code": "for x in range (0,100,step):\n        for y in range(0,100,step):\n            pt = rs.AddPoint(x,y,0)\n            cone = rs.AddCone(pt, .5, True)\n            if x % 4 and y % 9 == 0:\n                sphere = rs.AddSphere(pt, .7)\n                rs.ObjectColor(sphere, color01)\n            elif x % 3 == 0 or y % 6 == 0:\n                rs.ObjectColor(sphere, color02)\n                cone = rs.AddCone(pt, .5, True)\n            else:\n                rs.ObjectColor(sphere, color03)",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random as rd\n\ncolor01 = [255,0,255]\ncolor02 = [0,255,255]\ncolor03 = [125,38,205]\n\n\nstep = 4\nrs.EnableRedraw(False)\n\nfor x in range (0,100,step):\n        for y in range(0,100,step):\n            # look at the following line, this creates a rhino/python 3D point\n            pt = rs.coerce3dpoint(x,y,0)\n            cone = rs.AddCone(pt, .5, True)\n            if x % 4 and y % 9 == 0:\n                sphere = rs.AddSphere(pt, .7)\n                rs.ObjectColor(sphere, color01)\n            elif x % 3 == 0 or y % 6 == 0:\n                rs.ObjectColor(sphere, color02)\n                cone = rs.AddCone(pt, .5, True)\n            else:\n                rs.ObjectColor(sphere, color03)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n    color01 = [255,0,255]\n    color02 = [0,255,255]\n    color03 = [125,38,205]\n    #radius \n\n    rs.EnableRedraw(False)\n\n    for x in range (0,100,5):\n            for y in range(0,100,5):\n                pt = rs.AddPoint(x,y,0)\n                if x % 4 and y % 9 == 0:\n                    rs.ObjectColor(pt, color01)\n                elif x % 3 == 0 or y % 6 == 0:\n                    rs.ObjectColor(pt, color02)\n                else:\n                    rs.ObjectColor(pt, color03)\n\n\n\n    rs.AddSphere(pt, .25)\n    rs.EnableRedraw()",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1212
+}

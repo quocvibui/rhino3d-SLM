@@ -1,0 +1,50 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-getconnectedcomponents-not-working/146462",
+  "topic_id": 146462,
+  "title": "Brep.GetConnectedComponents not working?",
+  "question": "I’ve got a brep made up of separate joined Polysurfaces. I’m trying to get the separate polysurfaces using \nBrep.GetConnectedComponents()\n but I get 6 separate surfaces instead of the 3 separate polysurfaces I would expect. Am I missing something?\n\n\n\n\nimage\n1139×395 8.63 KB\n\n\n\n\n220813 GetConnectedComp.3dm\n (194.6 KB)\n\n\n220813 GetConnectedComp.py\n (353 Bytes)\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef TestSplit():\n    obj = rs.GetObjects()\n    \n    if not obj:\n        return\n    \n    brep = rs.coercebrep(obj)\n    \n    breps = brep.GetConnectedComponents()\n    \n    for i in breps:\n        sc.doc.Objects.AddBrep(i)\n    \n    rs.DeleteObject(obj)\n\nTestSplit()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef TestSplit():\n    obj = rs.GetObjects()\n    \n    if not obj:\n        return\n    \n    brep = rs.coercebrep(obj)\n    \n    breps = brep.GetConnectedComponents()\n    breps = Rhino.Geometry.Brep.JoinBreps(breps,0.01)\n    for i in breps:\n        sc.doc.Objects.AddBrep(i)\n    \n    rs.DeleteObject(obj)\n    sc.doc.ActiveDoc.Views.Redraw()\n\nTestSplit()",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef TestSplit():\n    obj = rs.GetObject(preselect=True)\n    \n    if not obj:\n        return\n    \n    brep_In = rs.coercebrep(obj)\n    \n    brep_TaggedSrfs = brep_In.DuplicateBrep()\n    \n    key = '_FaceIndex'\n    \n    for face in brep_TaggedSrfs.Faces:\n        face.UnderlyingSurface().SetUserString(key, str(face.FaceIndex))\n    \n    breps_GCC = brep_TaggedSrfs.GetConnectedComponents()\n    \n    if len(breps_GCC) < 2:\n        print \"Brep does not have multiple 'shells'.\"\n        return\n    \n    breps_Joined = Rhino.Geometry.Brep.JoinBreps(\n        breps_GCC, 2.0*sc.doc.ModelAbsoluteTolerance)\n    \n    if len(breps_Joined) < 2:\n        print \"Brep does not have multiple 'shells'.\"\n        return\n    \n    bDeleteOK = True\n    \n    for brep in breps_Joined:\n        idxs = [int(face.UnderlyingSurface().GetUserString(key))\n                for face in brep.Faces]\n        \n        brep_Out = brep_In.DuplicateBrep()\n        \n        for i in xrange(brep_In.Faces.Count-1, -1, -1):\n            if i in idxs: continue\n            brep_Out.Faces.RemoveAt(i)\n        \n        gOut = sc.doc.Objects.AddBrep(brep_Out)\n        if gOut == gOut.Empty:\n            print \"Subset of brep could not be added.\"\n            bDeleteOK = False\n    \n    if bDeleteOK: rs.DeleteObject(obj)\n    \n    sc.doc.Views.Redraw()\n\nTestSplit()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef TestSplit():\n    obj = rs.GetObject(preselect=True)\n    \n    if not obj:\n        return\n    \n    brep_In = rs.coercebrep(obj)\n    \n    brep_TaggedSrfs = brep_In.DuplicateBrep()\n    \n    key = '_FaceIndex'\n    \n    for face in brep_TaggedSrfs.Faces:\n        face.UnderlyingSurface().SetUserString(key, str(face.FaceIndex))\n    \n    breps_GCC = brep_TaggedSrfs.GetConnectedComponents()\n    \n    if len(breps_GCC) < 2:\n        print \"Brep does not have multiple 'shells'.\"\n        return\n    \n    breps_Joined = rg.Brep.JoinBreps(\n        breps_GCC, 2.0*sc.doc.ModelAbsoluteTolerance)\n    \n    if len(breps_Joined) < 2:\n        print \"Brep does not have multiple 'shells'.\"\n        return\n    \n    bDeleteOK = True\n    \n    for brep in breps_Joined:\n        idxs = [int(face.UnderlyingSurface().GetUserString(key))\n                for face in brep.Faces]\n        \n        breps_ToMerge = [rg.BrepFace.DuplicateFace(\n                brep_In.Faces[i], duplicateMeshes=True)\n                for i in xrange(brep_In.Faces.Count)\n                if i in idxs]\n        \n        brep_Out = rg.Brep.MergeBreps(\n            breps_ToMerge,\n            2.0*sc.doc.ModelAbsoluteTolerance)\n        \n        bValid, sLog = brep_Out.IsValidWithLog()\n        if not bValid:\n            #print sLog\n        \n            if brep_Out.Repair(sc.doc.ModelAbsoluteTolerance):\n                #print \"Brep.Repair succeeded.\"\n                pass\n            else:\n                print \"Brep.Repair failed.\"\n                bDeleteOK = False\n                continue\n        \n        gOut = sc.doc.Objects.AddBrep(brep_Out)\n        if gOut == gOut.Empty:\n            print \"Subset of brep could not be added.\"\n            bDeleteOK = False\n    \n    if bDeleteOK: rs.DeleteObject(obj)\n    \n    sc.doc.Views.Redraw()\n\nTestSplit()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef TestSplit():\n    obj = rs.GetObjects()\n    \n    if not obj:\n        return\n    \n    brep = rs.coercebrep(obj)\n    \n    breps = brep.GetConnectedComponents()\n    \n    for i in breps:\n        sc.doc.Objects.AddBrep(i)\n    \n    rs.DeleteObject(obj)\n\nTestSplit()",
+      "language": "python",
+      "author": "siemen",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 445
+}

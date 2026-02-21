@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-can-we-do-modelling-works-when-running-a-backgroud-script/43480",
+  "topic_id": 43480,
+  "title": "How can we do modelling works when running a 'backgroud' script?",
+  "question": "Hi all,\n\n\nI am wondering, is that possible to have a ‘background script’ running when we are doing some modeling works?\n\nFor example, in the RhinoPythonPrimer 101, Page27, there is a script can constantly update the time and display on screen. But when this ‘time script’ is running, we cannot do modeling works smoothly. I cannot click and select any object. Even try to pan the view is not smoothly( maybe because of the ‘rs.sleep’ causing stop for the entire rhino).\n\nI know that we can do some modeling work using button. But can we have a better way to let a script running at the ‘background’ without affecting our modeling experience? Grasshopper seems like an option. But I am more interested in resolve in Rhino or RhinoPython.\n\n\nAppreciate for any suggestion,\n\n\nJack\n\n\nP27.py\n (682 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nfrom datetime import datetime\n\ndef MyIdleEvent(sender, e):\n    message = datetime.now().strftime('%Y-%m-%d %H:%M:%S')\n    Rhino.UI.StatusBar.SetMessagePane(message)\n\ndef DoSomething():\n    key_idle = \"MyIdleEvent\"\n    if scriptcontext.sticky.has_key(key_idle):\n        print \"Time display OFF\"\n        Rhino.RhinoApp.Idle -= scriptcontext.sticky[key_idle]\n        scriptcontext.sticky.Remove(key_idle)\n    else:\n        print \"Time display ON\"\n        scriptcontext.sticky[key_idle] = eval(key_idle)\n        Rhino.RhinoApp.Idle += eval(key_idle)\n        \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 20,
+  "views": 3089
+}

@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/assign-random-color-hsv-values-to-one-or-more-new-layers/163670",
+  "topic_id": 163670,
+  "title": "Assign Random Color HSV Values to One or More New Layers",
+  "question": "Starting a new thread with more specific details (and my \nlast one\n got a bit hi-jacked \n)\n\n\n@Helvetosaur\n I was hoping maybe you had a thought about this?\n\n\nUsing Python, would like to ask user how many sublayers named “sol_” they’d like to create as a child of a newly created layer.\n\n\nThen I’d like to assign random colors to those “sol_” layers, within certain HSV parameters.\n\n\n#Create Random Light Color\n\ndef random_color_light():\n    h=random.random()\n    s=random.uniform(0.2,0.3)\n    v=random.uniform(0.3,0.8)\n    rs.LayerColor(layer,Rhino.Display.ColorHSV(h,s,v).ToArgbColor())\n\n#Create Layers named per user-submitted new_element\n\nrs.AddLayer(name=new_element, parent=overall_parent)\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\ncrv_layer_name = rs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nsol_layer_name = rs.AddLayer(\"sol\"+new_element, random_color_light(), parent=new_element)\n\n\n\nThx\n\nAlan",
+  "code_blocks": [
+    {
+      "code": "'''\nCreates a simple layer tree for a new element, \nincluding a user-defined number of \"solids\" layers\n# v07 by Alan Farkas 230805\n'''\n\nfrom rhinoscript.layer import CurrentLayer\nimport rhinoscriptsyntax as rs\nimport random\nimport rhinocontext as rc\nfrom System.Drawing import Color\n\n#Asks for new layer tree name\n\nnew_element = rs.GetString(message=\"New Element?\")\nnew_element = new_element[0].upper()+new_element[1:] #camelCase\n\n\"\"\"\nCreate number of \"sol\" layers via user input...\nGetting problem: \"iteration over non-sequence of type int\"\nTried also as a List, but couldn't figure it out.\n\ndef CreateSolLayers():\n\n    input = rs.GetInteger(message=\"How many Solid Layers?\")\n    print(input)\n\n    if input is None: return\n\n    for i in input:\n        rs.AddLayer(\"sol_\"+input)\n\"\"\"\n\noverall_parent = CurrentLayer() # Defines CurrentLayer to be used as \"parent\" for new element tree\n\n#Create Random Light Color\n\ndef random_color_light():\n    h=random.random()\n    s=random.uniform(0.2,0.3)\n    v=random.uniform(0.3,0.8)\n    hsv = rc.Display.ColorHSV(h,s,v)\n    rgb = hsv.ToArgbColor()\n\n#Create default and \"sol\" layer(s) with integrated New Element name\n\nrs.AddLayer(name=new_element, parent=overall_parent) #////creates new element tree as child of overall_parent, defined above///\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\ncrv_layer_name = rs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nsol_layer_name = rs.AddLayer(\"sol\"+new_element, random_color_light(), parent=new_element)\n\n#Sets all print colors to black (otherwise they'll mimic layer color)\n\nlayers = rs.LayerNames(new_element)\nif layers:\n    for layer in layers:\n        black = rs.CreateColor((0,0,0))\n        if rs.LayerPrintColor(layer)!=black:\n            rs.LayerPrintColor(layer, black)\n\n#Set LayerPrintWidths for nonPlot layers (Works as of v03A)\n\nrs.LayerPrintWidth(bbox_layer_name, -1)\nrs.LayerPrintWidth(crv_layer_name, -1)\n\n#Assign Specific Material to Specific Layer 230728\n#Furnished by @Clement on Rhino Discourse 230728\n\nimport Rhino\nimport scriptcontext\n\ndef AssignRenderMaterialToLayer(layer_path, render_material_name):\n    \n    # find the layer by it's full path\n    index = scriptcontext.doc.Layers.FindByFullPath(layer_path, -1)\n    if index < 0: \n        print (\"Layer '{}' not found\".format(layer_path))\n        return False\n    \n    # find any rendermaterials by render_material_name\n    data = scriptcontext.doc.RenderMaterials.GetEnumerator()\n    mats = filter(lambda rm: rm.Name == render_material_name, data)\n    if not mats:\n        print (\"Material '{}' not found\".format(render_material_name))\n        return False\n    \n    # assign first found rendermaterial to layer\n    layer = scriptcontext.doc.Layers[index]\n    layer.RenderMaterial = mats[0]\n    return True\n\n#Use this line to Call Out defined function AssignRenderMaterialToLayer once it's been added to script.\n\nrc = AssignRenderMaterialToLayer(bbox_layer_name, \"MI_bBox\")\nrc = AssignRenderMaterialToLayer(sol_layer_name, \"MI_BaseGrey80\")",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino, random\n\ndef AddNumberedLayersStartFin():\n\n    num_lay = rs.GetInteger(\"How many solid layers?\", minimum=0)\n\n    if num_lay is None: return\n    \n    for i in range(1, num_lay+1):\n        layername = \"sol_\"+\"{}\".format(i).zfill(2)\n        h=random.random()\n        s=random.uniform(0.2,0.3)\n        v=random.uniform(0.8,1.0)\n        if not rs.IsLayer(layername): rs.AddLayer(layername, (Rhino.Display.ColorHSV(h,s,v)).ToArgbColor())\n\nAddNumberedLayersStartFin()",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino, random\n\ndef AddNumberedLayersStartFin():\n\n    num_lay = rs.GetInteger(\"How many solid layers?\", minimum=0)\n\n    if num_lay is None: return\n    \n\n    for i in range(num_lay):\n        layername = \"sol_\"+\"{}\".format(i+1).zfill(2)\n        h=(1/num_lay)*i\n        s=random.uniform(0.2,0.3)\n        v=random.uniform(0.8,1.0)\n        if not rs.IsLayer(layername): rs.AddLayer(layername, (Rhino.Display.ColorHSV(h,s,v)).ToArgbColor())\n\nAddNumberedLayersStartFin()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "#Create Random Light Color\n\ndef random_color_light():\n    h=random.random()\n    s=random.uniform(0.2,0.3)\n    v=random.uniform(0.3,0.8)\n    rs.LayerColor(layer,Rhino.Display.ColorHSV(h,s,v).ToArgbColor())\n\n#Create Layers named per user-submitted new_element\n\nrs.AddLayer(name=new_element, parent=overall_parent)\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\ncrv_layer_name = rs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nsol_layer_name = rs.AddLayer(\"sol\"+new_element, random_color_light(), parent=new_element)",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 662
+}

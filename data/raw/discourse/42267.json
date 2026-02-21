@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-access-userdictionary-in-python/42267",
+  "topic_id": 42267,
+  "title": "How access UserDictionary in Python?",
+  "question": "OK, I didn’t  sleep last night because the following drives me nuts: How can I access the UserDictionary with PythonScript of :\n\n\n\n\na Rhino object selected by the user,\n\n\nor a Brep, or Geometry in GH (what is the difference BTW?)\n\n\n\n\nFor the Rhino object I tried things the following for hours, but no matter what I try I get the error message “\nMessage: 'builtin_function_or_method' object has no attribute 'UserDictionary'\n”\n\n\nobj = Rhino.Input.Custom.GetObject()\nobj.SetCommandPrompt(\"Select objects\")\n... blah, blah\n\nfor i in range(obj.ObjectCount):\n    # Nope:\n    o = obj.Object(i)\n    o.UserDictionary.Set(\"KEY\", \"VALUE\")   <-- Nope, error\n    # Nope:\n    g = o.Geometry\n    g.UserDictionary.Set(\"KEY\", \"VALUE\")   <-- Nope, error\n    # Sigh....\n\n\n\nNada. I picked a solid Box and a Sphere, but no UserDictionary.\n\n\nObviously I have no idea how the basic concept works. I’ve created zillions of getters and setters in my life, and key value pairs isn’t exactly rocket science, so that’s not the problem, but where is the friggin dictionary? (And yes, I see them in the documentation but nowhere to be found in the code… \n  )\n\n\nAnd BTW, what is a ‘Geometry’ as opposed to an “Object” in Rhino (the difference)? And despite the difference, shouldn’t both have the UserDictionary?\n\n\nOK, perhaps I need some sleep, but if anyone has a python code snippet to share, please. And explain the concept (which should be obvious, I mean, if you just find the dict… )\n\n\n// Rolf",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nobject = rs.GetObject(message=None, filter=0, preselect=True, select=True, subobjects=True)\nx = rs.coercebrep(object)\nx.UserDictionary.Set(\"Rolf\", \"rendered by RILLife\")  # <-- TM removed!\n_, value = x.UserDictionary.TryGetValue('Rolf')\nprint(value)",
+      "language": "python",
+      "author": "MarcusStrube",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\ndef main():\n  gob = Rhino.Input.Custom.GetObject()\n  gob.SetCommandPrompt( 'Object ?' )\n  gob.Get()\n  key = rs.GetString( 'Key ?' )\n  val = rs.GetString( 'Value [Enter to read] ?' )\n  rob = gob.Object( 0 ).Object()\n  if val:\n    rob.Attributes.SetUserString( key, val )\n    print( 'Written value ' + val )\n  else:\n    val = rob.Attributes.GetUserString( key )\n    print( 'Read value ' + val )\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "obj = Rhino.Input.Custom.GetObject()\nobj.SetCommandPrompt(\"Select objects\")\n... blah, blah\n\nfor i in range(obj.ObjectCount):\n    # Nope:\n    o = obj.Object(i)\n    o.UserDictionary.Set(\"KEY\", \"VALUE\")   <-- Nope, error\n    # Nope:\n    g = o.Geometry\n    g.UserDictionary.Set(\"KEY\", \"VALUE\")   <-- Nope, error\n    # Sigh....",
+      "language": "python",
+      "author": "RIL",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 21,
+  "views": 4540
+}

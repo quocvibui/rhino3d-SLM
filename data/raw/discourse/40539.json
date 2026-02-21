@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curve-offset-rhino-vs-python/40539",
+  "topic_id": 40539,
+  "title": "Curve offset: Rhino vs Python",
+  "question": "Hi all,\n\n\nI’ve been staring at a script that gives me offset curves on both sides of closed polylines, but just cannot get this to work reliably.  It’s based on Mitch’s script (thanks for sharing, Mitch!) from\n\n\nhttps://discourse.mcneel.com/t/both-sides-offset-using-ironpython/27792/2\n\n\nwhich I simplified a little bit, and added some debug output:\n\n\ntest_OffsetMulticrvs2SidesWEnds.py\n (2.2 KB)\n\n\nSo I have this Rhino model:\n\n\ncrv_offset.png\n1177×679 29.8 KB\n\n\ncrv_offset.3dm\n (68.5 KB)\n\n\nwhere the troublesome polyline is the red one.  Running the script fails to offset.  It only produces the 4 small segments, rather than 2 closed polylines.\n\n\nWhen I run Explode, Join and SimplifyCrv in Rhino (green polyline), the script works.  Automating this with the following RS script:\n\n\ntest_RebuildPlines.py\n (1.4 KB)\n\n\nwill create a nice, rebuilt pline, but again the offset script does not work.\n\n\nPlease note that offsetting in Rhino works in all 3 cases.  Here are the object information, as output by List:\n\n\na) original polyline:\n\n\n\n\nRhino object: curve\n\nDEVELOPER DEBUGGING INFORMATION ONLY\n\nUse the Rhino “What” command.\n\nname: “”\n\nid: B7F52D60-21DE-4d55-847B-749991FBE76A\n\nlayer index: 5\n\nrender material index: -1 (from layer)\n\nON_PolyCurve segment count = 11\n\nSegment 1: (63.8746,65.2746)\n\nON_NurbsCurve dim = 3 is_rat = 0\n\norder = 2 cv_count = 2\n\nKnot Vector ( 2 knots )\n\nindex                     value  mult       delta\n\n0        63.87464931716093     1\n\n1       65.274613352306119     1         1.4\n\nControl Points  2 non-rational points\n\nindex               value\n\nCV[ 0] (-13.061572574683822, 11.05095200562722, 11.524653923406049)\n\nCV[ 1] (-13.202995391701705, 12.443754535246295, 11.524653923406049)\n\nSegment 2: (65.2746,70.2407) gap = 0\n\nON_NurbsCurve dim = 3 is_rat = 0\n\norder = 2 cv_count = 2\n\nKnot Vector ( 2 knots )\n\nindex                     value  mult       delta\n\n0       65.274613352306119     1\n\n1       70.240710811506062     1       4.966\n\n…\n\n\n\n\nb) re-built with RS scri...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    id = rs.GetObject(\"Curve to offset\", 4, True, False)\n    if not id: return\n    \n    pt = rs.GetPoint(\"rough pt estimate\", None, None, True)\n    if not pt: return\n    \n    rc = rs.OffsetCurve(id, pt,  0.5, normal=None, style=1)\n    rc = rs.OffsetCurve(id, pt, -0.5, normal=None, style=1)\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "nurbs",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 3398
+}

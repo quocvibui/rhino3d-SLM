@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issue-with-ienumerable-geometrybase/7936",
+  "topic_id": 7936,
+  "title": "Issue with IEnumerable(GeometryBase)",
+  "question": "Been trying to use the \nCreatePatch\n method, but got stuck on its first parameter: IEnumerable(GeometryBase).\n\n\nSeems like \n@stevebaer\n already gave an explanation on this issue \nin here\n.\n\nStill I am not getting it.\n\nTried the following code:\n\n\nfrom System.Collections.Generic import IEnumerable\nfrom Rhino.Geometry import Point\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport System\n\npt_ids = rs.GetObjects()\npts = [rs.coerce3dpoint(pt_id) for pt_id in pt_ids]\npointL = [Rhino.Geometry.Point(pt) for pt in pts]\n\nIEGB = IEnumerable[Point](pointL)\n\n\n\ngot the following error message (one the last line of the upper code):\n\n\nCannot create instances of IEnumerable[Point] because it is abstract\n\n\n\nI thought that maybe a “conversion” of Point3d needs to be done, as Point class has been derived from GeometryBase. Is this causing the problem?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\nsurface = rs.GetObject(\"select surface\", rs.filter.surface)\npoints = rs.GetPoints(True)\n\nsurface = rs.coercesurface(surface)\npoints = [Rhino.Geometry.Point(pt) for pt in points]\n\ntol = scriptcontext.doc.ModelAbsoluteTolerance\npatch = Rhino.Geometry.Brep.CreatePatch(points, surface, tol)\nprint patch",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System\n\nsurface = rs.GetObject(\"select surface\", rs.filter.surface)\npoints = rs.GetPoints(True)\n\nsurface = rs.coercesurface(surface)\npoints = [Rhino.Geometry.Point(pt) for pt in points]\n\nb = System.Array.CreateInstance(bool, 4)\nfor i in range(4): b[i] = True\n\ntol = scriptcontext.doc.ModelAbsoluteTolerance\npatch = Rhino.Geometry.Brep.CreatePatch(points, surface, 5, 8, True, False, 3, 10, 0, b, tol)\nscriptcontext.doc.Objects.Add(patch)\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "from System.Collections.Generic import IEnumerable\nfrom Rhino.Geometry import Point\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport System\n\npt_ids = rs.GetObjects()\npts = [rs.coerce3dpoint(pt_id) for pt_id in pt_ids]\npointL = [Rhino.Geometry.Point(pt) for pt in pts]\n\nIEGB = IEnumerable[Point](pointL)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 6532
+}

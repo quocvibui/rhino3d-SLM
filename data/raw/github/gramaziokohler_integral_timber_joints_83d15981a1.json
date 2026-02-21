@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gramaziokohler/integral_timber_joints/blob/d543a28ccfaeb8a56ff692a29d5510c3e649477f/src/integral_timber_joints/rhino/debug_change_beam_depth.py",
+  "repo": "gramaziokohler/integral_timber_joints",
+  "repo_stars": 11,
+  "repo_description": "Robotic Assembled Timber Structures with Integral Timber Joints",
+  "license": "MIT",
+  "filepath": "src/integral_timber_joints/rhino/debug_change_beam_depth.py",
+  "instruction": "Debug change beam depth",
+  "code": "import Rhino  # type: ignore\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport re\nfrom integral_timber_joints.rhino.load import get_process, get_process_artist, process_is_none\nfrom integral_timber_joints.geometry import JointHalfLap, JointNonPlanarLap\nfrom integral_timber_joints.rhino.assembly_artist import AssemblyNurbsArtist\nfrom integral_timber_joints.assembly import BeamAssemblyMethod\nfrom integral_timber_joints.tools import Clamp, Screwdriver, Gripper\n\nimport json\n\nfrom compas_rhino.utilities import clear_layer, delete_objects, draw_mesh\nfrom compas.data import DataEncoder\n\n\nfrom compas.geometry import Cylinder, Transformation\n\n\n\n\nif __name__ == '__main__':\n    process = get_process()\n    assembly = process.assembly\n    artist = get_process_artist()\n    beam_id = 'b15'\n\n    # Adjust Beam Dimension\n    # -----------------------------\n\n    # beam = assembly.beam(beam_id)\n    # print (beam.height)\n    # beam.height = 140\n\n    # artist.delete_interactive_beam_visualization(beam_id)\n    # artist.draw_beam_brep(beam_id)\n\n    # Deal with neighbouring joint\n    # -----------------------------\n\n    # nbr_beam_id = 'b9'\n\n    # joint = assembly.joint((nbr_beam_id, beam_id))\n    # joint.length = 140\n    # print (joint.data)\n\n    # artist.delete_interactive_beam_visualization(nbr_beam_id)\n    # artist.draw_beam_brep(nbr_beam_id)\n\n\n    # Recreate Planar Joints\n    # ----------------------\n\n    affected_beams = set()\n    for joint_id in assembly.get_joint_ids_of_beam(beam_id):\n        joint = assembly.joint(joint_id)\n        if joint.__class__.__name__ == 'JointHalfLap':\n            print (joint_id, joint.__class__.__name__)\n\n            x, y = joint_id\n            beam_stay_id = assembly.sequence[min(assembly.sequence.index(x), assembly.sequence.index(y))]\n            beam_move_id = assembly.sequence[max(assembly.sequence.index(x), assembly.sequence.index(y))]\n            beam_stay = assembly.beam(beam_stay_id)\n            beam_move = assembly.beam(beam_move_id)\n\n            j_s, j_m, screw_line = JointHalfLap.from_beam_beam_intersection(beam_stay, beam_move)\n            assembly.add_joint_pair(j_s, j_m, beam_stay.name, beam_move.name)\n            affected_beams.add(beam_stay_id)\n            affected_beams.add(beam_move_id)\n\n    for beam_id in affected_beams:\n        artist.delete_interactive_beam_visualization(beam_id)\n        artist.draw_beam_brep(beam_id)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

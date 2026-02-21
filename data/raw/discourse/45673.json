@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/box-surface-normal-pointing-inwards-huh/45673",
+  "topic_id": 45673,
+  "title": "Box surface Normal pointing inwards... huh?",
+  "question": "When I test the surface normals on a new Box Brep I noticed that the “bottom” surface has its Normal pointing upwards (inwards that is). How can that be?\n\n\nFig. 1. My solid Box, with two identical (length) Normals on top of each other, one Normal starting from the uppermost surfaceand the other one starting from the bottom surface going up through the Box :\n\n\n\n\nimage.png\n1200×571 98.9 KB\n\n\n\n\nHow can this be? I test the normal at the middle of the surface, like so :\n\n\n        InBrep.Surfaces(4).GetSurfaceSize(u, v)\n        DA.SetData(OUT_BFN_4, InBrep.Surfaces(4).NormalAt(u/2, v/2))\n\n\n\n(The component shown is my own “test component”)\n\n\n\n\nEdit\n: With “Analyse direction” turned on :\n\n\n\n\nimage.png\n555×582 29.1 KB\n\n\n\n\n// Rolf",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef main():\n  gob = Rhino.Input.Custom.GetObject()\n  gob.AcceptNothing( True )\n  gob.SetCommandPrompt( 'Brep ?' )\n  gob.Get()\n  res = gob.Result()\n  if res == Rhino.Input.GetResult.Object:\n    obref = gob.Object( 0 )\n    brep = obref.Brep()\n    for face in brep.Faces:\n##########################################\n      sux = face.SurfaceIndex\n##########################################\n      surf = brep.Surfaces[ sux ]\n      vec = surf.NormalAt( surf.Domain( 0 ).Mid, surf.Domain( 1 ).Mid )\n      pnt = surf.PointAt( surf.Domain( 0 ).Mid, surf.Domain( 1 ).Mid )\n      colr = System.Drawing.Color.White\n      if face.OrientationIsReversed:\n        vec.Reverse()\n        colr = System.Drawing.Color.Red\n      gid = scriptcontext.doc.Objects.AddLine(\n          Rhino.Geometry.Line( pnt, vec * 100 ) )\n      rob = Rhino.DocObjects.ObjRef( gid ).Object()\n      att = rob.Attributes\n      decor = Rhino.DocObjects.ObjectDecoration.EndArrowhead\n      att.ObjectDecoration = decor\n      att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n      att.ObjectColor = colr\n      Rhino.RhinoDoc.ActiveDoc.Objects.ModifyAttributes( rob, att, True )\n    scriptcontext.doc.Views.Redraw()\n \nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 8,
+  "views": 3255
+}

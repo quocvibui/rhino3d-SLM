@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_createsurfaceexample.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_createsurfaceexample.py",
+  "instruction": "Ex createsurfaceexample",
+  "code": "from Rhino.Geometry import Point3d, NurbsSurface, ControlPoint\nfrom scriptcontext import doc\n\ndef RunCommand():\n  bIsRational = False\n  dim = 3\n  u_degree = 2\n  v_degree = 3\n  u_cv_count = 3\n  v_cv_count = 5\n \n  # make up a quadratic knot vector with no interior knots\n  u_knot = [0.0, 0.0, 1.0, 1.0] \n \n  # make up a cubic knot vector with one simple interior knot\n  v_knot = [0.0, 0.0, 0.0, 1.5, 2.0, 2.0, 2.0]\n \n  # Rational control points can be in either homogeneous\n  # or euclidean form. Non-rational control points do not\n  # need to specify a weight.  \n  CV = dict( ((i,j),None) for i in range(2) for j in range(3) )\n  for i in range(0, u_cv_count):\n    for j in range(0, v_cv_count):\n      CV[i,j] = Point3d(i, j, i-j)\n \n  # creates internal uninitialized arrays for \n  # control points and knots\n  nurbs_surface = NurbsSurface.Create(\n    dim,\n    bIsRational,\n    u_degree + 1,\n    v_degree + 1,\n    u_cv_count,\n    v_cv_count\n    )\n \n  # add the knots\n  for i in range(0, nurbs_surface.KnotsU.Count):\n    nurbs_surface.KnotsU[i] = u_knot[i]\n  for j in range(0, nurbs_surface.KnotsV.Count):\n    nurbs_surface.KnotsV[j] = v_knot[j]\n\n  # add the control points\n  for i in range(0, nurbs_surface.Points.CountU):\n    for j in range(0, nurbs_surface.Points.CountV):\n      nurbs_surface.Points.SetControlPoint(i, j, ControlPoint(CV[i, j]))\n\n  if nurbs_surface.IsValid:\n    doc.Objects.AddSurface(nurbs_surface)\n    doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

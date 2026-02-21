@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/project-points-to-breps.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/project-points-to-breps.py",
+  "instruction": "Project points to breps",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import *\nfrom Rhino.Geometry import *\n\ndef RunCommand():\n    srfid = rs.GetObject(\"select surface\", rs.filter.surface | rs.filter.polysurface)\n    if not srfid: return\n    brep = rs.coercebrep(srfid)\n    if not brep: return\n\n    pts = Intersect.Intersection.ProjectPointsToBreps(\n        [brep], # brep on which to project\n        [Point3d(0, 0, 0), Point3d(3,0,3), Point3d(-2,0,-2)], # points to project\n        Vector3d(0, 1, 0), # project on Y axis\n        doc.ModelAbsoluteTolerance)\n\n    if pts != None and pts.Length > 0:\n        for pt in pts:\n            doc.Objects.AddPoint(pt)\n\n    doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

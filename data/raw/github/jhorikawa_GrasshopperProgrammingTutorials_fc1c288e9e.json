@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jhorikawa/GrasshopperProgrammingTutorials/blob/6e5b830b481bc0fbf5390d6b5504f5df180d1433/0004%20Load%20Grasshopper%20file%20with%20compute.rhino3d%20Python/ghload.py",
+  "repo": "jhorikawa/GrasshopperProgrammingTutorials",
+  "repo_stars": 173,
+  "repo_description": "File repo for Rhino / Grasshopper programming tutorial videos.",
+  "license": "unknown",
+  "filepath": "0004 Load Grasshopper file with compute.rhino3d Python/ghload.py",
+  "instruction": "Ghload",
+  "code": "import compute_rhino3d.Brep\nimport rhino3dm\nimport requests\nimport base64\nimport json\n\ncompute_rhino3d.Util.authToken = \"\"\ncompute_rhino3d.Util.url = \"http://127.0.0.1:8081/\"\n\npost_url = compute_rhino3d.Util.url + \"grasshopper\"\n\ngh_data = open(\"./voronoi.ghx\", mode=\"r\", encoding=\"utf-8-sig\").read()\ndata_bytes = gh_data.encode(\"utf-8\")\nencoded = base64.b64encode(data_bytes)\ndecoded = encoded.decode(\"utf-8\")\n\nresponse = requests.post(post_url, json={\n    \"algo\": decoded,\n    \"pointer\": None,\n    \"values\": [\n        {\n            \"ParamName\": \"RH_IN:Size\",\n            \"InnerTree\": {\n                \"{ 0; }\": [\n                    {\n                        \"type\": \"System.Double\",\n                        \"data\": \"100.0\"\n                    }\n                ]\n            }\n        },\n{\n            \"ParamName\": \"RH_IN:Count\",\n            \"InnerTree\": {\n                \"{ 0; }\": [\n                    {\n                        \"type\": \"System.Integer\",\n                        \"data\": \"80\"\n                    }\n                ]\n            }\n        },\n{\n            \"ParamName\": \"RH_IN:Outer\",\n            \"InnerTree\": {\n                \"{ 0; }\": [\n                    {\n                        \"type\": \"System.Double\",\n                        \"data\": \"40.0\"\n                    }\n                ]\n            }\n        },\n{\n            \"ParamName\": \"RH_IN:Inner\",\n            \"InnerTree\": {\n                \"{ 0; }\": [\n                    {\n                        \"type\": \"System.Double\",\n                        \"data\": \"20.0\"\n                    }\n                ]\n            }\n        }\n    ]\n})\n\nres = response.content.decode(\"utf-8\")\nres = json.loads(res)\n\nvalues = res[\"values\"]\n\nmodel = rhino3dm.File3dm()\nfor val in values:\n    paramName = val['ParamName']\n    print(paramName)\n    innerTree = val['InnerTree']\n    for key, innerVals in innerTree.items():\n        print(key)\n        for innerVal in innerVals:\n            data = json.loads(innerVal['data'])\n            geo = rhino3dm.CommonObject.Decode(data)\n            model.Objects.Add(geo)\nmodel.Write(\"./voronoi.3dm\")\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

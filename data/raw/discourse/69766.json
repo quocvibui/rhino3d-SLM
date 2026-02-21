@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rotate-vector-question-solved/69766",
+  "topic_id": 69766,
+  "title": "Rotate vector question [SOLVED]",
+  "question": "Hi there,\n\n\nI wanted to use the RotateVector method but it does not work somehow.\n\n\nI would like to rotate the tangent of the curve (at the start point) by 90 degree based on the normal vector of the curve plane. Finally I have got this result:\n\n\nRotate vector.py\n (969 Bytes)\n\n\nRotate vector.3dm\n (25.7 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# Select a planar curve\ncurve_id = rs.GetObject(\"Select planar curve\", rs.filter.curve)\n# Get the curve's domain\ncurve_dom = rs.CurveDomain(curve_id)\n# Get the curve's starting point\nstart_point = rs.CurveStartPoint(curve_id)\n\n# Get tangent direction at starting point\ntangent_dir = rs.CurveTangent(curve_id, curve_dom[0])\n# Create a point offset from the start point in the tangent direction\ntangent_point = rs.PointAdd(start_point, tangent_dir)\n# Add a line and select it\ntangent_line_id = rs.AddLine(start_point, tangent_point)\nrs.SelectObject(tangent_line_id)\n\n# Get the normal direction of the planar curve's plane\nnormal_dir = rs.CurveNormal(curve_id)\n# Create a point offset from the start point in the normal direction\nnormal_point = rs.PointAdd(start_point, normal_dir)\n# Add a line and select it\nnormal_line_id = rs.AddLine(start_point, normal_point)\nrs.SelectObject(normal_line_id)\n\n# Rotate the tangent vector 90 degress around the normal vector\nrotate_dir = rs.VectorRotate(tangent_dir, 90.0, normal_dir)\n# Rotate the tangent vector 90 degress around the normal vector\nrotate_point = rs.PointAdd(start_point, rotate_dir)\n# Add a line and select it\nrotate_line_id = rs.AddLine(start_point, rotate_point)\nrs.SelectObject(rotate_line_id)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 1632
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/ksteinfe/decodes/blob/b876d6d01ea23ccbf4558182582a822b008cf2b8/src/decodes/io/rhinoscript/linetype.py",
+  "repo": "ksteinfe/decodes",
+  "repo_stars": 43,
+  "repo_description": "a platform agnostic generative design library for 3d designers",
+  "license": "GPL-3.0",
+  "filepath": "src/decodes/io/rhinoscript/linetype.py",
+  "instruction": "Linetype",
+  "code": "import scriptcontext\nfrom . import utility as rhutil\nimport Rhino\n\n\ndef __getlinetype(name_or_id):\n    id = rhutil.coerceguid(name_or_id)\n    if id: name_or_id = id\n    linetype = scriptcontext.doc.Linetypes.Find(name_or_id, True)\n    if linetype>=0: return scriptcontext.doc.Linetypes[linetype]\n\n\ndef IsLinetype(name_or_id):\n    \"\"\"Verifies the existance of a linetype in the document\n    Returns: True or False\n    \"\"\"\n    lt = __getlinetype(name_or_id)\n    return lt is not None\n\n\ndef IsLinetypeReference(name_or_id):\n    \"\"\"Verifies that an existing linetype is from a reference file\n    Returns: True or False\n    \"\"\"\n    lt = __getlinetype(name_or_id)\n    if lt is None: raise ValueError(\"unable to coerce %s into linetype\"%name_or_id)\n    return lt.IsReference\n\n\ndef LinetypeCount():\n    \"Returns number of linetypes in the document\"\n    return scriptcontext.doc.Linetypes.Count\n\n\ndef LinetypeNames(sort=False):\n    \"\"\"Returns names of all linetypes in the document\n    Parameters:\n      sort[opt] = return a sorted list of the linetype names\n    Returns\n      list of strings if successful\n    \"\"\"\n    count = scriptcontext.doc.Linetypes.Count\n    rc = []\n    for i in range(count):\n        linetype = scriptcontext.doc.Linetypes[i]\n        if not linetype.IsDeleted: rc.append(linetype.Name)\n    if sort: rc.sort()\n    return rc\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

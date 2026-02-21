@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/building-a-brep-in-rhinocommon/11484",
+  "topic_id": 11484,
+  "title": "Building a Brep in RhinoCommon",
+  "question": "Hi,\n\nI am trying to define a new Brep object in RhinoCommon, following this Dale’s C++ sample\n\n\nhttps://github.com/mcneel/Rhino5Samples_CPP/blob/master/SampleBrepCommands/cmdSampleTrimmedPlane.cpp\n\n… but it looks like I’m missing something.\n\nThis is the code that gives me an invalid brep:\n\nIt should trim a PlaneSurface by an ArcCurve (a circle)\n\n\n\n\nimport Rhino\n\nimport math\n\n\n\n\n\n\ndef main():\n\n\n\n\n\n\ndefine surface\n\n\nsurf = Rhino.Geometry.PlaneSurface(\n\nRhino.Geometry.Plane.WorldXY,\n\nRhino.Geometry.Interval( -100, 100 ),\n\nRhino.Geometry.Interval( -100, 100 ) )\n\n\n\n\n\n\ndraw surface\n\n\nRhino.RhinoDoc.ActiveDoc.Objects.AddSurface( surf )\n\n\n\n\n\n\ndefine outer curve\n\n\ncirc = Rhino.Geometry.Circle( 75 )\n\ncurve3d = Rhino.Geometry.ArcCurve( circ )\n\n\n\n\n\n\ndraw outer curve\n\n\nRhino.RhinoDoc.ActiveDoc.Objects.AddCurve( curve3d )\n\nRhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\n\n\n\n\n\nget curve 2D\n\n\ntolr = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n\ncurve2d = surf.Pullback( curve3d, tolr )\n\nvertexpnt = curve3d.PointAtStart\n\n\n\n\n\n\nsurface orientation\n\n\nbacksurf = False\n\n\n\n\n\n\ncurve orientation\n\n\nbackedge = False\n\n\n\n\n\n\nbuild brep:\n\n\nrep = Rhino.Geometry.Brep()\n\n\nadd vertex\n\n\nvertex = rep.Vertices.Add(\n\nvertexpnt, Rhino.RhinoMath.UnsetValue )\n\nvertexindex = vertex.VertexIndex\n\n\nadd curve 3D\n\n\ncur3dindex = rep.AddEdgeCurve( curve3d )\n\n\nadd edge\n\n\nedge = rep.Edges.Add(\n\nvertexindex, vertexindex, cur3dindex, Rhino.RhinoMath.UnsetValue )\n\n\nadd surface\n\n\nsurfindex = rep.AddSurface( surf )\n\n\nadd face\n\n\nface = rep.Faces.Add( surfindex )\n\n\nadd loop\n\n\nloop = rep.Loops.Add( Rhino.Geometry.BrepLoopType.Outer, face )\n\n\nadd curve 2D\n\n\ncur2dindex = rep.AddTrimCurve( curve2d )\n\n\nadd trim\n\n\ntrim = loop.Trims.Add( edge, backedge, loop, cur2dindex )\n\ntrim.IsoStatus = Rhino.Geometry.IsoStatus.None\n\ntrim.TrimType = Rhino.Geometry.BrepTrimType.Boundary\n\ntrim.SetTolerances( Rhino.RhinoMath.UnsetValue, Rhino.RhinoMath.UnsetValue )\n\n\nset surface orientation\n\n\nface.OrientationIsReversed = backsurf\n\n\n\n\n\n\nprint ‘Brep is va...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef TestPlanarSrf():\n    \n    points = []\n    points.append([-100.0, -100.0, 0.0])\n    points.append([100.0, -100.0, 0.0])\n    points.append([100.0, 100.0, 0.0])\n    points.append([-100.0, 100.0, 0.0])\n    points.append([-100.0, -100.0, 0.0])\n    \n    curves = []\n    curves.append(rs.AddPolyline(points))\n    curves.append(rs.AddCircle(rs.WorldXYPlane(), 75))\n    \n    rs.AddPlanarSrf(curves)\n    rs.DeleteObjects(curves)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 8083
+}

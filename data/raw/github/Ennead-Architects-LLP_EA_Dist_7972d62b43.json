@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/_rhino/Block.tab/filter_block_by_name.button/filter_block_by_name_left.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/_rhino/Block.tab/filter_block_by_name.button/filter_block_by_name_left.py",
+  "instruction": "Filter block by name left",
+  "code": "__title__ = \"FilterBlockByName\"\r\n__doc__ = \"\"\"Smart block selection utility.\r\n\r\nFeatures:\r\n- Filter blocks by name patterns\r\n- Multi-select support for block names\r\n- Sorted block name display\r\n- Real-time search filtering\r\n- Automatic selection of matching instances\"\"\"\r\n\r\n__is_popular__ = True\r\n\r\nimport rhinoscriptsyntax as rs\r\nimport scriptcontext as sc\r\n\r\n\r\nfrom EnneadTab.RHINO import RHINO_FORMS\r\nfrom EnneadTab import LOG, ERROR_HANDLE\r\n\r\n@LOG.log(__file__, __title__)\r\n@ERROR_HANDLE.try_catch_error()\r\ndef filter_block_by_name():\r\n\r\n    # get all block names and sort\r\n    all_block_names = sorted(rs.BlockNames())\r\n    #note = \"<Get all currently shortlisted>\"\r\n    #all_block_names.insert(0, note)\r\n\r\n    # select multuple\r\n    selected_block_names = RHINO_FORMS.select_from_list(all_block_names, \r\n                                                        multi_select = True, \r\n                                                        message = \"Type the portion of block names you want to select\")\r\n\r\n    if not selected_block_names:\r\n        return\r\n\r\n    # select all blocks pass that names\r\n    OUT = []\r\n    for name in selected_block_names:\r\n        OUT.extend(rs.BlockInstances(name))\r\n\r\n    rs.UnselectAllObjects()\r\n    rs.SelectObjects(OUT)\r\n\r\nif __name__ == \"__main__\":\r\n    filter_block_by_name()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

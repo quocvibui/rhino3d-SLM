@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/addpictureframe-problem/124547",
+  "topic_id": 124547,
+  "title": "Addpictureframe problem",
+  "question": "Hey everyone,\n\nI’m facing this problem when I’m using Rhinocommon. But when I use rhinoscriptsyntax everything is OK.\n\nThe problem is when radius of circle is 1 in both way everything is ok,\n\n[Python = left, Rhinocommon = right]\n\n\n\n\n1\n1276×783 49.6 KB\n\n\n\n\nbut when I increase radius to 2, Rhinocommon won’t draw it correctly.\n\n\n\n\n2\n1277×782 53 KB\n\n\n\n\nanother problem is background transparency which is ok in python but I can find any workaround for C#.\n\nCan anyone tell me its a bug or Im doing smth wrong?\n\n\nPython\n:\n\n\nids = rs.GetObjects(\"Select points\", 1)\nframes = ['frame1', 'frame2', 'frame3', 'frame4', 'frame5']\nfor id in ids:\n    point = rs.PointCoordinates(id)\n    circle = rs.AddCircle(point,2)\n    circumference = rs.CircleCircumference(circle)\n    picpos = circumference / len(frames)\n    param = 0\n    for frame in frames:\n        frame = rs.CurveFrame(circle, param, -1)\n        origin = rs.EvaluatePlane(frame, [0, 0])\n        circ = rs.AddCircle(origin, 0.2)\n        frm = rs.CurveFrame(circ, 0, -1)\n        b = rs.AddPictureFrame(frm, \"smth.png\", 0.4, 0.4, False, True, True, False)\n        indexb = rs.ObjectMaterialIndex(b)\n        rs.MaterialTransparencyMap( indexb, \"smth.png\" )\n        param += picpos\n scriptcontext.doc.Views.Redraw()\n\n\n\nC#:\n\n\n   const ObjectType filter = ObjectType.Point;\n   var rc = RhinoGet.GetMultipleObjects(\"Sample points\", false, filter, out ObjRef[] points);\n           foreach (var basepoint in points)\n            {\n                var point = basepoint.Point();\n                var cord = point.Location;\n                Circle circle = new Circle(cord, 1);\n                doc.Objects.AddCircle(circle);\n                Curve crva = circle.ToNurbsCurve();\n                double circumference = circle.Circumference;\n                double picpos = circumference / frames.Count;\n                double param = 0;\n                foreach (Plane item in frames)\n                {\n                    Plane frame = item;\n                    crva.Fr...",
+  "code_blocks": [
+    {
+      "code": "mat = scriptcontext.doc.Materials[material_index]\n    if mat is None: return scriptcontext.errorhandler()\n    rc = mat.Transparency\n    if transparency:\n        mat.Transparency = transparency\n        mat.CommitChanges()\n        scriptcontext.doc.Views.Redraw()\n    return rc\n\n\n\n\ndef MaterialTransparencyMap(material_index, filename=None):\n    \"\"\"Returns or modifies a material's transparency bitmap filename\n    Parameters:\n      material_index (number): zero based material index\n      filename (str, optional): the transparency bitmap filename\n    Returns:\n      str: if filename is not specified, the current transparency bitmap filename\n      str: if filename is specified, the previous transparency bitmap filename\n      None: if not successful or on error\n    Example:\n      import rhinoscriptsyntax as rs",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "ids = rs.GetObjects(\"Select points\", 1)\nframes = ['frame1', 'frame2', 'frame3', 'frame4', 'frame5']\nfor id in ids:\n    point = rs.PointCoordinates(id)\n    circle = rs.AddCircle(point,2)\n    circumference = rs.CircleCircumference(circle)\n    picpos = circumference / len(frames)\n    param = 0\n    for frame in frames:\n        frame = rs.CurveFrame(circle, param, -1)\n        origin = rs.EvaluatePlane(frame, [0, 0])\n        circ = rs.AddCircle(origin, 0.2)\n        frm = rs.CurveFrame(circ, 0, -1)\n        b = rs.AddPictureFrame(frm, \"smth.png\", 0.4, 0.4, False, True, True, False)\n        indexb = rs.ObjectMaterialIndex(b)\n        rs.MaterialTransparencyMap( indexb, \"smth.png\" )\n        param += picpos\n scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "bahman.farshbaf",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "const ObjectType filter = ObjectType.Point;\n   var rc = RhinoGet.GetMultipleObjects(\"Sample points\", false, filter, out ObjRef[] points);\n           foreach (var basepoint in points)\n            {\n                var point = basepoint.Point();\n                var cord = point.Location;\n                Circle circle = new Circle(cord, 1);\n                doc.Objects.AddCircle(circle);\n                Curve crva = circle.ToNurbsCurve();\n                double circumference = circle.Circumference;\n                double picpos = circumference / frames.Count;\n                double param = 0;\n                foreach (Plane item in frames)\n                {\n                    Plane frame = item;\n                    crva.FrameAt(param, out frame);\n                    Point3d origin = frame.Origin;\n                    Circle circ = new Circle(origin, 0.2);\n                    Curve crv = circ.ToNurbsCurve();\n                    crv.FrameAt(0, out Plane frm);\n                    Guid picid = doc.Objects.AddPictureFrame(frm, \"smth.png\", false, 0.4, 0.4, false, false);\n                    RhinoObject picobj = doc.Objects.FindId(picid);\n                    int picMtrl = picobj.Attributes.MaterialIndex;\n                    var mat = doc.Materials[picMtrl];\n                    mat.AlphaTransparency = true;\n                    param += picpos;\n                }\n            }\n     doc.Views.Redraw();",
+      "language": "csharp",
+      "author": "bahman.farshbaf",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 739
+}

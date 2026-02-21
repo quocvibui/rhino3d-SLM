@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-a-truncated-cone-with-python/107962",
+  "topic_id": 107962,
+  "title": "Scripting a truncated cone with Python",
+  "question": "Maybe I’m just blind, but I can’t find a method for creating a truncated cone like this:\n\n\n\n\nThe AddCone method always creates a cone to a point, and I’m sure it’s easy enough to chop that point off at a given height, but I thought I’d ask the forum if there is a more elegant way of handling truncated cones.\n\n\nThanks,\n\n\nDan",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\ndef AddTruncatedCone(plane, height, base_radius, top_radius):\n    bottom_circle = rg.Circle(plane.Origin, base_radius)\n    top_circle = rg.Circle(plane.Origin + plane.ZAxis * height, top_radius)\n    shapeCurve = rg.LineCurve(bottom_circle.PointAt(0), top_circle.PointAt(0))\n    axis = rg.Line(bottom_circle.Center, top_circle.Center)\n    revsrf = rg.RevSurface.Create(shapeCurve, axis)\n    tcone_brep = rg.Brep.CreateFromRevSurface(revsrf, True, True)\n    return tcone_brep\n\na = AddTruncatedCone(Plane, Height, BaseRad, TopRad)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1220
+}

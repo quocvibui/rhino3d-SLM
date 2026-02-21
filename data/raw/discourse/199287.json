@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-data-problem/199287",
+  "topic_id": 199287,
+  "title": "Ghpython Data Problem",
+  "question": "Hello Forum, I am currently facing an issue with a GhPython script I am developing, specifically with maintaining my data structure when trying to divide curves to obtain their points. The script either returns a flat list or generates nested lists in the form of “System.Collections.Generic.List” that I am unable to extract properly.\n\n\nI am attaching the relevant portion of the script below, which is the last part where the issue occurs. I would appreciate any insights or suggestions you might have.\n\n\nHere is a snippet of my current code:\n\n\n# Create DataTree for the divided points\nDivide_Points_1_tree = DataTree[object]()\n\n# Define the number of divisions and kinks parameter\ncount = 4  # Number of divisions\nkinks = False\n\n# Iterate through the branches of Explode_1_tree maintaining the structure\nfor i in range(Explode_1_tree.BranchCount):\n    branch = Explode_1_tree.Branch(i)\n    path = Explode_1_tree.Path(i)  # Maintain the DataTree structure\n\n    divided_points = []\n\n    for curve in branch:\n        # Divide the curve into points with the same parameter\n        divided = gh.DivideCurve(curve, count, kinks)[0]  # We only get the points\n\n        # Ensure the output is a list and extract properly\n        if isinstance(divided, list):\n            divided_points.extend(divided)\n        else:\n            divided_points.append(divided)\n\n    # Add to the DataTree while maintaining the original hierarchy\n    Divide_Points_1_tree.AddRange(divided_points, path)\n\nCustom = Divide_Points_1_tree\n\n\n\nimage\n1587×677 81.4 KB\n\n\nGhpython_Problem.gh\n (18.2 KB)\n\n\nIn this script, I am attempting to pass data that initially comes out nested within a “System.Collections.Generic.List” from the output. When I try to use this data in another script as shown above, it still remains nested in lists of lists. How can I mitigate or fix this issue in a Python script to ensure a cleaner and more manageable data structure?\n\n\nThank you very much for your time and help.\n\n\nBest regards,\n\n\nHenry",
+  "code_blocks": [
+    {
+      "code": "from Grasshopper import DataTree\nfrom Grasshopper.Kernel.Data import GH_Path\n\nlists = []\ntree = DataTree[object]()\n\nfor i, lst in enumerate(lists):\n    path = GH_Path(i)\n    for item in lst:\n        tree.Add(item, path)",
+      "language": "python",
+      "author": "osama.fjr",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 2,
+  "views": 100
+}

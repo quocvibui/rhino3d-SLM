@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getobject-selects-subd-objects-when-filtered-for-brep-still-selects-subd/215371",
+  "topic_id": 215371,
+  "title": "GetObject selects SubD Objects when filtered for Brep still selects SubD",
+  "question": "When using GetObject with a filter set to select only Breps GetObject will still select  SubD objects.\n\nIs this intentional, if so how do I filter for breps and breps alone?\n\n\nCode to reproduce:\n\n\n// #! csharp\nusing System;\nusing Rhino.Geometry;\nusing Rhino.Input.Custom;\nusing Rhino.DocObjects;\nGetObject getObject = new GetObject()\n{\n    GeometryFilter = ObjectType.Brep\n};\n\ngetObject.GetMultiple(0,1);",
+  "code_blocks": [
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing Rhino.Input;\nusing Rhino.Input.Custom;\n\nvar test = new Test();\ntest.Main();\n\npublic class Test \n{\n    public void Main() \n    {\n        GetObject go = new GetObject();\n        go.SetCommandPrompt(\"Select surface or polysurface\");\n        go.SetCustomGeometryFilter((obj, geometry, ci) =>\n        {\n            return geometry is Surface || geometry is Brep;\n        });\n        go.Get();\n        if (go.CommandResult() != Result.Success)\n            return;\n        // TODO...\n    }\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino.Geometry;\nusing Rhino.Input.Custom;\nusing Rhino.DocObjects;\nGetObject getObject = new GetObject()\n{\n    GeometryFilter = ObjectType.Brep\n};\n\ngetObject.GetMultiple(0,1);",
+      "language": "csharp",
+      "author": "Cristopher_Russ",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 35
+}

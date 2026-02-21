@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/boundary-line-of-a-flat-object/61379",
+  "topic_id": 61379,
+  "title": "Boundary line of a flat object",
+  "question": "Hi,\n\n\nI am thinking how to find the boundary line of a flat object that includes splines, semicircle and lines.\n\nIt could be easy in case of a polygonal object by selecting grips but for curves I have no idea.\n\n\nI can also evaluate the curves and simplify it by some points on the curve and then connect it but there might other way.\n\n\nCan anybody suggest how to do it?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DupBorder():\n    filter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface or polysurface\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc\n\n    rhobj = objref.Object()\n    brep = objref.Brep()\n    if not rhobj or not brep: return Rhino.Commands.Result.Failure\n    rhobj.Select(False)\n    curves = brep.DuplicateEdgeCurves(True)\n    tol = scriptcontext.doc.ModelAbsoluteTolerance * 2.1\n    curves = Rhino.Geometry.Curve.JoinCurves(curves, tol)\n    for curve in curves:\n        id = scriptcontext.doc.Objects.AddCurve(curve)\n        scriptcontext.doc.Objects.Select(id)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success",
+      "language": "python",
+      "author": "tom_makin",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 593
+}

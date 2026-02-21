@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/animation-loop-in-python/204040",
+  "topic_id": 204040,
+  "title": "Animation loop in Python",
+  "question": "Hello, I’m trying to generate an animation within a Python component without using the Timer component.\n\nMy environment is Windows, Rhino8, and Python 3.\n\n\nThis Python code runs, but nothing is shown during the computation.\n\n\nDoes anyone have suggestions?\n\n\nThanks!\n\n\nimport Rhino.Geometry as rg\nmesh=rg.Mesh()\ndef main():\n    for t in range(20):\n        #update mesh\n        preview_event.set()\n    exit_event.set()\nexit_event = threading.Event()\npreview_event = threading.Event()\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript():\n         #initialize mesh()\n  \n        thread=threading.Thread(target=main,args=())        \n        thread.start()\n        counter=0\n        while(not exit_event.is_set()):\n            time.sleep(1)\n            Rhino.RhinoApp.Wait()\n            counter=counter+1\n            if(preview_event.is_set()):\n                ghenv.Component.ExpirePreview(True)\n                print(\"preview\")\n                preview_event.clear()\n                if(counter>5000):\n                    print(\"timeout\")\n                    break\n          \n    def DrawViewportWires(self, args):\n          args.Display.DrawMeshWires(mesh,System.Drawing.Color.Red,2)\n  \n    def DrawViewportMeshes(self, args):\n          args.Display.DrawMeshWires(mesh,System.Drawing.Color.Red,2)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nmesh=rg.Mesh()\ndef main():\n    for t in range(20):\n        #update mesh\n        preview_event.set()\n    exit_event.set()\nexit_event = threading.Event()\npreview_event = threading.Event()\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript():\n         #initialize mesh()\n  \n        thread=threading.Thread(target=main,args=())        \n        thread.start()\n        counter=0\n        while(not exit_event.is_set()):\n            time.sleep(1)\n            Rhino.RhinoApp.Wait()\n            counter=counter+1\n            if(preview_event.is_set()):\n                ghenv.Component.ExpirePreview(True)\n                print(\"preview\")\n                preview_event.clear()\n                if(counter>5000):\n                    print(\"timeout\")\n                    break\n          \n    def DrawViewportWires(self, args):\n          args.Display.DrawMeshWires(mesh,System.Drawing.Color.Red,2)\n  \n    def DrawViewportMeshes(self, args):\n          args.Display.DrawMeshWires(mesh,System.Drawing.Color.Red,2)",
+      "language": "python",
+      "author": "mikity_kogekoge",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 13,
+  "views": 303
+}

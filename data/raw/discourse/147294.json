@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-8-feature-gh1-is-now-more-than-just-geometry/147294",
+  "topic_id": 147294,
+  "title": "Rhino 8 Feature: GH1 Is Now More Than Just Geometry!",
+  "question": "New Data Types Available in GH1\n\n\n\n\nHave you ever been frustrated that you couldn’t bake geometry with custom attributes?\n\n\nWhat about display materials? Have you ever wanted to be able to use native Rhino materials in the Grasshopper display pipeline?\n\n\nHow about importing files into Grasshopper - have you ever become discouraged when you try to import a CAD file and lose all of the basic metadata that is included with the geometry?\n\n\n\n\nThe latest Rhino 8 WIP now has new data types and components which expand the way you work.\n\n\nGrasshopper 1.0 has always had common data types - some are frequently used (ie. points, curves, breps, booleans, numbers, and text etc.) while others are used more sporadically (ie. date/time, matrices, cultural specifiers, etc.).\n\n\nHowever, there are still many different types of data available in Rhino that have not been accessible in Grasshopper. \nRhino Layers\n, \nLinetypes\n, \nHatches\n, \nMaterials\n, \nFonts\n, and \nAnnotation Styles\n, \netc\n. are now included with Grasshopper 1 for Rhino 8 WIP as native data types. And, more will be coming soon!\n\n\nToolbar_20220913\n981×183 63.3 KB\n\n\nWhat is an Attribute?\n\n\nAll of these new components let you get and/or set the attributes of a given data type. So, what exactly is an \n“attribute”\n? \nAn attribute is simply a property or item that helps make up that type or object\n.\n\n\nLet’s look at Rhino layers, for example. A layer can be defined by the following properties:\n\n\n\n\nName\n\n\nIs Active (ie. Current)\n\n\nVisible/Hidden\n\n\nLocked/Unlocked\n\n\nDisplay Color\n\n\nMaterial\n\n\nLinetype\n\n\nPrint Color\n\n\nPrint Width\n\n\nClipping Plane\n\n\nSection Style\n\n\n\n\nWe can see and/or edit each of these attributes in the Rhino Layers dialog. Now, you can do the same in Grasshopper 1.0!\n\n\nAttributes\n1180×387 28.8 KB\n\n\nGetting Started\n\n\nGrasshopper in Rhino 8 WIP has a new toolbar labeled \nRhino\n which is broken down into several subcategories (ie. Layers, Linetypes, Materials, etc.). Each subcategory typically has two different types ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nimport os\n\n\ntemp_doc = Rhino.RhinoDoc.CreateHeadless(None)\nwait_export_file = Rhino.FileIO.File3dm.Read(Import_File)\n\nfor obj in wait_export_file.Objects:\n    temp_doc.Objects.Add(obj.Geometry)\n\n\nfile_name, file_extension = os.path.splitext(Import_File)\noutput_filepath = file_name + '.dwg'\n\n\n\noptions = Rhino.FileIO.FileDwgWriteOptions()\n\noptions.Version = Rhino.FileIO.FileDwgWriteOptions.AutocadVersion.Acad2007\noptions.Flatten = 0\n\noptions.ExportSurfacesAs = Rhino.FileIO.FileDwgWriteOptions.ExportSurfaceMode.Solids\noptions.ExportMeshesAs = Rhino.FileIO.FileDwgWriteOptions.ExportMeshMode.Meshes\n\n\n\nRhino.FileIO.FileDwg.Write(output_filepath, temp_doc, options)",
+      "language": "python",
+      "author": "Niko",
+      "post_number": 292,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# Get the camera location of the perspective view\ncamera_location = rs.ViewCamera()\n\n# Calculate the distance between the camera and the object\ndistance = rs.Distance(camera_location, CP)\n\n# Output the distance\nTextSize = round(distance *.01,3)\n\nghenv.Component.Message = \"Distance: \" + str(distance) + \"\\nText Size: \" + str(TextSize)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 140,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 323,
+  "views": 36997
+}

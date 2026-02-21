@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/germanbodenbender/MACAD-AIA-GEO_OPT/blob/4127a5112369717b43c647b04d84d2cda485ac60/SESSION%2004-A06-EXERCISE/GetMeshPathsModule.py",
+  "repo": "germanbodenbender/MACAD-AIA-GEO_OPT",
+  "repo_stars": 1,
+  "repo_description": "Repository for the AIA-Geometry Optimization Seminar that includes all the exercises and tests done during the semester using Pytho, NetworkX, Numpy, Rhinoinside and Hops",
+  "license": "unknown",
+  "filepath": "SESSION 04-A06-EXERCISE/GetMeshPathsModule.py",
+  "instruction": "AIA - GEOMETRY OPTIMIZATION SEMINAR STUDENT: German Otto Bodenbender EXERCISE 04",
+  "code": "#AIA - GEOMETRY OPTIMIZATION SEMINAR\n#STUDENT: German Otto Bodenbender\n#EXERCISE 04\n\nfrom pathlib import Path\nfolder = Path(\"C:\\Program Files\\Rhino 7\\System\")\n\nimport rhinoinside\nimport ghhops_server as hs\n\nrhinoinside.load(str(folder))\n\nimport Rhino\nimport Rhino.Geometry as rg\nhops = hs.Hops(app=rhinoinside)\n\nimport networkx as nx\nimport MeshPaths as mp\n\n@hops.component(\n    \"/MeshPathWalker\",\n    name=\"MeshPathWalker\",\n    description=\" Make a networkx graph with mesh vertices as nodes and mesh edges as edges \",\n    inputs=[\n        hs.HopsMesh(\"Mesh\",\"M\",\"Mesh to make networkx graph for\"),\n        hs.HopsString(\"WeightMode\",\"W\",\"Weight Mode\"),\n        hs.HopsString(\"GraphType\",\"T\",\"Mesh Graph Type\"),\n        hs.HopsLine(\"SLine\",\"L\", \"Line to process\"),\n        hs.HopsString(\"mode\" ,\"m\", \"Shortest Path Mode\")\n    ],\n    outputs=[\n        hs.HopsPoint(\"ShortestPath\", \"SP\" ,\"Shortest Path\",hs.HopsParamAccess.LIST),\n        hs.HopsString(\"FacesIndex\", \"I\" ,\"Faces indexes\",hs.HopsParamAccess.LIST)\n    ]\n)\n\ndef MeshPathWalker(mesh,weightMode,GraphType,SLine,mode):\n    return mp.meshwalker(mesh,weightMode,GraphType,SLine,mode)\n\nif __name__ == \"__main__\":\n    hops.start()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/a-quick-question-about-rs-redraw-bool/149174",
+  "topic_id": 149174,
+  "title": "A quick Question about rs.redraw(bool)",
+  "question": "HI all, i’m beginner of python, i want to know how to left the final object only, i don’t need to draw any object in process.\n\nas my code :\n\n=====code start=====\n\nimport rhinoscriptsyntax as rs\n\n\nwt = 15\n\npts = rs.GetPoints(True, True, “start point”, “next point”)\n\nrs.EnableRedraw(False)\n\npl = rs.AddPolyline(pts)\n\n\nplE = rs.OffsetCurve(pl,[0,0,0],(wt/2),None, 1)\n\nplI = rs.OffsetCurve(pl,[0,0,0],(-1*wt/2),None, 1)\n\nPL = [plE, plI]\n\nbase = rs.AddLoftSrf(PL, loft_type=2)\n\nedge = rs.DuplicateEdgeCurves(base, False )\n\noutline = rs.JoinCurves(edge, delete_input=True, tolerance=None)\n\nsrf = rs.AddPlanarSrf(outline)\n\nrs.DeleteObject(pl)\n\nrs.DeleteObjects(PL)\n\nrs.DeleteObjects(edge)\n\nrs.DeleteObjects(outline)\n\nrs.DeleteObject(base)\n\nrs.EnableRedraw(True)\n\n\n=====code end=====\n\n\nas my question, the code what i want is “srf” although i tried rs.deleteObject() and its worked in this simple code , but i want to know any idea about how to draw the final object “srf” only, do not draw the object in process.\n\n\nthanks for help.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nwt = 15\npts = rs.GetPoints(True, True, \"start point\", \"next point\")\nrs.EnableRedraw(False)\npl = rs.AddPolyline(pts)\n\nplE = rs.OffsetCurve(pl,[0,0,0],(wt/2),None, 1)\nplI = rs.OffsetCurve(pl,[0,0,0],(-wt/2),None, 1)\n#both of the above might be more than one curve, output is a list.\n#Assuming that it is only one curve, you can use plE[0] and plI[0]\n\nbase=rs.AddLoftSrf([plE[0],plI[0]],loft_type=2)\n\n#Use rs.DuplicateSurfaceBorder to get loft borders\nbords=rs.DuplicateSurfaceBorder(base,0)\n\n#simply add the planar surface using the list of borders\nsrf = rs.AddPlanarSrf(bords)\n\n#delete the construction objects\nrs.DeleteObjects([pl,plE,plI,base])\nrs.DeleteObjects(bords)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n#scriptcontext is the bridge between RhinoCommon virtual geometry and document\n#Rhino represents the whole of RhinoCommmon\n\nwt = 15\npts = rs.GetPoints(True, True, \"start point\", \"next point\")\n\n#for many methods, you need to supply a tolerance\ntol=rs.UnitAbsoluteTolerance()\n\n#create a 'virtual' polyline curve\npl=Rhino.Geometry.PolylineCurve(pts)\n\n#try to get the curve plane for the offset\nrc,plane=pl.TryGetPlane(tol)\n\n#or, get the active construction plane:\nplane=rs.ViewCPlane()\n\n#you need to supply a cornerstyle for Offset\ncs=Rhino.Geometry.CurveOffsetCornerStyle.Sharp\n\n#create the offsets\noffsetsE=pl.Offset(plane,wt/2,tol,cs)\noffsetsI=pl.Offset(plane,-wt/2,tol,cs)\n#both of the above might be more than one curve, output is a list.\n#Assuming that it is only one curve, you can try this:\nplE=offsetsE[0]\nplI=offsetsI[0]\n\n#Loft without end points needs this:\nus_pt=Rhino.Geometry.Point3d.Unset\n#Plus a loft type\nlt=Rhino.Geometry.LoftType.Straight\n#create loft surface\nloft_list=Rhino.Geometry.Brep.CreateFromLoft([plE,plI],us_pt,us_pt,lt,False)\n\n#assuming it is one polysurface, use loft_list[0], get edges:\nedges=loft_list[0].DuplicateNakedEdgeCurves(True,True)\n\n#join the edges\njoined=Rhino.Geometry.Curve.JoinCurves(edges)\n#this will be a list of joined edge curves\n\n#finally, create your planar surface\nbreps=Rhino.Geometry.Brep.CreatePlanarBreps(joined,tol)\n\n#the result could be several surfaces, so output is a list\n#add them to the document in a loop\nfor brep in breps: sc.doc.Objects.AddBrep(brep)\n\n#redraw the scene (this is not automatic)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "def GetPoint(message=None, base_point=None, distance=None, in_plane=False):\n\n    gp = Rhino.Input.Custom.GetPoint()\n    if message: gp.SetCommandPrompt(message)\n    base_point = rhutil.coerce3dpoint(base_point)\n    if base_point:\n        gp.DrawLineFromPoint(base_point,True)\n        gp.EnableDrawLineFromPoint(True)\n        if distance: gp.ConstrainDistanceFromBasePoint(distance)\n    if in_plane: gp.ConstrainToConstructionPlane(True)\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return scriptcontext.errorhandler()\n    pt = gp.Point()\n    gp.Dispose()\n    return pt",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 352
+}

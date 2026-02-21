@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/marking-camera-position/65841",
+  "topic_id": 65841,
+  "title": "Marking Camera Position",
+  "question": "We can show camera positions, one at a time, and store them as Named Views and recall them from that list.\n\n\nI am marking each one on the plan as I set it up, snapping to the Viewpoint the point of a small cone in a block also containing text to match the camera number so someone can point at that Camera position and ask “What does it look like from there?”\n\n\nIs there a more efficient way to store some portion of the Camera View icon itself? Something that automatically displayed the lens length would be good. I bet a Grassshopper could do it.",
+  "code_blocks": [
+    {
+      "code": "def test():\n    \n    x = sc.doc.NamedViews\n    if x.Count > 0:\n        for nv in x:\n            name = nv.Name\n            loc = nv.Viewport.CameraLocation\n            lLength= round(nv.Viewport.Camera35mmLensLength, 2)\n            targ = nv.Viewport.TargetPoint\n            vecDir = (targ-loc)* .5\n            strInfo = \"{0}\\n{1} mm\".format(name,str(lLength)) \n            id1 = rs.AddTextDot(strInfo,loc)\n            id2 = rs.AddLine(loc, loc + vecDir)\n            rs.CurveArrows(id2, 2)\n            rs.AddObjectsToGroup([id1,id2],rs.AddGroup())\n\ntest()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 5,
+  "views": 885
+}

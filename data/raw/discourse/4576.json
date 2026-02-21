@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-in-fitcurve/4576",
+  "topic_id": 4576,
+  "title": "Bug in FitCurve",
+  "question": "Hi Steve,\n\n\ncould you check the code for FitCurve? It somehow does fit the curve, but then unfortunately returns the old input curve.\n\n\nThanks,\n\nAndi",
+  "code_blocks": [
+    {
+      "code": "curve = rhutil.coercecurve(curve_id, -1, True)\n    if distance_tolerance is None or distance_tolerance<0:\n        distance_tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    if angle_tolerance is None or angle_tolerance<0:\n        angle_tolerance = scriptcontext.doc.ModelAngleToleranceRadians\n    nc = curve.Fit(degree, distance_tolerance, angle_tolerance)\n    if nc:\n        rhobj = rhutil.coercerhinoobject(curve_id)\n        rc = None\n        if rhobj:\n            rc = scriptcontext.doc.Objects.AddCurve(curve, rhobj.Attributes)\n        else:\n            rc = scriptcontext.doc.Objects.AddCurve(curve)\n        if rc==System.Guid.Empty: raise Exception(\"Unable to add curve to document\")\n        scriptcontext.doc.Views.Redraw()\n        return rc\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "curve = rhutil.coercecurve(curve_id, -1, True)\n    if distance_tolerance is None or distance_tolerance<0:\n        distance_tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    if angle_tolerance is None or angle_tolerance<0:\n        angle_tolerance = scriptcontext.doc.ModelAngleToleranceRadians\n    nc = curve.Fit(degree, distance_tolerance, angle_tolerance)\n    if nc:\n        rhobj = rhutil.coercerhinoobject(curve_id)\n        rc = None\n        if rhobj:\n             #changed curve to nc\n            rc = scriptcontext.doc.Objects.AddCurve(nc, rhobj.Attributes)\n        else:\n            #changed curve to nc\n            rc = scriptcontext.doc.Objects.AddCurve(nc)   \n        if rc==System.Guid.Empty: raise Exception(\"Unable to add curve to document\")\n        scriptcontext.doc.Views.Redraw()\n        return rc\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1076
+}

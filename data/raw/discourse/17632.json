@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-can-i-use-plane-fitplanetopoints-from-python-correctly/17632",
+  "topic_id": 17632,
+  "title": "How can I use Plane.FitPlaneToPoints from Python correctly?",
+  "question": "Hi all,\n\n\nthe doc to this method shows, that it is possible to get the maximum deviation as an additional result.\n\n\nhttp://4.rhino3d.com/5/rhinocommon/html/M_Rhino_Geometry_Plane_FitPlaneToPoints_1.htm\n\nHow can I get this number in Python? I’ve seen an example in \nVB.net\n by David Rutten here:\n\n\nhttp://www.grasshopper3d.com/forum/topics/points3darepointscoplanar-1?xg\n\nBasically he calls it like this:\n\n\nDim rc As PlaneFitResult = Plane.FitPlaneToPoints(New Point3d() {p, q, r, s}, pf, dev)\n\n\n\nSo he passes two additional “empty” parameters into the method, which are then filled by the method.\n\nIs this not possible in Python? I get the method to work when I only pass the pointlist, but then I’m missing the maximum deviation as a result.\n\n\nIf someone knows how to make this work in Python I’d be glad to see how the method has to be called correctly.\n\n\nThanks in advance,\n\nAndi",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\nimport Rhino\nimport clr\n\nptsIds = rs.GetObjects(\"pick up your points\", 1)\nptsObjs = [rs.coerce3dpoint(pt) for pt in ptsIds]\n\nplane = clr.StrongBox[Rhino.Geometry.Plane]()\ndeviation = clr.StrongBox[System.Double]()\n\nplaneFitResult = Rhino.Geometry.Plane.FitPlaneToPoints(ptsObjs, plane, deviation)\nfitPlane = plane\nmaxDeviation = deviation\nprint maxDeviation",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nptsIds = rs.GetObjects(\"pick up your points\", 1)\nptsObjs = [rs.coerce3dpoint(pt) for pt in ptsIds]\n\nplaneFitResultPlane = Rhino.Geometry.Plane.FitPlaneToPoints(ptsObjs)\nfitPlane = planeFitResultPlane[1]\n\ndeviations = []\nfor pt in ptsObjs:\n    d = fitPlane.DistanceTo(pt)\n    deviations.append(abs(d))\n\nmaxDeviation = max(deviations)\nprint maxDeviation",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 2038
+}

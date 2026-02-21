@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/save-geometry-in-json/110386",
+  "topic_id": 110386,
+  "title": "Save Geometry in Json",
+  "question": "Hello i have to convert a rhino Geometry and store it as a JsonFile.\n\nI am stuck on a Brep simply because have too many information to store.\n\nIs it possibile to store directly the data (even as ascii) directly in the json file?",
+  "code_blocks": [
+    {
+      "code": "# coding: utf-8\nimport scriptcontext as sc\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport json\n\ndef exportJSON():\n    hatches = rs.GetObjects(\"Selection\", filter=65536)\n    if hatches:\n        filter = \"JSON file (*.json)|*.json|All Files (*.*)|*.*||\"\n        filename = rs.SaveFileName(\"Open JSON File\", filter)\n\n    data = []\n    for hatch in hatches:\n        hatch_obj = rs.coercerhinoobject(hatch)\n        options = Rhino.FileIO.SerializationOptions(RhinoVersion=7, WriteUserData=False)\n        hatch_json = hatch_obj.ToJSON()\n        data.append(hatch_json)\n\n    with open(filename, 'w') as outfile:\n        json.dump(data, outfile)\n\n\nif __name__ == \"__main__\":\n    exportJSON()",
+      "language": "python",
+      "author": "ju_anoriant",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "# coding: utf-8\nimport scriptcontext as sc\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport json\n\ndef exportJSON():\n    hatches = rs.GetObjects(\"Selection\", filter=65536)\n    if hatches:\n        json_filter = \"JSON file (*.json)|*.json|All Files (*.*)|*.*||\"\n        filename = rs.SaveFileName(\"Open JSON File\", json_filter)\n\n        data = []\n        for hatch in hatches:\n            hatch_obj = rs.coercerhinoobject(hatch)\n            options = Rhino.FileIO.SerializationOptions(RhinoVersion=7, WriteUserData=False)\n            hatch_json = hatch_obj.ToJSON(options)\n            data.append(hatch_json)\n\n    with open(filename, 'w') as outfile:\n        json.dump(data, outfile)\n\n\nif __name__ == \"__main__\":\n    exportJSON()",
+      "language": "python",
+      "author": "ju_anoriant",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1701
+}

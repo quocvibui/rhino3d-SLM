@@ -1,0 +1,62 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problems-with-addsweep1/14049",
+  "topic_id": 14049,
+  "title": "Problems with addsweep1",
+  "question": "hi guys,\n\n\ni´va a problem with addsweep1.\n\ni don´t know why the following script isn´t working.\n\ni simply want to sweep a circle along a spiral.\n\n\nneed help.\n\n\nnice greets.\n\nPhilipp\n\n\nHere is the script:\n\n\nimport rhinoscriptsyntax as rs\nimport math\n\n\npoint0 = (0,0,0)\n\npoint1 = (100,0,0)\n\npitch = 1.5\n\nturns = 5\n\n\nradius0 = 5\n\nradius1 = 2\n\nrail = rs.AddSpiral(point0, point1, pitch, turns, radius0, radius1)\n\n\nr = 0.5\n\nshapes = rs.AddCircle( [0,radius0,0], r )\n\nrs.AddSweep1 (rail, shapes, closed=False)",
+  "code_blocks": [
+    {
+      "code": "rs.UnselectAllObjects()\nrs.SelectObjects(rs.AllObjects())\nprofiles = rs.SelectedObjects()\nrs.UnselectAllObjects()\n\n\nrs.CurrentView(\"Front\")\n\nrs.Command('_Circle 0,0,0 _R ' + str(ringsize) + \" _Enter\")\nrs.SelectObject(rs.LastCreatedObjects())\n\ncurve = rs.SelectedObjects()\n\nrs.UnselectAllObjects()\n\nrs.AddSweep1(curve,profiles,True)",
+      "language": "python",
+      "author": "Geeodorah",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "rs.CurrentView('Front')\n\n\njoinedCurveOne = rs.JoinCurves([W,X,Y,Z],delete_input=True)\nrs.MoveObject(joinedCurveOne,(0,0,ringsize+bottom+thickness))\nrs.RotateObject(joinedCurveOne,(0,0,0), 90,None, copy=True)\nrs.RotateObject(joinedCurveOne,(0,0,0), 180,None, copy=True)\nrs.RotateObject(joinedCurveOne,(0,0,0), 270,None, copy=True)\n\n#rs.HideObject(rs.AllObjects())",
+      "language": "python",
+      "author": "Geeodorah",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "rs.MoveObject(joinedCurveTwo,(0,0,ringsize+bottom+thickness))\n\nrs.CurrentView('Front')\n\nrs.RotateObject(joinedCurveTwo,(0,0,0), 45,None, copy=False)\nrs.RotateObject(joinedCurveTwo,(0,0,0), 90,None, copy=True)\nrs.RotateObject(joinedCurveTwo,(0,0,0), 180,None, copy=True)\nrs.RotateObject(joinedCurveTwo,(0,0,0), 270,None, copy=True)",
+      "language": "python",
+      "author": "Geeodorah",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "a = profiles[0]\nb = profiles[1]\nc = profiles[2]\nd = profiles[3]\ne = profiles[4]\nf = profiles[5]\ng = profiles[6]\nh = profiles[7]\nprofilesStr = [a,b,c,d,e,f,g,h]\n\nrs.CurrentView(\"Front\")\nrs.Command('_Circle 0,0,0 _R ' + str(ringsize) + \" _Enter\")\nrs.SelectObject(rs.LastCreatedObjects())\ncurve = rs.SelectedObjects()\nrs.UnselectAllObjects()\n\nrs.AddSweep1(curve,profilesStr,True)\n        \n            \n#rs.Command(\"_Sweep1 _Enter _C\")\n#macro = \"!_Sweep1 _Enter _ClosedSweep=True\"\n#Sweep.ClosedSweep=True\n#rs.Rhino.RhinoApp.RunScript(macro, True)",
+      "language": "python",
+      "author": "Geeodorah",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "joinedCurveOne = rs.JoinCurves([W,X,Y,Z],delete_input=True)\n\n\nrs.MoveObject(joinedCurveOne,(0,0,ringsize+bottom+thickness))\n\njoinedCurveThree = rs.RotateObject(joinedCurveOne,(0,0,0), 90,None, copy=True)",
+      "language": "python",
+      "author": "Geeodorah",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\n\npoint0 = (0,0,0)\n\npoint1 = (100,0,0)\n\npitch = 1.5\n\nturns = 5\n\n\nradius0 = 5\n\nradius1 = 2\n\nrail = rs.AddSpiral(point0, point1, pitch, turns, radius0, radius1)\n\n\nr = 0.5\n\nshapes = rs.AddCircle( [0,radius0,0], r )\n\nrs.AddSweep1 (rail, shapes, closed=False)",
+      "language": "python",
+      "author": "samphi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 2028
+}

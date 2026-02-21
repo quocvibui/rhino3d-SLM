@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/amargett/ShipHullOptimization/blob/9337f2af02f96737801be5c4ff7b5f830c569e04/topview2/topview2.py",
+  "repo": "amargett/ShipHullOptimization",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "topview2/topview2.py",
+  "instruction": "Topview2",
+  "code": "import rhinoscriptsyntax as rs \nimport math\n\nlb = 4\nlm = 5\nls = 3\nbs = 2\nbwl = 6\ny_dis_1 = 1.8\ny_dis_2 = 0.9\npd = 0.3 # pivot distance\n\n\n# set pivot points with given dimensions\npt1 = (0,0,0)\npt2 = (lb, bwl*-1/2, 0)\npt3 = (lb + lm, bwl*-1/2, 0)\npt4 = (lb+lm+ls, bs*-1/2, 0)\npt5 = (lb + lm+ ls, bs/2, 0)\npt6 = (lb+lm, bwl/2, 0)\npt7 = (lb, bwl/2, 0)\n\n# curve 1\nx = (pt1[0] + pt2[0])/2\ny = -y_dis_1\nnew_pt1 = (x, y, 0)\n\n# find pivots\nnew_x = pt2[0]- pd\nnew_x2 = pt3[0]+ pd\nnew_y = pt2[1] + pd\nnew_y2 = pt3[1] + pd\npivot1 = (new_x, new_y, 0)\npivot2 = (new_x2, new_y2, 0)\n\n# curve 2\nx = (pt3[0] + pt4[0])/2\ny = pt4[1] - y_dis_2\nnew_pt2 = (x, y, 0) \n\n# curve 3\nif pt4[1] != pt5[1]:\n    rs.AddLine(pt4, pt5)\n\n# curve 4\ny = pt5[1] + y_dis_2\nnew_pt3 = (x, y, 0)\n\n# find pivots\nnew_x = pt6[0] + pd\nnew_x2 = pt7[0] - pd\nnew_y = pt6[1] - pd\nnew_y2 = pt7[1] - pd\npivot3 = (new_x, new_y, 0)\npivot4 = (new_x2, new_y2, 0)\n\n# curve 5\nx = pt7[0]/2\ny = y_dis_1\nnew_pt4 = (x, y, 0)\n\n    \nrs.AddCurve([pt1, new_pt1, pivot1, pt2, pt3, pivot2, new_pt2, pt4])\nrs.AddCurve([pt5, new_pt3, pivot3, pt6, pt7, pivot4, new_pt4, pt1])\n\n\n\n    \n\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

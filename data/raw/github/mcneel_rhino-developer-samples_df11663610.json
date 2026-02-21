@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/8462fc3487f8b7a58595ef73f6a5c09f92717f60/rhinopython/SampleSetCameraTarget.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinopython/SampleSetCameraTarget.py",
+  "instruction": "SampleSetCameraTarget.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleSetCameraTarget.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext as sc\n\n# Demonstrates how to set a viewport's camera and target locations.\ndef SampleSetCameraTarget():\n    \n    view = sc.doc.Views.ActiveView\n    vp = view.ActiveViewport\n      \n    target = vp.CameraTarget\n    camera = vp.CameraLocation\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt('New target location')\n    gp.SetDefaultPoint(target)\n    gp.Get()\n    if (gp.CommandResult() != Rhino.Commands.Result.Success):\n        return;\n    target = gp.Point()\n    \n    gp.ClearDefault()\n    gp.SetCommandPrompt('New camera location')\n    gp.SetDefaultPoint(camera)\n    gp.SetBasePoint(target, True)\n    gp.DrawLineFromPoint(target, True)\n    gp.Get()\n    if (gp.CommandResult() != Rhino.Commands.Result.Success):\n        return;\n    camera = gp.Point()\n        \n    camdir = target - camera;\n    camdir.Unitize()\n    if (camdir.IsTiny()):\n        return;\n        \n    vp.SetCameraLocations(target, camera)\n    view.Redraw()\n    \n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__==\"__main__\":\n    SampleSetCameraTarget()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

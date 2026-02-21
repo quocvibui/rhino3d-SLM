@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/FRMlab/Jenny_Sabin_Workshop/blob/c86df9cc57ff3294a091af594a9354be514b0067/Python1/example6_populate%20surface_component.py",
+  "repo": "FRMlab/Jenny_Sabin_Workshop",
+  "repo_stars": 1,
+  "repo_description": "Material from Jenny Sabin's Fall 2014 UWSA Workshop",
+  "license": "GPL-2.0",
+  "filepath": "Python1/example6_populate surface_component.py",
+  "instruction": "Example6 populate surface component",
+  "code": "import rhinoscriptsyntax as rs\n\nidSurface = rs.GetObject(\"Surface to frame\", 8, True, True)\nfaces = []\n\nintCount = rs.GetInteger(\"Number of iterations per direction\", 20, 2)\n\nuDomain = rs.SurfaceDomain(idSurface, 0)\nvDomain = rs.SurfaceDomain(idSurface, 1)\nuStep = int((uDomain[1] - uDomain[0]) / intCount)\nvStep = int((vDomain[1] - vDomain[0]) / intCount)\n\nrs.EnableRedraw(False)\nfor u in range(int(uDomain[0]),int(uDomain[1]), int(uStep)):\n    for v in range(int(vDomain[0]),int(vDomain[1]), int(vStep)):\n        pt = rs.EvaluateSurface(idSurface, u, v)\n        srfFrame = rs.SurfaceFrame(idSurface, [u, v])\n        rs.AddPlaneSurface(srfFrame, 2.0, 2.0)\n        rs.AddEllipse(srfFrame, 1.0, 3.0)\n        #component = rs.GetObject(\"component to populate\",rs.filter.mesh)\n        #faces = rs.MeshFaces(component, False)\n        #rs.AddMesh(faces, srfFrame)\n\nrs.EnableRedraw(True)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-add-text-alignment-to-python-script/167881",
+  "topic_id": 167881,
+  "title": "How to add text alignment to Python Script",
+  "question": "import rhinoscriptsyntax as rs\n\n# Get all text objects in the DWG file\nall_objects = rs.AllObjects()\ntext_objects = [obj for obj in all_objects if rs.ObjectType(obj) == rs.filter.annotation]\n\n# Loop thru all text objects and change the font, size, and alignment\nfor text_object in text_objects:\n    rs.TextObjectFont(text_object, \"SIMPLEX\")\n    rs.TextObjectHeight(text_object, 2.000)\n\n\n\n\nIve been trying to add the following text justification to include:\n\nTopCenter\n\nBottomCenter\n\n\nAny help on how to proceed would be greatly appreciated .",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef DoSomething():\n    \n    font = \"Arial\"\n    height = 2.5\n    justification = 1 + 262144\n    \n    for text_id in rs.ObjectsByType(rs.filter.annotation):\n        if not rs.IsText(text_id): continue\n\n        text = rs.TextObjectText(text_id)\n        plane = rs.TextObjectPlane(text_id)\n        \n        rs.AddText(text, plane, height, font, 0, justification)\n        rs.DeleteObject(text_id)\n\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# Get all text objects in the DWG file\nall_objects = rs.AllObjects()\ntext_objects = [obj for obj in all_objects if rs.ObjectType(obj) == rs.filter.annotation]\n\n# Loop thru all text objects and change the font, size, and alignment\nfor text_object in text_objects:\n    rs.TextObjectFont(text_object, \"SIMPLEX\")\n    rs.TextObjectHeight(text_object, 2.000)",
+      "language": "python",
+      "author": "wm_c",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 300
+}

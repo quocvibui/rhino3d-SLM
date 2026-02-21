@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/batch-process-screencapturetofile-of-all-36-layer-states-in-my-model/200547",
+  "topic_id": 200547,
+  "title": "Batch process ScreenCaptureToFile of all 36 layer states in my model",
+  "question": "The objective is to create a movie of all the layer states in my model. About the time I get them all saved, something happens and I loose them all before I can get them added to the movie.\n\n\nThanks in advance.\n\n\nDavid",
+  "code_blocks": [
+    {
+      "code": "#! python 3\n# capture layer states in current viewport with current display mode\n\nimport scriptcontext as sc\nimport Rhino.Render as rr\nimport Rhino as r\nimport Rhino.DocObjects as rdob\n\nimport System\n\nav = sc.doc.Views.ActiveView\n\ndef capture_viewport(name):\n\tview_capture = r.Display.ViewCapture()\n\tview_capture.Width = av.ActiveViewport.Size.Width\n\tview_capture.Height = av.ActiveViewport.Size.Height\n\tview_capture.ScaleScreenItems = False\n\tview_capture.DrawAxes = False\n\tview_capture.DrawGrid = False\n\tview_capture.DrawGridAxes = False\n\tview_capture.TransparentBackground = False\n\tview_capture.RealtimeRenderPasses = 10\n\tbitmap = view_capture.CaptureToBitmap(av)\n\tif bitmap:\n\t\tfolder = System.Environment.SpecialFolder.Desktop\n\t\tpath = System.Environment.GetFolderPath(folder)\n\t\tfilename = System.IO.Path.Combine(path, name + \"_layerstate_capture.png\")\n\t\tprint(\"saving \", filename)\n\t\tbitmap.Save(filename, System.Drawing.Imaging.ImageFormat.Png)\n\nfor layer_state in sc.doc.NamedLayerStates.Names:\n    sc.doc.NamedLayerStates.Restore(layer_state, r.DocObjects.Tables.RestoreLayerProperties.All)\n    capture_viewport(layer_state)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 8,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "materials",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 14,
+  "views": 190
+}

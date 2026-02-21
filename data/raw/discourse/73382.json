@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-delete-a-class-instance-created-in-python/73382",
+  "topic_id": 73382,
+  "title": "How to delete a class instance created in Python",
+  "question": "Hi everybody,\n\nI’m exploring with a menu following a camera in Rhino.\n\nI implemented a class, so I can create an instance of that class and the objects keep following the camera after the script gets executed - the only thing it does is creating that instance.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef multiMenu ():\n    op1 = rs.AddTextDot (\"Rule 1\", (-1,0,0))\n    op2 = rs.AddTextDot (\"Rule 2\", (+0,0,0))\n    op3 = rs.AddTextDot (\"Rule 3\", (+1,0,0))\n    return [op1, op2, op3]\n\n#menu floating around users head\nclass Menu:\n\ndef __init__(self):\n    self.dist = 30\n    self.prevPos = (0,0,0)\n    #creates initial shape for menu, which will be moved around\n    #self.object = cubeFromCenter (self.prevPos, 3)\n    self.object = multiMenu()\n    self.createEvents()\n\ndef createEvents (self):\n    #Rhino.Display.DisplayPipeline.CalculateBoundingBox += self.OnCameraChange\n    Rhino.RhinoApp.Idle += self.OnCameraChange\n    Rhino.RhinoDoc.SelectObjects += self.OnSelectObjects\n    \n\n# CameraChange event handler\ndef OnCameraChange(self, sender, e):\n    self.updatePosition()\n    #print \"Camera changed\"\n\ndef OnSelectObjects(self, sender, e):\n    #print \"selected\"\n    self.menuAction()\n\ndef menuAction(self):\n    #print \"selected\"\n    selection = rs.SelectedObjects()\n    #print len(selection)\n    menuItems = self.object\n    #if selection:\n        #for menuItem in self.object:\n            #for selected in selection:\n                #if selected == menuItem:\n                    #print menuItem.text\n\ndef updatePosition(self):\n    camPos = rs.ViewCameraTarget() [0]\n    camTargetPos = rs.ViewCameraTarget() [1]\n    camRay = rs.VectorUnitize (rs.VectorCreate (camTargetPos, camPos))\n    currPos = rs.VectorAdd (camPos, rs.VectorScale (camRay, self.dist))\n    \n    if (currPos != self.prevPos):\n        #update prevPos\n        translation = rs.VectorCreate (currPos, self.prevPos)\n        self.prevPos = currPos\n        #rs.DeleteObject (self.object)\n        #self.object = cu...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef multiMenu ():\n    op1 = rs.AddTextDot (\"Rule 1\", (-1,0,0))\n    op2 = rs.AddTextDot (\"Rule 2\", (+0,0,0))\n    op3 = rs.AddTextDot (\"Rule 3\", (+1,0,0))\n    return [op1, op2, op3]\n\n#menu floating around users head\nclass Menu:\n\ndef __init__(self):\n    self.dist = 30\n    self.prevPos = (0,0,0)\n    #creates initial shape for menu, which will be moved around\n    #self.object = cubeFromCenter (self.prevPos, 3)\n    self.object = multiMenu()\n    self.createEvents()\n\ndef createEvents (self):\n    #Rhino.Display.DisplayPipeline.CalculateBoundingBox += self.OnCameraChange\n    Rhino.RhinoApp.Idle += self.OnCameraChange\n    Rhino.RhinoDoc.SelectObjects += self.OnSelectObjects\n    \n\n# CameraChange event handler\ndef OnCameraChange(self, sender, e):\n    self.updatePosition()\n    #print \"Camera changed\"\n\ndef OnSelectObjects(self, sender, e):\n    #print \"selected\"\n    self.menuAction()\n\ndef menuAction(self):\n    #print \"selected\"\n    selection = rs.SelectedObjects()\n    #print len(selection)\n    menuItems = self.object\n    #if selection:\n        #for menuItem in self.object:\n            #for selected in selection:\n                #if selected == menuItem:\n                    #print menuItem.text\n\ndef updatePosition(self):\n    camPos = rs.ViewCameraTarget() [0]\n    camTargetPos = rs.ViewCameraTarget() [1]\n    camRay = rs.VectorUnitize (rs.VectorCreate (camTargetPos, camPos))\n    currPos = rs.VectorAdd (camPos, rs.VectorScale (camRay, self.dist))\n    \n    if (currPos != self.prevPos):\n        #update prevPos\n        translation = rs.VectorCreate (currPos, self.prevPos)\n        self.prevPos = currPos\n        #rs.DeleteObject (self.object)\n        #self.object = cubeFromCenter (currPos, 3)\n        rs.MoveObjects (self.object, translation)\n\n#just for testing purposes\nrs.DeleteObjects (rs.AllObjects())\n#creates Menu instance\nnewMenu = Menu()\nprint newMenu\n#delete newMenu\n\n# save the value for use in the future\nscriptcontext.sticky[\"menu_instance\"] = newMenu",
+      "language": "python",
+      "author": "castroecosta",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\n\n#delete newMenu\nif scriptcontext.sticky.has_key(\"menu_instance\"):\n    activeMenuInstance = scriptcontext.sticky[\"menu_instance\"]\n    print activeMenuInstance\n    del activeMenuInstance",
+      "language": "python",
+      "author": "castroecosta",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 478
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/split-function-works-manually-but-not-when-using-python/122343",
+  "topic_id": 122343,
+  "title": "Split function works manually, but not when using Python",
+  "question": "I used the following code to create two swept splines and intend to split them, to later join the non-intersecting parts (basically a union of the fibres, but rs.BooleanUnion wouldn’t work):\n\nimport rhinoscriptsyntax as rs\n\nimport scriptcontext as sc\n\nimport Rhino\n\nimport operator\n\nRadius = 2.6\n\nCoordinates = [14.00954,12.9616]\n\niterated_control_points = [[14.00954,12.9616,0.0],[12.727702656374271,12.811948462590294,15.0],[13.954743063948921,12.717241605623197,30.0],[14.085457287625891,12.891559644787602,45.0],[15.241599363480855,16.36794801887896,60.0],[42.07469896146351,9.482372809298749,75.0],[14.016422380934365,12.956748890873245,90.0],[13.974544875161156,12.987854523125703,105.0],[14.026827387519548,12.977572311202493,120.0],[15.291377343625728,13.111251537409705,135.0],[14.00954,12.9616,150.0]]\n\nCoordinates2 = [9.198875000000001,14.64045]\n\niterated_control_points2 = [[9.198875000000001,14.64045,0.0],[8.698409066719025,14.798757469059224,15.0],[9.205489597698683,14.647949806483156,30.0],[9.149866823024054,14.630540479855526,45.0],[8.91344351555919,14.170312926701754,60.0],[9.195232856706747,14.630225059981237,75.0],[9.162454668904807,14.656664943432233,90.0],[9.646774298539965,14.743459621166169,105.0],[7.005891767396355,13.982028311870852,120.0],[9.699340933280975,14.482142530940775,135.0],[9.198875000000001,14.64045,150.0]]\n\nshape1 = rs.AddCircle([Coordinates[0],Coordinates[1]],Radius)\n\nshape2 = rs.AddCircle([Coordinates2[0],Coordinates2[1]],Radius)\n\nrail1 = rs.AddCurve(iterated_control_points)\n\nrail2 = rs.AddCurve(iterated_control_points2)\n\nFibre1 = rs.AddSweep1(rail1,[shape1])\n\nFibre2 = rs.AddSweep1(rail2,[shape2])\n\nsplit = rs.SplitBrep(Fibre1,Fibre2)\n\n\nThis sets the geometry out fine, but the split fails. However, if I perform the exact same split manually, it works fine. How can I change the script so that the split performs correctly - as is the case with the manual operation? Below are images of the fibres:\n\n\n\n\nimage\n1487×342 43.4 KB\n\n\n\nThe results of t...",
+  "code_blocks": [
+    {
+      "code": "Fibre1 = rs.AddSweep1(rail1,[shape1]) <<<< this returns a list, not a single object.\nFibre2 = rs.AddSweep1(rail2,[shape2])<<<< this returns a list, not a single object.\nsplit = rs.SplitBrep(Fibre1,Fibre2)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Fibre1 = rs.AddSweep1(rail1,[shape1])[0]\nFibre2 = rs.AddSweep1(rail2,[shape2])[0]\nsplit = rs.SplitBrep(Fibre1,Fibre2)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 352
+}

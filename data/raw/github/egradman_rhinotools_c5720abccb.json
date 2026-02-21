@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/egradman/rhinotools/blob/db6e79170674b887c00ad096eba3ba834382a98d/laydown.py",
+  "repo": "egradman/rhinotools",
+  "repo_stars": 23,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "laydown.py",
+  "instruction": "Laydown",
+  "code": "import rhinoscriptsyntax as rs\nimport getsubsurface\nimport math\n\ndef main():\n  rs.AddLayer(\"laydown\")\n\n  while True:\n    panel, face = getsubsurface.GetSubSurface(\"select down face\")\n    if panel is None or face is None:\n      break\n\n    # compute the plane\n    normal = rs.VectorUnitize(rs.SurfaceNormal(face, (0.5,0.5)))\n    plane = rs.PlaneFromNormal(rs.EvaluateSurface(face, 0.5, 0.5), normal)\n\n    rs.ViewCPlane(plane=plane)\n    box = rs.BoundingBox(face, rs.ViewCPlane(), in_world_coords=True)\n\n    proj_coords = [rs.SurfaceClosestPoint(face, coord) + (0,) for coord in box]\n    laydown = rs.OrientObject(panel, box[0:3], proj_coords[0:3], flags=1)\n    rs.ObjectLayer(laydown, \"laydown\")\n\n    rs.DeleteObject(face)\n    rs.HideObject(panel)\n\nif __name__ == '__main__':\n  main()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

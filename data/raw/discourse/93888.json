@@ -1,0 +1,64 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dim-closed-polylines/93888",
+  "topic_id": 93888,
+  "title": "Dim Closed Polylines",
+  "question": "Hi everybody\n\nI am having a problem.\n\n\n    import rhinoscriptsyntax as rs\n    import scriptcontext as sc\n    import Rhino\n\n    def GetOffsetMidpoints(pl_ID,dist,plane):\n        #get offset figure and offset points\n        bb=rs.BoundingBox(pl_ID)\n        xform=rs.XformScale(1.1,(bb[0]+bb[2])/2)\n        bb=rs.PointArrayTransform(bb,xform)\n        pl=rs.coercecurve(pl_ID)\n        sharp=Rhino.Geometry.CurveOffsetCornerStyle.Sharp\n        off_pl=pl.Offset(bb[2],plane.Normal,dist,sc.doc.ModelAbsoluteTolerance,sharp)\n        if off_pl:\n            segs=off_pl[0].DuplicateSegments()\n            mids=[(seg.PointAtStart+seg.PointAtEnd)/2 for seg in segs]\n            return mids\n        \n    #closed planar polyline filter\n    def pl_filt(rhino_object, geometry, component_index):\n        return rs.IsPolyline(geometry) and rs.IsCurveClosed(geometry) and rs.IsCurvePlanar(geometry)\n\n    def DimClosedPolylines2():\n        msg=\"Select polylines to dimension\"\n        pl_IDs=rs.GetObjects(msg,4,preselect=True,custom_filter=pl_filt)\n        if not pl_IDs: return\n        dist=rs.GetReal(\"Distance to offset?\",5,0)\n        if dist is None: return\n        \n        rs.EnableRedraw(False)\n        \n        dimStyle = CreateDimStyle(dist)\n        #Create a DimStyle\n        for pl_ID in pl_IDs:\n            verts=rs.PolylineVertices(pl_ID)\n            opts=GetOffsetMidpoints(pl_ID,dist,rs.CurvePlane(pl_ID))\n            if opts:\n                #checksum in case offset went wrong\n                if len(opts)+1==len(verts):\n                    for i in range(len(verts)-1):\n                        dim = rs.AddAlignedDimension(verts[i],verts[i+1],opts[i],dimStyle)\n\n\n    def CreateDimStyle(textHeight):\n        dimStyle_name = \"MyDim\"\n        dimStyle = rs.AddDimStyle(dimStyle_name)\n        rs.DimStyleTextHeight(dimStyle,textHeight)\n        rs.DimStyleArrowSize(dimStyle,textHeight)\n        return dimStyle\n\n\n    DimClosedPolylines2()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nfrom Rhino.Geometry import Plane\n\nid = rs.AddLinearDimension(Plane.WorldXY, (0,0,0), (20,0,0), (10,5,0))\no = doc.Objects.FindId(id)\nd = o.Geometry\n\n# give extension lines a fixed length of 2\nd.FixedLengthExtensionOn = True\nd.FixedExtensionLength = 2.0\n\n# give extension lines an offset of 1\n#d.FixedLengthExtensionOn = False\n#d.ExtensionLineOffset = 1\n\no.CommitChanges()\nrs.Redraw()",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nfrom Rhino.Geometry import Plane\n\nid = rs.AddLinearDimension(Plane.WorldXY, (0,0,0), (20,0,0), (10,5,0))\no = doc.Objects.FindId(id)\nd = o.Geometry\n\n# give extension lines a fixed length of 2\nd.FixedLengthExtensionOn = True\nd.FixedExtensionLength = 2.0\n\n# give extension lines an offset of 1\n#d.FixedLengthExtensionOn = False\n#d.ExtensionLineOffset = 1\n\no.CommitChanges()\nrs.Redraw()",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "def DimClosedPolylines2():\n    msg=\"Select polylines to dimension\"\n    pl_IDs=rs.GetObjects(msg,4,preselect=True,custom_filter=pl_filt)\n    if not pl_IDs: return\n    dist=rs.GetReal(\"Distance to offset?\",5,0)\n    if dist is None: return\n    \n    rs.EnableRedraw(False)\n    \n    dimStyle = CreateDimStyle(dist)\n    #Create a DimStyle\n    for pl_ID in pl_IDs:\n        verts=rs.PolylineVertices(pl_ID)\n        opts=GetOffsetMidpoints(pl_ID,dist,rs.CurvePlane(pl_ID))\n        if opts:\n            #checksum in case offset went wrong\n            if len(opts)+1==len(verts):\n                for i in range(len(verts)-1):\n                    dim = rs.AddAlignedDimension(verts[i],verts[i+1],opts[i],dimStyle)\n                    dimid = sc.doc.Objects.FindId(dim)\n                    dimG = dimid.Geometry\n                    dimG.FixedLengthExtensionOn = False\n                    dimG.ExtensionLineOffset = 50.0\n                    dimid.CommitChanges()\n                    rs.Redraw()",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "def DimClosedPolylines2():\n    msg=\"Select polylines to dimension\"\n    pl_IDs=rs.GetObjects(msg,4,preselect=True,custom_filter=pl_filt)\n    if not pl_IDs: return\n    dist=rs.GetReal(\"Distance to offset?\",20,0)\n    if dist is None: return\n    \n    rs.EnableRedraw(False)\n    \n    dimStyle = CreateDimStyle(dist)\n    #Create a DimStyle\n    for pl_ID in pl_IDs:\n        verts=rs.PolylineVertices(pl_ID)\n        opts=GetOffsetMidpoints(pl_ID,dist,rs.CurvePlane(pl_ID))\n        if opts:\n            #checksum in case offset went wrong\n            if len(opts)+1==len(verts):\n                for i in range(len(verts)-1):\n                    dim = rs.AddAlignedDimension(verts[i],verts[i+1],opts[i],dimStyle)\n                    dimid = sc.doc.Objects.FindId(dim)\n                    dimG = dimid.Geometry\n                    dimG.FixedLengthExtensionOn = False\n                    dimG.ExtensionLineOffset = 5.0\n                    dimid.CommitChanges()\n                    rs.Redraw()",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "dist=rs.GetReal(\"Distance to offset?\",20,0)\n\n# give extension lines an offset of 1\nd.FixedLengthExtensionOn = False\nd.ExtensionLineOffset = 5\n\n# give extension lines a fixed length of 2\n#d.FixedLengthExtensionOn = True\n#d.FixedExtensionLength = 2.0",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n    import scriptcontext as sc\n    import Rhino\n\n    def GetOffsetMidpoints(pl_ID,dist,plane):\n        #get offset figure and offset points\n        bb=rs.BoundingBox(pl_ID)\n        xform=rs.XformScale(1.1,(bb[0]+bb[2])/2)\n        bb=rs.PointArrayTransform(bb,xform)\n        pl=rs.coercecurve(pl_ID)\n        sharp=Rhino.Geometry.CurveOffsetCornerStyle.Sharp\n        off_pl=pl.Offset(bb[2],plane.Normal,dist,sc.doc.ModelAbsoluteTolerance,sharp)\n        if off_pl:\n            segs=off_pl[0].DuplicateSegments()\n            mids=[(seg.PointAtStart+seg.PointAtEnd)/2 for seg in segs]\n            return mids\n        \n    #closed planar polyline filter\n    def pl_filt(rhino_object, geometry, component_index):\n        return rs.IsPolyline(geometry) and rs.IsCurveClosed(geometry) and rs.IsCurvePlanar(geometry)\n\n    def DimClosedPolylines2():\n        msg=\"Select polylines to dimension\"\n        pl_IDs=rs.GetObjects(msg,4,preselect=True,custom_filter=pl_filt)\n        if not pl_IDs: return\n        dist=rs.GetReal(\"Distance to offset?\",5,0)\n        if dist is None: return\n        \n        rs.EnableRedraw(False)\n        \n        dimStyle = CreateDimStyle(dist)\n        #Create a DimStyle\n        for pl_ID in pl_IDs:\n            verts=rs.PolylineVertices(pl_ID)\n            opts=GetOffsetMidpoints(pl_ID,dist,rs.CurvePlane(pl_ID))\n            if opts:\n                #checksum in case offset went wrong\n                if len(opts)+1==len(verts):\n                    for i in range(len(verts)-1):\n                        dim = rs.AddAlignedDimension(verts[i],verts[i+1],opts[i],dimStyle)\n\n\n    def CreateDimStyle(textHeight):\n        dimStyle_name = \"MyDim\"\n        dimStyle = rs.AddDimStyle(dimStyle_name)\n        rs.DimStyleTextHeight(dimStyle,textHeight)\n        rs.DimStyleArrowSize(dimStyle,textHeight)\n        return dimStyle\n\n\n    DimClosedPolylines2()",
+      "language": "python",
+      "author": "rhinoceros.adv",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 20,
+  "views": 865
+}

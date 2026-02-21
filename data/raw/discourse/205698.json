@@ -1,0 +1,22 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/net-7-0-mac-windows-compatibility-onload-not-called/205698",
+  "topic_id": 205698,
+  "title": "Net 7.0 mac-windows compatibility - OnLoad not called",
+  "question": "in short:\n\nI came across a strange behaviour using the build project (.rhp) from the windows site, on the mac side. looks like OnLoad is not called - and some validation is bypassed.\n\n\nin detail:\n\nthe behaviour can be repeated by:\n\n\n\n\nOn the windows site: build a new Solution/Project based on the template for visual Studio 2022, use the sample command (add a line).\n\n\nadd code below to the  Rhino.PlugIns.PlugIn class.\n\n\nbuild the project with Configuration “Release”.\n\n\non the Windows site, the plugin is not loading - as expected.\n\n\nOn the mac site:\n\n\nusing the net7.0 .rhp Relase from the Windows site, create a .macrhi following \nthis instruction\n and install the plugin on the mac site. The Plugin / command \nis running\n ! \n \n \n \n\n\nlooks like OnLoad is never called\n\n\n\n\ni know that this is not the recommended way to build a cross-platform plugin but it looks like it allows some strange behaviour or even licence bypassing.\n\n\n@dan\n or \n@dale\n thanks for some thoughts / help / insights.\n\n\n protected override LoadReturnCode OnLoad(ref String errorMessage)\n {\n     errorMessage = \"..loading..\";\n     LoadReturnCode baseLoading = base.OnLoad(ref errorMessage);\n     if (baseLoading != LoadReturnCode.Success)\n     {\n         return baseLoading;\n     }\n     bool isValid = ValidateStuff();\n     if (isValid)\n     {\n         RhinoApp.WriteLine(\"success loading \" + this.Name);\n         errorMessage = errorMessage + \"success\";\n         return LoadReturnCode.Success;\n     }\n     RhinoApp.WriteLine(\"failed loading \" + this.Name);\n     errorMessage = errorMessage + this.Name + \"..failed\";\n     return LoadReturnCode.ErrorShowDialog;\n }\n private bool ValidateStuff()\n {\n     RhinoApp.WriteLine(\"Fake Fail\");\n     return false;\n }",
+  "code_blocks": [
+    {
+      "code": "protected override LoadReturnCode OnLoad(ref String errorMessage)\n {\n     errorMessage = \"..loading..\";\n     LoadReturnCode baseLoading = base.OnLoad(ref errorMessage);\n     if (baseLoading != LoadReturnCode.Success)\n     {\n         return baseLoading;\n     }\n     bool isValid = ValidateStuff();\n     if (isValid)\n     {\n         RhinoApp.WriteLine(\"success loading \" + this.Name);\n         errorMessage = errorMessage + \"success\";\n         return LoadReturnCode.Success;\n     }\n     RhinoApp.WriteLine(\"failed loading \" + this.Name);\n     errorMessage = errorMessage + this.Name + \"..failed\";\n     return LoadReturnCode.ErrorShowDialog;\n }\n private bool ValidateStuff()\n {\n     RhinoApp.WriteLine(\"Fake Fail\");\n     return false;\n }",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 167
+}

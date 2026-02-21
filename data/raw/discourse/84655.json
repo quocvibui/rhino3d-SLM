@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-may-the-source-be-with-you/84655",
+  "topic_id": 84655,
+  "title": "Python : May the source be with you!",
+  "question": "Hello everyone,\n\n\nI wrote a script to help me code in python and learn RhinoCommon and decided to share it with you \n\n\nAs you may know, the \nrhinoscriptsyntax\n library is written in Python and uses \nrhinocommon\n functions, also in Python, under the hood.  In order to look up the underlying code you can open up the full python file, you can use the \ninspect\n module or you can save the script below to your computer and run it each time you want to look up a particular function.  For instance if you search for ‘bounding’ you get the following options:\n\n\n\n\nAnd by clicking on the 3rd option you get the underlying source code, which you can read in the box, copy elsewhere, …\n\n\n\n\nget_source_v1.py (883 Bytes)\n\n\nget_source_v3.py (1.2 KB)\n : Clarified some text, PEP8 compliance, typo…\n\n\nAll comments, improvements and suggestions welcome !\n\n\n\n\n\nClick here for the code\n\n\nfrom inspect import getsource, getmembers, isfunction\n\nimport rhinoscriptsyntax as rs\n\n\"\"\" Script to view the source code for rhinoscript modules in Rhino 5 + 6\nBy Graham Knapp for personal use and for the McNeel Discourse forums\nhttps://discourse.mcneel.com/t/python-may-the-source-be-with-you/84655\n13/6/2019\n\"\"\"\n\n\ndef get_source():\n    search_term = rs.StringBox('Function name to search for',\n                               title='rhinoscriptsyntax'\n                               ).lower()\n    if not search_term:\n        return\n    functions = {name: obj for name, obj in getmembers(rs) if\n                 isfunction(obj) and search_term in name.lower()}  # (tuples of name, fuction)\n    if not functions:\n        return\n    selected = rs.ListBox(functions.keys(), title='rhinoscriptsyntax')\n    if not selected:\n        return\n\n    the_source = getsource(functions[selected])\n    box_result = rs.EditBox(the_source,\n                            message='Press OK to copy to clipboard',\n                            title='Use the source')\n    if box_result:\n        rs.ClipboardText(box_result)\n\n    return box_result\n\n\nif...",
+  "code_blocks": [
+    {
+      "code": "from inspect import getsource, getmembers, isfunction\n\nimport rhinoscriptsyntax as rs\n\n\"\"\" Script to view the source code for rhinoscript modules in Rhino 5 + 6\nBy Graham Knapp for personal use and for the McNeel Discourse forums\nhttps://discourse.mcneel.com/t/python-may-the-source-be-with-you/84655\n13/6/2019\n\"\"\"\n\n\ndef get_source():\n    search_term = rs.StringBox('Function name to search for',\n                               title='rhinoscriptsyntax'\n                               ).lower()\n    if not search_term:\n        return\n    functions = {name: obj for name, obj in getmembers(rs) if\n                 isfunction(obj) and search_term in name.lower()}  # (tuples of name, fuction)\n    if not functions:\n        return\n    selected = rs.ListBox(functions.keys(), title='rhinoscriptsyntax')\n    if not selected:\n        return\n\n    the_source = getsource(functions[selected])\n    box_result = rs.EditBox(the_source,\n                            message='Press OK to copy to clipboard',\n                            title='Use the source')\n    if box_result:\n        rs.ClipboardText(box_result)\n\n    return box_result\n\n\nif __name__ == '__main__':\n    get_source()",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1821
+}

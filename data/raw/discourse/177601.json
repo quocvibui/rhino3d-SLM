@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/csv-survey-points-import-naming-labelling-points/177601",
+  "topic_id": 177601,
+  "title": "CSV Survey points Import - Naming/labelling points",
+  "question": "Dear all,\n\n\nI recently conducted a survey of a building and obtained a CSV file containing x, y, z coordinates. I’m aware that I can easily import this data into points in Rhino. However, I’m wondering if it’s possible to import additional information, such as the point number, and create tags or text to label each coordinate. Ideally, the coordinates would be numbered according to the CSV row number.\n\n\nThis would greatly assist in identifying and verifying points during the redraw process.\n\n\nThank you for your help.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef ImportSurveyPointsSpecial():\n    start_folder=rs.DocumentPath()\n    #if not start_folder: start_folder=\"\"\n    filepath=rs.OpenFileName(\"Open\", \"CSV Files (*.csv)|*.csv||\",start_folder)\n    if not filepath: return\n    pass\n    rs.Prompt(\"Working...\")\n    pts=[]\n    ht=0.025 #change later\n    with open(filepath, \"r\") as file:\n        for line in file:\n            line_data=line.split(\";\")\n            try:\n                x=float(line_data[2])\n                y=float(line_data[3])\n                z=float(line_data[4])\n                pt=Rhino.Geometry.Point3d(x,y,z)\n                pt_name=line_data[0]+line_data[1]\n                pt_id=rs.AddPoint(pt)\n                rs.ObjectName(pt_id,pt_name)\n                text=rs.AddText(pt_name,pt,ht,justification=1+65536)\n                group=rs.AddGroup(\"Point {}\".format(pt_name))\n                rs.AddObjectsToGroup([pt_id,text],group)\n            except:\n                continue\n\nImportSurveyPointsSpecial()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 147,
+  "posts_count": 11,
+  "views": 826
+}

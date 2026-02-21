@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-how-to-draw-line-segments-while-picking-the-points/64267",
+  "topic_id": 64267,
+  "title": "[Help] How to draw line segments while picking the points",
+  "question": "Hi,\n\n\nFirst a small complain, RhinoCommon, RhinoPython, and the other APIs are really not helpful for beginner programmers. Same goes for the examples. Very few comments not really explaining what is going on.\n\n\nNow on the point. Can anyone explain, please…\n\nHow can I make the code below draw the line segments between the points while I’m creating them? I am getting its length after all.\n\nPlease excuse me for the useless lines, I’m trying to understand how it all works.\n\n\nimport Rhino\nimport scriptcontext\n\ndef zPolyline():\n    # For this example we will use a GetPoint class, but all of the custom\n    # \"Get\" classes support command line options.\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"GetPoint with options\")\n\n    # set up the options\n    intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n    dblOption = Rhino.Input.Custom.OptionDouble(2.2, 0, 99.9)\n    boolOption = Rhino.Input.Custom.OptionToggle(True, \"Off\", \"On\")\n    listValues = \"Item0\", \"Item1\", \"Item2\", \"Item3\", \"Item4\"\n    # set up options' defaults\n    gp.AddOptionInteger(\"Integer\", intOption)\n    gp.AddOptionDouble(\"Double\", dblOption)\n    gp.AddOptionToggle(\"Boolean\", boolOption)\n    listIndex = 3\n    list = Rhino.Collections.Point3dList\n    # WHA?\n    opList = gp.AddOptionList(\"List\", listValues, listIndex)\n    pl = Rhino.Geometry.Polyline()\n    while True:\n        # perform the get operation. This will prompt the user to\n        # input a point, but also allow for command line options\n        # defined above\n        for i in range(0,5):\n            get_rc = gp.Get()\n            #if you don't comply with the next if loop keep the command open\n            if gp.CommandResult()!=Rhino.Commands.Result.Success:\n                return gp.CommandResult() \n            #the if loop that completes the command\n            if get_rc == Rhino.Input.GetResult.Point:\n                \n                point = gp.Point()\n                scriptcontext.doc.Objects.AddPoint(point)\n                s...",
+  "code_blocks": [
+    {
+      "code": "numPoints = 2\nnumPointsMin = 1\nnumPointsMax = 99\n# set up the options\nintOption = Rhino.Input.Custom.OptionInteger(numPoints, numPointsMin, numPointsMax)",
+      "language": "unknown",
+      "author": "ivelin.peychev",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "while True:\n    # perform the get operation. This will prompt the user to\n    # input a point, but also allow for command line options\n    # defined above\n    for i in range(0,numPoints):\n        get_rc = gp.Get()\n        #if you don't comply with the next if loop keep the command open\n        if gp.CommandResult()!=Rhino.Commands.Result.Success:\n            return gp.CommandResult() \n        #the if loop that completes the command\n        if get_rc == Rhino.Input.GetResult.Point:\n            point = gp.Point()\n            sc.doc.Objects.AddPoint(point)\n            list.Add(point.X,point.Y,point.Z)\n            sc.doc.Objects.AddPolyline(pl)\n            sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef MakePolyline():\n    msg1=\"Pick first point\"\n    msg2=\"Pick next point or press Enter to end\"\n    pts=rs.GetPoints(True,message1=msg1,message2=msg2,max_points=99)\n    if pts and len(pts)>1: rs.AddPolyline(pts)\nMakePolyline()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 21,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef zPolyline():\n    # For this example we will use a GetPoint class, but all of the custom\n    # \"Get\" classes support command line options.\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"GetPoint with options\")\n\n    # set up the options\n    intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n    dblOption = Rhino.Input.Custom.OptionDouble(2.2, 0, 99.9)\n    boolOption = Rhino.Input.Custom.OptionToggle(True, \"Off\", \"On\")\n    listValues = \"Item0\", \"Item1\", \"Item2\", \"Item3\", \"Item4\"\n    # set up options' defaults\n    gp.AddOptionInteger(\"Integer\", intOption)\n    gp.AddOptionDouble(\"Double\", dblOption)\n    gp.AddOptionToggle(\"Boolean\", boolOption)\n    listIndex = 3\n    list = Rhino.Collections.Point3dList\n    # WHA?\n    opList = gp.AddOptionList(\"List\", listValues, listIndex)\n    pl = Rhino.Geometry.Polyline()\n    while True:\n        # perform the get operation. This will prompt the user to\n        # input a point, but also allow for command line options\n        # defined above\n        for i in range(0,5):\n            get_rc = gp.Get()\n            #if you don't comply with the next if loop keep the command open\n            if gp.CommandResult()!=Rhino.Commands.Result.Success:\n                return gp.CommandResult() \n            #the if loop that completes the command\n            if get_rc == Rhino.Input.GetResult.Point:\n                \n                point = gp.Point()\n                scriptcontext.doc.Objects.AddPoint(point)\n                scriptcontext.doc.Views.Redraw()\n                #print \"Command line option values are\"\n                #print \" Integer =\", intOption.CurrentValue\n                #print \" Double =\", dblOption.CurrentValue\n                #print \" Boolean =\", boolOption.CurrentValue\n                #print \" List =\", listValues[listIndex]\n                print \"x= \",point.X,\", y= \",point.Y,\", z= \",point.Z\n                pl.Add(point.X,point.Y,point.Z)\n                print pl.Length\n                #print list\n                \n                \n                # \n            elif get_rc==Rhino.Input.GetResult.Option:\n                if gp.OptionIndex()==opList:\n                    listIndex = gp.Option().CurrentListOptionIndex\n                    Rhino.Geometry.Polyline(list)\n                    \n                continue\n        break\n    return Rhino.Commands.Result.Success\n\n\nif __name__ == \"__main__\":\n    zPolyline()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 38,
+  "views": 4577
+}

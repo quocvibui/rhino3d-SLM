@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/i-don-t-understand-how-to-correctly-draw-a-u-channel-using-python/204598",
+  "topic_id": 204598,
+  "title": "I don’t understand how to correctly draw a U-channel using Python",
+  "question": "I’ve supplied the Python component with all the required dimensions to build the channel’s section curve. I know how to construct the curve with sharp corners, but I need to fillet the inner corners with one radius and a couple of the outer corners with a different radius. It’s the filleting that’s causing the problem.\n\n\nimage\n709×570 9.42 KB\n\n\nimage\n206×260 861 Bytes\n\nThis is what I ended up with\n\n\nimage\n790×554 15.8 KB\n\nAnd this is what I need to get\n\n\nCluster_channel.ghcluster\n (3.4 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\nimport ghpythonlib as gh\nfrom ghpythonlib.components import Fillet\n\nassert len(parameters) == 6, \"Wrong number of parameters\"\n\n# U-channel\nh, b, s, t, r1, r2 = [p * unit_scale for p in parameters]\n\npts = [\n    rg.Point3d(     0,           0, 0), #  0\n    rg.Point3d(     0,          -h, 0), #  1\n    rg.Point3d(     b,          -h, 0), #  2\n    rg.Point3d(     b, -h + t - r2, 0), #  3\n    rg.Point3d(     b,      -h + t, 0), #  4\n    rg.Point3d(b - r2,      -h + t, 0), #  5\n    rg.Point3d(s + r1,      -h + t, 0), #  6\n    rg.Point3d(     s,      -h + t, 0), #  7\n    rg.Point3d(     s, -h + t + r1, 0), #  8\n    rg.Point3d(     s,     -t - r1, 0), #  9\n    rg.Point3d(     s,          -t, 0), # 10\n    rg.Point3d(s + r1,          -t, 0), # 11\n    rg.Point3d(b - r2,          -t, 0), # 12\n    rg.Point3d(     b,          -t, 0), # 13\n    rg.Point3d(     b,     -t + r2, 0), # 14\n    rg.Point3d(     b,           0, 0), # 15\n]\n\npolycurve = rg.PolyCurve()\npolycurve.Append(rg.Line(pts[0], pts[1]))\npolycurve.Append(rg.Line(pts[1], pts[2]))\npolycurve.Append(rg.Line(pts[2], pts[3]))\npolycurve.Append(rg.Arc(pts[3], pts[4]-pts[3], pts[5]))\npolycurve.Append(rg.Line(pts[5], pts[6]))\npolycurve.Append(rg.Arc(pts[6], pts[7]-pts[6], pts[8]))\npolycurve.Append(rg.Line(pts[8], pts[9]))\npolycurve.Append(rg.Arc(pts[9], pts[10]-pts[9], pts[11]))\npolycurve.Append(rg.Line(pts[11], pts[12]))\npolycurve.Append(rg.Arc(pts[12], pts[13]-pts[12], pts[14]))\npolycurve.Append(rg.Line(pts[14], pts[15]))\npolycurve.Append(rg.Line(pts[15], pts[0]))\n\ntol = sc.doc.ModelAbsoluteTolerance\npolycurve.MakeClosed(tol)\n\ngeometry = polycurve.ToNurbsCurve()",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 171
+}

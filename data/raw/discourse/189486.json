@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-to-join-open-curves-in-blocks/189486",
+  "topic_id": 189486,
+  "title": "Python script to join open curves in blocks",
+  "question": "I have a set of closed curves that were made into blocks. Each block contains one closed curve. Somehow we broke all the closed curves open and they are now all open curve segments.  I can edit the block and select the curves and type ‘join’ and it fixes the issue.  but I have thousands of blocks.  What is the script that might accomplish this task.\n\nI am trying the following but it appears to have no affect.  I have one instance of each block in the file and I can print out ids for each curve and it seems to be looping correctly.\n\n\nblock_names = rs.BlockNames();\nfor block_name in block_names:\n  block_objects = rs.BlockObjects(block_name)\n  curves = []\n  for id in block_objects:\n    if rs.IsCurve(id):\n      curves.append(id)\n rs.JoinCurves(curves)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nrs.EnableRedraw(False)\n\nblockNames = rs.BlockNames()\n\nfor blockName in blockNames:\n\n    if rs.IsBlockReference(blockName) :\n        print(\"Cannot edit linked block.\")\n        break\n\n    blockObjects = rs.BlockObjects(blockName)\n\n    # Separate the curves from others type of objects\n    blockObjectsCurvesOnly = []\n    blockObjectsWithoutCurves = []\n\n    for object in blockObjects:\n        if rs.IsCurve(object):\n            blockObjectsCurvesOnly.append(object)\n        else:\n            blockObjectsWithoutCurves.append(object)\n    \n    # rs.JoinCurves need atleast 2 curves\n    if (len(blockObjectsCurvesOnly) < 2):\n        break\n    \n    joinedCurve = rs.JoinCurves(blockObjectsCurvesOnly)\n\n    # Make a union of the list with the newly created list of curves from rs.JoinCurves()\n    modifiedBlockObjects = blockObjectsWithoutCurves + joinedCurve\n\n    # Create a list of derived object from GeometryBase with rs.coercegeometry()\n    newGeometry = []\n    # Keep the same attributes assigned to the objects\n    newAttributes = []\n    \n    for modifiedObject in modifiedBlockObjects:\n        newGeometry.append(rs.coercegeometry(modifiedObject))\n        ref = Rhino.DocObjects.ObjRef(modifiedObject)\n        attr = ref.Object().Attributes\n        newAttributes.append(attr)\n\n    # Get the instance definition by block name\n    idef = sc.doc.InstanceDefinitions.Find(blockName)\n    idefIndex = idef.Index\n\n    # Assign a new list of derived object from geometryBase to the instance definition\n    sc.doc.InstanceDefinitions.ModifyGeometry(idefIndex,newGeometry,newAttributes)\n\n    # Delete objects created by rs.JoinCurves()\n    rs.DeleteObjects(modifiedBlockObjects)\n    \nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "ArchiCraig",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "block_names = rs.BlockNames();\nfor block_name in block_names:\n  block_objects = rs.BlockObjects(block_name)\n  curves = []\n  for id in block_objects:\n    if rs.IsCurve(id):\n      curves.append(id)\n rs.JoinCurves(curves)",
+      "language": "python",
+      "author": "dustin",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 99
+}

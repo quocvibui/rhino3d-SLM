@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/change-subobjects-color-through-rhinocommon/137719",
+  "topic_id": 137719,
+  "title": "Change subobjects' color through rhinocommon",
+  "question": "Hi guys,\n\nI’d like to change a brepface’s color to eg. red, in the meantime the other part’s color of this brep is remian the same (both the colorsource and the color). I can do it in rhino by selecting the brepface and then change the color at property panel, but in rhinocommon, I’ve found this but not working for now:\n\n\nbrepface.perfacecolor = red;\n\n\nrhinoobject.attributes.colorsource = by obj;\n\nrhinoobject.attributes.objectcolor = red;\n\nrhinoobject.commitchanges();\n\nredraw();\n\n\nI didn’t found a particular method for changing a sub-object’s attributes I guess, I did see the method getsubobjects(), but it seems that this method generate the new objects instead of changing the old which I may not need to.\n\n\nthx!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\n\ndef test_brep_perface_color():\n    # Select a face\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select surface\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    go.SubObjectSelect = True\n    go.Get()\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n    \n    objref = go.Object(0)\n    # Get the brep face that was picked\n    face = objref.Face()\n    # Get the owning brep\n    brep = objref.Brep()\n    if face and brep:\n        # Only make sense if there is more than 1 face\n        if brep.Faces.Count > 1:\n            new_brep = brep.DuplicateBrep()\n            new_brep.Faces[face.FaceIndex].PerFaceColor = System.Drawing.Color.Red\n            sc.doc.Objects.Replace(objref.ObjectId, new_brep)\n            sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_brep_perface_color() # Call the function defined above",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 1532
+}

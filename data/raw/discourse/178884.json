@@ -1,0 +1,77 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/adding-nurbssurface-to-model/178884",
+  "topic_id": 178884,
+  "title": "Adding NurbsSurface to Model",
+  "question": "Trying to add a Nurbs surface to a Model using rhino3d.\n\n\nI am getting a popup error when trying to add a surface to a model.\n\n\nImage 28-03-2024 at 07.05\n854×704 111 KB\n\n\nHow do I add a NurbsSurface to the list of Objects in a File3DM?\n\n\nCode is\n\n\ndef processSurfaceUV(self, surface):\n        print(f\"=========== Process Surface UV\")\n        print(dir(surface))\n        UDegree = surface.UDegree\n        UOrder = UDegree + 1\n        VDegree = surface.VDegree\n        VOrder =VDegree + 1\n        UPoles = surface.NbUPoles\n        VPoles = surface.NbVPoles\n        poles = surface.getPoles()\n        print(f\"UPoles {UPoles} VPoles {VPoles}\")\n        print(f\"Poles {poles}\")\n        print(f\"Poles {len(poles)} x {len(poles[0])}\")\n        print(f\"Surface UDegree {UDegree} VDegree {VDegree}\")\n        VKnots = surface.getVKnots()\n        UKnots = surface.getUKnots()\n        VMults = surface.getVMultiplicities()\n        UMults = surface.getUMultiplicities()\n        nurbSurf = r3.NurbsSurface.Create(3, False, UOrder, VOrder, UPoles, VPoles)\n        for c in range(0, len(self.curves)-1, 2):\n            nurbSurf.CreateRuledSurface(self.curves[c], self.curves[c+1])\n        self.model.Objects.AddSurface(nurbSurf)\n\n\n\nAnd report view has\n\n\n06:52:48  =========== Process Surface UV\n06:52:48  ['Content', 'Continuity', 'FirstUKnotIndex', 'FirstVKnotIndex', 'LastUKnotIndex', 'LastVKnotIndex', 'MaxDegree', 'MemSize', 'Module', 'NbUKnots', 'NbUPoles', 'NbVKnots', 'NbVPoles', 'Rotation', 'Tag', 'TypeId', 'UDegree', 'UKnotSequence', 'UPeriod', 'VDegree', 'VKnotSequence', 'VPeriod', '__class__', '__delattr__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'approximate', 'bounds', 'buildFromNSections', 'buildFromPolesMultsKnots', 'clone', 'copy', 'curvature', 'curvatureDirect...",
+  "code_blocks": [
+    {
+      "code": "for c in range(0, len(self.curves)-1, 2):\n    # use CreateRuledSurface as classmethod/static method:\n    nurbSurf = r3.NurbsSurface.CreateRuledSurface(self.curves[c], self.curves[c+1]) \n    self.model.Objects.AddSurface(nurbSurf)",
+      "language": "unknown",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "nurbSurf = r3.NurbsSurface.Create(3, False, UOrder, VOrder, UPoles, VPoles)\n        rs = nurbSurf.CreateRuledSurface(self.curves[c], self.curves[2])\n        self.model.Objects.AddSurface(rs)",
+      "language": "unknown",
+      "author": "Keith_Sloan",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def processSurfaceUV(self, surface):\n        print(f\"=========== Process Surface UV\")\n        print(dir(surface))\n        UDegree = surface.UDegree\n        UOrder = UDegree + 1\n        VDegree = surface.VDegree\n        VOrder =VDegree + 1\n        UPoles = surface.NbUPoles\n        VPoles = surface.NbVPoles\n        poles = surface.getPoles()\n        print(f\"UPoles {UPoles} VPoles {VPoles}\")\n        print(f\"Poles {poles}\")\n        print(f\"Poles {len(poles)} x {len(poles[0])}\")\n        print(f\"Surface UDegree {UDegree} VDegree {VDegree}\")\n        VKnots = surface.getVKnots()\n        UKnots = surface.getUKnots()\n        VMults = surface.getVMultiplicities()\n        UMults = surface.getUMultiplicities()\n        Ucurve = self.createNurbsCurve(UDegree, poles[0])\n        Vcurve = self.createNurbsCurve(VDegree, poles[1])\n        nurbSurf = r3.NurbsSurface.Create(3, False, UOrder, VOrder, UPoles, VPoles)\n        #for c in range(0, len(self.curves)-1, 2):\n        #    nurbSurf.CreateRuledSurface(self.curves[c], self.curves[c+1])\n        #    self.model.Objects.AddSurface(nurbSurf)\n        #ns =  nurbSurf.CreateRuledSurface(self.curves[0], self.curves[2])\n        ns =  nurbSurf.CreateRuledSurface(Ucurve, Vcurve)\n        if ns is not None:\n            self.model.Objects.AddSurface(ns)",
+      "language": "python",
+      "author": "Keith_Sloan",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "....\n\n the AddSphere(...)\n |      AddSphere(self: rhino3dm._rhino3dm.File3dmObjectTable, sphere: rhino3dm._rhino3dm.Sphere, attributes: rhino3dm._rhino3dm.ObjectAttributes = None) -> object\n |  \n |  AddSurface(...)\n |      AddSurface(self: rhino3dm._rhino3dm.File3dmObjectTable, surface: rhino3dm._rhino3dm.Sphere, attributes: rhino3dm._rhino3dm.ObjectAttributes = None) -> object\n |  \n...",
+      "language": "unknown",
+      "author": "Keith_Sloan",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino\nimport System\n\ndef _make_deformable_plane():\n    plane = Rhino.Geometry.Plane.WorldXY\n    u_interval = Rhino.Geometry.Interval(0.0, 15.0)\n    v_interval = Rhino.Geometry.Interval(0.0, 7.5)\n    u_degree = 2\n    v_degree = 2\n    u_points = 10\n    v_points = 10\n    srf = Rhino.Geometry.NurbsSurface.CreateFromPlane(plane, u_interval, v_interval, u_degree, v_degree, u_points, v_points)\n    if srf and srf.IsValid:\n        return srf\n    return None\n\ndef test_write():\n    archive = Rhino.FileIO.File3dm()\n    \n    color = System.Drawing.Color.CornflowerBlue\n    archive.AllLayers.AddDefaultLayer(\"Default\", color)\n    \n    srf = _make_deformable_plane()\n    attribs = Rhino.DocObjects.ObjectAttributes()\n    archive.Objects.Add(srf, attribs)\n    \n    path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop)\n    path = System.IO.Path.Combine(path, \"test_write.3dm\");\n    archive.Write(path, 70)\n\nif __name__ == \"__main__\":\n    test_write()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "plane = Rhino.Geometry.Plane.WorldXY\n    u_interval = Rhino.Geometry.Interval(0.0, 15.0)\n    v_interval = Rhino.Geometry.Interval(0.0, 7.5)\n    u_degree = 2\n    v_degree = 2\n    u_points = 10\n    v_points = 10\n    srf = Rhino.Geometry.NurbsSurface.CreateFromPlane(plane, u_interval, v_interval, u_degree, v_degree, u_points, v_points)\n    if srf and srf.IsValid:\n        return srf\n    return None",
+      "language": "unknown",
+      "author": "Keith_Sloan",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": ">>> import rhino3dm as r3\n>>> print(r3.__version__)\n8.4.0\n>>>",
+      "language": "python",
+      "author": "Keith_Sloan",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "def processSurfaceUV(self, surface):\n        print(f\"=========== Process Surface UV\")\n        print(dir(surface))\n        UDegree = surface.UDegree\n        UOrder = UDegree + 1\n        VDegree = surface.VDegree\n        VOrder =VDegree + 1\n        UPoles = surface.NbUPoles\n        VPoles = surface.NbVPoles\n        poles = surface.getPoles()\n        print(f\"UPoles {UPoles} VPoles {VPoles}\")\n        print(f\"Poles {poles}\")\n        print(f\"Poles {len(poles)} x {len(poles[0])}\")\n        print(f\"Surface UDegree {UDegree} VDegree {VDegree}\")\n        VKnots = surface.getVKnots()\n        UKnots = surface.getUKnots()\n        VMults = surface.getVMultiplicities()\n        UMults = surface.getUMultiplicities()\n        nurbSurf = r3.NurbsSurface.Create(3, False, UOrder, VOrder, UPoles, VPoles)\n        for c in range(0, len(self.curves)-1, 2):\n            nurbSurf.CreateRuledSurface(self.curves[c], self.curves[c+1])\n        self.model.Objects.AddSurface(nurbSurf)",
+      "language": "python",
+      "author": "Keith_Sloan",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 102,
+  "posts_count": 9,
+  "views": 342
+}

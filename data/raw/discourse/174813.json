@@ -1,0 +1,73 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-navigate-rhino-scripting-documentation/174813",
+  "topic_id": 174813,
+  "title": "How to navigate Rhino scripting documentation?",
+  "question": "I can’t begin to tell you how unhelpful I find the Rhino scripting documentation. I think I must be approaching it wrong somehow. Can you tell me how I should be approaching it?\n\n\nHere is an example: I want to take the Python routine __boxpoints helpfully provided here \nPythonScript equivalent of IsBox and BoxPoints?\n and apply it to all the boxes in the visible layers. Here is my attempt:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef __boxpoints(brep, tol):\n    if brep and brep.IsBox():\n        verts = brep.DuplicateVertices()\n        if len(verts) == 8:\n            # Since the vertices can be in any order,\n            # cook up their bounding box and return\n            # them in some logical order\n            face = brep.Faces[0]\n            u = face.Domain(0).Min\n            v = face.Domain(1).Min\n            rc, plane = face.FrameAt(u, v)\n            points = Rhino.Geometry.PointCloud(verts)\n            w2p = Rhino.Geometry.Transform.ChangeBasis(Rhino.Geometry.Plane.WorldXY, plane)\n            bbox = points.GetBoundingBox(w2p)\n            corners = Rhino.Geometry.PointCloud(bbox.GetCorners())\n            p2w = Rhino.Geometry.Transform.ChangeBasis(plane, Rhino.Geometry.Plane.WorldXY)\n            corners.Transform(p2w)\n            return corners.GetPoints()\n    return None\n\ndef labelBoxesInVisibleLayers():\n    layers = rs.LayerNames()\n    for layer in layers:\n        if rs.IsLayerVisible(layer):\n            rhobjs = sc.doc.Objects.FindByLayer(layer)\n            for obj in rhobjs:\n                brep = obj.Brep()\n                points = __boxpoints(brep, sc.doc.ModelAbsoluteTolerance)\n                if points:\n                    p = 0\n                    for pt in points:\n                        sc.doc.Objects.AddTextDot(str(p), pt)\n                        p = p + 1\n\ndef labelOneBox():\n    filter = Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select polysurface\", False, filter)\n   ...",
+  "code_blocks": [
+    {
+      "code": "def labelBoxesInVisibleLayers():\n    layers = rs.LayerNames()\n    for layer in layers:\n        if rs.IsLayerVisible(layer):\n            obj_ids=rs.ObjectsByLayer(layer)\n            if obj_ids:\n                for obj_id in obj_ids:\n                    #get the brep geometry from the object *if possible*\n                    brep = rs.coercebrep(obj_id)\n                    #only do the folllowing() if coercebrep succeeeded\n                    if brep:\n                        points = __boxpoints(brep, sc.doc.ModelAbsoluteTolerance)\n                        if points:\n                            p = 0\n                            for pt in points:\n                                sc.doc.Objects.AddTextDot(str(p), pt)\n                                p = p + 1",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef labelBoxesInVisibleLayers():\n    tol=sc.doc.ModelAbsoluteTolerance\n    layers = rs.LayerNames()\n    for layer in layers:\n        if rs.IsLayerVisible(layer):\n            obj_ids=rs.ObjectsByLayer(layer)\n            if obj_ids:\n                for obj_id in obj_ids:\n                    if rs.IsBrep(obj_id):\n                        #this gets the object, brep geometry from the object id\n                        brep=sc.doc.Objects.Find(obj_id).Geometry\n                        points = __boxpoints(brep,tol)\n                        if points:\n                            p = 0\n                            for pt in points:\n                                sc.doc.Objects.AddTextDot(str(p), pt)\n                                p = p + 1",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "# scriptcontext module\nimport rhinocompat as compat\n\n'''The Active Rhino document (Rhino.RhinoDoc in RhinoCommon) while a script\nis executing. This variable is set by Rhino before the exection of every script.\n'''\ndoc = None\n\n\n'''Identifies how the script is currently executing\n1 = running as standard python script\n2 = running inside grasshopper component\n3... potential other locations where script could be running\n'''\nid = 1\n\n\nclass __Py2StickyWrapper(dict):\n    '''A dictionary of values that can be reused between execution of scripts\n    '''",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def GetObjects(message=None, filter=0, group=True, preselect=False, select=False, objects=None, minimum_count=1, maximum_count=0, custom_filter=None):\n \n    if not preselect:\n        scriptcontext.doc.Objects.UnselectAll()\n        scriptcontext.doc.Views.Redraw()\n\n    objects = rhutil.coerceguidlist(objects)\n    class CustomGetObject(Rhino.Input.Custom.GetObject):\n        def __init__(self, filter_function):\n            self.m_filter_function = filter_function\n        def CustomGeometryFilter( self, rhino_object, geometry, component_index ):\n            if objects and not rhino_object.Id in objects: return False\n            rc = True\n            if self.m_filter_function is not None:\n                try:\n                    rc = self.m_filter_function(rhino_object, geometry, component_index)\n                except:\n                    rc = True\n            return rc\n    go = CustomGetObject(custom_filter)\n    go.SetCommandPrompt(message or \"Select objects\")\n    geometry_filter = __FilterHelper(filter)\n    if filter>0: go.GeometryFilter = geometry_filter\n    go.SubObjectSelect = False\n    go.GroupSelect = group\n    go.AcceptNothing(True)\n    if go.GetMultiple(minimum_count,maximum_count)!=Rhino.Input.GetResult.Object: return None\n    if not select and not go.ObjectsWerePreselected:\n        scriptcontext.doc.Objects.UnselectAll()\n        scriptcontext.doc.Views.Redraw()\n    rc = []\n    count = go.ObjectCount\n    for i in xrange(count):\n        objref = go.Object(i)\n        rc.append(objref.ObjectId)\n        obj = objref.Object()\n        if select and obj is not None: obj.Select(select)\n    go.Dispose()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef get_objects_on_layer(layer_name):\n    # Get all objects on the specified layer\n    objects_on_layer = rs.ObjectsByLayer(layer_name)\n\n    if objects_on_layer:\n        print(f\"Objects on layer '{layer_name}': {objects_on_layer}\")\n    else:\n        print(f\"No objects found on layer '{layer_name}'\")\n\n# Replace 'YourLayerName' with the name of the layer you are interested in\nlayer_name = 'YourLayerName'\nget_objects_on_layer(layer_name)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\ndef get_objects_on_layer(layer_name):\n    # Get the active Rhino document\n    doc = Rhino.RhinoDoc.ActiveDoc\n\n    # Get the layer index from the layer name\n    layer_index = doc.Layers.FindByFullPath(layer_name, -1)\n\n    if layer_index >= 0:\n        # Get all objects on the specified layer\n        objects_on_layer = doc.Objects.FindByLayer(layer_index)\n\n        if objects_on_layer:\n            print(f\"Objects on layer '{layer_name}': {objects_on_layer}\")\n        else:\n            print(f\"No objects found on layer '{layer_name}'\")\n    else:\n        print(f\"Layer '{layer_name}' not found\")\n\n# Replace 'YourLayerName' with the name of the layer you are interested in\nlayer_name = 'YourLayerName'\nget_objects_on_layer(layer_name)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef __boxpoints(brep, tol):\n    if brep and brep.IsBox():\n        verts = brep.DuplicateVertices()\n        if len(verts) == 8:\n            # Since the vertices can be in any order,\n            # cook up their bounding box and return\n            # them in some logical order\n            face = brep.Faces[0]\n            u = face.Domain(0).Min\n            v = face.Domain(1).Min\n            rc, plane = face.FrameAt(u, v)\n            points = Rhino.Geometry.PointCloud(verts)\n            w2p = Rhino.Geometry.Transform.ChangeBasis(Rhino.Geometry.Plane.WorldXY, plane)\n            bbox = points.GetBoundingBox(w2p)\n            corners = Rhino.Geometry.PointCloud(bbox.GetCorners())\n            p2w = Rhino.Geometry.Transform.ChangeBasis(plane, Rhino.Geometry.Plane.WorldXY)\n            corners.Transform(p2w)\n            return corners.GetPoints()\n    return None\n\ndef labelBoxesInVisibleLayers():\n    layers = rs.LayerNames()\n    for layer in layers:\n        if rs.IsLayerVisible(layer):\n            rhobjs = sc.doc.Objects.FindByLayer(layer)\n            for obj in rhobjs:\n                brep = obj.Brep()\n                points = __boxpoints(brep, sc.doc.ModelAbsoluteTolerance)\n                if points:\n                    p = 0\n                    for pt in points:\n                        sc.doc.Objects.AddTextDot(str(p), pt)\n                        p = p + 1\n\ndef labelOneBox():\n    filter = Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select polysurface\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success:\n        return\n        \n    brep = objref.Brep()\n    if not brep:\n        return\n        \n    points = __boxpoints(brep, sc.doc.ModelAbsoluteTolerance)\n    if points:\n        i = 0\n        for pt in points:\n            sc.doc.Objects.AddTextDot(str(i), pt)\n            i = i + 1\n\nlabelOneBox()\nlabelBoxesInVisibleLayers()",
+      "language": "python",
+      "author": "e.wynn",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 671
+}

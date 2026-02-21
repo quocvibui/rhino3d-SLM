@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/script-from-tutorial-generated-51-bad-objects/40509",
+  "topic_id": 40509,
+  "title": "Script from tutorial generated 51 \"bad objects\"",
+  "question": "I was trying to figure out how to write a script to help draw the first 180 degrees of a sine wave from, 90 through 270 degrees, when I searched YouTube for Rhino Python tutorials. I found a series by Jose Sanchez and worked through them all but have no idea whats causing the Check New Objects dialog box  to appear.\n\n\nRhino file from Tutorial 12:\n\n\nhttps://1drv.ms/u/s!AvbRThajlgqAhhhyBt3g4hE0FyHB\n\n\nPython script from Tutorial 12 (may be a typo on my part):\n\n\nhttps://1drv.ms/u/s!AvbRThajlgqAhhlBZggY2vGsOc13\n\n\nOn the original idea, here’s something similar to what I was trying to learn how to script when I started viewing Jose Sanchez’s tutorials:\n\n\nhttps://1drv.ms/i/s!AvbRThajlgqAhhouWkRu7IsNxKvN\n\n\nAny ideas? Thanks.\n\n\nDavid",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\ndeg = 90.0\nmax_deg = 270.0\namp = 50.0\nx = 0.0\nwhile (deg <= max_deg):\n    y = math.sin(math.radians(deg)) * amp\n    rs.AddPoint(x, y, 0.0)\n    deg += 1.0\n    x += 1.0",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom math import *\n\ndblStartDeg = 90.0\ndblEndDeg = 270.0\n\ndblXStart = rs.GetReal('Enter desired x-position at top of sine wave: ', 6.20)\ndblXEnd = rs.GetReal('Enter desired x-position at bottom of sine wave: ', 9.20)\ndblXStep = rs.GetReal('Entere desired step value for x-position of sine wave: ', 0.1)\ndblAmp = rs.GetReal('Enter desired y-position (amplitude) at top of sine wave: ', 1.387)\ndblWallThknss = rs.GetReal('Enter material thickness of Duct Mid-section separator wall: ', 0.03125)\n\n\\# y-coordinate of wave at peak of wave, e.g. at beginning of curve\n \ndblYCoordAtPeakOfWave = dblAmp - dblWallThknss / 2\n\ndblDegStep = (dblEndDeg - dblStartDeg) / ((dblXEnd - dblXStart) / dblXStep)\n\ndblDeg = dblStartDeg\ndblX = dblXStart\n\nSineCurveList = []\nwhile (dblDeg <= dblEndDeg):\n    # y-coordinate of wave at distance from datum (vertical axis) minus half of duct separator wall thickness\n    \n    dblYCoordAtDistFrDatum = sin(radians(dblDeg)) * dblYCoordAtPeakOfWave\n    \n    dblYCoordTranslatedUp = dblYCoordAtPeakOfWave + dblYCoordAtDistFrDatum\n  \n    dblYCoordDividedBy2 = dblYCoordTranslatedUp / 2\n    \n    # move the curve up by half the duct separator wall thickness\n    dblYCoordUpByHalfWallThickness = dblYCoordDividedBy2 + dblWallThknss / 2\n\n    # rs.AddPoint(dblX, 0.0, dblYCoordDividedBy2 )\n    dblNextPoint = [dblX, 0.0, dblYCoordUpByHalfWallThickness]\n    SineCurveList.append([dblX,0.0,dblYCoordUpByHalfWallThickness])\n    dblDeg += dblDegStep\n    dblX += dblXStep\n    # per Dale Fugier: \"...I'd push the points into the rs.AddInterpCurve \n    # method...\"\n    \nrs.AddInterpCurve(SineCurveList)",
+      "language": "python",
+      "author": "saucerdesigner",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 817
+}

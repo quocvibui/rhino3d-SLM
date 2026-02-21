@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-custom-objects/5403",
+  "topic_id": 5403,
+  "title": "RhinoCommon Custom Objects",
+  "question": "Are there any SDK samples demonstrating the use of the RhinoCommon custom doc objects? In particular showing the use of custom grips for custom brep objects, although any would be helpful.\n\n\nThanks,\n\n\nLarry",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n    ObjRef mRef;\n    Result res = RhinoGet.GetOneObject(\"Select mesh\", false, ObjectType.Mesh, out mRef);\n    if (res != Result.Success)\n        return res;\n\n    Mesh m = mRef.Mesh();\n    MyMeshObject my = new MyMeshObject(m);\n\n    doc.Objects.Replace(mRef, my);\n    doc.Views.Redraw();\n}\n\npublic class MyMeshObject : CustomMeshObject\n{\n    private BoundingBox _bb;\n    public MyMeshObject(Mesh m)\n        : base(m)\n    {\n        if (null != m)\n            _bb = m.GetBoundingBox(true);\n    }\n\n    public MyMeshObject()\n    {\n        // required\n    }\n\n    protected override void OnDuplicate(RhinoObject source)\n    {\n        MyMeshObject other = source as MyMeshObject;\n        if (null != other)\n        {\n            _bb = other._bb;\n        }\n        base.OnDuplicate(source);\n    }\n\n    protected override void OnDraw(DrawEventArgs e)\n    {\n        if (_bb.IsValid)\n            e.Display.DrawBox(_bb, Color.Red, 2);\n        base.OnDraw(e);\n    }",
+      "language": "csharp",
+      "author": "menno",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 22,
+  "views": 5951
+}

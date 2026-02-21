@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/lineardimension-prints-sideways-in-worldzx-plane/208403",
+  "topic_id": 208403,
+  "title": "LinearDimension prints sideways in WorldZX plane",
+  "question": "I don’t know what I’m doing wrong, but the linear dimension prints sideways. How can I get the linear dimension to appear correctly above the line it is measuring while aligning the dimension to the front viewport?\n\n\n```\n\n\n#! python 2\n\nimport Rhino.Geometry as rg\nimport Rhino\n\n# Create the line from (0, 0, 1) to (5, 0, 1)\nstart_point = rg.Point3d(0, 0, 1)\nend_point = rg.Point3d(5, 0, 1)\nline = rg.Line(start_point, end_point)\nline_curve = rg.LineCurve(line)\n\n# Use the World ZX plane\nzx_plane = rg.Plane.WorldZX\n\n# Project points onto the ZX plane (returns Point3d)\nstart_point_3d = zx_plane.ClosestPoint(start_point)\nend_point_3d = zx_plane.ClosestPoint(end_point)\n\n# Convert projected points to Point2d\n# For WorldZX plane: Point2d.X = Point3d.X, Point2d.Y = Point3d.Z\nstart_point_2d = rg.Point2d(start_point_3d.X, start_point_3d.Z)\nend_point_2d = rg.Point2d(end_point_3d.X, end_point_3d.Z)\n\n# Define the dimension line offset (in the Y direction of the ZX plane)\noffset_distance = 2.0\noffset_vector = zx_plane.YAxis * offset_distance\ndimension_point_3d = (start_point_3d + end_point_3d) * 0.5 + offset_vector  # Midpoint + offset\n\n# Convert the dimension point to a Point2d\ndimension_point_2d = rg.Point2d(dimension_point_3d.X, dimension_point_3d.Z)\n\n# Create the LinearDimension\nlinear_dimension = rg.LinearDimension(zx_plane, start_point_2d, end_point_2d, dimension_point_2d)\n\n# Add the line and dimension to the Rhino document\ndoc = Rhino.RhinoDoc.ActiveDoc\ndoc.Objects.AddLine(line)\ndoc.Objects.AddLinearDimension(linear_dimension)\n\n# Refresh the view\ndoc.Views.Redraw()\n\n\n\nResults of above code is shown below (I want the dimension to be horizontal and aligned to the line):\n\n\n2025-08-12_15-25-16\n1420×717 197 KB",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport Rhino.Geometry as rg\nimport Rhino\n\nstart_point = rg.Point3d(0, 0, 1)\nend_point = rg.Point3d(5, 0, 1)\nline = rg.Line(start_point, end_point)\n\ndimension_plane = rg.Plane(rg.Point3d(0, 0, 1), rg.Vector3d.XAxis, rg.Vector3d.YAxis)\n\nstart_point_2d = rg.Point2d(start_point.X, start_point.Y)\nend_point_2d = rg.Point2d(end_point.X, end_point.Y)\n\noffset_distance = 2.0\ndimension_point_2d = rg.Point2d((start_point.X + end_point.X) * 0.5, \n                                 start_point.Y + offset_distance)\n\nlinear_dimension = rg.LinearDimension(dimension_plane, start_point_2d, end_point_2d, dimension_point_2d)\n\ndoc = Rhino.RhinoDoc.ActiveDoc\ndoc.Objects.AddLine(line)\ndoc.Objects.AddLinearDimension(linear_dimension)\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "#! python 2\n\nimport Rhino.Geometry as rg\nimport Rhino\n\n# Create the line from (0, 0, 1) to (5, 0, 1)\nstart_point = rg.Point3d(0, 0, 1)\nend_point = rg.Point3d(5, 0, 1)\nline = rg.Line(start_point, end_point)\nline_curve = rg.LineCurve(line)\n\n# Use the World ZX plane\nzx_plane = rg.Plane.WorldZX\n\n# Project points onto the ZX plane (returns Point3d)\nstart_point_3d = zx_plane.ClosestPoint(start_point)\nend_point_3d = zx_plane.ClosestPoint(end_point)\n\n# Convert projected points to Point2d\n# For WorldZX plane: Point2d.X = Point3d.X, Point2d.Y = Point3d.Z\nstart_point_2d = rg.Point2d(start_point_3d.X, start_point_3d.Z)\nend_point_2d = rg.Point2d(end_point_3d.X, end_point_3d.Z)\n\n# Define the dimension line offset (in the Y direction of the ZX plane)\noffset_distance = 2.0\noffset_vector = zx_plane.YAxis * offset_distance\ndimension_point_3d = (start_point_3d + end_point_3d) * 0.5 + offset_vector  # Midpoint + offset\n\n# Convert the dimension point to a Point2d\ndimension_point_2d = rg.Point2d(dimension_point_3d.X, dimension_point_3d.Z)\n\n# Create the LinearDimension\nlinear_dimension = rg.LinearDimension(zx_plane, start_point_2d, end_point_2d, dimension_point_2d)\n\n# Add the line and dimension to the Rhino document\ndoc = Rhino.RhinoDoc.ActiveDoc\ndoc.Objects.AddLine(line)\ndoc.Objects.AddLinearDimension(linear_dimension)\n\n# Refresh the view\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 91
+}

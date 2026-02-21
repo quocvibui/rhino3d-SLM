@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-meshplane-intersection-slower-in-rhino-8/168951",
+  "topic_id": 168951,
+  "title": "RhinoCommon MeshPlane intersection slower in Rhino 8?",
+  "question": "We are using the \nMeshPlane\n intersection function ( Rhino.Geometry.Intersect.Intersection.MeshPlane) a lot\n\nto display the contour curves of our model, using a DisplayConduit. I notice that since Rhino8 this function is\n\nconsiderably slower than in Rhino 7. Setting a lower tolerance does not change much.\n\nI notice a new argument MeshIntersectionCache, not sure how this could help ?\n\n\nusing the Mesh.CreateContourCurves does not solve the performance problem either.\n\n\nAny ideas how to make this again as fast as in Rhino 7 ?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nfrom Rhino.Input import RhinoGet\nfrom Rhino.DocObjects import ObjectType\nfrom Rhino.Commands import Result\nfrom scriptcontext import doc\nimport time\n \ndef MeshContours():\n    rc, objRef = RhinoGet.GetOneObject(\"Select mesh\", True, ObjectType.Mesh )\n    if rc != Result.Success:\n        return rc\n    mesh = objRef.Mesh()\n    if None == mesh:\n        return Result.Failure\n    rs.UnselectAllObjects()\n    \n    start = time.time()\n    for z in xrange(0,50):\n        plane = Rhino.Geometry.Plane(rg.Point3d.Origin + z*rg.Vector3d.ZAxis,rg.Vector3d.ZAxis)\n        sections = Rhino.Geometry.Intersect.Intersection.MeshPlane(mesh,plane)\n        for line in sections:\n            doc.Objects.AddPolyline(line)\n        \n    end = time.time()\n    doc.Views.Redraw()\n    print(end - start)\n \nif( __name__ == \"__main__\" ):\n    MeshContours()",
+      "language": "python",
+      "author": "i-Shape",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nfrom Rhino.Input import RhinoGet\nfrom Rhino.DocObjects import ObjectType\nfrom Rhino.Commands import Result\nfrom scriptcontext import doc\nimport time\n \ndef MeshContours():\n    rc, objRef = RhinoGet.GetOneObject(\"Select mesh\", True, ObjectType.Mesh )\n    if rc != Result.Success:\n        return rc\n    mesh = objRef.Mesh()\n    if None == mesh:\n        return Result.Failure\n    rs.UnselectAllObjects()\n    \n    normal = rg.Vector3d(1,0.33,0.2)\n    # comment this out for random normal \n    #normal = rg.Vector3d.ZAxis\n    origin = rg.Point3d.Origin\n    \n    start = time.time()\n    cache = rg.Intersect.MeshIntersectionCache()\n    for z in xrange(0,50):\n        plane = Rhino.Geometry.Plane(origin + z *normal,normal)\n        #sections = Rhino.Geometry.Intersect.Intersection.MeshPlane(mesh,plane)\n        sections = Rhino.Geometry.Intersect.Intersection.MeshPlane(mesh,cache,plane,1.0e-10)\n        if None == sections:\n            continue\n        for line in sections:\n            doc.Objects.AddPolyline(line)\n        \n    end = time.time()\n    doc.Views.Redraw()\n    print(end - start)\n\nif( __name__ == \"__main__\" ):\n    MeshContours()",
+      "language": "python",
+      "author": "i-Shape",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 662
+}

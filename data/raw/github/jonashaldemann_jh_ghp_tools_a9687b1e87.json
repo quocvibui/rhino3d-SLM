@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/vss_rampe_schnitt.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/vss_rampe_schnitt.py",
+  "instruction": "Vss rampe schnitt",
+  "code": "import ghpythonlib.components as gh\nimport math\n\n\ndef vss_rampe_im_schnitt(geschosshoehe, gefaelle):\n    \"\"\"\n    Konstruktion einer Rampe im Schnitt gemäss VSS-Norm mit Abgerundeten Kuppen.\n    Args:\n        geschosshoehe (float): Die Höhe des Geschosses, die die vertikale Distanz der Rampe definiert.\n        gefaelle (float): Das Gefälle der Rampe in Grad, das die Neigung der Rampe bestimmt.\n    Returns:\n        tuple: Ein Tupel bestehend aus:\n            - rampe (Curve): Die erzeugte Rampe als Kurve.\n            - laenge (float): Die horizontale Länge der Rampe.\n    \"\"\"\n\n    # Umwandlung des Gefälles in Bogenmass\n    gefaelle_grad = math.atan(gefaelle / 100)\n\n    # Punkte definieren\n    p1 = gh.ConstructPoint(-20, 0, 0)\n    p2 = gh.ConstructPoint(0, 0, 0)\n\n    # Rampe konstruieren\n    v = gh.Rotate(gh.UnitX(1), -gefaelle_grad, gh.XYPlane(p2))[0]\n    vx, vy, _ = gh.DeconstructVector(v)\n    laenge_provisorisch = vx / -vy * geschosshoehe\n\n    p3 = gh.ConstructPoint(laenge_provisorisch, -geschosshoehe, 0)\n    p4 = gh.ConstructPoint(laenge_provisorisch + 20, -geschosshoehe, 0)\n\n    # Eckige Rampe\n    pline = gh.PolyLine([p1, p2, p3, p4], False)\n\n    # Erste Rundung\n    pline = gh.Fillet(pline, 1, 20)[0]\n\n    # Zweite Rundung an Diskontinuität\n    discont = gh.Discontinuity(pline, 1)[1][1]\n    pline = gh.Fillet(pline, discont, 30)[0]\n\n    # Start- und Endsegmente abschneiden\n    segments = list(gh.Explode(pline, True)[0])\n    middle_segments = segments[1:-1]\n\n    # Rampe wieder zusammensetzen\n    rampe = gh.JoinCurves(middle_segments, True)\n\n    # Länge berechnen\n    start, end = gh.EndPoints(rampe)\n    sx, _, _ = gh.Deconstruct(start)\n    ex, _, _ = gh.Deconstruct(end)\n    laenge = ex - sx\n    return rampe, laenge\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

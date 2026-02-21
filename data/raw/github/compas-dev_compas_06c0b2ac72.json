@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas/blob/HEAD/src/compas_rhino/scene/planeobject.py",
+  "repo": "compas-dev/compas",
+  "repo_stars": 352,
+  "repo_description": "Main library of the COMPAS framework and CAD integrations for Rhino/GH and Blender.",
+  "license": "MIT",
+  "filepath": "src/compas_rhino/scene/planeobject.py",
+  "instruction": "Planeobject",
+  "code": "from __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport scriptcontext as sc  # type: ignore\n\nfrom compas.geometry import Frame\nfrom compas.scene import GeometryObject\nfrom compas_rhino.conversions import point_to_rhino\nfrom compas_rhino.conversions import transformation_to_rhino\nfrom compas_rhino.conversions import vertices_and_faces_to_rhino\n\nfrom .sceneobject import RhinoSceneObject\n\n\nclass RhinoPlaneObject(RhinoSceneObject, GeometryObject):\n    \"\"\"Scene object for drawing planes.\n\n    Parameters\n    ----------\n    scale : float, optional\n        Scale factor.\n        Default is ``1.0``.\n    **kwargs : dict, optional\n        Additional keyword arguments.\n\n    Attributes\n    ----------\n    scale : float\n        Scale factor.\n        Default is ``1.0``.\n\n    \"\"\"\n\n    def __init__(self, scale=1.0, **kwargs):\n        super(RhinoPlaneObject, self).__init__(**kwargs)\n        self.scale = scale\n\n    def draw(self):\n        \"\"\"Draw the plane.\n\n        Returns\n        -------\n        list[System.Guid]\n            The GUIDs of the created Rhino objects.\n\n        \"\"\"\n        frame = Frame.from_plane(self._item)\n\n        guids = [\n            sc.doc.Objects.AddLine(\n                point_to_rhino(frame.to_world_coordinates([0, 0, 0])),\n                point_to_rhino(frame.to_world_coordinates([0, 0, self.scale])),\n            )\n        ]\n\n        vertices = [\n            frame.to_world_coordinates([-self.scale, -self.scale, 0]),\n            frame.to_world_coordinates([self.scale, -self.scale, 0]),\n            frame.to_world_coordinates([self.scale, self.scale, 0]),\n            frame.to_world_coordinates([-self.scale, self.scale, 0]),\n        ]\n        faces = [[0, 1, 2, 3]]\n        mesh = vertices_and_faces_to_rhino(vertices, faces)\n        guids.append(sc.doc.Objects.AddMesh(mesh))\n\n        transformation = transformation_to_rhino(self.worldtransformation)\n        for guid in guids:\n            obj = sc.doc.Objects.Find(guid)\n            if obj:\n                obj.Geometry.Transform(transformation)\n                obj.CommitChanges()\n\n        self._guids = guids\n        return self.guids\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

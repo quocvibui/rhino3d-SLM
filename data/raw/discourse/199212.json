@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-section-style/199212",
+  "topic_id": 199212,
+  "title": "RhinoScriptSyntax - Section Style?",
+  "question": "Just tried having a quick poke round, but couldn’t find anything - I’ve written a tool to set block properties to “By Parent” for things like linetype, print colour, etc, with commands similar to:\n\n\nrs.ObjectLinetypeSource(obj,3)\n\n\n\nI didn’t see any options in the \nRhinoScriptSyntax page\n but is there something similar to be able to set Section Style to “By Parent” as well? Something like…ObjectSectionSource?",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    obj_id = rs.GetObject(\"Select object\")\n    if not obj_id: return\n    \n    rh_obj = rs.coercerhinoobject(obj_id, True, True)\n    print \"Old:\", rh_obj.Attributes.SectionAttributesSource \n    \n    source = Rhino.DocObjects.ObjectSectionAttributesSource.FromLayer\n    print \"New:\", source\n    \n    attr = rh_obj.Attributes.Duplicate()\n    attr.SectionAttributesSource = source\n    scriptcontext.doc.Objects.ModifyAttributes(rh_obj, attr, False)\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 86
+}

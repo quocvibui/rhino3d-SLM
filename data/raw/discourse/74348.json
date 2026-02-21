@@ -1,0 +1,65 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/automatic-exporting-a-series-of-stl-files/74348",
+  "topic_id": 74348,
+  "title": "Automatic exporting a series of .STL files",
+  "question": "I have a bunch of  polisurfaces to be 3d printed. Is there a plugin or any solution which can export the selected objects in STL one by one into a folder automatically?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef GetSTLSettings():\n    e_str = \"_ExportFileAs=_Binary \"\n    e_str+= \"_ExportUnfinishedObjects=_Yes \"\n    e_str+= \"_UseSimpleDialog=_No \"\n    e_str+= \"_UseSimpleParameters=_No \"\n    e_str+= \"_Enter _DetailedOptions \"\n    e_str+= \"_JaggedSeams=_Yes \"\n    e_str+= \"_PackTextures=_Yes \"\n    e_str+= \"_Refine=_Yes \"\n    e_str+= \"_SimplePlane=_Yes \"\n    e_str+= \"_AdvancedOptions \"\n    e_str+= \"_Angle=2 \"\n    e_str+= \"_AspectRatio=0 \"\n    e_str+= \"_Distance=10 \"\n    e_str+= \"_Grid=4 \"\n    e_str+= \"_MaxEdgeLength=0 \"\n    e_str+= \"_MinEdgeLength=0.003 \"\n    e_str+= \"_Enter _Enter\"\n    return e_str\n    \ndef ExportSTLByObject():\n    a = rs.GetObject()\n    rs.SelectObject(a)\n    stl_sett = GetSTLSettings()\n    file_name = r'C:\\Users\\j.vanderidder\\Documents\\test3.stl'\n    rs.Command('-_Export \"{}\" {}'.format(file_name,stl_sett), False)\n    rs.EnableRedraw(True)\n\nExportSTLByObject()",
+      "language": "python",
+      "author": "user975",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "def GetSTLSettings(ang,ar,dist,grid,den,maxL=0,minL=.0001):\n    #Changed in V6 - UseSimpleParameters response *inverted*\n    e_str = \"_ExportFileAs=_Binary \"\n    e_str+= \"_ExportUnfinishedObjects=_Yes \"\n    e_str+= \"_UseSimpleDialog=_No \"\n    e_str+= \"_UseSimpleParameters=_{} \".format(\"Yes\" if rs.ExeVersion()==6 else \"No\")\n    e_str+= \"_Enter _DetailedOptions \"\n    e_str+= \"_JaggedSeams=_No \"\n    e_str+= \"_PackTextures=_No \"\n    e_str+= \"_Refine=_Yes \"\n    e_str+= \"_SimplePlane=_Yes \"\n    e_str+= \"_AdvancedOptions \"\n    e_str+= \"_Angle={} \".format(ang)\n    e_str+= \"_AspectRatio={} \".format(ar)\n    e_str+= \"_Distance={} \".format(dist)\n    e_str+= \"_Density={} \".format(den)\n    e_str+= \"_Grid={} \".format(grid)\n    e_str+= \"_MaxEdgeLength={} \".format(maxL)\n    e_str+= \"_MinEdgeLength={} \".format(minL)\n    e_str+= \"_Enter _Enter\"\n    return e_str",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "scheme = rs.GetString(\"select mesh settings\", defaultString=None, strings=('quick', 'medium', 'fine'))\n        \n        print(scheme)\n        \n        if scheme == 'quick':\n            rs.Command(\"-_Export \"+path+\" _Enter _Enter\", False)\n\n        if scheme == 'medium':\n            rs.Command(\"-_Export \"+path+\" _Enter d a a 0 s 0 d 0.1 g 4 m 0 i 0.02 u 4 _Enter _Enter\", False)\n        \n        if scheme == 'fine':\n            rs.Command(\"-_Export \"+path+\" _Enter d a a 0 s 0 d 0.005 g 4 m 0 i 0.02 u 4 _Enter _Enter\", False)",
+      "language": "python",
+      "author": "martinsiegrist",
+      "post_number": 46,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport Rhino\nimport os\n \nif scriptcontext.doc is not None:\n    meshop: Rhino.Geometry.MeshingParameters = Rhino.Geometry.MeshingParameters()\n    meshop.RefineAngleInDegrees = 0\n    meshop.GridAspectRatio = 0\n    meshop.Tolerance = 0.1\n    meshop.GridMinCount = 4\n    meshop.MinimumEdgeLength = 0.0001\n    meshop.RefineGrid = True\n\n    options = Rhino.FileIO.FileStlWriteOptions()\n    options.BinaryFile = False\n    options.ExportOpenObjects = True\n    options.MeshingParameters = meshop\n    options_dictionary = options.ToDictionary()\n \n    path = os.path.expanduser(\"~/Desktop/sample_py.stl\")\n    success = scriptcontext.doc.Export(path, options_dictionary)\n    if success:\n        print(\"Successfully exported sample.stl\")\n    else:\n        print(\"Error while trying to export sample.stl\")",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 47,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\n\nimport scriptcontext\nimport Rhino\nimport os\n\n    \nmeshop: Rhino.Geometry.MeshingParameters = Rhino.Geometry.MeshingParameters()\nmeshop.RefineAngleInDegrees = 0\nmeshop.GridAspectRatio = 0\nmeshop.Tolerance = 0.1\nmeshop.GridMinCount = 4\nmeshop.MinimumEdgeLength = 0.0001\nmeshop.RefineGrid = True\n\n\ndef writeselectedstl(filename):\n    if scriptcontext.doc is not None:\n        options = Rhino.FileIO.FileStlWriteOptions()\n        options.BinaryFile = False\n        options.ExportOpenObjects = True\n        options.MeshingParameters = meshop\n        options_dictionary = options.ToDictionary()\n    \n        path = os.path.expanduser(filename)\n        success = scriptcontext.doc.ExportSelected(path, options_dictionary)\n        if success:\n            print(\"Successfully exported sample.stl\")\n        else:\n            print(\"Error while trying to export sample.stl\")\n\ndef fun():\n\n    cdoc = Rhino.RhinoDoc.ActiveDoc\n    cnt = 0\n\n    for rObj in cdoc.Objects:\n        if rObj.IsNormal and rObj.IsMeshable:\n            cnt += 1\n            cdoc.Objects.Select(rObj.Id,True)\n            obj = rObj.Select\n            writeselectedstl(f'~/Desktop/sample_py{cnt}.stl')\n            cdoc.Objects.UnselectAll()\n\nfun()",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 48,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport Rhino\nimport os\n \nif scriptcontext.doc is not None:\n    options = Rhino.FileIO.FileDwgWriteOptions()\n    options.UseLWPolylines = True\n    options.Version = Rhino.FileIO.FileDwgWriteOptions.AutocadVersion.Acad2000\n    options_dictionary = options.ToDictionary()\n \n    path = os.path.expanduser(\"~/Desktop/sample_py.dxf\")\n    success = scriptcontext.doc.Export(path, options_dictionary)\n    if success:\n        print(\"Successfully exported sample_py.dxf\")\n    else:\n        print(\"Error while trying to export sample_py.dxf\")",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 43,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 65,
+  "views": 4873
+}

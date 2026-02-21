@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/code/gPipe.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "code/gPipe.py",
+  "instruction": "Creates a pipe along a curve.\n    Inputs:\n        c: the axis curve\n        r1: radius at the start of the curve\n        r2: radius at the end of the curve\n    Output:\n        d: the pipe object (sdf)",
+  "code": "\"\"\"Creates a pipe along a curve.\n    Inputs:\n        c: the axis curve\n        r1: radius at the start of the curve\n        r2: radius at the end of the curve\n    Output:\n        d: the pipe object (sdf)\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT / ETH Zurich'\n__license__    = 'MIT License'\n__email__      = ['<bernhard@arch.ethz.ch>']\n\nimport rhinoscriptsyntax as rs\n\ndef map_values(input_val, in_from, in_to, out_from, out_to):\n    out_range = out_to - out_from\n    in_range = in_to - in_from\n    in_val = input_val - in_from\n    val=(float(in_val)/in_range)*out_range\n    out_val = out_from+val\n    return out_val\n\nclass Pipe(object):\n\n    def __init__(self,c=None,r1=1.0,r2=1.0):\n        self.c = c\n        self.r1 = r1\n        self.r2 = r2\n\n    def get_distance(self,x,y,z):\n        p = rs.CreatePoint(x,y,z)\n        param=rs.CurveClosestPoint(self.c, p)\n        cp=rs.EvaluateCurve(self.c,param)\n        dv = map_values(param,self.c.Domain[0],self.c.Domain[1],0,1)\n        r = (1-dv)*self.r1 + dv*self.r2\n        d = rs.Distance(p,cp) - r\n        return d\n\nif __name__==\"__main__\":\n    if len(c)>0:\n        if r1 is None:\n            r1 = 1.0\n        if r2 is None:\n            r2 = 1.0\n\n        if len(c)>1:\n            d = [Pipe(t,r1,r2) for t in c]\n        else:\n            d = Pipe(c[0],r1,r2)\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

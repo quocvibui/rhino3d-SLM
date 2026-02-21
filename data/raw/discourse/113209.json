@@ -1,0 +1,73 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/draw-to-screen-space-foreground-from-drawviewportwires/113209",
+  "topic_id": 113209,
+  "title": "Draw To Screen Space Foreground From DrawViewportWires",
+  "question": "Hi All,\n\n\nI’m experimenting with implementing \nDrawViewportWires\n in GHPython for drawing e.g. legends on top of 3D geometry generated in Grasshopper. Here’s a quick example:\n\n\n2020-11-25 11_37_02-Window\n1121×605 114 KB\n\n\nThe issue I’m trying to resolve is that the rectangles (drawn with \nDraw2dRectangle\n ) are drawn behind the 3D geometry that is drawn by Grasshopper (though it still appears to obscure the wires of the 3D mesh), while the text is drawn in the foreground:\n\n\n2020-11-25 11_37_32-Window\n1121×605 106 KB\n\n\nHere’s a minimal example and file of this behaviour:\n\n\n2020-11-25 11_30_26-Window\n1281×780 125 KB\n\n\n201125_DrawRectangle2d_00.gh\n (4.9 KB)\n\n\nI can see that this issue \nhas been brought up previously\n by \n@andheum\n. But I’ve not been able to find any examples/code that demonstrate how one has resolved this (notably how to \n“add a callback to the DisplayPipeline.DrawForeground event”\n). I should also mention that I’ve been given great pointers by \n@dave_stasiuk\n and \n@tom_svilans\n on how they draw to the foreground from a display conduit in a compiled component. But before going down that path, I just wanted to make sure that I’m not missing something here.\n\n\nSo, is it possible to always draw to the screen space foreground from \nDrawViewportWires\n?\n\n\nBest,\n\n\nAnders",
+  "code_blocks": [
+    {
+      "code": "private void DrawForeground(object sender, DrawEventArgs e)\n    {\n        if (e.Viewport.Id == Rhino.RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewportID)\n        {\n         // do magic\n        }\n    }",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "private void DrawForeground(object sender, DrawEventArgs e)\n{\n    if (e.Viewport.Id == e.RhinoDoc.Views.ActiveView.ActiveViewportID)\n    {\n     // do magic\n    }\n}",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "public override void BeforeRunScript()\n  {\n    _point.Clear();\n    _box = BoundingBox.Empty;\n    \n    // Unregister & register new event\n    Rhino.Display.DisplayPipeline.DrawForeground -= DrawForeground;\n    Rhino.Display.DisplayPipeline.DrawForeground += DrawForeground;\n  }\n\n\n  public override BoundingBox ClippingBox\n    {get{return _box;}}\n\n  // Event function\n  private void DrawForeground(object sender, Rhino.Display.DrawEventArgs e)\n  {\n    for (int i = 0; i < _point.Count; i++)\n      DrawRec(e, _point[i]);\n  }\n\n  private void DrawRec(Rhino.Display.DrawEventArgs pipeline, Point3d point)\n  {\n    if (pipeline.Viewport.Id == pipeline.RhinoDoc.Views.ActiveView.ActiveViewportID)\n    {\n      Rectangle SQ = new Rectangle((int) point.X, (int) point.Y, 50, 50);\n      pipeline.Display.Draw2dRectangle(SQ, Color.Black, 5, Color.LimeGreen);\n    }\n  }",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "﻿using System;\nusing System.IO;\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.Display;\n\nnamespace SampleCsCommands\n{\n  public class SampleCsViewCapture : Command\n  {\n    public override string EnglishName => \"SampleCsViewCapture\";\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      var view = doc.Views.ActiveView;\n      if (null == view)\n        return Result.Failure;\n\n      var view_capture = new ViewCapture\n      {",
+      "language": "csharp",
+      "author": "Daniel_Beckmann",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "﻿using System;\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.FileIO;\n\nnamespace SampleCsCommands\n{\n  public class SampleCsWritePdf : Command\n  {\n    public override string EnglishName => \"SampleCsWritePdf\";\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      var pdf = FilePdf.Create();\n\n      var pdf_doc = pdf.PdfDocumentImplementation() as Xfinium.Pdf.PdfFixedDocument;\n      if (null == pdf_doc)\n        return Result.Failure;\n\n      var cover_page = pdf_doc.Pages.Add();",
+      "language": "csharp",
+      "author": "Daniel_Beckmann",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino as rc\nimport rhinoscriptsyntax as rs\n\ndef DrawForeground(sender,arg):\n    rc.RhinoApp.WriteLine(\"A 3\")\n    \n    # Check component preview/locked, active GH document and Rhino viewport\n    if arg.Viewport.Id == arg.RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewportID:\n        \n        rc.RhinoApp.WriteLine(\"A 4\")\n        \n        # Text is drawn in front of mesh\n        txt = \"a\"\n        pt = rc.Geometry.Point2d(180,100)\n        arg.Display.Draw2dText(txt,System.Drawing.Color.Black,pt,False,100,\"Consolas\")\n        \n        # Rectangle is drawn in front of mesh\n        rec2d = System.Drawing.Rectangle(50,100,100,100)\n        arg.Display.Draw2dRectangle(rec2d,System.Drawing.Color.Black,10,System.Drawing.Color.Red)\n     \nrc.Display.DisplayPipeline.DrawForeground += DrawForeground\nrs.GetString(\"listen to mouse down\")\nrc.Display.DisplayPipeline.DrawForeground -= DrawForeground",
+      "language": "python",
+      "author": "fmyl",
+      "post_number": 34,
+      "is_solution": false
+    },
+    {
+      "code": "ghenv.Component.Name = 'LB Capture View'\nghenv.Component.NickName = 'CaptureView'\nghenv.Component.Message = '1.2.0'\nghenv.Component.Category = 'Ladybug'\nghenv.Component.SubCategory = '4 :: Extra'\nghenv.Component.AdditionalHelpFromDocStrings = '2'\n\nimport os\n\ntry:\n    from ladybug.futil import preparedir\n    from ladybug.config import folders\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug:\\n\\t{}'.format(e))\n\ntry:\n    from ladybug_rhino.grasshopper import all_required_inputs, bring_to_front\n    from ladybug_rhino.viewport import viewport_by_name, capture_view\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ladybug_rhino:\\n\\t{}'.format(e))\n\n\nif all_required_inputs(ghenv.Component) and _capture:\n    # ensure the component runs last on the canvas\n    bring_to_front(ghenv.Component)\n\n    # prepare the folder\n    folder = _folder_ if _folder_ is not None else \\\n        os.path.join(folders.ladybug_tools_folder, 'resources', 'captured_views')\n    preparedir(folder, remove_content=False)\n\n    # get the viewport objects\n    vp_names = viewport_ if len(viewport_) != 0 else [None]\n    viewports = [viewport_by_name(vp) for vp in vp_names]\n\n    # save the viewports to images\n    for i, view_p in enumerate(viewports):\n        f_name = _file_name if len(viewports) == 1 else \\\n            '{}_{}'.format(_file_name, vp_names[i])\n        file_p = os.path.join(folder, f_name)\n        fp = capture_view(view_p, file_p, width_, height_, mode_, transparent_)\n        print(fp)",
+      "language": "python",
+      "author": "user2664",
+      "post_number": 40,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 42,
+  "views": 5872
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-and-rhinoscriptsyntax-object-color-methods-result-in-different-outcome/113070",
+  "topic_id": 113070,
+  "title": "Rhinocommon and rhinoscriptsyntax object color methods result in different outcome?",
+  "question": "print sc.doc.Objects.Find(objID).Attributes.ObjectColor\nprint rs.ObjectColor(objID)\n\n\n\nResult:\n\n\nColor [Black]\nColor [White]\n\n\n\nWhite is correct.",
+  "code_blocks": [
+    {
+      "code": "return rhino_object.Attributes.DrawColor(scriptcontext.doc)\n    color = rhutil.coercecolor(color, True)\n    if rhino_objects is not None:\n        for rh_obj in rhino_objects:\n            attr = rh_obj.Attributes\n            attr.ObjectColor = color\n            attr.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n            scriptcontext.doc.Objects.ModifyAttributes( rh_obj, attr, True)\n        scriptcontext.doc.Views.Redraw()\n        return len(rhino_objects)\n    rc = rhino_object.Attributes.DrawColor(scriptcontext.doc)\n    attr = rhino_object.Attributes\n    attr.ObjectColor = color\n    attr.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n    scriptcontext.doc.Objects.ModifyAttributes( rhino_object, attr, True )\n    scriptcontext.doc.Views.Redraw()\n    return rc\n\n\ndef ObjectColorSource(object_ids, source=None):\n    \"\"\"Returns of modifies the color source of an object.",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 580
+}

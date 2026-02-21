@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/iteratively-print-pdf-from-rhino-layout-containing-dynamic-annotations/191290",
+  "topic_id": 191290,
+  "title": "Iteratively print pdf from Rhino layout containing dynamic annotations",
+  "question": "Hi everyone.\n\nIn Rhino 8 and grasshopper\n\nI’m trying to iteratively print a layout, as a pdf, that updates based on a slider.\n\nThe process is:\n\nUpdate slider (automatically), graphics and annotations on a layout change, print that to pdf (using a python script shown below)\n\n\nI tried using Animate Slider, this works, but for some prints I think it prints before the layout is completely refreshed, so some geometry/ annotations are missing. The images (of the view) saved by this process are correct, but the pdf printed isn’t always correct.\n\n\nSo, I added a python script to generate a series of numbers with delay.\n\nWith this I can see the view getting updated correctly, but the sheets being printed do not include any dynamic annotations or geometry from grasshopper.\n\n\nI’m using the same python script to print for both of these methods.\n\n\nAny suggestions are welcome.\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport time\nimport Grasshopper as gh\n\ndef updateComponent(interval):\n    # Schedule a new solution after a specified time interval.\n    # https://discourse.mcneel.com/t/ghpython-counter-from-0-to-a-value/121290/2\n    # https://developer.rhino3d.com/api/grasshopper/html/M_Grasshopper_Kernel_GH_Document_ScheduleSolution_1.htm\n    # https://stackoverflow.com/questions/9596276/how-to-explain-callbacks-in-plain-english-how-are-they-different-from-calling-o\n    def callBack(e):\n        ghenv.Component.ExpireSolution(False)\n    ghenv.Component.OnPingDocument().ScheduleSolution(interval, gh.Kernel.GH_Document.GH_ScheduleDelegate(callBack))\n\nif \"count\" not in globals() or reset:\n    count = 0\n\nif run and count<len(input_list):\n    if run and not reset and count<len(input_list):\n        count += 1\n        input_val = input_list[count-1]\n        model_id = str(input_val)\n        updateComponent(wait_time*1000)\n    counter = count\n\n\n\nCode for printing\n\nfilepath, filettitle,\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nim...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport time\nimport Grasshopper as gh\n\ndef updateComponent(interval):\n    # Schedule a new solution after a specified time interval.\n    # https://discourse.mcneel.com/t/ghpython-counter-from-0-to-a-value/121290/2\n    # https://developer.rhino3d.com/api/grasshopper/html/M_Grasshopper_Kernel_GH_Document_ScheduleSolution_1.htm\n    # https://stackoverflow.com/questions/9596276/how-to-explain-callbacks-in-plain-english-how-are-they-different-from-calling-o\n    def callBack(e):\n        ghenv.Component.ExpireSolution(False)\n    ghenv.Component.OnPingDocument().ScheduleSolution(interval, gh.Kernel.GH_Document.GH_ScheduleDelegate(callBack))\n\nif \"count\" not in globals() or reset:\n    count = 0\n\nif run and count<len(input_list):\n    if run and not reset and count<len(input_list):\n        count += 1\n        input_val = input_list[count-1]\n        model_id = str(input_val)\n        updateComponent(wait_time*1000)\n    counter = count",
+      "language": "python",
+      "author": "Aditya_Kaushik",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport time\n\nfilename = filepath + '\\\\' + filetittle \npages = sc.doc.Views.GetPageViews()\n\npdf = Rhino.FileIO.FilePdf.Create()\ndpi = 300\nfor page in pages:\n    # page.Redraw()\n    capture = Rhino.Display.ViewCaptureSettings(page, dpi)\n    pdf.AddPage(capture)\npdf.Write(filename)\na = filetittle",
+      "language": "python",
+      "author": "Aditya_Kaushik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 103
+}

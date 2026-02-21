@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curve-projecttoplane-method-issue/96196",
+  "topic_id": 96196,
+  "title": "Curve.ProjectToPlane Method Issue",
+  "question": "When using this method on a curve, like:\n\n\nsome_curve.ProjectToPlane(Rhino.Geometry.Plane.WorldXY)\n\n\nI get this:\n\n\n\n\nisn’t the first argument supposed to be \nself\n, the curve itself that I want to project?\n\n\n\n\nimage\n747×466 16.8 KB\n\n\n\n\nNOTE: It’s the WIP that I’m testing this on.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ncrvID=rs.GetObject(\"Pick a curve\")\ncrv=rs.coercecurve(crvID)\nplane=Rhino.Geometry.Plane.WorldXY\ncrv.ProjectToPlane(crv,plane)\nsc.doc.Objects.AddCurve(crv)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ncrvID=rs.GetObject(\"Pick a curve\")\ncrv=rs.coercecurve(crvID)\nplane=Rhino.Geometry.Plane.WorldXY\nproj_crv=Rhino.Geometry.Curve.ProjectToPlane(crv,plane)\nsc.doc.Objects.AddCurve(proj_crv)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "// This method works directly on an instance  in RhinoCommon,\n\t\t//  so therefore it is *not* static in RhinoCommon. But here, let's \n\t\t// pretend we are making our own geometry library named \n\t\t// \"IvelinCommon\" in OOP style, so then we make our own Curve \n\t\t// class, and then we can just copy and paste \n\t\t// our old traditional \"procedural\" style library code into the \n\t\t// class and add the keyword \"static\" in front of the function \n\t\t// name and so end up having essentially the same thing as before,\n\t\t// namely a function that can be called from anywhere at anytime \n\t\t// without having to create a Curve instance:\n\t\tpublic static Point3d PointAt(Curve crv, double t)\n\t\t{\n\t\t    return ... // the point at parameter t\n\t\t}",
+      "language": "csharp",
+      "author": "RIL",
+      "post_number": 16,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 16,
+  "views": 734
+}

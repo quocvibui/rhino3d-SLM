@@ -1,0 +1,63 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/change-layer-of-block-definition/84801",
+  "topic_id": 84801,
+  "title": "Change layer of block *definition*?",
+  "question": "Having a bit of trouble finding this one - scriptwise, how does one change the layer of a block \ndefinition\n (not an instance)?  I don’t see any reference to the layer on which a definition resides in the \nInstanceDefinition Class\n. But it does indeed reside on a layer, as if you want to delete a layer which has a block definition on it, you get a warning message.\n\n\nThe idea being that a \ndefinition\n might reside on a layer which is otherwise empty, but it has \ninstances\n on other layers.  If you want to purge the layer on which the definition is, you lose the blocks on the other layers.  So I would like to transfer the block definition to a layer that will not be deleted…\n\n\nEdit:\n\n\nHmm, learning new stuff all the time.  Apparently a block definition does not exist on just \none\n layer…  It is linked to \nall\n the layers that the original objects had. This is easily tested, make a block with objects on a couple of different layers, then copy some instances to some other layers and delete the originals. Then try to delete any layer one of the original block objects were on.  You will get the message that you can’t.\n\n\nSo I guess I just answered my own question.  There’s no way to do this actually.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\ndef MoveBlockObjectsToLayer():\n    \n    ids = rs.GetObjects(\"Select block instances\", 4096, preselect=True)\n    if not ids:return\n    \n    targ = rs.GetLayer()\n    if not targ:return\n    \n    names = list(set([rs.BlockInstanceName(id) for id in ids]))\n    done = []\n\n    # EDIT: also move block instances to the selected layer\n    rs.ObjectLayer( ids, targ )\n    # /EDIT\n    \n    def BlockDrill(names):\n        while True:\n            if len (names) > 0 :\n                name = names.pop()\n            else: break\n            \n            done.append(name)\n            temp = rs.BlockObjects(name)\n            rs.ObjectLayer(temp, targ)\n            \n            for tempId in temp:\n                if rs.IsBlockInstance(tempId):\n                    tempName = rs.BlockInstanceName(tempId)\n                    if tempName not in names and tempName not in done:\n                        names.append(tempName)\n                        BlockDrill(names)\n            \n    BlockDrill(names)\n    \nif __name__ == \"__main__\": MoveBlockObjectsToLayer()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\ndef MoveBlockObjectsToLayer():\n    \n    ids = rs.GetObjects(\"Select block instances\", 4096, preselect=True)\n    if not ids:return\n    \n    targ = rs.GetLayer()\n    if not targ:return\n    \n    names = list(set([rs.BlockInstanceName(id) for id in ids]))\n    done = []\n\n    # EDIT: also move block instances to the selected layer\n    rs.ObjectLayer( ids, targ )\n    # /EDIT\n    \n    def BlockDrill(names):\n        while True:\n            if len (names) > 0 :\n                name = names.pop()\n            else: break\n            \n            done.append(name)\n            temp = rs.BlockObjects(name)\n            rs.ObjectLayer(temp, targ)\n            \n            for tempId in temp:\n                if rs.IsBlockInstance(tempId):\n\n                    # EDIT: also move nested instances to the selected layer\n                    rs.ObjectLayer( tempId, targ )\n                    # /EDIT\n\n                    tempName = rs.BlockInstanceName(tempId)\n                    if tempName not in names and tempName not in done:\n                        names.append(tempName)\n                        BlockDrill(names)\n            \n    BlockDrill(names)\n    \nif __name__ == \"__main__\": MoveBlockObjectsToLayer()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n#Not working for nested blocks...\n\ndef NukeAllBlockDefs(b_def,layer_index):\n    block_objs=b_def.GetObjects()\n    for block_obj in block_objs:\n        print type(block_obj)\n        if isinstance(block_obj,Rhino.DocObjects.InstanceDefinition):\n            #recurse\n            NukeAllBlockDefs(block_obj,layer_index)\n        elif isinstance(block_obj,Rhino.DocObjects.InstanceObject):\n            indef=block_obj.InstanceDefinition\n            NukeAllBlockDefs(indef,layer_index)\n        block_obj.Attributes.LayerIndex=layer_index\n        block_obj.CommitChanges()\n\nb_defs=sc.doc.InstanceDefinitions\nif b_defs:\n    msg=\"Layer to send all block objects to\"\n    dest_layer=rs.GetLayer(msg,show_new_button=True)\n    if dest_layer:\n        layers=sc.doc.Layers\n        layer_index=sc.doc.Layers.Find(dest_layer,True)\n        for b_def in b_defs: NukeAllBlockDefs(b_def,layer_index)\n        sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "def block_dissect(block_id=Rhino.Geometry.InstanceDefinitionGeometry, parent_layer = \"Root\"):\n    #check if its a block\n    block_obj = rs.coercerhinoobject(block_id)\n    \n    \n    # if its not a block, add to document \n    if type(block_obj) is not Rhino.DocObjects.InstanceObject: \n        #print \"{0} is not a block\".format(block_obj)\n        rs.AddLayer(name=parent_layer, color=None, visible=True, locked=False, parent=None)\n        rs.ObjectLayer(block_obj, parent_layer)\n        \n    #if its a block, get sub objects, and recursively dissect\n    if type(block_obj) is Rhino.DocObjects.InstanceObject:\n        #print \"{0} is a block\".format(block_obj)\n        block_name = rs.BlockInstanceName(block_id)\n        \n        #nake new parent layer\n        parent_layer = parent_layer + \"::\" + block_name\n        rs.AddLayer(name=parent_layer, color=None, visible=True, locked=False, parent=None)\n        sub_objs = rs.BlockObjects(block_name)\n        for obj in sub_objs:\n            block_dissect(obj, parent_layer)\n\ndef initiate_dissection():\n    block_id = [obj for obj in rs.AllObjects() if rs.ObjectType(obj) == rs.filter.instance]\n    block_dissect(block_id[0])",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 22,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n#Maybe working for nested blocks...\n\ndef NukeAllBlockDefs(b_def,layer_index):\n    block_objs=b_def.GetObjects()\n    for block_obj in block_objs:\n        print type(block_obj)\n#       if isinstance(block_obj,Rhino.DocObjects.InstanceDefinition):\n#           #recurse\n#           NukeAllBlockDefs(block_obj,layer_index)\n        if isinstance(block_obj,Rhino.DocObjects.InstanceObject):\n            indef=block_obj.InstanceDefinition\n            NukeAllBlockDefs(indef,layer_index)\n        else:\n            block_obj.Attributes.LayerIndex=layer_index\n            block_obj.CommitChanges()\n\nb_defs=sc.doc.InstanceDefinitions\nif b_defs:\n    msg=\"Layer to send all block objects to\"\n    dest_layer=rs.GetLayer(msg,show_new_button=True)\n    if dest_layer:\n        layers=sc.doc.Layers\n        layer_index=sc.doc.Layers.Find(dest_layer,True)\n        for b_def in b_defs: NukeAllBlockDefs(b_def,layer_index)\n        sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 27,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n#Maybe working for nested blocks...\n\ndef NukeAllBlockDefs(b_def,layer_index):\n    block_objs=b_def.GetObjects()\n    for block_obj in block_objs:\n        print type(block_obj)\n#       if isinstance(block_obj,Rhino.DocObjects.InstanceDefinition):\n#           #recurse\n#           NukeAllBlockDefs(block_obj,layer_index)\n#       if isinstance(block_obj,Rhino.DocObjects.InstanceObject):\n#           indef=block_obj.InstanceDefinition\n#           NukeAllBlockDefs(indef,layer_index)\n        block_obj.Attributes.LayerIndex=layer_index\n        block_obj.CommitChanges()\n    instances = b_def.GetReferences( 1 )\n    for instance in instances:\n        instance.Attributes.LayerIndex=layer_index\n        instance.CommitChanges()\n\nb_defs=sc.doc.InstanceDefinitions\nif b_defs:\n    msg=\"Layer to send all block objects to\"\n    dest_layer=rs.GetLayer(msg,show_new_button=True)\n    if dest_layer:\n        layers=sc.doc.Layers\n        layer_index=sc.doc.Layers.Find(dest_layer,True)\n        for b_def in b_defs: NukeAllBlockDefs(b_def,layer_index)\n        sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 29,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 39,
+  "views": 10843
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/calling-running-python-script-from-c-plugin/150757",
+  "topic_id": 150757,
+  "title": "Calling(running) python script from c# plugin",
+  "question": "Hi all,\n\n\nI’m trying to run a python script from my coworker in a plugin i’m writing in c#. (Sorry Dale i don’t know how to edit the text like you did last time).\n\n\nScriptEngine engine = Python.CreateEngine();\n\nScriptScope scope = engine.CreateScope();\n\nengine.ExecuteFile(\n\"{myPath}/prmd_convert.py\");\nengine.ExecuteFile(\n“{myPath}/prmd_convert.cfg.py”);\n\ndynamic testFunction = scope.GetVariable(“main()”);\n\n\nThe plugin is opening the file and then tries to import all libraries and necessary files. These are written in python.\n\n\nimport prmd_convert_cfg\n\nimport stl_export\n\nimport ps2d\n\nimport pmc\n\nimport Rhino\n\nimport Eto.Drawing as drawing\n\nimport Eto.Forms as forms\n\nimport datetime\n\nimport os\n\n\nI’m succeeding to this for the first 4. But i cant figure out how to dis for the Rhino namespace and probably also for ETO drawing, Forms, datetime and os.\n\n\ncan anyone help me out with this?\n\nI also tried running the runscript command through the commandline but then i’m encoutering other problems. Also this doesnt seem like a flexible way to do this.\n\n\nThanks in advance\n\nGr Reinder",
+  "code_blocks": [
+    {
+      "code": "[CommandStyle(Style.ScriptRunner)]\npublic class TestRunPythonScriptCommand : Rhino.Commands.Command\n{\n  public override string EnglishName => \"TestRunPythonScript\";\n\n  protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n  {\n    var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);\n    var path = System.IO.Path.Combine(folder, \"test.py\");\n    if (System.IO.File.Exists(path))\n    {\n      var script = string.Format(\"_-RunPythonScript \\\"{0}\\\"\", path);\n      RhinoApp.RunScript(script, false);\n    }\n    return Result.Success;\n  }\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 1241
+}

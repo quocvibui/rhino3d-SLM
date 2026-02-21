@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-model-space-scale-on-text-objects/170481",
+  "topic_id": 170481,
+  "title": "Set Model Space Scale on Text objects",
+  "question": "I would like to write a Rhino Python script that sets the Model Space Scale on selected Text objects to = 1.\n\n\n(because when I export Text objects to DXF for our plotting machine, the height of the Text exported = Text.Height x Text.Model Space Scale).\n\n\nI can’t seem to find the right command for this, so I have to select the objects in Rhino itself and manually change the attribute value.\n\n\nThanks in advance!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n\n    text_id = rs.GetObject(\"Select text\", rs.filter.annotation, True, False)\n    if not text_id: return\n    \n    text_obj = rs.coercerhinoobject(text_id, True, True)\n    if not isinstance(text_obj, Rhino.DocObjects.TextObject): return\n    \n    text_obj.TextGeometry.DimensionScale = 1.0\n    text_obj.CommitChanges()\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 318
+}

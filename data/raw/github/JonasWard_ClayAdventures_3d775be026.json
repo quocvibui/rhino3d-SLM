@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/JonasWard/ClayAdventures/blob/70e453eab058ddb92ad4ee34f3148155e4c1cf31/src/ghPython/PatternBrickLibrary/scrible.py",
+  "repo": "JonasWard/ClayAdventures",
+  "repo_stars": 3,
+  "repo_description": "A width range of different tests and experiments for fdm clay printing",
+  "license": "MIT",
+  "filepath": "src/ghPython/PatternBrickLibrary/scrible.py",
+  "instruction": "Scrible",
+  "code": "import Rhino.Geometry as rg\n\npts_a = []\npts_b = []\n\nfor i in range(x + 1):\n    for j in range(y + 1):\n        pts_a.append(pln.Origin + pln.XAxis * (i - .5 * x) * spacing + pln.YAxis * j * spacing )\n\nfor i in range(x + 1):\n    for j in range(y + 1):\n        pts_b.append(pln.Origin + pln.XAxis * (i - .5 * x) * spacing + pln.YAxis * j * spacing + pln.ZAxis * spacing )\n\npts = pts_a + pts_b\n\nmsh = rg.Mesh()\nfor pt in pts:\n    msh.Vertices.Add(pt)\n\ncnt = len(pts) / 2\n\nfor i in range(x):\n    id_x_a = i * (y + 1)\n    id_x_b = (i + 1) * (y + 1)\n    for j in range(y):\n        print(id_x_a + j, id_x_a + j + 1, id_x_b + j + 1, id_x_b + j )\n        msh.Faces.AddFace(id_x_a + j, id_x_a + j + 1, id_x_b + j + 1, id_x_b + j )\n        msh.Faces.AddFace(id_x_b + j + cnt, id_x_b + j + 1 + cnt, id_x_a + j + 1 + cnt, id_x_a + j + cnt )\n\nfor i in range(x):\n    id_x_a = i * (y + 1)\n    id_x_b = (i + 1) * (y + 1)\n\n    msh.Faces.AddFace( id_x_a, id_x_b, cnt + id_x_b, cnt + id_x_a )\n    # msh.Faces.AddFace( cnt + id_x_a, cnt + id_x_b, id_x_b, id_x_a )\n    # msh.Faces.AddFace( id_x_a + x + 1, id_x_b + x + 1, cnt + id_x_b + x + 1, cnt + id_x_a + x + 1 )\n    msh.Faces.AddFace( cnt + id_x_a + y, cnt + id_x_b + y, id_x_b + y, id_x_a + y )\n        \nfor i in range(y):\n    # msh.Faces.AddFace( i, i + 1, cnt + i + 1, cnt + i )\n    msh.Faces.AddFace( cnt + i, cnt + i + 1, i + 1, i )\n    msh.Faces.AddFace( (y + 1) * x + i, (y + 1) * x + i + 1, (y + 1) * x + cnt + i + 1, (y + 1) * x + cnt + i )\n    # msh.Faces.AddFace( (y + 1) * x + cnt + i , (y + 1) * x + cnt + i + 1, (y + 1) * x + i + 1, (y + 1) * x + i)\n    \nvalues = (x, y)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

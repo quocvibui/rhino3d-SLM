@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-coordinates-of-a-viewport-corners/153493",
+  "topic_id": 153493,
+  "title": "How to get coordinates of a viewport corners?",
+  "question": "I’m trying to automate \nSelCrossing <Point1> <Point2>\n command to select everything visible in the current viewport (detail view on a layout sheet). What’s the best way to “convert” viewport corners to “real world” coordinates?\n\n\nFor example:\n\n\n\n\nimage\n841×553 4.49 KB",
+  "code_blocks": [
+    {
+      "code": "from Rhino.DocObjects import ObjectType\nfrom Rhino.Geometry import Point2d\nimport scriptcontext as sc\n\nsc.doc.Objects.UnselectAll()\nviewport = sc.doc.Views.ActiveView.ActiveViewport\nfirst_corner = Point2d(viewport.Bounds.Left, viewport.Bounds.Bottom)\nsecond_corner = Point2d(viewport.Bounds.Right, viewport.Bounds.Top)\nrhino_objects = sc.doc.Objects.FindByCrossingWindowRegion(viewport,\n        first_corner, second_corner, True, ObjectType.AnyObject)\nfor obj in rhino_objects:\n    obj.Select(True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 330
+}

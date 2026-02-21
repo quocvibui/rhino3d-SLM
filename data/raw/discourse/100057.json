@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/reparametrize-geometry-python/100057",
+  "topic_id": 100057,
+  "title": "Reparametrize geometry python",
+  "question": "Hi, is there a reparametrize method in python, like in grasshopper?\n\nto make the domain of a curve from 0 to 1?",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nx.Domain = rg.Interval(0,1)\na = x",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "from inspect import getsource, getmembers, isfunction, getsourcefile\n\nimport rhinoscriptsyntax as rs\n\n\"\"\" Script to view the source code for rhinoscript modules in Rhino 5 + 6\nBy Graham Knapp for personal use and for the McNeel Discourse forums\nhttps://discourse.mcneel.com/t/python-may-the-source-be-with-you/84655\n13/6/2019\n\"\"\"\n\n\ndef get_source():\n    search_term = rs.StringBox('Function name to search for',\n                               title='rhinoscriptsyntax'\n                               ).lower()\n    if not search_term:\n        return\n    functions = {name: obj for name, obj in getmembers(rs) if\n                 isfunction(obj) and search_term in name.lower()}  # (tuples of name, fuction)\n    if not functions:\n        return\n    selected = rs.ListBox(functions.keys(), title='rhinoscriptsyntax')\n    if not selected:\n        return\n\n    the_source = getsource(functions[selected])\n    filename = getsourcefile(functions[selected])\n\n    # Get all used import statements\n    import_statements = []\n    with open(filename) as f:\n        for line in f.readlines():\n            if 'import' in line:\n                imported_name = line.strip().split()[-1]\n                if imported_name in the_source:\n                    import_statements.append(line.strip())\n                    \n    # Prepend import statements to the source code\n    the_source = '\\n'.join(import_statements)+'\\n\\n'+the_source\n\n    box_result = rs.EditBox(the_source,\n                            message='Press OK to copy to clipboard',\n                            title='Use the source')\n    if box_result:\n        rs.ClipboardText(box_result)\n\n    return box_result\n\n\nif __name__ == '__main__':\n    get_source()",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 19,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 4588
+}

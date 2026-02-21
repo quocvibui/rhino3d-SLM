@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bake-to-layer-error-curve-pointat-not-working-in-brep-createfromloft/91080",
+  "topic_id": 91080,
+  "title": "Bake to Layer error + Curve.PointAt not working in 'Brep.CreateFromLoft'",
+  "question": "I am getting some odd behavior (possibly on my end) from two aspects of this script. First, the \nrg.Curve.PointAt\n method should be returning two Point3d objects which I am using in the \n'Brep.CreateFromLoft'\n method. (This working just fine in Rhino Python btw). Furthermore, currently, only the ‘Point3d.UnSet’ option is working in this function.\n\n\nCurrently only one point is displayed in the GH preview and the print method is not showing that they are Point3d objects.\n\n\nSecond, there must be an error in my logic when baking to a layer as my code will only bake to the default layer.\n\n\nWhat am I missing? Thank you.\n\n\nimport Rhino.Geometry as rg\nimport Rhino.DocObjects as rd\nimport scriptcontext as sc\nimport Rhino as rh\n\nno_pt = rg.Point3d.Unset\ncrv_lst = []\npts = []\n\nfor crv in crvs:\n    crv.Domain = rg.Interval(0,1)\n    ptOnCrv = rg.Curve.PointAt(crv, 0)\n    pts.append(ptOnCrv)\n    crv_lst.append(crv)    \n\n    print ptOnCrv\n    #pointAt is not returning Point3D objects in GH    \n\n        \nloft = rg.Brep.CreateFromLoft(crv_lst, no_pt, no_pt, 0, False)\nloft = loft[0]\n\nsc.doc = rh.RhinoDoc.ActiveDoc\n\nif bake:\n    atts = rd.ObjectAttributes()\n    \n    #create layer object\n    layer = rd.Layer() \n    layer.Name = 'foo'\n    layerInd = sc.doc.Layers.Add(layer)\n    atts.LayerIndex = layerInd\n    print layer.Name\n    \n    #bake the object\n    sc.doc.Objects.Add(loft, atts)\n\n\nout = loft\npts = ptOnCrv\n\n\n\n\n\nerror\n1568×637 133 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino.DocObjects as rd\nimport scriptcontext as sc\nimport Rhino as rh\n\nno_pt = rg.Point3d.Unset\ncrv_lst = []\npts = []\n\nfor crv in crvs:\n    crv.Domain = rg.Interval(0,1)\n    ptOnCrv = rg.Curve.PointAt(crv, 0)\n    pts.append(ptOnCrv)\n    crv_lst.append(crv)    \n\n    print ptOnCrv\n    #pointAt is not returning Point3D objects in GH    \n\n        \nloft = rg.Brep.CreateFromLoft(crv_lst, no_pt, no_pt, 0, False)\nloft = loft[0]\n\nsc.doc = rh.RhinoDoc.ActiveDoc\n\nif bake:\n    atts = rd.ObjectAttributes()\n    \n    #create layer object\n    layer = rd.Layer() \n    layer.Name = 'foo'\n    layerInd = sc.doc.Layers.Add(layer)\n    atts.LayerIndex = layerInd\n    print layer.Name\n    \n    #bake the object\n    sc.doc.Objects.Add(loft, atts)\n\n\nout = loft\npts = ptOnCrv",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 396
+}

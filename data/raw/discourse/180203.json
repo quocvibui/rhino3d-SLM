@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-python-code-for-loop-not-working-to-many-values-to-unpack-error/180203",
+  "topic_id": 180203,
+  "title": "GH/ Python Code, For loop Not working \"To many values to unpack\" error",
+  "question": "Having issues with trying to convert this code for finding duplicate lines with tolerance from the C# tutorial into a python script so i can develop it further to take 2 sets of lines and check duplicates in one list again the other list of lines.\n\n\nThis is the tutorial i have used to get this coded but having issues with the for loop conversion, starting a 32 mins in ( Geometry Gems \n#10:\n Remove Duplicate Lines) \nhttps://www.youtube.com/watch?v=NLp4st0bGUA\n\n\nThe rest of the code works fine if i give it a lineA, lineB input so its just the loop that’s breaking, with the error msg. “To many values to unpack”\n\n\nimage\n1920×1080 293 KB\n\n\nimport Rhino as rh\n\ndef RemoveDuplicates(lines,tol):\n    cleanedlines = [lines]\n    for i, in lines:\n        line = cleanedlines[i]\n\n        for j in reversed (lines):\n            other= cleanedlines[j]\n\n            dup = AreDuplicate(line,other,tol)\n            if (dup == True):(cleanedlines.RemoveAt(j))\n    return cleanlines\n    \ndef AreSimilar(a,b,tol):\n   similar = a.DistanceTo(b) < tol\n   return similar\n   \ndef AreDuplicate(lineA,lineB,tol):  \n    if ((AreSimilar(lineA.From,lineB.From,tol)) and (AreSimilar(lineA.To,lineB.To,tol))or(AreSimilar(lineA.From,lineB.To,tol)) and (AreSimilar(lineA.To,lineB.From,tol))):\n        return True\n    return False\n\nduplicates = RemoveDuplicates(lines,tol)\n\n\n\n240412_Duplicate lines python Example WIP.gh\n (9.4 KB)\n\n\nI know i can use, \nRhino.Geomtery.GeometryBase.GeometryEquals(x,y)\n to find the duplicates but as this gives no tolerance option i also wanted to solve it with tolerance.\n\n\nThanks Matt",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rh\n\ndef RemoveDuplicates(lines,tol):\n    #build a list of unique line indices\n    tokeep =[]\n    #empty list to store the lines\n    cleanedlines = []\n    #use range for 0 to the length of lines list -1 (before last item)\n    for i in range(len(lines) -1):\n        line = lines[i]\n        #use range from the next item to the end of the list \n        #no need to check previous items\n        #store duplicate as a variable here \n        #if no duplicates found, append lines[i]\n        dup = False\n        for j in  range(i+1, len(lines)):\n            other= lines[j]\n            \n            dup_temp = AreDuplicate(line,other,tol)\n            if (dup_temp): dup = True\n\n        #if unique, store it's index\n        if (dup == False):(tokeep.append(i))\n\n    #the last item is always unique\n    tokeep.append(len(lines)-1)\n    for i in tokeep:\n        cleanedlines.append(lines[i])\n    \n    return cleanedlines\n\n#not sure abou the logic of these two functions - \n#seems to work but haven't checked \ndef AreSimilar(a,b,tol):\n   similar = a.DistanceTo(b) < tol\n   return similar\n   \ndef AreDuplicate(lineA,lineB,tol):  \n    if ((AreSimilar(lineA.From,lineB.From,tol)) and (AreSimilar(lineA.To,lineB.To,tol))or(AreSimilar(lineA.From,lineB.To,tol)) and (AreSimilar(lineA.To,lineB.From,tol))):\n        return True\n    return False\n\n#this variable name is confusing...\nduplicates = RemoveDuplicates(lines,tol)",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\ndef RemoveDuplicates(lines, tol):\n    cleaned_lines = []\n    sq_tol = tol*tol\n    for line in lines:\n        is_duplicate = False\n        for cleaned_line in cleaned_lines:\n            if AreDuplicate(line, cleaned_line,sq_tol):\n                is_duplicate = True\n                break\n        if not is_duplicate:\n            cleaned_lines.append(line)\n    return cleaned_lines\n\n\ndef AreDuplicate(lineA, lineB, tol):\n    if AreSimilar(lineA.PointAt(0.5), lineB.PointAt(0.5), tol):\n        return (AreSimilar(lineA.From, lineB.From, tol) and\n                AreSimilar(lineA.To, lineB.To, tol)) or \\\n               (AreSimilar(lineA.From, lineB.To, tol) and\n                AreSimilar(lineA.To, lineB.From, tol))\n    return False\n\ndef AreSimilar(a, b, tol):\n    return a.DistanceToSquared(b) < tol\n\na = RemoveDuplicates(lines,tol)",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rhg\n\ndef RemoveDuplicates(geoA, geoB):\n    same = [geoB]\n    different_A = []\n    different_B = []\n    \n    for i in range(len(geoA)):\n        geo = geoA[i]\n\n        for j in reversed(range(len(geoB))):\n            other = geoB[j]\n\n        dup = rhg.GeometryBase.GeometryEquals(geo,other)\n        if (dup == True):same.RemoveAt(j)\n        else: different_A.append(i), different_B.append(j) \n        return different_A,different_B\n\nunique_A, unique_B = RemoveDuplicates(geoA,geoB)",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rhg\n\ndef RemoveDuplicates(geoA, geoB):\n    index_A =[]\n    index_B =[]\n\n    for i in reversed (range(len(geoA))):\n        geo = geoA[i]\n\n        for j in reversed(range(len(geoB))):\n            other = geoB[j]\n\n            dup = rhg.GeometryBase.GeometryEquals(geo,other)\n            if (dup == True): geoA.RemoveAt(i),geoB.RemoveAt(j)\n        else:index_A.append(i),index_B.append(j)\n    return geoA, geoB , index_A, index_B\n\nunique_A, unique_B, index_A, index_B = RemoveDuplicates(geoA,geoB)",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rh\n\ndef RemoveDuplicates(lines,tol):\n    cleanedlines = [lines]\n    for i, in lines:\n        line = cleanedlines[i]\n\n        for j in reversed (lines):\n            other= cleanedlines[j]\n\n            dup = AreDuplicate(line,other,tol)\n            if (dup == True):(cleanedlines.RemoveAt(j))\n    return cleanlines\n    \ndef AreSimilar(a,b,tol):\n   similar = a.DistanceTo(b) < tol\n   return similar\n   \ndef AreDuplicate(lineA,lineB,tol):  \n    if ((AreSimilar(lineA.From,lineB.From,tol)) and (AreSimilar(lineA.To,lineB.To,tol))or(AreSimilar(lineA.From,lineB.To,tol)) and (AreSimilar(lineA.To,lineB.From,tol))):\n        return True\n    return False\n\nduplicates = RemoveDuplicates(lines,tol)",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 13,
+  "views": 501
+}

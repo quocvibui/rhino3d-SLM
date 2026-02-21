@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/bicep/M.Arch2021/blob/ba85ea381e76727ffaec9f23f3d72d023c58c06a/bitcoin2012/parse.py",
+  "repo": "bicep/M.Arch2021",
+  "repo_stars": 0,
+  "repo_description": "Code for M. Arch I Portfolio Project (Blockchain Housing Prototype)",
+  "license": "unknown",
+  "filepath": "bitcoin2012/parse.py",
+  "instruction": null,
+  "code": "import csv\nimport sys\nimport random\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\nimport math\n\ndef TSVtoCSV(fileName, fileDestination):\n    tabin = csv.reader(open(fileName), dialect=csv.excel_tab)\n    commaout = csv.writer(open(fileDestination, 'wb'), dialect=csv.excel)\n    for row in tabin:\n        commaout.writerow(row)\n       \ndef inputToDimension(input):\n    # return int(math.sqrt(float(input)))\n    return float(input)**(1./8.)\n\ndef buildCSV(fileName):\n    chain = []\n\n    with open(fileName) as csvFile:\n        reader = csv.reader(csvFile)\n        next(reader, None)  # skip the header\n\n        prev = None\n        block = []\n        maxList = []\n        maxValue = 0\n\n        for row in reader:\n\n            if prev is not None and prev!=row[0]:\n                maxList.append(maxValue)\n                chain.append(block)\n                block = []\n                maxValue = 0\n            # 0- block index, 1 - hash, 12 - input_total (USD)\n            headersWeWant =[0, 1, 12]\n\n            row[12] = inputToDimension(row[12])\n            if (row[12]) > 0:\n               \n                # editedRow = [ row[h] for h in headersWeWant ]\n                editedRow = row[12]\n                block.append(editedRow)\n                if row[12] > maxValue:\n                    maxValue = row[12]\n\n            prev = row[0]\n\n    return (chain, maxList)\n\n\nfileName = r'C:\\Users\\ko Yiu Chung\\Desktop\\blockchain morphologies\\blockchair2012.csv'\nchain, maxList = buildCSV(fileName)\nmaxTree = th.list_to_tree(maxList)\ntree = th.list_to_tree(chain)",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

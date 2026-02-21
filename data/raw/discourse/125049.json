@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-for-mesh-mergeallcoplanarfaces-api-in-grasshopper/125049",
+  "topic_id": 125049,
+  "title": "Help for Mesh. MergeAllCoplanarFaces API(IN GRASSHOPPER)",
+  "question": "HI i need merge \n Mesh. MergeAllCoplanarFaces API(IN GRASSHOPPER)\n for \nMesh(or SubD)\n\nIn Python C # or Rhinoscriptsyntax,…???\n\nIs there a way for\n MergeCoplanarFaces\n Work in grasshopper as well as this performance in Rhino for( Mesh Brep and Subd)?\n\nOf course I wrote \nMergeCoplanarFaces\n command according to the relevant API for \nBREP\nOnly!!, but does not act for Mesh and SUBD\n\n\n\n\n\n\n\n\nhttps://global.discourse-cdn.com/mcneel/uploads/default/original/4X/c/e/b/ceb6d9e89954fd44a65b799ba5f9834270b42347.mp4\n\n\n\n\n\n\nMergeCoplanarFaces(mesh).gh\n (13.5 KB)\n\n\n\n\nmerge\n1463×683 176 KB\n\n\n\n\n  private void RunScript(Brep Brep, ref object brep, ref object Result)\n  {\n    if (null != Brep)\n    { brep = Brep.MergeCoplanarFaces(RhinoDocument.ModelAbsoluteTolerance);\n      Result = brep;\n      brep = Brep;}\n\n\n\n@dale\n\n\n@Mahdiyar",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(Mesh mesh, ref object A)\n{\n  mesh.Ngons.AddPlanarNgons(RhinoDocument.ModelAbsoluteTolerance);\n  A = mesh;\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "private void RunScript(Mesh mesh, bool trimmedTriangles, bool MergFace, ref object brep)\n  {\n    brep = Brep.CreateFromMesh(mesh, trimmedTriangles);\n    if (MergFace == true){\n      brep.MergeCoplanarFaces(RhinoDocument.ModelAbsoluteTolerance);     \n      }",
+      "language": "csharp",
+      "author": "architect.civil5",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(Mesh mesh, bool trimmedTriangles, bool mergeFaces, ref object A)\n{\n  var brep = Brep.CreateFromMesh(mesh, trimmedTriangles);\n  if (mergeFaces)\n    brep.MergeCoplanarFaces(RhinoDocument.ModelAbsoluteTolerance);\n  A = brep;\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(Brep Brep, ref object brep, ref object Result)\n  {\n    if (null != Brep)\n    { brep = Brep.MergeCoplanarFaces(RhinoDocument.ModelAbsoluteTolerance);\n      Result = brep;\n      brep = Brep;}",
+      "language": "csharp",
+      "author": "architect.civil5",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1102
+}

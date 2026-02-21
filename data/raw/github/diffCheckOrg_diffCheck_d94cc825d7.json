@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_normal_segmentator/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_normal_segmentator/code.py",
+  "instruction": null,
+  "code": "#! python3\n\n\nimport Rhino\nfrom ghpythonlib.componentbase import executingcomponent as component\n\n\nfrom diffCheck.diffcheck_bindings import dfb_segmentation\n\nfrom diffCheck import df_cvt_bindings\n\n\nclass DFCloudNormalSegmentator(component):\n    def RunScript(self,\n        i_cloud: Rhino.Geometry.PointCloud,\n        i_normal_threshold_degree=None,\n        i_min_cluster_size=None,\n        i_use_knn_neighborhood=None,\n        i_knn_neighborhood_size=None,\n        i_radius_neighborhood_size=None\n    ) -> Rhino.Geometry.PointCloud:\n\n        if i_cloud is None:\n            return None\n\n        o_clusters = []\n        df_cloud = df_cvt_bindings.cvt_rhcloud_2_dfcloud(i_cloud)\n\n        if i_normal_threshold_degree is None:\n            i_normal_threshold_degree = 20\n        if i_min_cluster_size is None:\n            i_min_cluster_size = 10\n        if i_use_knn_neighborhood is None:\n            i_use_knn_neighborhood = True\n        if i_knn_neighborhood_size is None:\n            i_knn_neighborhood_size = 30\n        if i_radius_neighborhood_size is None:\n            i_radius_neighborhood_size = 0.1\n\n        o_clusters = dfb_segmentation.DFSegmentation.segment_by_normal(\n            point_cloud=df_cloud,\n\n            normal_threshold_degree=i_normal_threshold_degree,\n            min_cluster_size=i_min_cluster_size,\n            use_knn_neighborhood=i_use_knn_neighborhood,\n            knn_neighborhood_size=i_knn_neighborhood_size,\n            radius_neighborhood_size=i_radius_neighborhood_size\n        )\n\n        return [df_cvt_bindings.cvt_dfcloud_2_rhcloud(cluster) for cluster in o_clusters]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

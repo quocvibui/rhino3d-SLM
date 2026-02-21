@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-polycurve-is-not-iterable/130109",
+  "topic_id": 130109,
+  "title": "GHPython: PolyCurve is not iterable",
+  "question": "Hi friends!\n\n\nI am learning how to write code in GHPython.\n\nI am trying to iterate over a data tree collecting curves, find periodic curves, close them within the tree, return the tree with all closed curves.\n\n\n\n\nimage\n1415×706 86.2 KB\n\n\n\n\nI am getting an error: PolyCurve is not iterable\n\n\nThe input is Tree Access, No Type Hint (tried curve as well).\n\n\nWhat am I doing wrong?\n\n\nThank you!\n\n\nRhino 6, Windows 10.\nghpython_err.gh\n (493.2 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na = []\n\nfor i, branch in enumerate(crv.Branches):\n\n    for j, item in enumerate(branch):\n        \n        if rs.IsCurveClosed(item):\n            bool = \"closed\"\n            a.append(item)\n        else:\n            bool = \"periodic\"\n            pts = list(rs.CurveEditPoints(item))\n            pts.append(pts[0])\n            a.append(rs.AddInterpCurve(pts,1,2))",
+      "language": "python",
+      "author": "efestwin",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import ghpythonlib.treehelpers as th\nimport rhinoscriptsyntax as rs\n\ncrv = th.tree_to_list(crv, lambda crv: crv)\n\na = []\n\nfor i,branch in enumerate(crv):\n    \n    for j,item in enumerate(branch):\n        if rs.IsCurveClosed(item):\n            bool = \"closed\"\n            a.append(item)\n        else:\n            bool = \"periodic\"\n            pts = list(rs.CurveEditPoints(item))\n            pts.append(pts[0])\n            a.append(rs.AddInterpCurve(pts,1,2))",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 1208
+}

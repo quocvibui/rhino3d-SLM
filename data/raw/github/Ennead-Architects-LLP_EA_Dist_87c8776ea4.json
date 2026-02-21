@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/lib/EnneadTab/RIR/_examples/pyrevit%20and%20RIR.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/lib/EnneadTab/RIR/_examples/pyrevit and RIR.py",
+  "instruction": "Pyrevit and rir",
+  "code": "from pyrevit import clr, revit, DB  # pyright: ignore\r\nfrom pyrevit.framework import Enumerable # pyright: ignore\r\nfrom pyrevit import script\r\n\r\n\r\nclr.AddReference('RhinoCommon')\r\nclr.AddReference('RhinoInside.Revit')\r\n\r\n\r\nfrom Rhino import Geometry # pyright: ignore\r\nfrom RhinoInside.Revit import Revit, Convert # pyright: ignore\r\n\r\n\r\nlogger = script.get_logger()\r\noutput = script.get_output()\r\n\r\n\r\nwith revit.Transaction(\"Rhino.Inside Sample7\"):\r\n    sphere = Geometry.Sphere(Geometry.Point3d.Origin, 12 * Revit.ModelUnits)\r\n    brep = sphere.ToBrep()\r\n    meshes = \\\r\n        Geometry.Mesh.CreateFromBrep(brep, Geometry.MeshingParameters.Default)\r\n\r\n    category = DB.ElementId(DB.BuiltInCategory.OST_GenericModel)\r\n    ds = DB.DirectShape.CreateElement(revit.doc, category)\r\n\r\n    solids = []\r\n    for mesh in meshes:\r\n        solid = Convert.Geometry.GeometryEncoder.ToSolid(mesh)\r\n        solids.append(solid)\r\n    \r\n    for geometry in solids:\r\n        ds.AppendShape([geometry])",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon"
+  ],
+  "has_docstring": false
+}

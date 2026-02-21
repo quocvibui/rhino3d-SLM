@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/furthest-z-on-surface-given-x-y.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/furthest-z-on-surface-given-x-y.py",
+  "instruction": "Furthest z on surface given x y",
+  "code": "import rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Intersect, Point3d, Vector3d\nfrom scriptcontext import doc\n\ndef RunCommand():\n    # select a surface\n    srfid = rs.GetObject(\"select serface\", rs.filter.surface | rs.filter.polysurface)\n    if not srfid: return\n    # get the brep\n    brep = rs.coercebrep(srfid)\n    if not brep: return\n\n    x = rs.GetReal(\"value of x\", 0)\n    y = rs.GetReal(\"value of y\", 0)\n\n    pts = [(abs(point.Z), point.Z) for point in Intersect.Intersection.ProjectPointsToBreps([brep], [Point3d(x, y, 0)], Vector3d(0, 0, 1), doc.ModelAbsoluteTolerance)]\n\n    pts.sort(reverse=True)\n\n    if pts == []:\n        print \"no Z for given X, Y\"\n    else:\n        rs.AddPoint(Point3d(x, y, pts[0][1]))\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

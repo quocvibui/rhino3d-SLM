@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issue-instancedefinitions-purge-sets-isdeleted-flag-unexpectedly/214315",
+  "topic_id": 214315,
+  "title": "Issue: InstanceDefinitions.Purge() sets .IsDeleted flag unexpectedly",
+  "question": "Hi,\n\n\nI am experiencing issues with deleting InstanceDefinitnions\n\nWhen I call InstanceDefinitions.Purge() on a definition with IsDeleted = True:\n\n\n\n\nthe .IsDeleted flag gets set to False unexpectedly\n\n\nI expect the definition to be removed from the InstanceDefinitions table completely, but this does not seem to happen. (possibly I don’t understand intended behavior correctly?)\n\n\n\n\nbest regards,\n\nTim\n\n\n#! python 3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nfrom Rhino.Geometry import Point3d, BoundingBox\n\nX_SPACE = 1000\nBOX_SIZES = [\n    ((0,0,0), (200,300,400)),\n    ((0,0,0), (500,600,700)),\n]\n\ndef create_geometry():\n\n    boxes = []\n    for i, box_size in enumerate(BOX_SIZES):\n        bbox = BoundingBox(Point3d(*box_size[0]), Point3d(*box_size[1]))\n        corners = list(bbox.GetCorners())\n        box = rs.AddBox(corners)\n        boxes.append(box)\n\n    return boxes\n\ndef create_definitions(boxes):\n\n    idefs = []\n    for i, box in enumerate(boxes):\n        def_name = f\"definition_{i}\"\n\n        def_objects = [rs.coercerhinoobject(box)]\n        geometry = [obj.Geometry for obj in def_objects]\n        attrs = [obj.Attributes for obj in def_objects]\n        index = sc.doc.InstanceDefinitions.Add(def_name, \"\", Point3d.Origin, geometry,\n\n                                                attrs)\n\n        idef = sc.doc.InstanceDefinitions.GetList(False)[index]\n        idefs.append(idef)\n\n    return idefs\n\ndef create_new_scene():\n    rs.DocumentModified(False)\n    rs.Command(\"-New None EnterEnd\", False)\n\n\ndef main():\n\n    create_new_scene()\n\n    boxes = create_geometry()\n    idefs = create_definitions(boxes)\n\n    # delete 1 instance\n    sc.doc.InstanceDefinitions.Delete(idefs[1]) # => sets IsDeleted flag?\n\n    print(\"len before purge ignoreDeleted=True:\", len(sc.doc.InstanceDefinitions.GetList(True))) # => prints 1 as expected\n    print(\"len before purge ignoreDeleted=False:\", len(sc.doc.InstanceDefinitions.GetList(False))) # => prints 2 as expected\n\n    # call Pu...",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nfrom Rhino.Geometry import Point3d, BoundingBox\n\nX_SPACE = 1000\nBOX_SIZES = [\n    ((0,0,0), (200,300,400)),\n    ((0,0,0), (500,600,700)),\n]\n\ndef create_geometry():\n\n    boxes = []\n    for i, box_size in enumerate(BOX_SIZES):\n        bbox = BoundingBox(Point3d(*box_size[0]), Point3d(*box_size[1]))\n        corners = list(bbox.GetCorners())\n        box = rs.AddBox(corners)\n        boxes.append(box)\n\n    return boxes\n\ndef create_definitions(boxes):\n\n    idefs = []\n    for i, box in enumerate(boxes):\n        def_name = f\"definition_{i}\"\n\n        def_objects = [rs.coercerhinoobject(box)]\n        geometry = [obj.Geometry for obj in def_objects]\n        attrs = [obj.Attributes for obj in def_objects]\n        index = sc.doc.InstanceDefinitions.Add(def_name, \"\", Point3d.Origin, geometry,\n\n                                                attrs)\n\n        idef = sc.doc.InstanceDefinitions.GetList(False)[index]\n        idefs.append(idef)\n\n    return idefs\n\ndef create_new_scene():\n    rs.DocumentModified(False)\n    rs.Command(\"-New None EnterEnd\", False)\n\n\ndef main():\n\n    create_new_scene()\n\n    boxes = create_geometry()\n    idefs = create_definitions(boxes)\n\n    # delete 1 instance\n    sc.doc.InstanceDefinitions.Delete(idefs[1]) # => sets IsDeleted flag?\n\n    print(\"len before purge ignoreDeleted=True:\", len(sc.doc.InstanceDefinitions.GetList(True))) # => prints 1 as expected\n    print(\"len before purge ignoreDeleted=False:\", len(sc.doc.InstanceDefinitions.GetList(False))) # => prints 2 as expected\n\n    # call Purge()    \n    sc.doc.InstanceDefinitions.Purge(idefs[1].Index) # => expected to remove InstanceDefinition from idef table indefinetly?\n\n\n    print(\"len after purge ignoreDeleted=True:\", len(sc.doc.InstanceDefinitions.GetList(True))) # => prints 2, expected 1\n    print(\"len after purge ignoreDeleted=False:\", len(sc.doc.InstanceDefinitions.GetList(False))) # => prints 2, expected 1\n\n\n    for idef in sc.doc.InstanceDefinitions.GetList(False):\n        print('block_name', idef.Name,  idef.IsDeleted)\n\n\nif __name__ == '__main__':\n    main()",
+      "language": "python",
+      "author": "timcastelijn",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 41
+}

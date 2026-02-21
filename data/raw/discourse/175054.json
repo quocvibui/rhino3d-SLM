@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/treehelpers-th-list-to-tree-is-failing-to-output-in-grasshopper/175054",
+  "topic_id": 175054,
+  "title": "Treehelpers th.list_to_tree is failing to output in Grasshopper",
+  "question": "I have implemented Treehelpers in a python script (attached). I am running the script in a GhPython component. When I connect a panel to an output named x, I have a null value, thogh when I print the list of lists, I get values (see screenshot). This means to me that the failure is in my use of Treehelpers.\n\n\nI don’t see how my script differs from this \nhttps://developer.rhino3d.com/guides/rhinopython/grasshopper-datatrees-and-python/\n\n\nAnyone know what’s going on?\n\n\nimage\n2532×992 233 KB\n\n\ntreehelpers_test.py\n (582 Bytes)\n\n\ntreehelpers_test.3dm\n (269.7 KB)\n\n\ntreehelpers_test.gh\n (6.0 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport random\nimport Rhino\nimport ghpythonlib.treehelpers as th\nimport System\nimport scriptcontext as sc\n\ndef FindObjs():\n    layerTree = []\n    layernames = [\"CurveLayer1\", \"CurveLayer2\",\"CurveLayer3\"]\n    for i in range(len(layernames)):\n        objs = Rhino.RhinoDoc.ActiveDoc.Objects.FindByLayer(layernames[i])\n        \n        if objs:\n            geoms = [obj.Geometry for obj in objs]\n            layerTree.append(geoms)\n    print(layerTree)\n    return th.list_to_tree(layerTree, source=[0,0])\n    \n    \nx = FindObjs()",
+      "language": "python",
+      "author": "Tom_P",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 313
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wish-load-external-ghuser-files-by-ghlink/92569",
+  "topic_id": 92569,
+  "title": "[Wish] Load external ghuser files by ghlink",
+  "question": "Hi All,\n\n\nAs far as I know, ghuser files won’t be loaded from outside of “%appdata%\\Grasshopper\\UserObjects”.\n\nIs it possible to do it like gha file linked by ghlink?\n\n\nThanks,\n\nMingbo",
+  "code_blocks": [
+    {
+      "code": "public override GH_LoadingInstruction PriorityLoad()\n{\n    try\n    {\n        Action<string> logger = (string message) => Rhino.RhinoApp.WriteLine(message);\n        Core.OpenStudio.OpenStudioHelper.LoadAssemblies(logger);\n        \n    }\n    catch (System.IO.FileNotFoundException loadError)\n    {\n        System.Windows.Forms.MessageBox.Show(loadError.Message);\n    }\n\n\n    GH.Instances.ComponentServer.AddCategoryIcon(\"Ladybug\", Properties.Resources.Ladybug);\n    GH.Instances.ComponentServer.AddCategoryIcon(\"Honeybee\", Properties.Resources.Honeybee);\n\n\n    GH.Instances.ComponentServer.AddCategoryIcon(\"Ironbug\", Properties.Resources.Ironbug);\n    GH.Instances.ComponentServer.AddCategoryShortName(\"Ironbug\", \"IB\");\n    GH.Instances.ComponentServer.AddCategorySymbolName(\"Ironbug\", 'I');\n    \n    return GH_LoadingInstruction.Proceed;",
+      "language": "csharp",
+      "author": "mingo1214",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "using Grasshopper;\nusing Grasshopper.GUI.Canvas;\nusing Grasshopper.Kernel;\nusing Rhino;\nusing System;\nusing System.Drawing;\nusing System.IO;\nusing System.Reflection;\nusing System.Windows.Forms;\n\nnamespace UserObjectsRefresh\n{\n    public class UserObjectsRefresh : Grasshopper.Kernel.GH_AssemblyPriority\n    {\n        public override Grasshopper.Kernel.GH_LoadingInstruction PriorityLoad()\n        {\n            //refresh user objects when a new document is added.\n            //I've tried adding this to canvas created event but although it copies the files they are not populated into the components.\n            //The same thing also happens when you run the code directly in Priority load.\n            Instances.DocumentServer.DocumentAdded += RefreshUserObjectsEvent;\n\n            return GH_LoadingInstruction.Proceed;\n        }\n\n        private void RefreshUserObjectsEvent(GH_DocumentServer sender, GH_Document doc)\n        {\n            // add date time stamp to rhino window to know when has run.\n            RhinoApp.WriteLine(\"______Refreshing Shared User Objects: \" + DateTime.Now.ToString());\n\n            //set paths for where new files are read from, and where user objects are added.\n            string sourcePath = \"G:\\\\Shared drives\\\\UserObjects\";\n            string targetPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + \"\\\\Grasshopper\\\\UserObjects\";\n\n            //set prefix for the local user objects so they can be identifed and removed.\n            string prefix = \"FMT_\";\n\n            //create targetPath if it doesn't already exist\n            if (!System.IO.Directory.Exists(targetPath))\n            {\n                Directory.CreateDirectory(targetPath);\n                RhinoApp.WriteLine(\"created userobjects folder\");\n            }\n\n            //clean out existing user objects so that new objects can the added without any clash issues.\n            string[] FilePaths = Directory.GetFiles(targetPath);\n            foreach (string filePath in FilePaths)\n            {\n                string filename = Path.GetFileName(filePath);\n                if (filename.Contains(prefix))\n                {\n                    File.Delete(filePath);\n                    RhinoApp.WriteLine(filename + \" has been deleted\");\n                }\n            }\n\n            //copy in new userobjects\n            RhinoApp.WriteLine(\"copying fresh set of userobjects\");\n            string fileName = string.Empty;\n            string destFile = string.Empty;\n\n            // To copy all the files in one directory to another directory. \n            if (System.IO.Directory.Exists(sourcePath))\n            {\n                string[] files = System.IO.Directory.GetFiles(sourcePath);\n\n                // Copy the files and overwrite destination files if they already exist. \n                foreach (string s in files)\n                {\n                    // Use static Path methods to extract only the file name from the path.\n                    fileName = System.IO.Path.GetFileName(s);\n                    //create new path with prefix\n                    destFile = System.IO.Path.Combine(targetPath, prefix + fileName);\n                    //copy file from existing path to new path.\n                    System.IO.File.Copy(s, destFile, true);\n                    RhinoApp.WriteLine(\"copied file: \" + fileName);\n                }\n            }\n            else\n            {\n                RhinoApp.WriteLine(\"SOURCE PATH DOES NOT EXIST! - Check you can access\" + sourcePath.ToString());\n            }\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "matthew.s.r.church",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 9,
+  "views": 1133
+}

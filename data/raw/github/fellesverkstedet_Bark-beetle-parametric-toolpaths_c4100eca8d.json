@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/fellesverkstedet/Bark-beetle-parametric-toolpaths/blob/a2f2f73aaebe195b05ba010fcd1ffe2bdcd1d0ed/Python_scripts/get_cutout_cnc.py",
+  "repo": "fellesverkstedet/Bark-beetle-parametric-toolpaths",
+  "repo_stars": 119,
+  "repo_description": "A grasshopper plugin for digital fabrication. Enables direct fabrication of geometry with 3D printers, CNC milling, Laser cutters, Robot arms and more. Also featuring 1:1 augmented reality toolpath projections.",
+  "license": "unknown",
+  "filepath": "Python_scripts/get_cutout_cnc.py",
+  "instruction": "this script asks the user to select the curves that will cut all the way through the material (outlines of a part)",
+  "code": "#this script asks the user to select the curves that will cut all the way through the material (outlines of a part)\n\n#import script types\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n#define User Key (so that the GH definition will know that this curve object is representing the material outline)\ncutoutkey = \"CNCcutout\"\n\n#make input request for cutout curves\ncutoutcurves = rs.GetObject(message=\"Select a curve for cutout (an outline of a part)\", filter=rs.filter.curve, preselect=True, select=False)\n\n# Clear any previous User Text\n#find out how many User text values to clear\nkeylist = rs.GetUserText(cutoutcurves, key=None , attached_to_geometry=False)\nkeylistlength = len(keylist)\n\n# Set the User Text to nothing (thereby clearing it)\nfor x in range(0,  keylistlength):\n    rskeys = rs.GetUserText(cutoutcurves, key=None , attached_to_geometry=False)\n    rs.SetUserText(cutoutcurves, rskeys[0], value=None, attach_to_geometry=False)\n    \n# Set the new User Text\nrs.SetUserText(cutoutcurves, cutoutkey, value=\"yes\", attach_to_geometry=False)\n\n# make Grasshopper recompute\ngh = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\ngh.RunSolver(True)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

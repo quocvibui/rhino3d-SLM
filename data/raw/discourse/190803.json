@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/executing-python-3-script-in-c/190803",
+  "topic_id": 190803,
+  "title": "Executing Python 3 Script in C#",
+  "question": "I’ve been successfully using \nRhino.Runtime.PythonScript\n to run IronPython  scripts directly in C#:\n\n\nprivate void RunScript(ref object a)\n{\n    var script = Rhino.Runtime.PythonScript.Create();\n    script.ExecuteScript(\"import sys\\na=sys.version\");\n    a = script.GetVariable(\"a\");\n}\n\n\n\nNow, I’m attempting to execute Python 3 code directly from C# using the \nRhinoCodePlatform.Rhino3D.Languages.Python3Script\n class:\n\n\nprivate void RunScript(ref object a)\n{\n    var script = RhinoCodePlatform.Rhino3D.Languages.Python3Script.Create();\n    script.ExecuteScript(\"import sys\\na=sys.version\");\n    a = script.GetVariable(\"a\");\n}\n\n\n\nPythonInCSharp\n1974×528 47.5 KB\n\n\nPythonInCSharp.gh\n (9.4 KB)\n\n\nIt seems that despite using \nPython3Script\n, it still executes Python 2 code. \n@eirannejad\n, could you please advise if there’s a method to execute Python 3 code directly from C# in Rhino? Any help or alternative methods would be greatly appreciated.",
+  "code_blocks": [
+    {
+      "code": "using Rhino.Runtime.Code;\nusing Rhino.Runtime.Code.Execution;\n\n// context holds execution configs, and input/output parameters\nvar ctx = new RunContext {\n  AutoApplyParams = true,\n  Inputs = {\n    [\"x\"] = 21,\n    [\"y\"] = 21,\n  },\n  Outputs = {\n    [\"a\"] = 0\n  }\n};\n\n// run script with created context\nRhinoCode.RunScript(\"#! python 3\\na = x + y\", ctx);\n\n// inspect context for return values\na = ctx.Outputs.Get<int>(\"a\");",
+      "language": "csharp",
+      "author": "eirannejad",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 231
+}

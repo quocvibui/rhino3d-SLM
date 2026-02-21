@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cutting-an-object-with-multiple-objects-rhinoscriptsyntax/81690",
+  "topic_id": 81690,
+  "title": "Cutting an object with multiple objects - rhinoscriptsyntax",
+  "question": "Hi all,\n\n\nI am trying to do what would seem a very simple operation with python but it appears to be more difficult than expected. I have a surface (or multiple surfaces) I have to split with a list of cubes, then I have to assign each of these surfaces to a layer and split them in turn with a list of lines. (see attached image)\n\n\nHowever the rhinoscriptsyntax doesn’t allow for this as it requires to use just to object at the time. I thought I could then use the rs.command but however I can’t manage to select the objects I want to cut my surface with. Below the code I am using\n\n\nimport rhinoscriptsyntax as rs\n\nsrf = rs.GetObject(\"surface to cut\",8)\ncuttingObjects = rs.GetObjects(\"cutting elements\",16)\n\nrs.SelectObject(srf)\nrs.Command(\"split \")\nrs.SelectObjects(cuttingObjects)\nrs.Command(\" \")\nrs.UnselectAllObjects()\n\n\n\nI tried for example to move the objects I want to cut my surface with and then write “sellast” in the command string, however this doesn’t appear to work.\n\n\nAny way this could be solved?\n\n\nThanks in advance\n\n\n\n\nimage.png\n1530×695 38 KB",
+  "code_blocks": [
+    {
+      "code": "> import rhinoscriptsyntax as rs\nimport Rhino\n\nsrf = rs.GetObject(\"surface to cut\",8)\ncuttingObjects = rs.GetObjects(\"cutting elements\",16)\n\nsurface = rs.coercebrep(srf)\nobjs = rs.coercebrep(cuttingObjects)\nsurface.Split(objs, 0.01)",
+      "language": "python",
+      "author": "revink",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc #<<<< at the top of your script if it is no there\ntol = .001\nSRF = rs.coercebrep(srf)\nbreps= [rs.coercebrep(id) for id in cuttingObjects]\nsplitList = SRF.Split(breps, tol)\n\nnewIds = [ sc.doc.Objects.AddBrep(brep) for brep in splitList]",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport System.Collections.Generic.IEnumerable as IEnumerable\nimport System.Double as sd\n   \n       \ntol = .001\nsrf = rs.GetObject(filter=8)\nSRF = rs.coercebrep(srf)\ncuttingObjects = rs.GetObjects(filter= 8 + 16)\nbreps= [rs.coercebrep(id) for id in cuttingObjects]\n\nsplitList = SRF.Split.Overloads[IEnumerable[Rhino.Geometry.Brep], sd]( breps, tol) #<<<Here\n\nnewIds = [ sc.doc.Objects.AddBrep(brep) for brep in splitList]",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "surface = rs.GetObject(\"Surface\",8)\n    tol = .0001\n    SRF = rs.coercebrep(surface)\n    \n    \n    cuttingObjects = rs.GetObjects(\"crvs\",4)\n    curves = [rs.coercecurve(id) for id in cuttingObjects]\n\n    if SRF:\n        splitList = SRF.Split.Overloads[IEnumerable[Rhino.Geometry.Curve], sd]( curves, tol)\n        newIds = [ sc.doc.Objects.AddBrep(brep) for brep in splitList]",
+      "language": "python",
+      "author": "revink",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsrf = rs.GetObject(\"surface to cut\",8)\ncuttingObjects = rs.GetObjects(\"cutting elements\",16)\n\nrs.SelectObject(srf)\nrs.Command(\"split \")\nrs.SelectObjects(cuttingObjects)\nrs.Command(\" \")\nrs.UnselectAllObjects()",
+      "language": "python",
+      "author": "revink",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1459
+}

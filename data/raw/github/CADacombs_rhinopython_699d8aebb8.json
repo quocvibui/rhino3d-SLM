@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/CADacombs/rhinopython/blob/541b4ade49f1dda6a3861d12b9e2613405182082/xNurbsCurve_selectNonUniform.py",
+  "repo": "CADacombs/rhinopython",
+  "repo_stars": 37,
+  "repo_description": "Python scripts for Rhinoceros (Rhino, Rhino3D).",
+  "license": "LGPL-3.0",
+  "filepath": "xNurbsCurve_selectNonUniform.py",
+  "instruction": "190610: Created, starting with another script.",
+  "code": "\"\"\"\r\n190610: Created, starting with another script.\r\n\"\"\"\r\n\r\nimport Rhino\r\nimport Rhino.DocObjects as rd\r\nimport Rhino.Geometry as rg\r\nimport scriptcontext as sc\r\n\r\nimport xKnotList\r\n\r\n\r\ndef main(bEcho=True, bDebug=False):\r\n    \"\"\"\r\n    \"\"\"\r\n    \r\n    # Custom geometry filter to only select non-NurbsCurve wires.\r\n    def nurbsCurveGeometryFilter(rhObject, geom, compIdx):\r\n        if not isinstance(geom, rg.Curve): return False\r\n        return geom.GetType() == rg.NurbsCurve\r\n    \r\n    Rhino.RhinoApp.SetCommandPrompt(\"Searching ...\")\r\n    \r\n    gObjs_Preselected = [rdObj.Id for rdObj in sc.doc.Objects.GetSelectedObjects(includeLights=False, includeGrips=False)]\r\n    \r\n    gCrvs_Target = []\r\n    iter = rd.ObjectEnumeratorSettings()\r\n    iter.NormalObjects = True\r\n    iter.LockedObjects = False\r\n    iter.IncludeLights = False\r\n    iter.IncludeGrips = False\r\n    for rdRhinoObject in sc.doc.Objects.GetObjectList(iter):\r\n        if rdRhinoObject.Id in gObjs_Preselected:\r\n            continue\r\n        if rdRhinoObject.ObjectType != rd.ObjectType.Curve:\r\n            continue\r\n        rgCrv = rdRhinoObject.CurveGeometry\r\n        sCrvType = rgCrv.GetType().Name\r\n        if sCrvType == 'NurbsCurve':\r\n            if not xKnotList.isUniform(rgCrv.Knots):\r\n                gCrvs_Target.append(rdRhinoObject.Id)\r\n        rgCrv.Dispose()\r\n\r\n    ct_Selected  = 0\r\n\r\n    sc.doc.Views.RedrawEnabled = False\r\n    for gCrv in gCrvs_Target:\r\n        if sc.doc.Objects.Select(gCrv):\r\n            ct_Selected += 1\r\n    sc.doc.Views.RedrawEnabled = True\r\n\r\n    if bEcho:\r\n        if gCrvs_Target:\r\n            s  = \"{} curve{} added to selection.\".format(\r\n                    ct_Selected,\r\n                    '' if ct_Selected == 1 else 's')\r\n            print s\r\n        else:\r\n            print \"\\nNo curves added to selection.\"\r\n    \r\n    return gCrvs_Target\r\n\r\n\r\nif __name__ == '__main__': main(bEcho=bool(1), bDebug=bool(0))",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

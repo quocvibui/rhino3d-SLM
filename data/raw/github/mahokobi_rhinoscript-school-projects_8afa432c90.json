@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mahokobi/rhinoscript-school-projects/blob/a29965359f76d98935c658eb2f7efb8b99cfd7d7/week3/patterning.py",
+  "repo": "mahokobi/rhinoscript-school-projects",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "week3/patterning.py",
+  "instruction": "NOTES: WEEK 3 ASSIGNMENT 1 NAME: Maho Kobayashi",
+  "code": "#######################################\n#######################################\n\n#NOTES: WEEK 3 ASSIGNMENT 1\n#NAME: Maho Kobayashi\n\n#######################################\n#######################################\n\nimport rhinoscriptsyntax as rs\nimport random as rnd\n\n#create an empty list / dictionary\nptDict = {}\ncrvList = []\n\n#input values for imax and jmax\nimax = rs.GetInteger('input number in x direction',10)\njmax = rs.GetInteger('input number in y direction',10)\n\n#incremental loop to generate points\nfor i in range(imax):\n    for j in range(jmax):\n        #define x in terms of i\n        #define y in terms of j\n        x = i*6+(rnd.random()*3)\n        y = j*6+(rnd.random()*3)\n        z = 0\n\n        #render point in rhinospace\n        rs.AddPoint(x,y,z)\n\n        #save point values in a dictionary using (i,j) as a key\n        ptDict[(i,j)] = (x,y,z)\n\n#loop through dictionary to create geometry\nfor i in range (imax):\n    for j in range(jmax):\n\n        #CREATE GEOMETRY\n        if i > 0 and j > 0:\n            #find centroid of module using midPt of constructed line\n            constLine = rs.AddLine(ptDict[(i,j)],ptDict[(i-1,j-1)])\n            centroid = rs.CurveMidPoint(constLine)\n           \n            #delete constructed line\n            rs.DeleteObject(constLine)\n           \n            #POINTS\n            #   2-------1 1: (i,j)\n            #   | | 2: (i-1,j)\n            #   | mid | 3: (i-1,j-1)\n            #   | | 4: (i,j-1)\n            #   3-------4\n            \n            #draw line from 1 to centroid to 2\n            rs.AddCurve((ptDict[(i,j)], centroid, ptDict[(i-1,j)]))\n            \n            #draw line from 2 to centroid to 3\n            rs.AddCurve((ptDict[(i-1,j)], centroid, ptDict[(i-1,j-1)]))\n            \n            #draw line from 1 to 4 to 3\n            curve_0 = rs.AddCurve((ptDict[(i,j)], ptDict[(i,j-1)], ptDict[(i-1,j-1)]))\n           \n            #draw line from 1 to 2 to 3\n            curve_0 = rs.AddCurve((ptDict[(i,j)], ptDict[(i-1,j)], ptDict[(i-1,j-1)]))\n           \n            #construct a closed curve from corner points\n            curve = rs.AddCurve((ptDict[(i,j)], centroid, ptDict[(i-1,j-1)], ptDict[(i,j-1)], ptDict[(i,j)]))",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/looking-for-angle-point1-point2-plane-equivalent-in-net/86101",
+  "topic_id": 86101,
+  "title": "Looking for Angle(point1, point2, plane) equivalent in .net",
+  "question": "Hi,\n\nI’m looking for the .net equivalent of RhinoScript’s function \nAngle(point1, point2, plane)\n but I can’t find it.\n\nAny idea?\n\nRegards",
+  "code_blocks": [
+    {
+      "code": "v1 = Rhino.Geometry.Vector3d(pt1 - pl.Origin)\nv2 = Rhino.Geometry.Vector3d(pt2 - pl.Origin)\n\na = Rhino.Geometry.Vector3d.VectorAngle(v1, v2)",
+      "language": "unknown",
+      "author": "chanley",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def Angle(point1, point2, plane=True):\n    \"\"\"Measures the angle between two points\n    Parameters:\n      point1, point2 (point): the input points\n      plane (bool, optional): Boolean or Plane\n        If True, angle calculation is based on the world coordinate system.\n        If False, angle calculation is based on the active construction plane\n        If a plane is provided, angle calculation is with respect to this plane\n    Returns:\n      tuple(tuple(number, number), number, number, number, number): containing the following elements if successful\n        element 0 = the X,Y angle in degrees\n        element 1 = the elevation\n        element 2 = delta in the X direction\n        element 3 = delta in the Y direction\n        element 4 = delta in the Z direction\n      None: if not successful\n    Example:\n      import rhinoscriptsyntax as  rs\n      point1 = rs.GetPoint(\"First  point\")\n      if point1:\n          point2  = rs.GetPoint(\"Second point\")\n          if point2:\n              angle  = rs.Angle(point1, point2)\n              if  angle: print \"Angle: \", angle[0]\n    See Also:\n      Angle2\n      Distance\n    \"\"\"\n    pt1 = coerce3dpoint(point1)\n    if pt1 is None:\n        pt1 = coercerhinoobject(point1)\n        if isinstance(pt1, Rhino.DocObjects.PointObject): pt1 = pt1.Geometry.Location\n        else: pt1=None\n    pt2 = coerce3dpoint(point2)\n    if pt2 is None:\n        pt2 = coercerhinoobject(point2)\n        if isinstance(pt2, Rhino.DocObjects.PointObject): pt2 = pt2.Geometry.Location\n        else: pt2=None\n    point1 = pt1\n    point2 = pt2\n    if point1 is None or point2 is None: return scriptcontext.errorhandler()\n    vector = point2 - point1\n    x = vector.X\n    y = vector.Y\n    z = vector.Z\n    if plane!=True:\n        plane = coerceplane(plane)\n        if plane is None:\n            plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        vfrom = point1 - plane.Origin\n        vto = point2 - plane.Origin\n        x = vto * plane.XAxis - vfrom * plane.XAxis\n        y = vto * plane.YAxis - vfrom * plane.YAxis\n        z = vto * plane.ZAxis - vfrom * plane.ZAxis\n    h = math.sqrt( x * x + y * y)\n    angle_xy = math.degrees( math.atan2( y, x ) )\n    elevation = math.degrees( math.atan2( z, h ) )\n    return angle_xy, elevation, x, y, z",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 705
+}

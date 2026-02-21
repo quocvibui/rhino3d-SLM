@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-rhino-geometry-line-list-from-script/82051",
+  "topic_id": 82051,
+  "title": "Python Rhino.Geometry Line list from script",
+  "question": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport csv\n\na = [] # new. correct because global scope\ndef CSVlist():\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    #prompt the user for a file to import\n    filter = \"CSV file (*.csv)|*.csv|*.txt|All Files (*.*)|*.*||\"\n    filename = rs.OpenFileName(\"Open Point File\", filter)\n    if not filename: return\n\n    with open(filename) as csvfile:\n        reader = csv.reader(csvfile)\n        #a = [] # wrong because function scope\n        for row in reader:\n\n            p1 = Rhino.Geometry.Point3d(float(row[0]),\n                                        float(row[1]),\n                                        0)\n            p2 = Rhino.Geometry.Point3d(float(row[2]),\n                                        float(row[3]),\n                                        0)\n            \"\"\"\n            p1 = rs.AddPoint(float(row[0]),\n                             float(row[1]),\n                             0)\n            p2 = rs.AddPoint(float(row[2]),\n                             float(row[3]),\n                             0)\n            \"\"\"\n            x = Rhino.Geometry.Line(p1,p2)\n            print(x)\n            a.append(x)\n            #print(rs.AddLine(p1,p2))\n            #a.append(rs.AddLine(p1,p2))\n\n########################################################\n\n\n\n\n\nI am creating a list of lines and points from text. I want to output directly to line because it is easier than managing the creation of a polyline. I can output as a text fine with start points and end points of line segments, but the conversion from text to line is invalid. What to do?\n\n\n\n##################\n\n\n\n\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    if x:\n        CSVlist()\n\n\n\n\n\nEdit: I have attached the Label and/or Line components to a parameter, for which the representa...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\nlst=[\n\t[\"0.0\", \"0.0\", \"1.0\", \"0.0\"],\n\t[\"0.0\", \"0.0\", \"0.0\", \"1.0\"],\n\t[\"0.0\", \"1.0\", \"1.0\", \"1.0\"],\n\t[\"0.0\", \"1.0\", \"0.0\", \"2.0\"]\n]\n\na = []\ndef CSVlist():\n\treader = lst # simulate cvs reading\n\tfor row in reader:\n\t\tp1 = Rhino.Geometry.Point3d(float(row[0]),\n\t\t\t\t\t    float(row[1]),\n\t\t\t\t\t    0)\n\t\tp2 = Rhino.Geometry.Point3d(float(row[2]),\n\t\t\t\t\t    float(row[3]),\n\t\t\t\t\t    0)\n\t\tline = Rhino.Geometry.Line(p1,p2)\n\t\tprint line\n\t\ta.append(line)\n\nif __name__==\"__main__\":\n\tif x:\n\t\tCSVlist()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport csv\n\na = [] # new. correct because global scope\ndef CSVlist():\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    #prompt the user for a file to import\n    filter = \"CSV file (*.csv)|*.csv|*.txt|All Files (*.*)|*.*||\"\n    filename = rs.OpenFileName(\"Open Point File\", filter)\n    if not filename: return\n\n    with open(filename) as csvfile:\n        reader = csv.reader(csvfile)\n        #a = [] # wrong because function scope\n        for row in reader:\n\n            p1 = Rhino.Geometry.Point3d(float(row[0]),\n                                        float(row[1]),\n                                        0)\n            p2 = Rhino.Geometry.Point3d(float(row[2]),\n                                        float(row[3]),\n                                        0)\n            \"\"\"\n            p1 = rs.AddPoint(float(row[0]),\n                             float(row[1]),\n                             0)\n            p2 = rs.AddPoint(float(row[2]),\n                             float(row[3]),\n                             0)\n            \"\"\"\n            x = Rhino.Geometry.Line(p1,p2)\n            print(x)\n            a.append(x)\n            #print(rs.AddLine(p1,p2))\n            #a.append(rs.AddLine(p1,p2))\n\n########################################################",
+      "language": "python",
+      "author": "esolomon1221",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1449
+}

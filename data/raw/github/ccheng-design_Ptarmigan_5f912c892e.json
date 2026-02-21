@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ccheng-design/Ptarmigan/blob/a473d0b66c2733bca3a483f6c4f82cd927a9e8c8/01_RHINO/_SOURCE%20CODE/RevAlign.py",
+  "repo": "ccheng-design/Ptarmigan",
+  "repo_stars": 3,
+  "repo_description": "Rhino, Grasshopper, Houdini Scripts",
+  "license": "MIT",
+  "filepath": "01_RHINO/_SOURCE CODE/RevAlign.py",
+  "instruction": "Rev align",
+  "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n   \nmsg=\"Select a surface or Brep face to offset\"\nsrf_filter=Rhino.DocObjects.ObjectType.Surface \nrc,objref=Rhino.Input.RhinoGet.GetOneObject(msg,False,srf_filter)\nif rc==Rhino.Commands.Result.Success:\n    #offset=rs.GetReal(\"Offset value\")\n    \n    face=objref.Face()\n    subSrf=face.ToNurbsSurface()\n\n    oSrf=subSrf.Offset(0,sc.doc.ModelAbsoluteTolerance)\n    a=sc.doc.Objects.AddSurface(oSrf)\n    sc.doc.Views.Redraw()\n\n    #print(a)\n\n    centroid=rs.SurfaceAreaCentroid(a)\n    print(centroid[0])\nelse:\n    print(\"None Selected\")\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

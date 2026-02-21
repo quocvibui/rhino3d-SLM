@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/_rhino/Layer.tab/random_layer_color.button/color_setting_right.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/_rhino/Layer.tab/random_layer_color.button/color_setting_right.py",
+  "instruction": "Color setting right",
+  "code": "\r\n__title__ = \"RandomLayerColorSetting\"\r\n__doc__ = \"Change the setting of color style.\"\r\n\r\nimport rhinoscriptsyntax as rs\r\nimport sys\r\nimport os\r\nscript_folder = os.path.dirname(os.path.realpath(__file__))\r\nsys.path.append(script_folder)\r\nimport random_layer_color_left as RLC\r\n\r\n\r\n\r\nfrom EnneadTab import DATA_FILE\r\nfrom EnneadTab import LOG, ERROR_HANDLE\r\n\r\n\r\n@LOG.log(__file__, __title__)\r\n@ERROR_HANDLE.try_catch_error()\r\ndef color_setting():\r\n\r\n\r\n    current_setting = RLC.get_current_setting()\r\n    current_option = []\r\n    for item in RLC.COLOR_SETTING_DEFAULT:\r\n        title, _ = item\r\n        current_option.append((title, current_setting[title]))\r\n    res = rs.CheckListBox(current_option, \"After changing setting, run randomizer again.\",\"EnneadTab Random Layer Color Setting\")\r\n\r\n    setting = {}\r\n    if not res:\r\n        return\r\n    for item in res:\r\n        title, value = item\r\n        setting[title] = value\r\n        \r\n        \r\n    DATA_FILE.set_sticky(RLC.KEY_COLOR_SETTING, setting)\r\n\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    color_setting()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

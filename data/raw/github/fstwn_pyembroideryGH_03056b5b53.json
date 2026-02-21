@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/fstwn/pyembroideryGH/blob/ee7fd47316b364962a69976b4168ce9fef2702cf/usrobj_src/pyembroideryGH_PatternRead.py",
+  "repo": "fstwn/pyembroideryGH",
+  "repo_stars": 11,
+  "repo_description": "Set of UserObjects enabling Grasshopper to directly read, write and manipulate various kinds of embroidery formats. It is based on an IronPython-compatible fork of the original pyembroidery library.",
+  "license": "MIT",
+  "filepath": "usrobj_src/pyembroideryGH_PatternRead.py",
+  "instruction": "Reads any readable embroidery format and returns the\npattern as an instance of pyembroidery.EmbPattern\n    Inputs:\n        FilePath: Filepath of the embroidery pattern file.\n                  {item,...",
+  "code": "\"\"\"\nReads any readable embroidery format and returns the\npattern as an instance of pyembroidery.EmbPattern\n    Inputs:\n        FilePath: Filepath of the embroidery pattern file.\n                  {item, path}\n    Output:\n        Pattern: The embroidery pattern as pyembroidery.EmbPattern instance.\n                 {item/list/tree, EmbPattern}\n    Remarks:\n        Author: Max Eschenbach\n        License: MIT License\n        Version: 201030\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS\nfrom __future__ import division\nfrom os import path\n\n# GHPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"PatternRead\"\nghenv.Component.NickName = \"PR\"\nghenv.Component.Category = \"pyembroideryGH\"\nghenv.Component.SubCategory = \"1 Input/Output\"\n\n# LOCAL MODULE IMPORTS\ntry:\n    import pyembroidery\nexcept ImportError:\n    errMsg = (\"The pyembroidery python module seems to be not correctly \" +\n              \"installed! Please make sure the module is in you search \" +\n              \"path, see README for instructions!.\")\n    raise ImportError(errMsg)\n\nclass PatternRead(component):\n\n    def RunScript(self, FilePath):\n        # Initialize output\n        Pattern = Grasshopper.DataTree[object]()\n        \n        # only do something if input is defined\n        if FilePath != None:\n            try:\n                Pattern = pyembroidery.read(path.normpath(\n                                                    FilePath.strip(\"\\n\\r\")))\n            except Exception as e:\n                rml = self.RuntimeMessageLevel.Error\n                errMsg = (\"Could not read embroidery file!\" +\n                          \"Please check if format is readable.\")\n                self.AddRuntimeMessage(rml, errMsg)\n        else:\n            rml = self.RuntimeMessageLevel.Warning\n            errMsg = (\"Input FilePath failed to collect data!\")\n            self.AddRuntimeMessage(rml, errMsg)\n        \n        # return outputs if you have them; here I try it for you:\n        return Pattern\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

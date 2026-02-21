@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dwg-hatch-is-flipped-for-some-reason/114304",
+  "topic_id": 114304,
+  "title": "DWG Hatch is \"flipped\" for some reason",
+  "question": "Hi, I imported a DWG and wanted to change the fill to lines and see that some of the hatches are “flipped” or “mirrored” or something, resulting in the rotation going the opposite way.\n\n\nAll of these hatches has the same settings, and all are planar and on the same plane.\n\nThe one to the right is a remake of the one in the middle.\n\n\nAny idea what causes this? I see that I can’t use the “Flip” command on hatches.\n\n\nimage\n833×817 7.39 KB\n\n\nFlipped hatch.3dm\n (61.8 KB)",
+  "code_blocks": [
+    {
+      "code": "# --- DWG Rehatch\n\nimport rhinoscriptsyntax as rs\n\n\n\ndef Rebuild_Hatch(hatch_id):\n    orig_Fill = rs.HatchPattern(hatch_id)\n    orig_Scale = rs.HatchScale(hatch_id)\n    orig_Rotation = rs.HatchRotation(hatch_id)\n    orig_Layer = rs.ObjectLayer(hatch_id)\n    orig_Color = rs.ObjectColor(hatch_id)\n    \n    \n    rs.HatchPattern(hatch_id,'Solid')\n    obj = rs.ExplodeHatch(hatch_id, delete=True)\n    \n    crvs = rs.DuplicateEdgeCurves(obj)\n    \n    #newHatch = rs.AddHatch(crvs, orig_Fill, orig_Scale, orig_Rotation)\n    rs.SelectObjects(crvs)\n    rs.Command(\"_-Hatch _Enter _Enter\",False)\n    newHatch = rs.LastCreatedObjects()\n    \n    rs.DeleteObjects((crvs,obj))\n    \n    rs.ObjectLayer(newHatch, orig_Layer)\n    rs.ObjectColor(newHatch, orig_Color)\n    # --- Add these since rs.AddHatch() does't 'work' correctly.\n    rs.HatchScale(newHatch, orig_Scale)\n    rs.HatchRotation(newHatch, orig_Rotation)\n\nhatch_ids = rs.GetObjects(\"Get Hatch to rebuild\", rs.filter.hatch)\nif hatch_ids:\n    for hatch_id in hatch_ids:\n        rs.EnableRedraw(False)\n        Rebuild_Hatch(hatch_id)\n        rs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 10,
+  "views": 809
+}

@@ -1,0 +1,65 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-centroid-of-polyline-rhinocommon/80785",
+  "topic_id": 80785,
+  "title": "[Python] Centroid of Polyline RhinoCommon",
+  "question": "Hi guys,\n\n\nI want to select all polylines on a layer, and then get the the center point of each one to then move the camera’s target to those centroids.\n\n\nBut I am not sure about the syntax of using RhinoCommon classes…\n\n\nI am getting this error.\n\n\nimport Rhino\nimport scriptcontext\nimport System.Guid, System.Drawing.Color\n\n# Prompt for a layer name\nlayername = scriptcontext.doc.Layers.CurrentLayer.Name\nrc, layername = Rhino.Input.RhinoGet.GetString(\"Name of layer to select objects\", True, layername)\n\nCurves = scriptcontext.doc.Objects.FindByLayer(layername)\nfor obj in Curves: obj.Select(True)\n\nRhino.Geometry.Polyline.CenterPoint(Curves)\n\n\n\n\n\nMessage: expected Polyline, got Array[RhinoObject]\n\n\nTraceback:\n\nline 12,\n\n\n\n\nI tried multiple commands such as the AreaMassProperties.Centroid Property with no luck either.\n\n\nHoping someone could shed some light for me.\n\nShynn",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    # get the layer\n    layer_name = rs.GetLayer(\"Select Layer\", None, False)\n    if not layer_name: return\n\n    # get all objects on the layer\n    obj_ids = rs.ObjectsByLayer(layer_name)\n    if not obj_ids: return\n\n    # filter out polylines\n    polyline_ids = [obj_id for obj_id in obj_ids if rs.IsPolyline(obj_id)]\n    if not polyline_ids: return\n\n    # zoom to polylines bounding box\n    bounding_box = rs.BoundingBox(polyline_ids)\n    rs.ZoomBoundingBox(bounding_box)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def DoSomething():\n    layer_name = rs.GetLayer(\"Select Layer\", None, False)\n    if not layer_name: return\n    \n    idx = scriptcontext.doc.Layers.FindByFullPath(layer_name, True)\n    oes = Rhino.DocObjects.ObjectEnumeratorSettings()\n    oes.ObjectTypeFilter = Rhino.DocObjects.ObjectType.Curve\n    oes.LayerIndexFilter = idx\n    \n    rh_objs = scriptcontext.doc.Objects.FindByFilter(oes)\n    if not rh_objs: return\n    \n    point, count = Rhino.Geometry.Point3d.Origin, 0\n\n    for rh_obj in rh_objs:\n        rc, polyline = rh_obj.Geometry.TryGetPolyline()\n        if rc: \n            point += polyline.CenterPoint()\n            count += 1\n    \n    center = Rhino.Geometry.Point3d.Divide(point, count)\n    rs.ViewCameraTarget(None, None, center)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n# Generate a layout with a single detail view that zooms\n# to a list of objects\ndef AddLayout():\n    scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    page_number = 1\n    if page_views: page_number = len(page_views) + 1\n    pageview = scriptcontext.doc.Views.AddPageView(\"A0_{0}\".format(page_number), 1189, 841)\n    if pageview:\n        top_left = Rhino.Geometry.Point2d(20,821)\n        bottom_right = Rhino.Geometry.Point2d(1169, 20)\n        detail = pageview.AddDetailView(\"ModelView\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n        if detail:\n            pageview.SetActiveDetail(detail.Id)\n            detail.Viewport.ZoomBoundingBox(bounding_box)\n            detail.DetailGeometry.IsProjectionLocked = True\n            detail.DetailGeometry.SetScale(1, scriptcontext.doc.ModelUnitSystem, 1, scriptcontext.doc.PageUnitSystem)\n            # Commit changes tells the document to replace the document's detail object\n            # with the modified one that we just adjusted\n            detail.CommitChanges()\n        pageview.SetPageAsActive()\n        scriptcontext.doc.Views.ActiveView = pageview\n        scriptcontext.doc.Views.Redraw()\n\n\n# get the layer\nlayer_name = rs.GetLayer(\"Select Layer\", None, False)\n\n# get all objects on the layer\nobj_ids = rs.ObjectsByLayer(layer_name)\n\n# zoom to polylines bounding box\nbounding_box = rs.BoundingBox(obj_ids)",
+      "language": "python",
+      "author": "ShynnSup",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef AddLayout():\n    sc.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = sc.doc.Views.GetPageViews()\n    page_number = 1\n    if page_views: page_number = len(page_views) + 1\n    pageview = sc.doc.Views.AddPageView(\"A0_{0}\".format(page_number), 34, 20)\n    if pageview:\n        top_left = Rhino.Geometry.Point2d(0,0)\n        bottom_right = Rhino.Geometry.Point2d(34, 20)\n        detail = pageview.AddDetailView(\"ModelView\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n        pageview.SetPageAsActive()\n        sc.doc.Views.ActiveView = pageview\n        if detail:\n            pageview.SetActiveDetail(detail.Id)\n            detail.Viewport.ZoomBoundingBox(bounding_box)\n            detail.DetailGeometry.SetScale(1, sc.doc.ModelUnitSystem, 1, sc.doc.PageUnitSystem)\n            detail.DetailGeometry.IsProjectionLocked = True\n            detail.CommitChanges()\n        sc.doc.Views.Redraw()\n\n\nlayer = rs.GetLayer(\"Select Layer\", None, False)\nids = rs.ObjectsByLayer(layer)\nfor id in ids:\n    bounding_box = rs.coerceboundingbox(rs.BoundingBox(id))\n    AddLayout()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef AddLayout():\n    sc.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = sc.doc.Views.GetPageViews()\n    page_number = 1\n    if page_views: page_number = len(page_views) + 1\n    pageview = sc.doc.Views.AddPageView(\"A0_{0}\".format(page_number), 34, 20)\n    if pageview:\n        top_left = Rhino.Geometry.Point2d(0,0)\n        bottom_right = Rhino.Geometry.Point2d(34, 20)\n        detail = pageview.AddDetailView(\"ModelView\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n        pageview.SetPageAsActive()\n        sc.doc.Views.ActiveView = pageview\n        if detail:\n            pageview.SetActiveDetail(detail.Id)\n            detail.Viewport.ZoomBoundingBox(bounding_box)\n            detail.DetailGeometry.SetScale(1, sc.doc.ModelUnitSystem, 1, sc.doc.PageUnitSystem)\n            detail.DetailGeometry.IsProjectionLocked = True\n            detail.CommitChanges()\n        sc.doc.Views.Redraw()\n\n\nlayer = rs.GetLayer(\"Select Layer\", None, False)\nids = rs.ObjectsByLayer(layer)\nfor id in ids:\n    bounding_box = rs.coerceboundingbox(rs.BoundingBox(id))\n    AddLayout()",
+      "language": "python",
+      "author": "ShynnSup",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Guid, System.Drawing.Color\n\n# Prompt for a layer name\nlayername = scriptcontext.doc.Layers.CurrentLayer.Name\nrc, layername = Rhino.Input.RhinoGet.GetString(\"Name of layer to select objects\", True, layername)\n\nCurves = scriptcontext.doc.Objects.FindByLayer(layername)\nfor obj in Curves: obj.Select(True)\n\nRhino.Geometry.Polyline.CenterPoint(Curves)",
+      "language": "python",
+      "author": "ShynnSup",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 2418
+}

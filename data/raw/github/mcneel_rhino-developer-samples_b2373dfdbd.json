@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/calculate-curve-intersections.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/calculate-curve-intersections.py",
+  "instruction": "Calculate curve intersections",
+  "code": "import Rhino\nimport scriptcontext\n\ndef IntersectCurves():\n    # Select two curves to intersect\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select two curves\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.GetMultiple(2, 2)\n    if go.CommandResult()!=Rhino.Commands.Result.Success: return\n\n    # Validate input\n    curveA = go.Object(0).Curve()\n    curveB = go.Object(1).Curve()\n    if not curveA or not curveB: return\n\n    # Calculate the intersection\n    intersection_tolerance = 0.001\n    overlap_tolerance = 0.0\n    events = Rhino.Geometry.Intersect.Intersection.CurveCurve(curveA, curveB, intersection_tolerance, overlap_tolerance)\n\n    # Process the results\n    if not events: return\n    for ccx_event in events:\n        scriptcontext.doc.Objects.AddPoint(ccx_event.PointA)\n        if ccx_event.PointA.DistanceTo(ccx_event.PointB) > float.Epsilon:\n            scriptcontext.doc.Objects.AddPoint(ccx_event.PointB)\n            scriptcontext.doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    IntersectCurves()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

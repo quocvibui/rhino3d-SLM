@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-brepface-accurate-boundingbox-issue/202582",
+  "topic_id": 202582,
+  "title": "RhinoCommon BrepFace accurate BoundingBox Issue",
+  "question": "Hi,\n\nif I split any brep and join it back togethor, I will get the correct bounding box of each face in the Rhino GUI by selecting the indivual face and using the BoundingBox command. In RhinoCommon this is not the case. For each face I get the bounding box of the original untrimmed surface. I only get accurate face bounding boxes, if I first shrink all faces of the brep. Is this behaviour in RhinoCommon intended or an issue? Usually, I do not check, if all surfaces are shrunk in my model.\n\n\nSee the simple cpython script below that demonstrates this issue:\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef main():\n\n    shrink_faces = True\n    #shrink_faces = False\n\n    # Create a rectangle\n    split_plane_origin = Rhino.Geometry.Point3d(0, 0, 0)\n    split_plane_normal = Rhino.Geometry.Vector3d(0, 1, 0)\n    split_plane = Rhino.Geometry.Plane(split_plane_origin, split_plane_normal)\n\n    brep_rectangle = Rhino.Geometry.PlaneSurface(split_plane, Rhino.Geometry.Interval(0, 10), Rhino.Geometry.Interval(0, 100)).ToBrep()\n    #sc.doc.Objects.AddBrep(brep_rectangle)\n\n    # Create a split plane at the specified location\n    split_plane_origin = Rhino.Geometry.Point3d(50, 0, 5)\n    split_plane_normal = Rhino.Geometry.Vector3d(1, 0, 0)\n    split_plane = Rhino.Geometry.Plane(split_plane_origin, split_plane_normal)\n\n    split_brep = Rhino.Geometry.PlaneSurface(split_plane, Rhino.Geometry.Interval(-10, 10), Rhino.Geometry.Interval(-10, 10)).ToBrep()\n    #sc.doc.Objects.AddBrep(split_surface)\n\n    new_breps = brep_rectangle.Split(split_brep, sc.doc.ModelAbsoluteTolerance)\n    \n    new_brep = Rhino.Geometry.Brep.JoinBreps(new_breps, sc.doc.ModelAbsoluteTolerance)[0]\n\n    sc.doc.Objects.AddBrep(new_brep)\n\n    if shrink_faces:\n        new_brep.Faces.ShrinkFaces()\n\n    for i, face in enumerate(new_brep.Faces):\n        print(f'face = {i}, bbox = {face.GetBoundingBox(True)}')\n\n    return\n\n\nif __name__ == \"__main__\":\n    main()\n\n\n\nUsing \nshrink_surfaces=False\n w...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef main():\n\n    shrink_faces = True\n    #shrink_faces = False\n\n    # Create a rectangle\n    split_plane_origin = Rhino.Geometry.Point3d(0, 0, 0)\n    split_plane_normal = Rhino.Geometry.Vector3d(0, 1, 0)\n    split_plane = Rhino.Geometry.Plane(split_plane_origin, split_plane_normal)\n\n    brep_rectangle = Rhino.Geometry.PlaneSurface(split_plane, Rhino.Geometry.Interval(0, 10), Rhino.Geometry.Interval(0, 100)).ToBrep()\n    #sc.doc.Objects.AddBrep(brep_rectangle)\n\n    # Create a split plane at the specified location\n    split_plane_origin = Rhino.Geometry.Point3d(50, 0, 5)\n    split_plane_normal = Rhino.Geometry.Vector3d(1, 0, 0)\n    split_plane = Rhino.Geometry.Plane(split_plane_origin, split_plane_normal)\n\n    split_brep = Rhino.Geometry.PlaneSurface(split_plane, Rhino.Geometry.Interval(-10, 10), Rhino.Geometry.Interval(-10, 10)).ToBrep()\n    #sc.doc.Objects.AddBrep(split_surface)\n\n    new_breps = brep_rectangle.Split(split_brep, sc.doc.ModelAbsoluteTolerance)\n    \n    new_brep = Rhino.Geometry.Brep.JoinBreps(new_breps, sc.doc.ModelAbsoluteTolerance)[0]\n\n    sc.doc.Objects.AddBrep(new_brep)\n\n    if shrink_faces:\n        new_brep.Faces.ShrinkFaces()\n\n    for i, face in enumerate(new_brep.Faces):\n        print(f'face = {i}, bbox = {face.GetBoundingBox(True)}')\n\n    return\n\n\nif __name__ == \"__main__\":\n    main()",
+      "language": "python",
+      "author": "daniel.kowollik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 128
+}

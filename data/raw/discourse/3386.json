@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dynamic-move-object-with-python-common/3386",
+  "topic_id": 3386,
+  "title": "Dynamic move object with Python Common",
+  "question": "Hi Steve\n\nI want move one object dynamically but the below Python code don’t make it, where is my error?:\n\n\n#-*- encoding: utf-8 -*-\n#  Rhino Common  Dynamic move object\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\ndef move_obj():\n    obj=rs.GetObject(\"select one object\")\n    \n    pt_start=rs.GetPoint(\"Reference point\")  # con metodo script     \n    #************** funzione che disegna dinamicamente *********************\n    \n    def GetPointDynamicDrawFunc( sender, args ): \n        vect=args.CurrentPoint-pt_start\n        translation = rs.coerce3dvector(vect, True)\n        translation=Rhino.Geometry.Transform.Translation(translation)\n        print translation\n        a=Rhino.DocObjects.RhinoObject.GetDynamicTransform(obj,translation)\n        print a    \n        \n    gp = Rhino.Input.Custom.GetPoint()#creo oggetto gp    \n    gp.DynamicDraw += GetPointDynamicDrawFunc  # chiamo in continuazione la funzione che mi mostra la linea dinamica\n    gp.Get()   # qui ottengo i dati quando clicco     \n    if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n        pt = gp.Point() \n        print pt\n\nmove_obj()\n\n\n\nCiao Vittorio",
+  "code_blocks": [
+    {
+      "code": "#-*- encoding: utf-8 -*-\n#  Rhino Common  Dynamic move object\nimport System.Drawing.Color\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\ndef move_obj():\n    obj=rs.GetObject(\"select one object\")    \n    \n    obj_color=System.Drawing.Color.Black\n    pt_start=rs.GetPoint(\"Reference point\")  # con metodo script     \n    #************** funzione che disegna dinamicamente *********************\n    \n    def GetPointDynamicDrawFunc( sender, args ): \n        vect=args.CurrentPoint-pt_start        \n        translation=Rhino.Geometry.Transform.Translation(translation)        \n        Rhino.DocObjects.RhinoObject.GetDynamicTransform(obj,translation)        \n        args.Display.DrawObject(obj) #What should I put in brackets?\n        #args.Display.DrawObject(obj,obj_color) #that does not work \n    gp = Rhino.Input.Custom.GetPoint()#creo oggetto gp    \n    gp.DynamicDraw += GetPointDynamicDrawFunc  # chiamo in continuazione la funzione che mi mostra la linea dinamica\n    gp.Get()   # qui ottengo i dati quando clicco     \n    if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n        pt = gp.Point() \n        print pt\n\nmove_obj()",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def GetPointDynamicDrawFunc( sender, args ): \n        vect=args.CurrentPoint-pt_start        \n        translation=Rhino.Geometry.Transform.Translation(vect)        \n        args.Display.DrawObject(obj.Geometry, translation)",
+      "language": "python",
+      "author": "menno",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n    ObjRef oRef;\n    Result res = RhinoGet.GetOneObject(\"select one object\", false, ObjectType.AnyObject, out oRef);\n    if (res != Result.Success) return res;\n\n    RhinoObject obj = oRef.Object();\n    GeometryBase geo = obj.Geometry;\n    Point3d from;\n    res = RhinoGet.GetPoint(\"select ref point\", false, out from);\n    if (res != Result.Success) return res;\n\n    GetPoint gp = new GetPoint();\n    gp.DynamicDraw += (o, a) =>\n                            {\n                                Vector3d vect = a.CurrentPoint - from;\n                                Transform trans = Transform.Translation(vect);\n                                a.Display.DrawObject(obj, trans);\n                            };\n    GetResult result = gp.Get();\n    if (result == GetResult.Point)\n    {\n        Point3d to = gp.Point();\n        geo.Transform(Transform.Translation(to - from));\n        doc.Objects.Add(geo);\n    }\n\n    return Result.Success;\n}",
+      "language": "csharp",
+      "author": "menno",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#-*- encoding: utf-8 -*-\n#  Rhino Common  Dynamic move object\nimport System.Drawing.Color\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n\ndef move_obj():\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select object\", True, Rhino.DocObjects.ObjectType.AnyObject)\n    if rc!=Rhino.Commands.Result.Success: return\n    obj = objref.Object()\n    if not obj: return\n    rc, pt_start = Rhino.Input.RhinoGet.GetPoint(\"Start point\", False)\n    if( rc!=Rhino.Commands.Result.Success ): return \n    def GetPointDynamicDrawFunc( sender, args ): \n        vect=args.CurrentPoint-pt_start        \n        translation=Rhino.Geometry.Transform.Translation(vect)          \n        args.Display.DrawObject(obj,translation) \n    gp = Rhino.Input.Custom.GetPoint()\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    gp.Get()   \n    if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n        pt = gp.Point() \n        print pt\n\nmove_obj()",
+      "language": "python",
+      "author": "gianpaolo_savio",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#-*- encoding: utf-8 -*-\n#  Rhino Common  Dynamic move object\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\ndef move_obj():\n    obj=rs.GetObject(\"select one object\")\n    \n    pt_start=rs.GetPoint(\"Reference point\")  # con metodo script     \n    #************** funzione che disegna dinamicamente *********************\n    \n    def GetPointDynamicDrawFunc( sender, args ): \n        vect=args.CurrentPoint-pt_start\n        translation = rs.coerce3dvector(vect, True)\n        translation=Rhino.Geometry.Transform.Translation(translation)\n        print translation\n        a=Rhino.DocObjects.RhinoObject.GetDynamicTransform(obj,translation)\n        print a    \n        \n    gp = Rhino.Input.Custom.GetPoint()#creo oggetto gp    \n    gp.DynamicDraw += GetPointDynamicDrawFunc  # chiamo in continuazione la funzione che mi mostra la linea dinamica\n    gp.Get()   # qui ottengo i dati quando clicco     \n    if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n        pt = gp.Point() \n        print pt\n\nmove_obj()",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 4014
+}

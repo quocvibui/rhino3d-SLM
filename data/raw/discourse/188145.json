@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/make2d-by-ghpython/188145",
+  "topic_id": 188145,
+  "title": "Make2D by ghpython",
+  "question": "Hi everyone,\n\nI want to use component make2D ghpython, it seems not to work\n\n\nimage\n1837×855 134 KB",
+  "code_blocks": [
+    {
+      "code": "__author__ = \"Michael Vollrath\"\n__version__ = \"2023.07.15\"\n#Made With ♥ & 🐍 In Dallas, TX\n\n#Set Component Message\nif A:\n    ghenv.Component.Message = \"Real-Time\"\nelse:\n    ghenv.Component.Message = \"Manual\"\n\nghenv.Component.Name = \"Hidden Line Drawing\"\nghenv.Component.NickName = \"HLD\"\nghenv.Component.Description = \"Create a hidden line drawing of the input geometry from the input views and optionally run as real-time or require manual refresh\"\n\nghenv.Component.Params.Input[0].Name = \"Activate\"\nghenv.Component.Params.Input[0].NickName = \"A\"\nghenv.Component.Params.Input[0].Description = \"Set True To Activate\"\n\n# ghenv.Component.Params.Input[1].Name = \"Tolerance\"\n# ghenv.Component.Params.Input[1].NickName = \"T\"\n# ghenv.Component.Params.Input[1].Description = \"Tolerance For Make2D Operation\"\n\nghenv.Component.Params.Input[1].Name = \"Model Object\"\nghenv.Component.Params.Input[1].NickName = \"O\"\nghenv.Component.Params.Input[1].Description = \"Objects To Create Hidden Line Drawing From\"\n\nghenv.Component.Params.Input[2].Name = \"View\"\nghenv.Component.Params.Input[2].NickName = \"V\"\nghenv.Component.Params.Input[2].Description = \"View To Create From\"\n\nghenv.Component.Params.Input[3].Name = \"Manual\"\nghenv.Component.Params.Input[3].NickName = \"M\"\nghenv.Component.Params.Input[3].Description = \"Enable For Manual Refresh\"\n\nghenv.Component.Params.Output[0].Name = \"Curve\"\nghenv.Component.Params.Output[0].NickName = \"Cv\"\nghenv.Component.Params.Output[0].Description = \"Visible Curves Resulting From Hidden Line Drawing\"\n\nghenv.Component.Params.Output[1].Name = \"Curve\"\nghenv.Component.Params.Output[1].NickName = \"Ch\"\nghenv.Component.Params.Output[1].Description = \"Hidden Curves Resulting From Hidden Line Drawing\"\n\nghenv.Component.Params.Output[2].Name = \"Execution Time\"\nghenv.Component.Params.Output[2].NickName = \"T\"\nghenv.Component.Params.Output[2].Description = \"Time It Took For The Hidden Line Drawing Computation\"\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport ghpythonlib.treehelpers as th\nimport time\n\n# Get the instance ID of the current component\ninstance_id = str(ghenv.Component.InstanceGuid)\n\n# Check if the custom dictionary exists in scriptcontext.sticky\nif \"HLD_Attributes\" not in sc.sticky:\n    # Create a custom dictionary to store the created_curves dictionary\n    sc.sticky[\"HLD_Attributes\"] = {}\n\n# Retrieve the created_curves dictionary from the custom dictionary\ncreated_curves = sc.sticky[\"HLD_Attributes\"].get(instance_id, {})\n\n# Check if A or M is set to true, then update the sticky dictionary\nif A or M:\n    start_time = time.time()\n\n    # Set up a new hidden-line-drawing parameter\n    hld_parm = rg.HiddenLineDrawingParameters()\n    hld_parm.IncludeTangentEdges = False\n    hld_parm.IncludeTangentSeams = False\n    hld_parm.Flatten = True\n    hld_parm.IncludeHiddenCurves = True\n\n    for geo in O:\n        hld_parm.AddGeometry(geo, '')\n\n    Cv = []\n    Ch = []\n\n    for view in V:\n        hld_parm.SetViewport(view)\n\n        # Compute\n        hld = rg.HiddenLineDrawing.Compute(hld_parm, True)\n\n        vis = rg.HiddenLineDrawingSegment.Visibility.Visible\n        hid = rg.HiddenLineDrawingSegment.Visibility.Hidden\n\n        view_Cv = []\n        view_Ch = []\n\n        for hld_crv in hld.Segments:\n            segment_curve = hld_crv.CurveGeometry\n\n            if segment_curve in created_curves:\n                crv = created_curves[segment_curve]\n            else:\n                crv = segment_curve.DuplicateCurve()\n                created_curves[segment_curve] = crv\n\n            if hld_crv.SegmentVisibility == vis:\n                view_Cv.append(crv)\n            elif hld_crv.SegmentVisibility == hid:\n                view_Ch.append(crv)\n            else:\n                pass\n\n        Cv.append(view_Cv)\n        Ch.append(view_Ch)\n\n    # Store the Cv and Ch data in the created_curves dictionary\n    created_curves[\"Cv\"] = Cv\n    created_curves[\"Ch\"] = Ch\n\n    # Update the custom dictionary in scriptcontext.sticky\n    sc.sticky[\"HLD_Attributes\"][instance_id] = created_curves\n\n    end_time = time.time()\n    execution_time = round(end_time - start_time, 1)\n    T = str(execution_time) + \"s\"\n\nelse:\n    # Check if the current component's curves are already stored in the dictionary\n    if \"Cv\" in created_curves and \"Ch\" in created_curves:\n        Cv = created_curves[\"Cv\"]\n        Ch = created_curves[\"Ch\"]\n    else:\n        Cv = []\n        Ch = []\n\n# Output the curves as lists of curves\nCv_output = Cv\nCh_output = Ch\n\nCv = th.list_to_tree(Cv_output)\nCh = th.list_to_tree(Ch_output)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 324
+}

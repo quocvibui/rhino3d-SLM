@@ -1,0 +1,51 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/tutorial-creating-a-grasshopper-component-with-the-python-ghpy-compiler/38552",
+  "topic_id": 38552,
+  "title": "Tutorial: creating a Grasshopper component with the Python GHPY compiler",
+  "question": "[2025 update: McNeel no longer suggests or supports this compilation method in new versions of Rhino]\n\n\nGhPython\n in Rhino WIP ships with an all-Rhino Python compiler that can be used to create .Net compiled \nassemblies containing compiled instructions\n. Unlike other methods that are based on embedding a Python code string in a C# component, this speeds up code execution and makes reverse engineering more difficult.\n\n\nThere are two options for the process of making a component, \n1\n is extremely simplified and \n#2\n is more advanced. The component is able to pick up names, descriptions and help from the original Grasshopper component, and turn it into an executable \ndll\n file.\n\n\nTo perform this operation, the compiler makes heavy use of the facilities provided by \nclr.CompileModules()\n, which is a IronPython module devoted to creation of compiled assemblies, and is also what \npyc.py\n in \nIronPython\n uses to produce standalone executable files.\n\n\n\n\nNote: this is for Rhino WIP \n#6\n.0.16313.01411\n and greater!\n\n\n\n\n1. Compiling a \nsingle\n component in an assembly with the wizard\n\n\nWe will start by compiling a single component with the all-automated wizard.\n\n\n1.1. For this sample, we will start by placing a GhPython component on the canvas, and by setting the first hint to Point3d. The compiler will write code that is dependent on \ntype hints\n.\n\n\n01-hints.png\n624×573 19.2 KB\n1.1.1. Right-click the \"x\" input to show this context menu.\n\n\n\n\n1.2. Then we can \nremove an input\n for this sample. We do not need it. The compiler will write code that is dependent on the \namount of inputs\n and outputs. We also remove the \n“out” output\n.\n\n\n02-inputs.png\n315×218 16.9 KB\n1.2.1. You need to zoom in to see the \"-\" (minus) control.\n\n\n\n\n1.3. Then we can rename the input to “P” for this sample. This will have an influence on the way we write code.  We and the compiler will have to write code that is dependent on the \nnaming of inputs\n and outputs.\n\n\n03-rename.PNG\n329×155 4.87 KB\n1.3.1. Right...",
+  "code_blocks": [
+    {
+      "code": "# automnatically set the right input names and types (when using + icon) \n    numInputs = ghenv.Component.Params.Input.Count\n    accessList = ghenv.Component.Params.Input[0].Access.list\n    accessItem = ghenv.Component.Params.Input[0].Access.item\n    typeFloat = GhPython.Component.NewFloatHint()\n    typeBool = gh.Parameters.Hints.GH_BooleanHint_CS()\n    \n    for input in range(numInputs):\n        access = accessList\n        typeHint = typeString   \n        if input == 0: inputName = 'width'; access = accessItem; typeHint = typeFloat\n        elif input == 1: inputName = 'thickness'; access = accessItem; typeHint = typeFloat\n        elif input == 2: inputName = 'spacing'; access = accessItem; typeHint = typeFloat\n        elif input == 3: inputName = 'rotation'; access = accessItem; typeHint = typeFloat\n        elif input == 4: inputName = 'offsetFromWall'; access = accessItem; typeHint = typeFloat\n        elif input == 5: inputName = 'verticalOrientation' ; access = accessItem; typeHint = typeBool   \n        else: continue\n        \n        ghenv.Component.Params.Input[input].NickName = inputName\n        ghenv.Component.Params.Input[input].Name = inputName\n        ghenv.Component.Params.Input[input].Access = access\n        ghenv.Component.Params.Input[input].TypeHint = typeHint\n    ghenv.Component.Attributes.Owner.OnPingDocument()",
+      "language": "python",
+      "author": "sgaray",
+      "post_number": 46,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nclass MyComponent(component):\n    def RunScript(self, crv_id):\n        sc.doc = Rhino.RhinoDoc.ActiveDoc\n        crv_o = sc.doc.Objects.Find(crv_id)\n        a = crv_o.Attributes.Name\n        sc.doc = ghdoc\n        return a",
+      "language": "python",
+      "author": "RetroPost.LT",
+      "post_number": 39,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Draws a graphic symbol parallel to world XYZ showing orientations.\n    Inputs:\n        P: The point where the symbol should be drawn\n    Output:\n        X: The symbol, drawn as three lines\"\"\"\n\n__author__ = \"piac\"\n\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Point3d as p3\n\nif P:\n    X = []\n    \n    line_EW = rs.AddLine(P - p3(10,0,0), P + p3(10,0,0))\n    X.append(line_EW)\n    \n    line_NS =rs.AddLine(P - p3(0,10,0), P + p3(0,10,0))\n    X.append(line_NS)\n    \n    line_UD =rs.AddLine(P - p3(0,0,10), P + p3(0,0,10))\n    X.append(line_UD)",
+      "language": "python",
+      "author": "piac",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nclass SphereArtist(object):\n    \n    def __init__(self, radius):\n        self.radius = radius\n    \n    \n    def Draw(self, location):\n        \"\"\"Retuns new spheres\"\"\"\n        return rs.AddSphere(location, self.radius)",
+      "language": "python",
+      "author": "piac",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 59,
+  "posts_count": 60,
+  "views": 44566
+}

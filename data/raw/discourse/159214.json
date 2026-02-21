@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-switch-capture-release-of-a-component-in-gh-componentattributes/159214",
+  "topic_id": 159214,
+  "title": "How to switch Capture/Release of a component in GH_ComponentAttributes?",
+  "question": "It seems that by returning “GH_ObjectResponse.Capture” as the return value of the RespondToMouse method of GH_ComponentAttributes, the component enters the “Capture” state. Is it possible to intentionally switch the Capture/Release state of a component other than returning “Capture” as the return value of the RespondTo~ method?\n\n\n\n\nThe specific situation I would like to use is to expand and switch component drop-down menus, as shown in the figure below. We would like to make the component in “Capture” state so that mouse events of the currently expanded component will take precedence even if other components or menus overlap. However, it is necessary to “Release” at the timing when the component switches to unselected state.\n\n\n\n\n\n\nThe process of closing the menu when switching to the unselected state is implemented by overriding the Selected property of GH_ComponentAttributes as shown below.\n\n\nprivate bool m_selected;\npublic override bool Selected\n{\n    get { return m_selected; }\n    set { \n        if (m_selected != value && m_selected) OnDeselected();\n        m_selected = value; \n    }\n}\n\npublic void OnDeselected()\n{\n\t\t// 1. Close Menu !\n\t\t// 2. Release Component !\n}\n\n\n\nAny advice would be appreciated.",
+  "code_blocks": [
+    {
+      "code": "// implimented in GH_ComponentAttributes\npublic override GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e)\n{\n    if (e.Button == MouseButtons.Left)\n    {\n        bool isactive = object.ReferenceEquals(\n            Grasshopper.Instances.ActiveCanvas.ActiveObject, this);\n        string id_text = Owner.InstanceGuid.ToString().Substring(0, 6);\n        string state = isactive ? \"Capturing\" : \"Released\";\n        RhinoApp.WriteLine($\"Component {id_text}... {state} X: {e.CanvasX}, Y:{e.CanvasY}\");\n        return GH_ObjectResponse.Handled;\n    }\n    else {\n        return GH_ObjectResponse.Release;\n    }\n}\n\n// .......\n\n// implimented in GH_Component\nprotected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)\n{\n    base.AppendAdditionalComponentMenuItems(menu);\n    Menu_AppendItem(menu, \"Capture\", Menu_CaptureClicked, true);\n    Menu_AppendItem(menu, \"Release\", Menu_ReleaseClicked, true);\n}\n\nprivate void Menu_CaptureClicked(object sender, EventArgs e)\n{\n    Grasshopper.Instances.ActiveCanvas.ActiveObject = this;\n}\n\nprivate void Menu_ReleaseClicked(object sender, EventArgs e)\n{\n    Grasshopper.Instances.ActiveCanvas.ActiveObject = null;\n}",
+      "language": "csharp",
+      "author": "ymz.ptr",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 336
+}

@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-transforming-box/194991",
+  "topic_id": 194991,
+  "title": "Problem transforming box",
+  "question": "I am trying to reproduce the function of rs.BoundingBox, but have it take RhinoCommon Geometry instead of object ids, and output a RhinoCommon box instead of just the corner points.  Specifically I want to duplicate the function when a non-world plane is input.\n\n\nBasically i copied the rhinoscriptsyntax definition and just eliminated the various conversions from object id to geometry.  That is fine, it is at the end, where the rhinoscriptsyntax function gets the bounding box corners - which I assume are in plane coordinates at this point - transforms them back to world and returns them.  That works fine, but I tried transforming the box from which the corners came with the same transform as used for the points and it does not return the same result.\n\n\nI assume I’m missing something in how the box is transformed.  Using the reverse transform or no transform on the box doesn’t work either.\n\n\nHere is my test code:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef MyBoundingBox(objs,plane=None,w_coords=True):\n    \n    def __objectbbox(obj, xform):\n        geom=rs.coercegeometry(obj, False)\n        if not geom:\n            pt = rs.coerce3dpoint(obj, True)\n            if xform: pt = xform * pt\n            return Rhino.Geometry.BoundingBox(pt,pt)\n        if xform: return geom.GetBoundingBox(xform)\n        return geom.GetBoundingBox(True)\n    \n    xform=None\n    wxy=Rhino.Geometry.Plane.WorldXY\n    if plane:\n        xform=Rhino.Geometry.Transform.ChangeBasis(wxy,plane)\n    bbox = Rhino.Geometry.BoundingBox.Empty\n    if type(objs) is list or type(objs) is tuple:\n        for obj in objs:\n            objectbbox = __objectbbox(obj,xform)\n            bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    else:\n        objectbbox = __objectbbox(objs, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    if bbox.IsValid:\n        if w_coords and plane is not None:\n            plane_to_world=Rhino.Geometry.Transform.ChangeBasis...",
+  "code_blocks": [
+    {
+      "code": "#! python3\n\nimport scriptcontext as sc\nimport Rhino\n\np = sc.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n\nobs = list(sc.doc.Objects)\n\n(ok, bb) = Rhino.DocObjects.RhinoObject.GetTightBoundingBox(obs, p)\n\nbx = Rhino.Geometry.Box(p, bb)\n\nsc.doc.Objects.AddBox(bx)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef MyBoundingBox(objs,plane=None,w_coords=True):\n    \n    def __objectbbox(obj, xform):\n        geom=rs.coercegeometry(obj, False)\n        if not geom:\n            pt = rs.coerce3dpoint(obj, True)\n            if xform: pt = xform * pt\n            return Rhino.Geometry.BoundingBox(pt,pt)\n        if xform: return geom.GetBoundingBox(xform)\n        return geom.GetBoundingBox(True)\n    \n    xform=None\n    wxy=Rhino.Geometry.Plane.WorldXY\n    if plane:\n        xform=Rhino.Geometry.Transform.ChangeBasis(wxy,plane)\n    bbox = Rhino.Geometry.BoundingBox.Empty\n    if type(objs) is list or type(objs) is tuple:\n        for obj in objs:\n            objectbbox = __objectbbox(obj,xform)\n            bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    else:\n        objectbbox = __objectbbox(objs, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    if bbox.IsValid:\n        if w_coords and plane is not None:\n            plane_to_world=Rhino.Geometry.Transform.ChangeBasis(plane,wxy)\n            box_pts=list(bbox.GetCorners())\n            #transform points from input plane back to world (works)\n            for pt in box_pts: pt.Transform(plane_to_world)\n            #try to transform box the same way (doesn't work)\n            bbox.Transform(plane_to_world)\n        return box_pts,bbox\n\nobj_ids=rs.GetObjects(preselect=True)\nobjs=[rs.coercegeometry(obj_id) for obj_id in obj_ids]\n\npts,box=MyBoundingBox(objs, rs.ViewCPlane(), True)\nrs.AddPolyline([pts[0],pts[1],pts[2],pts[3],pts[0]])\n\nbox_pts=box.GetCorners()\nrs.AddPolyline([box_pts[0],box_pts[1],box_pts[2],box_pts[3],box_pts[0]])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 120
+}

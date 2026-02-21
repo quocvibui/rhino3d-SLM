@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issue-when-performing-boolean-intersection-between-a-volume-and-surface-with-python/67508",
+  "topic_id": 67508,
+  "title": "Issue when performing boolean intersection between a volume and surface with Python",
+  "question": "Hello,\n\n\nI am trying to perform a boolean intersection between a box and a surface in rhino using the python script. It seems the operation is not doing anything.\n\n\nIt is a bit strange since I have successfully  performed this operation before cutting other circular surfaces. I would be grateful if someone could help me out here.\n\n\nThanks to all for your time.\n\n\nHere I have attached the code ready to be run using a simple example:\n\n\nimport rhinoscriptsyntax as rs\nimport math\n\nDext_torre_inf=6 #[m]\nDext_torre_sup=4 #[m]\nDint_torre_inf=2 #[m]\nDint_torre_sup=2 #[m]\nH_torre=80       #[m]\nang_torre=15     #[m]\nincrement=5      #[m]\nexcentricity=0   #[m] Has not been applied in the longitudinal reinforcements\nganma=30         #[deg] Angle of the 3rd and 4th longitudinal reinforcements according to Y axis \n\n#Trigonometry to obtain cylinder base distances\n\nang_rad=math.radians(ang_torre)\ncoor_x=math.tan(ang_rad)\nsen=math.sin(ang_rad)\ncos=math.cos(ang_rad)\nsenbetaDegrees1=(Dext_torre_inf-Dext_torre_sup)/H_torre\nbetaDegrees1=math.asin(senbetaDegrees1)\nbeta_rad1=math.radians(betaDegrees1)\nsenBeta1=math.sin(beta_rad1)\nsenbetaDegrees2=(Dint_torre_inf-Dint_torre_sup)/H_torre\nbetaDegrees2=math.asin(senbetaDegrees2)\nbeta_rad2=math.radians(betaDegrees2)\nsenBeta2=math.sin(beta_rad2)\n\nh1=(Dext_torre_inf/2)/cos\nz1=sen*h1\nw1=z1*senBeta1\nf1=w1/cos\nDist_final1=h1+f1\n\nh2=(Dint_torre_inf/2)/cos\nz2=sen*h2\nw2=z2*senBeta2\nf2=w2/cos\nDist_final2=h2+f2\n\n\n\npoint1R=rs.AddPoint((Dist_final1,0,0))\npoint2R=rs.AddPoint((Dist_final2+excentricity,0,0))\npoint3R=rs.AddPoint((-(H_torre+increment)*coor_x+Dext_torre_sup/2,0,H_torre+increment))\npoint4R=rs.AddPoint((-(H_torre+increment)*coor_x+Dint_torre_sup/2+excentricity,0,H_torre+increment))\n\nR1=rs.AddSrfPt([point1R,point2R,point3R,point4R])\n\n\npoint1=rs.AddPoint((-100,100,0))\npoint2=rs.AddPoint((100,100,0))\npoint3=rs.AddPoint((-100,-100,0))\npoint4=rs.AddPoint((100,-100,0))\n\npoint5=rs.AddPoint((-100,100,80))\npoint6=rs.AddPoint((100,100,80))\npoint7=rs.AddPoint...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\nDext_torre_inf=6 #[m]\nDext_torre_sup=4 #[m]\nDint_torre_inf=2 #[m]\nDint_torre_sup=2 #[m]\nH_torre=80       #[m]\nang_torre=15     #[m]\nincrement=5      #[m]\nexcentricity=0   #[m] Has not been applied in the longitudinal reinforcements\nganma=30         #[deg] Angle of the 3rd and 4th longitudinal reinforcements according to Y axis \n\n#Trigonometry to obtain cylinder base distances\n\nang_rad=math.radians(ang_torre)\ncoor_x=math.tan(ang_rad)\nsen=math.sin(ang_rad)\ncos=math.cos(ang_rad)\nsenbetaDegrees1=(Dext_torre_inf-Dext_torre_sup)/H_torre\nbetaDegrees1=math.asin(senbetaDegrees1)\nbeta_rad1=math.radians(betaDegrees1)\nsenBeta1=math.sin(beta_rad1)\nsenbetaDegrees2=(Dint_torre_inf-Dint_torre_sup)/H_torre\nbetaDegrees2=math.asin(senbetaDegrees2)\nbeta_rad2=math.radians(betaDegrees2)\nsenBeta2=math.sin(beta_rad2)\n\nh1=(Dext_torre_inf/2)/cos\nz1=sen*h1\nw1=z1*senBeta1\nf1=w1/cos\nDist_final1=h1+f1\n\nh2=(Dint_torre_inf/2)/cos\nz2=sen*h2\nw2=z2*senBeta2\nf2=w2/cos\nDist_final2=h2+f2\n\n\n\npoint1R=rs.AddPoint((Dist_final1,0,0))\npoint2R=rs.AddPoint((Dist_final2+excentricity,0,0))\npoint3R=rs.AddPoint((-(H_torre+increment)*coor_x+Dext_torre_sup/2,0,H_torre+increment))\npoint4R=rs.AddPoint((-(H_torre+increment)*coor_x+Dint_torre_sup/2+excentricity,0,H_torre+increment))\n\nR1=rs.AddSrfPt([point1R,point2R,point3R,point4R])\n\n\npoint1=rs.AddPoint((-100,100,0))\npoint2=rs.AddPoint((100,100,0))\npoint3=rs.AddPoint((-100,-100,0))\npoint4=rs.AddPoint((100,-100,0))\n\npoint5=rs.AddPoint((-100,100,80))\npoint6=rs.AddPoint((100,100,80))\npoint7=rs.AddPoint((-100,-100,80))\npoint8=rs.AddPoint((100,-100,80))\n\ncube=rs.AddBox([point1,point3,point4,point2,point5,point7,point8,point6])\n\nrs.BooleanIntersection(R1,cube)",
+      "language": "python",
+      "author": "alvaro.ortega",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 531
+}

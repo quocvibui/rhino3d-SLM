@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/_rhino/EnneadTab.menu/get_latest.button/get_latest_left.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/_rhino/EnneadTab.menu/get_latest.button/get_latest_left.py",
+  "instruction": "Get latest left",
+  "code": "import os\r\nimport sys\r\nimport time\r\nimport rhinoscriptsyntax as rs\r\nimport Rhino # pyright: ignore\r\n\r\n\r\n\r\n\r\ndef add_search_path():\r\n    # for path in rs.SearchPathList():\r\n    #     if 'EnneadTab-OS' in path:\r\n    #         rs.DeleteSearchPath(path)\r\n    _app_folder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))\r\n    lib_path = os.path.join(_app_folder, \"lib\" )\r\n    rs.AddSearchPath(lib_path)\r\n    sys.path.append(lib_path)\r\n    sys.path = list(set(sys.path))\r\n    \r\n      \r\ntime_start = time.time()\r\nadd_search_path()\r\n# print (\"Get Latest use {:.2}s\".format(time.time() - time_start))\r\n# print (\"\\n\".join(sys.path))\r\n\r\n\r\n\r\n\r\n__title__ = \"GetLatest\"\r\n__doc__ = \"\"\"Update EnneadTab to latest version.\r\n\r\nKey Features:\r\n- Automatic version detection\r\n- Core module updates\r\n- System path configuration\r\n- Component synchronization\r\n- Installation verification\"\"\"\r\n__FONDATION__ = True\r\nfrom EnneadTab import ERROR_HANDLE\r\nfrom EnneadTab import VERSION_CONTROL, NOTIFICATION, ERROR_HANDLE\r\nfrom EnneadTab.RHINO import RHINO_RUI, RHINO_ALIAS\r\n\r\n# @LOG.log(__file__, __title__)\r\n@ERROR_HANDLE.try_catch_error()\r\ndef get_latest(is_silient = False):\r\n    print (\"get_latest called\")\r\n    \r\n    RHINO_ALIAS.register_alias_set()\r\n    print (\"alias set registered\")\r\n    RHINO_RUI.update_my_rui()\r\n    print (\"rui updated\")\r\n    RHINO_RUI.add_startup_script()\r\n    print (\"startup script added\")\r\n\r\n\r\n    if not is_silient:\r\n        NOTIFICATION.messenger(\"Latest EnneadTab-For-Rhino Loaded\")\r\n    else:\r\n        print (\"Latest EnneadTab-For-Rhino Loaded\")\r\n\r\n    # this is always done in the background so no need to wait for it.,\r\n    try:\r\n        VERSION_CONTROL.update_dist_repo()\r\n    except Exception as e:\r\n        print (\"Error updating EA dist\")\r\n        print (e)\r\n\r\n\r\n\r\n \r\n\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    get_latest()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

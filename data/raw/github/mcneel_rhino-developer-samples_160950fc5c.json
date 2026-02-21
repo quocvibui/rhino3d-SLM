@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_addlayout.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_addlayout.py",
+  "instruction": "Ex addlayout",
+  "code": "import Rhino\nimport scriptcontext\n\n# Generate a layout with a single detail view that zooms\n# to a list of objects\ndef AddLayout():\n    scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    page_number = 1\n    if page_views: page_number = len(page_views) + 1\n    pageview = scriptcontext.doc.Views.AddPageView(\"A0_{0}\".format(page_number), 1189, 841)\n    if pageview:\n        top_left = Rhino.Geometry.Point2d(20,821)\n        bottom_right = Rhino.Geometry.Point2d(1169, 20)\n        detail = pageview.AddDetailView(\"ModelView\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n        if detail:\n            pageview.SetActiveDetail(detail.Id)\n            detail.Viewport.ZoomExtents()\n            detail.DetailGeometry.IsProjectionLocked = True\n            detail.DetailGeometry.SetScale(1, scriptcontext.doc.ModelUnitSystem, 10, scriptcontext.doc.PageUnitSystem)\n            # Commit changes tells the document to replace the document's detail object\n            # with the modified one that we just adjusted\n            detail.CommitChanges()\n        pageview.SetPageAsActive()\n        scriptcontext.doc.Views.ActiveView = pageview\n        scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    AddLayout()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

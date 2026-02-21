@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scriptcontext-directly-from-ironpython/9870",
+  "topic_id": 9870,
+  "title": "Scriptcontext directly from ironpython",
+  "question": "Hi friends,\n\n\nI’m trying to get RhinoCommon running from an external ironpython interpreter. My process so far has been to add the following lines to the top of my python script to specify path directories for the modules:\n\n\nimport clr, sys\nsys.path.append(r\"C:\\Program Files (x86)\\Rhinoceros 5\\System\")\nclr.AddReference (\"RhinoCommon.dll\")\nsys.path.append(r\"C:\\Program Files (x86)\\Rhinoceros 5\\Plug-ins\\IronPython\")\nclr.AddReference (\"RhinoPythonHost.dll\") # Had to add this because scriptcontext was complaining that RhinoPython.Host was missing\nsys.path.append(r\"C:\\Users\\Nic\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\")\nsys.path.append(r\"C:\\Program Files (x86)\\Rhinoceros 5\\Plug-ins\\IronPython\\Lib\")\nsys.path.append(r\"C:\\Users\\Nic\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\scripts\")\n\n\n\nThis has allowed ironpython to find RhinoCommon successfully and the following command executes as expected:\n\n\ncircle = Rhino.Geometry.Circle(Rhino.Geometry.Point3d(0,0,0),5)\n\n\n\nHowever, to write this to the active document, I’m having trouble getting scriptcontext to succeed. For example, running the following yields:\n\n\nprint scriptcontext.doc\nNone\n\n\n\nIt’s finding the module since:\n\n\nprint scriptcontext    \n<module 'scriptcontext' from 'C:\\Users\\Nic\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\scriptcontext.py'>\n\n\n\nSo perhaps, there’s some other dll I’m missing that isn’t allowing the scriptcontext to link to the Rhino.RhinoDoc object?\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import clr, sys\nsys.path.append(r\"C:\\Program Files (x86)\\Rhinoceros 5\\System\")\nclr.AddReference (\"RhinoCommon.dll\")\nsys.path.append(r\"C:\\Program Files (x86)\\Rhinoceros 5\\Plug-ins\\IronPython\")\nclr.AddReference (\"RhinoPythonHost.dll\") # Had to add this because scriptcontext was complaining that RhinoPython.Host was missing\nsys.path.append(r\"C:\\Users\\Nic\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\")\nsys.path.append(r\"C:\\Program Files (x86)\\Rhinoceros 5\\Plug-ins\\IronPython\\Lib\")\nsys.path.append(r\"C:\\Users\\Nic\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\scripts\")",
+      "language": "python",
+      "author": "pickledgator",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 3433
+}

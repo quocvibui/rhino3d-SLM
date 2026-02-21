@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/8462fc3487f8b7a58595ef73f6a5c09f92717f60/rhinopython/SampleRebuildSrfDeviation.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinopython/SampleRebuildSrfDeviation.py",
+  "instruction": "SampleRebuildSrfDeviation.py Copyright (c) 2018 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleRebuildSrfDeviation.py\n# Copyright (c) 2018 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport System\nimport rhinoscriptsyntax as rs\n\n# Description:\n#   Returns max deviation of a rebuilt surface\n# Parameters:\n#   original - A Brep face whose underlying surface was rebuilt\n#   rebuild - The rebuilt surface\ndef SampleRebuildSrfDeviation(original, rebuilt):\n    o_domain = []\n    r_domain = []\n    for i in range(2):\n        o_domain.append(original.Domain(i))\n        r_domain.append(rebuilt.Domain(i))\n    \n    knot = []\n    for i in range(2):\n        k = original.GetSpanVector(i)\n        knot.append(k)\n    \n    delta = []\n    samples = 2\n    for j0 in range(knot[0].Count - 1):\n        u_interval = Rhino.Geometry.Interval(knot[0][j0], knot[0][j0 + 1])\n        for j1 in range(knot[1].Count - 1):\n            v_interval = Rhino.Geometry.Interval(knot[1][j1], knot[1][j1 + 1])\n            for i0 in range(samples + 1):\n                for i1 in range(samples + 1):\n                    if i0 == 0 and j0 > 0: continue\n                    if i1 == 0 and j1 > 0: continue\n                    u = u_interval.ParameterAt(i0 / samples)\n                    v = v_interval.ParameterAt(i1 / samples)\n                    if original.IsPointOnFace(u, v) != Rhino.Geometry.PointFaceRelation.Exterior:\n                        po = original.PointAt(u, v)\n                        uu = r_domain[0].ParameterAt(o_domain[0].NormalizedParameterAt(u))\n                        vv = r_domain[1].ParameterAt(o_domain[1].NormalizedParameterAt(v))\n                        rc, ru, rv = rebuilt.LocalClosestPoint(po, uu, vv)\n                        if rc:\n                            pr = rebuilt.PointAt(ru, rv)\n                            delta.append(Rhino.Geometry.Line(po, pr))\n    \n    max_deviation = 0.0\n    for line in delta:\n        length = line.Length\n        if length > max_deviation:\n            max_deviation = length\n    \n    return max_deviation\n\n# Tests the above function\ndef TestSampleRebuildSrfDeviation():\n    brep_id = rs.GetObject('Select surface to rebuild', 8)\n    if brep_id:\n        brep = rs.coercebrep(brep_id)\n        face = brep.Faces[0]\n        srf = brep.Surfaces[face.SurfaceIndex]\n        nurb = srf.Rebuild(3, 3, 8, 8)\n        print 'Maximum deviation =', SampleRebuildSrfDeviation(face, nurb)\n\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    TestSampleRebuildSrfDeviation()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

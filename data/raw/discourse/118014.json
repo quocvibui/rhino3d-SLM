@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-getpoints-method-in-plane-option-is-too-constrained/118014",
+  "topic_id": 118014,
+  "title": "rs.GetPoints() method - in_plane option is 'too constrained'",
+  "question": "The optional argument currently accepts only a Boolean value to constrain the points to the active CPlane (True) or not.  Methinks this is too limited - instead of a binary yes/no answer, why can’t this input be a plane - any plane - and not just an option to use the active CPlane or not.  It would add a lot to the flexibility of the method.\n\n\nI think the code could be modified to accommodate this without breaking existing scripts…\n\n\nCurrent excerpt:\n\n\n    if in_plane:\n        gp.ConstrainToConstructionPlane(True)\n        plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        gp.Constrain(plane, False)\n\n\n\nMaybe could be:\n\n\n    if in_plane:\n        if isinstance(in_plane,Rhino.Geometry.Plane):\n            gp.ConstrainToConstructionPlane(False)\n            plane=in_plane\n        else:\n            gp.ConstrainToConstructionPlane(True)\n            plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        gp.Constrain(plane, False)\n\n\n\nOr something like that…",
+  "code_blocks": [
+    {
+      "code": "if in_plane:\n        gp.ConstrainToConstructionPlane(True)\n        plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        gp.Constrain(plane, False)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "if in_plane:\n        if isinstance(in_plane,Rhino.Geometry.Plane):\n            gp.ConstrainToConstructionPlane(False)\n            plane=in_plane\n        else:\n            gp.ConstrainToConstructionPlane(True)\n            plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        gp.Constrain(plane, False)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 274
+}

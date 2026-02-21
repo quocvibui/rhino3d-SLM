@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/section-style-does-not-work/201647",
+  "topic_id": 201647,
+  "title": "Section style does not work?",
+  "question": "See this image:\n\n\nimage\n1105×1495 122 KB\n\n\nThe wall to the left has a 45-deg line pattern that is set for the Layer where the wall is.\n\n\nThe rest of the geometry has no setting in the layers palette nor do they have overrides per object.\n\n\nSo then I assume that the actual setting in the section selected should work?\n\n\nimage\n733×375 4.72 KB\n\n\nSee “custom”:\n\n\nimage\n405×358 7.62 KB\n\n\nAs you can see this is not what I see on the Display.\n\n\nI’ve played around a bit, but it just does not seem to work.\n\n\nSomething that I do not understand ?\n\n\n/Erik",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SwitchSectionStyle():\n    # Get multiple objects instead of a single object\n    obj_ids = rs.GetObjects(\"Select objects\")\n    \n    # Check if any objects were selected\n    if not obj_ids:\n        return\n    \n    # Process each selected object\n    for obj_id in obj_ids:\n        rh_obj = rs.coercerhinoobject(obj_id, True, True)\n        \n        # Set the new source\n        source = Rhino.DocObjects.ObjectSectionAttributesSource.FromSectioner\n        \n        # Apply the new attributes\n        attr = rh_obj.Attributes.Duplicate()\n        attr.SectionAttributesSource = source\n        scriptcontext.doc.Objects.ModifyAttributes(rh_obj, attr, False)\n    \n    # Redraw the view to show changes\n    scriptcontext.doc.Views.Redraw()\n\nSwitchSectionStyle()",
+      "language": "python",
+      "author": "Japhy",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 31,
+  "views": 516
+}

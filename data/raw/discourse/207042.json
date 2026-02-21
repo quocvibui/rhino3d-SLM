@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issues-with-deletedisplaymode-getdisplaymode-and-findbyname/207042",
+  "topic_id": 207042,
+  "title": "Issues with DeleteDisplayMode, GetDisplayMode, and FindByName",
+  "question": "I’m writing a plugin that documents the parts in an assembly, and part of that documentation process is taking pictures of the assembly to use in an Excel file. To isolate the geometry while taking the images, I’m using a method described \nhere\n, which uses a custom display mode that hides everything and then assigns override display modes for the objects in a new viewport.\n\n\nThe issue is that I would like for the display mode to be created and deleted dynamically, and the methods for doing this seem incredibly unreliable. \nSometimes\n this block of code throws an error where _display_mode is unassigned and thus cannot have attributes assigned to it:\n\n\nprivate void CreateDisplayMode()\n{\n    _display_mode = DisplayModeDescription.FindByName(\"hideall\");\n    if (_display_mode == null)\n    {\n        var temp = DisplayModeDescription.AddDisplayMode(\"hideall\");\n        _display_mode = DisplayModeDescription.GetDisplayMode(temp);\n    }\n    // DisplayAttributes assignments go here.\n    DisplayModeDescription.UpdateDisplayMode(_display_mode)\n}\n\n\n\nAnd after checking the file whenever the process does work, sometimes this block of code does not successfully delete the display mode from the Rhino file:\n\n\nprivate void TryDeleteDisplayMode()\n{\n    if (_display_mode == null) return;\n    Guid display_mode_id = _display_mode.Id;\n    if (!DisplayModeDescription.DeleteDisplayMode(display_mode_id))\n    {\n        var test = DisplayModeDescription.FindByName(_display_mode.EnglishName);\n        if (test == null) throw new Exception(\"The display mode is impossible to delete\");\n        DisplayModeDescription.DeleteDisplayMode(test.Id);\n    }\n    DisplayModeDescription.UpdateDisplayMode(_display_mode);\n    _display_mode.Dispose();\n    _display_mode = null;\n}\n\n\n\nThe DeleteDisplayMode method will return true and yet the display mode will still be present in the document \nsometimes\n. It has no issue deleting the default display modes after some testing.\n\n\nPlease let me know if these are bugs or ...",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  // Select objects to draw\n  GetObject go = new GetObject();\n  go.SetCommandPrompt(\"Select objects to draw\");\n  go.GetMultiple(1, 0);\n  if (go.CommandResult() != Result.Success)\n    return go.CommandResult();\n\n  // Get the active view\n  RhinoView view = go.View();\n  if (null == view)\n    return Result.Failure;\n\n  // Create a set of ids of the objects to draw\n  HashSet<Guid> objectsToDraw = new HashSet<Guid>();\n  foreach (Rhino.DocObjects.ObjRef objref in go.Objects())\n    objectsToDraw.Add(objref.ObjectId);\n\n  // Create and enable a fancy display conduit\n  TestColeDisplayConduit conduit = new TestColeDisplayConduit(view.ActiveViewportID, objectsToDraw)\n  {\n    Enabled = true\n  };\n\n  // Redraw the document\n  doc.Views.Redraw();\n\n  // Wait for some user input\n  GetString gs = new GetString();\n  gs.SetCommandPrompt(\"Press <Enter> to continue\");\n  gs.AcceptNothing(true);\n  gs.Get();\n\n  // Disable the fancy conduit redraw the document\n  conduit.Enabled = false;\n  doc.Views.Redraw();\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "public class CustomConduit : DisplayConduit\n{\n    public Guid ViewportId { get; private set; }\n    public HashSet<Guid> ObjectsToDraw { get; private set; }\n    public CustomConduit(Guid viewport_id, HashSet<Guid> objects)\n    {\n        ViewportId = viewport_id;\n        ObjectsToDraw = objects;\n    }\n\n    protected override void PreDrawObject(DrawObjectEventArgs args)\n    {\n        base.PreDrawObject(args);\n        if (args.Viewport.Id != ViewportId)\n        {\n            args.DrawObject = true;\n            return;\n        }\n        if (!ObjectsToDraw.Contains(args.RhinoObject.Id))\n        {\n            args.DrawObject = false;\n        }\n        else\n        {\n            if (args.RhinoObject.Geometry is not Brep) return;\n            args.Display.DrawBrepShaded((Brep)args.RhinoObject.Geometry, args.Display.SetupDisplayMaterial(args.RhinoDoc, args.RhinoObject, args.RhinoObject.Attributes));\n        }\n    }\n\n    protected override void PreDrawObjects(DrawEventArgs args)\n    {\n        base.PreDrawObjects(args);\n        if(args.Viewport.Id != ViewportId) return;\n        args.Display.ClearFrameBuffer(System.Drawing.Color.FromArgb(255, 255, 255, 255));\n    }\n}",
+      "language": "csharp",
+      "author": "Cole_Howell1",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 95
+}

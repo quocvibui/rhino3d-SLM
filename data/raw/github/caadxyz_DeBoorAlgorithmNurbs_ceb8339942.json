@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caadxyz/DeBoorAlgorithmNurbs/blob/683f93a9c430eaecd45684521ebdc4561181de9b/src/pointGoo.py",
+  "repo": "caadxyz/DeBoorAlgorithmNurbs",
+  "repo_stars": 53,
+  "repo_description": "De Boor's Algorithm for NURBS Curve",
+  "license": "LGPL-3.0",
+  "filepath": "src/pointGoo.py",
+  "instruction": "coding=utf-8",
+  "code": "#coding=utf-8\nimport rhinoscriptsyntax as rs\nimport Grasshopper as gh\nimport Rhino\nimport System\nfrom math import sqrt\n\nclass PointGoo( gh.Kernel.Types.GH_GeometricGoo[Rhino.Geometry.Point3d], \n               gh.Kernel.IGH_PreviewData ):\n\n    #region construction\n    def __init__(self, point):\n        self.m_value = point\n        self.color = None\n\n    def SetColor(self,color):\n        self.color = color\n    \n    @staticmethod\n    def DuplicatePoint(original):\n        if original is None: return None\n        return Rhino.Geometry.Point3d(original.X,original.Y,original.Z)\n    \n    def DuplicateGeometry(self):\n        return PointGoo(PointGoo.DuplicatePoint(self.m_value))\n    \n    #region properties\n    def get_TypeName(self):\n        return \"colored point3d\"\n        \n    def get_TypeDescription(self):\n        return \"colored point3d\"\n \n    def ToString(self):\n        if self.m_value is None: return \"<null>\"\n        return str(self.m_value.X)+','+str(self.m_value.Y)+','+str(self.m_value.Z)\n       \n    #region preview\n    def DrawViewportWires(self, args):\n        if self.m_value is None: return\n        args.Pipeline.DrawPoint(self.m_value,self.color)\n  \n    def DrawViewportMeshes(self, args):\n        pass\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

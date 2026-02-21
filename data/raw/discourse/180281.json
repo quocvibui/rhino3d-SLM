@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-typeerror-parameter-must-be-a-guid/180281",
+  "topic_id": 180281,
+  "title": "Python \"TypeError: Parameter must be a Guid\"",
+  "question": "Hi,\n\n\nBefore last update of Rhino a python component in grasshopper containing this snippet worked, but not any more.\n\n\n“”\"\n\nimport rhinoscriptsyntax as rs\n\n\nfor i in x:\n\nprint (rs.Area(i))\n\n“”\"\n\n\nNow it raises “TypeError: Parameter must be a Guid or string representing a Guid”\n\nThe problem is that I havn’t changed anything.\n\nx = a bounch of surfaces and hit is set to ghdoc object.\n\n\nHave anything changed i the latest release reguarding this??",
+  "code_blocks": [
+    {
+      "code": "for i in x:\n    a = rs.coerceguid(i)\n    print (rs.Area(a))",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "# MIT License\n\n# Copyright (c) [2021] [Cardiff University]\n\nimport System\n\nimport Rhino\n\ndef get_geom_and_source_else_leave(obj):\n    #type(type[any])-> type[any], type[any]\n    \"\"\" Leaves Geometric objects and non-guid strings alone.\n        Otherwise searches Rhino doc and ghdoc with obj as guid.\n    \"\"\"\n    if hasattr(Rhino.Geometry, type(obj).__name__):\n        return obj, 'SOURCE_IS_ALREADY_GEOM'\n        # So that we can call it on curves and it will leave them alone\n\n    if isinstance(obj, basestring):\n        # To leave legend tags, group names and layer names alone\n        try:\n            obj = System.Guid(obj)\n        except: # (TypeError, ValueError):\n            return obj, 'SOURCE_IS_STRING'\n\n    for source in (Rhino.RhinoDoc.ActiveDoc, ghdoc):\n        geom = source.Objects.FindGeometry(obj)\n        if geom is not None:\n            return geom, source\n    else:\n        msg = 'Type: %s, val: %s, not supported by get_geom_and_source_else_leave' \n        msg %= (type(obj), obj)\n        raise NotImplementedError(msg)",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nfor i in x:\n    id = sc.doc.Objects.Add(i)\n    a = rs.Area(id)\n\nprint(a)",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 19,
+  "views": 615
+}

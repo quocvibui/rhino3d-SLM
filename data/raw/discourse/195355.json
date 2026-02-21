@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/modifying-rhino-options-with-a-python-script/195355",
+  "topic_id": 195355,
+  "title": "Modifying Rhino Options with a Python script",
+  "question": "Hi \n@clement\n and \n@dale\n,\n\n\nI’m trying to modify \nthe very helpful code you provided in another thread\n \n@clement\n to now delete paths from Options->RhinoScript->Startup , located here via the UI\n\n\nimage\n819×760 37 KB\n\n\nbut I can’t figure out how to access “RhinoScript” in “Options” with my python script. My code below, fails on this line\n\n\nsettings = settings.GetChild(\"Options\").GetChild(\"RhinoScript\")\n\n\n\nbecause “RhinoScript” is not a child of “Options”. I’ve tried googling around but I don’t understand  where it is nor do I understand how to list all the children and strings \nwithin the PersistentSettings class\n, can you help? Thank you!\n\n\n\ndef RemoveRhinoScriptStartupPath(path):\n    '''removes a command from rhinoscript startup path list'''\n    \n    path = path.lower()\n    \n    rhino_id = Rhino.RhinoApp.CurrentRhinoId\n    settings = Rhino.PlugIns.PlugIn.GetPluginSettings(rhino_id, False)\n    settings = settings.GetChild(\"Options\").GetChild(\"RhinoScript\")\n    paths =  settings.GetString(\"Startup\").splitlines()\n    \n    if path and path in paths: \n        paths.remove(path)\n        settings.SetString(\"Startup\", \"\\n\".join(paths))",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\n__RHINOSCRIPT__ = \"1c7a3523-9a8f-4cec-a8e0-310f580536a7\"\n\ndef DeleteStartupScripts():\n    rhinoScript = Rhino.RhinoApp.GetPlugInObject(__RHINOSCRIPT__)\n    if rhinoScript:\n        startupList = rhinoScript.StartupScriptList()\n        if startupList:\n            for script in startupList:\n                rhinoScript.DeleteStartupScript(script)\n\nif __name__==\"__main__\":  \n    DeleteStartupScripts()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "__RHINOSCRIPT__ = \"1c7a3523-9a8f-4cec-a8e0-310f580536a7\"\n\ndef DeleteStartupScripts():\n    rhinoScript = Rhino.RhinoApp.GetPlugInObject(__RHINOSCRIPT__)\n    if rhinoScript:\n        startupList = rhinoScript.StartupScriptList()\n        if startupList:\n            for script in startupList:\n                rhinoScript.DeleteStartupScript(script)\n\nif __name__==\"__main__\":  \n    DeleteStartupScripts()",
+      "language": "python",
+      "author": "Michael_H",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "def deleteRhinoScriptStartupScript(path):\n    '''Removes a script from the RhinoScript startup script list.'''\n    deletedPath = False\n    try:\n        if path:\n            path = path.lower()\n\n            # Get the RhinoScript plugin object\n            rhinoScript_Id = Rhino.PlugIns.PlugIn.IdFromName(\"RhinoScript\")\n            rhinoScript = Rhino.RhinoApp.GetPlugInObject(rhinoScript_Id)\n\n            # Remove the script if it exists in the startup list\n            if rhinoScript:\n                startupList = rhinoScript.StartupScriptList()\n                if startupList:\n                    for script in startupList:\n                        if script.lower() == path:\n                            rhinoScript.DeleteStartupScript(script)\n                            deletedPath = True\n    except Exception as e:\n        try:\n            print(\"Error in deleteRhinoScriptStartupScript: \" + str(e))\n        except Exception:\n            print(\"Error in deleteRhinoScriptStartupScript: An unknown error occurred.\")\n    return deletedPath",
+      "language": "python",
+      "author": "Michael_H",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "def RemoveRhinoScriptStartupPath(path):\n    '''removes a command from rhinoscript startup path list'''\n    \n    path = path.lower()\n    \n    rhino_id = Rhino.RhinoApp.CurrentRhinoId\n    settings = Rhino.PlugIns.PlugIn.GetPluginSettings(rhino_id, False)\n    settings = settings.GetChild(\"Options\").GetChild(\"RhinoScript\")\n    paths =  settings.GetString(\"Startup\").splitlines()\n    \n    if path and path in paths: \n        paths.remove(path)\n        settings.SetString(\"Startup\", \"\\n\".join(paths))",
+      "language": "python",
+      "author": "Michael_H",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 182
+}

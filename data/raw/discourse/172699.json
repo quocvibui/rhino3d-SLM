@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/find-the-two-closest-parallel-lines-and-create-a-loft/172699",
+  "topic_id": 172699,
+  "title": "Find the two closest parallel lines and create a loft",
+  "question": "image\n822×891 33.9 KB\n\n\nI want to find the two closest parallel lines among the many lines and make a loft.\n\nAdditionally, I would like to include an option that excludes lines below the entered length value.\n\nI need some professional advice.\n\n\nThank you.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport logging\n\nlogging.basicConfig(filename='script_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')\n\ndef is_vector_parallel_to(vector1, vector2):\n    try:\n        return vector1.IsParallelTo(vector2, rs.UnitAngleTolerance()) != 0\n    except Exception as e:\n        logging.error(\"Error in is_vector_parallel_to: \" + str(e))\n        return False\n\ndef find_closest_parallel_line(lines_guid, line1_guid):\n    try:\n        line1 = rs.coercecurve(line1_guid)\n        if not line1:\n            logging.warning(\"Line with GUID {line1_guid} could not be coerced into a curve.\")\n            return None\n\n        line1_vector = line1.TangentAtStart\n        closest_line = None\n        min_distance = float('inf')\n\n        for line_guid in lines_guid:\n            if line_guid == line1_guid:\n                continue\n\n            line = rs.coercecurve(line_guid)\n            if not line:\n                logging.warning(\"Line with GUID {line_guid} could not be coerced into a curve.\")\n                continue\n\n            line_vector = line.TangentAtStart\n            if is_vector_parallel_to(line1_vector, line_vector):\n                distance = calculate_distance_between_parallel_lines(line1, line)\n                if distance < min_distance:\n                    min_distance = distance\n                    closest_line = line_guid\n\n        if closest_line:\n            loft_and_add_surface(line1_guid, closest_line)\n        else:\n            logging.info(\"No parallel line found for line GUID \" + str(line1_guid))\n\n        return closest_line\n    except Exception as e:\n        logging.error(\"Error in find_closest_parallel_line: \" + str(e))\n        return None\n\ndef calculate_distance_between_parallel_lines(line1, line2):\n    try:\n        point_on_line1 = line1.PointAtStart\n        perpendicular_plane = rg.Plane(line2.PointAtStart, line2.TangentAtStart)\n        projected_point = rg.Plane.ClosestPoint(perpendicular_plane, point_on_line1)\n        return point_on_line1.DistanceTo(projected_point)\n    except Exception as e:\n        logging.error(\"Error in calculate_distance_between_parallel_lines: \" + str(e))\n        return float('inf')\n\ndef loft_and_add_surface(line1, line2):\n    try:\n        if not rs.IsLine(line1) or not rs.IsLine(line2):\n            logging.error(\"Invalid input lines for lofting.\")\n            return\n\n        rhino_line1 = rs.coercecurve(line1)\n        rhino_line2 = rs.coercecurve(line2)\n        curves_to_loft = [rhino_line1, rhino_line2]\n        lofted_surface = Rhino.Geometry.Brep.CreateFromLoft(curves_to_loft, Rhino.Geometry.Point3d.Unset, Rhino.Geometry.Point3d.Unset, Rhino.Geometry.LoftType.Normal, False)[0]\n        if lofted_surface:\n            if \"lofted_surfaces\" in sc.sticky:\n                sc.sticky[\"lofted_surfaces\"].append(lofted_surface)\n            else:\n                sc.sticky[\"lofted_surfaces\"] = [lofted_surface]\n            sc.doc.Objects.AddBrep(lofted_surface)\n            sc.doc.Views.Redraw()\n        return lofted_surface\n    except Exception as e:\n        logging.error(\"Error in loft_and_add_surface: \" + str(e))\n        return None\n\ndef main():\n    try:\n        lines_ids = rs.GetObjects(\"Select lines\", rs.filter.curve)\n        if not lines_ids:\n            logging.info(\"No lines were selected.\")\n            return\n\n        for line in lines_ids:\n            find_closest_parallel_line(lines_ids, line)\n    except Exception as e:\n        logging.error(\"Error in main function: \" + str(e))\n\nif __name__ == \"__main__\":\n    main()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 245
+}

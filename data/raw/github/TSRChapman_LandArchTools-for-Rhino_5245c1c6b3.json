@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/TSRChapman/LandArchTools-for-Rhino/blob/43036cbbcab2bf756216f6a752f65e83aac3fccb/RandomDrop.py",
+  "repo": "TSRChapman/LandArchTools-for-Rhino",
+  "repo_stars": 5,
+  "repo_description": "Custom Tools for Rhino made for Landscape Architects",
+  "license": "BSD-3-Clause",
+  "filepath": "RandomDrop.py",
+  "instruction": "Copyright <2021> <Thomas Chapman>",
+  "code": "\n'''\n\nCopyright <2021> <Thomas Chapman>\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE\nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR\nCOPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR\nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n'''\n\nimport rhinoscriptsyntax as rs\nimport random as r\n\n\ndef RandomDrop():\n    try:\n        obj = rs.GetObjects('Pick blocks to drop randomly',\n                            filter=4096, preselect=True)\n        dropnum = rs.GetReal(\"Enter max drop distance\")\n\n        if obj:\n            rs.EnableRedraw(False)\n\n            for object in obj:\n                num = r.uniform((-abs(dropnum)), 0)\n                vec = rs.VectorCreate([0, 0, num], [0, 0, 0])\n                point = rs.BlockInstanceInsertPoint(object)\n                rs.MoveObject(object, vec)\n\n            rs.EnableRedraw(True)\n\n    except:\n        print(\"Failed to execute\")\n        rs.EnableRedraw(True)\n        return\n\n\nif __name__ == \"__main__\":\n    RandomDrop()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

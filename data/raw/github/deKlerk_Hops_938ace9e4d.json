@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/deKlerk/Hops/blob/74059c9c167d2830732c566c4319fc880b0d95c6/app/app.py",
+  "repo": "deKlerk/Hops",
+  "repo_stars": 4,
+  "repo_description": "Grasshopper components as Flask Endpoints using Hops",
+  "license": "MIT",
+  "filepath": "app/app.py",
+  "instruction": null,
+  "code": "from flask import Flask\nimport ghhops_server as hs\nfrom ghhops_server.params import HopsCurve, HopsInteger, HopsNumber\nimport rhino3dm as rh\n\nfrom owlready2 import *\n\n# register hops app as middleware\napp = Flask(__name__)\nhops: hs.HopsFlask = hs.Hops(app)\n\n# flask app can be used for other stuff drectly\n@app.route(\"/help\")\ndef help():\n    return \"Welcome to Grashopper Hops for CPython!\"\n\n#-- Point At component --#\n@hops.component(\n    \"/pointat\",\n    name=\"PointAt\",\n    description=\"Get a point along a curve\",\n    inputs=[\n        hs.HopsCurve(\"Curve\", \"C\", \"Curve to evaluate\"),\n        hs.HopsNumber(\"t\", \"t\", \"Parameter on Curve to evaluate.\")\n    ],\n    outputs=[\n        hs.HopsPoint(\"P\", \"P\", \"Point on Curve at parameter t\")\n    ]\n)\ndef pointat(curve: rh.Curve, t: float=0):\n    pt = curve.PointAt(t)\n    return pt\n\n\n#-- Profile Levels component --#\n@hops.component(\n    \"/plevels\",\n    name=\"ProfileLevels\",\n    description=\"Creates a series of levels from a profile\",\n    inputs=[\n        hs.HopsCurve(\"Curve\", \"C\", \"Curve to replicate\"),\n        hs.HopsNumber(\"Dist\", \"D\", \"Distance between levels\"),\n        hs.HopsInteger(\"Num\", \"N\", \"Number of levels\")\n    ],\n    outputs=[hs.HopsCurve(\"Curves\", \"Cs\", \"Series of profile curves\")]\n)\ndef plevels(curve: rh.Curve, d: float=1.0, n: int=1):\n    crvs = []\n    dists = [d*i for i in range(n+1)]\n\n    for dist in dists:\n        vec = rh.Vector3d(0, 0, dist)\n        trans = rh.Transform.Translation(vec)\n        temp = curve.Duplicate()\n        temp.Transform(trans)\n        crvs.append(temp)\n\n    return crvs\n\n\n#-- OWLREADY2 Demo --#\n@hops.component(\n    \"/owldemo\",\n    name=\"OwlDemo\",\n    description=\"Demo using Owlready2\",\n    inputs=[hs.HopsString(\"Url\", \"U\", \"Url to ontology\")],\n    outputs=[\n        hs.HopsString(\"Classes\", \"Cls\", \"Classes in the ontology\"),\n        hs.HopsString(\"Properties\", \"Prop\", \"Properties in the ontology\"),\n        hs.HopsString(\"Individuals\", \"Ind\", \"Individuals in the ontology\")\n    ]\n)\ndef owlDemo(owlurl: str):\n    \n    onto = get_ontology(owlurl).load()\n    owl_class = set(onto.classes())\n    owl_prop = set(onto.properties())\n    owl_ind = set(onto.individuals())\n\n    ls_class = [str(c) for c in owl_class]\n    ls_prop = [str(p) for p in owl_prop]\n    ls_ind = [str(i) for i in owl_ind]\n\n    return (ls_class, ls_prop, ls_ind)\n\n\nif __name__ == '__main__':\n    # set debug=True\n    app.run(debug=True)",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinopython/SampleMove.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinopython/SampleMove.py",
+  "instruction": "SampleMove.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleMove.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nfrom Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\n# Rhino.Input.Custom.GetPoint derived class that dynamically\n# draws the selected objects.   \nclass SampleGetMovePoint(GetPoint):\n    \n    # Class initializer\n    def __init__(self, go, base_point):\n        self.m_objects = [o.Object() for o in go.Objects()]\n        self.m_point = base_point\n        self.m_xform = Transform.Identity\n    \n    # Calculates the transformation\n    def CalculateTransform(self, point):\n        xform = Transform.Identity\n        dir = point - self.m_point\n        if (not dir.IsTiny()):\n            xform = Transform.Translation(dir)\n        return xform\n    \n    # OnMouseMove override\n    def OnMouseMove(self, e):\n        self.m_xform = self.CalculateTransform(e.Point)\n        GetPoint.OnMouseMove(self, e)\n    \n    # OnDynamicDraw override\n    def OnDynamicDraw(self, e):\n        for obj in self.m_objects:\n            e.Display.DrawObject(obj, self.m_xform)\n        GetPoint.OnDynamicDraw(self, e)\n        \n        \n# Moves objects from one location to another.   \ndef SampleMove():\n    \n    # Select objects to move\n    go = GetObject()\n    go.SetCommandPrompt(\"Select objects to move\")\n    go.GetMultiple(1, 0)\n    if go.CommandResult() <> Result.Success:\n        return go.CommandResult()\n    \n    # Point to move from\n    gp = GetPoint()\n    gp.SetCommandPrompt(\"Point to move from\")\n    gp.Get()\n    if gp.CommandResult() <> Result.Success:\n        return gp.CommandResult()\n    \n    base_point = gp.Point()\n    \n    # Point to move to\n    gm = SampleGetMovePoint(go, base_point)\n    gm.SetCommandPrompt(\"Point to move to\")\n    gm.SetBasePoint(base_point, True)\n    gm.DrawLineFromPoint(base_point, True)\n    gm.Get()\n    if gm.CommandResult() <> Result.Success:\n        return gm.CommandResult()\n    \n    target_point = gm.Point()\n    \n    # One final transformation calculation\n    xform = gm.CalculateTransform(target_point);\n\n    # Transform (move) the objects\n    for o in go.Objects():\n        doc.Objects.Transform(o, xform, True);\n        doc.Views.Redraw()\n    \n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    SampleMove()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,69 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-flip-curve-rs-reversecurve/127896",
+  "topic_id": 127896,
+  "title": "Python flip curve (rs.ReverseCurve)",
+  "question": "This should be so simple, and the forum is discouraging me from creating a new topic:\n\n\n\n\nYour topic is similar to…\n\n\n\n\nHowever, I’ve searched far and wide without finding an answer.\n\n\nHere is my Python code:\n\n\nimport rhinoscriptsyntax as rs\n\nif crv.ClosedCurveOrientation(P) == 'Clockwise':\n    CW = crv\n    CCW = rs.ReverseCurve(crv)\nelse:\n    CW = rs.ReverseCurve(crv)\n    CCW = crv\n\n\n\nBoth lines referring to ‘\nrs.ReverseCurve(crv)\n’ cause this error:\n\n\n\n\nRuntime error (TypeErrorException): Parameter must be a Guid or string representing a Guid\n\n\nTraceback:\n\nline 890, in coerceguid, “C:\\Users\\josep\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py”\n\nline 3709, in ReverseCurve, “C:\\Users\\josep\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\curve.py”\n\nline 7, in script\n\n\n\n\nApparently ‘rs.ReverseCurve(crv)’ wants a Guid instead of the curve?  Two issues with that:\n\n\n\n\n\n\nIt’s ridiculous.\n\n\n\n\n\n\nDespite \nextensive searching\n, I haven’t found a way to obtain the Guid from the ‘crv’ param?\n\n\n\n\n\n\nThis really shouldn’t be so hard.\n\n\nflip_crv_Python_2021_Jul24a.gh\n (7.6 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv_id = rs.coercecurve(crv)\nif crv.ClosedCurveOrientation(P) == 'Clockwise':\n    CW = crv\n    CCW = rs.ReverseCurve(crv_id)\nelse:\n    CW = rs.ReverseCurve(crv_id)\n    CCW = crv",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\nCW = crv\nCCW = crv.Duplicate()\nCCW.Reverse()\n\nif crv.ClosedCurveOrientation(P) != rg.CurveOrientation.Clockwise:\n    CW = CCW\n    CCW = crv",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\nif crv.ClosedCurveOrientation(P) == rg.CurveOrientation.Clockwise:\n    crv.Reverse()\n\na = crv",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\nif crv.ClosedCurveOrientation(P) == rg.CurveOrientation.Clockwise:\n    CW = crv\n    CCW = crv.Duplicate()\n    CCW.Reverse()\nelse:\n    CCW = crv\n    CW = crv.Duplicate()\n    CW.Reverse()",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport inspect\n\nprint inspect.getsource(rs.AddPoint)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\ndef flip(curve):\n    \"\"\"Returns a reversed copy of the input curve.\"\"\"\n    curve2 = curve.Duplicate()\n    curve2.Reverse()\n    return curve2\n\ndef get_orientated(curve, plane):\n    \"\"\"Returns the curve wound clockwise [0] in relation to \n       the plane, and the same curve but reversed [1]. \n       If the curve orientation can't be established,\n       None [0] and None [1] get returned.\"\"\"\n    cw = curve\n    ccw = flip(curve)\n    \n    rc = curve.ClosedCurveOrientation(plane)\n    if rc != rg.CurveOrientation.Clockwise:\n        temp_crv = ccw\n        ccw = crv\n        cw = temp_crv\n        \n        if rc == rg.CurveOrientation.Undefined:\n            cw, ccw = None, None\n\n    return cw, ccw \n\nif __name__ == \"__main__\":\n    CW, CCW = get_orientated(crv, P)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nif crv.ClosedCurveOrientation(P) == 'Clockwise':\n    CW = crv\n    CCW = rs.ReverseCurve(crv)\nelse:\n    CW = rs.ReverseCurve(crv)\n    CCW = crv",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 14,
+  "views": 3438
+}

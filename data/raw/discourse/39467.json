@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/calling-function-for-command-line-options/39467",
+  "topic_id": 39467,
+  "title": "Calling function for command line options",
+  "question": "I have the below python code in which I implement a function \n_options\n that can prompt command line options. I need to call the function twice to get different objects. However, it only prompts once, and for the second time, it directly get the result from the first one without prompting anything for input.\n\n\nCan anyone help me out with this? Thanks!\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef _xx():\n    def _options(msg, dft):\n        \"\"\"\n        Use command line options as input\n        args:\n            msg: String.\n            dft: Int. 1 or 0.\n        Return:\n            List of GUIDs\n        \"\"\"\n        # Init base getter\n        gi = Rhino.Input.Custom.GetObject()\n        gi.SetCommandPrompt(msg)\n        gi.GroupSelect = True\n        gi.AlreadySelectedObjectSelect = False\n\n        # set up the options\n        boolOption = Rhino.Input.Custom.OptionToggle(bool(dft), \"False\", \"True\")\n        gi.AddOptionToggle(\"Meshed\", boolOption) # Hyphen not allowed\n\n        # set filter based on options\n        if boolOption.CurrentValue:\n            gi.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh\n        else:\n            gi.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.Brep\n\n        while True:\n            get_rc = gi.GetMultiple(1,0)\n            if gi.CommandResult()!=Rhino.Commands.Result.Success:\n                # return None if nothing selected\n                return\n            elif get_rc == Rhino.Input.GetResult.Option:\n                # set filter based on options\n                if boolOption.CurrentValue:\n                    gi.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh\n                else:\n                    gi.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.Brep\n                continue\n            break\n        ids = [gi.Object(i).ObjectId for i in range(gi.ObjectCount)]\n        newdft = int(boolOption.CurrentValue)\n        return ids, newdft\n\n    # read default optio...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef _xx():\n    def _options(msg, dft):\n        \"\"\"\n        Use command line options as input\n        args:\n            msg: String.\n            dft: Int. 1 or 0.\n        Return:\n            List of GUIDs\n        \"\"\"\n        # Init base getter\n        gi = Rhino.Input.Custom.GetObject()\n        gi.SetCommandPrompt(msg)\n        gi.GroupSelect = True\n        gi.AlreadySelectedObjectSelect = False\n\n        # set up the options\n        boolOption = Rhino.Input.Custom.OptionToggle(bool(dft), \"False\", \"True\")\n        gi.AddOptionToggle(\"Meshed\", boolOption) # Hyphen not allowed\n\n        # set filter based on options\n        if boolOption.CurrentValue:\n            gi.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh\n        else:\n            gi.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.Brep\n\n        while True:\n            get_rc = gi.GetMultiple(1,0)\n            if gi.CommandResult()!=Rhino.Commands.Result.Success:\n                # return None if nothing selected\n                return\n            elif get_rc == Rhino.Input.GetResult.Option:\n                # set filter based on options\n                if boolOption.CurrentValue:\n                    gi.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh\n                else:\n                    gi.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.Brep\n                continue\n            break\n        ids = [gi.Object(i).ObjectId for i in range(gi.ObjectCount)]\n        newdft = int(boolOption.CurrentValue)\n        return ids, newdft\n\n    # read default option values\n    a = 0\n    b = 0\n\n    # Get ids\n    result1 = _options(\"select A surfaces\", a)\n    result2 = _options(\"select B surfaces\", b)\n\n    print result1\n    print result2\n\n    return\n\nif __name__ == \"__main__\":\n\t_xx()",
+      "language": "python",
+      "author": "vincentfs",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 785
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/what-class-method-does-grasshopper-use-when-picking-objects-from-rhino-as-command-option/64294",
+  "topic_id": 64294,
+  "title": "What class/method does Grasshopper use when picking objects from rhino as command option",
+  "question": "Hi,\n\n\nI would like to understand how command options work and what is possible there. Assume I want to create a surface from curves or points. How can I set command option that prompts the user to select objects?\n\n\nI assume it’s this one :\n\n\nAddOptionEnumSelectionList[T](self: GetBaseClass, englishOptionName: str, enumSelection: IEnumerable[T], listCurrentIndex: int) -> int\n\n\nCould somebody give me short example how to use it?",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import dotnetcompiledcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nclass ParamBrepPick(Grasshopper.Kernel.Parameters.Param_Brep):\n    # use a line like the one below here to see require signature\n    # Grasshopper.Kernel.Parameters.Param_Brep.Prompt_Singular(\n    def Prompt_Singular(self, result):\n        #result is  System.Runtime.CompilerServices.StrongBox[Brep]\n        \n        try:\n            g1 = Rhino.Input.RhinoGet.GetOneObject(\"Personal brep selection\", False, Rhino.DocObjects.ObjectType.Brep)\n            \n            if g1[0] == Rhino.Input.GetResult.Object:\n                geometry = g1[1].Geometry()\n                \n                if isinstance(geometry, Rhino.Geometry.Brep):\n                    # use a line like the one below here to see require signature\n                    # Rhino.Geometry.Brep.\n                    result.Value = Grasshopper.Kernel.Types.GH_Brep(g1[1].ObjectId)\n                \n                return Grasshopper.Kernel.GH_GetterResult.success\n        except Exception as ex:\n            System.Windows.Forms.MessageBox.Show(ex, \"Error in picking code\")\n        return Grasshopper.Kernel.GH_GetterResult.cancel\n\nclass PreviewEx(component):\n    def __new__(cls):\n        instance = Grasshopper.Kernel.GH_Component.__new__(cls,\n            \"Pick\", \"PickEx\", \"\"\"Component to pick something off Rhino\"\"\", \"Pick\", \"Pick\")\n        return instance\n    \n    def get_ComponentGuid(self):\n        return System.Guid(\"ae9ec8cd-f30d-48fc-9c89-04820b652268\")\n    \n    def SetUpParam(self, p, name, nickname, description):\n        p.Name = name\n        p.NickName = nickname\n        p.Description = description\n        p.Optional = True\n    \n    def RegisterInputParams(self, pManager):\n        p = ParamBrepPick()\n        self.SetUpParam(p, \"t\", \"t\", \"Pick one brep\")\n        p.Access = Grasshopper.Kernel.GH_ParamAccess.item\n        self.Params.Input.Add(p)\n        \n    \n    def RegisterOutputParams(self, pManager):\n        p = Grasshopper.Kernel.Parameters.Param_GenericObject()\n        self.SetUpParam(p, \"a\", \"a\", \"Pick one result.\")\n        self.Params.Output.Add(p)\n        \n    def SolveInstance(self, DA):\n        p0 = self.marshal.GetInput(DA, 0)\n        result = self.RunScript(p0)\n        \n        \n    def RunScript(self, t):\n        return t\n        \n\nclass AssemblyInfo(GhPython.Assemblies.PythonAssemblyInfo):\n    def get_AssemblyName(self):\n        return \"pickingsample\"\n    \n    def get_AssemblyDescription(self):\n        return \"\"\"A picking sample\"\"\"\n\n    def get_AssemblyVersion(self):\n        return \"0.1\"\n\n    def get_AuthorName(self):\n        return \"giulio@mcneel.com\"\n    \n    def get_Id(self):\n        return System.Guid(\"66c54542-da0d-478d-a5a4-5dc0fc173feb\")",
+      "language": "python",
+      "author": "piac",
+      "post_number": 6,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 3279
+}

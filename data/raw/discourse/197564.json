@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/minimum-radius-on-curve/197564",
+  "topic_id": 197564,
+  "title": "Minimum radius on curve?",
+  "question": "I’ve searched the forums, but the Curvature command still seems to involve a bit of manual guesswork. Is there a command I’ve missed which can tell me the minimum radius of the entire curve?\n\n\nimage\n1388×539 236 KB\n\n\nThe curve was projected onto a mesh and then rebuilt within a tolerance.\n\n\nsection.3dm\n (2.5 MB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System.Guid\nimport math\n\ndef GetMinimumRadius():\n\n    curves = rs.GetObjects(\"Select curves to analyze\", 4, preselect=True)\n    if not curves: return\n    \n    min_radius = float('inf')\n    min_radius_point = None\n    min_radius_curve_id = None\n    \n    for curve_id in curves:\n\n        curve = rs.coercecurve(curve_id)\n        if not curve: continue\n\n        domain = curve.Domain\n\n        samples = 1000  #should be adapted to curve lngh\n        parameters = [domain.ParameterAt(t / float(samples - 1)) for t in range(samples)]\n        \n        for t in parameters:\n\n            vector = curve.CurvatureAt(t)\n            if vector:\n                curvature = vector.Length\n                if curvature > 0:  \n                    radius = 1.0 / curvature\n                    if radius < min_radius:\n                        min_radius = radius\n                        min_radius_point = curve.PointAt(t)\n                        min_radius_curve_id = curve_id\n    \n    if min_radius == float('inf'):\n        print(\"No curvature found - curves may be linear\")\n        return\n\n    if min_radius_point:\n\n        point_id = rs.AddPoint(min_radius_point)\n        rs.ObjectColor(point_id, (255, 0, 0))  \n        \n\n        circle = rs.AddCircle(min_radius_point, min_radius)\n        rs.ObjectColor(circle, (0, 255, 0)) \n        \n        text = \"Min Radius: {:.3f}\".format(min_radius)\n        rs.AddTextDot(text, min_radius_point)\n        \n        rs.SelectObject(min_radius_curve_id)\n    \n    print(\"Minimum radius of curvature: {:.3f}\".format(min_radius))\n    return min_radius\n\n\nif __name__ == \"__main__\":\n    GetMinimumRadius()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 5,
+  "views": 146
+}

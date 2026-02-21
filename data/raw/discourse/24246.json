@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-objectattributes-removedisplaymodeoverride-method/24246",
+  "topic_id": 24246,
+  "title": "RhinoCommon ObjectAttributes.RemoveDisplayModeOverride method",
+  "question": "This method has an overload -\n\n\neither call it with a specific viewport ID as argument to remove a custom object display mode in the supplied viewport -  \nRemoveDisplayModeOverride(viewportID)\n\n\nor,\n\n\nwithout an argument to (supposedly) remove any custom object display mode set in \nALL\n viewports - \nRemoveDisplayModeOverride()\n\n\nI cannot get the second to work…  Must be doing something wrong.\n\n\nThis works here:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef RemObjDisplayModeAllViewports():\n    msg=\"Select objects to reset display mode to default\"\n    objIDs=rs.GetObjects(msg,8+16+32,preselect=True)\n    if not objIDs: return\n        \n    vIDs=[view.ActiveViewportID for view in sc.doc.Views]\n    for vID in vIDs:\n        for objID in objIDs:\n            objRef=sc.doc.Objects.Find(objID)\n            attr = objRef.Attributes\n            attr.RemoveDisplayModeOverride(vID)\n            sc.doc.Objects.ModifyAttributes(objID, attr, False)\n    sc.doc.Views.Redraw()\n    \nRemObjDisplayModeAllViewports()\n\n\n\nThis doesn’t:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef RemObjDisplayModeAllViewports():\n    msg=\"Select objects to reset display mode to default\"\n    objIDs=rs.GetObjects(msg,8+16+32,preselect=True)\n    if not objIDs: return\n    \n    for objID in objIDs:\n        objRef=sc.doc.Objects.Find(objID)\n        attr = objRef.Attributes\n        attr.RemoveDisplayModeOverride()\n        sc.doc.Objects.ModifyAttributes(objID, attr, False)\n    sc.doc.Views.Redraw()\n    \nRemObjDisplayModeAllViewports()\n\n\n\nWhat did I miss here?\n\n\nThanks, --Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef RemObjDisplayModeAllViewports():\n    msg=\"Select objects to reset display mode to default\"\n    objIDs=rs.GetObjects(msg,8+16+32,preselect=True)\n    if not objIDs: return\n        \n    vIDs=[view.ActiveViewportID for view in sc.doc.Views]\n    for vID in vIDs:\n        for objID in objIDs:\n            objRef=sc.doc.Objects.Find(objID)\n            attr = objRef.Attributes\n            attr.RemoveDisplayModeOverride(vID)\n            sc.doc.Objects.ModifyAttributes(objID, attr, False)\n    sc.doc.Views.Redraw()\n    \nRemObjDisplayModeAllViewports()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef RemObjDisplayModeAllViewports():\n    msg=\"Select objects to reset display mode to default\"\n    objIDs=rs.GetObjects(msg,8+16+32,preselect=True)\n    if not objIDs: return\n    \n    for objID in objIDs:\n        objRef=sc.doc.Objects.Find(objID)\n        attr = objRef.Attributes\n        attr.RemoveDisplayModeOverride()\n        sc.doc.Objects.ModifyAttributes(objID, attr, False)\n    sc.doc.Views.Redraw()\n    \nRemObjDisplayModeAllViewports()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 882
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unable-to-create-a-block-in-rhino-no-template-mode/205719",
+  "topic_id": 205719,
+  "title": "Unable to create a block in Rhino \" No Template\" mode",
+  "question": "Hi team,\n\nI am unable to create a block when I am in \n“no template”\n option. is it a rhino limitation or am I missing something .\n\n\nint idef_index = Rhinodoc.InstanceDefinitions.Add(idef_name, string.Empty, Point3d.Origin, geometries, attributes);\n\n\n\nthis method is returning value -1.",
+  "code_blocks": [
+    {
+      "code": "using Rhino;\nusing Rhino.Commands;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing System.Collections.Generic;\n\nnamespace SampleBlockPlugin\n{\n    public class CreateBlockCommand : Command\n    {\n        public override string EnglishName => \"CreateBlockExample\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            // Define block name\n            var go = new Rhino.Input.Custom.GetObject();\n            go.SetCommandPrompt(\"Select objects to create block definition\");\n            go.GroupSelect = true;\n            go.SubObjectSelect = false;\n            \n            \n            go.GetMultiple(1, 0);\n\n            if (go.CommandResult() != Result.Success)\n                return go.CommandResult();\n\n            var geometries = new List<GeometryBase>();\n            var attributes = new List<ObjectAttributes>();\n\n            for (int i = 0; i < go.ObjectCount; i++)\n            {\n                var rhObj = go.Object(i).Object();\n                if (rhObj == null) continue;\n\n                geometries.Add(rhObj.Geometry.Duplicate()); // get copy of geometry\n                attributes.Add(rhObj.Attributes.Duplicate());\n            }\n\n            if (geometries.Count == 0)\n            {\n                RhinoApp.WriteLine(\"No valid geometry selected.\");\n                return Result.Cancel;\n            }\n            var basePoint = Point3d.Origin;\n            string blockName = \"MyBlockFromSelection\";\n\n            // Add block definition\n            int idefIndex = doc.InstanceDefinitions.Add(\n                blockName,\n                \"Simple block example\",\n                basePoint,\n                geometries,\n                attributes\n            );\n\n            if (idefIndex < 0)\n            {\n                RhinoApp.WriteLine(\"Failed to create block definition.\");\n                return Result.Failure;\n            }\n\n            RhinoApp.WriteLine($\"Block definition \\\"{blockName}\\\" created successfully.\");\n\n            // Insert the block at world origin\n            var xform = Transform.Translation(0, 0, 0);\n            doc.Objects.AddInstanceObject(idefIndex, xform);\n\n            doc.Views.Redraw();\n            return Result.Success;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "Sushant_Joshi",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 76
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas-RV3/blob/8335249503e16fe615e9bc64e125005e5bb3238d/src/compas_rv3/rhino/conduits/horizontalconduit.py",
+  "repo": "BlockResearchGroup/compas-RV3",
+  "repo_stars": 6,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "src/compas_rv3/rhino/conduits/horizontalconduit.py",
+  "instruction": "Horizontalconduit",
+  "code": "from __future__ import print_function\nfrom __future__ import absolute_import\nfrom __future__ import division\n\nfrom compas_rhino.conduits import BaseConduit\n\nfrom Rhino.Geometry import Point3d\nfrom Rhino.Geometry import Line\n\nfrom System.Collections.Generic import List\nfrom System.Drawing.Color import FromArgb\n\n\nclass HorizontalConduit(BaseConduit):\n    \"\"\"A Rhino display conduit for lines.\n\n    Parameters\n    ----------\n    lines : list of 2-tuple\n        A list of start-end point pairs that define the lines.\n    thickness : list of int, optional\n        The thickness of the individual lines.\n        Default is ``1.0`` for all lines.\n    color : list of str or 3-tuple, optional\n        The colors of the faces.\n        Default is ``(255, 255, 255)`` for all lines.\n\n    Attributes\n    ----------\n    color\n    thickness\n    lines : list\n        A list of start-end point pairs that define the lines.\n\n    Examples\n    --------\n    >>>\n\n    \"\"\"\n\n    def __init__(self, lines, **kwargs):\n        super(HorizontalConduit, self).__init__(**kwargs)\n        self._default_thickness = 1.0\n        self._default_color = FromArgb(255, 255, 255)\n        self.lines = lines or []\n\n    def DrawForeground(self, e):\n        lines = List[Line](len(self.lines))\n        for start, end in self.lines:\n            lines.Add(Line(Point3d(start[0], start[1], 0), Point3d(end[0], end[1], 0)))\n        e.Display.DrawLines(lines, self._default_color, self._default_thickness)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

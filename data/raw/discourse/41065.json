@@ -1,0 +1,60 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/plotting-issue-with-rhinopython-on-first-run/41065",
+  "topic_id": 41065,
+  "title": "Plotting issue with RhinoPython on first run",
+  "question": "I’m building a script in RhinoPython and rhinoscriptsytax that will plot two small squares next to an angled, larger square. The set-up is supposed to look like this:\n\n\n\n\nRight now, when I run the code for the first time after opening Rhino, it looks like this:\n\n\n\n\nWhat’s happening is that the two squares plot on top of each other at the origin [0,0,0]. I am using blocks to handle the plotting.\n\n\nHere’s my current code:\n\n\n\n\n\n\nClass of functions used to plot the squares:\n\n\nclass vizRhino:\n\n\n # Prepares data from line segments\n def data_prep(self, line_set):\n     lineSeg_x = [[0 for x in range (2)] for y in range(len(line_set))]\n     lineSeg_y = [[0 for x in range (2)] for y in range(len(line_set))]\n     lineSeg_z = [[0 for x in range (2)] for y in range(len(line_set))]\n     \n     for i in range(len(line_set)):\n         for j in range(2):\n             if j == 0 :\n                 lineSeg_x[i][j] = float(line_set[i].start.x.value)\n                 lineSeg_y[i][j] = float(line_set[i].start.y.value)\n                 lineSeg_z[i][j] = float(line_set[i].start.z.value)\n             else: \n                 lineSeg_x[i][j] = float(line_set[i].end.x.value)\n                 lineSeg_y[i][j] = float(line_set[i].end.y.value)\n                 lineSeg_z[i][j] = float(line_set[i].end.z.value)\n \n     return lineSeg_x, lineSeg_y, lineSeg_z\n \n # Plots line segments\n def Line(self, num, lineX, lineY, lineZ, coords, color):\n     block = []\n\n     for i in range(len(lineX)):\n         line = rs.AddLine((lineX[i][0], lineY[i][0], lineZ[i][0]), (lineX[i][1], lineY[i][1], lineZ[i][1]))\n         block.append(line)\n         rs.ObjectColor(line, [199,21,133])\n     \n     rs.AddBlock(block, [0,0,0], 'block %i'%num, delete_input = True)\n     rs.InsertBlock('block %i'%num, coords)\n \n # Plots point/Updates point location\n def Point(self, pointSource):\n     for i in pointSource:\n         pt = rs.AddPoint(float(i.value.x.value), float(i.value.y.value), float(i.value.z.value))\n         rs.ObjectColor(pt, ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ncount = 1\nfor j in range(2):\n    block = []\n    if j == 0:\n        lineX = [[-1.0, -1.0], [1.0, 1.0], [-1.0, 1.0], [-1.0, 1.0]]\n        lineY = [[-1.0, 1.0], [-1.0, 1.0], [-1.0, -1.0], [1.0, 1.0]]\n        lineZ = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]\n    if j == 1:\n        lineX = [[-1.0, -1.0], [1.0, 1.0], [-1.0, -0.60000000000000009], [0.59999999999999998, 1.0], [-1.0, 0.59999999999999998], [-0.60000000000000009, 1.0], [-1.0, 1.0], [-1.0, 1.0]]\n        lineY = [[-1.0, 1.0], [-1.0, 1.0], [0.59999999999999998, -1.0], [1.0, -0.60000000000000009], [0.59999999999999998, 1.0], [-1.0, -0.60000000000000009], [-1.0, -1.0], [1.0, 1.0]]\n        lineZ = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]\n    for i in range(len(lineX)):\n        line = rs.AddLine((lineX[i][0], lineY[i][0], lineZ[i][0]), (lineX[i][1], lineY[i][1], lineZ[i][1]))\n        block.append(line)\n        rs.ObjectColor(line, [199,21,133])\n    if count-1 == 0:\n        coords = [-5.5,1,0]\n        rs.AddTextDot(\"LHS\",(-5.5,-1,0))\n    elif count-1 == 1:\n        coords = [-2,1,0]\n        rs.AddTextDot(\"RHS\",(-2,-1,0))\n    rs.AddBlock(block, [0,0,0], 'block %i'%count, delete_input = True)\n    rs.InsertBlock('block %i'%count, coords)\n    count+=1",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "try: rs.DeleteBlock('block %i'%count)\nexcept: pass\nrs.AddBlock(block, coords, 'block %i'%count, delete_input = True)\nrs.InsertBlock('block %i'%count, coords)",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "try: rs.DeleteBlock('block %i'%count)\nexcept: pass\nrs.AddBlock(block, [0,0,0], 'block %i'%count, delete_input = True)\nrs.InsertBlock('block %i'%count, coords)",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "if rs.IsBlock('block %i'%count): rs.DeleteBlock('block %i'%count)\nrs.AddBlock(block, [0,0,0], 'block %i'%count, delete_input = True)\nrs.InsertBlock('block %i'%count, coords)",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "# Prepares data from line segments\n def data_prep(self, line_set):\n     lineSeg_x = [[0 for x in range (2)] for y in range(len(line_set))]\n     lineSeg_y = [[0 for x in range (2)] for y in range(len(line_set))]\n     lineSeg_z = [[0 for x in range (2)] for y in range(len(line_set))]\n     \n     for i in range(len(line_set)):\n         for j in range(2):\n             if j == 0 :\n                 lineSeg_x[i][j] = float(line_set[i].start.x.value)\n                 lineSeg_y[i][j] = float(line_set[i].start.y.value)\n                 lineSeg_z[i][j] = float(line_set[i].start.z.value)\n             else: \n                 lineSeg_x[i][j] = float(line_set[i].end.x.value)\n                 lineSeg_y[i][j] = float(line_set[i].end.y.value)\n                 lineSeg_z[i][j] = float(line_set[i].end.z.value)\n \n     return lineSeg_x, lineSeg_y, lineSeg_z\n \n # Plots line segments\n def Line(self, num, lineX, lineY, lineZ, coords, color):\n     block = []\n\n     for i in range(len(lineX)):\n         line = rs.AddLine((lineX[i][0], lineY[i][0], lineZ[i][0]), (lineX[i][1], lineY[i][1], lineZ[i][1]))\n         block.append(line)\n         rs.ObjectColor(line, [199,21,133])\n     \n     rs.AddBlock(block, [0,0,0], 'block %i'%num, delete_input = True)\n     rs.InsertBlock('block %i'%num, coords)\n \n # Plots point/Updates point location\n def Point(self, pointSource):\n     for i in pointSource:\n         pt = rs.AddPoint(float(i.value.x.value), float(i.value.y.value), float(i.value.z.value))\n         rs.ObjectColor(pt, [199,21,133])\n\n     return pt",
+      "language": "python",
+      "author": "Bianchi",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "ruleSides = [r.lhs, r.rhs]\n count = 1 \n for j in range(len(ruleSides)):\n     block = []\n     lineX, lineY, lineZ = viz.data_prep(ruleSides[j].elements[1].elements)\n\n for i in range(len(lineX)):\n     \n     line = rs.AddLine((lineX[i][0], lineY[i][0], lineZ[i][0]), (lineX[i][1], lineY[i][1], lineZ[i][1]))\n     block.append(line)\n     rs.ObjectColor(line, [199,21,133])\n     \n if count-1 == 0:\n     coords = [-5.5,1,0]\n     rs.AddTextDot(\"LHS\",(-5.5,-1,0))\n elif count-1 == 1:\n     coords = [-2,1,0]\n     rs.AddTextDot(\"RHS\",(-2,-1,0))\n     \n point = viz.Point(ruleSides[j].elements[0])\n block.append(point)\n rs.AddBlock(block, coords, 'block %i'%count, delete_input = True)\n rs.InsertBlock('block %i'%count, coords)\n\n count+=1",
+      "language": "python",
+      "author": "Bianchi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1001
+}

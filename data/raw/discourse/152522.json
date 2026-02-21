@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-select-bottom-surfaces/152522",
+  "topic_id": 152522,
+  "title": "How to select bottom surfaces",
+  "question": "Hello everyone\n\nI’m trying to develop a simple python plugin which draws a sort of “halo” around the bottom surface of a polysurface ( I’ll use that to avoid nesting objects too close to each other )\n\n\n\n\nIMG\n782×816 25 KB\n\n\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef Halo():\n    OBJ = rs.GetObjects(\"Select objects to nest:\", 16, False, True, True, True)\n    if not OBJ: return\n    \n    for ObjId in OBJ:\n        Surfaces = rs.ExtractSurface(ObjId, 0, True)\n                \n        for SrfId in Surfaces:\n            Edges = rs.DuplicateEdgeCurves(SrfId)\n            rs.DeleteObject(SrfId)\n            JoinedEdges = rs.JoinCurves(Edges)\n            rs.DeleteObjects(Edges)\n            \n            for EdgeId in JoinedEdges:\n                col = rs.CreateColor(255,0,0)\n                Direction = (1000,1000,1000)\n                OffsetEdges = rs.OffsetCurve(EdgeId, Direction, 20)\n                rs.DeleteObjects(EdgeId)\n                \n                for OEId in OffsetEdges:\n                    rs.ObjectColor(OEId, col)\n                    Grp = rs.AddGroup()\n                    rs.AddObjectsToGroup([ObjId, OEId], Grp)\n                \nif __name__==\"__main__\":\n    DoHalo()\n\n\n\nThis won’t work because the surface “0” is not always the bottom one, as I could have rotated the objects. Question is :\n\n\nHow can I select the surfaces \nfacing down\n or, at lest, the surfaces \nlaying on the C plane\n ?\n\nOr even better, is there a way to select \nthe largest one\n between the top and bottom surface ?\n\n\nOf course I am open to any better solution\n\n\nThank you !",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport System\n\ndef Halo():\n    filter = Rhino.DocObjects.ObjectType.PolysrfFilter\n    cornerStyle = rg.CurveOffsetCornerStyle.Sharp\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    crvIds = []\n    attrs = Rhino.DocObjects.ObjectAttributes()\n    attrs.ObjectColor = System.Drawing.Color.FromArgb(255,255,0,0)\n    attrs.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n    \n    rc, objRefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Select Polysurfaces\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc\n    if not objRefs: return Rhino.Commands.Result.Failure\n    \n    rc, offsetDistance = Rhino.Input.RhinoGet.GetNumber(\"Offset Distance\", False, 1)\n    if rc != Rhino.Commands.Result.Success: return rc\n    \n    for objRef in objRefs:\n        brep = objRef.Brep()\n        offsetCrvList = []\n        for face in brep.Faces:\n            faceNormal = face.NormalAt(face.Domain(0).Mid, face.Domain(1).Mid)\n            dotProduct = rg.Vector3d.Multiply(faceNormal, rg.Vector3d.ZAxis)\n            if Rhino.RhinoMath.EpsilonEquals(abs(dotProduct), 1, tolerance):\n                for loop in face.Loops:\n                    if loop.LoopType == rg.BrepLoopType.Outer:\n                        loopCurve = loop.To3dCurve()\n                        rc, plane = loopCurve.TryGetPlane()\n                        if rc == False: return Rhino.Commands.Result.Failure\n                        offsetCrvs = loopCurve.Offset(plane, offsetDistance, tolerance, cornerStyle)\n                        offsetCrvList.extend(offsetCrvs)\n        projectedCurves = []\n        for offsetCrv in offsetCrvList:\n            projectedCurves.append(rg.Curve.ProjectToPlane(offsetCrv, rg.Plane.WorldXY))\n        boolUnionCrvs = rg.Curve.CreateBooleanUnion(projectedCurves, tolerance)\n        for boolUnionCrv in boolUnionCrvs:\n            id = sc.doc.Objects.AddCurve(boolUnionCrv, attrs)\n            crvIds.append(id)\n    sc.doc.Groups.Add(crvIds)\n    sc.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    Halo()",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System.Guid\n\ndef Halo():\n    \n    rs.EnableRedraw = False\n        \n    SelObjects = rs.GetObjects(\"Seleziona le polisuperfici:\", rs.filter.polysurface, False, True, True, True)\n    HaloOffset = rs.GetInteger(\"Valore dell'offset per l'halo:\", 10, 0, None)\n    \n    if not SelObjects: return\n    if not HaloOffset: return\n    \n    rs.UnselectAllObjects()\n    \n    scriptcontext.doc.Layers.Add(\"Halo\", System.Drawing.Color.Red)\n    direzione = (10000, 10000, 10000)\n    \n    if  rs.MessageBox(\"Vuoi spostare tutto sul piano C?\", 4 | 32)==6:\n        #Moves everything on C plane, if needed\n            for Obj in SelObjects:\n                bb=rs.BoundingBox(Obj)\n                if bb: rs.MoveObject(Obj,rs.coerce3dvector([0,0,-bb[0][2]]))\n    \n    rs.CurrentView('Superiore')\n    # Switch view to top\n        \n    for Obj in SelObjects:\n        \n        rs.SelectObject(Obj)\n                               \n        rc = rs.Command(\"_MeshOutline\", False)\n        if not rc: return\n        \n        Crv = rs.FirstObject(True)\n        Halo = rs.OffsetCurve(Crv, direzione, HaloOffset, None, 2)\n        rs.DeleteObject(Crv)\n        \n        rs.ObjectLayer(Halo, \"Halo\")\n        \n        Group = rs.AddGroup()\n        rs.AddObjectsToGroup([Obj, Halo], Group)\n                \n        rs.UnselectAllObjects()\n        \n    rs.EnableRedraw = True\n\n\nHalo()",
+      "language": "python",
+      "author": "Lightafuncool",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef Halo():\n    OBJ = rs.GetObjects(\"Select objects to nest:\", 16, False, True, True, True)\n    if not OBJ: return\n    \n    for ObjId in OBJ:\n        Surfaces = rs.ExtractSurface(ObjId, 0, True)\n                \n        for SrfId in Surfaces:\n            Edges = rs.DuplicateEdgeCurves(SrfId)\n            rs.DeleteObject(SrfId)\n            JoinedEdges = rs.JoinCurves(Edges)\n            rs.DeleteObjects(Edges)\n            \n            for EdgeId in JoinedEdges:\n                col = rs.CreateColor(255,0,0)\n                Direction = (1000,1000,1000)\n                OffsetEdges = rs.OffsetCurve(EdgeId, Direction, 20)\n                rs.DeleteObjects(EdgeId)\n                \n                for OEId in OffsetEdges:\n                    rs.ObjectColor(OEId, col)\n                    Grp = rs.AddGroup()\n                    rs.AddObjectsToGroup([ObjId, OEId], Grp)\n                \nif __name__==\"__main__\":\n    DoHalo()",
+      "language": "python",
+      "author": "Lightafuncool",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 877
+}

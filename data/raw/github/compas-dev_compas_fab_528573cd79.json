@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_fab/blob/431e82c810ea299b9727b010b73a39abc73c5d62/src/compas_fab/ghpython/components/Cf_CollisionMesh/code.py",
+  "repo": "compas-dev/compas_fab",
+  "repo_stars": 124,
+  "repo_description": "Robotic fabrication package for the COMPAS Framework.",
+  "license": "MIT",
+  "filepath": "src/compas_fab/ghpython/components/Cf_CollisionMesh/code.py",
+  "instruction": "Add or remove a collision mesh from the planning scene.",
+  "code": "\"\"\"\nAdd or remove a collision mesh from the planning scene.\n\nCOMPAS FAB v1.0.2\n\"\"\"\n\nfrom compas_rhino.conversions import mesh_to_compas\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom compas_fab.robots import CollisionMesh\n\n\nclass CollisionMeshComponent(component):\n    def RunScript(self, scene, M, name, add, append, remove):\n        ok = False\n        self.Message = \"\"\n\n        if (add and append) or (append and remove) or (add and remove):\n            self.Message = \"Use only one operation at a time\\n(add, append or remove)\"\n            raise Exception(self.Message)\n\n        if scene and M and name:\n            mesh = mesh_to_compas(M)\n            collision_mesh = CollisionMesh(mesh, name)\n            if add:\n                scene.add_collision_mesh(collision_mesh)\n                self.Message = \"Added\"\n                ok = True\n            if append:\n                scene.append_collision_mesh(collision_mesh)\n                self.Message = \"Appended\"\n                ok = True\n            if remove:\n                scene.remove_collision_mesh(name)\n                self.Message = \"Removed\"\n                ok = True\n        return ok\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

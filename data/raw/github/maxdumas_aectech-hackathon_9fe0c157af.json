@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/maxdumas/aectech-hackathon/blob/590cd50d67783d027722516bcd37c52a641b953f/helpers/run-script.py",
+  "repo": "maxdumas/aectech-hackathon",
+  "repo_stars": 18,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "helpers/run-script.py",
+  "instruction": "Run script",
+  "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino\n\nimport os\nimport sys\nimport ctypes\nfrom importlib import util\n\nclass RhinoLoader:\n    SYSTEM_DIR = \"C:\\\\Program Files\\\\Rhino 7\\\\System\\\\\"\n    _core = None\n\n    @classmethod\n    def initialize(cls):\n        if cls._core is None:\n            # In Python, there isn't a direct equivalent to RhinoInside.Resolver,\n            # but you could set up your environment paths or sys.path here.\n            sys.path.append(cls.SYSTEM_DIR)\n\n            # Assuming the equivalent functionality to resolve assemblies is done here\n            # This could be setting up the right paths or other environment variables\n            # that Python's import system uses to find modules.\n            cls.load_core()\n            cls.load_eto()\n\n    @classmethod\n    def tear_down(cls):\n        if cls._core:\n            # Assuming _core has a dispose or close method to clean up resources.\n            cls._core.dispose()\n            cls._core = None\n\n    @classmethod\n    def load_core(cls):\n        # Assuming the RhinoCore functionality is provided by a Python library\n        # that we can import and instantiate.\n        rhino_core_module = util.find_spec(\"Rhino.Runtime.InProcess.RhinoCore\")\n        if rhino_core_module:\n            rhino_core = util.module_from_spec(rhino_core_module)\n            rhino_core_module.loader.exec_module(rhino_core)\n            cls._core = rhino_core.RhinoCore()\n\n    @classmethod\n    def load_eto(cls):\n        # Assuming Eto.Forms has a Python equivalent or wrapper\n        # This could be a simple import statement or more complex setup\n        eto_module = util.find_spec(\"Eto.Forms\")\n        if eto_module:\n            eto = util.module_from_spec(eto_module)\n            eto_module.loader.exec_module(eto)\n            eto.Platform.AllowReinitialize = True\n            eto.Platform.Initialize(eto.Platforms.Wpf)\n\n    @staticmethod\n    def resolve_for_rhino_assemblies(name):\n        # In Python, you typically don't resolve modules at runtime like this.\n        # Instead, you ensure they are in the right place on the file system or in the PYTHONPATH.\n        plugin_paths = [\n            \"Plug-ins\\\\Grasshopper\",\n        ]\n\n        for plugin in plugin_paths:\n            file = os.path.join(RhinoLoader.SYSTEM_DIR, plugin, name + \".dll\")\n            if os.path.exists(file):\n                return ctypes.CDLL(file)  # or any other way to load the dynamic lib\n\n        return None\n\n# Example usage:\nif __name__ == \"__main__\":\n    RhinoLoader.initialize()\n    # ... do work ...\n    RhinoLoader.tear_down()\n",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": false
+}

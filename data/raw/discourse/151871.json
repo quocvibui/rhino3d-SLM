@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/missing-delete-object-event-after-block-modification/151871",
+  "topic_id": 151871,
+  "title": "Missing Delete Object Event After Block Modification",
+  "question": "I encountered the potential bug when testing a custom \nUserData\n object with blocks. Using the SampleCsEventWatcher project from the development samples, I was able to determine that there appears to be a missing \nDeleteRhinoObject\n event invocation in the block editing process.\n\nSteps to Reproduce:\n\n\n\n\nCreate a box BRep\n\n\nAdd create a block from the box\n\n\nOpen the block for editing\n\n\nClose block editing\n\n\n\n\nThe Associated Event Log Looks Like\n\n\n\n\nCreate a box BRep\n\na. \nAddRhinoObject\n (Box Guid 1) ← The original box\n\n\nAdd create a block from the box\n\na. \nAddRhinoObject\n  (Box Guid 2) ← Copy of Box to be used as reference geometry)\n\nb. \nInstanceDefinitionTableEvent\n (Add) ← Referenced geometry lists \nBox Guid 2\n\nc. \nDeleteRhinoObject\n (Box Guid 1) ← The original box is removed\n\nd. \nAddRhinoObject\n (InstanceReference Object)\n\n\nOpen the block for editing\n\na. \nAddRhinoObject\n (Box Guid 3) ← New Copy of Box available for editing while block is open\n\nb. \nModifyObjectAttributes\n (InstanceReference Object)\n\n\nClose block editing\n\na. \nDeleteRhinoObject\n (Box Guid 3) ← Version created for editing is removed\n\nb. \nModifyObjectAttributes\n (InstanceReference Object)\n\nc. \nAddRhinoObject\n (Box Guid 3) ← Version created for editing is added back to persist as the new reference geometry\n\nd. \nInstanceDefinitionTableEvent\n (Modify) ← Referenced geometry now lists \nBox Guid 3\n\ne. \nPurgeObject\n (Box Guid 3) ← Version creating for editing is purged, not the one in the object table, just the one(s) in the undo record for block editing. You get one \nPurgeObject\n per \nAddRhinoObject\n that occurred during block editing\n\n\n\n\nYou will note that the we were never notified that \nBox Guid 2\n was removed from the object table. In fact, if you open up grasshopper and use the GUID to get the object from the document, it’s still accessible. If you save, close, and reopen the document the that object is gone, like we’d expect it to be.\n\n\nI haven’t delved into the c++ API to see if this problem persists ...",
+  "code_blocks": [
+    {
+      "code": "void SomeEventHandler(object sender, InstanceDefinitionTableEventArgs e)\n{\n   if (InstanceDefinitionTableEventType.Deleted != e.EventType) return;\n\n   var deletedIds = e.NewState.GetObjectIds().ToList();\n   foreach (var id in deletedIds)\n   {\n       // Do Something\n   }\n\n}",
+      "language": "csharp",
+      "author": "Noah_Rouse",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 543
+}

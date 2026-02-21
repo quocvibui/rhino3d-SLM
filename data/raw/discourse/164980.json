@@ -1,0 +1,63 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/did-i-hit-my-first-limitation-for-utilizing-scripts/164980",
+  "topic_id": 164980,
+  "title": "Did I hit my first limitation for utilizing scripts?",
+  "question": "Hello All,\n\nI was able to get this script to read a point coordinate and generate a dot object that reports the. z value of this coordinate. Before compiling it to a rhp plugin. I’m wondering I it is possible to keep the dot “Alive” so every time I move the point it will automatically report the z.value. unless the idea of developing a plugin from a script is too linear and limited.\n\n\nIs there a method that tracks (or listens) to the change to object properties (in this case position), and reevaluate the function?\n\n\nI replicated my intended function in Grasshopper, like the below:\n\n\n\n\nBelow is my starting point\n\n\nimport Rhino\nimport scriptcontext\nimport System\n\ndef AddDot():\n    # Get the point from the user\n    rc, point = Rhino.Input.RhinoGet.GetPoint(\"Pick a point location\", False)\n    if rc != Rhino.Commands.Result.Success:\n        return rc\n\n    # Get the active view's construction plane\n    view = scriptcontext.doc.Views.ActiveView\n    if view:\n        cplane = view.ActiveViewport.ConstructionPlane()\n        # Calculate the distance from the point to the construction plane\n        z_value = 12 * cplane.DistanceTo(point)\n        # Convert to feet and fractional inches\n        feet, inches = divmod(z_value, 12)\n        inches, fraction = divmod(inches, 1)\n        fraction = round(fraction * 16) / 16\n        if fraction.is_integer():\n            inches += int(fraction)\n            fraction = 0\n        # Format the output\n        if fraction > 0:\n            output = \"{}' {} {}/16\\\"\".format(int(feet), int(inches), int(fraction * 16))\n        else:\n            output = \"{}' {}\\\"\".format(int(feet), int(inches))\n        # Add a dot with the formatted output\n        dot = Rhino.Geometry.TextDot(output, point)\n        \n        # Find or create the layer called \"+WorkArea::Elev\"\n        layer = scriptcontext.doc.Layers.FindName(\"+WorkArea::Elev\")\n        if not layer:\n            layer_index = scriptcontext.doc.Layers.Add(\"+WorkArea::Elev\", System.Drawing.Color.Black)\n ...",
+  "code_blocks": [
+    {
+      "code": "################################################################################\n# SampleEventHandler.py\n# Copyright (c) 2018 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext as sc\n\n################################################################################\n# SampleEventHandler class\n################################################################################\nclass SampleEventHandler():\n    \n    # Initializer\n    def __init__(self):\n        # Enable the event handlers\n        Rhino.RhinoDoc.AddRhinoObject += self.OnAddRhinoObject\n        Rhino.RhinoDoc.ReplaceRhinoObject += self.OnReplaceRhinoObject\n        Rhino.RhinoDoc.DeleteRhinoObject += self.OnDeleteRhinoObject\n        Rhino.RhinoDoc.UndeleteRhinoObject += self.OnUndeleteRhinoObject",
+      "language": "python",
+      "author": "Tom_P",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef onTransform(sender, e):\n    if e.OldRhinoObject.Geometry != e.NewRhinoObject.Geometry:\n        print(\"object moved\")\n\ndef testTransformObjectHandler():\n    Rhino.RhinoDoc.ReplaceRhinoObject += onTransform\n\ntestTransformObjectHandler()",
+      "language": "python",
+      "author": "tay.othman",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "# Create a function to handle the TransformObject event\ndef onTransform(sender, e):\n    # Filter out all objects except text dots\n    if isinstance(e.OldRhinoObject.Geometry, Rhino.Geometry.TextDot):\n        new = e.NewRhinoObject\n        old = e.OldRhinoObject\n        # get the z values of the new and old dots\n        new_z = round(new.Geometry.Point[2], 3)\n        old_z = round(old.Geometry.Point[2], 3)\n        if new_z != old_z:\n             # get the new objects\n            new = e.NewRhinoObject\n            # convert Guid to RhinoObject\n            objgeo = new.Geometry\n            # Get the dot's grip point\n            point = objgeo.Point\n            # get the coordinate system\n            cplane = get_coordinate_system()\n            # Calculate the distance from the point to the construction plane\n            z_value = 12 * cplane.DistanceTo(point)\n            # Convert the distance to feet and inches\n            output = decimal_to_feet_and_inches(z_value)\n            # delete the old dot\n            rs.DeleteObject(old)\n            # create a new dot\n            dot = Rhino.Geometry.TextDot(output, point)\n            attributes = Rhino.DocObjects.ObjectAttributes()\n            # add the elevation to the dot\n            attributes.SetUserString(\"Elevation\", output)\n            # add the dot to the layer \"+WorkArea::Elev\"\n            layer = scriptcontext.doc.Layers.FindName(\"+WorkArea::Elev\")\n            # assign layer to the dot\n            attributes.LayerIndex = layer.Index\n            # add the dot to the document\n            scriptcontext.doc.Objects.AddTextDot(dot, attributes)\n            # redraw the view\n            scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "tay.othman",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nclass get_textdot_point(Rhino.Input.Custom.GetPoint):\n    def OnDynamicDraw(self, e):\n        point = e.CurrentPoint\n        e.Display.DrawDot(point, point.Z.ToString())\n        Rhino.Input.Custom.GetPoint.OnDynamicDraw(self, e)    \n\ndef test_move_textdot():\n    filter = Rhino.DocObjects.ObjectType.TextDot\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select text dot to move\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success:\n        return \n    \n    text_dot = objref.TextDot()\n    if not text_dot:\n        return\n        \n    gp = get_textdot_point()\n    gp.SetCommandPrompt(\"Point to move to\")\n    gp.SetBasePoint(text_dot.Point, True)\n    gp.DrawLineFromPoint(text_dot.Point, True)\n    gp.Get()\n    if gp.CommandResult() != Rhino.Commands.Result.Success:\n        return\n        \n    point = gp.Point()\n    new_dot = text_dot.Duplicate()\n    new_dot.Point = point\n    new_dot.Text = point.Z.ToString()\n    \n    sc.doc.Objects.Replace(objref, new_dot)\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_move_textdot()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\nclass TransformEventHandler:\n    def __init__(self):\n        self.is_attached = False\n\n    def onTransform(self, sender, e):\n        try:\n            if e.OldRhinoObject.Geometry != e.NewRhinoObject.Geometry:\n                print(\"object moved\")\n        except Exception as ex:\n            print(\"An error occurred:\"+ex)\n\n    def attach(self):\n        if not self.is_attached:\n            Rhino.RhinoDoc.ReplaceRhinoObject += self.onTransform\n            self.is_attached = True\n\n    def detach(self):\n        if self.is_attached:\n            Rhino.RhinoDoc.ReplaceRhinoObject -= self.onTransform\n            self.is_attached = False\n\n# Create an instance of the event handler and store it in scriptcontext.sticky\nkey = 'transform_event_handler'\nif key not in scriptcontext.sticky:\n    scriptcontext.sticky[key] = TransformEventHandler()\n\n# Attach or reattach the event handler\nhandler = scriptcontext.sticky[key]\nhandler.detach()\nhandler.attach()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef AddDot():\n    # Get the point from the user\n    rc, point = Rhino.Input.RhinoGet.GetPoint(\"Pick a point location\", False)\n    if rc != Rhino.Commands.Result.Success:\n        return rc\n\n    # Get the active view's construction plane\n    view = scriptcontext.doc.Views.ActiveView\n    if view:\n        cplane = view.ActiveViewport.ConstructionPlane()\n        # Calculate the distance from the point to the construction plane\n        z_value = 12 * cplane.DistanceTo(point)\n        # Convert to feet and fractional inches\n        feet, inches = divmod(z_value, 12)\n        inches, fraction = divmod(inches, 1)\n        fraction = round(fraction * 16) / 16\n        if fraction.is_integer():\n            inches += int(fraction)\n            fraction = 0\n        # Format the output\n        if fraction > 0:\n            output = \"{}' {} {}/16\\\"\".format(int(feet), int(inches), int(fraction * 16))\n        else:\n            output = \"{}' {}\\\"\".format(int(feet), int(inches))\n        # Add a dot with the formatted output\n        dot = Rhino.Geometry.TextDot(output, point)\n        \n        # Find or create the layer called \"+WorkArea::Elev\"\n        layer = scriptcontext.doc.Layers.FindName(\"+WorkArea::Elev\")\n        if not layer:\n            layer_index = scriptcontext.doc.Layers.Add(\"+WorkArea::Elev\", System.Drawing.Color.Black)\n            layer = Rhino.DocObjects.Layer()\n            layer.Index = layer_index\n        \n        # Add the dot to the layer\n        attributes = Rhino.DocObjects.ObjectAttributes()\n        attributes.LayerIndex = layer.Index\n        scriptcontext.doc.Objects.AddTextDot(dot, attributes)\n        \n        scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__ == \"__main__\":\n    AddDot()",
+      "language": "python",
+      "author": "tay.othman",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 1092
+}

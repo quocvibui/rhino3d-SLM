@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/TSRChapman/LandArchTools-for-Rhino/blob/43036cbbcab2bf756216f6a752f65e83aac3fccb/ToggleLevels.py",
+  "repo": "TSRChapman/LandArchTools-for-Rhino",
+  "repo_stars": 5,
+  "repo_description": "Custom Tools for Rhino made for Landscape Architects",
+  "license": "BSD-3-Clause",
+  "filepath": "ToggleLevels.py",
+  "instruction": "Copyright <2022> <Thomas Chapman>",
+  "code": "\"\"\"\n\nCopyright <2022> <Thomas Chapman>\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE\nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR\nCOPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR\nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\"\"\"\n\n# Toggle visibility of levels\n# By Thomas Chapman on 06/08/2022\n\n\nimport scriptcontext as sc\nimport Rhino as r\nimport itertools\n\n\ndef ToggleLevels():\n\n    # Get list of relevent objects\n    it = r.DocObjects.ObjectEnumeratorSettings()\n    it.IncludeLights = False\n    it.IncludeGrips = False\n    it.NormalObjects = True\n    it.LockedObjects = True\n    it.HiddenObjects = True\n    it.ReferenceObjects = False\n    it.ObjectTypeFilter = r.DocObjects.ObjectType.TextDot  # get textdots only\n    textdotList = sc.doc.Objects.GetObjectList(it)\n\n    # Loop through all textdots in document, check userdata and check if visible, toggle visibility\n    visiList = []\n    tdl1, tdl2 = itertools.tee(textdotList, 2)\n\n    # in case some rl textdots are already hidden, check and turn all on\n    for i in tdl1:\n        visiList.append(i.IsHidden)\n    if sum(visiList) == 0:\n        hidden = False\n    else:\n        hidden = True\n\n    for i in tdl2:\n        stringCheck = i.Geometry.UserStringCount\n        if stringCheck > 0:\n            string = i.Geometry.GetUserString(\"LandArchTools\")\n            if string == \"RLTextDot\":\n                if hidden == True:\n                    sc.doc.Objects.Show(i, True)\n                elif hidden == False:\n                    sc.doc.Objects.Hide(i, True)\n\n    sc.doc.Views.Redraw()\n\n\nif __name__ == \"__main__\":\n    ToggleLevels()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

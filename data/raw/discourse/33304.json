@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-there-a-way-to-generate-a-textobject-the-3d-version-with-the-scripting-engine/33304",
+  "topic_id": 33304,
+  "title": "Is there a way to generate a TextObject (the 3D version) with the scripting engine?",
+  "question": "I see AddText but there is no AddTextObject.\n\n\nIs this possible in Rhino 6 WIP? Where can I download V6?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef DoSomething():\n    '''creates a 3d text object'''\n    te = Rhino.Geometry.TextEntity()\n    te.Plane = Rhino.Geometry.Plane.WorldXY\n    te.Text = \"Rhino rocks !\"\n    te.TextHeight = 10.0\n    te.Justification = Rhino.Geometry.TextJustification.BottomLeft\n    te.FontIndex = scriptcontext.doc.Fonts.FindOrCreate(\"Arial\", False, False)\n\n    curves = te.Explode()\n    arr_breps = Rhino.Geometry.Brep.CreatePlanarBreps(curves)\n    if arr_breps.Count == 0: return\n    \n    start_pt = te.Plane.Origin\n    end_pt = te.Plane.ZAxis\n    height = 1.5\n    xform = Rhino.Geometry.Transform.Scale(te.Plane, height, height, height)\n    end_pt.Transform(xform)\n    line = Rhino.Geometry.Line(start_pt, end_pt)\n    path = line.ToNurbsCurve()\n    \n    for brep in arr_breps:\n        new_brep = brep.Faces[0].CreateExtrusion(path, True)\n        scriptcontext.doc.Objects.AddBrep(new_brep)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1297
+}

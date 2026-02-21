@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-an-ellipsoid-from-two-ellipses/46765",
+  "topic_id": 46765,
+  "title": "How to create an ellipsoid from two ellipses?",
+  "question": "I need to create a double-ellipse ellipsoid (ellipses) in two planes. As shown in the picture below, the curve “b” is a perfect circle while the curve “B” is an ellipse. That’s the easy one to create since the  ellipsoid can be made using the \nRevolve\n command.\n\n\nBut the curves “a” and “A” are \nboth\n ellipses, so now it gets tricky (the ellipse form of “a” is not so clear in the picture, but it is an ellipse). \nQ: So how can I make an ellipsoid out of these two curves?\n (\na\n and \nA\n)\n\n\n\n\nbild.png\n716×478 135 KB\n\n\n\n\nAddendum: Although not part of the basic problem of creating the ellipsoid, I can mention that the ellipsoid will be adjusted many times before finding the final shape. I will have to adjust two radiuses for each plane (a1, a2 in the XY plane and A1, A2 in the YZ plane) several times before arriving at the final form (I will iteratively try to fit it against some other objects until I find a “best fit”).\n\n\n// Rolf",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n    \ndef AddEllipsoid(plane, size_x, size_y, size_z):\n    '''creates an ellipsoid in a plane'''\n    surface = Rhino.Geometry.Sphere(plane, 1.0).ToNurbsSurface()\n    xform = Rhino.Geometry.Transform.Scale(plane, size_x, size_y, size_z)\n    surface.Transform(xform)\n    return surface\n    \ndef RunCommand():\n    plane = Rhino.Geometry.Plane.WorldXY\n    size_x, size_y, size_z = 13.0, 8.0, 18.0\n    ellipsoid = AddEllipsoid(plane, size_x, size_y, size_z)\n    if ellipsoid: \n        scriptcontext.doc.Objects.Add(ellipsoid)\n        scriptcontext.doc.Views.Redraw()\n        \nRunCommand()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 15,
+  "views": 5712
+}

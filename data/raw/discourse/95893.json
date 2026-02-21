@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cycle-through-layers-and-namedviews-using-python-rhinoscriptsyntax/95893",
+  "topic_id": 95893,
+  "title": "Cycle through layers and namedviews using python rhinoscriptsyntax",
+  "question": "I am an architect, and often I have to do a similar task: I design multiple options for a project, each on a layer, in the following tree organisation:\n\nOPTIONS\n\n– 01\n\n– 02\n\n– 03\n\n\nI then create a couple of named views. I will then create screen captures for each option, using each namedview. Manually, this is quite a laborious and error prone process, and I think it would benefit from being automate with a little script.\n\n\nSomehow, if i loop over 1 single option and create a screenshot for each namedview, it works.\n\n\n(For instance with this code):\n\n\nimport rhinoscriptsyntax as rs\n\nviews = rs.NamedViews()\n\ndef make_capture(option, view):\n    print(view)\n    rs.RestoreNamedView(view, view=None, restore_bitmap=False)    \n    comm=\"\"\" -_ViewCaptureToFile C:\\\\Users\\\\vincentk\\\\Desktop\\\\200203_Massing_Study\\\\View{}_Option{}.png \n    _Width=1200 _Height=900 _Scale=1 \n    _DrawGrid=_No _DrawWorldAxes=_No _DrawCPlaneAxes=_No \n    _TransparentBackground=_No _Enter\"\"\".format(option, view)\n    rs.Command(comm,False)\n\nfor view in views:\n    print(view)\n    make_capture(1, view)\n    rs.RestoreNamedView(view, view=None, restore_bitmap=True)\n\n\n\nBut when I create the nested loop with looping over each option, and then looping over each namedview within them, the second loop is ignored and it is only creating a screenshot for the first named view of each option.\n\n\nimport rhinoscriptsyntax as rs\n\nviews = rs.NamedViews()\n\ndef make_capture(option, view):\n    rs.RestoreNamedView(view, view=None, restore_bitmap=False)\n    comm=\"\"\" -_ViewCaptureToFile C:\\\\Users\\\\vincentk\\\\Desktop\\\\200203_Massing_Study\\\\View{}_Option{}.png \n    _Width=1200 _Height=900 _Scale=1 \n    _DrawGrid=_No _DrawWorldAxes=_No _DrawCPlaneAxes=_No \n    _TransparentBackground=_No _Enter\"\"\".format(option, view)\n    rs.Command(comm,False)\n\nlayers = rs.LayerNames()\nfor layer in layers:\n    if 'OPTIONS::' in layer:\n        print(layer)\n        rs.LayerVisible(layer, visible=True, forcevisible_or_donotpersist=False)\n        fo...",
+  "code_blocks": [
+    {
+      "code": "rs.EnableRedraw(True)\n...\nrs.EnableRedraw(False)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nviews = rs.NamedViews()\n\ndef make_capture(option, view):\n    print(view)\n    rs.RestoreNamedView(view, view=None, restore_bitmap=False)    \n    comm=\"\"\" -_ViewCaptureToFile C:\\\\Users\\\\vincentk\\\\Desktop\\\\200203_Massing_Study\\\\View{}_Option{}.png \n    _Width=1200 _Height=900 _Scale=1 \n    _DrawGrid=_No _DrawWorldAxes=_No _DrawCPlaneAxes=_No \n    _TransparentBackground=_No _Enter\"\"\".format(option, view)\n    rs.Command(comm,False)\n\nfor view in views:\n    print(view)\n    make_capture(1, view)\n    rs.RestoreNamedView(view, view=None, restore_bitmap=True)",
+      "language": "python",
+      "author": "vincent.konate",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nviews = rs.NamedViews()\n\ndef make_capture(option, view):\n    rs.RestoreNamedView(view, view=None, restore_bitmap=False)\n    comm=\"\"\" -_ViewCaptureToFile C:\\\\Users\\\\vincentk\\\\Desktop\\\\200203_Massing_Study\\\\View{}_Option{}.png \n    _Width=1200 _Height=900 _Scale=1 \n    _DrawGrid=_No _DrawWorldAxes=_No _DrawCPlaneAxes=_No \n    _TransparentBackground=_No _Enter\"\"\".format(option, view)\n    rs.Command(comm,False)\n\nlayers = rs.LayerNames()\nfor layer in layers:\n    if 'OPTIONS::' in layer:\n        print(layer)\n        rs.LayerVisible(layer, visible=True, forcevisible_or_donotpersist=False)\n        for view in views:\n            print(view)\n            make_capture(layer, view)\n        rs.LayerVisible(layer, visible=False, forcevisible_or_donotpersist=False)",
+      "language": "python",
+      "author": "vincent.konate",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 614
+}

@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/displaypipeline-conduit-objects/155859",
+  "topic_id": 155859,
+  "title": "DisplayPipeline/Conduit Objects",
+  "question": "Hi All,\n\n\nI don’t know if there is already a script for that need,\n\nin practice with Py/RCommon I create points/curves objects etc\n\nhow could I before creating them, see them in preview and then create them\n\n\nThanks. . .",
+  "code_blocks": [
+    {
+      "code": "public class CsDrawBrepConduit : Rhino.Display.DisplayConduit\n        {\n            public Rhino.Geometry.Brep Brep { get; set; }\n\n            protected override void CalculateBoundingBox(Rhino.Display.CalculateBoundingBoxEventArgs e)\n            {\n                if (null != Brep)\n                {\n                    e.IncludeBoundingBox(Brep.GetBoundingBox(false));\n                }\n            }\n\n            protected override void PostDrawObjects(Rhino.Display.DrawEventArgs e)\n            {\n                if (null != Brep)\n                {\n                    Rhino.Display.DisplayMaterial material = new Rhino.Display.DisplayMaterial();\n                    material.IsTwoSided = true;\n                    material.Diffuse = System.Drawing.Color.DeepPink;\n                    material.BackDiffuse = System.Drawing.Color.HotPink;\n                    e.Display.EnableLighting(true);\n                    e.Display.DrawBrepShaded(Brep, material);\n                    e.Display.DrawBrepWires(Brep, System.Drawing.Color.Black);\n                }\n            }\n        }",
+      "language": "csharp",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 811
+}

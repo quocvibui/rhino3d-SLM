@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/monitor-mouse-event/4481",
+  "topic_id": 4481,
+  "title": "Monitor mouse event",
+  "question": "Hi everyone:\n\nI want to create a piece a python script to monitor mouse events, like object selection, object modified. And then call different function according to different event.\n\nIs there any sample script to take reference?\n\nThanks in advance!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef MyAddObjectEvent(sender, e):\n    print \"Object Added, Id =\", e.ObjectId\n\n\n#check to see if the callback is already assigned\nif scriptcontext.sticky.has_key(\"MyAddObjectEvent\"):\n    print \"removing the callback\"\n    func = scriptcontext.sticky[\"MyAddObjectEvent\"]\n    Rhino.RhinoDoc.AddRhinoObject -= func\n    scriptcontext.sticky.Remove(\"MyAddObjectEvent\")\nelse:\n    print \"adding the callback\"\n    func = MyAddObjectEvent\n    scriptcontext.sticky[\"MyAddObjectEvent\"] = func\n    Rhino.RhinoDoc.AddRhinoObject += func",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef MySelectObjectEvent(sender, e):\n    print \"Object(s) selected =\", e.Selected\n    \ndef DoSomething():\n    select_event_name = \"MySelectObjectEvent\"\n    \n    if scriptcontext.sticky.has_key(select_event_name):\n        print \"removing callback\"\n        func = scriptcontext.sticky[select_event_name]\n        Rhino.RhinoDoc.SelectObjects -= func\n        #Rhino.RhinoDoc.DeselectObjects -= func\n        scriptcontext.sticky.Remove(select_event_name)\n    else:\n        print \"adding callback\"\n        func = eval(select_event_name)\n        scriptcontext.sticky[select_event_name] = func\n        Rhino.RhinoDoc.SelectObjects += func\n        #Rhino.RhinoDoc.DeselectObjects += func\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 24,
+  "views": 7216
+}

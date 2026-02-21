@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/item-list-tree-access-in-ghpython/108968",
+  "topic_id": 108968,
+  "title": "\"Item;List;Tree\" Access in GhPython",
+  "question": "Hello\n\nIs there a way to change between \nItem;List;Tree … Access\n from GhPython?\n\n\nimage\n609×585 31.2 KB",
+  "code_blocks": [
+    {
+      "code": "from Grasshopper.Kernel import GH_ParamAccess\nif x == 0:\n    access = GH_ParamAccess.item\nif x == 1:\n    access = GH_ParamAccess.list\nif x == 2:\n    access = GH_ParamAccess.tree\nif (access != ghenv.Component.Params.Input[1].Access):\n    ghenv.Component.Params.Input[1].Access = access\n    ghenv.Component.ExpireSolution(True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "from Grasshopper.Kernel import GH_ParamAccess\n\naccess = [GH_ParamAccess.item,GH_ParamAccess.list,GH_ParamAccess.tree]\n\nif access[x] != ghenv.Component.Params.Input[1].Access:\n    ghenv.Component.Params.Input[1].Access = access[x]\n    ghenv.Component.ExpireSolution(True)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"bogdan\"\n__version__ = \"2020.09.20\"\n\nimport rhinoscriptsyntax as rs\nfrom itertools import groupby\nfrom itertools import chain\nimport ghpythonlib.treehelpers as th\n\n\n\ntotal = 0\nlistChunks = []\nsecond_list =y\n\nfor j in range(len(second_list)):\n    chunk_mylist = x[total:total+second_list[j]]\n    listChunks.append(chunk_mylist)\n    total += second_list[j]\n#After running this, listChunks is a list containing sublists with the lengths found in second_list.\n\n#print listChunks\n\nendlist =[]\nfor j in range(len(listChunks)):\n    lists2 = [list(listChunks[j]) for i, listChunks[j] in groupby(listChunks[j])]\n    print lists2\n    endlist.append(lists2)\n\n\n\n#a= th.list_to_tree(listChunks)\nb= th.list_to_tree(endlist)",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 2260
+}

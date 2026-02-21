@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-ghpython-script-array-str/144673",
+  "topic_id": 144673,
+  "title": "Grasshopper GhPython Script - Array[str]",
+  "question": "Hello\n\nI’m working on a GhPython Script which uses an external API\n\nThe function I’m using is asking for a parameter in the form of Array[str]. How do I define a variable with this type?\n\n\nHere is the Runtime Error:\n\n\nRuntime error (ArgumentTypeException): expected Array[str], got list\n\n\nHere is the Help on the function i’m using:\n\n\nHelp on method-descriptor ModalParticipatingMassRatios\n\n\nModalParticipatingMassRatios(…)\n\n\nModalParticipatingMassRatios(self: cAnalysisResults, NumberResults: int, LoadCase: Array[str], StepType: Array[str], StepNum: Array[float], Period: Array[float], UX: Array[float], UY: Array[float], UZ: Array[float], SumUX: Array[float], SumUY: Array[float], SumUZ: Array[float], RX: Array[float], RY: Array[float], RZ: Array[float], SumRX: Array[float], SumRY: Array[float], SumRZ: Array[float]) → (int, int, Array[str], Array[str], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float], Array[float])\n\n\nAnd here is how I’m defining the variables at the moment:\n\n\nNumberResults = 0\n\nLoadCase  = []\n\nStepType  = []\n\nStepNum  = []\n\nPeriod = []\n\netc…\n\n\nHere is how the function is called(this line produces the Runtime error that i’m trying to solve)\n\n\nret = ETABSmodel.Results.ModalParticipatingMassRatios(NumberResults, LoadCase, StepType, StepNum, Period, UX, UY, UZ, SumUX, SumUY, SumUZ, RX, RY, RZ, SumRX, SumRY, SumRZ)\n\n\nAnd i’ve attached the .gh file\n\n\nETABStest.gh\n (4.3 KB)\n\n\nThanks in advance",
+  "code_blocks": [
+    {
+      "code": "from System import Array\nimport Rhino\n\n    p0 = Rhino.Geometry.Point3d(0,0,0)\n    p1 = Rhino.Geometry.Point3d(5,0,0)\n    p2 = Rhino.Geometry.Point3d(5,5,0)\n    p3 = Rhino.Geometry.Point3d(0,5,0)\n    pt_list = [p0, p1, p2, p3]\n    pt_array = Array[Rhino.Geometry.Point3d](pt_list)  <<<<< This is the bit you need - tell it what kind of thing is in the list, in this case a Point3d, then the list.",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "pt_array = Array.CreateInstance(Rhino.Geometry.Point3d, 4)\npt_array(0) = Rhino.Geometry.Point3d(0,0,0)\npt_array(1) = Rhino.Geometry.Point3d(5,0,0)\npt_array(2) = Rhino.Geometry.Point3d(5,5,0)\npt_array(3) = Rhino.Geometry.Point3d(0,5,0)",
+      "language": "unknown",
+      "author": "TomTom",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 1198
+}

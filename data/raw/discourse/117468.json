@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/draw-point-with-rhino-display-displaypipeline-drawdot-in-rhinopython/117468",
+  "topic_id": 117468,
+  "title": "Draw point with Rhino.Display.DisplayPipeline.DrawDot() in RhinoPython?",
+  "question": "Hi,\n\n\nDoes somebody have an example on how to draw a \nRhino.Geometry.Point3d()\n with \nRhino.Display.DisplayPipeline.DrawDot()\n in RhinoPython?\n\n\nAm I right in the assumption that this method just draws a dot with a shader?\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\nclass MyConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, points):\n        self.Points = points\n    \n    def DrawForeground(self, e):\n        for index, pt in enumerate(self.Points):\n            e.Display.DrawDot(pt, str(index))\n\ndef RunScript():\n    curve = Rhino.Geometry.Circle(50.0).ToNurbsCurve()\n    points = [curve.PointAt(t) for t in curve.DivideByCount(10, True)]\n    conduit = MyConduit(points)\n    conduit.Enabled = True\n    scriptcontext.doc.Views.Redraw()\n    prompt = rs.GetString(\"Press Enter when done\")\n    conduit.Enabled = False\n    \nRunScript()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1053
+}

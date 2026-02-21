@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-maintain-source-layers-in-a-make2d-script-hiddenlinedrawing/153690",
+  "topic_id": 153690,
+  "title": "How to \"Maintain Source Layers\" in a Make2D script - HiddenLineDrawing",
+  "question": "I’m trying to write a batch Make2D script for all detail viewports on selected layouts that maintains object layers. Just noticed that \nHiddenLineDrawingParameters.AddGeometry\n method takes objects’ geometry as an argument and not the rhino objects themselves, which makes me think that layer information (and other object properties) isn’t included anywhere in the resulting HiddenLineDrawing object  - in other words it’s lost.\n\n\nHowever, in Rhino app there is a “maintain source layers” option. Is there any way to do the same via a python script?\n\n\n\n\nWIP:\n\n\nfrom Rhino.DocObjects import ObjectType\nfrom Rhino.Geometry import Point2d, HiddenLineDrawing, HiddenLineDrawingParameters\nfrom Rhino.Display import RhinoPageView\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nselected_page_names = rs.MultiListBox([i.PageName for i in sc.doc.Views.GetPageViews()])\nselected_pages = [i for i in sc.doc.Views.GetPageViews() if i.PageName in selected_page_names]\n\nfor selected_page in selected_pages:\n    for detail_view in RhinoPageView.GetDetailViews(selected_page):\n        \n        first_corner = Point2d(detail_view.Viewport.Bounds.Left, detail_view.Viewport.Bounds.Bottom)\n        second_corner = Point2d(detail_view.Viewport.Bounds.Right, detail_view.Viewport.Bounds.Top)\n        \n        detail_view.IsActive = True\n        \n        rhino_objects = sc.doc.Objects.FindByCrossingWindowRegion(detail_view.Viewport, \n                                                                first_corner, second_corner, \n                                                                True, ObjectType.AnyObject)\n        \n        parameters = HiddenLineDrawingParameters()\n        parameters.AbsoluteTolerance = sc.doc.ModelAbsoluteTolerance\n        parameters.Flatten = True\n        parameters.IncludeHiddenCurves = False\n        parameters.IncludeTangentEdges = False\n        parameters.IncludeTangentSeams = False\n        parameters.SetViewport(detail_view.Viewport)\n        for obj in rhino_objec...",
+  "code_blocks": [
+    {
+      "code": "from Rhino.DocObjects import ObjectType\nfrom Rhino.Geometry import Point2d, HiddenLineDrawing, HiddenLineDrawingParameters\nfrom Rhino.Display import RhinoPageView\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nselected_page_names = rs.MultiListBox([i.PageName for i in sc.doc.Views.GetPageViews()])\nselected_pages = [i for i in sc.doc.Views.GetPageViews() if i.PageName in selected_page_names]\n\nfor selected_page in selected_pages:\n    for detail_view in RhinoPageView.GetDetailViews(selected_page):\n        \n        first_corner = Point2d(detail_view.Viewport.Bounds.Left, detail_view.Viewport.Bounds.Bottom)\n        second_corner = Point2d(detail_view.Viewport.Bounds.Right, detail_view.Viewport.Bounds.Top)\n        \n        detail_view.IsActive = True\n        \n        rhino_objects = sc.doc.Objects.FindByCrossingWindowRegion(detail_view.Viewport, \n                                                                first_corner, second_corner, \n                                                                True, ObjectType.AnyObject)\n        \n        parameters = HiddenLineDrawingParameters()\n        parameters.AbsoluteTolerance = sc.doc.ModelAbsoluteTolerance\n        parameters.Flatten = True\n        parameters.IncludeHiddenCurves = False\n        parameters.IncludeTangentEdges = False\n        parameters.IncludeTangentSeams = False\n        parameters.SetViewport(detail_view.Viewport)\n        for obj in rhino_objects:\n            parameters.AddGeometry(obj.Geometry, None)\n        \n        hld = HiddenLineDrawing.Compute(parameters, True)\n        \n        for hld_curve in hld.Segments:\n            sc.doc.Objects.AddCurve(#WIP here...)",
+      "language": "python",
+      "author": "Daniel_Krajnik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 704
+}

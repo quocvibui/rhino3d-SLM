@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-add-material-to-an-object-if-i-know-the-material-index/122739",
+  "topic_id": 122739,
+  "title": "How to add material to an object if I know the material index?",
+  "question": "Hi there,\n\n\nI would like to add a material to an object by knowing the material index however I could not find the method. Only method I can use is the match material, but what if the object is being deleted before the I use it.",
+  "code_blocks": [
+    {
+      "code": "var sphere = new Sphere(Plane.WorldXY, 5);\nvar attributes = doc.CreateDefaultAttributes();\nattributes.MaterialSource = ObjectMaterialSource.MaterialFromObject;\nattributes.MaterialIndex = material_index; //  your index...\ndoc.Objects.AddSphere(sphere, attributes);\ndoc.Views.Redraw();",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Drawing\nimport rhinoscriptsyntax as rs\n\ndef ChangeAttr():\n    obj = rs.GetObject ( message=None, filter=0, preselect=False, select=False, custom_filter=None, subobjects=False)\n    matIndex = rs.ObjectMaterialIndex (obj)\n    rs.DeleteObject(obj)\n    objMat = rs.GetObject ( message=None, filter=0, preselect=False, select=False, custom_filter=None, subobjects=False)\n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.MaterialIndex = matIndex\n    attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n    #attrChange = Rhino.DocObjects.Tables.ObjectTable.ModifyAttributes(objMat, attr, True)\n    attrChange = scriptcontext.doc.Objects.ModifyAttributes(objMat, attr, True)\n    scriptcontext.doc.Views.Redraw();",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def ChangeMaterial(matIndex, ObjectID):\n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.MaterialIndex = matIndex\n    attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n    attrChange = scriptcontext.doc.Objects.ModifyAttributes(ObjectID, attr, True)\n    scriptcontext.doc.Views.Redraw();",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 719
+}

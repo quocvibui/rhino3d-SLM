@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-a-hatch-by-pattern-python-rhinocommon/29762",
+  "topic_id": 29762,
+  "title": "Select a Hatch by Pattern - Python & RhinoCommon",
+  "question": "Hey Guys\n\n\nto improve my scripting/coding skills (I’m a programming-beginner ^^), I try to develop basic scripts to make my daily rhinowork faster.\n\n\nCurrently, I’m trying to develop a kind of “Select a Hatch by Pattern” Script, that selects all hatches with the same pattern in Python.\n\n\nI get stuck at the point, where my script has to select the objects that are stored in a list.\n\nI’ve tried to use RhinoCommon (\nRhinoCommon Documentation\n for this issue, but i got this error:\n\n“Message: expected ObjectTable, got Guid”\n\n\n(As far as I know, I did everything, that the common-documentation asks for^^)\n\nIt sounds like I missunderstood some basic RhinoCommon/Python stuff ^^\n\n\nAny Ideas to fix this?\n\n\nMy Python Code so far:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System\n\nhatchbypattern = []\nhatch = rs.GetObject(\"Select Hatch to select by Pattern\", rs.filter.hatch, True, True)\n\nif hatch:\n    hatchpattern = rs.HatchPattern(hatch)\n    print hatchpattern\n\nallhatches = rs.ObjectsByType(65536)\nfor i in allhatches:\n    if rs.HatchPattern(i) == hatchpattern:\n        hatchbypattern.append(i)\n\nfor j in hatchbypattern:\n    Rhino.DocObjects.Tables.ObjectTable.Select(j, True)\n\n\n\nThanks,\n\nRivex",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef SelByHatchPattern():\n    \n    msg = \"Select Hatch to select by Pattern\"\n    hatch_id = rs.GetObject(msg, rs.filter.hatch, True, True)\n    if not hatch_id: return\n    \n    hatchpattern = rs.HatchPattern(hatch_id)\n    allhatches = rs.ObjectsByType(rs.filter.hatch)\n    \n    results = []\n    for hatch in allhatches:\n        if rs.HatchPattern(hatch) == hatchpattern:\n            if rs.IsObjectSelectable(hatch):\n                results.append(hatch)\n    \n    if len(results) > 0: rs.SelectObjects(results)\n     \nif __name__==\"__main__\":\n    SelByHatchPattern()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "for hatch in allhatches:\n        if rs.HatchPattern(hatch) == hatchpattern:\n            if rs.IsObjectSelectable(hatch):\n                scriptcontext.doc.Objects.Select(hatch, True, True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System\n\nhatchbypattern = []\nhatch = rs.GetObject(\"Select Hatch to select by Pattern\", rs.filter.hatch, True, True)\n\nif hatch:\n    hatchpattern = rs.HatchPattern(hatch)\n    print hatchpattern\n\nallhatches = rs.ObjectsByType(65536)\nfor i in allhatches:\n    if rs.HatchPattern(i) == hatchpattern:\n        hatchbypattern.append(i)\n\nfor j in hatchbypattern:\n    Rhino.DocObjects.Tables.ObjectTable.Select(j, True)",
+      "language": "python",
+      "author": "rivex",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 2042
+}

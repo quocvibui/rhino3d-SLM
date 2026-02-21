@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-with-solving-trig-problem/35658",
+  "topic_id": 35658,
+  "title": "Help with solving Trig problem",
+  "question": "I want to script drawing the blue teardrop in the image below. Before going down my usual brute force and ignorance method of solving this I wonder if anyone’s got any bright ideas. What I want to do is pick the 2 red dots and be able to generate a tangential lead-in for a CNC toolpath.\n\n\nI guess I can use CurveTangent to get to the centre of the arc then construct the rest from there.\n\n\n\n\nPasted image\n740×406 2.94 KB\n\n\n\n\nThanks Mark",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport math\n\ndef main():\n  ra = rs.GetReal( 'Radius ?' )\n  cu = rs.GetObject( 'Curve ?' )\n  p1 = rs.GetPoint( 'Point on curve ?' )\n  p2 = rs.GetPoint( 'Other point ?' )\n  uu = rs.CurveClosestPoint( cu, p1 )\n  p1 = rs.EvaluateCurve( cu, uu )\n  # 'vertical' axis: plane-with-curve normal or Z axis\n  kk = rs.CurveNormal( cu )\n  if not kk:\n    kk = [ 0, 0, 1 ]\n  ii = rs.CurveTangent( cu, uu )\n  # curve normal\n  jj = rs.VectorCrossProduct( ii, kk )\n  jj = rs.VectorUnitize( jj )\n  # possible center points\n  c1 = rs.VectorAdd( p1, rs.VectorScale( jj, ra ) )\n  c2 = rs.VectorSubtract( p1, rs.VectorScale( jj, ra ) )\n  # pick the center point on the right side\n  if rs.Distance( p2, c2 ) < rs.Distance( p2, c1 ):\n    c1 = c2\n  di = rs.Distance( p1, p2 )\n  degs = math.degrees( math.asin( ra / di ) )\n  vec = rs.VectorUnitize( rs.VectorCreate( c1, p2 ) )\n  vec1 = rs.VectorRotate( vec, -90 - degs, kk )\n  # joint point between line and arc ( 1 )\n  t1 = rs.VectorAdd( c1, rs.VectorScale( vec1, ra ) )\n  vec2 = rs.VectorRotate( vec, 90 + degs, kk )\n  # joint point between line and arc ( 2 )\n  t2 = rs.VectorAdd( c1, rs.VectorScale( vec2, ra ) )\n  # aux point do draw the arc\n  au = rs.VectorAdd( c1, rs.VectorScale( vec, ra ) )\n  rs.AddLine( p2, t1 )\n  rs.AddLine( p2, t2 )\n  rs.AddLine( p2, c1 )\n  rs.AddLine( p1, c1 )\n  rs.AddArc3Pt( t1, t2, au )\n  rs.AddTextDot( 'C1 X%.3fY%.3fZ%.3f' % ( c1.X, c1.Y, c1.Z ), c1 )\n  rs.AddTextDot( 'T1 X%.3fY%.3fZ%.3f' % ( t1.X, t1.Y, t1.Z ), t1 )\n  rs.AddTextDot( 'T2 X%.3fY%.3fZ%.3f' % ( t2.X, t2.Y, t2.Z ), t2 )\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 721
+}

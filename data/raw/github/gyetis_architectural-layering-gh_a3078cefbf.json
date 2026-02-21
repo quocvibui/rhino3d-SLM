@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/gyetis/architectural-layering-gh/blob/b6d9dace2766073a42ec35136d2fe7db72024dc0/ml-models/decision_tree.py",
+  "repo": "gyetis/architectural-layering-gh",
+  "repo_stars": 7,
+  "repo_description": "Segmentation of architectural elements in a 3D model with Supervised Learning in Grasshopper and Rhinoceros",
+  "license": "unknown",
+  "filepath": "ml-models/decision_tree.py",
+  "instruction": "Decision tree",
+  "code": "__author__=\"GizemYetis, OzanYetkin, KongpyungMoon & Ozkan Kilic\"\n__mail__=\"yetis.gizem@metu.edu.tr, ozan.yetkin@metu.edu.tr, kpmoon@gmail.com & okilic@ybu.edu.tr\"\n__institution__=\"Middle East Technical University, Yildirim Beyazit University\"\n\nfrom Grasshopper import DataTree\nimport scriptcontext\nnp = scriptcontext.sticky['numpy']\nsk = scriptcontext.sticky['sklearn']\n\ndata_list=[list(i) for i in training_set.Branches]\nx_train=[]\ny_train=[]\nfor d in range(data_list.Count): \n    x_train.append(data_list[d][:len(training_set.Branches[d])-1])\n    y_train.append(data_list[d][len(training_set.Branches[d])-1:])\n\ntest_list=[list(i) for i in test_set.Branches]\nx_test=[]\ny_test=[]\nfor d in range(test_list.Count): \n    x_test.append(test_list[d][:len(test_set.Branches[d])-1])\n    y_test.append(test_list[d][len(test_set.Branches[d])-1:])\nfor row in x_test:\n    for k in (0,1,2):\n        row[k] = float(row[k])\n\nskpp = scriptcontext.sticky['sklearn.preprocessing']\nlabelencoder_y = skpp.LabelEncoder()\ny_train = labelencoder_y.fit_transform(y_train)\ny_test = labelencoder_y.fit_transform(y_test)\n\n\"\"\"sc = skpp.StandardScaler()\nx_train = sc.fit_transform(x_train)\nx_test = sc.transform(x_test)\"\"\"\n\nsklm=scriptcontext.sticky['sklearn.tree']\nclassifier = sklm.DecisionTreeClassifier(criterion = 'entropy', random_state = None)\nclassifier.fit(x_train, y_train)\ny_pred = classifier.predict(x_test)\n\nskm=scriptcontext.sticky['sklearn.metrics']\ncm = skm.confusion_matrix(y_test, y_pred)\n\nyp=np.ndarray.tolist(labelencoder_y.inverse_transform(y_pred))\nyt=np.ndarray.tolist(labelencoder_y.inverse_transform(y_test))\n\nprint(yp)\nprint(yt)\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

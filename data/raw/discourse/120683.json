@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/exporting-to-stp-through-python-rhino-7/120683",
+  "topic_id": 120683,
+  "title": "Exporting to STP through python rhino 7",
+  "question": "I am having a an issue in exporting a closed polysurfaces as STP file through python.\n\nthe script was working in previous rhino but now in rhino 7 exports only empty STP files (0 kb)\n\n\nSnip of the code:\n\n\n    rs.SelectObject(nowObj)\n    print nowObj\n    nowName = str(nowLayer)\n    nowName = nowName.replace(\":\", \"-\")\n    nowName = nowName.replace(\" \", \"_\")\n    exportPath = filePath + nowName + \".stp\"\n\n    Rhino.RhinoApp.RunScript(\"-_Export \" + str(exportPath)+ \" Schema=AP214AutomotiveDesign \" + \" ExportParameterSpaceCurves=No\" + \" LetImportingApplicationSetColorForBlackObjects=Yes\" +\" Enter\", False)\n        Rhino.RhinoApp.RunScript(\"-_SelNone\", False)\n        rs.DeleteObject(nowObj)\n\n\n\nprint output for example is (are closed object polysurfaces) :\n\nff6af33c-bdf2-46cd-bb4e-d6ecbab7a080\n\n33cde126-d2ba-4b76-b6a7-07984b5b81fc\n\n\nso they are objects but they don’t get to be exported in the STL file, any idea why?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nobj = rs.GetObject(\"object\", 8+16)\n\n\nRhino.RhinoApp.RunScript(\"-_SelNone\", False)\nfilePath = r'C:\\Users\\firstname.secondname\\Desktop'\nfileName = '/testobj.stp'\nexportPath = filePath+fileName\nrs.SelectObject(obj)\n\nRhino.RhinoApp.RunScript(\"-_Export \" + str(exportPath)+ \" Schema=AP214AutomotiveDesign \" + \" ExportParameterSpaceCurves=No\" + \" LetImportingApplicationSetColorForBlackObjects=Yes\" +\" Enter\", False)\nRhino.RhinoApp.RunScript(\"-_SelNone\", False)",
+      "language": "python",
+      "author": "revink",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\n\ndef test_export_step():\n    \n    filter = rs.filter.surface + rs.filter.polysurface\n    object_id = rs.GetObject('Select surface or polysurface to export', filter, False, True)\n    if not object_id:\n        return\n    \n    path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop)\n    filename = System.IO.Path.Combine(path, \"test_export_step.stp\");\n\n    # Surround string with double-quotes (in case it contains spaces)\n    filename = chr(34)+ filename + chr(34)\n    \n    script = '_-Export ' + filename + ' _Enter'\n    rs.Command(script, False)\n\nif __name__ == \"__main__\":\n    test_export_step()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "rs.SelectObject(nowObj)\n    print nowObj\n    nowName = str(nowLayer)\n    nowName = nowName.replace(\":\", \"-\")\n    nowName = nowName.replace(\" \", \"_\")\n    exportPath = filePath + nowName + \".stp\"\n\n    Rhino.RhinoApp.RunScript(\"-_Export \" + str(exportPath)+ \" Schema=AP214AutomotiveDesign \" + \" ExportParameterSpaceCurves=No\" + \" LetImportingApplicationSetColorForBlackObjects=Yes\" +\" Enter\", False)\n        Rhino.RhinoApp.RunScript(\"-_SelNone\", False)\n        rs.DeleteObject(nowObj)",
+      "language": "python",
+      "author": "revink",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1157
+}

@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/drawforeground-python2-python3/166424",
+  "topic_id": 166424,
+  "title": "DrawForeground - Python2 -> Python3",
+  "question": "Hello,\n\n\nI’m attempting to update some of my IronPython components to the new script component and Python 3 language and I’m stuck on the event handlers and I don’t understand what it’s expecting in terms of arguments.\n\n\nI found this template code related to DrawWires:\n\n\n\"\"\"Grasshopper Script Instance (With Draw Methods)\"\"\"\nimport System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        return x + y\n\n    @property\n    def ClippingBox(self):\n        return Rhino.Geometry.BoundingBox.Empty\n\n    def DrawViewportWires(self, args):\n      pass\n\n    def DrawViewportMeshes(self, args):\n      pass\n\n\n\nHere’s my working IronPython code:\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nimport System\nimport Rhino as rh\nimport Rhino.Geometry as rg\n\nclass MyComponent(component):\n    \n    def RunScript(self, P, F, S, D, V):\n\n        if S == None: S = 20\n        if D == None: D = True\n        if V == None: V = False\n        \n        self.F = F\n        self.P = P\n        self.D = D  # Store the value of D as an instance variable\n        \n        if self.F:\n            bitmap = System.Drawing.Bitmap.FromFile(F)\n            self.B = rh.Display.DisplayBitmap(bitmap)\n\n        self.S = S\n        self.size = V\n        \n        if self.P and len(P) > 0:\n            bb = rg.BoundingBox(P)\n            self.bb = bb\n        else:\n            self.bb = rh.Geometry.BoundingBox.Empty\n\n    def DrawForeground(self,sender, arg):\n        if self.D:  # If D is True, draw the sprite in the foreground\n            if self.P and self.F:\n                items = rh.Display.DisplayBitmapDrawList()\n                items.SetPoints(self.P)\n                arg.Display.DrawSprites(self.B, items, self.S, self.size)\n\n    def DrawViewportWires(self, arg):\n        if not self.D:  # If D is False, draw the sprite as before using DrawViewportWires\n            if self.P and self.F:\n      ...",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Grasshopper Script Instance (With Draw Methods)\"\"\"\nimport System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        return x + y\n\n    @property\n    def ClippingBox(self):\n        return Rhino.Geometry.BoundingBox.Empty\n\n    def DrawViewportWires(self, args):\n      pass\n\n    def DrawViewportMeshes(self, args):\n      pass",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\n\nimport System\nimport Rhino as rh\nimport Rhino.Geometry as rg\n\nclass MyComponent(component):\n    \n    def RunScript(self, P, F, S, D, V):\n\n        if S == None: S = 20\n        if D == None: D = True\n        if V == None: V = False\n        \n        self.F = F\n        self.P = P\n        self.D = D  # Store the value of D as an instance variable\n        \n        if self.F:\n            bitmap = System.Drawing.Bitmap.FromFile(F)\n            self.B = rh.Display.DisplayBitmap(bitmap)\n\n        self.S = S\n        self.size = V\n        \n        if self.P and len(P) > 0:\n            bb = rg.BoundingBox(P)\n            self.bb = bb\n        else:\n            self.bb = rh.Geometry.BoundingBox.Empty\n\n    def DrawForeground(self,sender, arg):\n        if self.D:  # If D is True, draw the sprite in the foreground\n            if self.P and self.F:\n                items = rh.Display.DisplayBitmapDrawList()\n                items.SetPoints(self.P)\n                arg.Display.DrawSprites(self.B, items, self.S, self.size)\n\n    def DrawViewportWires(self, arg):\n        if not self.D:  # If D is False, draw the sprite as before using DrawViewportWires\n            if self.P and self.F:\n                items = rh.Display.DisplayBitmapDrawList()\n                items.SetPoints(self.P)\n                arg.Display.DrawSprites(self.B, items, self.S, self.size)\n    \n    def get_ClippingBox(self):\n        return self.bb\n    \n    def IsPreviewCapable(self):\n        return True\n\n    def __exit__(self):\n        rh.Display.DisplayPipeline.DrawForeground -= self.DrawForeground\n\n    def __enter__(self):\n        rh.Display.DisplayPipeline.DrawForeground += self.DrawForeground",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "#from ghpythonlib.componentbase import executingcomponent as component\n\nimport System\nimport Rhino as rh\nimport Rhino.Geometry as rg\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    \n    def RunScript(self, P, F, S, D, V):\n\n        if S == None: S = 20\n        if D == None: D = True\n        if V == None: V = False\n        \n        self.F = F\n        self.P = P\n        self.D = D  # Store the value of D as an instance variable\n        \n        if self.F:\n            bitmap = System.Drawing.Bitmap.FromFile(F)\n            self.B = rh.Display.DisplayBitmap(bitmap)\n\n        self.S = S\n        self.size = V\n        \n        if self.P and len(P) > 0:\n            bb = rg.BoundingBox(P)\n            self.bb = bb\n        else:\n            self.bb = rh.Geometry.BoundingBox.Empty\n\n    @property\n    def DrawForeground(self, sender, args):\n        if self.D:  # If D is True, draw the sprite in the foreground\n            if self.P and self.F:\n                items = rh.Display.DisplayBitmapDrawList()\n                items.SetPoints(self.P)\n                args.Display.DrawSprites(self.B, items, self.S, self.size)\n                pass\n\n    def DrawViewportWires(self, args):\n        if not self.D:  # If D is False, draw the sprite as before using DrawViewportWires\n            if self.P and self.F:\n                items = rh.Display.DisplayBitmapDrawList()\n                items.SetPoints(self.P)\n                args.Display.DrawSprites(self.B, items, self.S, self.size)\n                pass\n    \n    def get_ClippingBox(self):\n        return self.bb\n    \n    def IsPreviewCapable(self):\n        return True\n\n    def __exit__(self):\n        rh.Display.DisplayPipeline.DrawForeground -= self.DrawForeground\n\n    def __enter__(self):\n        rh.Display.DisplayPipeline.DrawForeground += self.DrawForeground",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 25,
+  "posts_count": 10,
+  "views": 815
+}

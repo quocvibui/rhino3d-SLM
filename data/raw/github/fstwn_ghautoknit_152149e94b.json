@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/fstwn/ghautoknit/blob/5ca6d07df601d34be5a67fe6c76a942daef50a85/usrobj_src/GHAutoknit_BuildAutoknitModel.py",
+  "repo": "fstwn/ghautoknit",
+  "repo_stars": 3,
+  "repo_description": "A prototypical bridge between Grasshopper and Autoknit.",
+  "license": "MIT",
+  "filepath": "usrobj_src/GHAutoknit_BuildAutoknitModel.py",
+  "instruction": "Load an Autoknit *.cons file and interpret the constraints in it.\n    Inputs:\n        Mesh: The mesh to build the model with {item, mesh}\n        Constraints: The constraints to build the model with...",
+  "code": "\"\"\"\nLoad an Autoknit *.cons file and interpret the constraints in it.\n    Inputs:\n        Mesh: The mesh to build the model with {item, mesh}\n        Constraints: The constraints to build the model with as Autoknit Constraints {list, Autoknit Constraint}\n    Outputs:\n        Model: The vertices from the constraint file as tuples {list, Autoknit Model}\n    Remarks:\n        Author: Max Eschenbach\n        License: MIT License\n        Version: 211029\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS\nfrom __future__ import division\nfrom string import join\n\n# GHPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n# LOCAL MODULE IMPORTS\nimport ghautoknit as ghak\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"BuildAutoknitModel\"\nghenv.Component.NickName =\"BAM\"\nghenv.Component.Category = \"GHAutoknit\"\nghenv.Component.SubCategory = \"2 Autoknit Model\"\n\nclass BuildAutoknitModel(component):\n    \n    def RunScript(self, M, C):\n        # define outputs so they're never empty\n        AKModel = None\n        \n        if not M:\n            return None\n        if not C:\n            C = None\n        \n        for i, c in enumerate(C):\n            if type(c) is not ghak.Constraint:\n                raise ValueError(\"Supplied constraint {i} is not a valid \" + \\\n                                 \"AKConstraint!\".format(i))\n        \n        # create model\n        AKModel = ghak.Model(M, C)\n        \n        # return outputs if you have them; here I try it for you:\n        return (AKModel)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

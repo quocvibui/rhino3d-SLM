@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas_3gs/blob/162cecfbeb8806340a55713ec3a0bce7cc932c89/examples/_old_examples/01_60_volmesh_modification.py",
+  "repo": "BlockResearchGroup/compas_3gs",
+  "repo_stars": 11,
+  "repo_description": "3D graphic statics add-on for the COMPAS framework",
+  "license": "MIT",
+  "filepath": "examples/_old_examples/01_60_volmesh_modification.py",
+  "instruction": "01 60 volmesh modification",
+  "code": "from __future__ import absolute_import\nfrom __future__ import print_function\nfrom __future__ import division\n\nimport compas\n\nfrom compas_rhino.utilities import volmesh_from_polysurfaces\n\nfrom compas_3gs.diagrams import ForceVolMesh\n\nfrom compas_3gs.rhino import rhino_vertex_move\nfrom compas_3gs.rhino import rhino_vertex_align\nfrom compas_3gs.rhino import rhino_vertex_modify_fixity\nfrom compas_3gs.rhino import rhino_volmesh_vertex_lift\n\nfrom compas_3gs.rhino import draw_vertex_fixities\n\ntry:\n    import rhinoscriptsyntax as rs\nexcept ImportError:\n    compas.raise_if_ironpython()\n\n\n# ------------------------------------------------------------------------------\n# 1. make vomesh from rhino polysurfaces\n# ------------------------------------------------------------------------------\nlayer_force = 'force_volmesh'\n\nguids = rs.GetObjects(\"select polysurfaces\", filter=rs.filter.polysurface)\nrs.HideObjects(guids)\n\nforcediagram = ForceVolMesh()\nforcediagram = volmesh_from_polysurfaces(forcediagram, guids)\nforcediagram.layer = layer_force\nforcediagram.attributes['name'] = layer_force\n\nforcediagram.draw_faces()\nforcediagram.draw_edges()\nforcediagram.draw_vertices()\n\n# ------------------------------------------------------------------------------\n# 2. modify volmesh vertices\n# ------------------------------------------------------------------------------\n\nwhile True:\n\n    rs.EnableRedraw(True)\n\n    modify = rs.GetString('modify volmesh vertices', strings=[\n                          'move', 'align', 'lift', 'fixity', 'exit'])\n\n    if modify is None or modify == 'exit':\n        break\n\n    if modify == 'move':\n        rhino_vertex_move(forcediagram)\n\n    elif modify == 'align':\n        rhino_vertex_align(forcediagram)\n\n    elif modify == 'lift':\n        rhino_volmesh_vertex_lift(forcediagram)\n\n    elif modify == 'fixity':\n        rhino_vertex_modify_fixity(forcediagram)\n\n    forcediagram.draw_faces()\n    forcediagram.draw_edges()\n    forcediagram.draw_vertices()\n    draw_vertex_fixities(forcediagram)\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

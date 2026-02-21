@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/lost-in-python-rhinoscriptsyntax/156100",
+  "topic_id": 156100,
+  "title": "Lost in Python - rhinoscriptsyntax",
+  "question": "Hi,\n\n\nI must be really dumb but something here just evades me. I want to define a vector in a python script. I literally copied this line from \nhere\n\n\nimport rhinoscriptsyntax as rs\n \nvec = rs.CreateVector(1.0, 2.0, 3.0)\n\n\n\nAnd it´s throwing an error \" Message: ‘module’ object has no attribute ‘CreateVector’ \" in line 29:\n\n\nimport rhinoscriptsyntax as rs\n\nmsg = \"Select closed curve to use as selection boundary within the viewport\"\nbound = rs.GetObject(msg, 4, True)\n#if not bound: return \n\nrs.EnableRedraw(False)\n\nrs.Command(\"_SelBoundary _selid \" + str(bound) + \" _Enter\", False)\nobjs = rs.SelectedObjects()\nrs.UnselectAllObjects()\n\nif objs:\n    group = rs.AddGroup()\n\n    # Uncomment below to select just curves\n    # res = [c for c in objs if rs.IsCurve(c)]\n    # objs = res\n\n    rs.AddObjectsToGroup(objs, group)\n    rs.AddObjectToGroup(bound, group)\n    rs.ObjectsByGroup(group, True)\n\nrs.EnableRedraw(True)\n\nObjects = rs.SelectedObjects()\nRefPts = rs.GetPoints(max_points=2)\nTarget = rs.GetPoint()\nvec = rs.CreateVector(1.0, 0, 0)\nTarget2 = rs.MoveObject(Target, vec)\nTargets = [Target, Target2]\nrs.OrientObjects(Objects, RefPts, Targets)\n\n\n\nCan anyone explain what am I doing wrong?\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nv1=rs.CreateVector(1,0,0)\npt1=rs.coerce3dpoint([0,0,0])\npt2=rs.coerce3dpoint([1,0,0])\nv2=rs.VectorCreate(pt2,pt1)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "Objects = rs.SelectedObjects()\nRefPts = rs.GetPoints(max_points=2)\nTarget = rs.GetPoint()\nTarget2 = rs.coerce3dpoint([Target.X+1,Target.Y,Target.Z])\nTargets = [Target, Target2]\nrs.OrientObjects(Objects, RefPts, Targets)",
+      "language": "python",
+      "author": "kral",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n \nvec = rs.CreateVector(1.0, 2.0, 3.0)",
+      "language": "python",
+      "author": "kral",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmsg = \"Select closed curve to use as selection boundary within the viewport\"\nbound = rs.GetObject(msg, 4, True)\n#if not bound: return \n\nrs.EnableRedraw(False)\n\nrs.Command(\"_SelBoundary _selid \" + str(bound) + \" _Enter\", False)\nobjs = rs.SelectedObjects()\nrs.UnselectAllObjects()\n\nif objs:\n    group = rs.AddGroup()\n\n    # Uncomment below to select just curves\n    # res = [c for c in objs if rs.IsCurve(c)]\n    # objs = res\n\n    rs.AddObjectsToGroup(objs, group)\n    rs.AddObjectToGroup(bound, group)\n    rs.ObjectsByGroup(group, True)\n\nrs.EnableRedraw(True)\n\nObjects = rs.SelectedObjects()\nRefPts = rs.GetPoints(max_points=2)\nTarget = rs.GetPoint()\nvec = rs.CreateVector(1.0, 0, 0)\nTarget2 = rs.MoveObject(Target, vec)\nTargets = [Target, Target2]\nrs.OrientObjects(Objects, RefPts, Targets)",
+      "language": "python",
+      "author": "kral",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 482
+}

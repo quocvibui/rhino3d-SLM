@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-current-ortho-angle-rhinoscriptsyntax/165363",
+  "topic_id": 165363,
+  "title": "Get current ortho angle, rhinoscriptsyntax",
+  "question": "Hi \n@pascal\n\n\nIs it possible to retrieve the current ortho angle, change the ortho angle, run a command / macro, say something like this:\n\n\n_-NamedCPlane _Save TEMP Enter\n\n_ProjectOsnap _disable\n\n_CPlane _Elevation _pause\n\n_ProjectOsnap _enable\n\n_CPlane _3Point _pause _pause _pause\n\n_BoundingBox _pause _C=CPlane enter\n\n_-NamedCPlane _restore TEMP Enter\n\n_-NamedCPlane _delete TEMP Enter\n\n\n(I am able to script the above)\n\n\nand then restore original ortho angle\n\n\nI can only find “rs.Ortho” in both rhinoscriptsynatax and rhinoscript, which only allows a bool value.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ndef OrthoAngle(angle=None):\n    \n    if angle is not None:\n        Rhino.ApplicationSettings.ModelAidSettings.OrthoAngle = Rhino.RhinoMath.ToRadians(angle)\n        \n    return Rhino.RhinoMath.ToDegrees(Rhino.ApplicationSettings.ModelAidSettings.OrthoAngle)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef OrthoAngle(angle=None):\n    \n    if angle is not None:\n        Rhino.ApplicationSettings.ModelAidSettings.OrthoAngle = Rhino.RhinoMath.ToRadians(angle)\n        \n    return Rhino.RhinoMath.ToDegrees(Rhino.ApplicationSettings.ModelAidSettings.OrthoAngle)\n    \n\n# get Rhino's current ortho angle\ncrntAngle = OrthoAngle()\n\n# store the angle\nsc.sticky[\"ORTHO_ANGLE\"] = crntAngle\n\n\"\"\"\n\n# do some stuff that involves changing the ortho angle\n#blah-blah\n\n\n\n\"\"\"\n\n# now get the stored angle back from storage and restore it as Rhino's OrthoAngle:\n    \n# first check to make sure there is an angle stored\nif \"ORTHO_ANGLE\" in sc.sticky:\n    angle = sc.sticky[\"ORTHO_ANGLE\"]\n    \n    # if there is one stored, then use it to restore Rhino's OrthoAngle\n    # using the OrthoAngle function above:\n    OrthoAngle(angle)\n    \n    # Then clear the key/value in sticky so that you can start over on the next time through:\n    sc.sticky.pop(\"ORTHO_ANGLE\")",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 2,
+  "views": 228
+}

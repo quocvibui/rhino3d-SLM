@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/automatically-reassigning-annotation-style-and-dim-scale/193265",
+  "topic_id": 193265,
+  "title": "Automatically reassigning annotation style and dim scale",
+  "question": "Hey all,\n\n\nNew to scripting so fingers crossed this is a simple fix. The gist of what I’m trying to do is automate a process for taking old architectural details imported from CAD and reassign their annotation style to a uniform one with a variable model space scale - that variable model space scale being determined by what the original annotation style is and assigned via a csv file. Generally, I’m able to get everything to work up until the last step - that being assigning the custom scale. Is this possible / am I missing something obvious? Thanks!\n\n\nimport rhinoscriptsyntax as rs\nimport csv\nimport Rhino\nimport System\n\ndef reassign_annotation_style():\n    # Select the object\n    obj = rs.GetObject(\"Select an annotation object\", rs.filter.annotation)\n    if not obj:\n        return\n\n    # Get the current annotation style\n    current_style = rs.DimensionStyle(obj)\n\n    # Prompt user to select the CSV file\n    filter = \"CSV Files (*.csv)|*.csv|All Files (*.*)|*.*||\"\n    csv_file = rs.OpenFileName(\"Select the annotation scales CSV file\", filter)\n    if not csv_file:\n        print(\"No CSV file selected. Operation cancelled.\")\n        return\n\n    # Read the CSV file for scale information\n    scale_dict = {}\n    try:\n        with open(csv_file, 'r') as csvfile:\n            reader = csv.DictReader(csvfile)\n            for row in reader:\n                scale_dict[row['OriginalStyle']] = float(row['ModelSpaceScale'])\n    except Exception as e:\n        print(\"Error reading CSV file: {}\".format(str(e)))\n        return\n\n    # Set the new annotation style\n    new_style = \"Paperspace\"\n    rs.DimensionStyle(obj, new_style)\n\n    # Apply the model space scale\n    if current_style in scale_dict:\n        scale = scale_dict[current_style]\n        \n        # Get the dimension style\n        dim_style = rs.DimensionStyle(new_style)\n        \n        if dim_style:\n            # Create a new dimension style with the updated scale\n            new_style_name = \"{}_{}_Scale\".format(new_style, ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef Test(ds_name):\n    # Find some existing dimension style\n    ds = sc.doc.DimStyles.FindName(ds_name)\n    if not ds:\n        print(\"{} dimension style does not exist.\".format(ds_name))\n        return\n        \n    # Print the model space scale\n    print(\"{}.DimensionScale = {}\".format(ds.Name, ds.DimensionScale))\n    \n    ds_new_scale = 4.0 # some scale\n    ds_new_name = \"{}_{}_Scale\".format(ds_name, ds_new_scale)\n    ds_new = sc.doc.DimStyles.FindName(ds_new_name)\n    if ds_new:\n        print(\"{} dimension style already exists.\".format(ds_new_name))\n        return\n    \n    # Copy the dimension style\n    ds_new = ds.Duplicate()\n    # Set the name\n    ds_new.Name = ds_new_name\n    # Set the model space scale\n    ds_new.DimensionScale = ds_new_scale \n    # Add the copy to the document\n    ds_index = sc.doc.DimStyles.Add(ds_new, False)\n    \n    # Find the newly added copy by index\n    ds = sc.doc.DimStyles.FindIndex(ds_index)\n    if ds:\n        # Print the model space scale\n        print(\"{}.DimensionScale = {}\".format(ds.Name, ds.DimensionScale))\n\nif __name__ == \"__main__\":\n    ds_name = \"Paperspace\"\n    Test(ds_name)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport csv\nimport Rhino\nimport System\n\ndef reassign_annotation_style():\n    # Select the object\n    obj = rs.GetObject(\"Select an annotation object\", rs.filter.annotation)\n    if not obj:\n        return\n\n    # Get the current annotation style\n    current_style = rs.DimensionStyle(obj)\n\n    # Prompt user to select the CSV file\n    filter = \"CSV Files (*.csv)|*.csv|All Files (*.*)|*.*||\"\n    csv_file = rs.OpenFileName(\"Select the annotation scales CSV file\", filter)\n    if not csv_file:\n        print(\"No CSV file selected. Operation cancelled.\")\n        return\n\n    # Read the CSV file for scale information\n    scale_dict = {}\n    try:\n        with open(csv_file, 'r') as csvfile:\n            reader = csv.DictReader(csvfile)\n            for row in reader:\n                scale_dict[row['OriginalStyle']] = float(row['ModelSpaceScale'])\n    except Exception as e:\n        print(\"Error reading CSV file: {}\".format(str(e)))\n        return\n\n    # Set the new annotation style\n    new_style = \"Paperspace\"\n    rs.DimensionStyle(obj, new_style)\n\n    # Apply the model space scale\n    if current_style in scale_dict:\n        scale = scale_dict[current_style]\n        \n        # Get the dimension style\n        dim_style = rs.DimensionStyle(new_style)\n        \n        if dim_style:\n            # Create a new dimension style with the updated scale\n            new_style_name = \"{}_{}_Scale\".format(new_style, scale)\n            new_dim_style = rs.CopyDimensionStyle(new_style, new_style_name)\n            \n            # Set the new scale\n            rs.DimensionScale(new_dim_style, scale)\n            \n            # Apply the new style to the object\n            rs.DimensionStyle(obj, new_style_name)\n            \n            print(\"Annotation style changed from '{}' to '{}' and scaled by {}\".format(current_style, new_style_name, scale))\n        else:\n            print(\"Unable to find the '{}' dimension style.\".format(new_style))\n    else:\n        print(\"Annotation style changed from '{}' to '{}', but no scale found in CSV\".format(current_style, new_style))\n\n    # Update the document\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\n# Run the function\nreassign_annotation_style()",
+      "language": "python",
+      "author": "Caleb_Schemmel",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 98
+}

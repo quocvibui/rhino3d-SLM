@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-breploops-without-overlapping-curves/58392",
+  "topic_id": 58392,
+  "title": "Get BrepLoops without overlapping curves",
+  "question": "I try to get BrepLoops.To3dCurves without curves with are overlapping completly.\n\n\nAs example i have this image:\n\n\n\n\nukahviui.png\n1920×1080\n\n\n\n\nI have Brep “1” and with BrepLoops.To3dCurves i get “2” but i like to get “3”.\n\nThe curve i have removed in “3” are 2 Curves overlapping complet but are part of the same curve as “2”.\n\n\nHow could i get “3” with RhinoCommon and python?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport math\n\ndef ExtractSharpEdgeCurves():\n    \n    brep_id = rs.GetObject(\"Select Brep\", 16, True, False)\n    if not brep_id: return\n    \n    brep = rs.coercebrep(brep_id, True)\n    angle = math.radians(1.0)\n    curves = []\n    \n    for edge in brep.Edges:\n        if not edge.IsSmoothManifoldEdge(angle):\n            curve = edge.DuplicateCurve()\n            curves.append(curve)\n        \n    if not curves: return\n    for crv in curves:\n        crv_id = scriptcontext.doc.Objects.AddCurve(crv)\n        rs.SelectObject(crv_id)\n    \nExtractSharpEdgeCurves()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 709
+}

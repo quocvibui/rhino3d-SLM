@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinopython-report-error/115556",
+  "topic_id": 115556,
+  "title": "Rhinopython report error",
+  "question": "Hi guys, I am a beginner of rhino python.\n\nI tried to use python to generate a polygon, but the script didn’t work well and report the following error.I have no idea which part of my script wrong. Could someone tell me how to solve the problem?\n\n\n\n\nimage\n1325×754 110 KB\n\n\n\nRuntime error (ValueErrorException): Could not convert a9ae2f78-a453-43f8-866f-8fb7621657c2 to a list of points\n\n\nHere is my file:\nfenxing.py\n (542 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport inspect\n\nprint inspect.getsource(\"rs.AddPoint\")  # outputs the source code of this function",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\ndef generate_polygon(point, radius, segments):\n    polyline = rg.Polyline()  # construct a Polyline object\n    angle = (2 * math.pi) / segments  # angle in radians\n    vector = rg.Vector3d.XAxis * radius  # construct a Vector3d object\n    for _ in range(segments):\n        vector.Rotate(angle, rg.Vector3d.ZAxis)  # rotate the existing Vector3d object\n        polyline.Add(point + vector)  # add a point to the existing Polyline object\n    polyline.Add(polyline[0]) \n    return rg.PolylineCurve(polyline)  # construct a PolylineCurve object from the Polyline object and return it\n\n# Output\na = generate_polygon(rg.Point3d.Origin, 12.0, 5)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1343
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/custom-geometry-filter.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/custom-geometry-filter.py",
+  "instruction": "Custom geometry filter",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import *\nimport Rhino\n\ndef circleWithRadiusOf10GeometryFilter (rhObject, geometry, componentIndex):\n    isCircleWithRadiusOf10 = False\n    c = rs.coercecurve(geometry)\n    if c:\n        b, circle = c.TryGetCircle()\n    if b:\n        isCircleWithRadiusOf10 = circle.Radius <= 10.0 + Rhino.RhinoMath.ZeroTolerance and circle.Radius >= 10.0 - Rhino.RhinoMath.ZeroTolerance\n    return isCircleWithRadiusOf10\n\ndef RunCommand():\n    # only use a custom geometry filter if no simpler filter does the job\n\n    # for curves - only a simple filter is needed\n    if rs.GetObject(\"select curve\", rs.filter.curve): #Rhino.DocObjects.ObjectType.Curve):\n        print \"curve vas selected\"\n\n    # for circles with a radius of 10 - a custom geometry filter is needed\n    if rs.GetObject(\"select circle with radius of 10\", rs.filter.curve, False, False, circleWithRadiusOf10GeometryFilter):\n        print \"circle with radius of 10 was selected\"\n\nif __name__==\"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

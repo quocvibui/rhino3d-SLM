@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/fstwn/cockatoo/blob/d952ac5d2148ec29fba52e8eb75f0f43770c74ca/usrobj_src/Cockatoo_WriteKnittingPatternToBitmap.py",
+  "repo": "fstwn/cockatoo",
+  "repo_stars": 38,
+  "repo_description": "Cockatoo is a prototypical open-source software toolkit for generating (3d-)knitting patterns from NURBS surface and mesh geometry directly inside Grasshopper.",
+  "license": "MIT",
+  "filepath": "usrobj_src/Cockatoo_WriteKnittingPatternToBitmap.py",
+  "instruction": "Write knitting pattern data to a bitmap file.\n---\nBased on an example by Anders Holden Deleuran\nhttps://discourse.mcneel.com/t/write-a-bitmap-pixel-by-pixel-in-python/81116/2\n    Inputs:\n       ...",
+  "code": "\"\"\"\nWrite knitting pattern data to a bitmap file.\n---\nBased on an example by Anders Holden Deleuran\nhttps://discourse.mcneel.com/t/write-a-bitmap-pixel-by-pixel-in-python/81116/2\n    Inputs:\n        Write: Set to True to save the bitmap file.\n               {item, bool}\n        PixelData: The knitting pattern pixel data to write to the bitmap file.\n                   Use the MakePatternData component to obtain the pixel data\n                   for a KnitNetwork.\n                   {item, PixelData}\n        Path: The file path to a .bmp file where the knitting pattern should\n              be written.\n              {item, str}\n    Remarks:\n        Author: Max Eschenbach\n        License: MIT License\n        Version: 200813\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS\nfrom __future__ import division\nfrom os import path\n\n# GHPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"WriteKnittingPatternToBitmap\"\nghenv.Component.NickName =\"WKPTB\"\nghenv.Component.Category = \"Cockatoo\"\nghenv.Component.SubCategory = \"09 Pattern Data\"\n\nclass WriteKnittingPatternToBitmap(component):\n    \n    def RunScript(self, Write, PixelData, Path):\n        \n        if Write and PixelData and Path:\n            # reverse the data so that the start is at the bottom of the image\n            PixelData.reverse()\n            \n            # Get number of columns and rows in csv data\n            columns = max([len(row) for row in PixelData])\n            rows = len(PixelData)\n            \n            # initialize empty bitmap\n            bitmap = System.Drawing.Bitmap(columns, rows)\n            \n            # add pixels\n            for i in range(columns):\n                for j in range(rows):\n                    \n                    try:\n                        col = PixelData[j][i]\n                    except IndexError:\n                        col = System.Drawing.Color.Gray\n                    \n                    # set pixel\n                    bitmap.SetPixel(i, j, col)\n                    \n            # save to file\n            bitmap.Save(path.normpath(Path.strip(\"\\n\\r\")),\n                        System.Drawing.Imaging.ImageFormat.Bmp)\n        \n        else:\n            if not PixelData:\n                rml = self.RuntimeMessageLevel.Warning\n                self.AddRuntimeMessage(rml, \"No PixelData input!\")\n            if not Path:\n                rml = self.RuntimeMessageLevel.Warning\n                self.AddRuntimeMessage(rml, \"No Path input!\")\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

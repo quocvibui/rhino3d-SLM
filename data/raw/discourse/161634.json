@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/allow-rhinoscriptsyntax-surfacevolume-other-methods-to-accept-subds/161634",
+  "topic_id": 161634,
+  "title": "Allow rhinoscriptsyntax SurfaceVolume (+ other methods) to accept SubD's",
+  "question": "The rs.SurfaceVolume() relies on the helper function \n__GetMassProperties\n which looks like this:\n\n\ndef __GetMassProperties(object_id, area):\n    surface = rhutil.coercebrep(object_id)  # <--  fails if object is a subd\n    if surface is None:\n        surface = rhutil.coercesurface(object_id)  # <--  also fails if subd\n        if surface is None: return None  # <-- so if object a subd - returns None\n    if area==True: return Rhino.Geometry.AreaMassProperties.Compute(surface)\n    if not surface.IsSolid: return None\n    return Rhino.Geometry.VolumeMassProperties.Compute(surface)\n\n\n\nThis fails because rs.coercebrep() does not currently work with SubD’s.  So, it would need the method to be able accept and convert them to Breps.\n\n\nExisting:\n\n\ndef coercebrep(id, raise_if_missing=False):\n    \"\"\"attempt to get polysurface geometry from the document with a given id\n    Parameters:\n      id = id to be coerced into a brep\n      raise_if_missing [opt] = True or False\n    Returns:\n      a Rhino.Geometry.Brep\n    Example:\n    See Also:\n    \"\"\"\n    geom = coercegeometry(id, False)\n    if isinstance(geom, Rhino.Geometry.Brep): return geom\n    if isinstance(geom, Rhino.Geometry.Extrusion): return geom.ToBrep(True)\n    if raise_if_missing: raise ValueError(\"unable to convert %s into Brep geometry\"%id)\n\n\n\nTo be modified to something like this:\n\n\ndef coercebrep(id, raise_if_missing=False):\n    \"\"\"attempt to get polysurface geometry from the document with a given id\n    Parameters:\n      id = id to be coerced into a brep\n      raise_if_missing [opt] = True or False\n    Returns:\n      a Rhino.Geometry.Brep\n    Example:\n    See Also:\n    \"\"\"\n    geom = coercegeometry(id, False)\n    if isinstance(geom, Rhino.Geometry.Brep): return geom\n    if isinstance(geom, Rhino.Geometry.Extrusion): return geom.ToBrep(True)\n    if isinstance(geom, Rhino.Geometry.SubD): return geom.ToBrep(True) # add this line\n    if raise_if_missing: raise ValueError(\"unable to convert %s into Brep geometry\"%id)\n\n\n\nThis ...",
+  "code_blocks": [
+    {
+      "code": "def __GetMassProperties(object_id, area):\n    surface = rhutil.coercebrep(object_id)  # <--  fails if object is a subd\n    if surface is None:\n        surface = rhutil.coercesurface(object_id)  # <--  also fails if subd\n        if surface is None: return None  # <-- so if object a subd - returns None\n    if area==True: return Rhino.Geometry.AreaMassProperties.Compute(surface)\n    if not surface.IsSolid: return None\n    return Rhino.Geometry.VolumeMassProperties.Compute(surface)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "def coercebrep(id, raise_if_missing=False):\n    \"\"\"attempt to get polysurface geometry from the document with a given id\n    Parameters:\n      id = id to be coerced into a brep\n      raise_if_missing [opt] = True or False\n    Returns:\n      a Rhino.Geometry.Brep\n    Example:\n    See Also:\n    \"\"\"\n    geom = coercegeometry(id, False)\n    if isinstance(geom, Rhino.Geometry.Brep): return geom\n    if isinstance(geom, Rhino.Geometry.Extrusion): return geom.ToBrep(True)\n    if raise_if_missing: raise ValueError(\"unable to convert %s into Brep geometry\"%id)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "def coercebrep(id, raise_if_missing=False):\n    \"\"\"attempt to get polysurface geometry from the document with a given id\n    Parameters:\n      id = id to be coerced into a brep\n      raise_if_missing [opt] = True or False\n    Returns:\n      a Rhino.Geometry.Brep\n    Example:\n    See Also:\n    \"\"\"\n    geom = coercegeometry(id, False)\n    if isinstance(geom, Rhino.Geometry.Brep): return geom\n    if isinstance(geom, Rhino.Geometry.Extrusion): return geom.ToBrep(True)\n    if isinstance(geom, Rhino.Geometry.SubD): return geom.ToBrep(True) # add this line\n    if raise_if_missing: raise ValueError(\"unable to convert %s into Brep geometry\"%id)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 1,
+  "views": 307
+}

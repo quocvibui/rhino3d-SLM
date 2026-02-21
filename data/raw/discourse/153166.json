@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-reduce-exception/153166",
+  "topic_id": 153166,
+  "title": "Mesh.Reduce() exception",
+  "question": "Hello,\n\n\nI’m having issues while using the \nMesh.Reduce(...)\n on any mesh (also a simple sphere).\n\nThe RhinoCommon version I am using is 7.20.22193.9001.\n\n\nAs an example, this is a python script reproducing the issue:\n\n\nimport sys\nimport rhinoscriptsyntax as rs\nfrom Rhino import RhinoApp\nfrom Rhino.Geometry import Mesh, ReduceMeshParameters\nfrom exceptions import Exception\n\n\nif __name__ == '__main__':\n    # Select a mesh before running this script.\n    obj = rs.SelectedObjects()[0]\n    mesh = rs.coercemesh(obj)\n    if mesh:\n        params = ReduceMeshParameters()\n        params.DesiredPolygonCount = 2000\n        params.Accuracy = 5\n        \n        try:\n            # The following line ALWAYS throws a null reference exception\n            # inside RhinoCommon.\n            success = mesh.Reduce(params, threaded=True)\n            print(\"Reduced\" if success else \"Not reduced\")\n        except Exception as e:\n            print(\"EXCEPTION: \" + str(e))\n    else:\n        print(\"Mesh is null\")\n\n\n\nThe method keeps crashing even if the \nDesiredPolygonCount\n and \nAccuracy\n values are lowered, or \nthreaded\n argument is toggled.\n\n\nAm I missing something?\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nmesh_id = rs.GetObject(\"Select mesh\",32,preselect=True)\nif mesh_id:\n    mesh = rs.coercemesh(mesh_id)\n    targ_count=2000\n    accuracy=5\n    success = mesh.Reduce(targ_count,True,accuracy,False,True)\n    if success:\n        sc.doc.Objects.Replace(mesh_id,mesh)\n        sc.doc.Views.Redraw()\n    else:\n        print \"Unable to reduce mesh\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import sys\nimport rhinoscriptsyntax as rs\nfrom Rhino import RhinoApp\nfrom Rhino.Geometry import Mesh, ReduceMeshParameters\nfrom exceptions import Exception\n\n\nif __name__ == '__main__':\n    # Select a mesh before running this script.\n    obj = rs.SelectedObjects()[0]\n    mesh = rs.coercemesh(obj)\n    if mesh:\n        params = ReduceMeshParameters()\n        params.DesiredPolygonCount = 2000\n        params.Accuracy = 5\n        \n        try:\n            # The following line ALWAYS throws a null reference exception\n            # inside RhinoCommon.\n            success = mesh.Reduce(params, threaded=True)\n            print(\"Reduced\" if success else \"Not reduced\")\n        except Exception as e:\n            print(\"EXCEPTION: \" + str(e))\n    else:\n        print(\"Mesh is null\")",
+      "language": "python",
+      "author": "p.stragliotto",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 500
+}

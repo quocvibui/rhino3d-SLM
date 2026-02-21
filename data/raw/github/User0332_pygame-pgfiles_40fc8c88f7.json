@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/User0332/pygame-pgfiles/blob/716b1009670a9ba5550f9c8e5c848f7dfa52fcb2/pygame-pgx/pgx/run.py",
+  "repo": "User0332/pygame-pgfiles",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "pygame-pgx/pgx/run.py",
+  "instruction": null,
+  "code": "from .api.scriptctx import ScriptContext\nfrom .parsemodule import recurse_pgx\nfrom .exceptions import InvalidAppException, InvalidAttributeException\nfrom .parseval import parse_size\nfrom .api import PGXApp\nfrom domapi import Element\nimport os\nimport pygame as pg\nimport lxml.etree as etree\n\ndef run(filename: str):\n\tos.chdir(os.path.dirname(filename))\n\t\n\tdocument: etree._ElementTree = etree.parse(os.path.basename(filename))\n\n\tdoctype: str = document.docinfo.internalDTD.name\n\n\tif doctype != \"pygame-pgx\":\n\t\traise InvalidAppException(\n\t\t\t\"Invalid doctype (must be pygame-pgx)!\"\n\t\t)\n\t\t\n\troot: etree._Element = document.getroot()\n\n\tif root.tag != \"app\":\n\t\traise InvalidAppException(\n\t\t\t\"Root element is not <app>\"\n\t\t)\n\n\tdoc = Element(root)\n\n\tif doc.getAttribute(\"size\") is None:\n\t\traise InvalidAppException(\n\t\t\t\"No size specified on <app>\"\n\t\t)\n\t\n\tpg.init()\n\n\ttry: framerate = int(doc.getAttribute(\"framerate\"))\n\texcept TypeError: framerate = 60\n\texcept ValueError: raise InvalidAttributeException(\"Invalid value for framerate (must be int)\")\n\n\tapp = PGXApp(parse_size(doc.getAttribute(\"size\")), framerate)\n\tdeferred_scripts: list[tuple[str, ScriptContext]] = []\n\n\tscreen = pg.display.set_mode(app.size)\n\n\tapp.root_elements, _ = recurse_pgx(app, deferred_scripts, doc)\n\n\tfor (script_text, context) in deferred_scripts:\n\t\texec(script_text, { **app.global_namespace, \"current_script\": context })\t\n\n\tapp.app_update = getattr(app.global_namespace[\"exports\"], \"pgx_update\", lambda: None)\n\n\twhile 1:\n\t\tfor event in pg.event.get(): # TODO: have a separate event thread that calls event handlers\n\t\t\tif event.type == pg.QUIT:\n\t\t\t\tpg.quit()\n\t\t\t\texit(0)\n\n\t\tapp.render_to(screen)\n\n\t\tapp.update()\n\t\t\t\t\n\t\tpg.display.update()\n\nif __name__ == \"__main__\":\n\trun()",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

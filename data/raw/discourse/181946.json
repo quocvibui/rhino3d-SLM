@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pickling-rhino-geometry-objects-fails-in-python-3-works-in-ironpython/181946",
+  "topic_id": 181946,
+  "title": "Pickling Rhino Geometry Objects Fails In Python 3 (Works in IronPython)",
+  "question": "I have created my own classes, that contain Rhino geometries as attributes (mostly points, lines, NurbsCurves). I then perform many operations such as offsets, trims and joins. Objects rely on previous objects geometries and so on. On runtime there can be several hundred objects and the associated points, lines, curves, joined polycurves,  etc.\n\n\nIt was really nice to be able to just pickle my python class objects to a temp pickle-file on success and/or failure and then retrieve the pickle and look at the attributes/geometries in the objects to look what went right/wrong.\n\nI could analyze all the object attributes with an interactive python grasshopper component and look at complex geometries and their interaction.\n\n\nNow I am converting the project from Rhino v7 / IronPython to Rhino v8 / python3 and struggle with the python pickling of objects  and geometries.\n\n\nIn Rhino v8 the python code refuses to pickle something as basic as a Point3d with the error: cannot pickle ‘Point3d’ object.\n\n\nWhile the same works in an IronPython component. Will this be fixed? Do I need to modify the pickle process? What would be another solution for this?\n\n\nExample below works in IronPython in v8 but fails in Python3 component:\n\n\n# import pickle in python 3\nimport cPickle as pickle\nimport rhinoscriptsyntax as rs\nimport os\nfrom Rhino.Geometry import Point3d\n# create point object\npt = Point3d(0,0,0)\n\n# pickle point to temp file in user folder\ntemp_file = os.path.join(os.path.expanduser('~'), 'test_pickle.pickle')\nwith open(temp_file, 'w') as f:\n    pickle.dump(pt,f)\n\n# retrieve point from pickle\nwith open(temp_file, 'r') as f :\n    pt = pickle.load(f)\n    print(type(pt))",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nfrom Rhino.Geometry import Point3d, LineCurve\n# create custom class with Rhino.Geometry objects inside\nclass MyClass:\n    def __init__(self):\n        self.pt1 = Point3d(0,500,0)\n        self.pt2 = Point3d(500,0,0)\n        self.line = LineCurve(self.pt1, self.pt2)\n        \n    def save_debug(self):\n        # save full object to sticky dict\n        sc.sticky['debug'] = self\n\nmy_class = MyClass()\nmy_class.save_debug()",
+      "language": "python",
+      "author": "cpbln",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nfrom Rhino.Geometry import Point3d\n\nmy_class = sc.sticky['debug']\npt1 = my_class.pt1\nprint(pt1)\nline = my_class.line\nprint(line.GetLength())",
+      "language": "python",
+      "author": "cpbln",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# import pickle in python 3\nimport cPickle as pickle\nimport rhinoscriptsyntax as rs\nimport os\nfrom Rhino.Geometry import Point3d\n# create point object\npt = Point3d(0,0,0)\n\n# pickle point to temp file in user folder\ntemp_file = os.path.join(os.path.expanduser('~'), 'test_pickle.pickle')\nwith open(temp_file, 'w') as f:\n    pickle.dump(pt,f)\n\n# retrieve point from pickle\nwith open(temp_file, 'r') as f :\n    pt = pickle.load(f)\n    print(type(pt))",
+      "language": "python",
+      "author": "cpbln",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 301
+}

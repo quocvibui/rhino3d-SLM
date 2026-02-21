@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-viewdisplaymodeproperty-settings-dont-last/78410",
+  "topic_id": 78410,
+  "title": "RS: ViewDisplayModeProperty settings don't last",
+  "question": "hi \n@dale\n\n\nI have been working recently more with this method, creating some shadow-settings tools:\n\n\nViewDisplayModeProperty\n\n\nFor some reason the shadows settings set by this script method don’t stick, or basically they revert back after a while. It is tricky and I cannot reproduce exact steps, but every time I change, let’s say, Shadows ON/Off, or the shadows quality, after a short while of working with Rhino, it would revert back to what it used to before the change.\n\n\nIs it possible that this method is not checking some boxes deeper in Rhino and something else later on reverts/restore the older DisplayMode settings?\n\n\nSample script would be:\n\n\nDim strCurrentDispMod_ID : strCurrentDispMod_ID = Rhino.ViewDisplayModeEx(,, False)\nIf Rhino.ViewDisplayModeProperty(strCurrentDispMod_ID, \"Lighting\\CastShadows\") Then\n   Call Rhino.ViewDisplayModeProperty(strCurrentDispMod_ID, \"Lighting\\CastShadows\", False)\nElse\n   Call Rhino.ViewDisplayModeProperty(strCurrentDispMod_ID, \"Lighting\\CastShadows\", True)\nEnd If\n\n\n\nOver here, the toggle would last for a bit, but then Rhino reverts back.\n\n\nAny ideas?\n\n\n–jarek",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DisplayModeToggleMeshWires():\n    dmd = scriptcontext.doc.Views.ActiveView.ActiveViewport.DisplayMode\n    state = dmd.DisplayAttributes.MeshSpecificAttributes.ShowMeshWires\n    dmd.DisplayAttributes.MeshSpecificAttributes.ShowMeshWires = not state\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(dmd)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    DisplayModeToggleMeshWires()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 13,
+  "views": 1120
+}

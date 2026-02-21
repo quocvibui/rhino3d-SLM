@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/weave-lists-of-pts-together/29550",
+  "topic_id": 29550,
+  "title": "Weave lists of pts together",
+  "question": "I am new to python (sort of), anyway I am not sure why this is not working. Should be simple to weave two lists together with a boolean pattern of true false.\n\n\nI don’t really understand how to flatten the two lists after using python’s built in ‘zip’ function.\n\n\nimport rhinoscriptsyntax as rs\n\nlist1 = []\nlist2 = []\nlist3 = []\n\n\nfor x in range (0,20,2):\n    y = 0\n    z = 0\n    ptlist1 = rs.AddPoint(x,y,z)\n    list1.append(ptlist1)\n    \n    for x2 in range (0,20,3):\n        y = 0\n        z = 0\n        ptlist2 = rs.AddPoint(x2,y,z)\n        ptlist2move = rs.MoveObjects(ptlist2, (0,5,0))\n#        rs.DeleteObjects(ptlist2)\n        list2.append(ptlist2move)\n        \ndef weaveLists():\n    zip(list1, list2)\n    flattenList = [item for sublist in zip(list1, list2) for item in sublist] #this line confuses me\n    list3.append(flattenList)\n    return rs.AddPolyline(list3)\n    \n# attempting to weave lists together with a boolean pattern like the 'weave' pattern in \n# grasshopper.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nlist1 = []\nlist2 = []\n    \ny=0\nz=0\nfor x in range (0,20,2):\n    #make a 3d point object from your coordinates\n    #(does not add a point object to document)\n    pt1=rs.coerce3dpoint([x,y,z])\n    rs.AddPoint(pt1) #optional if you really want the point to be added\n    list1.append(pt1)\n    \n#same as above - except create the points directly at y=5\ny=5\nfor x2 in range (0,20,3):\n    pt2=rs.coerce3dpoint([x2,y,z])\n    rs.AddPoint(pt2) #optional\n    list2.append(pt2)\n    \nflattened = [item for sublist in zip(list1,list2) for item in sublist]\nrs.AddPolyline(flattened)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nlist1 = []\nlist2 = []\nlist3 = []\n\n\nfor x in range (0,20,2):\n    y = 0\n    z = 0\n    ptlist1 = rs.AddPoint(x,y,z)\n    list1.append(ptlist1)\n    \n    for x2 in range (0,20,3):\n        y = 0\n        z = 0\n        ptlist2 = rs.AddPoint(x2,y,z)\n        ptlist2move = rs.MoveObjects(ptlist2, (0,5,0))\n#        rs.DeleteObjects(ptlist2)\n        list2.append(ptlist2move)\n        \ndef weaveLists():\n    zip(list1, list2)\n    flattenList = [item for sublist in zip(list1, list2) for item in sublist] #this line confuses me\n    list3.append(flattenList)\n    return rs.AddPolyline(list3)\n    \n# attempting to weave lists together with a boolean pattern like the 'weave' pattern in \n# grasshopper.",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2505
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/localsoftware/localsoftware_rhino-grasshopper/blob/4aafec57e33b9f09cce6fd73dcda12b17cf794a5/python/UnpickleData.py",
+  "repo": "localsoftware/localsoftware_rhino-grasshopper",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "BSD-2-Clause",
+  "filepath": "python/UnpickleData.py",
+  "instruction": "Deserializes data from binary file.",
+  "code": "\"\"\"Deserializes data from binary file.\n\nUn-pickles (de-serializes) pickled files into Grasshopper geometries.\nUn-pickling geometry is faster and more efficient than importing Rhino files.\nBased on the work of Jackie Berry.\n\n    Typical usage:\n        You need to provide a path for the folder that contains the files to be imported.\n        Use the string concatenate component to join the file path of the folder with the number of the file to be imported.\n        You can specify the file number with a slider. Specify the name of the layers you want to import from the rhino file.\n        Type the layer names in a Panel. Make sure the Multiline Data option is unchecked (you can uncheck the box while typing in the panel or by right click).\n\n    Inputs:\n        siteNumber: site number\n        layer: layer name\n        path: path to source file directory.\n        read: boolean\n\n    Outputs:\n        geometry: converted geometry\"\"\"\n\n__author__ = \"palomagr\"\n__version__ = \"2020.07.09\"\n\n#ghenv.Component.Name = \"Unpicke Data\"\n#ghenv.Component.NickName = \"Unpickle Data\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython, System, Rhino, os\nimport rhinoscriptsyntax as rs\nimport cPickle as pickle\n\nclass MyComponent(component):\n    geometry=None\n    def RunScript(self, siteNumber, layer, path, read):\n        if path!=None and read==True and layer!=None:\n            try:\n                if siteNumber!=None:\n                    filepath = os.path.join(path,str(int(siteNumber))+layer)\n                else:\n                    filepath = os.path.join(path,layer)\n                f=open(filepath,'rb')\n                geometry = pickle.load(f)\n                if len(geometry)>0:\n                    print \"file loaded successfully.\"\n                else:\n                    print \"the file is empty.\"\n                f.close()\n\n            except:\n                print 'problem loading\\n %s\\nfile may not exist or the path may be invalid.' % filepath\n        else:\n            if path==None:\n                geometry = \"please provide path to source directory.\"\n            if layer==None:\n                geometry = \"please provide layer name of source file.\"\n            if read!=True:\n                geometry = \"set read to True to load file contents.\"\n        return geometry\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

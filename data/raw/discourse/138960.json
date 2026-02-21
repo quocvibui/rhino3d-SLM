@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-multiplies-my-output-in-ghpython/138960",
+  "topic_id": 138960,
+  "title": "Mesh multiplies my output in GHPython",
+  "question": "Hey everyone,\n\n\nI have a problem with my python script in grasshopper. So far I have made a script that interpolates some data which I need to now solar radiation in relation to windows orientation. This works fine. I have another script that takes window geometry and finds orientation, slope and area which is needed for my calculation. Also works perfect. My idea is to make one script that does it all so I don’t need too many components since it gets a bit confusing with the outputs. The problem is quite simple. When I take my window mesh from grasshopper and puts it in to the script that does the interpolation it makes the interpolation script run 52 times (Matching the number of windows I have in the building atm). I have changed the input type to List - mesh since it has worked before, but it doesn’t work now. As you can see on the picture this ruins both scripts and make it all run way too many times which also makes it slow. Hopefully there is a good reason for this and it is probably just the way ghpython works - since I am still quite new to it I don’t know.\n\nThanks in advance and have a great weekend!\n\nFile and picture of problem is linked \n\n\n\n\nQuestion_MeshInPython\n951×1051 231 KB\n\n\n\n\nWorking_Weatherfile.gh\n (53.9 KB)",
+  "code_blocks": [
+    {
+      "code": "import ghpythonlib.components as ghcomp\nimport math\n\npi = math.pi\n\n# Ouputs lists\narea = []\nnormals = []\nslope = []\norient = []\n\nfor window in windows:\n    area.append(ghcomp.Area(window))\n    normals.append(ghcomp.DeconstructVector(ghcomp.FaceNormals(window)[1])[0])\n    slope.append(\n        (ghcomp.Angle(ghcomp.UnitZ(1), ghcomp.FaceNormals(window)[1])[0]) * 180 / pi\n    )\n    angle = (ghcomp.Angle(ghcomp.UnitY(1), ghcomp.FaceNormals(window)[1])[0]) * 180 / pi\n    if (ghcomp.DeconstructVector(ghcomp.FaceNormals(window)[1])[0]) < 0:\n        angle += 180\n    orient.append(angle)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 548
+}

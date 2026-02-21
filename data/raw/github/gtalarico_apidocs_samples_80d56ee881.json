@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_closestpoint.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_closestpoint.py",
+  "instruction": "Ex closestpoint",
+  "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\n# data passed to the RTree's SearchCallback function that\n# we can use for recording what is going on\nclass SearchData:\n    def __init__(self, mesh, point):\n        self.HitCount = 0\n        self.Mesh = mesh\n        self.Point = point\n        self.Index = -1\n        self.Distance = 0\n        \n\ndef SearchCallback(sender, e):\n    data = e.Tag\n    data.HitCount += 1\n    vertex = data.Mesh.Vertices[e.Id]\n    distance = data.Point.DistanceTo(vertex)\n    if data.Index == -1 or data.Distance > distance:\n        # shrink the sphere to help improve the test\n        e.SearchSphere = Rhino.Geometry.Sphere(data.Point, distance)\n        data.Index = e.Id\n        data.Distance = distance\n\ndef RunSearch():\n    id = rs.GetObject(\"select mesh\", rs.filter.mesh)\n    mesh = rs.coercemesh(id)\n    if mesh:\n        rs.UnselectObject(id)\n        tree = Rhino.Geometry.RTree()\n        # I can add a RhinoCommon function that just builds an rtree from the\n        # vertices in one quick shot, but for now...\n        for i,vertex in enumerate(mesh.Vertices): tree.Insert(vertex, i)\n        \n        while(True):\n            point = rs.GetPoint(\"test point\")\n            if not point: break\n            \n            data = SearchData(mesh, point)\n            # Use the first vertex in the mesh to define a start sphere\n            distance = point.DistanceTo(mesh.Vertices[0])\n            sphere = Rhino.Geometry.Sphere(point, distance * 1.1)\n            if tree.Search(sphere, SearchCallback, data):\n                rs.AddPoint(mesh.Vertices[data.Index])\n                print \"Found point in {0} tests\".format(data.HitCount)\n\nif __name__==\"__main__\":\n    RunSearch()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "RhinoCommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

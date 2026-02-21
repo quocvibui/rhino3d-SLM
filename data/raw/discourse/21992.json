@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-visualize-normals-of-point-clouds-with-normals/21992",
+  "topic_id": 21992,
+  "title": "How to visualize normals of point clouds with normals?",
+  "question": "Hello,\n\n\nI have a point clouds in a very simple text format where each line is composed of the following informations (separated by \n,\n):\n\n\n\n\nx, y, z, Nx, Ny, Nz\n\n\n\n\nI can import this point cloud into Rhino and see the points but I cannot figure how to visualize the normal information.  Is it lost during importation?\n\n\nI wish I could add some kind of arrow starting from each point and pointing in the normal direction.  Is there something like this directly in Rhino or does someone has any Idea on how to do it in Python?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef Import_npts():\n    filter = \"PointNormal (*.npts)|*.npts|All Files (*.*)|*.*||\"\n    filename = rs.OpenFileName(\"Open points with normals file\", filter)\n    if not filename: return\n\n    file = open(filename, \"r\")\n    contents = file.readlines()\n    file.close()\n\n    cloud = Rhino.Geometry.PointCloud()\n    npoint = Rhino.Geometry.Point3d.Unset\n    normal = Rhino.Geometry.Vector3d.Unset\n\n    rs.StatusBarProgressMeterShow(\" Processing\", 0, len(contents), True, True)\n    rs.Prompt(\"Processing, please wait\")\n\n    for i, line in enumerate(contents):\n    items = line.strip(\"()\\n\").split(\" \")\n    if not items[0].startswith(\"nan\"):\n        npoint.X = float(items[0])\n        npoint.Y = float(items[1])\n        npoint.Z = float(items[2])\n        normal.X = float(items[3])\n        normal.Y = float(items[4])\n        normal.Z = float(items[5])\n        cloud.Add(npoint, normal)\n        if (i%50000) == 0: rs.StatusBarProgressMeterUpdate(i)\n\n    rs.Prompt()\n    rs.StatusBarProgressMeterHide()\n\n    if cloud.IsValid:\n        scriptcontext.doc.Objects.AddPointCloud(cloud)\n        scriptcontext.doc.Views.Redraw()\n        print \"One poincloud with normals build from\", file.name\n\n    cloud.Dispose()\n\nif (__name__ == \"__main__\"):\n    Import_npts()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 2896
+}

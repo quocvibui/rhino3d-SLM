@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/cmuphyscomp/hmv-s16/blob/7863c66ed645b463b72aef98a5c484a18cc9f396/Grasshopper/CutShtDemo/CreateCutSht.py",
+  "repo": "cmuphyscomp/hmv-s16",
+  "repo_stars": 5,
+  "repo_description": "Course resources for the Human-Machine Virtuosity course at Carnegie Mellon University, Spring 2016.",
+  "license": "BSD-3-Clause",
+  "filepath": "Grasshopper/CutShtDemo/CreateCutSht.py",
+  "instruction": "Create cut sht",
+  "code": "﻿# CreateCutSht.py - contents of the CreateCutsht ghpython script\n\n# inputs\n#   layers -  a list of strs representing cut sht layers to create in Rhino\n#   no_cut - geo for no_cut layer\n#   score - geo for score layer\n#   cut_1 - geo for cut_1 layer\n#   cut_2 - geo for cut_2 layer\n# outputs\n#   out    - console debugging output\n# notes\n#   script currently hard coded to take in geo from only those layers reprsented \n#   in input.\n\n\nimport scriptcontext as sc\nimport Rhino as r\nimport ghutil.ghrhinodoc as ghutil\n\n#==============================================================================\n\n# take in all geo inputs and order them by layer name list\nallItems = [no_cut,score,cut_1,cut_2]\nlayerNum = 0\nfor name in layers:\n    # create or fetch cut sht layers\n    layer =  ghutil.fetch_or_create_layer_index(name)\n    # delete any current items on these layers \n    all_objects = ghutil.all_doc_objects(name)\n    for obj in all_objects:\n        r.RhinoDoc.ActiveDoc.Objects.Delete(obj, True)\n    # add all objects associated with layer\n    layerItems = allItems[layerNum]\n    layerNum +=1\n    for item in layerItems:\n        ghutil.add_geometry(item,layer)\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

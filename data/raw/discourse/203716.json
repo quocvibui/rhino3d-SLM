@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/odd-phenom-with-plane-closestpoint-or-distanceto/203716",
+  "topic_id": 203716,
+  "title": "Odd phenom with plane.ClosestPoint or DistanceTo",
+  "question": "In the file below, there are 6 planes, which started out as copies (no history).  Then each one has had its top edge moved in the Y direction a tiny amount as indicated by the dots - to simulate a “just off vertical situation”.  The idea was to check at what tolerance the script would detect a non-vertical condition.\n\n\nBasically what it does is get the surface plane, move its origin to W0, make a point a certain height (roughly the size of the object) along the World Z axis and check the distance from this point to the closest point on the surface plane.  Obviously a completely vertical surface will have essentially 0 distance, as the plane is tilted by moving the top edge there should be an increasing distance between the two points, getting greater the more the tilt.\n\n\nMoving the check point higher along the world Z axis should result in a proportionally larger distance being measured.  The script prints out this distance.  I compare this to the file tolerance and if it is less than that, I select the object as being ‘vertical within tolerance’.\n\n\nWhat I am finding is that the script (just a prototype for something else) is working OK for all except the second object - the one that has had the upper edge moved by only 0.001 (file tolerance).  I would expect a distance to be printed out for that one that is smaller than the file tolerance, maybe around 0.0009.  Instead it prints 0.0:\n\n\nimage\n198×138 1.8 KB\n\n\nNow if I increase the ‘size’ variable by a factor of 10, all the values should be multiplied by 10 proportionally.\n\n\nimage\n178×148 1.65 KB\n\n\nWhich they do, \nall except the second one\n which remains 0.0.\n\n\nI can increase the size as much as I want - to 1000, 10,000 or more - but the second one stubbornly stays at 0.0.  Interestingly if I start decreasing the size value from 100, I start getting more of the planes selected, as one would expect - at  50 I get the third one lighting up, at 30 the fourth one, at 20 the fifth one, and at 10 all of them.  So it is wor...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef TestPlaneWVertical(o_plane,size,tol):\n    w0=Rhino.Geometry.Point3d(0,0,0)\n    chk_pt=Rhino.Geometry.Point3d(0,0,size)\n    o_plane.Origin=w0\n    print(abs(o_plane.DistanceTo(chk_pt))) #debug\n    if abs(o_plane.DistanceTo(chk_pt))<tol: return True\n    return False\n\nsize=100.0 #start value, can change\ntol=sc.doc.ModelAbsoluteTolerance\n\nobj_ids=rs.ObjectsByType(8)\nbreps=[rs.coercebrep(obj_id) for obj_id in obj_ids]\nfor i,brep in enumerate(breps):\n    face=brep.Faces[0]\n    rc,obj_plane=face.TryGetPlane()\n    if rc:\n        if TestPlaneWVertical(obj_plane,size,tol):\n            rs.SelectObject(obj_ids[i])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 143
+}

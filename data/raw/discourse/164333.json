@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-add-object-redraw-performance/164333",
+  "topic_id": 164333,
+  "title": "Rhinoscriptsyntax - Add Object, redraw - performance",
+  "question": "playing arround with the new Rhinocode Editor i noticed, that many / all (?) rhinoscript syntax functions, that add geometry to the document, call:\n\n\ndoc.Views.Redraw()\n\n\n\nin old times with vb-script based rhinoscript, it was a huge performance increase to turn of redraw and only redraw at the end of a command.\n\n\nIs this obsolete with the latest Display Pipeline ?\n\n\nexample:\n\nFILE .rhinocode/python3.9-32/site-rhinopython/rhinoscript/curve.py\n\nLINE 221 onward\n\n\ndef AddCurve(points, degree=3):\n    points = rhutil.coerce3dpointlist(points, True)\n    curve = Rhino.Geometry.Curve.CreateControlPointCurve(points, degree)\n    if not curve: raise Exception(\"unable to create control point curve from given points\")\n    rc = scriptcontext.doc.Objects.AddCurve(curve)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add curve to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc\n\n\n\njust stumbled across ist and was wondering.\n\nno actual use case - skipping rhinoscript syntax and use rhinocommon.\n\nkind regards - tom",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nnum = 5\ntime = 100\n#point by point\nfor i in range(num):\n    rs.AddPoint(i,0,0)\n    rs.Sleep(time)\n    \n# no redraw\nrs.EnableRedraw(False)\nfor i in range(num):\n    rs.AddPoint(i,1,0)\n    rs.Sleep(time)\nrs.EnableRedraw(True)\n\n# redraw without effect\nrs.EnableRedraw(False)\nfor i in range(num):\n    rs.AddPoint(i,2,0)\n    # no impact by Redraw \n    sc.doc.Views.Redraw()\n    rs.Sleep(time)\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Tom_P",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "def AddCurve(points, degree=3):\n    points = rhutil.coerce3dpointlist(points, True)\n    curve = Rhino.Geometry.Curve.CreateControlPointCurve(points, degree)\n    if not curve: raise Exception(\"unable to create control point curve from given points\")\n    rc = scriptcontext.doc.Objects.AddCurve(curve)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add curve to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Tom_P",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 627
+}

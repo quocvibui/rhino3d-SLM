@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/constructing-triangles-with-known-edge-lengths/118001",
+  "topic_id": 118001,
+  "title": "Constructing triangles with known edge lengths",
+  "question": "Hi, I’m making a script that does some sort of flattening of strips.\n\nThe strips are defined by polylines (and theirs offsets), so the method should be simple. get triangles from the strips, and draw the same triangles sequentially on a plane.\n\n\nBut I just noticed, just drawing a triangle based on known edge lengths is not an easy task. I cannot find any built-in component that does this. I’m very curious how people are achieving this.\n\n\nI’d omit solutions by circles and Kangaroo, since I assume there are more direct solutions.\n\nPlease help!",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\nfor i in range(crv1.Count-1):\n    p=crv1[i]\n    q=crv1[i+1]\n    r=crv2[i]\n    w=crv2[i+1]\n    if i==0:\n        pp=[rg.Point3d(0,,0)]\n        L=(r-p).Length\n        qq=[rg.Point3d(0,-L,0)]\n    A=(r-p).Length\n    B=(q-p).Length\n    C=(r-q).Length\n    _cos=(q-p)*(r-p)/A/B\n    theta=math.acos(_cos)\n    R=rg.Transform.Rotation(theta,rg.Vector3d(0,0,1),pp[i])\n    V=qq[i]-pp[i]\n    V.Transform(R)\n    V.Unitize()\n    V*=B\n    p=pp[i]\n    p+=V\n    print p\n    pp.append(p)\n\n    A=(w-q).Length\n    B=(q-r).Length\n    C=(w-r).Length\n    _cos=(w-q)*(r-q)/A/B\n    theta=math.acos(_cos)\n    R=rg.Transform.Rotation(theta,rg.Vector3d(0,0,1),pp[i+1])\n    V=qq[i]-pp[i+1]\n    V.Transform(R)\n    V.Unitize()\n    V*=A\n    r=pp[i+1]\n    r+=V\n    qq.append(r)",
+      "language": "python",
+      "author": "mikity_kogekoge",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 14,
+  "views": 1502
+}

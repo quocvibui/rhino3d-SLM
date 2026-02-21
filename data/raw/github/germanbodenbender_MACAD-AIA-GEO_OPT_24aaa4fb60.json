@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/germanbodenbender/MACAD-AIA-GEO_OPT/blob/4127a5112369717b43c647b04d84d2cda485ac60/SESSION%2003-A03/app-comp_vision.py",
+  "repo": "germanbodenbender/MACAD-AIA-GEO_OPT",
+  "repo_stars": 1,
+  "repo_description": "Repository for the AIA-Geometry Optimization Seminar that includes all the exercises and tests done during the semester using Pytho, NetworkX, Numpy, Rhinoinside and Hops",
+  "license": "unknown",
+  "filepath": "SESSION 03-A03/app-comp_vision.py",
+  "instruction": "App comp vision",
+  "code": "from flask import Flask\nimport ghhops_server as hs\nimport rhino3dm\nimport numpy as np\nimport os\nimport sys\n\nos.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'\n\nimport tensorflow as tf\nimport numpy as np\nfrom PIL import Image\nfrom matplotlib import pyplot as plt\n\napp = Flask(__name__)\nhops = hs.Hops(app)\n\n\n@hops.component(\n    \"/runml\",\n    name=\"runml\",\n    description=\"Run Machine Learning prediction\",\n    icon=\"examples/pointat.png\",\n    #inputs=[\n    #    hs.HopsCurve(\"Curve\", \"C\", \"Curve to evaluate\"),\n    #    hs.HopsNumber(\"t\", \"t\", \"Parameter on Curve to evaluate\"),\n    #],\n    #outputs=[\n    #    hs.HopsPoint(\"P\", \"P\", \"Point on curve at t\")\n    #]\n)\n\n\n\n\n#FIND DEPENDENCIES\npath_model = \"pattern_model.h5\"\nprint(\"Dependencies OK\")\n\n#LOAD MODEL\nnew_model = tf.keras.models.load_model(path_model)\n#new_model.summary()\nprint(\"Model OK\")\n\n#LOAD QUERY\nquery_flat = np.loadtxt(\"query.txt\") #load\nquery = np.reshape(query_flat,(128,128,3))\nquery = query.astype(np.float32)\nquery_norm = np.multiply(query, 2)\nquery_norm = np.subtract(query_norm , 1)  #normalize -1 to 1, it is already 0 to 1\nquery_t = tf.convert_to_tensor(query_norm)\nquery_t = tf.expand_dims(query_t, 0)\n\n#MAKE PREDICTION\nIMG_WIDTH = 128\nIMG_HEIGHT = 128\nCHANNELS = 3\n\ndef plot(tensor):\n    array = np.asarray(tensor)\n    array = array.astype('float64')\n    array = array.reshape(IMG_HEIGHT, IMG_WIDTH,CHANNELS)\n    return array\n\ndef generate_images(model, test_input):\n    prediction = model(test_input, training=True)\n\n    # remap to [0,1]\n    test_input = test_input * 0.5 + 0.5\n    prediction = prediction * 0.5 + 0.5\n\n    display_list = [plot(test_input), plot(prediction)]\n    title = ['Input Image', 'Predicted Image']\n\n    for i in range(2):\n        plt.subplot(1, 2, i + 1)\n        plt.title(title[i])\n        # getting the pixel values between [0, 1] to plot it.\n        plt.imshow(display_list[i])\n        plt.axis('off')\n    plt.draw()\n    plt.savefig(\"D:\\German Profile\\Desktop\\PREDICTION MODEL\\log.png\")\n\n    return prediction\n\npred = generate_images(new_model,query_t)\nprint(\"Prediction OK\")\n\n#SAVE TO FOLDER\npred = np.reshape(pred,(128,128,3))\nnp.savetxt(\"prediction.txt\", pred.flatten())\nprint(\"text Saved\")\n\nimg = Image.fromarray(np.uint8(pred * 255), 'RGB')\nimg.save(\"pred_image.png\")\nprint(\"imagesaved\")\n\n\nif __name__ == \"__main__\":\n    app.run()",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

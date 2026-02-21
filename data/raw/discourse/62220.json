@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ifc-python-question-continued-from-old-forum/62220",
+  "topic_id": 62220,
+  "title": "IFC Python Question (continued from old forum)",
+  "question": "grasshopper3d.com\n\n\n\n\n\n\n\n\nIFC Python question\n\n\nHi Jon \nI see your post about IFC script(python).\nAt first, thank you about sharing your research.\nI see your IFC python sample file.\nBut when I opened IFC pyt…\n\n\n\n\n\n\n\n\n\n\n\n\nhi \n@johnmirts\n  , i guess that the old python example you posted a while ago is not working with the your current IFC library.\n\n\nI tried to adapt it to the current version of the library without success.\n\nI was able to output what it looks an express code, but no ifc viewer is capable of interpret this…\n\nSome working example for python with the currect IFC library version would be much appreciated.\n\n\n\n\nCaptura111.PNG\n683×818 72.6 KB\n\n\n\n\n\n    import clr\n    import sys\n    #sys.path.append(r\"C:\\Program Files (x86)\\Geometry Gym\\Rhino3d\")\n\n    #clr.AddReference(\"ggRhinoIFC.dll\")\n    clr.AddReferenceToFileAndPath(r\"C:\\Users\\aleceta\\Source\\Repos\\GeometryGymIFC\\DLL Projects\\GeometryGymIFCRhinoCommonx64\\bin\\GeometryGymIFCRhinoCommonx64.dll\")\n\n\n    import GeometryGym.Ifc as gg \n\n\n    from System.Collections.Generic import List\n    from System import Guid\n    from Rhino.Geometry import Transform\n    from Rhino.Geometry import Point3d\n    from Rhino.Geometry import Vector3d\n    from Rhino.Geometry import Line\n    from Rhino.Geometry import Plane\n\n    ipe = \"IPE300\"\n    db = gg.DatabaseIfc(True,gg.ModelView.Ifc2x3Coordination) \n\n    building = gg.IfcBuilding(db,\"PythonBuilding\")\n    project = gg.IfcProject(db,\"PythonProject\")\n    s355 = gg.IfcMaterial(db,\"S355JR\") \n    s355.Category = \"STEEL\"\n    pd = gg.IfcIShapeProfileDef(db,ipe,300,150,7.1,10.7,15)\n    #ifcBeamTypeID = GuidEncoder.Encode(Guid(\"{FA07940E-19FC-417a-B7F1-09A0CCF39B74}\")) \n    #Can create a unique identifier if you wish else leave blank\n    mp = gg.IfcMaterialProfile(ipe,s355,pd)\n    mpUsage = gg.IfcMaterialProfileSetUsage(mp)\n    #bt = gg.IfcBeamType(ipe,mp,gg.IfcBeamTypeEnum.BEAM)\n    ln = Line(Point3d(0,0,0),Point3d(1,0,0)) #use SI units ie metres\n    clipPlanes = List[Plane]()\n\n    #beam = ...",
+  "code_blocks": [
+    {
+      "code": "import clr\n    import sys\n    #sys.path.append(r\"C:\\Program Files (x86)\\Geometry Gym\\Rhino3d\")\n\n    #clr.AddReference(\"ggRhinoIFC.dll\")\n    clr.AddReferenceToFileAndPath(r\"C:\\Users\\aleceta\\Source\\Repos\\GeometryGymIFC\\DLL Projects\\GeometryGymIFCRhinoCommonx64\\bin\\GeometryGymIFCRhinoCommonx64.dll\")\n\n\n    import GeometryGym.Ifc as gg \n\n\n    from System.Collections.Generic import List\n    from System import Guid\n    from Rhino.Geometry import Transform\n    from Rhino.Geometry import Point3d\n    from Rhino.Geometry import Vector3d\n    from Rhino.Geometry import Line\n    from Rhino.Geometry import Plane\n\n    ipe = \"IPE300\"\n    db = gg.DatabaseIfc(True,gg.ModelView.Ifc2x3Coordination) \n\n    building = gg.IfcBuilding(db,\"PythonBuilding\")\n    project = gg.IfcProject(db,\"PythonProject\")\n    s355 = gg.IfcMaterial(db,\"S355JR\") \n    s355.Category = \"STEEL\"\n    pd = gg.IfcIShapeProfileDef(db,ipe,300,150,7.1,10.7,15)\n    #ifcBeamTypeID = GuidEncoder.Encode(Guid(\"{FA07940E-19FC-417a-B7F1-09A0CCF39B74}\")) \n    #Can create a unique identifier if you wish else leave blank\n    mp = gg.IfcMaterialProfile(ipe,s355,pd)\n    mpUsage = gg.IfcMaterialProfileSetUsage(mp)\n    #bt = gg.IfcBeamType(ipe,mp,gg.IfcBeamTypeEnum.BEAM)\n    ln = Line(Point3d(0,0,0),Point3d(1,0,0)) #use SI units ie metres\n    clipPlanes = List[Plane]()\n\n    #beam = gg.IfcBeamStandardCase(building,bt,ln,Vector3d.YAxis, gg.IfcCardinalPointReference.MID,clipPlanes)\n    axisPlacement = gg.IfcAxis2Placement3D(gg.IfcCartesianPoint(db,0,0,0),gg.IfcDirection(db,0,1,0),gg.IfcDirection(db,0,0,1))\n    beam = gg.IfcBeamStandardCase(building,mpUsage,axisPlacement,10)\n    a = db.ToString()\n    gg.DatabaseIfc.WriteFile(db,'testFile')",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 65,
+  "posts_count": 2,
+  "views": 1404
+}

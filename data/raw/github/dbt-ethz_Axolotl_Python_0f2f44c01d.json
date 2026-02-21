@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/_old_axolotl-1.0/code/modifications/sobel.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "_old_axolotl-1.0/code/modifications/sobel.py",
+  "instruction": "gradient vectors from voxelspace",
+  "code": "\"\"\"\ngradient vectors from voxelspace\n\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT / ETH Zurich'\n__license__    = 'MIT License'\n__email__      = '<bernhard@arch.ethz.ch>'\n\nimport rhinoscriptsyntax as rs\nimport math\n\ndef get_index(x,y,z):\n    return x * nyz + y * nz + z\n\nif __name__==\"__main__\":\n    if not nx:\n        nx = 0\n    if not ny:\n        ny = 0\n    if not nz:\n        nz = 0\n    nyz = ny*nz\n    nxy = nx*ny\n\n    ukernel = [[1,2,1],[2,4,2],[1,2,1]]\n    mkernel = [[0]*3]*3\n    lkernel = [[-1,-2,-1],[-2,-4,-2],[-1,-2,-1]]\n    kernel = [ukernel,mkernel,lkernel]\n\n    #xval = [0 for _ in vals]\n    #yval = [0 for _ in vals]\n    #zval = [0 for _ in vals]\n    nval = [0 for _ in vals]\n    for x in range(1,nx-1):\n        for y in range(1,ny-1):\n            for z in range(1,nz-1):\n                ix = get_index(x,y,z)\n                vsx = 0\n                vsy = 0\n                vsz = 0\n                for dx in range(-1,2):\n                    for dy in range(-1,2):\n                        for dz in range(-1,2):\n                            it = get_index(x+dx,y+dy,z+dz)\n                            vt = vals[it]\n                            vsx += vt * kernel[dz+1][dx+1][dy+1]\n                            vsy += vt * kernel[dy+1][dz+1][dx+1]\n                            vsz += vt * kernel[dx+1][dy+1][dz+1]\n                #xval[ix] = vsx\n                #yval[ix] = vsy\n                #zval[ix] = vsz\n                nval[ix] = math.sqrt(vsx**2 + vsy**2 + vsz**2)\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

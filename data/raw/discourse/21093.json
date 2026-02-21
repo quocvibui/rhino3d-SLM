@@ -1,0 +1,50 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-equivalent-of-explode/21093",
+  "topic_id": 21093,
+  "title": "RhinoCommon equivalent of \"Explode\"",
+  "question": "I seem to be missing something here.  In the file attached, there is one polycurve consisting of two segments, the split points are indicated with points.  Each of the two subcurves is “kinked”, meaning it will explode into more segments.\n\n\nRunning the Rhino command “Explode” on the original curve produces 25 segments.  I would like to be able to do this with RhinoCommon.  I guess I am missing something, because I can’t find an exact way.\n\n\nI ran the following script on the curve to test:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef TestExplode():\n    crvID=rs.GetObject(\"Pick polycurve\",4,True)\n    p_crv=sc.doc.Objects.Find(crvID).Geometry\n    msg=\"\"\n    msg+=\"Original has {} segments\\n\".format(p_crv.SegmentCount)\n    if p_crv.IsNested:\n        msg+=\"Polycurve is nested\\n\"\n        p_crv.RemoveNesting()\n    else:\n        msg+=\"Polycurve is NOT nested\\n\" \n    exploded=p_crv.Explode()\n    msg+=\"Number of segs after crv.Explode()={}\\n\".format(len(exploded))\n    dup_segs=p_crv.DuplicateSegments()\n    msg+=\"Number of segs found with crv.DuplicateSegments={}\\n\".format(len(dup_segs))\n    ex_crvs=rs.ExplodeCurves(crvID,False)\n    msg+=\"Number of segs found after rs.ExplodeCurves()={}\\n\".format(len(ex_crvs))\n    rs.SelectObject(crvID)\n    rs.Command(\"Explode\",False)\n    lco=rs.LastCreatedObjects()\n    msg+=\"Number of segs found after Rhino Explode command={}\\n\".format(len(lco))\n    print msg\nTestExplode()\n\n\n\nThe results are as follows:\n\n\n\n\nOriginal has 2 segments\n\nPolycurve is NOT nested\n\nNumber of segs after crv.Explode()=2\n\nNumber of segs found with crv.DuplicateSegments=19\n\nNumber of segs found after rs.ExplodeCurves()=19\n\nNumber of segs found after Rhino Explode command=25\n\n\n\n\nI did not find any method that would completely explode the curve as the Rhino explode command does.  Am I missing something?  Or do I have to write my own function with FindNextDiscontinuity (painful) and split the curve, something like the following:\n\n\nimport Rhino...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nobjID=rs.GetObject(\"Select polycurve\",4,True)\ncrvObj=sc.doc.Objects.Find(objID)\nsu=crvObj.GetSubObjects()\nfor i,obj in enumerate(su):\n    geo=obj.Geometry\n    #errors out here",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nobjID=rs.GetObject(\"Select polycurve\",4,True)\ncrvObj=sc.doc.Objects.Find(objID)\n\ncrv_dup = crvObj.DuplicateGeometry() # It's here you get a copy that is not bound to the doc\n\nsu=crv_dup.DuplicateSegments() #This was my explode means for the polycurve I tested\nfor i,obj in enumerate(su):\n    sc.doc.Objects.AddCurve(obj)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef TestExplode():\n    crvID=rs.GetObject(\"Pick polycurve\",4,True)\n    p_crv=sc.doc.Objects.Find(crvID).Geometry\n    msg=\"\"\n    msg+=\"Original has {} segments\\n\".format(p_crv.SegmentCount)\n    if p_crv.IsNested:\n        msg+=\"Polycurve is nested\\n\"\n        p_crv.RemoveNesting()\n    else:\n        msg+=\"Polycurve is NOT nested\\n\" \n    exploded=p_crv.Explode()\n    msg+=\"Number of segs after crv.Explode()={}\\n\".format(len(exploded))\n    dup_segs=p_crv.DuplicateSegments()\n    msg+=\"Number of segs found with crv.DuplicateSegments={}\\n\".format(len(dup_segs))\n    ex_crvs=rs.ExplodeCurves(crvID,False)\n    msg+=\"Number of segs found after rs.ExplodeCurves()={}\\n\".format(len(ex_crvs))\n    rs.SelectObject(crvID)\n    rs.Command(\"Explode\",False)\n    lco=rs.LastCreatedObjects()\n    msg+=\"Number of segs found after Rhino Explode command={}\\n\".format(len(lco))\n    print msg\nTestExplode()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef SplitAtAllDiscontinuities(crv):\n    dom=crv.Domain\n    params=[]\n    if crv.IsClosed:\n        cd=Rhino.Geometry.Continuity.C1_locus_continuous\n    else:\n        cd=Rhino.Geometry.Continuity.C1_continuous\n    param=dom[0]\n    while True:\n        chk,next_param=crv.GetNextDiscontinuity(cd,param,dom[1])\n        if chk:\n            params.append(next_param)\n            param=next_param\n        else:\n            break\n    return params\n    \ncrvID=rs.GetObject(\"Select polycurve\",4,preselect=True)\ncrv=sc.doc.Objects.Find(crvID).Geometry\nparameters=SplitAtAllDiscontinuities(crv)\nif len(parameters)>0:\n    pts=[rs.EvaluateCurve(crvID,p) for p in parameters]\n    rs.AddPoints(pts)\n    rs.SplitCurve(crvID,parameters,False)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 6042
+}

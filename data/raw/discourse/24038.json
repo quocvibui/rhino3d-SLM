@@ -1,0 +1,85 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/layernames-returns-empty-list-after-open-command-launch-from-modeless-dialog/24038",
+  "topic_id": 24038,
+  "title": "LayerNames returns empty list after Open command launch from modeless dialog?",
+  "question": "Hello,\n\n\nI have a GUI that calls mesh intersection code that sometimes crashes.  To prevent losing too much work, I implemented a “\nbackup\n” function that saves the complete Rhino project (.3dm) and the current GUI-related values (.txt) before the \ndangerous operations\n.  After a crash, if both these files are available, I load them so that my project is restored and my GUI is reseted to the right values.\n\n\nMy problem is that sometimes, right after the command\n\n\n\n\nrs.Command(“_-Open \" + backupFile + \" _Enter” )\n\n\n\n\nEverything seems fine:\n\n\n\n\nI see all the surfaces, curves and points (and I can pick them, etc)\n\n\nThe \nLayers\n tab shows all the layers (and I can turn them on/off)\n\n\n\n\nBUT\n the command\n\n\n\n\nrhinoscriptsyntax.LayerNames()\n\n\n\n\nreturns an \nEMPTY\n layer list… Then, all my other scripts fail because they cannot find their inputs in the expected layer (as rs.IsLayer(layer) returns False ).  Here is a print out of the traces I have showing the problem:\n\n\nFirst restoration (everything works as expected with lots of layers, in particular the STL one)\n\n\nEntering RestoreProject...\n   allLayers: ['Default', 'Layer 01', 'Layer 02', 'Layer 03', 'Layer 04', 'Layer 05']\nRestorationIsPossible: True\nRestoring design file: P:\\PREP_DECOUPE\\BackupDesign.3dm\nPython Script ( ResetEngine ): _-Open\nName of the file to open ( UpdatePromptUpdateBlocks=Yes  Browse ): P:\\PREP_DECOUPE\\BackupDesign.3dm\nFile \"P:\\PREP_DECOUPE\\BackupDesign.3dm\" successfully read\nCommand: _Enter\n   allLayers AFTER -Open command: ['Default', 'STL', '104564D Podoscan', '0', '104564D_Contour_Data4941985', 'Metatarsal_1', 'Metatarsal_2', 'Metatarsal_3', 'Metatarsal_4', 'Metatarsal_5', 'AlignmentPoint_1', 'AlignmentPoint_2', 'AlignmentPoint_3', 'AlignmentPoint_4', 'AlignmentPoint_5', 'AxisLines', 'Forefoot_Contour', 'Medial_Edge', 'Lateral_Edge', '104564D_Contour_Data4941985::Heel_Contour']\nRestoring parameters file: P:\\PREP_DECOUPE\\BackupParameters.txt\n   allLayers AFTER reading parameters: ['Default', 'STL', ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef OpenProjectTest():\n        allLayers = rs.LayerNames()\n        print \"allLayers before Open command: \" + str(allLayers)\n        \n        desigbBkpFilename = \"P:\\PREP_DECOUPE\\BackupDesign.3dm\"\n        rs.Command(\"_-Open \" + desigbBkpFilename + \" _Enter\" )\n        \n        allLayers = rs.LayerNames()\n        print \"allLayers after Open command: \" + str(allLayers)\n                \n        rs.Command(\"_-Open \" + desigbBkpFilename + \" _Enter\" )\n        allLayers = rs.LayerNames()\n        print \"allLayers after second Open command: \" + str(allLayers)\n\nOpenProjectTest()",
+      "language": "python",
+      "author": "bmartin",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# Try giving Rhino some time to finish its stuff.\ntime.sleep( 3 )\nRhino.RhinoApp.Wait()",
+      "language": "unknown",
+      "author": "bmartin",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "def Restore_OnButtonPress(self, sender, e):\n    print \"\\nEntering Restore_OnButtonPress...\"\n    allLayers = rs.LayerNames()\n    print \"   allLayers: \" + str(allLayers)\n    self.RestoreProject()",
+      "language": "python",
+      "author": "bmartin",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "def LayerNames(sort=False):\n    rc = []\n    for layer in scriptcontext.doc.Layers:\n        if not layer.IsDeleted: rc.append(layer.FullPath)\n    if sort: rc.sort()\n    return rc",
+      "language": "python",
+      "author": "menno",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "def LayerNames(sort=False):\n    rc = []\n    for layer in scriptcontext.doc.Layers:\n        if not layer.IsDeleted: rc.append(layer.FullPath)\n    if sort: rc.sort()\n    return rc",
+      "language": "python",
+      "author": "dale",
+      "post_number": 22,
+      "is_solution": false
+    },
+    {
+      "code": "'''The Active Rhino document (Rhino.RhinoDoc in RhinoCommon) while a script\nis executing. This variable is set by Rhino before the execution of every script.\n'''\ndoc = None",
+      "language": "unknown",
+      "author": "dale",
+      "post_number": 22,
+      "is_solution": false
+    },
+    {
+      "code": "Entering RestoreProject...\n   allLayers: ['Default', 'Layer 01', 'Layer 02', 'Layer 03', 'Layer 04', 'Layer 05']\nRestorationIsPossible: True\nRestoring design file: P:\\PREP_DECOUPE\\BackupDesign.3dm\nPython Script ( ResetEngine ): _-Open\nName of the file to open ( UpdatePromptUpdateBlocks=Yes  Browse ): P:\\PREP_DECOUPE\\BackupDesign.3dm\nFile \"P:\\PREP_DECOUPE\\BackupDesign.3dm\" successfully read\nCommand: _Enter\n   allLayers AFTER -Open command: ['Default', 'STL', '104564D Podoscan', '0', '104564D_Contour_Data4941985', 'Metatarsal_1', 'Metatarsal_2', 'Metatarsal_3', 'Metatarsal_4', 'Metatarsal_5', 'AlignmentPoint_1', 'AlignmentPoint_2', 'AlignmentPoint_3', 'AlignmentPoint_4', 'AlignmentPoint_5', 'AxisLines', 'Forefoot_Contour', 'Medial_Edge', 'Lateral_Edge', '104564D_Contour_Data4941985::Heel_Contour']\nRestoring parameters file: P:\\PREP_DECOUPE\\BackupParameters.txt\n   allLayers AFTER reading parameters: ['Default', 'STL', '104564D Podoscan', '0', '104564D_Contour_Data4941985', 'Metatarsal_1', 'Metatarsal_2', 'Metatarsal_3', 'Metatarsal_4', 'Metatarsal_5', 'AlignmentPoint_1', 'AlignmentPoint_2', 'AlignmentPoint_3', 'AlignmentPoint_4', 'AlignmentPoint_5', 'AxisLines', 'Forefoot_Contour', 'Medial_Edge', 'Lateral_Edge', '104564D_Contour_Data4941985::Heel_Contour']\nRestoring UI\nUI update finish\n   allLayers AFTER UI update: ['Default', 'STL', '104564D Podoscan', '0', '104564D_Contour_Data4941985', 'Metatarsal_1', 'Metatarsal_2', 'Metatarsal_3', 'Metatarsal_4', 'Metatarsal_5', 'AlignmentPoint_1', 'AlignmentPoint_2', 'AlignmentPoint_3', 'AlignmentPoint_4', 'AlignmentPoint_5', 'AxisLines', 'Forefoot_Contour', 'Medial_Edge', 'Lateral_Edge', '104564D_Contour_Data4941985::Heel_Contour']",
+      "language": "python",
+      "author": "bmartin",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Entering RestoreProject...\n   allLayers: ['Default', 'STL', '104564D Podoscan', '0', '104564D_Contour_Data4941985', 'Metatarsal_1', 'Metatarsal_2', 'Metatarsal_3', 'Metatarsal_4', 'Metatarsal_5', 'AlignmentPoint_1', 'AlignmentPoint_2', 'AlignmentPoint_3', 'AlignmentPoint_4', 'AlignmentPoint_5', 'AxisLines', 'Forefoot_Contour', 'Medial_Edge', 'Lateral_Edge', '104564D_Contour_Data4941985::Heel_Contour']\nRestorationIsPossible: True\nRestoring design file: P:\\PREP_DECOUPE\\BackupDesign.3dm\nCommand: _-Open\nName of the file to open ( UpdatePromptUpdateBlocks=Yes  Browse ): P:\\PREP_DECOUPE\\BackupDesign.3dm\nFile \"P:\\PREP_DECOUPE\\BackupDesign.3dm\" successfully read\nCommand: _Enter\n   allLayers AFTER -Open command: []\nRestoring parameters file: P:\\PREP_DECOUPE\\BackupParameters.txt\n   allLayers AFTER reading parameters: []\nRestoring UI\nUI update finish\n   allLayers AFTER UI update: []",
+      "language": "python",
+      "author": "bmartin",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "def RestoreProject(self):\n        \"\"\" Restores the Rhino project from its last state along with the Heel modeling parameters.\n        \"\"\"\n        print \"\\nEntering RestoreProject...\"\n        allLayers = rs.LayerNames()\n        print \"   allLayers: \" + str(allLayers)\n        \n        if not self.RestorationIsPossible():\n            return\n        \n        GeoUtil.ShowMessageAndContinue(\"Restoring design file: \" + self.BkpDesignCompleteFilename(), sleeptime=2)\n        rs.Command(\"_-Open \" + self.BkpDesignCompleteFilename() + \" _Enter\" )\n        \n        allLayers = rs.LayerNames()\n        print \"   allLayers AFTER -Open command: \" + str(allLayers)\n        \n        GeoUtil.ShowMessageAndContinue(\"Restoring parameters file: \" + self.BkpParametersCompleteFilename(), sleeptime=2)\n        paramFile = open(self.BkpParametersCompleteFilename(), 'rt')\n        readParameters = pickle.load( paramFile )\n        self.data = readParameters\n        paramFile.close()\n        \n        allLayers = rs.LayerNames()\n        print \"   allLayers AFTER reading parameters: \" + str(allLayers)\n        GeoUtil.ShowMessageAndContinue(\"Restoring UI\", sleeptime=2)\n        self.UpdateUI()\n        \n        allLayers = rs.LayerNames()\n        print \"   allLayers AFTER UI update: \" + str(allLayers)",
+      "language": "python",
+      "author": "bmartin",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 23,
+  "views": 3667
+}

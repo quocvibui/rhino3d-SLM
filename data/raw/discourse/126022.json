@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-rhino-background-color/126022",
+  "topic_id": 126022,
+  "title": "Get Rhino background color",
+  "question": "Hello everyone!\n\nNice to meet you here.\n\n\nI am trying to get background color of specific rhino viewport using C#.\n\nHere is what I already did:\n\n\n1: Before  I can get background color in “perspective” viewport, I have to get what display mode “perspective” is using. This is done with codes below:\n\n\nA = Rhino.RhinoDoc.ActiveDoc.Views.Find(x, false).ActiveViewport.DisplayMode.DisplayAttributes.EnglishName;\n\n\n1\n956×365 19.9 KB\n\n\n2: After that I have to get backgroundstyle of “Shaded” displaymode.\n\nI stuck here.\n\nI searched rhinocommon online and tried a few ways. None of them asked for some input or parameter related to “shaded”. They are all somehow “global” settings.\n\n\n2\n675×347 12.8 KB\n\n\n3\n636×333 12.7 KB\n\n\nCan anybody help me with this.\n\nThank you very much!",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(string name, ref object Mode, ref object Colors)\n{\n  var displayMode = doc.Views.Find(name, false).ActiveViewport.DisplayMode;\n  var fillMode = displayMode.DisplayAttributes.FillMode;\n  Mode = fillMode;\n  var colors = new Color[4];\n  displayMode.DisplayAttributes.GetFill(out colors[0], out colors[1], out colors[2], out colors[3]);\n  switch (fillMode)\n  {\n    case DisplayPipelineAttributes.FrameBufferFillMode.DefaultColor:\n      Colors = Rhino.ApplicationSettings.AppearanceSettings.ViewportBackgroundColor;\n      break;\n    case DisplayPipelineAttributes.FrameBufferFillMode.SolidColor:\n      Colors = colors[0];\n      break;\n    case DisplayPipelineAttributes.FrameBufferFillMode.Gradient2Color:\n      Colors = new[] { colors[0], colors[1] };\n      break;\n    case DisplayPipelineAttributes.FrameBufferFillMode.Gradient4Color:\n      Colors = colors;\n      break;\n    case DisplayPipelineAttributes.FrameBufferFillMode.Bitmap:\n      break;\n    case DisplayPipelineAttributes.FrameBufferFillMode.Renderer:\n      switch (RhinoDocument.RenderSettings.BackgroundStyle)\n      {\n        case BackgroundStyle.SolidColor:\n          Colors = RhinoDocument.RenderSettings.BackgroundColorTop;\n          break;\n        case BackgroundStyle.WallpaperImage:\n          break;\n        case BackgroundStyle.Gradient:\n          Colors = new[]\n            {\n              RhinoDocument.RenderSettings.BackgroundColorTop,\n              RhinoDocument.RenderSettings.BackgroundColorBottom\n            };\n          break;\n        case BackgroundStyle.Environment:\n          break;\n        default:\n          throw new ArgumentOutOfRangeException();\n      }\n      break;\n    case DisplayPipelineAttributes.FrameBufferFillMode.Transparent:\n      break;\n    default:\n      throw new ArgumentOutOfRangeException();\n  }\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "materials",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 942
+}

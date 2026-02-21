@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/distribute-control-points-by-z-axis/182701",
+  "topic_id": 182701,
+  "title": "Distribute Control points by z-axis",
+  "question": "import Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport math\nimport random\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\ncrv = rs.GetObject(\"sel crv\",rs.filter.curve,True)\nrs.EnableObjectGrips(crv)\ncps = rs.GetObjectGrips(\"sel control point\")\ncpps = rs.coercegeometry(crv).Points\n\ndef linspace(start,end,count):\n    step = (end - start) / (count - 1)\n    numbers = [start + i * step for i in range(count)]\n    return numbers\n\nl = len(cps)\nr = range(l)\nz = []\nfor i in r:\n    z.append(cps[i][2].Z)\n\nnz = linspace(min(z),max(z),l)\nfor i in r:\n    index = cps[i][1]\n    cpps.SetPoint(index,rg.Point3d(cps[i][2].X,cps[i][2].Y,nz[i]),cpps[index].Weight)\n\n\n\nI’m trying to write a small tool for uniformizing control points on the Z axis,\n\nSo I wrote a piece of code and it didn’t go wrong but it didn’t work either.\n\nSo I don’t know how to correct itself.\n\n\nPlease help me.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport math\nimport random\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\ncrv = rs.GetObject(\"sel crv\",rs.filter.curve,True)\nrs.EnableObjectGrips(crv)\ncps = rs.GetObjectGrips(\"sel control point\")\ncpps = rs.coercegeometry(crv).Points\n\ndef linspace(start,end,count):\n    step = (end - start) / (count - 1)\n    numbers = [start + i * step for i in range(count)]\n    return numbers\n\nl = len(cps)\nr = range(l)\nz = []\nfor i in r:\n    z.append(cps[i][2].Z)\n\nnz = linspace(min(z),max(z),l)\nfor i in r:\n    index = cps[i][1]\n    cpps.SetPoint(index,rg.Point3d(cps[i][2].X,cps[i][2].Y,nz[i]),cpps[index].Weight)",
+      "language": "python",
+      "author": "cy.huang.archi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 159
+}

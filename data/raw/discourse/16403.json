@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-matchobjectattributes/16403",
+  "topic_id": 16403,
+  "title": "BUG MatchObjectAttributes",
+  "question": "Hi All,\n\n\nI wanted to point out a potential bug when using \nrs.MatchObjectAttributes()\n .\n\n\nimport rhinoscriptsyntax as rs\n\nsrcId = rs.GetObject('pick source')\ntargetId = rs.GetObject('pick target')\nrs.MatchObjectAttributes(targetId, srcId)\n\n\n\nWhilst all attributes are \ncopied\n  from \nsrcId\n to \ntargetId\n, User Strings are completely \nremoved\n from \nsrcId\n object in the process.",
+  "code_blocks": [
+    {
+      "code": "def MatchObjectAttributes(target_ids, source_id=None):\n    \"\"\"Matches, or copies the attributes of a source object to a target object\n    Parameters:\n      target_ids = identifiers of objects to copy attributes to\n      source_id[opt] = identifier of object to copy attributes from. If None,\n        then the default attributes are copied to the target_ids\n    Returns:\n      number of objects modified\n    \"\"\"\n    id = rhutil.coerceguid(target_ids, False)\n    if id: target_ids = [id]\n    source_attr = scriptcontext.doc.CreateDefaultAttributes()\n    if source_id:\n        source = rhutil.coercerhinoobject(source_id, True, True)\n        source_attr = source.Attributes.Duplicate()\n    rc = 0\n    for id in target_ids:\n        id = rhutil.coerceguid(id, True)\n        if scriptcontext.doc.Objects.ModifyAttributes(id, source_attr, True):\n            rc += 1\n    if rc: scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef MyMatchObjectAttributes(target_ids, source_id=None):\n    \"\"\"Matches, or copies the attributes of a source object to a target object\n    Parameters:\n      target_ids = identifiers of objects to copy attributes to\n      source_id[opt] = identifier of object to copy attributes from. If None,\n        then the default attributes are copied to the target_ids\n    Returns:\n      number of objects modified\n    \"\"\"\n    id = rs.coerceguid(target_ids, False)\n    if id: target_ids = [id]\n    source_attr = scriptcontext.doc.CreateDefaultAttributes()\n    if source_id:\n        source = rs.coercerhinoobject(source_id, True, True)\n        source_attr = source.Attributes.Duplicate()\n    rc = 0\n    for id in target_ids:\n        id = rs.coerceguid(id, True)\n        if scriptcontext.doc.Objects.ModifyAttributes(id, source_attr, True):\n            rc += 1\n    if rc: scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "dale",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsrcId = rs.GetObject('pick source')\ntargetId = rs.GetObject('pick target')\nrs.MatchObjectAttributes(targetId, srcId)",
+      "language": "python",
+      "author": "gmacarchitect",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1318
+}

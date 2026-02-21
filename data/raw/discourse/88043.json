@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-script-to-select-all-object-and-export-as-iges-file/88043",
+  "topic_id": 88043,
+  "title": "Rhino script to select all object and export as .iges file",
+  "question": "Hi all,\n\n\nI have made an object using Grasshopper and baked the model using \nbake objects\n component. What I am trying to do, as a next step is that I am trying to \nexport\n the baked model as .iges file from Rhino using a rhino python script.\n\n\nThe code I am currently having is this\n\n\nimport rhinoscriptsyntax as rs\n\ndef ExportIGESFile():\n\nfilter=“IGES files|.igs||”\n\nfilename=rs.SaveFileName(“Iges export”,filter)\n\nif not filename: return\t\t\n\nrs.Command(\"_-Export “+chr(34)+filename+chr(34)+” _Enter\",False)\n\nExportIGESFile()\n\n\nThis coding is NOT able to choose the baked model, I still manually have to choose the baked model before running the script.\n\n\nwhat code should I add to make the baked model automatically chosen and export as an iges file?\n\n\nRegards",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef ExportIGESFile():\n    filter=\"IGES files|.igs||\"\n    filename=rs.SaveFileName(\"Iges export\",filter)\n    if not filename: return\n    #make sure nothing is selected first\n    rs.UnselectAllObjects()\n    #select your baked object here\n    rs.SelectObject(rs.FirstObject())\n    rs.Command(\"_-Export \"+chr(34)+filename+chr(34)+\" _Enter\",False)\nExportIGESFile()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.UnselectAllObjects()\nrs.Command(\"_SelLast\")\nobjs=rs.SelectedObjects()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef ExportIGESFile():\n    filter=\"IGES files|.igs||\"\n    filename=rs.SaveFileName(\"Iges export\",filter)\n    if not filename: return\n    #make sure nothing is selected first\n    rs.UnselectAllObjects()\n    #select your just-baked object(s) here - will get them all\n    rs.Command(\"_SelLast\")\n    rs.Command(\"_-Export \"+chr(34)+filename+chr(34)+\" _Enter\",False)\nExportIGESFile()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 15,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 21,
+  "views": 4260
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_cloud_normal_estimator/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_cloud_normal_estimator/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport Rhino\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom diffCheck import df_cvt_bindings\n\nclass DFCloudNormalEstimator(component):\n    def RunScript(self,\n            i_cloud: Rhino.Geometry.PointCloud,\n            i_knn: int,\n            i_radius: int,\n            i_switch_mode: bool):\n        o_cloud = Rhino.Geometry.PointCloud()\n\n        if i_cloud is None:\n            return None\n\n        df_cloud = df_cvt_bindings.cvt_rhcloud_2_dfcloud(i_cloud)\n\n        if i_knn is None:\n            i_knn = 100\n\n        if i_switch_mode is None:\n            i_switch_mode = False\n\n        df_cloud.estimate_normals(\n            use_cilantro_evaluator=i_switch_mode,\n            knn=i_knn,\n            search_radius=i_radius\n            )\n\n        o_cloud = df_cvt_bindings.cvt_dfcloud_2_rhcloud(df_cloud)\n\n        return [o_cloud]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

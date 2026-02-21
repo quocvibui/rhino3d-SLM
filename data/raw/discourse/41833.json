@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-in-rs-addhatch-if-no-pattern-in-file/41833",
+  "topic_id": 41833,
+  "title": "Bug in rs.AddHatch() if no pattern in file?",
+  "question": "Hi, if I make a new document with no template and run a script that adds a hatch, just like the example, then no hatch is made since there are no hatch definitions in the file… so what should I do for it to automatically add “Solid” and use that?\n\n\nimport rhinoscriptsyntax as rs\ncircle = rs.AddCircle(rs.WorldXYPlane(), 10.0)\nif rs.IsHatchPattern(\"Grid\"):\n    rs.AddHatch( circle, \"Grid\" )\nelse:\n    rs.AddHatch( circle, rs.CurrentHatchPattern() )\n\n\n\nThe problem I guess is that if you run print rs.HatchNames() to an empty file then it returns nothing.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nname = Rhino.DocObjects.HatchPattern.Defaults.Solid.Name\npattern = sc.doc.HatchPatterns.FindName(name)\nif not pattern:\n    sc.doc.HatchPatterns.Add(Rhino.DocObjects.HatchPattern.Defaults.Solid)\n\ncircle = rs.AddCircle(rs.WorldXYPlane(), 10.0)\nrs.AddHatch(circle, name)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ncircle = rs.AddCircle(rs.WorldXYPlane(), 10.0)\nif rs.IsHatchPattern(\"Grid\"):\n    rs.AddHatch( circle, \"Grid\" )\nelse:\n    rs.AddHatch( circle, rs.CurrentHatchPattern() )",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 878
+}

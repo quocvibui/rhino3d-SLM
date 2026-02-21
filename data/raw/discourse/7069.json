@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/please-add-to-the-python-wishlist/7069",
+  "topic_id": 7069,
+  "title": "Please add to the Python wishlist",
+  "question": "I could use an UnlockAllObjects method. Currently, the unlock methods require objects id’s, but sometimes I need to unlock everything in the file. I have one scenario where I lock everything that isn’t a cylinder or a planar surface. When the task is done, I use the regular Rhino command “Unlock” to unlock everything, It seems to me a Python method would be handy.\n\n\nSecondly, I could really use a method for sorting cylinders that are complete, not just portions. In our business we deal with a lot of holes, and a IsCylinderClosed method would be VERY useful. I don’t need to know if the ends are capped, just that the cylindrical surface forms a true cylinder. Currently, the IsCylinder method also finds fillets.\n\n\nOf course, if any of this is currently possible and I’m not seeing it, I welcome suggestions.\n\n\nThanks,\n\n\nDan",
+  "code_blocks": [
+    {
+      "code": "for brep in breps: scriptcontext.doc.Objects.AddBrep(brep)\n    for curve in curves: scriptcontext.doc.Objects.AddCurve(curve)\n    for point in points: scriptcontext.doc.Objects.AddPoint(point)\n    for dot in dots: scriptcontext.doc.Objects.AddTextDot(dot)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SubSelectCylinder():\n    obj_ref = rs.GetObject(message=\"Sel\", filter=8, preselect=False, subobjects=True)\n    if obj_ref:\n        subsrf=obj_ref.Surface()\n        if subsrf:\n            # check if part of cylinder\n            res, cyl = subsrf.TryGetCylinder()\n            if res:\n                # check if cylinder is closed in u or v direction\n                if subsrf.IsClosed(0) or subsrf.IsClosed(1):\n                    circle = cyl.CircleAt(0.0)\n                    print \"Closed cylinder properties:\"\n                    print \"axis vector:\", cyl.Axis\n                    print \"center:\", cyl.Center\n                    print \"height:\", cyl.TotalHeight\n                    print \"diameter:\", circle.Diameter\n                else:\n                    print \"this cylinder is not closed\"\n            else:\n                print \"sorry, i am not a cylinder\"\n\nif __name__==\"__main__\":\n    SubSelectCylinder()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 2563
+}

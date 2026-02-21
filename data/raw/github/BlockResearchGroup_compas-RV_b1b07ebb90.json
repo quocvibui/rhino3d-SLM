@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas-RV/blob/6764c66911729f5ca48f1ea8a714e297980622c5/src/compas_rv/conduits/horizontalconduit.py",
+  "repo": "BlockResearchGroup/compas-RV",
+  "repo_stars": 14,
+  "repo_description": "Rhino plugin for form finding of spatial networks of compression forces in equilibrium with vertical loads using two-dimensional, reciprocal form and force diagrams.",
+  "license": "NOASSERTION",
+  "filepath": "src/compas_rv/conduits/horizontalconduit.py",
+  "instruction": "Horizontalconduit",
+  "code": "import System  # type: ignore\nfrom Rhino.Geometry import Line  # type: ignore\nfrom Rhino.Geometry import Point3d  # type: ignore\nfrom System.Collections.Generic import List  # type: ignore\n\nfrom compas_rhino.conduits import BaseConduit\n\n# this needs to be reorganised\n# there is not need to update anything since we don't go via RPC anymore\n# the data IS live when probably associated with the conduit\n\n\nclass HorizontalConduit(BaseConduit):\n    def __init__(self, lines, **kwargs):\n        super(HorizontalConduit, self).__init__(**kwargs)\n        self._default_thickness = 1.0\n        self._default_color = System.Drawing.Color.FromArgb(255, 255, 255)\n        self.lines = lines or []\n\n    def DrawForeground(self, e):\n        lines = List[Line](len(self.lines))\n        for start, end in self.lines:\n            lines.Add(Line(Point3d(start[0], start[1], 0), Point3d(end[0], end[1], 0)))\n        e.Display.DrawLines(lines, self._default_color, self._default_thickness)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

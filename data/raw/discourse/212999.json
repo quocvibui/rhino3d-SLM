@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-geometry-output-diagnostic-minimal-sphere-test/212999",
+  "topic_id": 212999,
+  "title": "C# Geometry Output Diagnostic: Minimal Sphere Test",
+  "question": "C# Geometry Output Diagnostic: Minimal Sphere Test\n\nI am attempting to diagnose an issue where certain C# components execute successfully in Grasshopper but fail to output any geometry to the Rhino viewport. I have created a minimal test case and would appreciate it if others experiencing similar problems could replicate this to confirm if this issue is system-specific or widespread.\n\n\nThe Setup\n\nPlease place two components on a fresh Grasshopper canvas:\n\n\nNumber Slider: Name it R and set its value to 10.000.\n\n\nC# Script Component:\n\n\nSet the input name to R (double-click the input grip).\n\n\nSet the output name to Output (double-click the output grip).\n\n\nConnect the R slider output to the R C# input.\n\n\nThe Code to Paste\n\nDouble-click the C# component, delete the existing code, and paste only the following lines inside the RunScript function. This code attempts to generate a single sphere with radius R and output it as a BRep.\n\n\nC#\n\n\nvoid RunScript(double R, ref object Output)\n\n{\n\n// Simple Test: Generate a sphere and output it.\n\nOutput = new Rhino.Geometry.Sphere(Rhino.Geometry.Plane.WorldXY, R).ToBrep();\n\n}\n\nThe Failure Result (The Key Observation)\n\nAfter closing the C# Script Editor, the component should re-run.\n\n\nObservation: The C# component executes and turns Grey.\n\n\nCritical Failure Check: Go to the Rhino viewport and execute the Zoom Extents command.\n\n\nIf you are experiencing the issue I am seeing, the result will be:\n\n\nComponent Status: The C# component is Grey (no syntax errors).\n\n\nRhino Viewport: NO Sphere geometry appears.\n\n\nIf you observe this behavior, please reply to this thread. This failure confirms a fundamental blockage preventing C# components from sending geometry to the Rhino display, even when the code compiles successfully.\n\n\nimage (10)\n1539×1134 83.5 KB",
+  "code_blocks": [
+    {
+      "code": "// Grasshopper Script Instance\n\n#region Usings\n\nusing System;\n\nusing System.Linq;\n\nusing System.Collections;\n\nusing System.Collections.Generic;\n\nusing System.Drawing;\n\n\nusing Rhino;\n\nusing Rhino.Geometry;\n\n\nusing Grasshopper;\n\nusing Grasshopper.Kernel;\n\nusing Grasshopper.Kernel.Data;\n\nusing Grasshopper.Kernel.Types;\n\n#endregion\n\n\npublic class Script_Instance : GH_ScriptInstance\n\n{\n\n    #region Notes\n\n    /* \n\n      Members:\n\n        RhinoDoc RhinoDocument\n\n        GH_Document GrasshopperDocument\n\n        IGH_Component Component\n\n        int Iteration\n\n\n      Methods (Virtual & overridable):\n\n        Print(string text)\n\n        Print(string format, params object[] args)\n\n        Reflect(object obj)\n\n        Reflect(object obj, string method_name)\n\n    */\n\n    #endregion\n\n\n    private void RunScript(double R, ref object Output)\n\n        {\n\n        // Simple Test: Generate a sphere and output it.\n\n        Output = new Rhino.Geometry.Sphere(Rhino.Geometry.Plane.WorldXY, R).ToBrep();\n\n        }\n\n}",
+      "language": "csharp",
+      "author": "martinsiegrist",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 10,
+  "views": 179
+}

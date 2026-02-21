@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-tags-using-ghpython/97036",
+  "topic_id": 97036,
+  "title": "Create Tags using GhPython",
+  "question": "Hello,\n\n\nI would like to annonate some geometry I create with a GhPython component, like for example, display a specific number next to each point of a set of points, but within this very same script. I managed to add 3D text to my custom display. But it’s not really what i’m after … I’m looking for something similar to Grasshopper Tags which always face the camera.\n\n\nI can’t find any resources on this. If anyone has a clue i’ll take it ! \n\n\nThank you in advance !",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\n\nACTIVE_DOC = Rhino.RhinoDoc.ActiveDoc\n\n\ndef create_textdot(text_str, point, height=-1, font=-1):\n    \"\"\"Creates a TextDot at a given location.\n    \n    Args:\n        text_string (str): A text to display.\n        point (Rhino.Geometry.Point3d): A location.\n        height (int): A font height.\n        font (str): A font face.\n    \n    Returns:\n        The Rhino.Geometry.TextDot().\n    \"\"\"\n    textdot = Rhino.Geometry.TextDot(text_str, point)\n    if height > 0:\n        textdot.FontHeight = height\n    if font > 0: \n        textdot.FontFace = font\n    return textdot\n\n\ndef clear_textdots():\n    \"\"\"Deletes all TextDots from the active Rhino document.\"\"\"\n    textdots = ACTIVE_DOC.Objects.FindByObjectType(Rhino.DocObjects.ObjectType.TextDot)\n    if len(textdots) > 0:\n        for tdot in textdots:\n           ACTIVE_DOC.Objects.Delete(tdot, True)\n\n\nif __name__ == \"__main__\":\n    clear_textdots()\n    \n    if Tag:\n        attr = Rhino.DocObjects.ObjectAttributes()\n        attr.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n        attr.ObjectColor = Color;\n        \n        for i in xrange(len(Locations)):\n            tdot = create_textdot(Descriptions[i], Locations[i], Size, Font)\n            ACTIVE_DOC.Objects.AddTextDot(tdot, attr)\n    \n    else:           \n        clear_textdots()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nfrom uuid import uuid4\nimport Rhino\n\n\nACTIVE_DOC = Rhino.RhinoDoc.ActiveDoc\n\n\ndef get_unique_id(_depth=0):\n    \"\"\"Returns a unique id that is not already a key in sticky.\"\"\"\n    if _depth > 50:\n        raise ValueError(\n            \"Recursion limit exceeded. Could not get a unique id.\"\n            )\n    id = str(uuid4())\n    if id not in sc.sticky.keys():\n        return id\n    _depth += 1\n    return get_unique_id(_depth)\n\n\ndef create_textdot(text_str, point, height=-1, font=-1):\n    \"\"\"Creates a TextDot at a given location.\n    \n    Args:\n        text_string (str): A text to display.\n        point (Rhino.Geometry.Point3d): A location.\n        height (int): A font height.\n        font (str): A font face.\n    \n    Returns:\n        The Rhino.Geometry.TextDot().\n    \"\"\"\n    textdot = Rhino.Geometry.TextDot(text_str, point)\n    if height > 0:\n        textdot.FontHeight = height\n    if font > 0: \n        textdot.FontFace = font\n    return textdot\n\n\ndef clear_textdots(object_ids):\n    \"\"\"Deletes a collection of TextDots from the active Rhino document.\"\"\"\n    count = 0\n    for id in object_ids:\n        if ACTIVE_DOC.Objects.Delete(id, True):\n            count += 1\n    return count\n    \n\ndef clear_all_textdots():\n    \"\"\"Deletes all TextDots from the active Rhino document.\"\"\"\n    textdots = ACTIVE_DOC.Objects.FindByObjectType(\n                    Rhino.DocObjects.ObjectType.TextDot\n                )\n    if len(textdots) > 0:\n        for tdot in textdots:\n           ACTIVE_DOC.Objects.Delete(tdot, True)\n\n\nif __name__ == \"__main__\":\n    #sc.sticky = dict()\n    #clear_all_textdots()\n    \n    if \"component_id\" not in globals():\n        component_id = get_unique_id()\n\n    try:\n        clear_textdots(sc.sticky[component_id])\n    except:\n        pass\n\n    if Tag:\n        sc.sticky[component_id] = []\n        print sc.sticky\n        print \"Creating TextDots:\"\n        for i in xrange(len(Locations)):\n            attr = Rhino.DocObjects.ObjectAttributes()\n            attr.ColorSource = Rhino.DocObjects.ObjectColorSource.\\\n                                    ColorFromObject\n            attr.ObjectColor = Color;\n            tdot = create_textdot(Descriptions[i], Locations[i], Size, Font)\n            id = ACTIVE_DOC.Objects.AddTextDot(tdot, attr)\n            sc.sticky[component_id].append(id)\n        print \" - {} TextDots placed\".format(len(sc.sticky[component_id]))\n        \n    else:\n        if component_id in sc.sticky.keys():\n            print \"Deleting TextDots:\"\n            num = clear_textdots(sc.sticky[component_id])\n            print \" - {} TextDots purged\".format(len(sc.sticky[component_id]))\n            sc.sticky.pop(component_id)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 7,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 12,
+  "views": 3269
+}

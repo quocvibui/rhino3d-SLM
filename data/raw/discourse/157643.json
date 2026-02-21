@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-vdb-advection-possible-with-grasshopper/157643",
+  "topic_id": 157643,
+  "title": "Is VDB advection possible with Grasshopper?",
+  "question": "Hi,\n\n\nis there a way to work with VDB advection with Grasshopper? Maybe with Dendro, but are there any experiments with this topic already? All I can find about it is made with Houdini.\n\n\nI would be happy to find some help.",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing System.Collections.Generic;\nusing Rhino.Geometry;\n\nprivate void RunScript(List<Point3d> Pts, List<Vector3d> VField, double TimeStep, int Iterations, ref object A)\n{\n    if (Pts.Count != VField.Count)\n    {\n        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, \"The number of points and vectors must be equal.\");\n        return;\n    }\n\n    List<Point3d> advectedPts = new List<Point3d>(Pts);\n\n    for (int iter = 0; iter < Iterations; iter++)\n    {\n        for (int i = 0; i < advectedPts.Count; i++)\n        {\n            advectedPts[i] += VField[i] * TimeStep;\n        }\n    }\n\n    A = advectedPts;\n}",
+      "language": "csharp",
+      "author": "hellolana",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th\nimport pyopenvdb as vdb\nimport numpy as np\nimport math\n\ndef mesh_to_vdb(mesh, voxel_size=1.0):\n    points = [vdb.Vec3s(p.X, p.Y, p.Z) for p in mesh.Vertices]\n    vertices = [(int(a), int(b), int(c)) for a, b, c in mesh.Faces]\n    \n    mesh_grid = vdb.FloatGrid.createLevelSetFromPolygons(points, vertices, voxel_size)\n    return mesh_grid\n\ndef vdb_to_mesh(vdb_grid, iso_value=0.0, adaptivity=0.0):\n    mesh = rg.Mesh()\n    vertices, faces = vdb.convertLevelSetToTriangles(vdb_grid, iso_value, adaptivity)\n\n    for v in vertices:\n    for v in vertices:\n        mesh.Vertices.Add(v.x(), v.y(), v.z())\n        \n    for f in faces:\n        mesh.Faces.AddFace(f[0], f[1], f[2])\n    \n    return mesh\n\ndef advect_vdb(vdb_grid, vel_field, time_step, iterations=1):\n    for _ in range(iterations):\n        advect = vdb.GridAdvect(vdb_grid, vel_field)\n        advect.set_time_step(time_step)\n        advect.advect()\n        \n    return vdb_grid\n\n# Convert Rhino mesh to VDB\nmesh_vdb = mesh_to_vdb(mesh, voxel_size)\n\n# Advect VDB\nmesh_vdb_advected = advect_vdb(mesh_vdb, velocity_field, time_step, iterations)\n\n# Convert VDB back to Rhino mesh\nmesh_output = vdb_to_mesh(mesh_vdb_advected, iso_value, adaptivity)\n\n# Set the output\nA = mesh_output",
+      "language": "python",
+      "author": "hellolana",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 58,
+  "posts_count": 11,
+  "views": 914
+}

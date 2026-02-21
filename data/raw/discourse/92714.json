@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cluster-points-kangaroo-galapagos-python-space-syntax/92714",
+  "topic_id": 92714,
+  "title": "Cluster points: kangaroo, galapagos, python, space syntax",
+  "question": "Hey,\n\n\nI have a problem. I cannot figure out a strategy to cluster points together. Do you know might have an idea about that? What is the most fastest you think?\n\nThank you for your response \n\n\nproblem_sortClusters_00.gh\n (16.4 KB) \n\n\nproblem_sortClusters_00\n1412×707 82.9 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nfrom ghpythonlib import treehelpers\n\n\n# Get the diagonal length of the points' bounding box\nbbox = rg.BoundingBox(Points)\nbbox_dlen = bbox.Diagonal.Length\n\n# Get the start points from the points\nstart_pts = [Points[i] for i in StartIndices]\n\n# Temporary point cloud keep track of unchecked points \ntemp_ptcloud = rg.PointCloud(Points)\n# Temporary indices keep track of unchecked points inital indices \ntemp_indices = [i for i in range(len(Points))] \n\ncurr_step = StepSize # current step size\ncount = 0 # iteration counter\n\n# Intialise an empty cluster list for each start point \nclusters = [[] for _ in start_pts]\nactive = [True for _ in start_pts]\n\nwhile temp_ptcloud.Count > 0 and curr_step < bbox_dlen:\n    \n    for i in xrange(len(start_pts)):\n        \n        # Skip inactive clusters\n        if not active[i]:\n            continue\n        \n        # Get the current closest point indices\n        rc = rg.RTree.PointCloudClosestPoints(temp_ptcloud, \n                                              [start_pts[i]], \n                                              curr_step)\n        closest = list(list(rc)[0])\n        if len(closest) < 1: # no current, closest points\n            continue\n    \n        # Get current cluster points (if it isn't empty)\n        curr_cl_pts = None\n        if len(clusters[i]) > 0:\n            curr_cl_pts = [Points[k] for k in clusters[i]]\n            \n        misses = 0 # counts closest points beyond threshold\n        for j in xrange(len(closest)):\n            # Skip index out of range errors\n            if closest[j] >= len(temp_indices):\n                continue\n            # Skip clusters that have reached the desired size\n            if len(clusters[i]) == ClusterSizes[i]:\n                active[i] = False\n                continue\n            # Get the current, closest point\n            closest_pt = Points[temp_indices[closest[j]]]\n            # Check whether the closest point is near the cluster points\n            if curr_cl_pts != None:\n                dists = [pt.DistanceTo(closest_pt) for pt in curr_cl_pts]\n                if min(dists) > Threshold + Threshold * 0.05: # 5% leeway\n                    misses += 1\n                    continue\n            # Save the closest indices to the current cluster\n            clusters[i].append(temp_indices[closest[j]])\n            # Delete the visited points and indices\n            temp_ptcloud.RemoveAt(closest[j])\n            temp_indices.pop(closest[j])\n        \n        # Deactive the current cluster if no valid closest point were found\n        if misses == len(closest):\n            active[i] = False\n    \n    # Grow the search radius and iteration count\n    curr_step += StepSize\n    count += 1\n\n# Check whether all points are included in one of the cluster\nif AllotRest and sum([len(c) for c in clusters]) < len(Points):\n    # Loop the remaining point indices in reverse\n    for i in xrange(len(temp_indices)-1, -1, -1):\n        rest_pt = Points[temp_indices[i]] \n        \n        # # Identify the closest cluster\n        min_dist = float(\"inf\")\n        closest = None\n        for j in xrange(len(clusters)):\n            cl_pts = [Points[k] for k in clusters[j]]\n            dist = min([pt.DistanceTo(rest_pt) for pt in cl_pts])\n            if dist < min_dist:\n                min_dist = dist\n                closest = j\n        \n        if closest != None:\n            # Add the remaining point index to the closest cluster\n            clusters[closest].append(temp_indices[i])\n            # And remove it\n            del temp_indices[i]\n \n\n# Outputs\nClustered = treehelpers.list_to_tree(clusters)\nUnallotted = temp_indices",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 21,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 25,
+  "views": 3298
+}

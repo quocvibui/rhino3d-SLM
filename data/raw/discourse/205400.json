@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/texture-coordinate-modification-not-working-in-rhino-8-0/205400",
+  "topic_id": 205400,
+  "title": "Texture Coordinate Modification Not Working in Rhino 8.0",
+  "question": "Dear Rhino Developers,\n\n\nI’m encountering a critical compatibility issue between Rhino 7.0 and 8.0, and would greatly appreciate your expertise.\n\n\nProblem Summary:\n\n\n\n\nPreconditions\n: Material and texture axes are properly configured before execution.\n\n\nProject Constraint\n: I can ONLY modify the mesh’s \nm_T\n texture coordinate array .\n\n\nRhino 7.0\n: Directly modifying \nm_T\n (see code below) successfully updates texture display.\n\n\nRhino 8.0\n: Identical code executes without errors, but \nno visual changes\n to texture.\n\n\n\n\nCode Snippet (Working in 7.0, Failing in 8.0):\n\n\nconst CRhinoMeshObject* mesh_obj = CRhinoMeshObject::Cast(ob);\nif (mesh_obj)\n{\n    const ON_Mesh* mesh = mesh_obj->Mesh();\n    if (mesh)\n    {\n        ON_Mesh* copy_mesh = mesh->Duplicate();\n        if (copy_mesh)\n        {\n            for (int i = 0; i < copy_mesh->m_T.Count(); i++)\n            {\n                ON_2fPoint pt(copy_mesh->m_T[i].x * 1.5, copy_mesh->m_T[i].y * 2);\n                copy_mesh->m_T[i] = pt;\n            }\n            RhinoApp().ActiveDoc()->ReplaceObject(mesh_obj, *copy_mesh);\n        }\n    }\n}\n\n\n\nBest regards,\n\nYe",
+  "code_blocks": [
+    {
+      "code": "const CRhinoMeshObject* mesh_obj = CRhinoMeshObject::Cast(ob);\nif (mesh_obj)\n{\n    const ON_Mesh* mesh = mesh_obj->Mesh();\n    if (mesh)\n    {\n        ON_Mesh* copy_mesh = mesh->Duplicate();\n        if (copy_mesh)\n        {\n            for (int i = 0; i < copy_mesh->m_T.Count(); i++)\n            {\n                ON_2fPoint pt(copy_mesh->m_T[i].x * 1.5, copy_mesh->m_T[i].y * 2);\n                copy_mesh->m_T[i] = pt;\n            }\n            RhinoApp().ActiveDoc()->ReplaceObject(mesh_obj, *copy_mesh);\n        }\n    }\n}",
+      "language": "unknown",
+      "author": "147026546",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "mesh"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 73
+}

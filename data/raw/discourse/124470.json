@@ -1,0 +1,53 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/why-does-it-behave-like-that/124470",
+  "topic_id": 124470,
+  "title": "Why does it behave like that?",
+  "question": "To put dim text below dim line (a hidden/old option).\n\n\nThis works:\n\n\n        dim = Rhino.Geometry.LinearDimension(plane, pt1, pt2, pt0)\n        dim.Aligned = True\n        dim = sc.doc.Objects.AddLinearDimension(dim)\n        dim = Rhino.DocObjects.ObjRef(dim).Object()\n\n        dim.Geometry.TextLocation = Rhino.DocObjects.DimensionStyle.TextLocation.BelowDimLine\n        dim.CommitChanges()\n\n\n\nThis doesn’t:\n\n\n        dim = Rhino.Geometry.LinearDimension(plane, pt1, pt2, pt0)\n        dim.Aligned = True\n        dim.TextLocation = Rhino.DocObjects.DimensionStyle.TextLocation.BelowDimLine\n        dim = sc.doc.Objects.AddLinearDimension(dim)\n        dim = Rhino.DocObjects.ObjRef(dim).Object()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nplane = Rhino.Geometry.Plane.WorldXY\npt1 = Rhino.Geometry.Point2d(0, 0)\npt2 = Rhino.Geometry.Point2d(10, 0)\npt0 = Rhino.Geometry.Point2d(0, 5)\n\n#dim = Rhino.Geometry.LinearDimension(plane, pt1, pt2, pt0)\n#dim.Aligned = True\n#dim = sc.doc.Objects.AddLinearDimension(dim)\n#dim = Rhino.DocObjects.ObjRef(dim).Object()\n#\n#dim.Geometry.TextLocation = Rhino.DocObjects.DimensionStyle.TextLocation.BelowDimLine\n#dim.CommitChanges()\n\ndim = Rhino.Geometry.LinearDimension(plane, pt1, pt2, pt0)\ndim.Aligned = True\ndim.TextLocation = Rhino.DocObjects.DimensionStyle.TextLocation.BelowDimLine\ndim = sc.doc.Objects.AddLinearDimension(dim)\ndim = Rhino.DocObjects.ObjRef(dim).Object()",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "aligned = Rhino.Geometry.AnnotationType.Aligned\nds = sc.doc.DimStyles.Current\nplane = Rhino.Geometry.Plane.WorldXY\nv = Rhino.Geometry.Vector3d(0,5,0)\npt1 = Rhino.Geometry.Point3d(0,0,0)\npt2 = Rhino.Geometry.Point3d(10,0,0)\npt0 = Rhino.Geometry.Point3d(0,5,0)\ndim = Rhino.Geometry.LinearDimension.Create(aligned, ds, plane, v, pt1, pt2, pt0, 0)",
+      "language": "unknown",
+      "author": "Alain",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "aligned = Rhino.Geometry.AnnotationType.Aligned\nds = sc.doc.DimStyles.Current\nplane = Rhino.Geometry.Plane.WorldXY\nv = Rhino.Geometry.Vector3d(-5,0,0)\npt1 = Rhino.Geometry.Point3d(0,0,0)\npt2 = Rhino.Geometry.Point3d(0,10,0)\npt0 = Rhino.Geometry.Point3d(-5,0,0)\ndim = Rhino.Geometry.LinearDimension.Create(aligned, ds, plane, v, pt1, pt2, pt0, 0)",
+      "language": "unknown",
+      "author": "Asterisk",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "dim = Rhino.Geometry.LinearDimension(plane, pt1, pt2, pt0)\n        dim.Aligned = True\n        dim = sc.doc.Objects.AddLinearDimension(dim)\n        dim = Rhino.DocObjects.ObjRef(dim).Object()\n\n        dim.Geometry.TextLocation = Rhino.DocObjects.DimensionStyle.TextLocation.BelowDimLine\n        dim.CommitChanges()",
+      "language": "unknown",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "dim = Rhino.Geometry.LinearDimension(plane, pt1, pt2, pt0)\n        dim.Aligned = True\n        dim.TextLocation = Rhino.DocObjects.DimensionStyle.TextLocation.BelowDimLine\n        dim = sc.doc.Objects.AddLinearDimension(dim)\n        dim = Rhino.DocObjects.ObjRef(dim).Object()",
+      "language": "unknown",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 581
+}

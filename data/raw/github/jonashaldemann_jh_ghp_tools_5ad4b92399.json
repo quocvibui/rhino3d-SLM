@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/zweistundenschatten.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/zweistundenschatten.py",
+  "instruction": "Zweistundenschatten",
+  "code": "import Rhino\nimport System\nimport ghpythonlib.components as gh\n\n\ndef zweistundenschatten(B, day=29, month=10, start=8, end=17, step=None, delta=None):\n    \"\"\"\n    Berechnet den Schatten eines Objektes B in einem Zeitraum von 2 Stunden.\n\n    Args:\n        B: Das Objekt, dessen Schatten berechnet werden soll.\n        start: Startzeit in Stunden (z.B. 8.0 für 08:00 Uhr).\n        end: Endzeit in Stunden (z.B. 18.0 für 18:00 Uhr).\n\n    Returns:\n        schatten: Die berechneten Schattenflächen.\n    \"\"\"\n    if step is None:\n        step = 1\n    if delta is None:\n        delta = 2\n\n    # Rothrist, MEZ UTC+1\n    sun = Rhino.RhinoDoc.ActiveDoc.RenderSettings.Sun\n    sun.Longitude = 7.8798\n    sun.Latitude = 47.3063\n    sun.Timezone = 1.0\n\n    # Generate hourly series\n    stundenserie = [start + i * step for i in range(int((end - start) / step) + 1)]\n    pl = gh.XYPlane(gh.ConstructPoint(0, 0, 0))\n    regions = []\n\n    # Calculate shadow regions\n    for t in stundenserie:\n        h, m = divmod(int(t * 60), 60)\n        datetime = System.DateTime(\n            2025, month, day, h, m, 0, System.DateTimeKind.Unspecified\n        )\n        sun.SetDateTime(datetime, datetime.Kind)\n        vec = sun.Vector\n        brep = gh.ProjectAlong(B, pl, vec)[0]\n        region = gh.DeconstructBrep(brep)[0]\n        regions.append(gh.RegionUnion(region))\n\n    # Find intersection points of shadows\n    match_points = [\n        pt\n        for i in range(len(regions) - delta)\n        if regions[i] and regions[i + delta]\n        for pt in gh.MultipleCurves([regions[i], regions[i + delta]])[0]\n    ]\n\n    # Filter points outside the footprint\n    distances = gh.BrepClosestPoint(match_points, B)[2]\n    match_points_outer = [\n        point for point, dist in zip(match_points, distances) if dist > 0.1\n    ]\n\n    # Cut shadow polygons and calculate X-hour shadow\n    split_crv = gh.PolyLine(match_points_outer, False)\n    brep_centroid = gh.Volume(B)[1]\n    surfaces = []\n    for srf in regions[delta:-delta]:\n        split = gh.SurfaceSplit(srf, split_crv)\n        split_centroids = gh.Area(split)[1]\n        distances = gh.Distance(split_centroids, brep_centroid)\n        split_s = sorted(zip(split, distances), key=lambda x: x[1])\n        surfaces.append(split_s[0][0])\n\n    schatten = gh.BoundarySurfaces(gh.RegionUnion(surfaces))\n\n    return regions, match_points_outer, schatten\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

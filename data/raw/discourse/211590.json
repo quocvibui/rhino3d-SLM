@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/silent-input-in-c-noecho-style/211590",
+  "topic_id": 211590,
+  "title": "\"silent\" input in C# (noecho style)",
+  "question": "In this simple script, I would like to hide the letters typed by the user during the GetString input:\n\n\nusing System;\nusing Rhino;\nusing Rhino.UI;\n\nbool keyPressed = false;\nRhinoApp.KeyboardEvent += OnKeyboardEvent;\n\nbool result = PauseForEnter();\nRhinoApp.KeyboardEvent -= OnKeyboardEvent;\nRhinoApp.WriteLine(result?\"Comand confirmed\":\"Command canceled\");\n\nvoid OnKeyboardEvent(int key)\n{\n        if (!keyPressed)\n        {\n            keyPressed = true;\n            return;\n        }\n        else\n        {\n            switch(key)\n            {\n                case (int)KeyboardKey.A:\n                {\n                    RhinoApp.WriteLine(\"action A\");\n                    break;\n                }\n                case (int)KeyboardKey.D:\n                {\n                    RhinoApp.WriteLine(\"action D\");\n                    break;\n                }\n            }\n            keyPressed = false;\n        }\n}\n\nbool PauseForEnter()\n{\n    string outputString = string.Empty;\n    string prompt = \"Press A-D for actions, spacebar or ENTER to confirm, ESC to exit\";\n    var result = Rhino.Input.RhinoGet.GetString(prompt, true, ref outputString);\n    return (result!=Rhino.Commands.Result.Cancel);\n}\n\n\n\nBasically, hide those “aaaddaaadda” characters typed in input:\n\n\n\n\nIs this possible somehow? I’ve searched the documentation, examples and forum to no avail so far.",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  GetOption go = new GetOption();\n  go.SetCommandPrompt(\"Select an action\");\n  go.AcceptNothing(true);\n\n  int a_index = go.AddOption(\"A\");\n  int b_index = go.AddOption(\"B\");\n  int c_index = go.AddOption(\"C\");\n  int d_index = go.AddOption(\"D\");\n\n  while (true)\n  {\n    GetResult res = go.Get();\n\n    if (res != GetResult.Option)\n      break;\n\n    CommandLineOption option = go.Option();\n    if (null != option)\n    {\n      if (option.Index == a_index)\n        RhinoApp.WriteLine(\"Action A selected\");\n      else if (option.Index == b_index)\n        RhinoApp.WriteLine(\"Action B selected\");\n      else if (option.Index == c_index)\n        RhinoApp.WriteLine(\"Action C selected\");\n      else if (option.Index == d_index)\n        RhinoApp.WriteLine(\"Action D selected\");\n    }\n    continue;\n  }\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing Rhino;\nusing Rhino.UI;\n\nbool keyPressed = false;\nRhinoApp.KeyboardEvent += OnKeyboardEvent;\n\nbool result = PauseForEnter();\nRhinoApp.KeyboardEvent -= OnKeyboardEvent;\nRhinoApp.WriteLine(result?\"Comand confirmed\":\"Command canceled\");\n\nvoid OnKeyboardEvent(int key)\n{\n        if (!keyPressed)\n        {\n            keyPressed = true;\n            return;\n        }\n        else\n        {\n            switch(key)\n            {\n                case (int)KeyboardKey.A:\n                {\n                    RhinoApp.WriteLine(\"action A\");\n                    break;\n                }\n                case (int)KeyboardKey.D:\n                {\n                    RhinoApp.WriteLine(\"action D\");\n                    break;\n                }\n            }\n            keyPressed = false;\n        }\n}\n\nbool PauseForEnter()\n{\n    string outputString = string.Empty;\n    string prompt = \"Press A-D for actions, spacebar or ENTER to confirm, ESC to exit\";\n    var result = Rhino.Input.RhinoGet.GetString(prompt, true, ref outputString);\n    return (result!=Rhino.Commands.Result.Cancel);\n}",
+      "language": "csharp",
+      "author": "ale2x72",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 105
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/germanbodenbender/MACAD-AIA-COM_VISION-URBANAI/blob/b05f4c87ed1203e2759c02b547bbe917ebfe9eb3/VS%20CODE/app.py",
+  "repo": "germanbodenbender/MACAD-AIA-COM_VISION-URBANAI",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "VS CODE/app.py",
+  "instruction": null,
+  "code": "from flask import Flask\r\nimport ghhops_server as hs\r\nimport rhino3dm\r\nimport myml\r\n\r\napp = Flask(__name__)\r\nhops = hs.Hops(app)\r\n\r\n@hops.component(\r\n     \"/ml_prediction3\",\r\n     name=\"ML_prediction\",\r\n     description=\"Get the features, output the predictions\",\r\n     icon=\"smaller.png\",\r\n     inputs=[\r\n         hs.HopsNumber(\"Min_Depth\", \"Min_Depth\", \"First Metric\"),\r\n         hs.HopsNumber(\"Max_Depth\", \"Max_Depth\", \"Second Metric\"),\r\n         hs.HopsNumber(\"Min_Heigth\", \"Min_Heigth\", \"Second Metric\"),\r\n         hs.HopsNumber(\"Max_Heigth\", \"Max_Heigth\", \"Second Metric\"),\r\n         hs.HopsNumber(\"Volume\", \"Volume\", \"Second Metric\"),\r\n         hs.HopsNumber(\"Area\", \"Area\", \"Second Metric\"),\r\n         hs.HopsNumber(\"Green_area\", \"Green_area\", \"Second Metric\"),\r\n         hs.HopsNumber(\"FAR\", \"FAR\", \"Second Metric\"),\r\n     ],\r\n     outputs=[\r\n         hs.HopsNumber(\"radiation\", \"radiation\", \"ml pedricted values\"),\r\n         hs.HopsNumber(\"green_comfort\", \"green_comfort\", \"ml pedricted values\"),\r\n         hs.HopsNumber(\"energy\", \"energy\", \"ml pedricted values\"),\r\n     ]\r\n)\r\n\r\ndef ml_prediction3(Min_Depth, Max_Depth, Min_Heigth, Max_Heigth, Volume, Area, Green_area, FAR):\r\n    prediction = myml.predictions(Min_Depth, Max_Depth, Min_Heigth, Max_Heigth, Volume, Area, Green_area, FAR)\r\n\r\n    radiation = prediction[0]\r\n    green_comfort = prediction[1]\r\n    energy = prediction[2]\r\n\r\n    return radiation, green_comfort, energy\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    app.run()",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

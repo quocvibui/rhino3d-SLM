@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-trim-failure/114597",
+  "topic_id": 114597,
+  "title": "Brep.Trim() failure",
+  "question": "Hi ,\n\n\nCan someone please let me know why this minimal-example trim is not returning a trimmed brep? The surfaces are coplanar, and the smaller cutter resides within the larger surface to be cut.\n\n(There are reasons why I am not using python-rhinoscript TrimBrep() )\n\n\nThank you!\n\n\n\nimport  Rhino.Geometry as Geom\nfrom    scriptcontext import doc\n\nif __name__ == \"__main__\":\n\n    nc = Geom.Circle( Geom.Point3d(0,0,0), 10. ).ToNurbsCurve()\n    breps = Geom.Brep.CreatePlanarBreps( nc )\n    plate_surf = breps[0]\n\n    nc = Geom.Circle( Geom.Point3d(0,0,0), 5. ).ToNurbsCurve()\n    breps = Geom.Brep.CreatePlanarBreps( nc )\n    hole_surf = breps[0]\n\n    breps = plate_surf.Trim( hole_surf, doc.ModelAbsoluteTolerance  )\n    print( len(breps) )",
+  "code_blocks": [
+    {
+      "code": "import  Rhino.Geometry as Geom\nfrom    scriptcontext import doc\n\ncvs = []\nnc1 = Geom.Circle( Geom.Point3d(0,0,0), 10. ).ToNurbsCurve()\ncvs.append(nc1)\nnc2 = Geom.Circle( Geom.Point3d(0,0,0), 5. ).ToNurbsCurve()\ncvs.append(nc2)\n\nbreps = Geom.Brep.CreatePlanarBreps(cvs)\n\ndoc.ActiveDoc.Objects.AddBrep(breps[0])\ndoc.ActiveDoc.Views.Redraw()",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import  Rhino.Geometry as Geom\nfrom    scriptcontext import doc\n\nif __name__ == \"__main__\":\n\n    nc = Geom.Circle( Geom.Point3d(0,0,0), 10. ).ToNurbsCurve()\n    breps = Geom.Brep.CreatePlanarBreps( nc )\n    plate_surf = breps[0]\n\n    nc = Geom.Circle( Geom.Point3d(0,0,0), 5. ).ToNurbsCurve()\n    breps = Geom.Brep.CreatePlanarBreps( nc )\n    hole_surf = breps[0]\n\n    breps = plate_surf.Trim( hole_surf, doc.ModelAbsoluteTolerance  )\n    print( len(breps) )",
+      "language": "python",
+      "author": "Dow",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 368
+}

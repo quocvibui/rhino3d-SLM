@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ring-with-python/118528",
+  "topic_id": 118528,
+  "title": "Ring with python",
+  "question": "Hello,\n\n\nI am a beginner to python.\n\n\nCan anybody explain to me what went wrong here?\n\n\n\n\nimage\n1431×698 221 KB\n\n\n\n\nI wanted to get a ring with 3-point arcs at every side of the profile.\n\n\nscripting looks good for me, but not the surface of the ring. The outside surface is strange. The other 3 are good working.\n\n\nwhy not the outside?\n\n\nthx for help.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom Rhino.Geometry import *\nimport scriptcontext as sc\n\nplane = Plane.WorldXY\nradius = 30.0\n\ncurve = rs.AddCircle(plane, radius)\ncircle  = rs.coercecurve(curve)\ndomain = rs.CurveDomain(curve)\ncount = 12\nparams = Curve.DivideByCount(circle, count, True)\nframes = [rs.CurvePerpFrame(curve, param) for param in params]\n\nr = 1\ncurves = []\nfor frame in frames:\n    circle = Circle(frame, r)\n    curve = circle.ToNurbsCurve()\n    curves.append(curve)\n    r+=1\nlofts = Brep.CreateFromLoft(curves, Point3d.Unset, Point3d.Unset, LoftType.Normal, False)\n\nfor loft in lofts:\n    sc.doc.Objects.Add(loft)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 814
+}

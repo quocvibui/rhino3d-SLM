@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/splitbrep-works-but-not-when-inside-another-for-loop/115448",
+  "topic_id": 115448,
+  "title": "SplitBrep works, but not when inside another for loop",
+  "question": "I am new to Python, and I feel like I am missing something basic. Forgive me if that is true, but please point me toward something that explains the concept because I have been trying to work around this for a while and I am out of ideas.\n\n\nI have some surfaces and I want to use them to split each other. I am using the SplitBreps method. It seems to work, generally. The code below splits a brep: segSurfs contains two surfaces. I ignore the first and keep the second as my remainder.\n\n\nInside the for loop, I want the first element of remainder to be saved to TTops and save the second as my remainder for the next loop.\n\n\nBut when I attempt this, it will not let me get at the elements inside segSurfs. I have tried the for loop below- for j in segSurfs-  and I have tried segSurfs[0], segSurfs[1]. These work fine outside the ‘for i in range(TFaces.Count):’ loop, but not inside it. I am, however, able to print the ObjectType of segSurfs[0] from within the loop.\n\nThat’s the problem in a nutshell- the split happens and I can access it if I do it once. As soon as I set it inside a for loop, I cannot.\n\n\nI get a runtime error saying segSurfs is not subscriptable or that it is “iteration over non-sequence type None Type”\n\n\nsegSurfs = []\nTBreps = []\nTVBreps = rs.coercebrep(TVSurf[0])\nTTops =[]\ntTop = []\nTBreps.Add(rs.coercebrep(TFaces[0]))\nsegSurfs = rs.SplitBrep(TVBreps,TBreps[0],False)\nfor i in segSurfs:\n    if i == 0:\n        continue\n    remainder = i\nfor i in range(TFaces.Count):\n    if i == 0: #skip the first iteration\n        continue\n    TBreps.Add(rs.coercebrep(TFaces[i]))\n    segSurfs = rs.SplitBrep(remainder,TBreps[i],False)\n    tops.Add(rs.coerceguid(segSurfs))\n    for j in segSurfs:\n        if j == 0:\n            TTops.Add(j)\n        remainder = j\n\n\n\nThanks for any help",
+  "code_blocks": [
+    {
+      "code": "segSurfs = rs.SplitBrep(TVBreps,TBreps[0],False)\nfor i in segSurfs:\n    if i == 0:\n        continue",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\nMTOL = sc.doc.ModelAbsoluteTolerance  # document tolerance\n\n\nstart_pts = []  # intersection curve start points\nfor i, srf in enumerate(VFaces):\n    rc, icrvs, ipts = rg.Intersect.Intersection.SurfaceSurface(TopSurf, srf, MTOL)\n    if not rc:\n        print \"No intersection found between TopSurf and VFaces at index\", i\n        continue\n    if len(icrvs) == 0:\n        print \"No intersection curve found between TopSurf and VFaces at index\", i\n        continue\n    for crv in icrvs:\n        start_pts.append(crv.PointAtStart)\n\n\nsegments = []  # surface segments\nif len(start_pts) > 0:\n    # Get the surface edge from the intersection curve start points\n    edge = TopSurf.InterpolatedCurveOnSurface(start_pts, MTOL)\n    \n    # Split the base surface into segments\n    tmp_srf = TopSurf  # temporary surface that is \"recursively\" split\n    for i in range(len(start_pts)):\n        rc, u, v = tmp_srf.ClosestPoint(start_pts[i])\n        if not rc:\n            continue\n        # Split the temporary surface into two segments\n        split_srfs = tmp_srf.Split(1, v)  # horizontal split in v-direction\n        if len(split_srfs) == 0:\n            print \"Failed to split TopSurf horizontally with VFace at index\", i\n            continue\n        south_seg, north_seg = split_srfs\n        segments.append(south_seg)\n        tmp_srf = north_seg  # update the temporary surface\n    segments.append(tmp_srf)\n\n\n# Outputs\na = segments",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 9,
+      "is_solution": true
+    },
+    {
+      "code": "segSurfs = []\nTBreps = []\nTVBreps = rs.coercebrep(TVSurf[0])\nTTops =[]\ntTop = []\nTBreps.Add(rs.coercebrep(TFaces[0]))\nsegSurfs = rs.SplitBrep(TVBreps,TBreps[0],False)\nfor i in segSurfs:\n    if i == 0:\n        continue\n    remainder = i\nfor i in range(TFaces.Count):\n    if i == 0: #skip the first iteration\n        continue\n    TBreps.Add(rs.coercebrep(TFaces[i]))\n    segSurfs = rs.SplitBrep(remainder,TBreps[i],False)\n    tops.Add(rs.coerceguid(segSurfs))\n    for j in segSurfs:\n        if j == 0:\n            TTops.Add(j)\n        remainder = j",
+      "language": "python",
+      "author": "graham",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 950
+}

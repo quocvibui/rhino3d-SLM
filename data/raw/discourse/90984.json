@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-of-duplicated-result/90984",
+  "topic_id": 90984,
+  "title": "Problem of duplicated result",
+  "question": "Hello; the problem always happens when i use many inputs\n\nin x input: 4 curves (item access)\n\nin y input: 2 surfaces (item access)\n\nThe result:\n\na >> 4 curves divides\n\nb >> 4 branches (number of x input) with 2 items ( number of y input)\n\n\n\n\nqae.JPG\n1451×617 88 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\n    \ndef div(crv):\n     return rs.DivideCurve(crv,10,True)\n    \ndef cen(surf):\n    return rs.SurfaceAreaCentroid(surf)   \n        \n    \na = div(x) \n\nb = cen(y)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport Rhino.Geometry as rg\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\n\nnuma = []\nnumb = []\nlines = []\nframes = []\n\n#Change domain----------------------------------------------------------------\nintr1 = rg.Interval(0,1)\nintr2 = rg.Interval(0,1)\nrg.Surface.SetDomain(x,0,intr1)\nrg.Surface.SetDomain(x,0,intr2)\ndomainU = rs.SurfaceDomain(x, 0)\ndomainV = rs.SurfaceDomain(x, 1)\nu = domainU[1]\nv = domainV[1]\n#-----------------------------------------------------------------------------\nif n>1:\nfor i in range(n):\n   for j in range(n):\n       #print(i/(n-1),j/(n-1))\n       frame = rs.SurfaceFrame(x, ((u*i)/(n-1),(v*j)/(n-1)))\n       line = rh.Geometry.Line(frame[0],frame[3],3)\n       frames.append(frame)\n       lines.append(line)\n\nc = lines\nd = frames",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n    \ndef div(crv):\n     return rs.DivideCurve(crv,10,True)\n    \ndef cen(surf):\n    return rs.SurfaceAreaCentroid(surf)   \n        \n    \na = div(x) \n\nb = cen(y)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 390
+}

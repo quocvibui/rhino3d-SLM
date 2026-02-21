@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_fab/blob/431e82c810ea299b9727b010b73a39abc73c5d62/src/compas_fab/ghpython/components/Cf_RosTopicSubscribe/code.py",
+  "repo": "compas-dev/compas_fab",
+  "repo_stars": 124,
+  "repo_description": "Robotic fabrication package for the COMPAS Framework.",
+  "license": "MIT",
+  "filepath": "src/compas_fab/ghpython/components/Cf_RosTopicSubscribe/code.py",
+  "instruction": "Subscribe to a ROS topic.",
+  "code": "\"\"\"\nSubscribe to a ROS topic.\n\nCOMPAS FAB v1.0.2\n\"\"\"\n\nimport time\n\nimport Grasshopper.Kernel\nfrom ghpythonlib.componentbase import executingcomponent as component\nfrom roslibpy import Topic\nfrom scriptcontext import sticky as st\n\nfrom compas_fab.backends.ros.messages import ROSmsg\nfrom compas_fab.ghpython.components import create_id\n\n\nclass ROSTopicSubscribe(component):\n    def RunScript(self, ros_client, topic_name, topic_type, interval, start, stop):\n        if not topic_name:\n            raise ValueError(\"Please specify the name of the topic\")\n        if not topic_type:\n            raise ValueError(\"Please specify the type of the topic\")\n\n        if not hasattr(self, \"message_count\"):\n            self.message_count = 0\n\n        self.interval = interval or 25  # in milliseconds\n        self.is_updating = False\n        self.is_subscribed = False\n\n        self.msg_key = create_id(self, \"last_msg\")\n        key = create_id(self, \"topic\")\n\n        last_msg = st.get(self.msg_key, None)\n        topic = st.get(key, None)\n\n        if ros_client and ros_client.is_connected:\n            if start:\n                self._unsubscribe(topic)\n\n                topic = Topic(ros_client, topic_name, topic_type)\n                topic.subscribe(self.topic_callback)\n                time.sleep(0.2)\n\n                st[key] = topic\n\n            if stop:\n                self._unsubscribe(topic)\n\n        self.is_subscribed = topic and topic.is_subscribed\n\n        if last_msg:\n            last_msg = ROSmsg.parse(last_msg, topic_type)\n\n        if self.is_subscribed:\n            self.Message = \"Subscribed, {} messages\".format(self.message_count)\n        else:\n            self.Message = \"Not subscribed\"\n\n        return (topic, last_msg, self.is_subscribed)\n\n    def _unsubscribe(self, topic):\n        if topic and topic.is_subscribed:\n            topic.unsubscribe()\n            time.sleep(0.2)\n\n    def topic_callback(self, msg):\n        self.message_count += 1\n        st[self.msg_key] = msg\n\n        if self.is_subscribed:\n            ghdoc = ghenv.Component.OnPingDocument()  # noqa: F821 This is defined by Grasshopper\n            if not self.is_updating and ghdoc.SolutionState != Grasshopper.Kernel.GH_ProcessStep.Process:\n                self.is_updating = True\n                ghdoc.ScheduleSolution(\n                    self.interval, Grasshopper.Kernel.GH_Document.GH_ScheduleDelegate(self.expire_callback)\n                )\n\n    def expire_callback(self, ghdoc):\n        if ghdoc.SolutionState != Grasshopper.Kernel.GH_ProcessStep.Process:\n            ghenv.Component.ExpireSolution(False)  # noqa: F821 This is defined by Grasshopper\n        self.is_updating = False\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

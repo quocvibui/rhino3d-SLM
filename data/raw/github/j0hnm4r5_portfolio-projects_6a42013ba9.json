@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/j0hnm4r5/portfolio-projects/blob/fe4f5b2fd5be055b59ae6bcf0387b0dd4b07691b/Block%20Island/pointGrabber.py",
+  "repo": "j0hnm4r5/portfolio-projects",
+  "repo_stars": 1,
+  "repo_description": "Code for projects on john-mars.com",
+  "license": "NOASSERTION",
+  "filepath": "Block Island/pointGrabber.py",
+  "instruction": "Point grabber",
+  "code": "import rhinoscriptsyntax as rs\nimport sys, os\n\nislands = rs.ObjectsByLayer(\"ISLAND\")\n\npointlist = []\nfor island in islands:\n\tbb = rs.BoundingBox(island)\n\tpoint = bb[4]\n\tpointlist.append(point)\n\nwith open('points', 'w') as f:\n\tf.write(\"3 \\n\" + str(len(pointlist)) + \"\\n\")\n\tfor point in pointlist:\n\t\tf.write(str(point).replace(\",\", \" \") + '\\n')\n\nos.system('qconvex i TO result < points')\n\nwith open('result', 'r') as f:\n\tcontent = f.readlines()\n\nindex_list = []\nfor line in content:\n\tline = line.strip(' \\n').split(\" \")\n\tindex_list.append(line)\n\nindex_list = index_list[1:]\nfor index_set in index_list:\n\trs.AddCurve((pointlist[int(index_set[0])], pointlist[int(index_set[1])], pointlist[int(index_set[2])]), 1)\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

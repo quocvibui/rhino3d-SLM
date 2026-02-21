@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-geometry-commands-like-getsegments-not-working-in-cpython-flask/158848",
+  "topic_id": 158848,
+  "title": "Rhino.Geometry commands like GetSegments() not working in CPython & Flask",
+  "question": "Good day,\n\n\nI’ve been struggling to make definitions that work perfectly in the GH Python component work with rhinoinside. I’m running the newest Hops (1.6.0) and PyCharm with 3.10 as the interpreter and Flask.\n\n\nimport rhinoinside\nrhinoinside.load()\nfrom flask import Flask\nimport ghhops_server as hs\nimport Rhino.Geometry as rg\nimport math\n[...]\ndef breakpolyline(polylines, tolerance):\n    if len([polylines]) > 0:\n        break_crv = []\n        break_pts = []\n        for crv in [polylines]:\n\n            end_pts = []\n\n            crv_pl = crv.ToPolyline()\n            exp_crvs = rg.Polyline.GetSegments(crv_pl)\n\n\n\nThis is where the code breaks, I get an error on the Hops component:\n\n\n1. Exception occured in handler:\nNo method matches given arguments for Polyline.GetSegments: ()\n  File \"C:\\Users\\levzh\\SHAGA STUDIO Dropbox\\Lev Zhitnik\\CTIES_3D MODULE\\CODE\\TEST\\app.py\", line 38, in breakpolyline\n    exp_crvs = rg.Polyline.GetSegments(crv_pl)\n\n\n\nSame with exp_crvs  = crv_pl.GetSegments(). Do I need to re-write all of these things or did I not import things correctly? If I do need to re-write, is there a source for commands that work with rhinoinside?\n\nBecause this Method definitely appears on the RhinoCommon API:\n\n\nhttps://developer.rhino3d.com/api/rhinocommon/rhino.geometry.polyline#constructors\n\n\nThanks a lot for your help!\n\nLev",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport math\n\ndef breakpolyline(polylines, tolerance):\n    if len([polylines]) > 0:\n        \"\"\"Break a polyline into individual lines by an angle\n        difference.\"\"\"\n        break_crv = []\n        break_pts = []\n        for crv in polylines:\n\n            end_pts = []\n\n            crv_pl = crv.ToPolyline()\n            exp_crvs = rg.Polyline.GetSegments(crv_pl)\n            for i, crv_new in enumerate(exp_crvs):\n                end_pt1 = rg.Line.PointAt(crv_new, 0)\n                end_pts.append(end_pt1)\n                end_pt2 = rg.Line.PointAt(crv_new, 1)\n                end_pts.append(end_pt2)\n                new_i = (i + 1) % len(exp_crvs)\n                vector = crv_new.Direction\n                crv_2nd = exp_crvs[new_i]\n                vector_2 = crv_2nd.Direction\n                int_angle = rg.Vector3d.VectorAngle(vector, vector_2)\n                int_deg = math.degrees(int_angle)\n                if int_deg >= tolerance:\n                    break_crv.append(new_i)\n\n        end_pts_cull = rg.Point3d.CullDuplicates(end_pts, 0.001)\n        for i, pt in enumerate(end_pts_cull):\n            break_pt = break_crv.count(i)\n            if break_pt > 0:\n                break_pts.append(pt)\n\n        cut_pt = []\n        for pt in break_pts:\n            t_crv = rg.PolylineCurve.ClosestPoint(crv, pt)\n            cut_pt.append(t_crv[1])\n        final_split = rg.PolylineCurve.Split(crv, cut_pt)\n\n        return final_split, break_pts",
+      "language": "python",
+      "author": "l.zhitnik",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nfrom flask import Flask\nimport ghhops_server as hs\nimport Rhino.Geometry as rg\nimport math\n[...]\ndef breakpolyline(polylines, tolerance):\n    if len([polylines]) > 0:\n        break_crv = []\n        break_pts = []\n        for crv in [polylines]:\n\n            end_pts = []\n\n            crv_pl = crv.ToPolyline()\n            exp_crvs = rg.Polyline.GetSegments(crv_pl)",
+      "language": "python",
+      "author": "l.zhitnik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 790
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/intersectbreps-error/38096",
+  "topic_id": 38096,
+  "title": "IntersectBreps() Error",
+  "question": "Hi,\n\n\nI got an error with this simple code -\n\n\ndef test():\n    box = AddBrepBox(-5000, -5000, 0, 10000, 10000, 10000)\n    if box is None: return\n        \n    planesrf = rs.AddPlaneSurface( rs.WorldXYPlane(), 100000.0, 50000.0 )\n    rs.TransformObjects( planesrf, rs.XformTranslation([-10000,-25000,1000]), False )\n    \n    curves = rs.IntersectBreps( box, planesrf )\n\n\n\nThe error msg I got is -\n\nunable to convert Success into Brep geometry\n\n\nAny ideas? Many thanks for help!\n\n\n–Max",
+  "code_blocks": [
+    {
+      "code": "def AddBrepBox(x0, y0, z0, l, w, h):\npt0 = Rhino.Geometry.Point3d(x0, y0, z0)\npt1 = Rhino.Geometry.Point3d(x0+l, y0+w, z0+h)\nbox = Rhino.Geometry.BoundingBox(pt0, pt1)\nbrep = box.ToBrep()\nrc = Rhino.Commands.Result.Failure\nif( scriptcontext.doc.Objects.AddBrep(brep) != System.Guid.Empty ):\n    rc = Rhino.Commands.Result.Success\n    scriptcontext.doc.Views.Redraw()\nreturn rc",
+      "language": "python",
+      "author": "max.wwwang",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def test():\n    box = AddBrepBox(-5000, -5000, 0, 10000, 10000, 10000)\n    if box is None: return\n        \n    planesrf = rs.AddPlaneSurface( rs.WorldXYPlane(), 100000.0, 50000.0 )\n    rs.TransformObjects( planesrf, rs.XformTranslation([-10000,-25000,1000]), False )\n    \n    curves = rs.IntersectBreps( box, planesrf )",
+      "language": "python",
+      "author": "max.wwwang",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 782
+}

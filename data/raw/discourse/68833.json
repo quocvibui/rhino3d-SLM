@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/point-occlusion-and-visibility/68833",
+  "topic_id": 68833,
+  "title": "Point Occlusion and Visibility",
+  "question": "Is it possible to check if a point is occluded as seen from the camera?\n\n\nCurrently I’m thinking of extending lines from points towards the camera, and if they intersect with geometry then consider them occluded. This doesn’t seem like an efficient method though.\n\n\nCheers",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef visibleRenderMesh():\n    all = rs.AllObjects()\n    all = rs.ObjectsByType(8 | 16 | 32)\n\n    objects = []\n    for item in all:\n        if rs.IsVisibleInView(item):\n            objects.append(rs.coercerhinoobject(item))\n            \n    objRef = Rhino.DocObjects.RhinoObject.GetRenderMeshes(objects, False, True)\n    \n    meshes = []\n    for item in objRef:\n        mesh = item.Mesh()\n        meshes.append(mesh)\n    \n    #sc.doc.Objects.AddMesh(mesh)    \n    return meshes\n \ndef isVisible(point, object, renderMeshes):\n   \n    projection = rs.ViewProjection()\n    if projection == 1: #Parallel\n        viewCPlane = rs.ViewCPlane()\n        bounds = rs.BoundingBox(object, viewCPlane)\n        rs.AddLine(bounds[0], bounds[4])\n        depth = rs.Distance(bounds[0], bounds[4])\n        direction = rs.VectorScale(viewCPlane[3], depth*1.2)\n        viewpoint = rs.PointAdd(point, direction)\n        ray = Rhino.Geometry.Ray3d(point, direction)\n        \n    elif projection == 2: #Perspective\n        viewpoint = rs.ViewCameraPlane()[0]\n        direction = -rs.VectorCreate(viewpoint, point)\n        ray = Rhino.Geometry.Ray3d(viewpoint, direction)\n        \n    else: return False\n    \n    occluded = False\n    for mesh in renderMeshes:\n        intersection = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, ray)\n        if 0.99 >= intersection > 0.01:\n            occluded = True\n            print \"Vertex is Occluded\"\n            break\n\n    if occluded == False:\n        return point    \n\ndef visibleEditPoints():\n    object = rs.GetObject(preselect=True, select=True)\n    if not object: return\n    \n    brep_obj = rs.coercebrep(object)\n    vertices = brep_obj.Vertices\n    \n    rs.EnableRedraw(False)\n    \n    meshes = visibleRenderMesh()\n    \n    for i in range (0,vertices.Count):\n        point = isVisible(vertices[i].Location, object, meshes)\n        if point: rs.AddPoint(point)\n    \n    rs.EnableRedraw(True)\n\nvisibleEditPoints()",
+      "language": "python",
+      "author": "Alasdair",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def isVisible(point, object, renderMeshes):\n    projection = rs.ViewProjection()\n    viewCPlane = rs.ViewCameraPlane()\n    \n    if projection == 1: #Parallel\n        \n        bounds = rs.BoundingBox(object, viewCPlane)\n        direction = viewCPlane[3]\n        \n        viewpoint = rs.PlaneClosestPoint(viewCPlane, point)\n        ray = Rhino.Geometry.Ray3d(viewpoint, -direction)\n        distance = rs.Distance(viewpoint, point)\n\n        occluded = False\n\n        for mesh in renderMeshes:\n            \n            intersection = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, ray)\n            \n            if intersection != -1.0:\n                if abs(intersection-distance) > 0.1:\n                    occluded = True\n                    break\n    \n    elif projection == 2: #Perspective\n        viewpoint = rs.ViewCameraPlane()[0]\n        direction = -rs.VectorCreate(viewpoint, point)\n        ray = Rhino.Geometry.Ray3d(viewpoint, direction)\n        \n        distanceA = rs.Distance(viewpoint, point)\n   \n        occluded = False\n        for mesh in renderMeshes:\n            intersection = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, ray)\n\n            hit_pt = ray.PointAt(intersection)\n            distanceB = rs.Distance(hit_pt, viewpoint)\n            \n            if abs(distanceA - distanceB) > 0.1:\n                if distanceB < distanceA:\n                    occluded = True\n                    break\n        \n    else: return False\n\n    if occluded == False: return point",
+      "language": "python",
+      "author": "Alasdair",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef annotate_visible():\n    \"\"\"Annotate all visible points with a text dot\"\"\"\n    rs.EnableRedraw(False)\n    previous_selection = rs.SelectedObjects()\n    rs.UnselectAllObjects()\n    \n    spheres = {}\n    for pt in rs.ObjectsByType(1):\n        spheres[pt] = rs.AddSphere(rs.PointCoordinates(pt), 0.1)\n    rs.Redraw()\n    rs.Command(\"_SelVisible _Enter\")\n    visible = set(rs.SelectedObjects())\n    for pt, sphere in spheres.iteritems():\n        if sphere in visible:\n            nom = rs.ObjectName(pt)\n            col = rs.ObjectColor(pt)\n            dot = rs.AddTextDot(nom, rs.PointCoordinates(pt))\n            rs.ObjectColor(dot, col)\n            rs.ObjectName(dot,nom)\n        rs.DeleteObject(sphere)\n    rs.UnselectAllObjects()\n    rs.SelectObjects(previous_selection)\n    rs.EnableRedraw(True)\n\nif __name__ == \"__main__\":\n    annotate_visible()",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 2010
+}

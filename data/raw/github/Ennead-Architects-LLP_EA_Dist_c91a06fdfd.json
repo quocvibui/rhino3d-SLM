@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/lib/EnneadTab/RHINO/RHINO_GRASSHOPPER.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/lib/EnneadTab/RHINO/RHINO_GRASSHOPPER.py",
+  "instruction": "Rhino grasshopper",
+  "code": "\r\nimport os\r\nimport sys\r\nroot_folder = os.path.abspath((os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))\r\nsys.path.append(root_folder)\r\nimport ENVIRONMENT\r\nif ENVIRONMENT.is_Grasshopper_environment():\r\n    import Rhino # pyright: ignore\r\n    import Grasshopper # pyright: ignore\r\n    import rhinoscriptsyntax as rs\r\n    import scriptcontext as sc\r\n\r\ndef set_doc_to_rhinodoc():\r\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\r\n\r\ndef set_doc_to_ghdoc():\r\n    sc.doc = Grasshopper.Instances.ActiveCanvas.Document\r\n\r\n\r\nclass AccessRhinoDoc():\r\n    \"\"\"Simplifies switching backa dn forth between Rhino and Grasshopper documents. \r\n    by setting to RhinoDoc.ActiveDoc and ghdoc before and after the context.\r\n    Automatically rolls back if exception is raised.\r\n\r\n    >>> with AccessRhinoDoc():\r\n    >>>     wall.DoSomething()\r\n\r\n    \"\"\"\r\n    def __init__(self):\r\n        pass\r\n\r\n    def __enter__(self):\r\n        set_doc_to_rhinodoc()\r\n        return self\r\n\r\n    def __exit__(self, exception, exception_value, traceback):\r\n        set_doc_to_ghdoc()\r\n\r\n\r\n\"\"\"\r\nit turns out you can load grasshopper compnent to rhino doc method.\r\n\r\nhttps://developer.rhino3d.com/guides/rhinopython/ghpython-call-components/#node-in-code-from-rhinopython\r\n\r\nimport rhinoscriptsyntax as rs\r\nimport ghpythonlib.components as ghcomp\r\nimport scriptcontext\r\n \r\npoints = rs.GetPoints(True, True)\r\nif points:\r\n    curves = ghcomp.Voronoi(points)   <----------------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\r\n    for curve in curves:\r\n        scriptcontext.doc.Objects.AddCurve(curve)\r\n    for point in points:\r\n        scriptcontext.doc.Objects.AddPoint(point)\r\n    scriptcontext.doc.Views.Redraw()\r\n\r\n\"\"\"",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

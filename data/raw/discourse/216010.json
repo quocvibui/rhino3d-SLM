@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-make-a-color-from-rhinoinside-using-python/216010",
+  "topic_id": 216010,
+  "title": "How to make a Color from rhinoinside using Python",
+  "question": "I am converting a bunch of code from RhinoScriptSyntax to RhinoCommon.  So far, I have been able to use the source code RhinoScriptSyntax to figure out where to look in RhinoCommon.  Suddenly, I ran into a problem.\n\n\nIt seems that the Color property of a Layer (for example) comes from a System module.  I think this is a C# module but I am using Python.  Is there a way to create (and get values from) a Color using some method in RhinoCommon?  Where do I go from here?\n\n\nHere is a snip of where I am at…\n\n\n\n\nimport rhinoinside\n\nrhinoinside.load()\n\nimport Rhino\n\ndocument = Rhino.RhinoDoc.CreateHeadless(None)\n\n\nsomeLayer = document.Layers.FindName(‘Bob’)\n\ncolor = someLayer.Color\n\n\nNow what do I do with this .NET object?\n\n\n\n\nI hope this makes sense - It is getting late.\n\n\nThank you for your help.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ndoc = Rhino.RhinoDoc.ActiveDoc\n\nlayer = doc.Layers.FindName('test')\n\ncolor = layer.Color\n\nA = color.A\nR = color.R\nG = color.G\nB = color.B\n\nprint A,R,G,B",
+      "language": "python",
+      "author": "flokart",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport Rhino\nimport System\n\ndocument = Rhino.RhinoDoc.CreateHeadless(None)\n\nfor layer in document.Layers:\n    print(f’{layer.Name} \\t {layer.Color=}')\n\nnewColor = System.Drawing.Color.FromArgb(255, 200, 0, 0)\nprint(newColor)",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 39
+}

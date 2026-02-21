@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-rhino-materials-and-custom-preview-supports-texture-bump/80353",
+  "topic_id": 80353,
+  "title": "GHPython, Rhino Materials and Custom Preview-supports texture/bump?!",
+  "question": "First off, I can’t believe I missed this.   I don’t use textures/materials in GH very often, (beyond basic coloring/shading so it wasn’t on my radar.).  TLDR; spent afternoon writing up something for functionality that already exists…at least in the current Rhino 6 version)\n\n\n\n\n\n\n\n\nGrasshopper Custom Render Objects\n \nGallery\n\n\n\n\n\n    Testing automatic inclusion of GH geometry with custom materials in the render process. This can be done using the [Custom Display] component in next weeks Serengeti WIP release: \n\n \nBe careful when baking though, all too easy to end up with something like this: \n\n\n\n\n\n\n\nSomeone asked me if we could use materials from their Rhino Document as preview materials.  They were using an older material table plugin from Human and they were using the shader output to feed the custom preview component.   Setting the viewport  display mode to Rendered was not showing the texture/bump, (which I didn’t expect to, but like I said, I missed the above link).\n\nSo I spent a little time writing up a python version of the Material table component…which…I totally didn’t need to do.\n\nFor whatever reason, when I searched the forum , (before starting my task), I didn’t see the post I listed above, and was totally unaware of the fact that you can use the freaking name of the material as input to the native custom preview component.\n\nAny who…here is the result of my fairly pointless exercise.  The only bit that might be useful is seeing, one way, to create a gh_material from the xml property of a Rhino render material.  which…is not needed because you just use the name!\n\n\nGHCustomPreview_materials2\n1552×643 227 KB\n\n\n\"\"\"Material Table: Retrieves materials from the currently active rhino document\n    Inputs:\n        U: Update\n    Output:\n        Names: Name of Material\n        GHMaterial: a grasshopper shader object\"\"\"\n        \n__author__ = \"chanley\"\n__version__ = \"2019.03.14\"\n\nimport Rhino\nimport ghpythonlib.treehelpers as th\nimport Grasshopper as GH\n\nMatNames = [...",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Material Table: Retrieves materials from the currently active rhino document\n    Inputs:\n        U: Update\n    Output:\n        Names: Name of Material\n        GHMaterial: a grasshopper shader object\"\"\"\n        \n__author__ = \"chanley\"\n__version__ = \"2019.03.14\"\n\nimport Rhino\nimport ghpythonlib.treehelpers as th\nimport Grasshopper as GH\n\nMatNames = []\nDisplayMaterial = []\n\n# example to show a way to create a an GH_Material\nfor mat in Rhino.RhinoDoc.ActiveDoc.RenderMaterials:\n    DisplayMaterial.append([GH.Kernel.Types.GH_Material(mat.Xml)])\n    MatNames.append([mat.Name])\n\n# output nested lists as data tree\nNames = th.list_to_tree(MatNames)\nGHMaterial = th.list_to_tree(DisplayMaterial)",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 1,
+  "views": 1570
+}

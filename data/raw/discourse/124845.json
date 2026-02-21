@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-rhinocommon-decal-placement/124845",
+  "topic_id": 124845,
+  "title": "GhPython/RhinoCommon Decal Placement",
+  "question": "Is it possible to use the Decal Methods in the RhinoCommon library to update decal application based on a variable point position? I am struggling to find documentation and the Decal constructors aren’t working for me at the moment.",
+  "code_blocks": [
+    {
+      "code": "params = Rhino.Render.DecalCreateParams()\nparams.TextureInstanceId = rt.Id\nparams.DecalMapping = Rhino.Render.DecalMapping.Planar\nparams.DecalProjection = Rhino.Render.DecalProjection.Forward\nparams.Origin = Rhino.Geometry.Point3d(-10,-10,0)\nparams.VectorUp = Rhino.Geometry.Vector3d(0,20,0)\nparams.VectorAcross = Rhino.Geometry.Vector3d(20,0,0)\ndecal = Rhino.Render.Decal.Create(params)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rh\n          import Rhino.Render as rr\n          import Rhino.DocObjects as rd\n          import scriptcontext as sc\n          \n          bitmap_texture_type_guid = rr.ContentUuids.BitmapTextureType\n          pbr_material_type_guid = rr.ContentUuids.PhysicallyBasedMaterialType\n          \n          bmtex = rr.RenderContentType.NewContentFromTypeId(bitmap_texture_type_guid)\n          bmtex.Filename = \"C:\\\\Users\\\\Nathan\\\\Pictures\\\\uvtester.png\"\n          \n          simtex = bmtex.SimulatedTexture(rr.RenderTexture.TextureGeneration.Allow)\n          \n          # first create an empty PBR material\n          pbr_rm = rr.RenderContentType.NewContentFromTypeId(pbr_material_type_guid)\n          \n          # to get to a Rhino.DocObjects.PhysicallyBasedMaterial we need to simulate the\n          # render material first.\n          sim = pbr_rm.SimulatedMaterial(rr.RenderTexture.TextureGeneration.Allow)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 17,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 24,
+  "views": 1408
+}

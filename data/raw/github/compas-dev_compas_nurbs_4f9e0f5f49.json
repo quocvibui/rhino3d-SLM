@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_nurbs/blob/a64f3a024d660d4df40a6d5838fbc14c1421d873/src/compas_nurbs/rhino/curve_artist.py",
+  "repo": "compas-dev/compas_nurbs",
+  "repo_stars": 12,
+  "repo_description": "NURBS for COMPAS",
+  "license": "MIT",
+  "filepath": "src/compas_nurbs/rhino/curve_artist.py",
+  "instruction": "Curve artist",
+  "code": "import time\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nfrom compas_rhino.artists import BaseArtist\n\n\nclass CurveArtist(BaseArtist):\n    \"\"\"\n    \"\"\"\n\n    def __init__(self, curve):\n        self.curve = curve\n\n    def draw(self):\n        points = [rg.Point3d(*p) for p in self.curve.control_points]\n        knots = self.curve.knot_vector[1:-1]\n        return rs.AddNurbsCurve(points, knots, self.curve.degree, self.curve.weights)\n\n    def draw_points(self):\n        return rs.AddPoints(self.curve.control_points)\n\n    def redraw(self, timeout=None):\n        \"\"\"Redraw the Rhino view.\n\n        Parameters\n        ----------\n        timeout : float, optional\n            The amount of time the artist waits before updating the Rhino view.\n            The time should be specified in seconds.\n            Default is ``None``.\n\n        \"\"\"\n        if timeout:\n            time.sleep(timeout)\n\n        sc.doc.Views.Redraw()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

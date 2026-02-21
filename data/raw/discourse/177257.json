@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/call-is-ambiguous-curve-trygetpolyline/177257",
+  "topic_id": 177257,
+  "title": "Call is ambiguous... Curve.TryGetPolyline(...)",
+  "question": "Dear all,\n\n\ni am trying to re-write a script from ironpython for python3:\n\n\nobj = rs.GetObject()\n\nif rs.IsPolyline(obj):\n    points = rs.PolylineVertices(obj)\n    if points:\n        for k, point in enumerate(points, start=0):\n            x = str(point[0])\n            y = str(point[1])\n            z = str(point[2])\n\n\n\nWhen i run the script i get this error:\n\n\n\n\nIn ironpython this script will just work fine. Looks to me that something is going wrong with the \nCurve.TryGetPolyline method (rhino3d.com)\n or the rhinoscriptsyntax, or do i miss something?\n\nDoes anyone have an idea how i can work around this?\n\n\nBest Peter",
+  "code_blocks": [
+    {
+      "code": "import clr\n\nbox = clr.StrongBox[Rhino.Geometry.Polyline]()\ncurve.TryGetPolyLine(box)\n\n# this has the PolyLine value\nbox.Value",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from rhinoscript import utility as rhutil\nimport clr\nimport Rhino\n\ndef PolylineVertices(curve_id, segment_index=-1):\n    box = clr.StrongBox[Rhino.Geometry.Polyline]()\n    curve = rhutil.coercecurve(curve_id, segment_index, True)\n    curve.TryGetPolyline(box)\n    if box: return [pt for pt in box.Value]",
+      "language": "python",
+      "author": "peter.zock",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "obj = rs.GetObject()\n\nif rs.IsPolyline(obj):\n    points = rs.PolylineVertices(obj)\n    if points:\n        for k, point in enumerate(points, start=0):\n            x = str(point[0])\n            y = str(point[1])\n            z = str(point[2])",
+      "language": "python",
+      "author": "peter.zock",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 470
+}

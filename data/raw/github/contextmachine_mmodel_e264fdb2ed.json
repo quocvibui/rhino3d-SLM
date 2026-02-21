@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/contextmachine/mmodel/blob/0545e5c2a11c641fc54e91f603e709d3dea549f3/connectors/speckle.py",
+  "repo": "contextmachine/mmodel",
+  "repo_stars": 0,
+  "repo_description": "Deployment branch",
+  "license": "Apache-2.0",
+  "filepath": "connectors/speckle.py",
+  "instruction": "Speckle",
+  "code": "import compas.geometry\nimport numpy as np\nfrom compas.data import DataDecoder\nfrom compas.data import DataEncoder\n\nfrom specklepy.objects import Base\n\n\nclass SpeckleDataBridge(Base):\n    data: dict = {}\n\n    @classmethod\n    def from_compas(cls, compas_obj):\n        encoder = DataEncoder()\n        return cls(data=encoder.default(compas_obj))\n\n    def to_compas(self):\n        decoder = DataDecoder()\n        return decoder.object_hook(self.data)\n\n\nif __name__ == '__main__':\n    from compas.datastructures import Mesh as cMesh\n\n    from specklepy.api import operations\n\n    from specklepy.objects.geometry import Line, Point, Mesh\n\n    from specklepy.api.client import SpeckleClient\n    from specklepy.api.credentials import get_default_account, get_account_from_token\n    from specklepy.transports.server.server import ServerTransport\n    from specklepy.objects.base import Base\n\n    mesh = cMesh()\n    smesh = SpeckleDataBridge.from_compas(mesh)\n\n    client = SpeckleClient(host=\"speckle.xyz\")\n\n    client.authenticate_with_token(token='b6df5ab76888a726d7d82897998caf017a7854590e')\n\n    print(f'account: {client}')\n    stream_id = '489451a9f8'\n    transport = ServerTransport(client=client, stream_id=stream_id)\n    # object_id = operations.send(base=smesh, transports=[transport])\n    # commid_id = client.commit.create(stream_id=stream_id, object_id=object_id, message='Test commit')\n    # base_obj = operations.receive(obj_id='9de5e083f6d656bb9cf9cd13fc093de6', remote_transport=transport)\n    # print(f'resived: {base_obj}')\n    # br = SpeckleDataBridge()\n    # base_obj.get_member_names()\n    import rhino3dm\n    import open3d as o3d\n\n\n    def line():\n        newline = Line()\n        end, start = Point(), Point()\n        end.x, end.y, end.z = 1.2, 33, 0.23\n        start.x, start.y, start.z = 56.2, 2.1, 12.8\n        newline.start = start\n        newline.end = end\n        print(newline)\n\n\n    tetr = o3d.geometry.TriangleMesh.create_tetrahedron(radius=2.0, create_uv_map=True)\n    tetr.compute_vertex_normals()\n\n    verts = np.asarray(tetr.vertices, dtype=float).flatten().tolist()\n    faces = np.asarray(tetr.triangles, dtype=int).flatten().tolist()\n\n    speckle_mesh = Mesh.create(vertices=verts, faces=faces, colors=[40, 40, 40, 40])\n\n    object_id = operations.send(base=speckle_mesh, transports=[transport])\n    commid_id = client.commit.create(stream_id=stream_id, object_id=object_id, message='Test tetrahedron commit')\n    print(speckle_mesh, object_id, commid_id)\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

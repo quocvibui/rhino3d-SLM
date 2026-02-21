@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-orient-a-list-a-point3d/129036",
+  "topic_id": 129036,
+  "title": "GHpython: Orient a list a Point3d",
+  "question": "Hello Everyone,\n\n\nI’am trying to Orient a list of Points using GH python.\n\nMy points are created earlier inside the script , they are not a input  of the component.\n\nI ‘am mean orient like the Orient component in GH ’ changeBasis transformation’\n\nI tryed using rhinoscriptsyntax and RhinoCommon.\n\n\n\n\n\n\nUsing rhinoscriptsyntax :\n\nrs.OrientObject want a Guid but I only have Point3d\n\n\n\n\n\n\nUsing RhinoCommon:\n\nI’am not good enough to understand what to do.\n\nI found that : \nhttps://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Transform_Translation_1.htm\n\nWish seem to be close to what I want but still want a Guid\n\n\n\n\n\n\nMy python script below and a minimal file attached. (all data are include in the script)\n\n\nThanks for your help.\n\nFred\n\n\n\n\n\"\"\"Forum question orient a list of Point3d\n    Inputs:\n        All inputs already in the code\n    Output:\n        points_oriented: The wanted results\n    \n    The following variable are internal but expose for debuging:\n        list_points, original_plane , target_plane\"\"\"\n\n__author__ = \"fred\"\n__version__ = \"2021.08.20\"\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino \nimport Rhino.Geometry as rg\n\n# Creating the origional points\nlist_points= [ rg.Point3d(-10,-10,0),\n                 rg.Point3d(-8,12,0),\n                 rg.Point3d(-8,7,5), ]\n\n# creating the original and target plane \noriginal_plane = rg.Plane.WorldXY\n\ntarget_plane_origin = rg.Point3d(20,-10,5)\ntarget_plane_normal =  rg.Vector3d(1,1,1)\ntarget_plane = rs.PlaneFromNormal(target_plane_origin, target_plane_normal)\n\n# Tentative with rhinoscriptsyntax\npoints_oriented = []\nfor pt_i in list_points : \n    pt_i_oriented = rs.OrientObject( pt_i, original_plane , target_plane, flags=1 )\n    points_oriented.append(pt_i_oriented)\n# Do not work as rs.OrientObject expect a Guid not Point3d\n    \n# Tentative with Rhinoocommon\ntransform_i = rg.Transform.ChangeBasis(target_plane, original_plane  )\n# What to do with that ?\n\n\n\n\nghpython_orient_point3d.gh\n (6.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\nlist_points= [\n    rg.Point3d(-10,-10,0),\n    rg.Point3d(-8,12,0),\n    rg.Point3d(-8,7,5)\n]\n\n# creating the original and target plane \noriginal_plane = rg.Plane.WorldXY\n\ntarget_plane_origin = rg.Point3d(20,-10,5)\ntarget_plane_normal =  rg.Vector3d(1,1,1)\ntarget_plane = rg.Plane(target_plane_origin, target_plane_normal)\n \n# cf. https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Transform_PlaneToPlane.htm\nxform = rg.Transform.PlaneToPlane(original_plane, target_plane)\n\nfor pt in list_points : \n    pt.Transform(xform)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Forum question orient a list of Point3d\n    Inputs:\n        All inputs already in the code\n    Output:\n        points_oriented: The wanted results\n    \n    The following variable are internal but expose for debuging:\n        list_points, original_plane , target_plane\"\"\"\n\n__author__ = \"fred\"\n__version__ = \"2021.08.20\"\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino \nimport Rhino.Geometry as rg\n\n# Creating the origional points\nlist_points= [ rg.Point3d(-10,-10,0),\n                 rg.Point3d(-8,12,0),\n                 rg.Point3d(-8,7,5), ]\n\n# creating the original and target plane \noriginal_plane = rg.Plane.WorldXY\n\ntarget_plane_origin = rg.Point3d(20,-10,5)\ntarget_plane_normal =  rg.Vector3d(1,1,1)\ntarget_plane = rs.PlaneFromNormal(target_plane_origin, target_plane_normal)\n\n# Tentative with rhinoscriptsyntax\npoints_oriented = []\nfor pt_i in list_points : \n    pt_i_oriented = rs.OrientObject( pt_i, original_plane , target_plane, flags=1 )\n    points_oriented.append(pt_i_oriented)\n# Do not work as rs.OrientObject expect a Guid not Point3d\n    \n# Tentative with Rhinoocommon\ntransform_i = rg.Transform.ChangeBasis(target_plane, original_plane  )\n# What to do with that ?",
+      "language": "python",
+      "author": "fred3",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 1790
+}

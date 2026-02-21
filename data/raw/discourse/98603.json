@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hatch-list-in-ghpython/98603",
+  "topic_id": 98603,
+  "title": "Hatch list in Ghpython",
+  "question": "Hello, i create a script to add hatch but the problem it can’t detect list hatch automatically unless i open options and select hatch than click ok.\n\nThis happen also with other hatch components from other plugins\n\n\n\n\nimage\n1214×617 29.2 KB",
+  "code_blocks": [
+    {
+      "code": "sc.doc = Rhino.RhinoDoc.ActiveDoc\nhNames = rs.HatchPatternNames()\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport rhinoscriptsyntax as rs\nimport Rhino as rh\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\nimport math\n\nclass CreateHatch(component):\n\ndef RunScript(self,Curve,Hatch,Angle,Scale,Hatch_Color,Boundary_Color,Bake):\n    \n    sc.doc = rh.RhinoDoc.ActiveDoc\n    rs.HatchPatternNames()\n    sc.doc = ghdoc\n    self.c1 = Hatch_Color\n    self.c2 = Boundary_Color\n    if not self.c1 : self.c1 = System.Drawing.Color.Black\n    else : self.c1\n    if not self.c2: self.c2 = System.Drawing.Color.Black\n    else : self.c2\n    self.c = Curve\n    self.n = Hatch\n    if not self.n : self.n = 0\n    else : self.n\n    self.r = Angle\n    if not self.r : self.r = 0\n    else : self.r\n    self.s = Scale\n    if not self.s : self.s = 1\n    else : self.s\n    self.bake = Bake\n    \n    if not self.c: return\n        \ndef DrawViewportMeshes(self,arg):\n    \n    if not self.c: return\n    doc = rh.RhinoDoc.ActiveDoc\n    H = doc.ActiveDoc.HatchPatterns\n    hatch  = rg.Hatch.Create(self.c,self.n,math.radians(self.r),self.s) \n    pip = arg.Display\n    rh.Display.DisplayPipeline.DrawHatch(pip,hatch[0],self.c1,self.c2)\n    if self.bake == True:\n        doc.Objects.AddHatch(hatch[0])\n        doc.Views.Redraw()",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 1897
+}

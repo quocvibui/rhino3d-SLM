@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pointcloud-addrange-does-not-accept-list-of-point3d/76671",
+  "topic_id": 76671,
+  "title": "PointCloud.AddRange does not accept list of Point3d",
+  "question": "Hi \n@dale\n,\n\n\ni am building a list of 3d points and colors using multiprocessing. To keep those pairs together i add them to a stack of tuples like this:\n\n\nstack = Sytem.Collections.Concurrent.ConcurrentStack[tuple]()\n\n\n\nnow i want to add the points with colors to a pointcloud. In Rhino 5 i iterate over each stack item and add the points and colors one by one:\n\n\nfor pt, color in stack.ToArray(): \n    cloud.Add(pt, color)\n\n\n\nUnfortunately, this takes very long in V6 compared to V5, so i tried to use the new \nPointCloud.AddRange\n method. Since i see no way to use automatic unpacking in the method call i need to create 2 seperate lists, one for points and one for colors. If i then pass the list of points to the method i get this error:\n\n\n\n\nMessage: expected PointCloud, got list\n\n\n\n\nShouldn’t it just accept a \nlist\n ?\n\nIs there a better way to add the contents from the stack to the pointcloud ?\n\n\n_\n\nc.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System\nfrom System.Drawing import Color\n\ncloud = Rhino.Geometry.PointCloud()\nstack = System.Collections.Concurrent.ConcurrentStack[tuple]()\n\np0 = Rhino.Geometry.Point3d(0,0,0)\np1 = Rhino.Geometry.Point3d(0,0,1)\nc0 = Color.White\nc1 = Color.Red\n\n# threaded\nstack.Push( (p0, c0) )\nstack.Push( (p1, c1) )\n\n# get points and colors from tuples in stack\np3dlst = Rhino.Collections.Point3dList( [i[0] for i in stack.ToArray()])\ncolors = System.Collections.Generic.List[Color]( [i[1] for i in stack.ToArray()])\n\ncloud.AddRange(p3dlst, colors)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 812
+}

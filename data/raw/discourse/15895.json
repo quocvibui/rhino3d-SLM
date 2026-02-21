@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-addcutplane-bug-and-request/15895",
+  "topic_id": 15895,
+  "title": "Rs.AddCutPlane() bug and request",
+  "question": "The python rhinoscriptsyntax version of AddCutPlane is different than its vb counterpart and Rhino’s CutPlaneCommand.\n\n\nBoth the vb version and Rhino command create a plane that cuts entirely through all the objects and is expanded by a certain margin (looks like 20% larger, but I don’t really know how the margin is calculated).\n\n\nThe python rhinoscriptsyntax version produces a plane that exactly encompasses the object but does not have any margin like the other versions do.\n\n\nIt also has a bug in that it might not cut entirely through the object if the object is in wireframe and isocurves are turned off.  Run the following to see… (need an English Rhino or at least one that has a “Wireframe” display mode)\n\n\nimport rhinoscriptsyntax as rs\nrs.ViewDisplayMode(mode=\"Wireframe\")\nsph=rs.AddSphere(rs.WorldXYPlane(),10.0)\nrs.SurfaceIsocurveDensity(sph,-1)\nzVec=rs.coerce3dvector([0,0,1])\nrs.AddCutPlane([sph],rs.coerce3dpoint([0,0,0]),rs.coerce3dpoint([1,0,0]),zVec)\n\n\n\nNote the cut plane starts at the sphere poles and only cuts half the sphere.\n\n\nSo, I would like have the margins if possible, and, of course the bug fixed…  \n\n\nEdit: actually, the bug is not in AddCutPlane(), its in how the bounding box is calculated in the above example:\n\n\nimport rhinoscriptsyntax as rs\nrs.ViewDisplayMode(mode=\"Wireframe\")\nsph=rs.AddSphere(rs.WorldXYPlane(),10.0)\nrs.SurfaceIsocurveDensity(sph,-1)\nbb=rs.BoundingBox(sph)\nrs.AddBox(bb) #Fails because box is only 2d\n\n\n\nHmm, need to see where in RhinoCommon this is failing…\n\n\nEdit \n#2\n - Found it…  The failure looks like it is in GeometryBaseClass.GetBoundingBox(Boolean).\n\nWhen True is passed, it calculates an “accurate” bounding box.  This seems to fail with the sphere sans isocurves.  If False is passed, everything works as expected.  Most of the rhinoscriptsyntax methods involving GetBoundingBox() are passed True.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nrs.ViewDisplayMode(mode=\"Wireframe\")\nsph=rs.AddSphere(rs.WorldXYPlane(),...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.ViewDisplayMode(mode=\"Wireframe\")\nsph=rs.AddSphere(rs.WorldXYPlane(),10.0)\nrs.SurfaceIsocurveDensity(sph,-1)\nzVec=rs.coerce3dvector([0,0,1])\nrs.AddCutPlane([sph],rs.coerce3dpoint([0,0,0]),rs.coerce3dpoint([1,0,0]),zVec)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.ViewDisplayMode(mode=\"Wireframe\")\nsph=rs.AddSphere(rs.WorldXYPlane(),10.0)\nrs.SurfaceIsocurveDensity(sph,-1)\nbb=rs.BoundingBox(sph)\nrs.AddBox(bb) #Fails because box is only 2d",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nrs.ViewDisplayMode(mode=\"Wireframe\")\nsph=rs.AddSphere(rs.WorldXYPlane(),10.0)\nrs.SurfaceIsocurveDensity(sph,-1)\ngeom=rs.coercegeometry(sph)\n#bb=geom.GetBoundingBox(False)\nbb=geom.GetBoundingBox(True)\nrs.AddPoints(bb.GetCorners())",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 837
+}

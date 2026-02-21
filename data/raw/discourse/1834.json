@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-popupmenu-error/1834",
+  "topic_id": 1834,
+  "title": "Rhinoscriptsyntax PopupMenu error",
+  "question": "There seems ot be something wrong with this method - using the following script to test:\n\n\nimport rhinoscriptsyntax as rs\ndef MyTest1():\n    myList=[\"one\",\"two\",\"three\",\"four\",\"five\"]\n    choice=rs.PopupMenu(myList)\n    print choice    \nMyTest1()\n\n\n\nthis errors out with the message:\n\n\nMessage: Value cannot be null.  Parameter name: collection\n\n\n\nIn stepping into the method, it calls\n\n\nRhino.UI.Dialogs.ShowContextMenu(items, screen_point, modes)\n\n\n\nThis appears to be where the error is occurring, in the “modes” argument, it’s not liking “None”, it seems…\n\nIt’s expecting some sort of enumerable.  If I run the following (with a mode specified):\n\n\nimport rhinoscriptsyntax as rs\ndef MyTest2():\n    myList=[\"one\",\"two\",\"three\",\"four\",\"five\"]\n    choice=rs.PopupMenu(myList,modes=0)\n    print choice\nMyTest2()\n\n\n\nI get a different error:\n\n\nMessage: expected IEnumerable[str], got list\n\n\n\nAnyway, there’s something in there that needs to be fixed, either in the rhinoscript syntax or in RhinoCommon…\n\n\nAnd I guess this is a moot point anyway I was trying to design something for the Mac, but I see that the PopupMenu method uses System.Windows.Forms.Cursor.Position, so it’s going to crash on a Mac anyway, I suppose…\n\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef MyTest1():\n    myList=[\"one\",\"two\",\"three\",\"four\",\"five\"]\n    choice=rs.PopupMenu(myList)\n    print choice    \nMyTest1()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef MyTest2():\n    myList=[\"one\",\"two\",\"three\",\"four\",\"five\"]\n    choice=rs.PopupMenu(myList,modes=0)\n    print choice\nMyTest2()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 786
+}

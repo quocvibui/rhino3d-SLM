@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-help-stuck-with-one-rectangle-trying-to-create-offsets/110855",
+  "topic_id": 110855,
+  "title": "Python Help! Stuck with one rectangle...trying to create offsets",
+  "question": "Hi everyone,\n\n\nNot getting any errors but I’ve tried both + and * and still not getting the nesting square effect.\n\n\nEssentially I am trying to recreate this artwork. \nhttps://thomafoundation.org/artwork/transformations/\n\n\nCan someone tell me what’s missing? Is it just my line 31?\n\n\nMuch appreciated!\n\n\nError Still\n1388×469 43.8 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nfrom ghpythonlib import treehelpers\nimport random\nimport math\n\n\ndef construct_square_grid(plane, size, extendx, extendy, padding=0):\n    \"\"\"Creates a two-dimensional grid of square cells.\n    \n    Args:\n      plane (Rhino.Geometry.Plane): Base plane for the grid\n      size (int|float): Size of the grid cells\n      extendx (int): Number of grid cells in the base plane x-direction\n      extendy (int): Number of grid cells in the base plane y-direction\n      padding (int|float): Optional padding between the grid cells, \n        by default 0, which means no padding\n    \n    Returns:\n      A list of grid cells as polylines.\n    \"\"\"\n    xform = rg.Transform.PlaneToPlane(rg.Plane.WorldXY, plane)\n    grid = []\n    for y in range(extendy):\n        for x in range(extendx):\n            pt1 = rg.Point3d(\n                    x * size + padding * x, \n                    y * size + padding * y,\n                    0\n                )\n            pt2 = rg.Point3d(\n                    (x + 1) * size + padding * x, \n                    (y + 1) * size + padding * y,\n                    0\n                )\n            rectangle = rg.Rectangle3d(rg.Plane.WorldXY, pt1, pt2)\n            rectangle.Transform(xform)\n            grid.append(rectangle.ToPolyline())\n    return grid\n\n\ndef random_vector2d(plane=rg.Plane.WorldXY, scale=1.0):\n    \"\"\"Returns a random, two-dimensional vector that can optionally\n        be scaled to a desired magnitude. If no scale is provided\n        a unit vector of magnitude 1.0 is returned.\"\"\"\n    theta = random.uniform(0, 2 * math.pi)\n    x = math.cos(theta)\n    y = math.sin(theta)\n    vec = rg.Vector3d(x, y, 0)\n    vec.Unitize()\n    if scale != 1.0:\n        vec *= scale\n    xform = rg.Transform.PlaneToPlane(rg.Plane.WorldXY, plane)\n    vec.Transform(xform)\n    return vec\n\n\ndef distort(polyline_crv, dmin=0, dmax=1):\n    \"\"\"Randomly distorts a polyline curve.\n    \n    Args:\n      plane:\n      polyline_crv (Rhino.Geometry.PolylineCurve): Polyline Curve to distort\n      dmin (int|float): Optional minimum distortion radius, by default 0.0\n      dmax (int|float): Optional maximum distortion radius, by default 1.0\n    \n    Returns:\n      The distorted polyline curve on success, otherwise the initial curve.\n    \"\"\"\n    if not isinstance(polyline_crv, rg.PolylineCurve):\n        return polyline_crv\n    \n    rc, plane = polyline_crv.TryGetPlane()\n    if not rc:\n        return polyline_crv\n    \n    pline = polyline_crv.ToPolyline()\n    if pline is None:\n        return polyline_crv\n    \n    for i in range(pline.Count-1):\n        rscale = random.uniform(dmin, dmax)\n        pline[i] += random_vector2d(plane, rscale)\n        \n    if polyline_crv.IsClosed:\n        pline[pline.Count-1] = pline[0]\n\n    return pline.ToPolylineCurve()\n\n# ------------------------------------------------------------------------------   \n    \nif __name__ == \"__main__\":\n    if Seed is not None:\n        random.seed(Seed)\n    \n    grid = construct_square_grid(Plane, Size, ExtendX, ExtendY, Padding)\n\n    transformations = []\n\n    for cell in grid:\n        prev_crv = cell.ToPolylineCurve()\n        sub_cells = [prev_crv]\n        \n        for i in range(Count-1):\n            offset_crv = prev_crv.Offset(Plane, -Padding, 0.01, 0)\n            if offset_crv is not None:\n                offset_crv = offset_crv[0]\n                if not isinstance(offset_crv, rg.PolylineCurve):\n                    break\n                if not offset_crv.IsClosed or offset_crv.PointCount != 5:\n                    break\n            \n                prev_crv = offset_crv\n            \n                if i == Index:\n                    offset_crv = distort(offset_crv, Padding, Padding * 2)\n            \n                sub_cells.append(offset_crv)\n                \n        transformations.append(sub_cells)\n\n    \n    # Outputs\n    Curves = treehelpers.list_to_tree(transformations)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 5,
+  "views": 1058
+}

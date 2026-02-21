@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/group-objects-by-contour-plane-in-python/71554",
+  "topic_id": 71554,
+  "title": "Group objects by contour plane in python",
+  "question": "Hi all,\n\nis there a way to group (get a nested list) contour curves with the same z value.\n\nRhino.Geometry.Brep.CreateContourCurves have no option to group the result it spits a flat list out.\n\n\nthanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino as R\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# get brep/surface\nguid = rs.GetObject('select object for contours')\n\n# to make the intersecting planes use the bounding box Z dimension\ngeo = rs.coercegeometry(guid)\nbbox = geo.GetBoundingBox(R.Geometry.Plane.WorldXY)\n\n# make a LineCurve to divide\nz_start = bbox.PointAt(0, 0, 0)\nz_end = bbox.PointAt(0, 0, 1)\nz_line = R.Geometry.LineCurve(z_start, z_end)\n\n# divide by 10 to make 10 contours\ndivide_t_points = z_line.DivideByCount(10, True)\ndivide_points = []\nfor t in divide_t_points:\n    divide_points.append(z_line.PointAt(t))\n\n# make planes at the divide points\nplanes = []\nfor p in divide_points:\n    planes.append(R.Geometry.Plane(p, R.Geometry.Vector3d.ZAxis))\n\n# now can get the contours\ncontours = []\nfor plane in planes:\n    curve_array = R.Geometry.Brep.CreateContourCurves(geo, plane)\n    contours.append(curve_array)\n    \n# check\nprint(contours)\n    \n# do something with them: adding to doc grouped\nfor i, c_array in enumerate(contours):\n    group_index = sc.doc.Groups.Add('contour_group_{}'.format(i))\n    for c in c_array:\n        c_guid = sc.doc.Objects.AddCurve(c)\n        sc.doc.Groups.AddToGroup(group_index, c_guid)",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport ghpythonlib.treehelpers as th\n\nPlaneXY = rh.Geometry.Plane.WorldXY\nBBox = rh.Geometry.Brep.GetBoundingBox(object,PlaneXY)\nptZ = BBox.Max.Z\nptmin = rh.Geometry.Point3d(0.0,0.0,BBox.Min.Z)\n\nplpt = []\ndef sume(ptZ):\n    if len(plpt) == step:\n        return False\n    else:\n        plpt.append(rh.Geometry.Point3d(0.0,0.0,ptZ))\n        return sume(ptZ-depth)\nsume(ptZ)\n\nvec = rh.Geometry.Vector3d(0.0,0.0,1)\nPlane = [rh.Geometry.Plane(i,vec) for i in plpt]\nCont = [rh.Geometry.Brep.CreateContourCurves(object,j) for j in Plane]\ncon = th.list_to_tree(Cont)",
+      "language": "python",
+      "author": "flokart",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1256
+}

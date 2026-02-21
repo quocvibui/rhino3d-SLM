@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-createfromtessellation/214330",
+  "topic_id": 214330,
+  "title": "Mesh.CreateFromTessellation",
+  "question": "Hello,\n\nThere are strange behaviors of the Rhino method from Mesh, CreateFromTessellation that I can’t understand and would appreciate some enlightenment on:\n\nThe method is functioning if I feed it with this :\n\nptobj = scriptcontext.doc.Objects.Find(pointID)\n\npoints.append(ptobj.PointGeometry.Location)\n\nand not with this :\n\npoints.append(rs.PointCoordinates(pointID))\n\nbut the two seems to produce exactly the same results with objects of type Point3d in both cases\n\n?\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef Test1():\n    object_ids = rs.GetObjects(\"Select points\", 1)\n    if not object_ids:\n        return\n\n    points = []\n    for obj_id in object_ids:\n        points.append(rs.PointCoordinates(obj_id))\n\n    rc, plane = Rhino.Geometry.Plane.FitPlaneToPoints(points)\n    if rc != Rhino.Geometry.PlaneFitResult.Success:\n        return\n\n    mesh = Rhino.Geometry.Mesh.CreateFromTessellation(points, None, plane, True)\n    if mesh:\n        sc.doc.Objects.AddMesh(mesh)\n        sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    Test1()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 70
+}

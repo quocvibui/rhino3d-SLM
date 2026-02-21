@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-how-to-make-a-closed-curve/206786",
+  "topic_id": 206786,
+  "title": "Python: How to make a closed curve?",
+  "question": "How can I make a closed curve? Here’s my attempt, but it was unsuccessful. \n\n\n#! python 2\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\npoints = []\nradius = 5\ntotal_points = 20\nfor i in range(total_points):\n    angle = (2 * math.pi * i) / total_points\n    x = radius * math.cos(angle)\n    y = radius * math.sin(angle)\n    z = 0.0\n    point = rg.Point3d(x, y, z)\n    points.append(point)\n    sc.doc.Objects.AddPoint(point)\n\ncurve = rg.Curve.CreateInterpolatedCurve(points, 3, rg.CurveKnotStyle.Uniform)\nprint('is closable?', curve.IsClosable(0.001)) # returns False :(\nsuccess = curve.MakeClosed(0.001)\nprint('success', success) # returns False :(\nsc.doc.Objects.AddCurve(curve)",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\npoints = []\nradius = 5\ntotal_points = 20\nfor i in range(total_points):\n    angle = (2 * math.pi * i) / total_points\n    x = radius * math.cos(angle)\n    y = radius * math.sin(angle)\n    z = 0.0\n    point = rg.Point3d(x, y, z)\n    points.append(point)\n    sc.doc.Objects.AddPoint(point)\n\n# oh, you have to add the first point onto the end of the points list!!!\npoints.append(rg.Point3d(points[0]))\n\ncurve = rg.Curve.CreateInterpolatedCurve(points, 3, rg.CurveKnotStyle.Uniform)\nprint('is closable?', curve.IsClosable(0.001))\nsuccess = curve.MakeClosed(0.001)\nprint('success', success)\nsc.doc.Objects.AddCurve(curve)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "#! python 2\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\npoints = []\nradius = 5\ntotal_points = 20\nfor i in range(total_points):\n    angle = (2 * math.pi * i) / total_points\n    x = radius * math.cos(angle)\n    y = radius * math.sin(angle)\n    z = 0.0\n    point = rg.Point3d(x, y, z)\n    points.append(point)\n    sc.doc.Objects.AddPoint(point)\n\ncurve = rg.Curve.CreateInterpolatedCurve(points, 3, rg.CurveKnotStyle.Uniform)\nprint('is closable?', curve.IsClosable(0.001)) # returns False :(\nsuccess = curve.MakeClosed(0.001)\nprint('success', success) # returns False :(\nsc.doc.Objects.AddCurve(curve)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 88
+}

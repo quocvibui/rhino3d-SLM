@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/_old_axolotl-1.0/code/primitives/torus.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "_old_axolotl-1.0/code/primitives/torus.py",
+  "instruction": "Creates a Torus\n    Inputs:\n        origin: The origin (plane) of the torus (list)\n        radius_a: Radius from center to axis (float)\n        radius_b: Radius of pipe around axis (float)\n       ...",
+  "code": "# -*- coding: utf-8 -*-\n\n\"\"\"\nCreates a Torus\n    Inputs:\n        origin: The origin (plane) of the torus (list)\n        radius_a: Radius from center to axis (float)\n        radius_b: Radius of pipe around axis (float)\n        pts: List of points to query (list)\n    Output:\n        a: Distance values for all points in pts\n\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT / ETH Zurich'\n__license__    = 'MIT License'\n__email__      = '<bernhard@arch.ethz.ch>'\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math\n\n# the distance function\ndef get_dist(p,o):\n    lxy = math.sqrt(math.pow(o.OriginX-p.X,2) + math.pow(o.OriginY-p.Y,2))\n    l2  = math.sqrt(math.pow(lxy-radius_a,2) + math.pow(o.OriginZ-p.Z,2))\n    return l2-radius_b\n\n# input check\nif not radius_a:\n    radius_a = 10\nif not radius_b:\n    radius_b = 5\n\na = [9999.9 for p in pts]\nvoxplane = rs.WorldXYPlane()\nfor o in origin:\n    tpts = [rg.Point3d(p) for p in pts]\n    voxplane.Origin = o.Origin\n    tf = rg.Transform.PlaneToPlane(o,voxplane)\n\n    # rebase the points according to the transformation matrix\n    for p in tpts:\n        p.Transform(tf)\n\n    # calculate distance for each point\n    a = [min(a[j],get_dist(p,o)) for j,p in enumerate(tpts)]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

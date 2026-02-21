@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/design-technology/S2F-AI-ScriptEditor/blob/b8b186096f89bf831661ef8308693b98d2bb5b39/4-Running_in_Rhino/01-viewcapture_to_processing.py",
+  "repo": "design-technology/S2F-AI-ScriptEditor",
+  "repo_stars": 5,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "4-Running_in_Rhino/01-viewcapture_to_processing.py",
+  "instruction": "01 viewcapture to processing",
+  "code": "import io\n\nfrom PIL import Image\nimport scriptcontext as sc\n\nfrom System.IO import MemoryStream\nimport System.Drawing.Imaging as sdi\nimport System.Drawing as sd\nfrom System import Array, Byte\n\nimport Eto.Drawing as ed\n\ndef bitmap_to_pil(bitmap: sd.Bitmap) -> Image.Image:\n    net_stream = MemoryStream()\n    \n    bitmap.Save(net_stream, sdi.ImageFormat.Png)\n    \n    byte_array = net_stream.ToArray()\n    pil_image = Image.open(io.BytesIO(byte_array))\n\n    return pil_image.convert(\"RGB\")\n    \ndef pil_to_bitmap(pil_image: Image.Image) -> ed.Bitmap:\n    if pil_image is None:\n        return None\n    \n    stream = io.BytesIO()\n    pil_image.save(stream, format=\"PNG\")\n    byte_array = stream.getvalue()\n    byte_array_net = Array[Byte](byte_array)  # Convert to .NET Byte[]\n\n    return ed.Bitmap(byte_array_net)\n\nif __name__ == \"__main__\":\n    sd_bitmap = sc.doc.Views.ActiveView.CaptureToBitmap(sd.Size(512,512), False, False, False)\n    pil_bitmap = bitmap_to_pil(sd_bitmap)\n    eto_bitmap = pil_to_bitmap(pil_bitmap)\n\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

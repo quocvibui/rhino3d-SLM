@@ -1,0 +1,54 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-inheritance-rhino-geometry-boundingbox/140291",
+  "topic_id": 140291,
+  "title": "Python inheritance Rhino.Geometry.BoundingBox",
+  "question": "Hi,\n\nonce again this might be quite a stupid question, but I will ask it anyways.\n\n\nIf I try to create a class inherited from a Rhino.Geometry.BoundingBox and I try this\n\n\nclass BBox(Rhino.Geometry.BoundingBox):\n\n    def __init__(self, geometry):\n\n        Rhino.Geometry.BoundingBox.__init__(self, geometry)\n\n\n\nand then I try it I get the following:\n\n\nbbox = BBox(lst)\n\ncannot derive from Rhino.Geometry.BoundingBox because it is a value type\n\n\n\nYet, when I try\n\n\nclass MyLine(Rhino.Geometry.LineCurve):\n\n    def __init__(self, pt_a, pt_b):\n\n        Rhino.Geometry.LineCurve.__init__(self, pt_a, pt_b)\n\n\n\nit’s working fine.\n\nI did my reserach on the value types, but I am stuck here.\n\n\nThanks,\n\nT.",
+  "code_blocks": [
+    {
+      "code": "class BBox(object):\n    \n    def __init__(self, geometries):\n\n        self.BBox = self._CreateAroundItems()\n\n    def _CreateAroundItems(self):\n        bbox = Rhino.Geometry.BoundingBox.Empty\n        for geo in geometries:\n            obj_box = geo.GetBoundingBox(Rhino.Geometry.Plane.WorldXY)\n            bbox = Rhino.Geometry.BoundingBox.Union(bbox, obj_box)\n\n        return bbox",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\n# Fancy bounding box class\nclass MyBoundingBox(object):\n    def __init__(self): \n        self.m_bbox = Rhino.Geometry.BoundingBox()\n    \n    # Set this bounding box from a Rhino bounding box\n    def Set(self, bbox):\n        self.m_bbox = bbox\n    \n    # Set this bounding box from a GetObject\n    def SetFromGetObject(self, go):\n        if go:\n            for objref in go.Objects():\n                rc, bbox = Rhino.DocObjects.RhinoObject.GetTightBoundingBox([objref.Object()])\n                if rc:\n                    self.m_bbox.Union(bbox)\n    \n    # Set this bounding box from a list of geometry\n    def SetFromGeomtryList(self, list):\n        for geo in list:\n            bbox = geo.GetBoundingBox(True)\n            self.m_bbox.Union(bbox)\n    \n    # Unions a Rhino bounding box to this bounding box\n    def Union(self, bbox):\n        self.m_bbox.Union(bbox)\n    \n    # Returns this bounding box as a Rhino bounding box\n    def Get(self):\n        return self.m_bbox\n    \n    # Get the minimum corner point\n    @property\n    def Min(self):\n        return self.m_bbox.Min\n    \n    # Get the maximum corner point\n    @property\n    def Max(self):\n        return self.m_bbox.Max\n\n# Test\ndef test():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt('Select curves')\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.GetMultiple(1, 0)\n    if go.CommandResult() == Rhino.Commands.Result.Success:\n        bbox = MyBoundingBox()\n        bbox.SetFromGetObject(go)\n        print(bbox.Min)\n        print(bbox.Max)\n\nif __name__==\"__main__\":\n    test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "class BBox(Rhino.Geometry.BoundingBox):\n\n    def __init__(self, geometry):\n\n        Rhino.Geometry.BoundingBox.__init__(self, geometry)",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "bbox = BBox(lst)\n\ncannot derive from Rhino.Geometry.BoundingBox because it is a value type",
+      "language": "unknown",
+      "author": "tobias.stoltmann",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "class MyLine(Rhino.Geometry.LineCurve):\n\n    def __init__(self, pt_a, pt_b):\n\n        Rhino.Geometry.LineCurve.__init__(self, pt_a, pt_b)",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 723
+}

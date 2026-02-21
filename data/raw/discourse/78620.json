@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/process-list-of-point3d-and-create-pointcloud-object/78620",
+  "topic_id": 78620,
+  "title": "Process list of point3d and create pointcloud object",
+  "question": "Hi All,\n\n\nI have recently started python in Gh and got stuck. I have a problem where i receive list of point3d at Pts variable and then i need to convert this Pts list to pointcloud and find the nearest point and then draw a line from current point to nearest point. Below is my code.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rc\n\ndef RunCommand(Pts, id0, maxn, maxdist, A):  \n    try:\n        p = rs.PointCloudPoints(Pts)\n        p = Pts\n        polylines = []\n        i = 0\n        if p:\n            while len(p)>0 and i < maxn:\n                \n                polys = PseudoSteinerTrees2(p, maxdist, maxn, id0)\n                \n                if(len(polys) >0):\n                    polylines.append(polys)\n                i += 1\n        A = polylines\n#        print(A)\n    except:\n        print(\"Unexpected error:\")\n        raise\n        \n    \n\n\ndef PseudoSteinerTrees2(p, maxdist, maxn, id0):\n    triLines  = []\n    p0 = 0\n    p1 = 0\n    p2 = 0\n\n    cp = 0\n#    print(p)\n    i = 0\n    while len(p)>1 and i<maxn:\n        p0 = p[0 % len(p)]\n#        print(p0)\n        p.pop(0 % len(p))\n\n        cp = p.PointArrayClosestPoint(p0)\n#        cp = p.index(p0+1)\n        p1 = p[cp]\n#        p1 = p[1]\n\n        distance = p0.DistanceTo(p1)\n        if distance > maxdist:\n            break\n        p01 = (p0 + p1) * 0.5\n#        p.RemoveAt(cp)\n        triLines.append(rc.Geometry.Polyline([p0,p01,p1]))\n        p0 = p01\n        i += 1\n    return triLines\n                        \n##\n#if \"__name__\" == \"__main__\":\n#    print('running...')\n#Runcommand1(x)\n\nRunCommand(Pts, id0, max, maxDist, A)\n\n\n\nPts has data:\n\n[<Rhino.Geometry.Point3d object at 0x000000000000003F [-0.502662831685814,-0.778512045637943,-0.0659786402555083]>,\n\n<Rhino.Geometry.Point3d object at 0x0000000000000040 [0.712929626793102,0.547407993836053,-0.822306199847863]>,\n\n<Rhino.Geometry.Point3d object at 0x0000000000000041 [-0.807991005390878,0.903379673093268,-0.0348241026675442]>,\n\n<Rhino.Geometry.Point3d object at 0x00000...",
+  "code_blocks": [
+    {
+      "code": "Runtime error (NotSupportedException): This type of object is not supported in Grasshopper, so this Python script cannot create it. You might want to use 'scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc' to use the Rhino doc, instead? If you do, remember to restore it: 'scriptcontext.doc = ghdoc'.\n\nTraceback:\n  line 125, in AddPointCloud, \"C:\\Users\\user\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\geometry.py\"\n  line 9, in RunCommand, \"<string>\"\n  line 63, in script",
+      "language": "python",
+      "author": "rajeshupadhayaya",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rc\n\ndef RunCommand(Pts, id0, maxn, maxdist, A):  \n    try:\n        p = rs.PointCloudPoints(Pts)\n        p = Pts\n        polylines = []\n        i = 0\n        if p:\n            while len(p)>0 and i < maxn:\n                \n                polys = PseudoSteinerTrees2(p, maxdist, maxn, id0)\n                \n                if(len(polys) >0):\n                    polylines.append(polys)\n                i += 1\n        A = polylines\n#        print(A)\n    except:\n        print(\"Unexpected error:\")\n        raise\n        \n    \n\n\ndef PseudoSteinerTrees2(p, maxdist, maxn, id0):\n    triLines  = []\n    p0 = 0\n    p1 = 0\n    p2 = 0\n\n    cp = 0\n#    print(p)\n    i = 0\n    while len(p)>1 and i<maxn:\n        p0 = p[0 % len(p)]\n#        print(p0)\n        p.pop(0 % len(p))\n\n        cp = p.PointArrayClosestPoint(p0)\n#        cp = p.index(p0+1)\n        p1 = p[cp]\n#        p1 = p[1]\n\n        distance = p0.DistanceTo(p1)\n        if distance > maxdist:\n            break\n        p01 = (p0 + p1) * 0.5\n#        p.RemoveAt(cp)\n        triLines.append(rc.Geometry.Polyline([p0,p01,p1]))\n        p0 = p01\n        i += 1\n    return triLines\n                        \n##\n#if \"__name__\" == \"__main__\":\n#    print('running...')\n#Runcommand1(x)\n\nRunCommand(Pts, id0, max, maxDist, A)",
+      "language": "python",
+      "author": "rajeshupadhayaya",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 12,
+  "views": 3026
+}

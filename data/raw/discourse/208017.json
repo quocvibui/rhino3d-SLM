@@ -1,0 +1,20 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/plugin-load-in-headless-rhino-inside-c/208017",
+  "topic_id": 208017,
+  "title": "Plugin load in headless Rhino.Inside C++",
+  "question": "Hello there!\n\n\nI am trying to integrate some Google testing for my Rhino plugin in C++.\n\nThis is the test I am trying to run:\n\n\n#include <gtest/gtest.h>\n\n#include \"pch.h\"\n#include \"RhinoCore.h\"\n\n\nTEST(TEST_INTEGRATION_CommandsSuite, MyIntegrationTest) {\n    CRhinoCreateDocumentOptions options;\n    options.SetCreateHeadless(true);  // <-- if true the plugin is not laoded\n    int doc_runtime_serial_number = CRhinoDoc::CreateDocument(nullptr, &options);\n    CRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(doc_runtime_serial_number);\n\n    bool resCmd = pDoc->RunScript(L\"<any-command>\", 1);\n    ASSERT_TRUE(resCmd);\n}\n\n\n\nIf\noptions.SetCreateHeadless(true)\n, my plugin (previously installed) won’t load, and the command will fail to be found.\n\n\nI suppose what I am trying to do is load a Rhino plugin I am building and run at least their commands as smoke test.\n\n\nAm I doing something wrong? Why is the headless not loading the plugins?\n\n\n@dale\n ? \n thanks!!",
+  "code_blocks": [
+    {
+      "code": "#include <gtest/gtest.h>\n\n#include \"pch.h\"\n#include \"RhinoCore.h\"\n\n\nTEST(TEST_INTEGRATION_CommandsSuite, MyIntegrationTest) {\n    CRhinoCreateDocumentOptions options;\n    options.SetCreateHeadless(true);  // <-- if true the plugin is not laoded\n    int doc_runtime_serial_number = CRhinoDoc::CreateDocument(nullptr, &options);\n    CRhinoDoc* pDoc = CRhinoDoc::FromRuntimeSerialNumber(doc_runtime_serial_number);\n\n    bool resCmd = pDoc->RunScript(L\"<any-command>\", 1);\n    ASSERT_TRUE(resCmd);\n}",
+      "language": "csharp",
+      "author": "andrea.settimi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 77
+}

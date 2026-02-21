@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Gaspard-Bourgeois/rhino-picksoul/blob/9431b8335b62d43ec3539852d1a1af603f0ce1c5/dev/label/blockCountLabel.py",
+  "repo": "Gaspard-Bourgeois/rhino-picksoul",
+  "repo_stars": 1,
+  "repo_description": "Generic plugin to manage blocs, materials and trajectories in rhino.",
+  "license": "Apache-2.0",
+  "filepath": "dev/label/blockCountLabel.py",
+  "instruction": "Author: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 05/01/26",
+  "code": "\"\"\"\nAuthor: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 05/01/26\n\"\"\"\nimport rhinoscriptsyntax as rs\n\ndef BlockCountLabels():\n    ids = rs.GetObjects(\"Sélectionnez les blocs pour compter leurs instances\", rs.filter.instance, preselect=True)\n    if not ids: return\n    rs.UnselectAllObjects()\n    \n    new_texts = []\n    for id in ids:\n        point = rs.BlockInstanceInsertPoint(id)\n        name = rs.BlockInstanceName(id)\n        formula = \"%<BlockInstanceCount(\\\"\" + str(name) + \"\\\")>%\"\n        txt_id = rs.AddText(formula, point, height=1.0)\n        if txt_id: new_texts.append(txt_id)\n    \n    if new_texts: rs.SelectObjects(new_texts)\n\nBlockCountLabels()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/aaronnelson/RhinoPython/blob/9f25cf249ab53ef9fd45d1a8df6cdac1da20c2c8/Vector%20Stuff/Random%20Point%20Walker.py",
+  "repo": "aaronnelson/RhinoPython",
+  "repo_stars": 2,
+  "repo_description": "Python Scripts for Rhino",
+  "license": "GPL-3.0",
+  "filepath": "Vector Stuff/Random Point Walker.py",
+  "instruction": "Random Point Walker Prompt user for a start point and number of random points along with a step value Starting from the user point create points in random directions using the step interval",
+  "code": "#Random Point Walker\n#Prompt user for a start point and number of random points along with a step value\n#Starting from the user point create points in random directions using the step interval\n\nimport rhinoscriptsyntax as rs\nimport random\n\n#prompt user for number of total points in walker\nnumPts = rs.GetInteger(\"Enter Total Number of Points\")\n\n#prompt user for interval between points\nstepPts = rs.GetInteger(\"Enter Steps between Points\")\n\n#ask the user to create a starting point\nuserPt = rs.GetPoint(\"Please create a point\")\npt = rs.AddPoint(userPt)\n\n#create a list a points and append starting pt to the list\npts = []\npts.append(pt)\n\n#walk through the range of points\nfor  i in range(numPts):\n    #create random values for X, Y, and Z.  These can be + or - as long as they fall in our interval range\n    xDir = random.uniform(-stepPts, stepPts)\n    yDir = random.uniform(-stepPts, stepPts)\n    zDir = random.uniform(-stepPts, stepPts)\n    #assemble the vector from the constituent components\n    vect = (xDir, yDir, zDir)\n    \n    #create a new point that copys the previous point and moves it along the translation vector \n    newPt = rs.CopyObject(pts[-1], vect)\n    #add the point to the list of points\n    pts.append(newPt)\n\n#create a curve using the point list\nmyCurve = rs.AddCurve(pts, 3)\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

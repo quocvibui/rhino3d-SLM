@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/compas-teaching/ITA19/blob/c4b10dc183599eed4ed60d922b6ef5922d173bdb/modules/module3/week2/compas_vol_rpc.py",
+  "repo": "compas-teaching/ITA19",
+  "repo_stars": 10,
+  "repo_description": "Schedule, examples, notebooks, ... for the ITA PhD course",
+  "license": "MIT",
+  "filepath": "modules/module3/week2/compas_vol_rpc.py",
+  "instruction": "Compas vol rpc",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nfrom compas_vol.primitives import VolSphere, VolBox\nfrom compas_vol.combinations import Union,Subtraction\nfrom compas.geometry import Sphere, Box, Frame\nfrom compas.rpc import Proxy\n\ns = VolSphere(Sphere((0, 0, 0), 6))\nb = VolBox(Box(Frame.worldXY(), 10, 10, 10), 1.5)\nu = Union(s, b)\nt = Subtraction(b, s)\n\np = Proxy('compas_vol.utilities')\n#p.stop_server()\n#p = Proxy('compas_vol.utilities')\n\nbounds = ((-25,25,100), (-25,25,100), (-25,25,100))\nvs,fs = p.get_vfs_from_tree(str(t), bounds, 1.0)\n\nmesh = rg.Mesh()\nfor v1, v2, v3 in vs:\n    mesh.Vertices.Add(v1, v2, v3)\nfor f in fs:\n    if len(set(f))>2:\n        mesh.Faces.AddFace(f[0], f[1], f[2])\nmesh.Compact()\nmesh.Normals.ComputeNormals()\n\na = mesh\nb = [rs.CreatePoint(v1,v2,v3) for v1, v2, v3 in vs]",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

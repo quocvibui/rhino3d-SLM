@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extract-center-curves-from-3d-meshes/200771",
+  "topic_id": 200771,
+  "title": "Extract center curves from 3D meshes",
+  "question": "I’m looking for a way to extract the skeleton of a mesh - the center curves of the solid mesh.\n\nI have previously used ngon mesh skeleton component, but in the latest version this component is no longer there. (\n@Petras_Vestartas\n).\n\n\nAre there any alternatives? Or suggestions for methods.\n\nThis article describes pretty well what I intend to do\n\n\n\n\ndoiserbia.nb.rs\n\n\n\n\n\n\n\n\n1820-02141001063S.pdf\n\n\n921.14 KB\n\n\n\n\n\n\n\n\n\n\n\n\nImage from article:\n\n\nimage\n1052×716 178 KB",
+  "code_blocks": [
+    {
+      "code": "#! python3\n# venv: timber_connections\n# r: wood-nano==0.2.0, compas-wood==2.4.0, compas==2.8.1, wood-rui==0.2.2\n\nimport Rhino\nimport Rhino.Input\nimport Rhino.DocObjects\nfrom Rhino.Geometry import Plane\nfrom typing import *\nfrom wood_rui import wood_rui_globals, process_input, add_skeleton\nfrom compas_wood.binding_rhino import beam_skeleton, mesh_skeleton\nimport System\n\n\ndef callback(selection: dict[str, any], name: str):\n    # Just axis without radii\n    if not selection[\"simplify\"]:\n        for mesh in selection[\"meshes\"]:\n            polylines = mesh_skeleton(mesh)\n            for polyline in polylines:\n                Rhino.RhinoDoc.ActiveDoc.Objects.AddPolyline(polyline)\n        return\n\n    # Try to simplify an axis\n\n    polylines = []\n    distances = []\n    meshes = []\n    transforms = []\n\n    for mesh in selection[\"meshes\"]:\n        polyline = None\n        polylines = []\n\n        polyline, distance = beam_skeleton(\n            mesh,\n            selection[\"divisions\"],\n            selection[\"nearest_neighbors\"],\n            selection[\"extend_end\"],\n        )\n        polylines.append(polyline)\n        distances.append(distance)\n        meshes.append(mesh)\n\n        # Add a small segement at the end of the polyline to provide orientation\n        z_axis = polyline[polyline.Count - 1] - polyline[0]\n        plane = Plane(polyline[polyline.Count - 1], z_axis)\n        x_axis = plane.XAxis\n        polyline.Add(polyline[polyline.Count - 1] + x_axis * 0.1)\n        plane_xy = Plane.WorldXY\n        plane = Plane(\n            polyline[polyline.Count - 1],\n            x_axis,\n            Rhino.Geometry.Vector3d.CrossProduct(x_axis, z_axis),\n        )\n        xform = Rhino.Geometry.Transform.PlaneToPlane(plane, plane_xy)\n        transforms.append(xform)\n\n    add_skeleton(polylines, \"mesh_skeleton\", distances, meshes, transforms)\n\n\nif __name__ == \"__main__\":\n    input_dict = {\n        \"meshes\": ([], list[Rhino.Geometry.Mesh]),\n        \"simplify\": (False, bool),\n        \"divisions\": (10, int),\n        \"nearest_neighbors\": (10, int),\n        \"extend_end\": (True, bool),\n    }\n\n    # Call the generalized input method with the dataset name and input dictionary\n    process_input(input_dict, callback, hide_input=False)",
+      "language": "python",
+      "author": "Petras_Vestartas",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "#!/usr/bin/env python3\n# venv: timber_connections\n# r: wood-nano==0.2.0, compas-wood==2.4.0, compas==2.8.1, wood-rui==0.2.2\n\n\nimport System\nimport Rhino\nimport Rhino.Input\nimport Rhino.DocObjects\nfrom Rhino.Geometry import Plane\nfrom typing import *\nfrom wood_rui import wood_rui_globals, process_input, add_skeleton\nfrom compas_wood.binding_rhino import beam_skeleton, mesh_skeleton\nimport System\n\ndef compute_mesh_skeleton(input_meshes: list[Rhino.Geometry.Mesh],\n                          simplify: bool = True,\n                          divisions: int = 100,\n                          nearest_neighbors: int = 10,\n                          extend_end: bool = False\n                         ) -> dict[str, any]:\n    if not simplify:\n        # Use mesh_skeleton when not simplifying: accumulate all returned polylines.\n        polylines = []\n        for mesh in input_meshes:\n            for poly in mesh_skeleton(mesh):\n                polylines.append(poly)\n        return {\"polylines\": polylines}\n    \n    # When simplifying, use beam_skeleton and adjust each polyline.\n    polylines = []\n    distances = []\n    meshes_out = []\n    transforms = []\n    \n    for mesh in input_meshes:\n        polyline, distance = beam_skeleton(mesh, divisions, nearest_neighbors, extend_end)\n        polylines.append(polyline)\n        distances.append(distance)\n        meshes_out.append(mesh)\n        \n        # Add a small segment at the end to provide orientation.\n        z_axis = polyline[polyline.Count - 1] - polyline[0]\n        plane = Plane(polyline[polyline.Count - 1], z_axis)\n        x_axis = plane.XAxis\n        polyline.Add(polyline[polyline.Count - 1] + x_axis * 0.1)\n        plane_xy = Plane.WorldXY\n        plane = Plane(polyline[polyline.Count - 1],\n                      x_axis,\n                      Rhino.Geometry.Vector3d.CrossProduct(x_axis, z_axis))\n        xform = Rhino.Geometry.Transform.PlaneToPlane(plane, plane_xy)\n        transforms.append(xform)\n    \n    return {\n        \"polylines\": polylines,\n        \"distances\": distances,\n        \"meshes\": meshes_out,\n        \"transforms\": transforms\n    }\n\nskeleton = compute_mesh_skeleton([mesh])['polylines']",
+      "language": "python",
+      "author": "Timo_Harboe_Nielsen",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "polylines = mesh_skeleton(mesh)\n            for polyline in polylines:\n                Rhino.RhinoDoc.ActiveDoc.Objects.AddPolyline(polyline",
+      "language": "python",
+      "author": "Petras_Vestartas",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 15,
+  "views": 563
+}

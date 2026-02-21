@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-in-rs-addcurve-or-append/58610",
+  "topic_id": 58610,
+  "title": "Bug in rs.addcurve or append :/",
+  "question": "I have tried to bugtrack this stuff but I don’t understand what is going on, for some reason code that works fine in V5 adds extra points at w(0,0,0) which is quite strange, but it happens on multiple of my scripts.\n\n\nAnd now that I work on a mesh tool that analyzes faces based on their boundries I realized that it only happens on the quads and not the tris (obviously based on how I check for similar vertex data on vertex 3 and 4)  but still it is very strange. Oh, and in my example it happnes on 66 curves, but there are 198 points at w(0,0,0)…\n\n\n\n\nmesh for quad tri bug.3dm\n (43.5 KB)\n\n\nmesh quad tri bug.py\n (544 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmesh=rs.GetObject(filter=32)\n\nvertices=rs.MeshVertices(mesh)\nfaces=rs.MeshFaceVertices(mesh)\n\nfor face in faces:\n    \n    pts=[]\n    \n    pts.append( vertices[ face[0] ] )\n    pts.append( vertices[ face[1] ] )\n    pts.append( vertices[ face[2] ] )\n    \n    if face[2]==face[3]:\n        #--- Mesh is TRI\n        rs.Sleep(0)\n    else:\n        #--- Mesh is QUAD\n        \n        pts.append( vertices[ face[3] ] )\n    \n    pts.append( vertices[ face[0] ] )\n    \n    rs.AddCurve(pts,degree=1)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 1052
+}

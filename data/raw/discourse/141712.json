@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/divide-curve-by-ratio-in-python-rhinoscript/141712",
+  "topic_id": 141712,
+  "title": "Divide curve by ratio in Python Rhinoscript",
+  "question": "Hi, can someone please help me in writing python code to divide a curve length by ratio? I want to divide a line and have points at 10%, 25%, 25%, 30%, and 10% of the total length.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef test():\n    \n    while True:\n        pct = 10\n        if sc.sticky.has_key('DIV_PCT'):\n            pct = sc.sticky['DIV_PCT']\n        go = Rhino.Input.Custom.GetObject()\n        go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n        go.SubObjectSelect=True\n        opPct = Rhino.Input.Custom.OptionDouble(pct,.01, 100)\n        go.AddOptionDouble('Percent',opPct)\n        go.AcceptNumber(True, False)\n        \n        rc = go.GetMultiple(1,0)\n        \n        if go.CommandResult()!=Rhino.Commands.Result.Success:\n            return go.CommandResult()\n            \n        if rc==Rhino.Input.GetResult.Object:\n            ids = [go.Object(i).ObjectId for i in range(go.ObjectCount)]\n            objs = [go.Object(i)  for i in range(go.ObjectCount)]\n            crvs = [obj.Curve() for obj in objs] \n            break\n            \n        elif rc==Rhino.Input.GetResult.Option:\n            pct = opPct.CurrentValue\n            sc.sticky['DIV_PCT'] = pct\n            continue\n        elif rc==Rhino.Input.GetResult.Number:\n            pct = go.Number()\n            if pct > 100:\n                print 'Enter a number less than 100'\n                continue\n            sc.sticky['DIV_PCT'] = pct\n            continue\n            \n            \n    div = pct/100\n    for crv in crvs:\n        length = crv.GetLength()\n        pars = crv.DivideByLength(length*div, False)\n        pts = [crv.PointAt(par) for par in pars]\n        rs.AddPoints(pts)\n\ntest()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ncrvid = rs.GetObjects(\"Select Curve\", rs.filter.curve, False, False, None, False)\ncrv = rs.coercecurve(crvid, -1, False)\nlength = crv.GetLength()\npct = 0\nwhile pct < 1:\n    input = rs.GetInteger(\"Enter Percentage Number\", None, 0, 100)\n    div = input/100 + pct\n    divide = crv.DivideByLength(length*div, False)\n    pt = crv.PointAtLength(divide[0])\n    rs.AddPoint(pt)\n    pct = div",
+      "language": "python",
+      "author": "bahman.farshbaf",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 695
+}

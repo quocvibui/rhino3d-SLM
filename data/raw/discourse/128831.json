@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-v6-import-specific-geometry-from-3dm-file/128831",
+  "topic_id": 128831,
+  "title": "RhinoCommon V6: Import specific geometry from 3DM file?",
+  "question": "Hi all,\n\n\nI want my C# RhinoCommon (V6) plugin to selectively import geometry from another .3dm file.\n\n\nFor instance, I would like to import a box object that’s on a specific layer.\n\n\nThe information I found on the forum is rather inconclusive, also most relevant links are outdated.\n\n\nWhat I can do is import the entire file:\n\n\n  private Rhino.Commands.Result testLoadingFrom3dm(RhinoDoc doc)\n        {\n            var options = new Rhino.FileIO.FileReadOptions();\n            options.ImportMode = true;\n\n            bool result = RhinoDoc.ReadFile(\"../testfile.3dm\", options);\n\n            if (result)\n                return Result.Success;\n            else\n                return Result.Failure;\n        }\n\n\n\nAny help appreciated!",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n    var file3dm = File3dm.Read(@\"C:\\test.3dm\");\n    foreach (var obj in file3dm.Objects)\n    {\n        if (file3dm.AllLayers.FindIndex(obj.Attributes.LayerIndex).Name != \"Default\") continue;\n        if (!(obj.Geometry is Extrusion extrusion)) continue;\n        if (!extrusion.IsSolid || extrusion.ProfileCount != 1) continue;\n        var profile = extrusion.Profile3d(0, 0);\n        if (!profile.IsPolyline()) continue;\n        profile.TryGetPolyline(out var pl);\n        Rectangle3d.CreateFromPolyline(pl, out var deviation, out var angle);\n        if (deviation < doc.ModelAbsoluteTolerance && angle < doc.ModelAngleToleranceRadians)\n            doc.Objects.AddExtrusion(extrusion);\n    }\n    return Result.Success;\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "private Rhino.Commands.Result testLoadingFrom3dm(RhinoDoc doc)\n        {\n            var options = new Rhino.FileIO.FileReadOptions();\n            options.ImportMode = true;\n\n            bool result = RhinoDoc.ReadFile(\"../testfile.3dm\", options);\n\n            if (result)\n                return Result.Success;\n            else\n                return Result.Failure;\n        }",
+      "language": "csharp",
+      "author": "lungenstrudel",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 651
+}

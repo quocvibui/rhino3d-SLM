@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/chansiky/RhinoScript/blob/d63f1354c9b3ff2b6a0f8dc687605b1eaaef87cb/Python/offset_curve_on_Surface-interpolated.py",
+  "repo": "chansiky/RhinoScript",
+  "repo_stars": 1,
+  "repo_description": "A collection of small scripts for Rhinoceros 3D",
+  "license": "MIT",
+  "filepath": "Python/offset_curve_on_Surface-interpolated.py",
+  "instruction": "Offset curve on surface interpolated",
+  "code": "import rhinoscriptsyntax as rs\n#in progress, \n#only curves will be created, \n#user should use Rhino command 'pull' to get the curve directly on the surface \n\ndef offsetCrvEndPt(curve,dist):\n    startPt = rs.CurveStartPoint(curve)\n    endPt = rs.CurveEndPoint(curve)\n    startSphere = rs.AddSphere(startPt,dist)\n    endSphere = rs.AddSphere(endPt,dist)\n    #intersect sphere with end\n    tupStart = rs.CurveSurfaceIntersection(curve,startSphere)\n    tupEnd = rs.CurveSurfaceIntersection(curve,endSphere)\n    \n    ptSt = rs.AddPoint(tupStart[0][1])\n    ptEn = rs.AddPoint(tupEnd[0][1])\n    \n    rs.DeleteObject(startSphere)\n    rs.DeleteObject(endSphere)\n    \n\n    return (ptSt,ptEn)\n\ndef offsetCurveOnSurface():\n    curve = rs.GetObject(\"sel curve\",4)\n    num = rs.GetReal(\"Offset Distance:\",200)\n    points = rs.DivideCurve(curve,num)\n    surface = rs.GetObject(\"sel surface\", 8)\n    offset_ptsA0 = []\n    offset_ptsA1 = []\n    offset_ptsB0 = []\n    offset_ptsB1 = []\n    \n    rs.EnableRedraw(False)\n    for point in points:\n        parameter =  rs.SurfaceClosestPoint(surface,point)\n        crv = rs.ExtractIsoCurve(surface,parameter, 2)\n        #create sphere at end\n        try:\n            offsetEndPtsA = offsetCrvEndPt(crv[0],num)\n            rs.DeleteObject(crv[0])\n        except IndexError:\n            offsetEndPtsA = None\n            \n        try:\n            offsetEndPtsB = offsetCrvEndPt(crv[1],num)\n            rs.DeleteObject(crv[1])\n        except IndexError:\n            offsetEndPtsB = None\n        #offset_points.append(offset_point)\n        \n        if not (offsetEndPtsA is None):\n            offset_ptsA0.append(offsetEndPtsA[0]);\n            offset_ptsA1.append(offsetEndPtsA[1]);\n        if not (offsetEndPtsB is None):\n            offset_ptsB0.append(offsetEndPtsB[0]);\n            offset_ptsB1.append(offsetEndPtsB[1]);\n        \n    rs.EnableRedraw(True)\n    rs.AddInterpCurve(offset_ptsA0)\n    rs.AddInterpCurve(offset_ptsA1)\n    rs.AddInterpCurve(offset_ptsB0)\n    rs.AddInterpCurve(offset_ptsB1)\n\noffsetCurveOnSurface()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

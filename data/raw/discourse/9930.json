@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/adding-name-to-newly-created-mesh/9930",
+  "topic_id": 9930,
+  "title": "Adding name to newly created mesh?",
+  "question": "Is there a way to also affect the “name” attribute for this newly created mesh?\n\n\nmesh = Rhino.Geometry.Mesh()\n\n\nmesh.Vertices.Add(0.0,0.0,0.0)\nmesh.Vertices.Add(xdim, 0.0, 0.0)\nmesh.Vertices.Add(xdim, ydim, 0.0)\nmesh.Vertices.Add(0.0, ydim, 0.0)\nmesh.Vertices.Add(0.0, 0.0, zdim)\nmesh.Vertices.Add(xdim, 0.0, zdim)\nmesh.Vertices.Add(xdim, ydim, zdim)\nmesh.Vertices.Add(0.0, ydim, zdim)\n\nmesh.Faces.AddFace(0,1,2,3)\nmesh.Faces.AddFace(0,1,5,4)\nmesh.Faces.AddFace(1,2,6,5)\nmesh.Faces.AddFace(2,3,7,6)\nmesh.Faces.AddFace(3,0,4,7)\nmesh.Faces.AddFace(4,5,6,7)\n\nmesh.Normals.ComputeNormals()\nmesh.Compact()",
+  "code_blocks": [
+    {
+      "code": "/// C#\nprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  double xdim = 15.0;\n  double ydim = 10.0;\n  double zdim = 5.0;\n\n  Rhino.Geometry.Mesh mesh = new Rhino.Geometry.Mesh();\n  mesh.Vertices.Add(0.0, 0.0, 0.0);\n  mesh.Vertices.Add(xdim, 0.0, 0.0);\n  mesh.Vertices.Add(xdim, ydim, 0.0);\n  mesh.Vertices.Add(0.0, ydim, 0.0);\n  mesh.Vertices.Add(0.0, 0.0, zdim);\n  mesh.Vertices.Add(xdim, 0.0, zdim);\n  mesh.Vertices.Add(xdim, ydim, zdim);\n  mesh.Vertices.Add(0.0, ydim, zdim);\n\n  mesh.Faces.AddFace(0, 1, 2, 3);\n  mesh.Faces.AddFace(0, 1, 5, 4);\n  mesh.Faces.AddFace(1, 2, 6, 5);\n  mesh.Faces.AddFace(2, 3, 7, 6);\n  mesh.Faces.AddFace(3, 0, 4, 7);\n  mesh.Faces.AddFace(4, 5, 6, 7);\n\n  mesh.Normals.ComputeNormals();\n  mesh.Compact();\n\n  Rhino.DocObjects.ObjectAttributes attribs = doc.CreateDefaultAttributes();\n  attribs.Name = \"Sample Mesh\";\n\n  doc.Objects.AddMesh(mesh, attribs);\n  doc.Views.Redraw();\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\n...\nscriptcontext.doc.Objects.AddMesh(mesh)",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 1262
+}

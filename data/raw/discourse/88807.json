@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/find-shortest-lines-between-curve-points-and-mesh-face-centers-with-ghpython/88807",
+  "topic_id": 88807,
+  "title": "Find shortest lines between curve points and mesh face centers with GHPython?",
+  "question": "hi everyone\n\nI create lines between the centroid(each face)  and some point on mesh with limited distance.\n\nmy problem is, to some point created more 1 line and want shortest one,\n\nanybody have an idea to help me?\n\n\nthanks for advance,Sara\n\n\ncreate_line.jpg\n1104×441 50.1 KB\n\n\n \n\n\nview.jpg\n1143×585 148 KB\n\n\n \nmodel_point.gh\n (8.2 KB)\nmodel.3dm\n (64.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper as gh\n\n# Get the curve division points (including the end points)\ncrv_points = [Curve.PointAt(t) for t in Curve.DivideByCount(Count, True)]\n\n# Get the mesh face centers\nface_centers = [Mesh.Faces.GetFaceCenter(i) for i in xrange(Mesh.Faces.Count)]\n\n# Initialise an RTree\nrtree = rg.RTree()\n\n# Populate the RTree with the mesh face centers and indices\nfor i, center_pt in enumerate(face_centers):\n    rtree.Insert(center_pt, i)\n\n# Evaluate the closest lines from each curve point to a mesh face center\nlines = [] \nfor pt in crv_points:\n    # Find the closest mesh faces within the search radius\n    closest_faces = [] # indices of closest faces\n    search_sphere = rg.Sphere(pt, Radius)\n    rtree_callback = lambda sender, args: closest_faces.append(args.Id)\n    rtree.Search(search_sphere, rtree_callback)\n    # Find the closest line\n    if len(closest_faces) > 0:\n        dists = [pt.DistanceTo(face_centers[i]) for i in closest_faces]\n        sorted_faces = [f for _, f in sorted(zip(dists, closest_faces))]\n        closest_line = rg.Line(pt, face_centers[sorted_faces[0]])\n        lines.append(gh.Kernel.Types.GH_Line(closest_line))\n\n# Outputs\na = lines",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper as gh\n\n# Get the curve division points (including the end points)\ncrv_points = [Curve.PointAt(t) for t in Curve.DivideByCount(Count, True)]\n\n# Get the mesh face centers\nface_centers = [Mesh.Faces.GetFaceCenter(i) for i in xrange(Mesh.Faces.Count)]\n\n# Initialise an RTree\nrtree = rg.RTree()\n\n# Populate the RTree with the mesh face centers and indices\nfor i, center_pt in enumerate(face_centers):\n    rtree.Insert(center_pt, i)\n\n# Evaluate the closest lines from each curve point to a mesh face center\nlines = []\nfaces = [] # face indices connected to by lines\nfor pt in crv_points:\n    # Find the closest mesh faces within the search radius\n    closest_faces = [] # indices of closest faces\n    search_sphere = rg.Sphere(pt, Radius)\n    rtree_callback = lambda sender, args: closest_faces.append(args.Id)\n    rtree.Search(search_sphere, rtree_callback)\n    # Find the closest line\n    if len(closest_faces) > 0:\n        dists = [pt.DistanceTo(face_centers[i]) for i in closest_faces]\n        sorted_faces = [f for _, f in sorted(zip(dists, closest_faces))]\n        closest_line = rg.Line(pt, face_centers[sorted_faces[0]])\n        lines.append(gh.Kernel.Types.GH_Line(closest_line))\n        faces.append(sorted_faces[0])\n\n# # Outputs\na = lines\nb = [face_centers[f] for f in faces] # centroids\nc = [f for f in faces] # face indices",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 1973
+}

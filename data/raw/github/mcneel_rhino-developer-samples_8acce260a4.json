@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_rhinopageviewwidthheight.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_rhinopageviewwidthheight.py",
+  "instruction": "Ex rhinopageviewwidthheight",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  width = 1189\n  height = 841\n  page_views = doc.Views.GetPageViews()\n  page_number = 1 if page_views==None else page_views.Length + 1\n  pageview = doc.Views.AddPageView(\"A0_{0}\".format(page_number), width, height)\n\n  new_width = width\n  rc, new_width = RhinoGet.GetInteger(\"new width\", False, new_width)\n  if rc != Result.Success or new_width <= 0: return rc\n\n  new_height = height\n  rc, new_height = RhinoGet.GetInteger(\"new height\", False, new_height)\n  if rc != Result.Success or new_height <= 0: return rc\n\n  pageview.PageWidth = new_width\n  pageview.PageHeight = new_height\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ZacZhangzhuo/3d_printing_teamwork/blob/1ae8e701e83329eb292170fc8bc483fa912b639b/working_file_joe/material_tests/substructure.py",
+  "repo": "ZacZhangzhuo/3d_printing_teamwork",
+  "repo_stars": 1,
+  "repo_description": "This is the 3D Printing teamwork repository of team 4 of MAS dfab 2023",
+  "license": "MIT",
+  "filepath": "working_file_joe/material_tests/substructure.py",
+  "instruction": "Substructure",
+  "code": "import Rhino.Geometry as rg\nimport ghpythonlib\nimport math\n\n\nlayer_cnt = int(brep_height/layer_thickness)\ncontours = []\ncontour_srf = []\ncontour_arc = []\n\n\nfor i, value in enumerate(graph_val):\n    center_pt = origin_pt + rg.Vector3d(0,0,i*layer_thickness)\n    #use the rg.vector to create the world xy origin, but not have it exist relation to the origin\n    center_plane = rg.Plane(center_pt, rg.Vector3d.XAxis, rg.Vector3d.YAxis)\n    contour = rg.Circle(center_plane, radius*graph_val[i])\n    contour.Rotate(math.radians(i*rot_angle),rg.Vector3d.ZAxis)\n    cont_arc = rg.ArcCurve(contour)\n    contour_arc.append(cont_arc)\n    contours.append(contour)\ncontour_srf = rg.Brep.CreateFromLoft(contour_arc, rg.Point3d.Unset,rg.Point3d.Unset,rg.LoftType(1),False)\n\n\npts= []\nx_axis = []\ny_axis = []\n\nfor c in contours:\n    cont_pts = []\n    temp = []\n    crv = c.ToNurbsCurve(2,5)\n    params = crv.DivideByCount(pole_count, True)\n    for i in params:\n        pt = crv.PointAt(i)\n        vec = rg.Vector3d(c.Center - pt)\n        temp.append(vec)\n        cont_pts.append(pt)\n    y_axis.append(temp)\n    pts.append(cont_pts)\n\npoles = []\npole_crvs = []\n\n\nfor i in range(pole_count):\n    temp = []\n    pole_circ = []\n    \n    for j, value in enumerate(pole_graph):\n        pole_center_plane = rg.Plane(pts[j][i], rg.Vector3d.CrossProduct(rg.Vector3d.ZAxis,y_axis[j][i]), y_axis[j][i])\n        pole_rect= rg.Rectangle3d(pole_center_plane, pole_length*(pole_graph[j]), pole_width*(pole_graph[j])).ToNurbsCurve()\n        temp.append(pole_rect)\n    pole = rg.Brep.CreateFromLoft(temp, rg.Point3d.Unset,rg.Point3d.Unset,rg.LoftType(1),False)\n    poles.append(pole)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

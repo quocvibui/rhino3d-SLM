@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wish-add-logo-watermark-to-render/105602",
+  "topic_id": 105602,
+  "title": "Wish: Add logo / Watermark to render",
+  "question": "Hi guys, I have a wish for Rhino that would speed up work when rendering and that is a post effect to add an image (logo) on top of renderings.\n\n\nWhen sending renderings off to clients it’s often nice to add a logo on it and that requires a bit of work in Photoshop to do, but it isn’t a difficult task, just time consuming.\n\n\nWould it be possible for you to add this to the wish list?\n\nWhat we would need is quite simply the ability to choose alignment, offset and size.\n\nAlignment would be Top/bottom and Left/right + an offset.\n\nOffset would be in X and Y in pixles or &\n\nSize would be in pixles or in % of width of rendering. (it should always be 1:1 IMO so one (the width) dimension should be enough)\n\n\nCheers",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System.Drawing\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\nclass CustomConduit(Rhino.Display.DisplayConduit):\n    def __init__(self):\n        url = 'https://gist.githubusercontent.com/sbaer/bebd530d103a56cdd0076156af66f54b/raw/a92efce9ef85fd09316a42afcd899bd0e2d19b15/greetings.png'\n        self.image = Rhino.Display.DisplayBitmap.Load(url)\n\n    def DrawForeground(self, e):\n        size = e.Viewport.Size\n        center = Rhino.Geometry.Point2d(size.Width*0.5,size.Height*0.5)\n        imageSize = self.image.Size\n        scaleX = size.Width / imageSize.Width\n        scaleY = size.Height / imageSize.Height\n        scale = scaleX\n        if scaleY > scaleX: scale = scaleY\n        width = scale * imageSize.Width\n        height = scale * imageSize.Height\n        e.Display.DrawSprite(self.image, center, width, height)\n\nif __name__== \"__main__\":\n    conduit = CustomConduit()\n    conduit.Enabled = True\n    scriptcontext.doc.Views.Redraw()\n    rs.GetString(\"Pausing for user input\")\n    conduit.Enabled = False\n    scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 52,
+  "views": 2973
+}

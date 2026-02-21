@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/fin-multiple-curves-simultaneously/178816",
+  "topic_id": 178816,
+  "title": "Fin multiple curves simultaneously",
+  "question": "Hello,\n\nI am trying to fin multiple curves on a surface with python script.\n\nI have set up the code block for getting the curves and checking the direction of fin, etc. But, I am missing the function in this page: \nExtrudeCurveNormal\n\nI don’t find it in RhinoScriptSyntax. Has anyone rewrote this function in Python using Rhino Commons?\n\nThanks,\n\nMHK.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    crv_ids = rs.GetObjects(\"Select curves on surface\", 4, True, True, False)\n    if not crv_ids: return\n    \n    rc = rs.GetSurfaceObject(\"Select base surface\", False, False)\n    if not rc: return\n    \n    curves = [rs.coercecurve(crv_id, -1, True) for crv_id in crv_ids]\n    surface = rs.coercesurface(rc[0], True)\n    height = 1.0\n    \n    for crv in curves:\n        new_crv = Rhino.Geometry.Curve.OffsetNormalToSurface(crv, surface, height)\n        if new_crv and new_crv.IsValid:\n            scriptcontext.doc.Objects.AddCurve(new_crv)\n    \n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 216
+}

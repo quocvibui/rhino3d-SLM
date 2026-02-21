@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/drawing-and-detecting-an-elliptical-arc/60093",
+  "topic_id": 60093,
+  "title": "Drawing and detecting an elliptical arc",
+  "question": "I’m interested in drawing elliptical arcs (i.e. parts of ellipses) in Rhino. Currently, I’ve tried splitting an ellipse into four parts (not necessarily into quadrants), like so:\n\n\n\n\nHowever, upon checking the object type and using IsEllipse, IsArc in rhinoscriptsyntax, I get some unexpected results:\n\n\nrs.IsEllipse: True\n\n\nrs.IsArc: False\n\n\nwhich means I can’t sense that it’s an arc, and that it still registers as an ellipse. What would be a surefire way to generate an elliptical arc that Rhino can sense, and how do I check if a curve geometry is an elliptical arc using RhinoPython / Rhinoscriptsyntax / Rhino common? Would I need to do some math bits first in order to check if it is elliptical?",
+  "code_blocks": [
+    {
+      "code": "def isEllipse(crv_id, tol=0.01):\n    crv = rs.coercecurve(crv_id)\n    success, ellipse = crv.TryGetEllipse(tol)\n    return success",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\nplane = Rhino.Geometry.Plane.WorldXY\nx_radius = 10.0\ny_radius = 5.0\nellipse = Rhino.Geometry.Ellipse(plane, x_radius, y_radius)\nif ellipse.IsValid:\n    nurb = ellipse.ToNurbsCurve()\n    if nurb.IsValid:\n        scriptcontext.doc.Objects.AddCurve(nurb)\n        scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 3554
+}

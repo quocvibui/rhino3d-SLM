@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-does-cplane-command-perp-to-curve-calculate-orientation-for-xy-axis/214874",
+  "topic_id": 214874,
+  "title": "How does CPlane command perp to Curve calculate orientation for XY axis?",
+  "question": "Trying to emulate it in python.",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\n\ndef ConstructionPlaneToCurve():\n    obj_type = Rhino.DocObjects.ObjectType.Curve\n    rc, obj_ref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to orient CPlane perpendicular to\", False, obj_type)\n    if rc != Rhino.Commands.Result.Success: \n        return\n\n    curve = obj_ref.Curve()\n    if curve is None: \n        return\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"CPlane origin or press Enter to accept default\")\n    gp.Constrain(curve, False)\n    gp.Get();\n    if gp.CommandResult() != Rhino.Commands.Result.Success: \n        return\n\n    view = gp.View()\n    if not view:\n        return\n\n    pt = gp.Point()\n    rc, t = curve.ClosestPoint(pt)\n    if rc == True and Rhino.RhinoMath.IsValidDouble(t):\n        plane = Rhino.Geometry.Plane()\n        origin = curve.PointAt(t)\n        tangent = curve.TangentAt(t)\n        xaxis = Rhino.Geometry.Vector3d.CrossProduct(Rhino.Geometry.Vector3d.ZAxis, tangent)\n        if xaxis.Unitize():\n            yaxis =  Rhino.Geometry.Vector3d.CrossProduct(tangent, xaxis)\n            plane = Rhino.Geometry.Plane(origin, xaxis, yaxis)\n        else:\n            plane = Rhino.Geometry.Plane(origin, Rhino.Geometry.Vector3d.XAxis, Rhino.Geometry.Vector3d.YAxis)\n\n        cp = view.ActiveViewport.GetConstructionPlane()\n        cp.Plane = plane\n        view.ActiveViewport.PushConstructionPlane(cp)\n        view.Redraw()\n\nif __name__ == \"__main__\":\n    ConstructionPlaneToCurve()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 40
+}

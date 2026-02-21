@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/aligning-seams-of-closed-curves/84003",
+  "topic_id": 84003,
+  "title": "Aligning seams of closed curves?",
+  "question": "Hi,\n\n\nI’m currently looking for a pythonic way to adjust/align the seams of a collection of closed curves?\n\nIs there a quick way to achieve this?\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ncurves = rs.GetObjects(\"Select closed curves to align seams of\", rs.filter.curve)\nguide = rs.GetPointOnCurve(curves[0], \"Select optional guide point on first curve\")\niterative = rs.GetBoolean(\"Iterative?\", (\"Iterative\", \"Flase\", \"True\"), True)\nif(guide == None):\n    guide = rs.CurveStartPoint(curves[0])\nfor curve in curves:\n    t = rs.CurveClosestPoint(curve, guide)\n    rs.CurveSeam(curve, t)\n    if(iterative[0]):\n        guide = rs.EvaluateCurve(curve, t)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\ndef align_polylines(polylines, guide_idx=None):\n    \"\"\"Aligns closed polylines so that their start/end vertices fall inline.\n        If the optional guide index is not defined, the polylines align to \n        the start/end vertex of the first polyline. \n    \n    Args:\n      polylines: A list of closed polylines.\n      guide_idx: An optional guide index for the polylines to align to.\n    \n    Returns:\n      The list of aligned polylines on success, or None.\"\"\"\n    if any([True for p in polylines if not p.IsClosed]):\n        return\n    \n    if guide_idx == None or guide_idx < 0:\n        guide_idx = 0\n    elif guide_idx > len(polylines[0]):\n        guide_idx = 0\n    \n    aligned_polylines = [polylines[guide_idx]]\n    for i in range(1, len(polylines)):\n        # Get the guide vertex of the previous polyline\n        guide_vtx = polylines[i-1][guide_idx]\n        # Get the closest index of a vertex of the current polyline\n        closest_idx = polylines[i].ClosestIndex(guide_vtx) # -1 on error\n        if closest_idx < 0:\n            return\n        # Get a list of indices of the current polyline\n        indices = range(len(polylines[i])-1)\n        # Restructure the polyline indices to align them\n        align_indices = indices[closest_idx:] + indices[:closest_idx]\n        align_vertices = [polylines[i][j] for j in align_indices]\n        align_vertices.append(align_vertices[0])\n        aligned_polylines.append(rg.Polyline(align_vertices))\n        # Update the guide index\n        guide_idx = closest_idx\n    return aligned_polylines",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1680
+}

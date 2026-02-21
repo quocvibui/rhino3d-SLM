@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multiple-font-sizes-in-single-text-box/94125",
+  "topic_id": 94125,
+  "title": "Multiple font sizes in single text box",
+  "question": "For denoting windows in Architectural Work many architects use a feet and inches finished size to denote the door so a 2668 is a 2’-6\" (30\") by 6’-8\" (78\").  On drawings this is typically noted with the feet component being larger than the inches so its a big 2 small 6 big 6 small 8.  Is there a way (preferably an easy way) to do this in Rhino?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport random\n\ndef split(word): \n    return [char for char in word]\n\nselText = rs.GetObject(\"Select Text\", 512)\n\ntextstr = rs.TextObjectText(selText)\ntextH = rs.TextObjectHeight(selText)\ntextPt = rs.TextObjectPoint(selText)\n\nsizeList = [textH, textH*.66,textH, textH*.66]\ncharList = split(textstr)\nranname = random.randint(1,1000)\ngroup = rs.AddGroup(ranname)\n\n\nfor inx,val in enumerate(charList):\n    vMove = rh.Geometry.Vector3d((inx*.85),0,0)\n    tAdd = rs.AddText(val, textPt + vMove ,sizeList[inx])\n    groupadd = rs.AddObjectsToGroup(tAdd,group)\n\nrs.DeleteObject(selText)",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 5,
+  "posts_count": 13,
+  "views": 1419
+}

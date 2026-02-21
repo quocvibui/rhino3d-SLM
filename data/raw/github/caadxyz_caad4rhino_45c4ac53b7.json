@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caadxyz/caad4rhino/blob/d3df5a030b2bd0ab58954fb341f04a4e814835d9/dev/caad_cmd.py",
+  "repo": "caadxyz/caad4rhino",
+  "repo_stars": 22,
+  "repo_description": " Caad4Rhino is a python package whose purpose is to provide computer aided architectural design tools in rhino 3d software",
+  "license": "LGPL-3.0",
+  "filepath": "dev/caad_cmd.py",
+  "instruction": "Copyright\ncreate on 2020.02.19\n@author mahaidong",
+  "code": "#coding=utf-8\n'''\nCopyright\ncreate on 2020.02.19\n@author mahaidong\n\ndescription:\n'''\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport caad.config as config\nimport caad.utility as util\nimport caad.Dimension as Dim\n\n__commandname__ = \"Caad\"\ndef RunCommand( is_interactive ):\n\n    print (\"caad4rhino 0.0.1\")\n    print (config.HOMEPAGE)\n\n    go = Rhino.Input.Custom.GetOption()\n    go.AcceptNothing(True)\n    go.SetCommandPrompt( \"caad4rhino setting\" )\n\n    scaleOption = Rhino.Input.Custom.OptionDouble( config.DRAWINGSCALE )\n    scaleOpIndex, scaleOpValue = go.AddOptionDouble(\"DrawingScale\", scaleOption)\n\n    arrowValues = []\n    for arrow in System.Enum.GetNames(Rhino.DocObjects.DimensionStyle.ArrowType):\n        if (arrow != 'None') and (arrow != 'UserBlock'):\n            arrowValues.append(arrow)\n    arrowValue = config.DIMARROWHEAD\n    arrowIndex = arrowValues.index(arrowValue)\n    arrowOpList = go.AddOptionList(\"DimArrowHead\", arrowValues, arrowIndex)\n\n    aliasOption = Rhino.Input.Custom.OptionToggle( config.IMPORTCOMMANDALIAS, \"Off\", \"On\")\n    go.AddOptionToggle(\"ImportCommandAlias\", aliasOption)\n\n    homePageOption = Rhino.Input.Custom.OptionToggle( config.SHOWHOMEPAGE, \"Off\", \"On\")\n    go.AddOptionToggle(\"GotoHelpPage\", homePageOption)\n\n    while True:\n        get_rc = go.Get()\n        if go.CommandResult()!=Rhino.Commands.Result.Success:\n            break\n        if get_rc==Rhino.Input.GetResult.Option: \n            isHomePage = homePageOption.CurrentValue\n            if isHomePage : util.openUrl( config.HOMEPAGE  )\n            if go.OptionIndex() == scaleOpIndex:\n                if  scaleOption.CurrentValue  in config.DRAWINGSCALEList:\n                    config.DRAWINGSCALE  = scaleOption.CurrentValue\n                else:\n                    print ( \"The scale is not working.\" )\n                    print ( \"It should be in \" + \" ,\".join([str(elem) for elem in config.DRAWINGSCALEList]) + \".\" )\n                    scaleOpValue.CurrentValue = config.DRAWINGSCALE\n            elif go.OptionIndex() == arrowOpList:\n                arrowIndex = go.Option().CurrentListOptionIndex\n                arrowValue = arrowValues[arrowIndex]\n                config.DIMARROWHEAD = arrowValue\n            continue\n        break\n     \n    if go.CommandResult() != Rhino.Commands.Result.Cancel:\n        Dim.ChangeDrawingScale(config.DRAWINGSCALE)\n        print (\"current drawwing scale = 1:\"+str(int(config.DRAWINGSCALE)))\n        Dim.ChangeCaadDimArrowHead( config.DIMARROWHEAD )\n        print ( \"current dimension arrowhead: \"+ config.DIMARROWHEAD )\n        isImportedAlias = aliasOption.CurrentValue\n        if isImportedAlias : \n            config.importCaadAlias()\n            print (\"caad4rhino command aliases imported\")\n\nif __name__ == \"__main__\":\n    RunCommand(True)\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

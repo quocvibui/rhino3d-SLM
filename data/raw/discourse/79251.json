@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wish-for-rhinoscript-distance-annotation/79251",
+  "topic_id": 79251,
+  "title": "Wish for rhinoscript: distance annotation",
+  "question": "Hi,\n\n\ndimensions are great, but sometimes a quick distance annotation is all one needs. I tried to use rhinoscript to make the following:\n\nPick point A,\n\npick point B,\n\ndraw line AB\n\napply arrowheads\n\nplace a textdot in the middle with the distance between points\n\n\nsomehow my script didn’t work \n - has someone an idea how to achieve this?\n\nthanks\n\n\n\n\nKonrad_RhinoTelegram133.png\n844×761 6.75 KB",
+  "code_blocks": [
+    {
+      "code": "! _NoEcho _-Runscript (\n    Option Explicit\n\nCall Distbetween()\nSub Distbetween()\nDim pt,pt2,dist,units,prec,msg\npt = Rhino.GetPoint(\"Pick point on object\")\nIf Not IsArray(pt) Then Exit Sub\n            pt2 = Rhino.GetPoint(\"Pick point on object\")\nIf Not IsArray(pt) Then Exit Sub\ndist = Rhino.Distance(pt,pt2)\nRhino.AddLine pt, pt2\n            units = Rhino.UnitSystemName(,, True)\nprec = Rhino.UnitDistanceDisplayPrecision()\nmsg = \"Distance between points is \"\nRhino.TextDotPoint Round(dist, prec), Rhino.PointDivide (Rhino.PointAdd(pt, pt2), 2)\n\n             Call Rhino.Print(msg & Cstr(Round(dist, prec)) & \" \" & units)\nEnd Sub\n)",
+      "language": "python",
+      "author": "Konrad",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom scriptcontext import doc",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "Call Distbetween()\nSub Distbetween()\n\tDim pt,pt2,dist,units,prec,msg, arrLine\n\tpt = Rhino.GetPoint(\"Pick point On object\")\n\tIf Not IsArray(pt) Then Exit Sub\n\tpt2 = Rhino.GetPoint(\"Pick point On object\")\n\tIf Not IsArray(pt) Then Exit Sub\n\tdist = Rhino.Distance(pt, pt2)\n\tarrLine = Rhino.AddLine(pt, pt2)\n\tCall Rhino.CurveArrows(arrLine, 3)\n\tunits = Rhino.UnitSystemName(, True)\n\tprec = Rhino.UnitDistanceDisplayPrecision()\n\tmsg = \"Distance between points is \"\n\tRhino.AddTextDot Cstr(Round(dist, prec)), Rhino.PointDivide(Rhino.PointAdd(pt, pt2), 2)\n\n\tCall Rhino.Print(msg & Cstr(Round(dist, prec)) & \" \" & units)\nEnd Sub",
+      "language": "python",
+      "author": "Cyver",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n\nCall Main()\nSub Main()\n\n        Dim arrPt0, arrPt1, dblTolerance, dblDistance, strLine, arrMidPt\n\t\n\tarrPt0 = Rhino.GetPoint(\"First point\")\n\tIf IsNull(arrPt0) Then Exit Sub\n\t\n\tarrPt1 = Rhino.GetPoint(\"Second point\")\n\tIf IsNull(arrPt1) Then Exit Sub\n\t\n\t' exit if the distance is to small to add a line\n\tdblDistance = Rhino.Distance(arrPt0, arrPt1)\n\tdblTolerance = Rhino.UnitAbsoluteTolerance()\n\tIf dblDistance < dblTolerance Then Exit Sub\n\t\n\t' create line with arrowheads\n\tstrLine = Rhino.AddLine(arrPt0, arrPt1)\n\tIf IsNull(strLine) Then Exit Sub\n\tCall Rhino.CurveArrows(strLine, 3)\n\t\n\t' add annotation dot to line mid point\n\tarrMidPt = Rhino.PointDivide(Rhino.PointAdd(arrPt0, arrPt1), 2.0)\n\tCall Rhino.AddTextDot(Round(dblDistance, 3), arrMidPt)\n\t\nEnd Sub",
+      "language": "unknown",
+      "author": "clement",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    pt0 = rs.GetPoint(\"First Point\")\n    if not pt0: return\n    \n    pt1 = rs.GetPoint(\"Second Point\", pt0)\n    if not pt1: return\n    \n    distance = pt0.DistanceTo(pt1)\n    \n    if distance > scriptcontext.doc.ModelAbsoluteTolerance:\n        line_id = rs.AddLine(pt0, pt1)\n        rs.CurveArrows(line_id, 3)\n        mid_pt = (pt0 + pt1) * 0.5\n        dot_id = rs.AddTextDot(round(distance, 3), mid_pt)\n        scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "! _NoEcho _-Runscript (\nCall Distbetween()\nSub Distbetween()\n  Dim arrPt0, arrPt1, dblTolerance, dblDistance, strLine, arrMidPt,  strDot, strGroup, strLineArr \n' create line with arrowheads\nstrLineArr = Rhino.GetLine \n            If IsNull(strLineArr) Then Exit Sub\n            If IsNull(strLineArr(0)) Then Exit Sub\n            If IsNull( strLineArr(1)) Then Exit Sub\n            strLine = Rhino.AddLine( strLineArr(0), strLineArr(1))\n            If IsNull(strLine) Then Exit Sub\n            \n            \n            ' exit if the distance is to small to add a line\ndblDistance = Rhino.Distance(strLineArr(0), strLineArr(1))\ndblTolerance = Rhino.UnitAbsoluteTolerance()\nIf dblDistance < dblTolerance Then Exit Sub\n            Call Rhino.CurveArrows(strLine, 3)\n\n' add annotation dot to line mid point\narrMidPt = Rhino.PointDivide(Rhino.PointAdd(strLineArr(0), strLineArr(1)), 2.0)\n\n           strDot = Rhino.AddTextDot(Round(dblDistance, 3), arrMidPt)\n            Call Rhino.ObjectColor(strDot, vbWhite) \n\n            strGroup = Rhino.AddGroup()\n            Call Rhino.AddObjectToGroup( strDot, strGroup)\n           Call Rhino.AddObjectToGroup( strLine, strGroup)\n           \nEnd Sub\n)",
+      "language": "unknown",
+      "author": "Konrad",
+      "post_number": 19,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 951
+}

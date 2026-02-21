@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-inclusion-error/59169",
+  "topic_id": 59169,
+  "title": "Mesh Inclusion Error",
+  "question": "Hi all,\n\n\nIt seems like the MeshInclusion component is not returning expected results in Grasshopper, and nor is calling it in a C# component with tolerance set to relatively high. Whereas the BrepInclusion seems to be returning the correct result. Strict inclusion booleans are both set to false.\n\nI am hoping to get the former working and avoiding using the Brep option since a huge array of meshes will be constructed and undergo the process eventually.\n\n\nPlease find attached the file and below a screenshot (notice item 14 in the panels), thank you.\n\n\ninclusion_test2.gh\n (233.9 KB)\n\n\ninclusion_test1\n2070×482 93.2 KB",
+  "code_blocks": [
+    {
+      "code": "int[] b_id = new int[p.Count];\n    double tol = RhinoDocument.ModelAbsoluteTolerance;\n    for(int i = 0; i < p.Count; ++i){\n      b_id[i] = -1;\n      for(int j = 0; j < b.Count; ++j){\n        bool test = b[j].IsPointInside(p[i], tol, false);\n        if(test){\n          b_id[i] = j;\n          break;\n        }\n      }\n    }\n\n    id = b_id;",
+      "language": "csharp",
+      "author": "timothytai",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "Brep[] b_all = new Brep[m.Count];\n    for(int i = 0; i < m.Count; ++i){\n      var mfl = m[i].Faces;\n      var mvl = m[i].Vertices;\n      Brep[] bl = new Brep[mfl.Count];\n      double tol = RhinoDocument.ModelAbsoluteTolerance;\n      for(int j = 0; j < mfl.Count; ++j){\n        Brep bp = new Brep();\n        if(mfl[j].IsTriangle) {\n          bp = Brep.CreateFromCornerPoints(mvl[mfl[j].A], mvl[mfl[j].B], mvl[mfl[j].C], tol);\n        }\n        else{\n          bp = Brep.CreateFromCornerPoints(mvl[mfl[j].A], mvl[mfl[j].B], mvl[mfl[j].C], mvl[mfl[j].D], tol);\n        }\n        bl[j] = bp;\n      }\n      b_all[i] = Brep.JoinBreps(bl, tol)[0];\n    }\n    b = b_all;",
+      "language": "csharp",
+      "author": "timothytai",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "mesh"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 24,
+  "views": 4167
+}

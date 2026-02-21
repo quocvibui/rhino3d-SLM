@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bake-curves-with-specific-rgb-colors-possible-without-plug-in/123317",
+  "topic_id": 123317,
+  "title": "Bake curves with specific RGB colors - possible without plug-in?",
+  "question": "Via a Python script component?  Or do I absolutely need something like Elefront?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\n\nif Bake:\n    rhobj=rs.coercerhinoobject(Crv)\n    sc.doc=Rhino.RhinoDoc.ActiveDoc\n    attr=Rhino.DocObjects.ObjectAttributes()\n    attr.ColorSource=Rhino.DocObjects.ObjectColorSource.ColorFromObject\n    attr.ObjectColor=System.Drawing.Color.FromArgb(0,255,0)\n    sc.doc.Objects.ModifyAttributes(rhobj,attr,True)\n    sc.doc.Views.Redraw()\n    sc.doc.Objects.Add(rhobj,attr)\n    sc.doc = ghdoc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsc.doc = ghdoc\n\nrhobj = rs.coercerhinoobject(Crv)\n\ngeometry = rhobj.Geometry\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nrhino_obj = sc.doc.Objects.Add(geometry)\nrs.ObjectColor(rhino_obj, rs.coercecolor([0,255,0]))\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(GeometryBase G, ref object A)\n  {\n    Rhino.DocObjects.ObjectAttributes att = new Rhino.DocObjects.ObjectAttributes();\n    att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject;\n    att.ObjectColor = System.Drawing.Color.Aquamarine;\n    this.RhinoDocument.Objects.Add(G, att);\n  }",
+      "language": "csharp",
+      "author": "maje90",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 18,
+  "views": 1771
+}

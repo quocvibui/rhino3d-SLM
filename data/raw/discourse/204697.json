@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/script-to-search-for-specific-geometry-in-rhino-document/204697",
+  "topic_id": 204697,
+  "title": "Script to search for specific geometry in rhino document",
+  "question": "Hello dearest RhinoGrasshopper community,\n\n\nCurrently working on an “instant LCA calculator” to get live results as we model in rhino.\n\nThe first part of such a development requires me to extract quantity data, as explained below:\n\n\nI need a C# script or Python script for Grasshopper that searches for specific geometry across the entire Rhino document, including inside block instances and nested block instances at any depth. The script should:\n\n\n1. Accept a text input parameter (TI) like “Slabs” that’s used as a search term\n\n\n2. Find all geometry that:\n\n**  * Exists on layers containing the TI text (case-insensitive)**\n\n**  * OR has the TI text in its object name (case-insensitive)**\n\n\n3. Separate the results by geometry type with dedicated outputs for:\n\n**  * Breps**\n\n**  * Extrusions**\n\n**  * Curves**\n\n**  * Surfaces**\n\n**  * Meshes**\n\n\n4. Handle recursion properly to reach geometry inside nested block instances at any depth\n\n\nIn other words, find any geometry in Rhino that is either on the layer “Slabs”, or has the name “Slabs”. Also check inside block instances.\n\n\nNow, ive scripted in grasshopper a solution that essentially does this - see screenshot - and works (although my script doesnt yet work with nested blocks).\n\n\nMy issue is that I want it to be a) as computationally efficient as possible, and b) use this as a case study to learn more about C# or python scripting withing rhinoGH.\n\nMy ambition was to write a C# component that would do the above, but Im having trouble with it. Im using ClaudeAI for help, but I still can’t quite get it to work.\n\nIve attached my .gh file, and have left in it all the different C# or Py3 scripts Ive tried in case you want to have a look.\n\n\nAny help would be much appreciated \n\n\nThanks you beautiful hoomans\n\n\nR&D_VroomVroomLCA_1.gh\n (26.4 KB)\n\n\nLCA_Rhino Template_1.3dm\n (2.9 MB)\n\n\nVroomVroomLCA_Ambition\n1572×725 106 KB",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef check_object(obj):\n\tname = rs.ObjectName(obj) if rs.ObjectName(obj) else \"\"\n\tlayer = rs.ObjectLayer(obj)\n\ttest = S\n\tif not C:\n\t\ttest = test.lower()\n\t\tname = name.lower()\n\t\tlayer = layer.lower()\n\tif N and E and test == name: return True\n\tif N and not E and test in name: return True\n\tif L and E and test == layer: return True\n\tif L and not E and test in layer: return True\n\treturn False\n\ndef sort_objects(objects):\n\tbreps = []\n\tcurves = []\n\textrusions = []\n\tmeshes = []\n\tother = []\n\tfor obj in objects:\n\t\tobj_type = obj.ObjectType\n\t\tif obj_type == Rhino.DocObjects.ObjectType.Brep: breps.append(obj)\n\t\telif obj_type == Rhino.DocObjects.ObjectType.Curve: curves.append(obj)\n\t\telif obj_type == Rhino.DocObjects.ObjectType.Extrusion: extrusions.append(obj)\n\t\telif obj_type == Rhino.DocObjects.ObjectType.Mesh: meshes.append(obj)\n\t\telse: other.append(obj)\n\treturn breps, curves, extrusions, meshes, other\n\ndef find_objects(objects=None):\n\tif not objects: objects = rs.AllObjects()\n\tfound = []\n\tfor obj in objects:\n\t\tif check_object(obj):\n\t\t\tfound.append(sc.doc.Objects.Find(obj).Geometry)\n\t\tif rs.IsBlockInstance(obj):\n\t\t\tblock_name = rs.BlockInstanceName(obj)\n\t\t\tblock_objects = rs.BlockObjects(block_name)\n\t\t\txform = rs.BlockInstanceXform(obj)\n\t\t\tnew_objects = rs.TransformObjects(block_objects, xform, copy=True)\n\t\t\tfound += find_objects(new_objects) # recursive search in block instances\n\t\t\trs.DeleteObjects(new_objects) # cleanup\n\treturn found\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\nrs.EnableRedraw(False)\nobjects = find_objects() # start recursive search\nrs.EnableRedraw(True)\nB, C, E, M, O = sort_objects(objects)\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 114
+}

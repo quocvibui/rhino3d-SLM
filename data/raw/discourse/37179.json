@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpythonlib-branching-output-comprehension/37179",
+  "topic_id": 37179,
+  "title": "ghPythonLib Branching Output Comprehension",
+  "question": "Hi, I am very pleased to hear about the implementation of the ‘ghpythonlib’ library into Serengeti’s ghPython.\n\nNevertheless, I have some issues trying to understand how it works.\n\n\nWhen I create a nested list within ghPython, I get the normal > IronPython.Runtime.List; however, when I run the below code, the output is not updated as a a tree with branches\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib as gh\n\na = []\n\nresult = list(map(list, (pts0, pts1)))\ngh.treehelpers.list_to_tree(result)\na.append(result)\nprint result\n\n\n\nIncidentally, the old way works, but I’d like to get around this extra coding.\n\n\nimport rhinoscriptsyntax as rs\nimport clr\nclr.AddReference(\"Grasshopper\")\nimport Grasshopper as gh\n\n#input list weaving into nested sublists\nresult = list(map(list, zip(pts0, pts1)))  \n\n    \ndef pythonListTGhDataTree(someList):\n    \n    dataTree = gh.DataTree[object]()\n    \n    for i,l in enumerate(someList):\n        for v in l:\n            dataTree.Add(v,gh.Kernel.Data.GH_Path(i))\n            \n    return dataTree\n\na = pythonListTGhDataTree(result)\n\n\n\n\n\nCapture.PNG\n1240×679 102 KB\n\n\n\n\npythonTestingSerengeti.gh\n (6.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib as gh\n\na = []\nb = []\n\nlist_a = []\nfor i in range(10):\n    pts = rs.AddPoint(i**2,0,0)\n    list_a.append(pts)\n    \nlist_b = []\nfor i in range(10):\n    pts1 = rs.AddPoint(i**2,5,0)\n    list_b.append(pts1)\n\nb.extend([list_a, list_b])\na = gh.treehelpers.list_to_tree(b, True, [0])",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib as gh\n\na = []\n\nresult = list(map(list, (pts0, pts1)))\ngh.treehelpers.list_to_tree(result)\na.append(result)\nprint result",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport clr\nclr.AddReference(\"Grasshopper\")\nimport Grasshopper as gh\n\n#input list weaving into nested sublists\nresult = list(map(list, zip(pts0, pts1)))  \n\n    \ndef pythonListTGhDataTree(someList):\n    \n    dataTree = gh.DataTree[object]()\n    \n    for i,l in enumerate(someList):\n        for v in l:\n            dataTree.Add(v,gh.Kernel.Data.GH_Path(i))\n            \n    return dataTree\n\na = pythonListTGhDataTree(result)",
+      "language": "python",
+      "author": "brobes05",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 2,
+  "views": 840
+}

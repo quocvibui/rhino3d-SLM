@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/assigning-rendermaterial-to-layers-with-a-python-script/169169",
+  "topic_id": 169169,
+  "title": "Assigning RenderMaterial to Layers with a Python script",
+  "question": "Hello,\n\n\nI am trying to edit the RenderMaterial property of the Layer Class, to automate the creation of layers with a preset material, color, linetype, etc.\n\n\nI got Layer.Color to work but for some reason I can’t really understand  Layer.RenderMaterial() seems to not work.\n\n\nNot sure what is happening under the hood or where my code is not working. Happy to hear some advices.\n\n\nimage\n2088×1166 267 KB\n\n\ndoc = Rhino.RhinoDoc.ActiveDoc\n\nrender_mat= Rhino.Render.RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material())\nrender_mat.Name=\"Wood\"\n\nexisting_mat = [mat.Name for mat in doc.RenderMaterials]\n\nif render_mat.Name not in existing_mat:\n    doc.RenderMaterials.Add(render_mat)\n\ndef create_layer(df):\n\n    existing_layer = [layer.Name for layer in doc.Layers if layer.IsDeleted == False]\n\n    for i in df:\n        if i[1]['LAYER_NAME'] not in existing_layer:\n\n            newlayer=Rhino.DocObjects.Layer()\n            newlayer.Name=i[1]['LAYER_NAME']\n            newlayer.Id=System.Guid.NewGuid()\n            newlayer.RenderMaterial=render_mat\n\n            print(newlayer.RenderMaterial)\n\n            try:\n                newlayer.Color= i[1]['RHINO_PEN']\n            except:\n                newlayer.Color= rs.CreateColor(255, 0, 0)\n\n            doc.Layers.Add(newlayer)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System\nimport scriptcontext as sc\n\ndef test_layer_with_material():\n    \n    \"\"\"\n    The properties of a Rhino material (Rhino.DocObjects.Material) define\n    what is required to draw an object using OpenGL. Most rendering plug-ins\n    require a much richer definition than this. And, not all rendering\n    plug-ins support the same material properties. This is where Render\n    materials (Rhino.Render.RenderMaterial) come in. A Render material\n    is an abstract material - one that is defined by the owning\n    rendering plug-in. But a basic Render material does share some\n     properties with a Rhino material.\n    \"\"\"\n    \n    \"\"\"\n    This example demonstrates how to create a basic Render material.\n    This material will appear in Rhino's Materials panel. It it called a\n    basic material because it does not target any particular rendering plug-in.\n    \"\"\"\n    \n    # 1. Create a Rhino material\n    rhino_material = Rhino.DocObjects.Material()\n    rhino_material.Name = \"Burly\"\n    rhino_material.DiffuseColor = System.Drawing.Color.BurlyWood\n    \n    # 2. Create a basic Render material from the Rhino material\n    render_material = Rhino.Render.RenderMaterial.CreateBasicMaterial(rhino_material, sc.doc)\n    \n    # 3. Add the basic Render material to the document\n    sc.doc.RenderMaterials.Add(render_material)\n    \n    \"\"\"\n    At this point, you will see a Render material appear in Rhino's\n    Materials panel. Note, RhinoDoc.Materials.Count will equal 0. This is\n    because we have not added a Rhino material. We've only added a\n    Render material. When you assign a Render material to an object\n    or layer, a compatible Rhino material will be added to RhinoDoc.Materials,\n    and this material will be referenced by the Render material.\n    \"\"\"\n    \n    # 4. Now create a layer with the Render material assigned to it\n    layer_index = sc.doc.Layers.Add(\"Tobia\", System.Drawing.Color.BurlyWood)\n    if layer_index > 0:\n        sc.doc.Layers[layer_index].RenderMaterial = render_material\n\nif __name__ == \"__main__\":\n    test_layer_with_material()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "doc = Rhino.RhinoDoc.ActiveDoc\n\nrender_mat= Rhino.Render.RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material())\nrender_mat.Name=\"Wood\"\n\nexisting_mat = [mat.Name for mat in doc.RenderMaterials]\n\nif render_mat.Name not in existing_mat:\n    doc.RenderMaterials.Add(render_mat)\n\ndef create_layer(df):\n\n    existing_layer = [layer.Name for layer in doc.Layers if layer.IsDeleted == False]\n\n    for i in df:\n        if i[1]['LAYER_NAME'] not in existing_layer:\n\n            newlayer=Rhino.DocObjects.Layer()\n            newlayer.Name=i[1]['LAYER_NAME']\n            newlayer.Id=System.Guid.NewGuid()\n            newlayer.RenderMaterial=render_mat\n\n            print(newlayer.RenderMaterial)\n\n            try:\n                newlayer.Color= i[1]['RHINO_PEN']\n            except:\n                newlayer.Color= rs.CreateColor(255, 0, 0)\n\n            doc.Layers.Add(newlayer)",
+      "language": "python",
+      "author": "Tobia_Davanzo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 358
+}

@@ -1,0 +1,77 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/possible-bug-line-points-incorrect-after-rotating/144260",
+  "topic_id": 144260,
+  "title": "POSSIBLE BUG: Line Points Incorrect After Rotating",
+  "question": "Python: This might be a possible bug.  If I create a line object, rotate it, now the To point does not change according to the rotation.  Why?  Is this a bug?  Try this code…\n\n\nl = rs.AddLine((0,0,0), (0, 100, 0))\nobjl = rs.coerceline(l)\n\nprint objl.To\n\nrs.RotateObject(l, objl.From, -90)\n\nprint objl.To\n\n\n\nIf this  is a bug, is there a band-aid for it to get the new point?  The line would not necessarily be on any of the axis.",
+  "code_blocks": [
+    {
+      "code": "l = rs.AddLine((0,0,0), (0, 100, 0))\nobjl = rs.coerceline(l)\n\nprint objl.To\n\nl2 = rs.RotateObject(l, objl.From, -90)\n\nobjl2 = rs.coerceline(l2)\n\nprint objl2.To",
+      "language": "python",
+      "author": "siemen",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "l = rs.AddLine((0,0,0), (0, 100, 0))\n# l is now an object-id representing a rhino object\nobjl = rs.coerceline(l)\n# objl is a copy of the geometry of l ( a Rhino line)\n# there is no reference back to the rhino object l\n\nprint objl.To  # clear: print the To point\n\n# here you rotate the rhino object l, but this does not affect objl in any way\nrs.RotateObject(l, objl.From, -90, copy=False)\n\nprint objl.To # clear: print the same To point\n\n# What you would do to get the expected result is:\nobjl_2 = rs.coerceline(l)\nprint objl_2.To",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "def RotateObject(object_id, center_point, rotation_angle, axis=None, copy=False):\n    \"\"\"Rotates a single object\n    Parameters:\n      object_id (guid): The identifier of an object to rotate\n      center_point (point): the center of rotation\n      rotation_angle (number): in degrees\n      axis (plane, optional): axis of rotation, If omitted, the Z axis of the active\n        construction plane is used as the rotation axis\n      copy (bool, optional): copy the object\n    Returns:\n      guid: Identifier of the rotated object if successful\n      None: on error\n    Example:\n      import rhinoscriptsyntax as rs\n      obj = rs.GetObject(\"Select object to rotate\")\n      if obj:\n          point = rs.GetPoint(\"Center point of rotation\")\n          if point: rs.RotateObject(obj, point, 45.0, None, copy=True)\n    See Also:\n      RotateObjects\n    \"\"\"\n    rc = RotateObjects(object_id, center_point, rotation_angle, axis, copy)\n    if rc: return rc[0]\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "def RotateObjects( object_ids, center_point, rotation_angle, axis=None, copy=False):\n    \"\"\"Rotates multiple objects\n    Parameters:\n      object_ids ([guid, ...]): Identifiers of objects to rotate\n      center_point (point): the center of rotation\n      rotation_angle (number): in degrees\n      axis (plane, optional): axis of rotation, If omitted, the Z axis of the active\n        construction plane is used as the rotation axis\n      copy (bool, optional): copy the object\n    Returns:\n      list(guid, ...): identifiers of the rotated objects if successful\n    Example:\n      import rhinoscriptsyntax as rs\n      objs = rs.GetObjects(\"Select objects to rotate\")\n      if objs:\n          point = rs.GetPoint(\"Center point of rotation\")\n          if point:\n              rs.RotateObjects( objs, point, 45.0, None, True )\n    See Also:\n      RotateObject\n    \"\"\"\n    center_point = rhutil.coerce3dpoint(center_point, True)\n    if not axis:\n        axis = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal\n    axis = rhutil.coerce3dvector(axis, True)\n    rotation_angle = Rhino.RhinoMath.ToRadians(rotation_angle)\n    xf = Rhino.Geometry.Transform.Rotation(rotation_angle, axis, center_point)\n    rc = TransformObjects(object_ids, xf, copy)\n    return rc",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "def TransformObjects(object_ids, matrix, copy=False):\n    \"\"\"Moves, scales, or rotates a list of objects given a 4x4 transformation\n    matrix. The matrix acts on the left.\n    Parameters:\n      object_ids [(guid, ...}): List of object identifiers.\n      matrix (transform): The transformation matrix (4x4 array of numbers).\n      copy (bool, optional): Copy the objects\n    Returns:\n      list(guid, ...): ids identifying the newly transformed objects\n    Example:\n      import rhinoscriptsyntax as rs\n      # Translate (move) objects by (10,10,0)\n      xform = rs.XformTranslation([10,10,0])\n      objs = rs.GetObjects(\"Select objects to translate\")\n      if objs: rs.TransformObjects(objs, xform)\n    See Also:\n      TransformObject\n    \"\"\"\n    xform = rhutil.coercexform(matrix, True)\n    id = rhutil.coerceguid(object_ids, False)\n    if id: object_ids = [id]\n    elif isinstance(object_ids, Rhino.Geometry.GeometryBase): object_ids = [object_ids]\n    elif type(object_ids) in __allowed_transform_types: object_ids = [object_ids]\n    rc = []\n    for object_id in object_ids:\n        id = System.Guid.Empty\n        old_id = rhutil.coerceguid(object_id, False)\n        if old_id:\n            id = scriptcontext.doc.Objects.Transform(old_id, xform, not copy)\n        elif isinstance(object_id, Rhino.Geometry.GeometryBase):\n            if copy: object_id = object_id.Duplicate()\n            if not object_id.Transform(xform): raise Exception(\"Cannot apply transform to geometry.\")\n            id = scriptcontext.doc.Objects.Add(object_id)\n        else:\n            type_of_id = type(object_id)\n            if type_of_id in __allowed_transform_types:\n                if copy: object_id = System.ICloneable.Clone(object_id)\n                if object_id.Transform(xform) == False: #some of the Transform methods return bools, others have no return\n                    raise Exception(\"Cannot apply transform to geometry.\")\n                ot = scriptcontext.doc.Objects\n                fs = [ot.AddPoint,ot.AddLine,ot.AddRectangle,ot.AddCircle,ot.AddEllipse,ot.AddArc,ot.AddPolyline,ot.AddBox,ot.AddSphere]\n                t_index = __allowed_transform_types.index(type_of_id)\n                id = fs[t_index](object_id)\n            else:\n                raise Exception(\"The {0} cannot be tranformed. A Guid or geometry types are expected.\".format(type_of_id))\n        if id!=System.Guid.Empty: rc.append(id)\n    if rc: scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "l = rs.AddLine((0,0,0), (0, 100, 0))\nobjl = rs.coerceline(l)\nprint objl.To  # clear: print the To point",
+      "language": "python",
+      "author": "Mike24",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "l = rs.AddLine((0,0,0), (0, 100, 0))\nobjl = rs.coerceline(l)\nprint objl.To\nl2 = rs.RotateObject(l, objl.From, -90, copy=False)\nobjl2 = rs.coerceline(l2)\nprint objl2.To",
+      "language": "python",
+      "author": "Mike24",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "l = rs.AddLine((0,0,0), (0, 100, 0))\nobjl = rs.coerceline(l)\n\nprint objl.To\n\nrs.RotateObject(l, objl.From, -90)\n\nprint objl.To",
+      "language": "python",
+      "author": "Mike24",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 426
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscript-to-python-help/48227",
+  "topic_id": 48227,
+  "title": "RhinoScript to Python help",
+  "question": "Hi folks - long time no see! I have 2500 holes to place at point locations in my file. I found this old Rhinoscript by Damon - any chance I could get it rewritten in Python so I can use it in Mac Rhino?\n\n\nOption Explicit\n'Script written by Damon Sidel\n'Script copyrighted by Damon Sidel\n'Script version Sunday, April 19, 2009 7:22:34 PM\n\nCall CopyToPoints()\nSub CopyToPoints()\n\n\tDim pts : pts = Rhino.GetPointCoordinates(\"Select points\",True)\n\tIf IsNull(pts) Then Exit Sub\n\n\tDim\tcopyObj : copyObj = Rhino.GetObject(\"Select object to copy\")\n\tIf IsNull(copyObj) Then Exit Sub\n\n\tDim copyObjOrigin : copyObjOrigin = Rhino.GetPointCoordinates(\"Select point at origin of object being copied\")\n\tIf IsNull(copyObjOrigin) Then Exit Sub\n\n\tCall Rhino.EnableRedraw(False)\n\n\tDim arrPt\n\tIf IsArray(pts) Then\n\t\tFor Each arrPt In pts\n\t\t\tCall Rhino.CopyObject(copyObj,copyObjOrigin(0),arrPt)\n\t\tNext\n\tEnd If\n\n\n\nThanks for any help offered in the form of yummy virtual beer.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npts = rs.GetPointCoordinates(\"Select points\",True)\nif pts is None: sys.exit()\n\ncopyObj = rs.GetObject(\"Select object to copy\")\nif copyObj is None: sys.exit()\n\ncopyObjOrigin = rs.GetPoint(\"Select point at origin of object being copied\")\nif copyObjOrigin is None: sys.exit()\n\nrs.EnableRedraw(False)\n\nfor arrPt in pts:\n    vec = rs.VectorCreate(arrPt, copyObjOrigin)\n    rs.CopyObject(copyObj,vec)",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef CopyObjectToPoints():\n    pts = rs.GetObjects(\"Points to copy to\", rs.filter.point, True, True, False)\n    if not pts: return\n    \n    copyObj = rs.GetObject(\"Select object to copy\")\n    if not copyObj: return\n    \n    copyObjOrigin = rs.GetPoint(\"Origin of object to copy\")\n    if not copyObjOrigin: return\n    \n    rs.EnableRedraw(False)\n    for pt_obj in pts:\n        pt = rs.PointCoordinates(pt_obj)\n        rs.CopyObject(copyObj, pt - copyObjOrigin)\n    rs.EnableRedraw(True)\n\nCopyObjectToPoints()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n'Script written by Damon Sidel\n'Script copyrighted by Damon Sidel\n'Script version Sunday, April 19, 2009 7:22:34 PM\n\nCall CopyToPoints()\nSub CopyToPoints()\n\n\tDim pts : pts = Rhino.GetPointCoordinates(\"Select points\",True)\n\tIf IsNull(pts) Then Exit Sub\n\n\tDim\tcopyObj : copyObj = Rhino.GetObject(\"Select object to copy\")\n\tIf IsNull(copyObj) Then Exit Sub\n\n\tDim copyObjOrigin : copyObjOrigin = Rhino.GetPointCoordinates(\"Select point at origin of object being copied\")\n\tIf IsNull(copyObjOrigin) Then Exit Sub\n\n\tCall Rhino.EnableRedraw(False)\n\n\tDim arrPt\n\tIf IsArray(pts) Then\n\t\tFor Each arrPt In pts\n\t\t\tCall Rhino.CopyObject(copyObj,copyObjOrigin(0),arrPt)\n\t\tNext\n\tEnd If",
+      "language": "python",
+      "author": "markleichliter",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 2190
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-split-with-curves-problem/180802",
+  "topic_id": 180802,
+  "title": "Brep split with curves problem",
+  "question": "In rhino 7 I made a python script to splits a surface with several curves.\n\nWhen I use the blue curves in combination with the other curves the split will go wrong and one piece of the surface disappear.\n\nIt seams that the brep exists.\n\nBut when I add it to the document the guid “00000000-0000-0000-0000-000000000000” is created.\n\n\nbrepsplit.3dm\n (2.4 MB)\n\n\nbrepsplits.py\n (653 Bytes)\n\n\nimage\n834×635 4.5 KB\n\nbefore the split\n\n\nimage\n889×695 3.79 KB\n\nAfter the split\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nfrom Rhino.Geometry import Curve\nfrom System.Collections.Generic import IEnumerable\nfrom System import Double\n\ntol=sc.doc.ModelAbsoluteTolerance\n\nbrepID=rs.GetObject(\"Select surface\",8)\ncrvIDs=rs.GetObjects(\"Select curves\",4)\n\ncrvs=[rs.coercecurve(crvID) for crvID in crvIDs]\nbrep=rs.coercebrep(brepID)\nsplits=brep.Split.Overloads[IEnumerable[Curve],Double](crvs, tol)\nif splits:\n    for brep in splits:\n        splitsurf=sc.doc.Objects.AddBrep(brep)\n        print splitsurf\n        rs.MatchObjectAttributes(splitsurf,brepID)\n    rs.DeleteObject(brepID)\nsc.doc.Views.Redraw()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nfrom Rhino.Geometry import Curve\nfrom System.Collections.Generic import IEnumerable\nfrom System import Double\n\ntol=sc.doc.ModelAbsoluteTolerance\n\nbrepID=rs.GetObject(\"Select surface\",8)\ncrvIDs=rs.GetObjects(\"Select curves\",4)\n\ncrvs=[rs.coercecurve(crvID) for crvID in crvIDs]\nbrep=rs.coercebrep(brepID)\nsplits=brep.Split.Overloads[IEnumerable[Curve],Double](crvs, tol)\nif splits:\n    for brep in splits:\n        splitsurf=sc.doc.Objects.AddBrep(brep)\n        print splitsurf\n        rs.MatchObjectAttributes(splitsurf,brepID)\n    rs.DeleteObject(brepID)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 160
+}

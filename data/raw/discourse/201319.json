@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/finding-objects-hidden-by-clipping-plane-in-viewport/201319",
+  "topic_id": 201319,
+  "title": "Finding objects hidden by clipping plane in viewport",
+  "question": "I have a script which adds text on the objects visible in a detail. The script includes a method which determines which objects are visible in the detail. This works great except with clipping planes. Any objects hidden by a clipping plane get the text, which they should not. Does anyone know how to determine which objects in a detail are hidden by a clipping plane?\n\n\nHere is the method:\n\n\ndef _is_object_in_viewport(obj, viewport, clippingPlanes):\n    \"\"\"\n    Check if an object is visible in the viewport.\n    \"\"\"    \n    layer_for_obj = sc.doc.Layers[obj.Attributes.LayerIndex]\n    if not layer_for_obj.PerViewportIsVisible(viewport.Id):\n        return False\n    if obj.Attributes.HasHideInDetailOverrideSet(viewport.Id):\n        return False    \n    bbox = rs.BoundingBox(obj)        \n    does_contain = True\n    for p in bbox:\n        does_contain = viewport.GetFrustumBoundingBox().Contains(p)\n        if not does_contain:\n            break\n    return does_contain",
+  "code_blocks": [
+    {
+      "code": "def _is_object_in_viewport(obj, viewport, clippingPlanes):\n    \"\"\"\n    Check if an object is visible in the viewport.\n    \"\"\"    \n    layer_for_obj = sc.doc.Layers[obj.Attributes.LayerIndex]\n    if not layer_for_obj.PerViewportIsVisible(viewport.Id):\n        return False\n    if obj.Attributes.HasHideInDetailOverrideSet(viewport.Id):\n        return False    \n    bbox = rs.BoundingBox(obj)        \n    does_contain = True\n    for p in bbox:\n        does_contain = viewport.GetFrustumBoundingBox().Contains(p)\n        if not does_contain:\n            break\n    return does_contain",
+      "language": "python",
+      "author": "GaryC",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 80
+}

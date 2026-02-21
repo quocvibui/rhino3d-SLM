@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-can-i-add-a-radial-dimension/37644",
+  "topic_id": 37644,
+  "title": "How can I add a RADIAL dimension?",
+  "question": "I am trying to add a radial dimension via Python/RhinoCommon:\n\n\n            dimension = Rhino.Geometry.RadialDimension(pCenter, pTip, vX, vZ, dOffset)\n            id = doc.Objects.AddRadialDimension(dimension)\n\n\n\nThis works fine, but I (always) get a DIAMETER dimension instead of a RADIUS dimension. The property IsDiameterDimension is read only, so how can I define the type?",
+  "code_blocks": [
+    {
+      "code": "params = (\"Radius\", \"No\", \"Yes\")\nisRadius = rs.GetBoolean(\"Radius\", params, (False) )\n\ndimension = Rhino.Geometry.RadialDimension(pCenter, ...\nif isRadius[0]:\n    dimension = dimension / 2\nid = doc.Objects.AddRadialDimension(dimension)",
+      "language": "python",
+      "author": "RIL",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "dimension = Rhino.Geometry.RadialDimension(pCenter, pTip, vX, vZ, dOffset)\ndimension.Text = \"R{}\".format(dimension.NumericValue*0.5) \nid = doc.Objects.AddRadialDimension(dimension)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 1437
+}

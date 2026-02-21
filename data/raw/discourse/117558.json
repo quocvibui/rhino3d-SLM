@@ -1,0 +1,73 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-can-i-retrieve-the-count-of-instanceobject-for-each-instancedefinition-with-c/117558",
+  "topic_id": 117558,
+  "title": "How can I retrieve the count of InstanceObject for each InstanceDefinition with C#?",
+  "question": "Struggling RhinoCommon newbie here.\n\nHow can I retrieve the count of InstanceObject for each InstanceDefinition with C# ?\n\n\nI’m trying to use the \n TextFields.BlockInstanceCount Method\n .\n\nI’ve got no errors, but I’ve got no juice either…\n\n\nBlockInstanceCount\n1194×992 156 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef organizeBlocks():\n    \"\"\"\n    organize blocks onto layers with their blockname nested under layer Block_Definitions\n    tested in Rhino 6.14\n    www.studiogijs.nl\n    \"\"\"\n    blocks = Rhino.RhinoDoc.ActiveDoc.Objects.FindByObjectType(Rhino.DocObjects.ObjectType.InstanceReference)\n    if not blocks:\n        print 'no blocks found in this document'\n        return\n    for block in blocks:\n        block_name = block.InstanceDefinition.Name\n        #check if layer Block_Definitions exist, else create it\n        if not rs.IsLayer(\"Block_Definitions\"): rs.AddLayer(\"Block_Definitions\")\n        \n        #check if layer with block name exists, else create it\n        layer_name = \"Block_Definitions::\"+block_name",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def BlockInstanceCount(block_name,where_to_look=0):    \n    idef = scriptcontext.doc.InstanceDefinitions.Find(block_name)\n        if not idef: raise ValueError(\"%s does not exist in InstanceDefinitionsTable\"%block_name)\n        refs = idef.GetReferences(where_to_look)\n        return len(refs)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nblock= sc.doc.InstanceDefinitions.Find(\"block\")\n\namount = len( Rhino.DocObjects.InstanceDefinition.GetReferences(block,0))\nprint amount",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n    import scriptcontext as sc\n    sc.doc=Rhino.RhinoDoc.ActiveDoc\n\n    a=x, rs.BlockInstanceCount(x, 1) \n\n    sc.doc=ghdoc",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 33,
+      "is_solution": false
+    },
+    {
+      "code": "def BlockInstanceCount(block_name,where_to_look=0):\n    \"\"\"Counts number of instances of the block in the document.\n    Nested instances are not included in the count.\n    Parameters:\n      block_name (str): the name of an existing block definition\n      where_to_look (number, optional):\n        0 = get top level references in active document.\n        1 = get top level and nested references in active document.\n        2 = check for references from other instance definitions\n    Returns:\n      number: the number of instances of the block in the document\n    Example:\n      import rhinoscriptsyntax as rs\n      blockname = rs.GetString(\"Block to count\")\n      if rs.IsBlock(blockname):\n          count = rs.BlockInstanceCount(blockname)\n          print(\"{} block(s) found.\".format(count))\n    See Also:\n      BlockInstanceInsertPoint\n      BlockInstances\n      BlockInstanceXform\n      IsBlockInstance\n    \"\"\"\n    idef = scriptcontext.doc.InstanceDefinitions.Find(block_name)\n    if not idef: raise ValueError(\"%s does not exist in InstanceDefinitionsTable\"%block_name)\n    refs = idef.GetReferences(where_to_look)\n    return len(refs)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 62,
+      "is_solution": false
+    },
+    {
+      "code": "using Grasshopper.Kernel;\nusing Rhino;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\n\nnamespace PancakeAlgo.Block\n{\n    public class pcgCountBlk : GH_Component\n    {\n        public pcgCountBlk()\n          : base(\"Count Blocks\", \"pcgCountBlk\",\n              \"Count block references inside the active document. This included nested ones.\",\n              \"Pancake\", \"Blocks\")\n        {\n        }\n\n        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)\n        {\n            pManager.AddTextParameter(\"N\", \"N\", \"\", GH_ParamAccess.item);\n        }\n        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)\n        {\n            pManager.AddIntegerParameter(\"C\", \"C\", \"\", GH_ParamAccess.item);\n        }\n        protected override void SolveInstance(IGH_DataAccess DA)\n        {\n            var name = default(string);\n            DA.GetData(0, ref name);\n\n            var doc = RhinoDoc.ActiveDoc;\n            if (!(doc.InstanceDefinitions.Find(name) is InstanceDefinition idef))\n            {\n                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $\"Block {name} not found.\");\n                return;\n            }\n\n            _count.Clear();\n\n            DA.SetData(0, CountBlockObjects(doc.Objects.GetObjectsByType<InstanceObject>(), idef.Id));\n        }\n\n        private readonly Dictionary<Guid, int> _count = new Dictionary<Guid, int>();\n        private int CountBlockObjects(IEnumerable<InstanceObject> iobjs, Guid target)\n            => iobjs.Sum(iobj => CountBlockDefinition(iobj.InstanceDefinition, target));\n        private int CountBlockDefinition(InstanceDefinition subject, Guid target)\n            => (subject.Id == target) ? 1 : \n            (_count.TryGetValue(subject.Id, out var val) ? val :\n            (_count[subject.Id] = CountBlockObjects(subject.GetObjects()\n                .OfType<InstanceObject>(), target)));\n\n        protected override System.Drawing.Bitmap Icon => null;\n        public override Guid ComponentGuid => new Guid(\"57b3c876-ee6c-45aa-8718-57bdbc9c6592\");\n    }\n}",
+      "language": "csharp",
+      "author": "gankeyu",
+      "post_number": 29,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\n\nusing Rhino;\nusing Rhino.Geometry;\n\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n\n\n\n/// <summary>\n/// This class will be instantiated on demand by the Script component.\n/// </summary>\npublic class Script_Instance : GH_ScriptInstance\n{\n#region Utility functions\n  /// <summary>Print a String to the [Out] Parameter of the Script component.</summary>\n  /// <param name=\"text\">String to print.</param>\n  private void Print(string text) { /* Implementation hidden. */ }\n  /// <summary>Print a formatted String to the [Out] Parameter of the Script component.</summary>\n  /// <param name=\"format\">String format.</param>\n  /// <param name=\"args\">Formatting parameters.</param>\n  private void Print(string format, params object[] args) { /* Implementation hidden. */ }\n  /// <summary>Print useful information about an object instance to the [Out] Parameter of the Script component. </summary>\n  /// <param name=\"obj\">Object instance to parse.</param>\n  private void Reflect(object obj) { /* Implementation hidden. */ }\n  /// <summary>Print the signatures of all the overloads of a specific method to the [Out] Parameter of the Script component. </summary>\n  /// <param name=\"obj\">Object instance to parse.</param>\n  private void Reflect(object obj, string method_name) { /* Implementation hidden. */ }\n#endregion\n\n#region Members\n  /// <summary>Gets the current Rhino document.</summary>\n  private readonly RhinoDoc RhinoDocument;\n  /// <summary>Gets the Grasshopper document that owns this script.</summary>\n  private readonly GH_Document GrasshopperDocument;\n  /// <summary>Gets the Grasshopper script component that owns this script.</summary>\n  private readonly IGH_Component Component;\n  /// <summary>\n  /// Gets the current iteration count. The first call to RunScript() is associated with Iteration==0.\n  /// Any subsequent call within the same solution will increment the Iteration count.\n  /// </summary>\n  private readonly int Iteration;\n#endregion\n\n  /// <summary>\n  /// This procedure contains the user code. Input parameters are provided as regular arguments,\n  /// Output parameters as ref arguments. You don't have to assign output parameters,\n  /// they will have a default value.\n  /// </summary>\n  private void RunScript(string name, ref object guidBlockDefs, ref object guidInBlockDefs, ref object blockInstanceCount)\n  {\n    var def = RhinoDocument.InstanceDefinitions.Find(name);\n    if(def == null)\n      return;\n\n    guidBlockDefs = def.Id;\n    guidInBlockDefs = def.GetObjectIds();\n\n    var guids = Convert.ToString(guidBlockDefs);\n    var rc = -1;\n    var idef = RhinoDocument.InstanceDefinitions.Find(guids, true);\n    if (null != idef)\n      // Returns the number of references of this instance definition in the model.\n      // Both top-level references and nested instances are included in the count.\n      rc = idef.UseCount();\n    blockInstanceCount = rc;\n\n\n  }\n\n  // <Custom additional code> \n\n  // </Custom additional code> \n}",
+      "language": "csharp",
+      "author": "osuire",
+      "post_number": 44,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 62,
+  "views": 3746
+}

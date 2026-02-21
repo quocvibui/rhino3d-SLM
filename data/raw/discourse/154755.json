@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-currently-active-layer/154755",
+  "topic_id": 154755,
+  "title": "Select currently active layer?",
+  "question": "Is there a quick and easy way to select the currently active layer with an alias?\n\nI often need to join curves on the active layer, this would help a lot in that procedure.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef sel_current():\n    layer = rs.CurrentLayer()\n    objs = sc.doc.Objects\n    ci = sc.doc.Layers.CurrentLayerIndex\n    rs.EnableRedraw(False)\n    for obj in objs:\n        if obj.Attributes.LayerIndex == ci:\n            rs.SelectObject(obj.Id)\n    rs.EnableRedraw(True)\n\nsel_current()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.UnselectAllObjects()\nrs.SelectObjects(rs.ObjectsByLayer(rs.CurrentLayer(),True))",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 4,
+  "views": 399
+}

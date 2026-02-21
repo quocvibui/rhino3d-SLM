@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/face-materials-and-headless-rhino-document/206616",
+  "topic_id": 206616,
+  "title": "Face materials and headless Rhino Document",
+  "question": "Hi \n@dale\n I’m opening a new topic related to \nthis\n, because I’m finding that I cannot access face materials when opening a headless Rhino and I wanted to check with you if this is normal behaviour.\n\n\nThe following code:\n\n\nobj = document.Objects.FindId(System.Guid('c9cb3490-c171-47fb-b41d-da3d04e28af8'))\nfor ci in obj.SubobjectMaterialComponents:\n            face_mat = obj.GetMaterial(ci)\n            print(ci.Index, ci.ComponentIndexType, face_mat, face_mat.Id)\n\n\n\nworks differently if the document is an active open model or a headless opened document, that is:\n\n\nIf I am in an empty document and load another document in headless mode with:\n\n\ndocument = Rhino.RhinoDoc.OpenHeadless(this_file_path)\n\n\nI get the obj base material it has assigned and no face material data:\n\n\n\n\n0 BrepFace Material: M_Material_ZZZ (1352) a106bd85-401d-4a8e-bcb2-66bb9c0f6b5b\n\n1 BrepFace Material: M_Material_ZZZ (1352) a106bd85-401d-4a8e-bcb2-66bb9c0f6b5b\n\n\n\n\nIf I open the model and access the RhinoDoc instance with\n\n\ndocument = Rhino.RhinoDoc.ActiveDoc\n\n\nI get each face material data as expected.\n\n\n\n\n0 BrepFace Material: T_Tx01 (1332) 57c9d9d1-9dc8-44b7-87b2-8e92606c911b\n\n1 BrepFace Material: T_Tx02 (1087) f80e9001-dc6a-43c7-85e7-a565b3449481\n\n\n\n\nI want to compare face material data between versions of a Rhino file so I need to open both versions in headless mode to do that. For geometry comparissons and attribute data, everything works as expected, but with material data it does not.\n\n\nCan you comment on this?\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing Rhino;\n\nstring file_path = \"C:\\\\Temp\\\\01_Textures.3dm\";\nRhinoDoc document = Rhino.RhinoDoc.OpenHeadless(file_path);\n\nGuid guid = System.Guid.Parse(\"c9cb3490-c171-47fb-b41d-da3d04e28af8\");\n\nConsole.Out.WriteLine(guid);\n\nRhino.DocObjects.RhinoObject obj = document.Objects.FindId(guid);\n\n// Using Subobject Material info\nforeach (Rhino.Geometry.ComponentIndex ci in obj.SubobjectMaterialComponents)\n{\n    Rhino.DocObjects.Material face_mat = obj.GetMaterial(ci);\n    Console.Out.WriteLine($\"Face material: {face_mat.Name}\");\n}\n\n// Iterating over Brep Faces\nRhino.DocObjects.BrepObject brep_obj = (Rhino.DocObjects.BrepObject)obj;\nforeach (Rhino.Geometry.BrepFace face in brep_obj.BrepGeometry.Faces)\n{\n    int index = face.MaterialChannelIndex;\n    Rhino.Geometry.ComponentIndex cidx = face.ComponentIndex();\n    Rhino.DocObjects.Material mat = brep_obj.GetMaterial(cidx);\n\n    Console.Out.WriteLine($\"Face Material index {index} Material: {mat.Name}\");\n}",
+      "language": "csharp",
+      "author": "Iván_Pajares_Sánchez",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 137
+}

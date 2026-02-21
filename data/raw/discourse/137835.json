@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/accomplising-circle-around-curve-via-python-api/137835",
+  "topic_id": 137835,
+  "title": "Accomplising Circle Around Curve via Python API",
+  "question": "Anyone know how to generate a circle around a curve via python API? Trying to use Circle(Point3d, Vector3d, Point3d) but I think I am missing something. I am trying to target one curve’s start and endpoint to dictate center point and direction (vector).\n\n\nThanks !\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\n\nmaster_obj_list = rs.AllObjects()\n\nfor obj in master_obj_list:\n    if rs.ObjectType(obj) == 4:\n        print(\"This is ID is the curve \" + str(obj))\n        target_crv = rs.coercecurve(obj)\n        \nprint target_crv\nprint type(target_crv.PointAtLength(0))\n\nvectorOne = Rhino.Geometry.Vector3d(target_crv.PointAtLength(0))\n\ncircleOne = Rhino.Geometry.Circle(target_crv.PointAtLength(0), vectorOne, target_crv.PointAtLength(1))\n\nscriptcontext.doc.ActiveDoc.Views.Redraw",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    crv_id = rs.GetObject(\"Curve\", rs.filter.curve, True, False)\n    if not crv_id: return\n    \n    point = rs.GetPointOnCurve(crv_id, \"Point for circle\")\n    if not point: return\n    \n    curve = rs.coercecurve(crv_id, -1, True)\n    rc, t = Rhino.Geometry.Curve.ClosestPoint(curve, point)\n    if not rc: return\n    \n    plane = Rhino.Geometry.Plane(point, curve.TangentAt(t))\n    circle = Rhino.Geometry.Circle(plane, radius=10)\n    \n    scriptcontext.doc.Objects.AddCircle(circle)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\n\nmaster_obj_list = rs.AllObjects()\n\nfor obj in master_obj_list:\n    if rs.ObjectType(obj) == 4:\n        print(\"This is ID is the curve \" + str(obj))\n        target_crv = rs.coercecurve(obj)\n        \nprint target_crv\nprint type(target_crv.PointAtLength(0))\n\nvectorOne = Rhino.Geometry.Vector3d(target_crv.PointAtLength(0))\n\ncircleOne = Rhino.Geometry.Circle(target_crv.PointAtLength(0), vectorOne, target_crv.PointAtLength(1))\n\nscriptcontext.doc.ActiveDoc.Views.Redraw",
+      "language": "python",
+      "author": "Derek_Comeau",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 565
+}

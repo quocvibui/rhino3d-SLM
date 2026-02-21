@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/negative-volume-issue/97825",
+  "topic_id": 97825,
+  "title": "Negative volume issue",
+  "question": "Hi,\n\n\nI’ve got an issue with Brep.GetVolume() reporting a negative volume that I’m unable to fix\n\n\nvolume_issue.3dm\n (183.3 KB)\n\n\nThe brep in the file is not solid, calling Brep.CapPlanarHoles() will make it solid yet when trying to get te volume it is a negative value\n\n\nHowever If I add the brep to the document first and grab the brep from the document, the volume on that brep is positive. So somewhere in that proces the negative volume issue is fixed.\n\n\nI’m looking for a way to fix that negative volume without the adding to document loop.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nid = rs.GetObject('select brep', preselect=True)\nbrep = rs.coercebrep(id)\n\ncapped_brep = brep.CapPlanarHoles(sc.doc.ModelAbsoluteTolerance)\n\ncapped_brep.Standardize()\ncapped_brep.Compact()\n\n#here we get a negative volume : -2283643.74245\nprint 'capped_brep.GetVolume()  ',capped_brep.GetVolume()\n\n#adding the brep to the document and reading the brep back from the doc\ncapped_id = sc.doc.Objects.AddBrep(capped_brep)\ndoc_brep = rs.coercebrep(capped_id)\n\n#here we get a positive volume : 2283643.74245\nprint 'doc_brep.GetVolume()  ',doc_brep.GetVolume()\n\n\n\nThanks\n\n-Willem\n\n\nEDIT for those with a similar issues:\n\nto fix the incorrect solid orientation\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nid = rs.GetObject('select brep', preselect=True)\nbrep = rs.coercebrep(id)\n\n\ncapped_brep = brep.CapPlanarHoles(sc.doc.ModelAbsoluteTolerance)\n\nif capped_brep.SolidOrientation == Rhino.Geometry.BrepSolidOrientation.Inward:\n    capped_brep.Flip()\n    \n\nprint 'capped_brep.GetVolume()  ',capped_brep.GetVolume()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nid = rs.GetObject('select brep', preselect=True)\nbrep = rs.coercebrep(id)\n\ncapped_brep = brep.CapPlanarHoles(sc.doc.ModelAbsoluteTolerance)\n\ncapped_brep.Standardize()\ncapped_brep.Compact()\n\n#here we get a negative volume : -2283643.74245\nprint 'capped_brep.GetVolume()  ',capped_brep.GetVolume()\n\n#adding the brep to the document and reading the brep back from the doc\ncapped_id = sc.doc.Objects.AddBrep(capped_brep)\ndoc_brep = rs.coercebrep(capped_id)\n\n#here we get a positive volume : 2283643.74245\nprint 'doc_brep.GetVolume()  ',doc_brep.GetVolume()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nid = rs.GetObject('select brep', preselect=True)\nbrep = rs.coercebrep(id)\n\n\ncapped_brep = brep.CapPlanarHoles(sc.doc.ModelAbsoluteTolerance)\n\nif capped_brep.SolidOrientation == Rhino.Geometry.BrepSolidOrientation.Inward:\n    capped_brep.Flip()\n    \n\nprint 'capped_brep.GetVolume()  ',capped_brep.GetVolume()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 437
+}

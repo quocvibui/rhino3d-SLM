@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/from-python-into-rhino-common/33654",
+  "topic_id": 33654,
+  "title": "From Python into Rhino Common",
+  "question": "Continuing the discussion from \nIs this the best way to automatically update linked blocks?\n:\n\n\n\n\n\n\n\n\nIs this the best way to automatically update linked blocks?\n\n\n\n\nI never figure out how to find what I need in scriptcontext, how do you do it?\n\n\n\n\n\n\nHi Jorgen,\n\n\nBelow a description on how I find my way in RhinoCommon through Python:\n\n\nstarting with the code:\n\n\nimport rhinoscriptsyntax as rs\nblockList=rs.BlockNames()\n\n\n\nI put a \ndebug breakpoint\n at the last line:\n\n\n\n\nRun the code with the green arrow (F5).\n\nThe script stops at line 2 and you get options to continue, StepInto SetOver over …etc\n\n\nChoose StepInto\n\n\n\n\nThe script will step into the code rs.BlockNames() and the containing scriptfile is opened in a new tab:\n\n\nPasted image\n914×421 30.6 KB\n\n\nYou see what rs.BlockNames() does and how it interacts with scriptcontext.\n\nscriptcontext is the context where this script is running in thus the current active file.\n\nIt’s a means to read information from the current file.\n\nAs you can see below scriptcontext.doc is referencing Rhino.DocObjects for the current file.\n\n\nNow keep stepping until you reach line 172:\n\nIn the list at the bottom we see what our different variables are.\n\n\nPasted image\n945×333 16 KB\n\n\nNotice how scriptcontext.doc.InstanceDefinitions.Getlist(True) looks like a method. That is passed the argument ‘True’ it returns a list of instance definitions:\n\n\n\n\nIf we dig into the list we find single objects identifying the blocks in our file:\n\n\nPasted image\n786×270 10.5 KB\n\n\nBack to the rest of the script:\n\n\n\n\nWe Step Into the method rs.BlockStatus()\n\n\nPasted image\n1043×538 37.2 KB\n\n\nNotice how again first the \nscriptcontext.doc.InstanceDefinitions\n is used to find the block by it’s name.\n\nIn line 218 for the instance definition the property ArchiveFileStatus is converted into an integer.\n\n\nLets find out what this is about.\n\nI copy \nArchiveFileStatus\n and search for it on this page:\n\n\nhttp://developer.rhino3d.com/api/RhinoCommon/html/N_Rhino.htm#\n!\n\n\n\nTo find ...",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nfor idef in scriptcontext.doc.InstanceDefinitions :\n    status=int(idef.ArchiveFileStatus)\n    print status",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 3788
+}

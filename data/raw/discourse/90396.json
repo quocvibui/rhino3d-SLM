@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/name-created-object-by-its-path/90396",
+  "topic_id": 90396,
+  "title": "Name created object by its path",
+  "question": "Dear Rhino Users and Developers,\n\n\nhow can I add name to recently created object. I have string of its path, which I would like to put as its name.\n\n\nobj=scriptcontext.doc.Objects.AddPointCloud(…)\n\n\nThank you for any help.",
+  "code_blocks": [
+    {
+      "code": "# myPointCloud is a pointCloud defined elsewhere\n# myName is a string of the name you want, defined elsewhere\n\nimport Rhino\nimport scriptcontext as sc\n\nattributes = Rhino.DocObjects.ObjectAttributes()\nattributes.Name = myName\n\nsc.doc.Objects.AddPointCloud(myPointCloud, attributes)\n\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "obj=scriptcontext.doc.Objects.AddPointCloud(myPointCloud)\nrs.ObjectName(obj,myName)\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "mlukasz87",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import scriptcontext as sc\nimport Rhino\n\n\npc=Rhino.Geometry.PointCloud()\nfor i in range(5):\n    for j in range(5):\n        for k in range(5):\n            pc.Add(Rhino.Geometry.Point3d(i,j,k))\n\nattrs=Rhino.DocObjects.ObjectAttributes()\nattrs.Name=\"MyPointCloud\"\n\npc_id=sc.doc.Objects.AddPointCloud(pc,attrs)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 425
+}

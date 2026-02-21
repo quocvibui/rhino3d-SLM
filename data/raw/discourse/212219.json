@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/stringing-multiple-hops-together/212219",
+  "topic_id": 212219,
+  "title": "Stringing Multiple Hops Together",
+  "question": "I’ve made multiple Hops and now I’ve made a script from them that I’m trying to run on Rhino Compute on a VM. It appears to work fine in Grasshopper connected to my VM but not when I call it via JavaScript. Can anyone see what’s potentially wrong (screenshot and code attached).\n\n\n// Imports\n\nfunction ProcessButton() {\n  const rhinoRef = useRef(null);\n  const definitionRef = useRef(null);\n\n// ...\n\n// Rhino setup\n\n  useEffect(() => {\n    (async () => {\n      const rhino = await window.rhino3dm();\n      rhinoRef.current = rhino;\n\n      RhinoCompute.url = import.meta.env.VITE_RHINO_COMPUTE_URL;\n      RhinoCompute.apiKey = import.meta.env.VITE_RHINO_COMPUTE_API_KEY;\n      RhinoCompute.authToken = import.meta.env.VITE_RHINO_COMPUTE_AUTH_TOKEN;\n\n      const definition = new Uint8Array(\n        await (await fetch(\"/definitions/building.gh\")).arrayBuffer()\n      );\n      definitionRef.current = definition;\n    })();\n  }, []);\n\n  const handlePress = async () => {\n\n// ...\n\n// Using Rhino Compute\n\n    const trees = [new RhinoCompute.Grasshopper.DataTree(\"geojson\")];\n    trees[0].append([0], [JSON.stringify(geojson)]);\n\n    console.log(\"Sending data to Rhino.Compute\");\n    console.log(\"Trees:\", trees);\n\n    const result = await RhinoCompute.Grasshopper.evaluateDefinition(\n      definitionRef.current,\n      trees\n    );\n\n    const meshes = Object.values(result.values[0].InnerTree)\n      .flat()\n      .map((entry) =>\n        rhinoRef.current.CommonObject.decode(JSON.parse(entry.data))\n      );\n\n    const loader = new THREE.BufferGeometryLoader();\n    const exporter = new OBJExporter();\n\n    const objs = meshes.map((mesh, index) => {\n      const geometry = loader.parse(mesh.toThreejsJSON());\n      const threeMesh = new THREE.Mesh(geometry);\n      threeMesh.name = `mesh-${index}`;\n      return exporter.parse(threeMesh);\n    });\n\n    console.log(\"OBJs:\", objs);\n\n    setOBJs(objs);\n  };\n\n  return <Button onPress={handlePress}>Process</Button>;\n}\n\nexport default ProcessButton;\n\n\n\nThank...",
+  "code_blocks": [
+    {
+      "code": "// Imports\n\nfunction ProcessButton() {\n  const rhinoRef = useRef(null);\n  const definitionRef = useRef(null);\n\n// ...\n\n// Rhino setup\n\n  useEffect(() => {\n    (async () => {\n      const rhino = await window.rhino3dm();\n      rhinoRef.current = rhino;\n\n      RhinoCompute.url = import.meta.env.VITE_RHINO_COMPUTE_URL;\n      RhinoCompute.apiKey = import.meta.env.VITE_RHINO_COMPUTE_API_KEY;\n      RhinoCompute.authToken = import.meta.env.VITE_RHINO_COMPUTE_AUTH_TOKEN;\n\n      const definition = new Uint8Array(\n        await (await fetch(\"/definitions/building.gh\")).arrayBuffer()\n      );\n      definitionRef.current = definition;\n    })();\n  }, []);\n\n  const handlePress = async () => {\n\n// ...\n\n// Using Rhino Compute\n\n    const trees = [new RhinoCompute.Grasshopper.DataTree(\"geojson\")];\n    trees[0].append([0], [JSON.stringify(geojson)]);\n\n    console.log(\"Sending data to Rhino.Compute\");\n    console.log(\"Trees:\", trees);\n\n    const result = await RhinoCompute.Grasshopper.evaluateDefinition(\n      definitionRef.current,\n      trees\n    );\n\n    const meshes = Object.values(result.values[0].InnerTree)\n      .flat()\n      .map((entry) =>\n        rhinoRef.current.CommonObject.decode(JSON.parse(entry.data))\n      );\n\n    const loader = new THREE.BufferGeometryLoader();\n    const exporter = new OBJExporter();\n\n    const objs = meshes.map((mesh, index) => {\n      const geometry = loader.parse(mesh.toThreejsJSON());\n      const threeMesh = new THREE.Mesh(geometry);\n      threeMesh.name = `mesh-${index}`;\n      return exporter.parse(threeMesh);\n    });\n\n    console.log(\"OBJs:\", objs);\n\n    setOBJs(objs);\n  };\n\n  return <Button onPress={handlePress}>Process</Button>;\n}\n\nexport default ProcessButton;",
+      "language": "csharp",
+      "author": "aidan.newsome",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 1,
+  "views": 28
+}

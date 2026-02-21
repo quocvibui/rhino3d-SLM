@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/komotoshunto/RDP-Automatic/blob/680b2cc9081582547d1b37440ec7ea97a94a14ea/%E9%96%A2%E6%95%B0/%E6%96%87%E5%AD%97%E3%82%92%E8%A1%A8%E7%A4%BA%E3%81%95%E3%81%9B%E3%82%8B%E3%81%A8%E3%81%8D%E3%81%AE%E8%A7%92%E5%BA%A6%E3%82%92%E6%95%B4%E3%81%88%E3%82%8B.py",
+  "repo": "komotoshunto/RDP-Automatic",
+  "repo_stars": 0,
+  "repo_description": "雨水排水計画を自動化するツール",
+  "license": "unknown",
+  "filepath": "関数/文字を表示させるときの角度を整える.py",
+  "instruction": "Input x, List Access, Surface",
+  "code": "#Input\n#x, List Access, Surface\n\n#Output\n#normal_list, \n#flame_list,\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math\n\n#法線とOriginから、見やすく面に水平なPlaneを返す関数\ndef TextVisible_flame(normal, origin):\n    if normal[2] == 1 or normal[2] == -1:\n        flame_x = rg.Vector3d(1, 0, 0)\n        flame_y = rg.Vector3d(0, 1, 0)\n        base_vec = rg.Vector3d(0, 0, 1)\n    else:\n        base_vec = rg.Vector3d(normal[0], normal[1], 0)\n        flame_x = rs.VectorRotate(base_vec, 90, rg.Vector3d(0, 0, 1))\n        flame_y = rs.VectorRotate(normal, -90, flame_x)\n    flame = rg.Plane(origin, flame_x, flame_y)\n    return flame\n\n\nflame_list = []\nfor surface in x:\n    param = (0.5, 0.5)\n    surface_param = rs.SurfaceParameter(surface, param)\n    u = surface_param[0]\n    v = surface_param[1]\n    normal = rg.Surface.NormalAt(surface, u, v)\n    point = rg.Surface.PointAt(surface, u, v)\n    flame = TextVisible_flame(normal, point)\n    flame_list.append(flame)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

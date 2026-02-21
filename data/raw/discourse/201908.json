@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/meshbooleanoptions/201908",
+  "topic_id": 201908,
+  "title": "MeshBooleanOptions",
+  "question": "McNeel folks -\n\n\nI’m wondering if you can shed some light on what goes on under the hood in Rhino8 mesh boolean commands for the sake of us who are developing scripts that replicate them.  Clearly the command line boolean operations are more robust than there were in R7.\n\n\nI’m specifically interested in the new MeshBooleanOptions class.  When I run a boolean difference from the command line with the automatic tolerance option set, the result is calculated correctly - although I do get a message saying ‘Original face index orig_fi is out of range.’  Running the same command with tolerance set to ‘document’ fails (in much the same way my current scripts are).\n\n\nIn the R8 api, there are now two methods to compute a boolean difference, one which uses MeshBooleanOptions and the older version which does not take a tolerance.  I’m guessing that the command line tool depends on the new and improved version, but I’d be interested to know if there’s any pre-processing being done by the command line tool to the input meshes before the call, and exactly how ‘automatic’ tolerance is set to ensure a successful result.\n\n\nI am sanity checking my input meshes before attempting a boolean with this function:\n\n\ndef CheckSolidMesh(mg):\n\n“”“Fast sanity check on mesh which should be a good solid 03/24/2025 “””\n\nreturn mg.IsClosed and mg.IsOriented and mg.IsSolid and mg.IsValid\n\n\nMy goal is to create a wrapper around Rhino.Geometry.Mesh.CreateBooleanDifference that works, most of the time.\n\n\nI’m currently relaxing the tolerance of the MeshBooleanOptions object each time the result fails and checking its text log, which typically reads:\n\n\nAn intersection computed a wrong result. Hit is invalid.\n\nA face required new points for splitting.\n\nOriginal face index orig_fi is out of range.\n\n\nBut I still can’t get this code to replicate the good result from the command line tool.  Any pointers would be welcome!\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "internal static double GetAdmendedTolerance(RhinoDoc doc)\n    {\n      if (doc == null) return double.NaN;\n      if (CurrentToleranceListValue == \"Zero\") return RhinoMath.ZeroTolerance * 10; //old Rhino zero tolerance value\n\n      double tolerance = doc.ModelAbsoluteTolerance;\n      double coefficient = CurrentToleranceListValue == \"Auto\" ? Intersection.MeshIntersectionsTolerancesCoefficient : 1;\n\n      if (RhinoMath.IsValidDouble(coefficient))\n        tolerance *= coefficient;\n\n      return tolerance;\n    }",
+      "language": "csharp",
+      "author": "piac",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "def GetAmendedTolerance():\n    tol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n    coeff = rg.Intersect.Intersection.MeshIntersectionsTolerancesCoefficient\n    return tol * coeff if Rhino.RhinoMath.IsValidDouble(coeff) else tol",
+      "language": "python",
+      "author": "will8",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "geometry",
+    "mesh",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 299
+}

@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/deswaks/space-invader/blob/94e00bff3b5371cfa6999f381461af9af6e0b0ba/ghpython%20component%20source%20code/room_connectivity.py",
+  "repo": "deswaks/space-invader",
+  "repo_stars": 0,
+  "repo_description": "Tools for locating and reconstructing analytical building spaces with Rhino Grasshopper",
+  "license": "MIT",
+  "filepath": "ghpython component source code/room_connectivity.py",
+  "instruction": "Find the adjacent rooms for each room. The returned adjecency graph will\ncontain a list for each room containing the indices of the rooms that are\nadjacent to it.\nInput:\n    rooms [brep] - Surfaces...",
+  "code": "\"\"\" Find the adjacent rooms for each room. The returned adjecency graph will\ncontain a list for each room containing the indices of the rooms that are\nadjacent to it.\nInput:\n    rooms [brep] - Surfaces of the rooms to analyze\n    distance [value] - Distance from the room to check for other rooms\n    sample [value] - Distance between sample points (lower = more points)\nReturns:\n    connectivity [index] - Room connectivity in adjacency graph representation\n\"\"\"\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\nimport Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as ght\n\n# Create output List\nconnectivity = []\nP = []\n# Define global tool objects\nreparam = rg.Interval(0,1)\nglobal_Z = rg.Vector3d(0,0,1)\nglobal_Z_neg = ghc.Reverse(global_Z)\nglobal_XY = ghc.XYPlane(ghc.ConstructPoint(0,0,0))\n\n\ndef standardize_surfaces(srf):\n    srf = ghc.ProjectAlong(srf, global_XY, global_Z_neg)[0]\n    srf_normal = ghc.EvaluateSurface(srf, ghc.ConstructPoint(0.5,0.5,0))[1]\n    if srf_normal[2] < 0:\n        return ghc.Flip(srf)[0]\n    else:\n        return srf\n\ndef create_outside_points(segment):\n    # Create a point mid-curve outside the region\n    n_pts = max(int(segment.GetLength()/sample),1)\n    curve_points, tangents, _ = ghc.DivideCurve(segment, n_pts, False)\n    if n_pts > 1:\n        points = []\n        for curve_point in curve_points[1:-1]:\n            normal = ghc.CrossProduct(tangents[0], global_Z, True)\n            curve_point, _ = ghc.Move(curve_point, normal[0]*distance)\n            points.append(curve_point)\n        return points\n    else:\n        segment.Domain = reparam\n        normal = ghc.CrossProduct(tangents, global_Z, True)\n        curve_point = ghc.EvaluateCurve(segment,0.5)[0]\n        curve_point, _ = ghc.Move(curve_point, normal[0][0]*distance)\n        return [curve_point]\n\n# Standardize surfaces\nrooms = [standardize_surfaces(room) for room in rooms]\n\n# Convert brep to polylines\nroom_segments = [ghc.DeconstructBrep(room)[1] for room in rooms]\nroom_polylines = [ghc.JoinCurves(segments, True) for segments in room_segments]\n\n# Main script\nfor i, room_polyline in enumerate(room_polylines):\n    connect = set()\n    for segment in room_segments[i]:\n        points = create_outside_points(segment)\n        P.append(points)\n        if type(points) in [list, tuple]:\n            for p in points:\n                for j, pl in enumerate(room_polylines):\n                    if j not in connect:\n                        relation, _ = ghc.PointInCurve(p, pl)\n                        if relation > 0:\n                            connect.add(j)\n    connectivity.append(list(connect))\n\n\n# Convert outputs to trees\nR = ght.list_to_tree(rooms)\nP = ght.list_to_tree(P)\ngraph = ght.list_to_tree(connectivity)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-split-a-brep-with-multiple-surfaces/165695",
+  "topic_id": 165695,
+  "title": "How to split a brep with multiple surfaces",
+  "question": "Hello,\n\n\nI’m trying to split this singular brep with multiple surfaces which have been constructed on a series of planes. From my limited understanding the \nsplit brep multiple\n component should resolve this. However, it doesn’t seem to be working in this particular scenario unless I convert the surfaces into breps by adding a thickness. The problem with that is it isn’t what I want to do as it adds small surfaces between the larger ones.\n\n\nimage\n3461×1295 467 KB\n\n\nimage\n1920×1102 63.2 KB\n\n\n2023-09-16\n1920×800 93.9 KB\n\n\nHere is the script working with the surfaces converted to breps but adds extra surfaces which is not the result I wanted.\n\n\nimage\n1920×1138 70.1 KB\n\n\n2023-09-16 (2)\n1920×800 103 KB\n\n\nGH script: \nBalustrade_Design_230916_help.gh\n (48.0 KB)\n\n\nThank you for your help in advanced!",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\ntol=sc.doc.ModelAbsoluteTolerance\n\ncutter = rg.Brep()\nfor b in cutters:\n    cutter.Append(b)\n\npieces = brep.Split(cutter, tol)",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\nimport scriptcontext as sc\n\ntol=sc.doc.ModelAbsoluteTolerance\n\ncutter=rg.Brep.MergeBreps(cutters,tol)\n\npieces = rg.Brep.CreateBooleanSplit([to_split], cutter, tol)\n\nprint (pieces)",
+      "language": "python",
+      "author": "ShynnSup",
+      "post_number": 20,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 20,
+  "views": 2871
+}

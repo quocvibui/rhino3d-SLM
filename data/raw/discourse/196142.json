@@ -1,0 +1,68 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-map-function/196142",
+  "topic_id": 196142,
+  "title": "Python MAP Function",
+  "question": "Hi,\n\n\nCan anyone please provide an example of using Python MAP function with a Rhino syntax command instead of a loop, tried and failed so need a little guidance.\n\nSomething simple like a “surfaceclosestpoint” select one surface  and a list of existing 3d points that was what I was trying and return the list of the 3d closest points on the surface.\n\n\nRegards\n\nRoger",
+  "code_blocks": [
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\n\ndef __MyFunc(srf, point):\n    uv = rs.SurfaceClosestPoint(srf, point)\n    return rs.EvaluateSurface(srf, uv[0], uv[1])\n\ndef Test():\n    srf = rs.GetObject(\"Select a surface\", rs.filter.surface)\n    if not srf:\n        return\n\n    points = rs.GetPoints(False, False, \"First point\", \"Next point. Press Enter when done\")\n    if not points:\n        return\n\n    results = map(lambda x: __MyFunc(srf, x), points)\n    for p in list(results):\n        print(p)\n\nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\n\nresults = []\nresultsa = []\n\nimport rhinoscriptsyntax as rs\n\ndef __MyFunc(srf, point):\n    arrCP = rs.BrepClosestPoint(srf, point)\n    #uv = rs.SurfaceClosestPoint(srf, point)\n    return (arrCP[0], arrCP[3])\n    #return rs.EvaluateSurface(srf, uv[0], uv[1])\n\n#def __MyFunc1(srf, point):\n    #arrCP = rs.BrepClosestPoint(srf, point)\n    #uv = rs.SurfaceClosestPoint(srf, point)\n    #return arrCP[3]\n\ndef Test():\n    srf = rs.GetObject(\"Select a surface\", rs.filter.surface)\n    if not srf:\n        return\n\n    points = rs.GetObjects(\"Pick some points\", rs.filter.point)\n    if not points:\n        return\n\n    results = map(lambda x: __MyFunc(srf, x), points)\n\n    #resultsb = map(lambda x: __MyFunc1(srf, x), points)\n\n    for p in results:\n        print(\"arrCP = \", str(p))",
+      "language": "python",
+      "author": "RogerD",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\n\n\ndef __MyFunc(srf, point):\n    uv = rs.SurfaceClosestPoint(srf, point)\n    return [rs.EvaluateSurface(srf,uv[0],uv[1]), rs.SurfaceNormal(srf, uv)]\n\n\ndef Test():\n    srf = rs.GetObject(\"Select a surface\", rs.filter.surface)\n    if not srf:\n        return\n\n    points = rs.GetObjects(\"Pick some points\", rs.filter.point)\n\n    if not points:\n        return\n\n    results = map(lambda x: __MyFunc(srf, x), points)\n\n\n\n    if results:\n        \n        for p in list(results):\n            \n            rs.AddPoints([(p[0]), (p[0])+(p[1])])\n            rs.AddLine((p[0]), (p[0])+(p[1]))\n\n\nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "RogerD",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\n\n\ndef __MyFunc(srf, point):\n    uv = rs.SurfaceClosestPoint(srf, point)\n    return [rs.EvaluateSurface(srf,uv[0],uv[1]), rs.SurfaceNormal(srf, uv)]\n\n\ndef __RealizeObjects(p):\n    point_guids = rs.AddPoints([(p[0]), (p[0])+(p[1])])\n    line_guid = rs.AddLine((p[0]), (p[0])+(p[1]))\n    return (point_guids, line_guid)\n\n\ndef Test():\n    srf = rs.GetObject(\"Select a surface\", rs.filter.surface)\n    if not srf:\n        return\n\n    points = rs.GetObjects(\"Pick some points\", rs.filter.point)\n\n    if not points:\n        return\n\n    results = map(lambda x: __MyFunc(srf, x), points)\n    new_guids = map(lambda p: __RealizeObjects(p), results)\n    print(list(new_guids))\n\nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\n\n\npoints = []\n\nresults = []\n\n\n\nimport rhinoscriptsyntax as rs\n\ndef __MyFunc(srf, point):\n    arrCP = rs.BrepClosestPoint(srf, point)\n    return [arrCP[0],arrCP[3]]\n\n\ndef __RealizeObjects(p):\n    point_guids = rs.AddPoints([(p[0]), (p[0])+(p[1])])\n    line_guid = rs.AddLine((p[0]), (p[0])+(p[1]))\n    return (point_guids,line_guid)\n\n\ndef Test():\n    srf = rs.GetObject(\"Select a surface\", rs.filter.surface)\n    if not srf:\n        return\n\n    points = rs.GetObjects(\"Pick some points\", rs.filter.point)\n    \n    if not points:\n        return\n\n      \n    results = list(map(lambda x: __MyFunc(srf, x), points))\n\n    new_guids = map(lambda p: __RealizeObjects(p), results)\n\n\n        \n    #if results:\n        \n        #for p in list(results):\n            #rs.AddPoints([(p[0]), (p[0])+(p[1])])\n            #rs.AddLine((p[0]), (p[0])+(p[1]))\n\n            #print((p[0]))\n            #print((p[1]))\n\n    #new_guids = map(lambda p: __RealizeObjects(p), results)\n\n    #if results:\n        \n        #for p in list(results):\n            #rs.AddPoints([(p[0]), (p[0])+(p[1])])\n            #rs.AddLine((p[0]), (p[0])+(p[1]))\n\n            #print((p[0]))\n            #print(\"pt = \",pt)\n\n        #for p in points:\n            #print(p)\n\nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "RogerD",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\n\n\ndef __MyFunc(srf, point):\n    res = rs.BrepClosestPoint(srf, point)\n    return (res[0], res[3])\n\n\ndef __RealizeObjects(p):\n    point_guids = rs.AddPoints([(p[0]), (p[0])+(p[1])])\n    line_guid = rs.AddLine((p[0]), (p[0])+(p[1]))\n    return (point_guids, line_guid)\n\n\ndef Test():\n    srf = rs.GetObject(\"Select a surface\", rs.filter.surface | rs.filter.polysurface)\n    if not srf:\n        return\n\n    points = rs.GetObjects(\"Pick some points\", rs.filter.point)\n    if not points:\n        return\n\n    results = map(lambda x: __MyFunc(srf, x), points)\n    new_guids = map(lambda p: __RealizeObjects(p), results)\n\n\nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\n\n\ndef __MyFunc(srf, point):\n    res = rs.BrepClosestPoint(srf, point)\n    return (res[0], res[3])\n\n\ndef __RealizeObjects(p):\n    point_guids = rs.AddPoints([(p[0]), (p[0])+(p[1])])\n    line_guid = rs.AddLine((p[0]), (p[0])+(p[1]))\n    return (point_guids, line_guid)\n\n\ndef Test():\n    srf = rs.GetObject(\"Select a surface\", rs.filter.surface | rs.filter.polysurface)\n    if not srf:\n        return\n\n    points = rs.GetObjects(\"Pick some points\", rs.filter.point)\n    if not points:\n        return\n\n    results = map(lambda x: __MyFunc(srf, x), points)\n    new_guids = map(lambda p: __RealizeObjects(p), results)\n\n\nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "RogerD",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 264
+}

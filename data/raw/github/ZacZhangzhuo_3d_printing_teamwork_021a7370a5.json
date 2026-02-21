@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ZacZhangzhuo/3d_printing_teamwork/blob/1ae8e701e83329eb292170fc8bc483fa912b639b/working_file_joe/skin_testing/skinPattern.py",
+  "repo": "ZacZhangzhuo/3d_printing_teamwork",
+  "repo_stars": 1,
+  "repo_description": "This is the 3D Printing teamwork repository of team 4 of MAS dfab 2023",
+  "license": "MIT",
+  "filepath": "working_file_joe/skin_testing/skinPattern.py",
+  "instruction": "Skin pattern",
+  "code": "\nimport Rhino.Geometry as rg\nimport scriptcontext as rs\n\nif Reset: Iteration = rs.sticky[\"Iteration\"] = 0\n\nIteration = Iteration+1\n\ncircles = []\nOutPoints = []\n\nfor i in range(Iteration):\n\n    totalVec = [rg.Vector3d(0,0,0)]*len(Points)\n    counts = [0]*len(Points)\n\n    for i in range(len(Points)):\n        for j in range(i,len(Points)):\n            distance = Points[i].DistanceTo(Points[j])\n            if ( 2*Radius>distance):\n                \n                subVec = Points[i] - Points[j]\n                subVec.Unitize()\n                subVec = 0.5*((2*Radius)-distance)*subVec\n                totalVec[i] += subVec\n                totalVec[j] -= subVec\n                counts[i] +=1\n                counts[j] +=1\n\n\n    #! Bounding\n    for k in range(len(Points)):\n        if counts[k] != 0 and Edge.Contains(Points[k]) == rg.PointContainment.Inside:\n            move = totalVec[k] / counts[k]\n            Points[k] += move\n\n        if (Points.Count<MaxCounts):\n            indices = []\n\n            for i in range(Points.Count-1):\n                if Points[i].DistanceTo(Points[i + 1]) > Radius:\n                    indices.append(i+1)\n\n            for j in indices:\n                addPoint = 0.5* (Points[j-1]+Points[j])\n                Points.Insert(j, addPoint)\n\n\n\nOutPoints = Points\n\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

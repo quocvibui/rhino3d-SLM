@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-in-rs-moveplane-example/80335",
+  "topic_id": 80335,
+  "title": "[Error] in rs.MovePlane() example",
+  "question": "If you fix the typo in rs.ViewCplane() to rs.ViewCPlane() there’s another error:\n\n\n\n\nimage.png\n817×401 10.5 KB\n\n\n\n\nCould anyone explain to me how can I create named CPlanes with python?\n\n\nThanks in advance.",
+  "code_blocks": [
+    {
+      "code": "def myCP(Rhino.DocObjects.ConstructionPlane):\n    def __init__(self):\n        return Rhino.DocObjects.ConstructionPlane(self)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n#define a custom plane\norigin=rs.coerce3dpoint([10,10,0])\nxvec=rs.coerce3dvector([1,1,0])\nyvec=rs.coerce3dvector([0,0,1])\ncustom_plane=Rhino.Geometry.Plane(origin,xvec,yvec)\n\n#get table of all named construction planes (shouldn't be any in a new blank document)\nncps=sc.doc.NamedConstructionPlanes\n#add your custom plane\nncps.Add(\"My_New_CP\",custom_plane)\n#print list of named construction planes, new one should now be in it.\nprint rs.NamedCPlanes()\n#restore this plane to the Perspective viewport to see onscreen\nrs.RestoreNamedCPlane(\"My_New_CP\",\"Perspective\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nmy_cp = Rhino.DocObjects.ConstructionPlane()\nmy_cp.Plane = Rhino.Geometry.Plane.WorldXY\nmy_cp.Name = \"my_cp\"",
+      "language": "python",
+      "author": "dharman",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nplane = Rhino.Geometry.Plane.WorldXY\nresult = Rhino.RhinoDoc.ActiveDoc.NamedConstructionPlanes.Add(\"hello plane\", plane)",
+      "language": "python",
+      "author": "dharman",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 761
+}

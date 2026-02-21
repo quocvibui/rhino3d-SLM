@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/compas-dev/compas/blob/HEAD/src/compas_rhino/conversions/extrusions.py",
+  "repo": "compas-dev/compas",
+  "repo_stars": 352,
+  "repo_description": "Main library of the COMPAS framework and CAD integrations for Rhino/GH and Blender.",
+  "license": "MIT",
+  "filepath": "src/compas_rhino/conversions/extrusions.py",
+  "instruction": "Extrusions",
+  "code": "from __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport Rhino  # type: ignore\nimport scriptcontext as sc  # type: ignore\n\nfrom .shapes import box_to_compas\nfrom .shapes import cylinder_to_compas\nfrom .shapes import torus_to_compas\n\n# =============================================================================\n# To Rhino\n# =============================================================================\n\n# =============================================================================\n# To COMPAS\n# =============================================================================\n\n\ndef extrusion_to_compas_box(extrusion):\n    \"\"\"Convert a Rhino extrusion to a COMPAS box.\n\n    Parameters\n    ----------\n    extrusion : :rhino:`Rhino.Geometry.Extrusion`\n\n    Returns\n    -------\n    :class:`compas.geometry.Box`\n\n    \"\"\"\n    plane = extrusion.GetPathPlane(0)\n    bbox = extrusion.GetBoundingBox(plane)\n    box = Rhino.Geometry.Box(plane, bbox)\n    return box_to_compas(box)\n\n\ndef extrusion_to_compas_cylinder(extrusion, tol=None):\n    \"\"\"Convert a Rhino extrusion to a COMPAS cylinder.\n\n    Parameters\n    ----------\n    extrusion : :rhino:`Rhino.Geometry.Extrusion`\n    tol : float, optional\n        The tolerance used to determine if the extrusion is a cylindrical surface.\n        Default is the absolute tolerance of the current doc.\n\n    Returns\n    -------\n    :class:`compas.geometry.Cylinder`\n\n    \"\"\"\n    tol = tol or sc.doc.ModelAbsoluteTolerance\n    if extrusion.IsCylinder(tol):\n        result, cylinder = extrusion.TryGetFiniteCylinder(tol)\n        if result:\n            return cylinder_to_compas(cylinder)\n\n\ndef extrusion_to_compas_torus(extrusion, tol=None):\n    \"\"\"Convert a Rhino extrusion to a COMPAS torus.\n\n    Parameters\n    ----------\n    extrusion : :rhino:`Rhino.Geometry.Extrusion`\n    tol : float, optional\n        The tolerance used to determine if the extrusion is a toroidal surface.\n        Default is the absolute tolerance of the current doc.\n\n    Returns\n    -------\n    :class:`compas.geometry.Torus`\n\n    \"\"\"\n    tol = tol or sc.doc.ModelAbsoluteTolerance\n    if extrusion.IsTorus(tol):\n        result, torus = extrusion.TryGetTorus(tol)\n        if result:\n            return torus_to_compas(torus)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

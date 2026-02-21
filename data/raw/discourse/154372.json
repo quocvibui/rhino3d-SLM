@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/moving-brep-vertices-works-only-halfway-and-leaves-wireframe-behind/154372",
+  "topic_id": 154372,
+  "title": "Moving Brep vertices works only halfway and leaves wireframe behind",
+  "question": "I’m writing a script which involves moving the vertices of a Brep and replacing the resulting Brep in the document.\n\n\nHowever, it seems like it only works half-way, which appears in shaded mode, but the wireframe of the object stays in place. Also, this doesn’t appear immediately upon execution of the script, but only after navigating the view.\n\n\nSimplified script and result are below. Does anyone have an idea why this happens or how to complete the replacement?\n\n\n\n\nimage\n666×647 18.2 KB\n\n\n\n\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import *\n\ndef moveVerts():\n    obj = rs.GetObject(\"Select object\")\n    \n    objBrep = rs.coercebrep(obj)\n    verts = objBrep.Vertices\n    \n    moveDist = rs.GetReal(\"Enter the move distance of vertices\",0)\n    \n    for vert in verts:\n        x, y, z = [c + moveDist for c in vert.Location]\n        vert.Location = Point3f(x,y,z)\n    \n    doc.Objects.Replace(obj, objBrep)\n    \nmoveVerts()",
+  "code_blocks": [
+    {
+      "code": "from scriptcontext import doc\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import *\n\ndef moveVerts():\n    obj = rs.GetObject(\"Select object\")\n    \n    objBrep = rs.coercebrep(obj)\n    verts = objBrep.Vertices\n    \n    moveDist = rs.GetReal(\"Enter the move distance of vertices\",0)\n    \n    for vert in verts:\n        x, y, z = [c + moveDist for c in vert.Location]\n        vert.Location = Point3f(x,y,z)\n    \n    doc.Objects.Replace(obj, objBrep)\n    \nmoveVerts()",
+      "language": "python",
+      "author": "famak2",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 884
+}

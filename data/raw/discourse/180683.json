@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scriptcontext-escape-test-not-reset-at-start-of-rhinocode-execution/180683",
+  "topic_id": 180683,
+  "title": "Scriptcontext.escape_test not reset at start of RhinoCode execution",
+  "question": "In 8.6.24101.5001, 2024-04-10,\n\n\n\n\n\nthis script\n\n\n#! python 2\n\nimport Rhino\nimport scriptcontext as sc\n\ndef anotherCheck(s):\n    if sc.escape_test(throw_exception=False, reset=True):\n        print(\"escape_test WAS reset {} loop routine.\".format(s))\n    else:\n        print(\"escape_test was NOT reset {} loop routine.\".format(s))\n\nprint('-'*40)\n\nanotherCheck(\"before\")\n\nfor i in range(10000, 0, -1):\n    Rhino.RhinoApp.CommandPrompt = \"Press Esc now ({})\".format(i)\n    if sc.escape_test(throw_exception=False):\n        print(\"Esc was pressed.\")\n        break\n\n# anotherCheck(\"after\")\n\n\n\n\n\noutputs\n\n\n----------------------------------------\nescape_test was NOT reset before loop routine.\nEsc was pressed.\n\n\n\nwhen executed via either\n\n\n\n\nStart Debugging\n or \nStart Without Debugging\n button in Rhino Python Editor (_EditPythonScript).\n\n\n_RunPythonScript with the script containing \n#! python 2\n or neither \n#! python 2\n or \n#! python3\n.\n\n\n\n\nHowever, it then outputs\n\n\n----------------------------------------\nescape_test WAS reset before loop routine.\nEsc was pressed.\n\n\n\nwhen executed via either\n\n\n\n\nRun active script\n button in Script Editor regardless if the script contains \n#! python 2\n or \n#! python3\n.\n\n\n_RunPythonScript with \n#! python3\n in place of \n#! python 2\n.\n\n\n\n\nAdditional observations:\n\n\n\n\nescape_test does not return True when the initial (new Rhino instance) execution is via RhinoCode.\n\n\nThe reset is required even after first executing the script via non-RhinoCode.\n\n\nescape_test state is retained at the beginning of the next RhinoCode execution, regardless of which script is executed.",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport Rhino\nimport scriptcontext as sc\n\ndef anotherCheck(s):\n    if sc.escape_test(throw_exception=False, reset=True):\n        print(\"escape_test WAS reset {} loop routine.\".format(s))\n    else:\n        print(\"escape_test was NOT reset {} loop routine.\".format(s))\n\nprint('-'*40)\n\nanotherCheck(\"before\")\n\nfor i in range(10000, 0, -1):\n    Rhino.RhinoApp.CommandPrompt = \"Press Esc now ({})\".format(i)\n    if sc.escape_test(throw_exception=False):\n        print(\"Esc was pressed.\")\n        break\n\n# anotherCheck(\"after\")",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 165
+}

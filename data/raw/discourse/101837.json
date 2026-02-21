@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/addmaterialtoobject-nukes-usertext/101837",
+  "topic_id": 101837,
+  "title": "AddMaterialToObject nukes usertext",
+  "question": "G’day everyone,\n\n\nA user has exposed my poor scripting skills. I’m just beginning the debugging and can’t see anything that looks to be responsible.\n\n\nA surface has thickness usertext attributed to it, not attached to geometry so it should be resilient. A “property checker” confirms that the thickness (and other attributes) is assigned. Another script (below) changes the objects colour (rs.ObjectColor) based on the thickness attribute, but in the process nukes all the usertext attributes (thickness, name, etc…) of some of the surfaces.\n\n\nWhile debugging, running this script once seems to work, nothing gets nuked and the colours get changed properly. But if I run it again straight away some of the parts are nuked, but not all of the ones with the same thickness. Actually, it looks like the usertext gets nuked on the first run, but is only apparent after the second run.\n\n\nI have tried to avoid adding any usertext to geometry because I don’t want it to be volatile, but it may’ve slipped in over the intermittent years of development. But objectcolor change should not nuke geometry usertext.\n\n\nIt isn’t a particularly complex script.\n\nGetObjects\n\nLoop through the objects\n\nGetUserText\n\nAddMaterialToObject\n\nObjectColor\n\nMaterialColor\n\n\nAny thoughts?\n\n\nimport rhinoscriptsyntax as rs\nimport System\nfrom System.Drawing import Color\n\n\ndef colourparts():\n    \n    strSurfIDs = rs.GetObjects(\"Please select surfaces to colour.\", 24, True, True)\n    if not strSurfIDs: return\n    \n    strAttribute = \"Thickness\"\n    if not strAttribute: return\n    \n    \n    for strSurfID in strSurfIDs:\n        \n        strValue = rs.GetUserText(strSurfID, strAttribute)      #Object Attribute Value\n        \n        index_Material = rs.AddMaterialToObject(strSurfID)\t#In case viewport is rendered\n        \n        if strValue == \"3\":\n            color = Color.LightCoral\n        elif strValue == \"4\":\n            color = Color.Green\n        elif strValue == \"5\":\n            color = Color.HotPink\n        elif...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\nfrom System.Drawing import Color\n\n\ndef colourparts():\n    \n    strSurfIDs = rs.GetObjects(\"Please select surfaces to colour.\", 24, True, True)\n    if not strSurfIDs: return\n    \n    strAttribute = \"Thickness\"\n    if not strAttribute: return\n    \n    \n    for strSurfID in strSurfIDs:\n        \n        strValue = rs.GetUserText(strSurfID, strAttribute)      #Object Attribute Value\n        \n        index_Material = rs.AddMaterialToObject(strSurfID)\t#In case viewport is rendered\n        \n        if strValue == \"3\":\n            color = Color.LightCoral\n        elif strValue == \"4\":\n            color = Color.Green\n        elif strValue == \"5\":\n            color = Color.HotPink\n        elif strValue == \"6\":\n            color = Color.Olive\n        elif strValue == \"8\":\n            color = Color.Purple\n        elif strValue == \"10\":\n            color = Color.RoyalBlue\n        elif strValue == \"12\":\n            color = Color.DarkSeaGreen\n        else:\n            color = Color.Black\n        \n        objColour = rs.ObjectColor(strSurfID, color)\n        matColour = rs.MaterialColor(index_Material, color)\n        \n    \nif __name__ == '__main__':\n    colourparts()",
+      "language": "python",
+      "author": "Ncik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 782
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/debugging-rhino-on-production-server/207608",
+  "topic_id": 207608,
+  "title": "Debugging Rhino on production server",
+  "question": "I have been able to setup Compute server in production via \nthese docs\n.\n\n\nEverything was working last time I tested, but when I was testing again today I started getting 500s and I can’t tell why. I even tried the basic twisty example:\n\n\n  pt1 = rhino3dm.Point3d(0, 0, 0)\n  circle = rhino3dm.Circle(pt1, 5)\n  angle = 20\n\n  # convert circle to curve and stringify\n  curve = json.dumps(circle.ToNurbsCurve().Encode())\n\n  # create list of input trees\n  curve_tree = gh.DataTree(\"RH_IN:curve\")\n  curve_tree.Append([0], [curve])\n  rotate_tree = gh.DataTree(\"RH_IN:rotate\")\n  rotate_tree.Append([0], [angle])\n  trees = [curve_tree, rotate_tree]\n  gh.EvaluateDefinition(\"gh/twisty.gh\", trees)\n\n\n\nResponse\n\n\n    response = Util.ComputeFetch(url, args)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n.../site-packages/compute_rhino3d/Util.py\", line 35, in ComputeFetch\n    return r.json()\n           ^^^^^^^^\n    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)\nrequests.exceptions.JSONDecodeError: Expecting value: line 2 column 1 (char 2)\n\n\n\nThe response is a JsonDecodeError but that’s not very helpful.\n\nUnder that error it’s a standard 500 “Internal Server Error” html page with no json payload,\n\nso it can’t be serialized .\n\n\nCompute Liveness\n\n\n❯ curl -H \"RhinoComputeKey: $KEY\" $COMPUTE_URL/activechildren\n5⏎\n\n\n\nLogs\n\n\nIn the production server, I can see logs and the 500 errors as expected:\n\n\n# C:\\inetpub\\logs\\LogFiles\\W3SVC2\n...\n2025-07-25 20:42:28 10.138.0.5 POST /grasshopper - 80 - 34.125.14.33 compute.rhino3d.py/0.12.2 - 500 0 0 32\n2025-07-25 20:43:30 10.138.0.5 POST /grasshopper - 80 - 34.125.14.33 compute.rhino3d.py/0.12.2 - 500 0 0 30\n\n\n\nand here:\n\n\n# C:\\inetpub\\wwwroot\\aspnet_client\\system_web\\4_0_30319\\rhino.compute\\logs\nRC   [20:41:52 INF] Max concurrent requests = 0\nRC   [20:42:28 ERR] HTTP POST /grasshopper responded 500 in 4.3887 ms\nRC   [20:42:52 INF] Max concurrent requests = 1\nRC   [20:43:30 ERR] HTTP POST /grasshopper responded 500 in 2.7354 ms\nRC   [20:43:52 INF] Max conc...",
+  "code_blocks": [
+    {
+      "code": "# C:\\inetpub\\logs\\LogFiles\\W3SVC2\n...\n2025-07-25 20:42:28 10.138.0.5 POST /grasshopper - 80 - 34.125.14.33 compute.rhino3d.py/0.12.2 - 500 0 0 32\n2025-07-25 20:43:30 10.138.0.5 POST /grasshopper - 80 - 34.125.14.33 compute.rhino3d.py/0.12.2 - 500 0 0 30",
+      "language": "unknown",
+      "author": "gtalarico1",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "# C:\\inetpub\\wwwroot\\aspnet_client\\system_web\\4_0_30319\\rhino.compute\\logs\nRC   [20:41:52 INF] Max concurrent requests = 0\nRC   [20:42:28 ERR] HTTP POST /grasshopper responded 500 in 4.3887 ms\nRC   [20:42:52 INF] Max concurrent requests = 1\nRC   [20:43:30 ERR] HTTP POST /grasshopper responded 500 in 2.7354 ms\nRC   [20:43:52 INF] Max concurrent requests = 1",
+      "language": "unknown",
+      "author": "gtalarico1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 90,
+  "posts_count": 21,
+  "views": 262
+}

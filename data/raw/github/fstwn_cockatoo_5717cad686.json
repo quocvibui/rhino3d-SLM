@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/fstwn/cockatoo/blob/d952ac5d2148ec29fba52e8eb75f0f43770c74ca/modules/cockatoo/environment.py",
+  "repo": "fstwn/cockatoo",
+  "repo_stars": 38,
+  "repo_description": "Cockatoo is a prototypical open-source software toolkit for generating (3d-)knitting patterns from NURBS surface and mesh geometry directly inside Grasshopper.",
+  "license": "MIT",
+  "filepath": "modules/cockatoo/environment.py",
+  "instruction": ".. currentmodule:: cockatoo.environment",
+  "code": "\"\"\"\n.. currentmodule:: cockatoo.environment\n\n.. autosummary::\n    :nosignatures:\n\n    is_rhino_inside\n    RHINOINSIDE\n    networkx_version\n    NXVERSION\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS ---------------------------------------------\nfrom __future__ import absolute_import\nfrom __future__ import print_function\n\n# DUNDER ----------------------------------------------------------------------\n__all__ = [\n    \"is_rhino_inside\",\n    \"RHINOINSIDE\",\n    \"networkx_version\",\n    \"NXVERSION\"\n]\n\n# LOCAL MODULE IMPORTS --------------------------------------------------------\nfrom cockatoo.exception import RhinoNotPresentError\nfrom cockatoo.exception import NetworkXNotPresentError\n\n# CHECKING FOR RHINO DEPENDENCY AND ENVIRONMENT -------------------------------\n\n\ndef is_rhino_inside():\n    \"\"\"\n    Check if Rhino is running using rhinoinside.\n\n    Returns\n    -------\n    bool\n        ``True`` if Rhino is running using rhinoinside, otherwise ``False``.\n\n    Raises\n    ------\n    RhinoNotPresentError\n        If import of Rhino fails.\n    \"\"\"\n    try:\n        import Rhino\n    except ImportError:\n        try:\n            import rhinoinside\n            rhinoinside.load()\n            import Rhino  # NOQA: F401\n            return True\n        except Exception:\n            errMsg = (\"Rhino could not be loaded! Please make sure the \" +\n                      \"RhinoCommon API is available to continue.\")\n            raise RhinoNotPresentError(errMsg)\n    return False\n\n\nRHINOINSIDE = is_rhino_inside()\n\"\"\"\nbool: Will be ``True`` if Rhino is running using rhinoinside, ``False``\n      otherwise.\n\"\"\"\n\n# CHECKING FOR NETWORKX DEPENDENCY AND VERSION --------------------------------\n\n\ndef networkx_version():\n    \"\"\"\n    Return the version of the used networkx module.\n\n    Returns\n    -------\n    str\n        The version string of the used networkx module.\n\n    Raises\n    ------\n    NetworkXNotPresentError\n        If the networkx module cannot be found.\n    \"\"\"\n    try:\n        import networkx\n        version = networkx.__version__\n    except ImportError:\n        errMsg = \"Could not load NetworkX. Please make sure the networkx \" + \\\n                 \"module is available to continue.\"\n        raise NetworkXNotPresentError(errMsg)\n\n    return version\n\n\nNXVERSION = networkx_version()\n\"\"\"\nstr: The version string of the networkx module that is being used.\n\"\"\"\n\n# MAIN ------------------------------------------------------------------------\n\n\nif __name__ == '__main__':\n    pass\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon"
+  ],
+  "has_docstring": true
+}

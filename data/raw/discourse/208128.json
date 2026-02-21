@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/refering-to-shared-libraries-across-of-plugins/208128",
+  "topic_id": 208128,
+  "title": "Refering to shared libraries across of plugins",
+  "question": "Hi all,\n\n\nI’m developing two plugins on to separate yak packages. One is a standalone and the other one depends on the first one.\n\n\nIf I ship the same dll with both packages, I get a load error that the dll is already loaded.\n\n\nDoes anyone have experience with how to check for the dll and make sure it gets loaded from the “other” location?\n\n\nIn my case I’m working on an inhouse LINK_Grasshopper plugin that depends on dlls in the publicly available LINK_Dashboards.\n\n\nBut it could be any dependency such as Human, Elefront etc, that I wanted to utilize.\n\n\nI looked into snippets like the below but i want to be able to search another directory and make sure that the dynamically loaded dll is added to the current runtime.\n\n\nThe below is run whenever I open our rhino panel, but could also be on plugin OnLoad().\n\n\nIt however only checks if the dll is loaded, it doesnt try to load it from another location.\n\n\n [DllImport(\"LINK_EP.Dashboards.dll\")]\n private static extern void SomeMethod();\n\n public static bool DashboardsExists()\n {\n     try\n     {\n\n\n         SomeMethod();\n         return true;\n     }\n     catch (DllNotFoundException)\n     {\n         MessageBox.Show(\"Looks like you are loading plugin without LINK Dashboards. Please install them in the packagemanager\", \"LINK_EP\");\n         return false;\n     }\n \n }",
+  "code_blocks": [
+    {
+      "code": "private Assembly OnAssemblyResolve_Dashboards(object sender, ResolveEventArgs args)\n{\n    if (!args.Name.StartsWith(\"LINK_EP.Dashboards\"))\n        return null;\n\n    WL.Debug(LogCategories.Events, () => $\"OnAssemblyResolve, Searching for {args.Name}...\");\n    string basePath = Path.Combine(\n        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),\n        $\"McNeel\\\\Rhinoceros\\\\packages\\\\{RhinoApp.ExeVersion}.0\\\\LINK_Dashboards\");\n\n    if (!Directory.Exists(basePath))\n    {\n        WL.Error(LogCategories.Events, () => $\"{basePath} not found\");\n        return null;\n\n    }\n\n\n    WL.Debug(LogCategories.Events, () => $\"OnAssemblyResolve, {basePath} found\");\n\n    // Find highest version directory\n    var versionDirs = Directory.GetDirectories(basePath)\n        .Select(Path.GetFileName)\n        .Select(v =>\n        {\n            bool ok = System.Version.TryParse(v, out var parsed);\n            return new { Version = parsed, IsValid = ok, FolderName = v };\n        })\n        .Where(x => x.IsValid)\n        .OrderByDescending(x => x.Version)\n        .ToList();\n\n    foreach (var version in versionDirs)\n    {\n        string dllPath = Path.Combine(basePath, version.FolderName, \"LINK_Dashboards.dll\");\n\n        if (File.Exists(dllPath))\n        {\n            try\n            {\n                return Assembly.LoadFrom(dllPath);\n            }\n            catch (Exception ex)\n            {\n// my own logger, you could use RhinoApp.WriteLine($\"...\"); instead\n                WL.Error(LogCategories.Events, () => $\"Failed to load {dllPath}: {ex.Message}\");\n            }\n        }\n    }\n    WL.Error(LogCategories.Events, \"LINK_Dashboards.dll not found in any version folder.\");\n    return null;\n}",
+      "language": "csharp",
+      "author": "sonderskovmathias",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 68
+}

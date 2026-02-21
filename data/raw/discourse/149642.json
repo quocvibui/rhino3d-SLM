@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/convert-planar-mesh-to-brep/149642",
+  "topic_id": 149642,
+  "title": "Convert planar mesh to Brep",
+  "question": "Hi,\n\n\nIs it somehow possible to create a Brep surface from a planar mesh including several holes/openings?\n\nI am using the python rhino3dm package (version 7.14.1) and started to create a mesh and convert it with rhino3dm.Brep.CreateFromMesh() into a brep. This resulting brep has still the mesh faces structure.\n\n\nAs the mesh is planar, I would like to eliminate the interior edges in the brep to get only the outside boundary and holes. Is there a function for this or is there even a manual way? Maybe my approach to get a brep with holes through a mesh is also wrong…\n\n\nHere is a small example:\n\n\nimport rhino3dm\n\n# init model\nmodel = rhino3dm.File3dm()\n\n# create and add layer\nlayer = rhino3dm.Layer()\nlayer.Color = (255, 255, 0, 255)\nlayer.Name = 'example'\nmodel.Layers.Add(layer)\n\n# create mesh\nmesh = rhino3dm.Mesh()\n\n# create list of points\npoints = [[0, 0, 0], [1, 1, 0], [2, 1, 0], [3, 0, 0], [3, 3, 0], [2, 2, 0], [1, 2, 0], [0, 3, 0]]\nfor p in points:\n    mesh.Vertices.Add(p[0], p[1], p[2])\n\n# add faces from point list\nmesh.Faces.AddFace(0, 1, 6, 7)\nmesh.Faces.AddFace(6, 5, 4, 7)\nmesh.Faces.AddFace(2, 3, 4, 5)\nmesh.Faces.AddFace(0, 3, 2, 1)\n\n# create brep\nbrp = rhino3dm.Brep.CreateFromMesh(mesh, True)\n\n# add brep to model\nmodel.Objects.AddBrep(brp)\n\n# save to file\nmodel.Write('example.3dm')\n\n\n\n\n\nmesh_to_brep_example\n2013×1537 322 KB\n\n\n\n\nThanks in advance for your support,\n\nJay",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    mesh = Rhino.Geometry.Mesh()\n    \n    points = [[0, 0, 0], [1, 1, 0], [2, 1, 0], [3, 0, 0], [3, 3, 0], [2, 2, 0], [1, 2, 0], [0, 3, 0]]\n    for p in points: mesh.Vertices.Add(p[0], p[1], p[2])\n    \n    mesh.Faces.AddFace(0, 1, 6, 7)\n    mesh.Faces.AddFace(6, 5, 4, 7)\n    mesh.Faces.AddFace(2, 3, 4, 5)\n    mesh.Faces.AddFace(0, 3, 2, 1)\n    \n    mesh.FaceNormals.ComputeFaceNormals()\n    mesh.Compact()\n    \n    polylines = mesh.GetNakedEdges()\n    if not polylines: return\n    \n    curves = [polyline.ToNurbsCurve() for polyline in polylines]\n    breps = Rhino.Geometry.Brep.CreatePlanarBreps(curves, 0.001)\n    for b in breps: scriptcontext.doc.Objects.AddBrep(b)\n    \n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhino3dm\n\n# init model\nmodel = rhino3dm.File3dm()\n\n# create and add layer\nlayer = rhino3dm.Layer()\nlayer.Color = (255, 255, 0, 255)\nlayer.Name = 'example'\nmodel.Layers.Add(layer)\n\n# create mesh\nmesh = rhino3dm.Mesh()\n\n# create list of points\npoints = [[0, 0, 0], [1, 1, 0], [2, 1, 0], [3, 0, 0], [3, 3, 0], [2, 2, 0], [1, 2, 0], [0, 3, 0]]\nfor p in points:\n    mesh.Vertices.Add(p[0], p[1], p[2])\n\n# add faces from point list\nmesh.Faces.AddFace(0, 1, 6, 7)\nmesh.Faces.AddFace(6, 5, 4, 7)\nmesh.Faces.AddFace(2, 3, 4, 5)\nmesh.Faces.AddFace(0, 3, 2, 1)\n\n# create brep\nbrp = rhino3dm.Brep.CreateFromMesh(mesh, True)\n\n# add brep to model\nmodel.Objects.AddBrep(brp)\n\n# save to file\nmodel.Write('example.3dm')",
+      "language": "python",
+      "author": "Jay_Tea",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 102,
+  "posts_count": 4,
+  "views": 1199
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/finding-rhinopython-command-equivalent/65341",
+  "topic_id": 65341,
+  "title": "Finding Rhinopython command equivalent",
+  "question": "Hi everyone,\n\n\nI have some queries regarding Rhinopython commands.\n\n\nIn most cases, I am able to find the Rhinopython equivalent of the Rhino commands (or option from Rhino toolbars) based on the name of the command but not in some cases.\n\n\nCould someone please help me out in getting the command for these 2 cases?\n\n\n\n\n\n\nArc: start, end, direction at start\n\n\n\n\nimage.png\n220×682 19.5 KB\n\n\n\n\n\n\n\n\nRebuild surface UV option.\n\n\n\n\n\n\n\n\nAlso is there any provision to set the U,V discretization of Network curve surface while calling the AddNetworkSurf command itself rather than pursuing the “Rebuild surface UV” option in Rhino?\n\n\n\n\n\n\nRegards,",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef TestCreateFromLoftRebuild():\n    \n    p0 = Rhino.Geometry.Point3d(0,0,0)\n    p1 = Rhino.Geometry.Point3d(0,10,0)\n    l0 = Rhino.Geometry.LineCurve(p0, p1)    \n    \n    p0 = Rhino.Geometry.Point3d(5,0,5)\n    p1 = Rhino.Geometry.Point3d(5,10,5)\n    l1 = Rhino.Geometry.LineCurve(p0, p1)    \n    \n    p0 = Rhino.Geometry.Point3d(10,0,0)\n    p1 = Rhino.Geometry.Point3d(10,10,0)\n    l2 = Rhino.Geometry.LineCurve(p0, p1)    \n    \n    crvs = System.Array[Rhino.Geometry.Curve]([l0, l1, l2])\n    unset = Rhino.Geometry.Point3d.Unset\n    ltype = Rhino.Geometry.LoftType.Normal\n    breps = Rhino.Geometry.Brep.CreateFromLoftRebuild(crvs, unset, unset, ltype, False, 8)\n    if breps:\n        for b in breps:\n            scriptcontext.doc.Objects.AddBrep(b)\n        scriptcontext.doc.Views.Redraw()\n    \nTestCreateFromLoftRebuild()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 17,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 20,
+  "views": 2047
+}

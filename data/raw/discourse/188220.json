@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/tweak-modify-object-color-python-script/188220",
+  "topic_id": 188220,
+  "title": "Tweak -Modify Object color Python script",
+  "question": "Hi all Python Genuises out there.\n\n\n\n\n\n\n\n\nwww.rhino3d.com\n\n\n\n\n\n\nModify Object Color\n\n\nDemonstrates how to modify the color of a user-specified object.\n\n\n\n\n\n\n\n\n\n\n\n\nI Realy like this script to change object colors on the go ,\n\nThe only thing is that it lets you pick one object at a time.\n\nCan someone tweak it so it is possible to pick multiple objects or a group .",
+  "code_blocks": [
+    {
+      "code": "from System.Drawing import *\nfrom Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.Commands import *\nfrom Rhino.UI.Dialogs import ShowColorDialog\nfrom scriptcontext import doc\n \ndef RunCommand():\n    rc, obj_refs = RhinoGet.GetMultipleObjects(\"Select object/s\", False, ObjectType.AnyObject)\n    if rc != Result.Success:\n        return rc\n    b, color = ShowColorDialog(Display.ColorXYZ(0,0,0))\n    if not b: return Result.Cancel\n    for i in obj_refs:\n        rhino_object = i.Object()\n        rhino_object.Attributes.ObjectColor = color\n        rhino_object.Attributes.ColorSource = ObjectColorSource.ColorFromObject\n        rhino_object.CommitChanges()\n    \n    doc.Views.Redraw()\n    return Result.Success\n\n\nif __name__ == \"__main__\":\n    RunCommand()",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 93
+}

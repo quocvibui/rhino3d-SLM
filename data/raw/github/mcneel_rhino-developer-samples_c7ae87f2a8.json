@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_addmaterial.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_addmaterial.py",
+  "instruction": "Ex addmaterial",
+  "code": "import Rhino\nimport scriptcontext\nimport System.Drawing\n\ndef AddMaterial():\n    # materials are stored in the document's material table\n    index = scriptcontext.doc.Materials.Add()\n    mat = scriptcontext.doc.Materials[index]\n    mat.DiffuseColor = System.Drawing.Color.Chocolate\n    mat.SpecularColor = System.Drawing.Color.CadetBlue\n    mat.CommitChanges()\n\n    # set up object attributes to say they use a specific material\n    sp = Rhino.Geometry.Sphere(Rhino.Geometry.Plane.WorldXY, 5)\n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.MaterialIndex = index\n    attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n    scriptcontext.doc.Objects.AddSphere(sp, attr)\n\n    # add a sphere without the material attributes set\n    sp.Center = Rhino.Geometry.Point3d(10, 10, 0)\n    scriptcontext.doc.Objects.AddSphere(sp)\n\n    scriptcontext.doc.Views.Redraw();\n\nif __name__==\"__main__\":\n    AddMaterial()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

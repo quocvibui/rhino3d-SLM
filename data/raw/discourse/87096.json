@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/additional-rhino-6-ghpython-feedback/87096",
+  "topic_id": 87096,
+  "title": "Additional Rhino 6 GhPython feedback",
+  "question": "Hi \n@piac\n, \n@brian\n  + all,\n\n\nIt’s been a while, but we finally upgraded to Rhino 6 and I’ve now had a few months of GHPythoning within it. Overall this has been a very positive experience, but I’ve also experienced issues that I would consider a (sometimes highly severe) step backwards compared to the Rhino 5 GHPython editor. These include, in order of severity:\n\n\nFunctional Issues (that break development):\n\n\n1: Printing to Output is MUCH slower and leads to unresponsive editor/crashing Rhino\n\n\nPrinting large data chunks in Rhino 6 will make it unresponsive and crash Rhino (and I keep falling into this hole):\n\n\n2019-07-24%2011_21_55-Grasshopper%20-%20unnamed\n1011×911 27.6 KB\n\n\nPrinting the same list in Rhino 5 is more or less instant and one can easily scroll up/down the data in the console window (which is super duper useful):\n\n\n2019-07-24%2011_23_17-Grasshopper%20-%20unnamed\n1028×903 84.6 KB\n\n\nEdit 1:\n This print lag is made more apparent when printing multiple/many times. Where the cost of printing isn’t actually captured by the component profiler, but is clearly noticeable and can be seen below the canvas on the \nSolution completed in ~N seconds\n bar (many times over):\n\n\n\n\n\n\n\n\nhttps://global.discourse-cdn.com/mcneel/uploads/default/original/3X/5/c/5c28accb33876918c408f685338cd81e31830a6b.mp4\n\n\n\n\n\n\nAs also apparent from this example, dragging the scroll bar to the right of the Output window is also much more laggy/choppy in Rhino 6.\n\n\nEdit 2:\n Had this crash report on my desktop afterwards, looks like some casting business with the \nDataGridView\n that was implemented for the Output window:\n\n\n[ERROR] FATAL UNHANDLED EXCEPTION: System.InvalidCastException: Specified cast is not valid.\n   at GhPython.Forms.PythonScriptForm.outputGridView_SortCompare(Object sender, DataGridViewSortCompareEventArgs e)\n   at System.Windows.Forms.DataGridView.OnSortCompare(DataGridViewSortCompareEventArgs e)\n   at System.Windows.Forms.DataGridView.OnSortCompare(DataGridViewColumn data...",
+  "code_blocks": [
+    {
+      "code": "import System.Reflection as rf\nimport System.Windows.Forms as forms\n\ndef print_ex(line):\n    editor = ghdoc.Component.Attributes.Form\n    outputPage = editor.GetType().GetField(\"outputPage\", rf.BindingFlags.NonPublic | rf.BindingFlags.Instance).GetValue(editor);\n    label = forms.Label()\n    label.Text = line\n    outputPage.Controls.Clear()\n    outputPage.Controls.Add(label)\n    outputPage.SuspendLayout();\n\nprint_ex(\"foobar\")",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 29,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"tomja\"\n__version__ = \"2020.10.14\"\n\nimport rhinoscriptsyntax as rs\n\nfrom System.Text import StringBuilder\nimport System.String as ss\nimport System.Reflection as rf\nimport System.Windows.Forms as forms\n\noutputPage = None\ntextBox = None\nprintdata = StringBuilder()\ndef print_f(line):\n    global outputPage, textBox    \n    if (outputPage == None and textBox == None):\n        editor = ghdoc.Component.Attributes.Form\n        outputPage = editor.GetType().GetField(\"outputPage\", rf.BindingFlags.NonPublic | rf.BindingFlags.Instance).GetValue(editor);\n        outputPage.Controls.Clear()\n        textBox = forms.TextBox()\n        textBox.Width = 1200\n        textBox.Height = 200\n        textBox.Multiline = True\n        textBox.ScrollBars = forms.ScrollBars.Vertical\n        textBox.AcceptsReturn = True\n        textBox.AcceptsTab = True\n        textBox.WordWrap = True\n        outputPage.Controls.Add(textBox)\n        outputPage.SuspendLayout()\n        \n    printdata.Append(line)\n\n# Your code goes in here\nfor i in range(0,100000):\n    print_f(\"test \\r\\n\") \n\n\n# Add to the output before the script terminates\ntextBox.Text = printdata.ToString()",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 30,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 25,
+  "views": 2983
+}

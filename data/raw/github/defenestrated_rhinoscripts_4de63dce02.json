@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/defenestrated/rhinoscripts/blob/89419e6e00c59d28e92a8e6625236f07961f47f7/testsun.py",
+  "repo": "defenestrated/rhinoscripts",
+  "repo_stars": 1,
+  "repo_description": "collection of my rhino python scripts",
+  "license": "unknown",
+  "filepath": "testsun.py",
+  "instruction": "Testsun",
+  "code": "import rhinoscriptsyntax as rs\nnumberofpoints = rs.GetInteger(\"how many points?\")\nradius = rs.GetReal(\"what's the radius?\")\n\nrs.AddLayer(\"Sphere\", [255,0,0])\nrs.CurrentLayer(\"Sphere\")\n\nSunsphere = rs.AddSphere([0,0,0], radius)\n\nif ((numberofpoints > 0) and (radius > 0)):\n    #stuff if true\n    print \"we're good\"\n    \n    dayname = rs.GetString(\"what day is this?\")\n    print \"the entered day name is:\", dayname\n    \n    rs.AddLayer(dayname, [0,0,255])\n    rs.CurrentLayer(dayname)\n    \n    listofpoints = []\n    \n    startpoint = rs.AddPoint([0,radius,0])\n    \n    for i in range(numberofpoints):\n        elevation = rs.GetReal(\"what's the elevation?\")\n        azimuth = rs.GetReal(\"what's the azimuth?\")\n        azimuth *= -1\n        rs.RotateObject (startpoint, [0,0,0], elevation, axis=[1,0,0], copy=True)\n        rs.RotateObject (rs.FirstObject(), [0,0,0], azimuth, axis=[0,0,1], copy=False)\n        \n        listofpoints.append(rs.FirstObject())\n    \n    sunpath = rs.AddInterpCurve(listofpoints)\n    \n    \n    \n    \n    \n    \nelse:\n    #stuff if not true\n    print \"please enter a real number above zero\"",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

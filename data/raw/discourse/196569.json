@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/string-instead-of-point3d/196569",
+  "topic_id": 196569,
+  "title": "String instead of point3d",
+  "question": "Hi all, my goal is to compare the red and yellow geometry (tree branch shape) with the white design branch. I wanted to do this via GHpython, but that doesn’t seem to recognize the point coordinates in my panel. It says its a string, and that it requires it to be a point3D.\n\n\nSchermafbeelding 2024-12-14 233225\n1399×812 104 KB\n\n\nthis is the error that I keep getting:\n\n\nRuntime error (ArgumentTypeException): \nexpected Point3d, got str\n\n\nTraceback:\n\n\n\n\nline 24, in compare_forks, “”*\n\n\nline 37, in script*\n\n\n\n\nis there a way I can let ghpython recognize these as actual points instead of strings.\n\n\nthe code I’m working with:\n\n\nimport Rhino.Geometry as rg\nimport math\n\n# Function to calculate the angle between two vectors\ndef calculate_angle(vector1, vector2):\n    return rg.Vector3d.VectorAngle(vector1, vector2)\n\n# Function to normalize the angle to a match score (0 = worst match, 1 = perfect match)\ndef normalize_angle_to_match_score(angle):\n    return 1 - (angle / math.pi)  # Normalizes angle to a score between 0 and 1\n\n# Inputs from Grasshopper (connected directly to the script)\n# Tree forks and design forks as lists of Point3d\n# tree_forks_1, tree_forks_2, and design_forks are already connected in Grasshopper\n# tree_forks_1 = [list of 3 points representing tree fork 1]\n# tree_forks_2 = [list of 3 points representing tree fork 2]\n# design_forks = [list of 3 points representing the design fork]\n\n# Function to compare each tree fork to the design fork and get the matching scores\ndef compare_forks(tree_forks, design_forks):\n    matching_scores = []\n\n    for i in range(len(tree_forks)):\n        tree_vector = rg.Vector3d(tree_forks[i])  # Vector from origin to tree fork endpoint\n        design_vector = rg.Vector3d(design_forks[i])  # Vector from origin to design fork endpoint\n        \n        # Calculate the angle between the vectors\n        angle = calculate_angle(tree_vector, design_vector)\n        \n        # Convert the angle to a match score (0 = worst match, 1 = perfect m...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\n# Function to calculate the angle between two vectors\ndef calculate_angle(vector1, vector2):\n    return rg.Vector3d.VectorAngle(vector1, vector2)\n\n# Function to normalize the angle to a match score (0 = worst match, 1 = perfect match)\ndef normalize_angle_to_match_score(angle):\n    return 1 - (angle / math.pi)  # Normalizes angle to a score between 0 and 1\n\n# Inputs from Grasshopper (connected directly to the script)\n# Tree forks and design forks as lists of Point3d\n# tree_forks_1, tree_forks_2, and design_forks are already connected in Grasshopper\n# tree_forks_1 = [list of 3 points representing tree fork 1]\n# tree_forks_2 = [list of 3 points representing tree fork 2]\n# design_forks = [list of 3 points representing the design fork]\n\n# Function to compare each tree fork to the design fork and get the matching scores\ndef compare_forks(tree_forks, design_forks):\n    matching_scores = []\n\n    for i in range(len(tree_forks)):\n        tree_vector = rg.Vector3d(tree_forks[i])  # Vector from origin to tree fork endpoint\n        design_vector = rg.Vector3d(design_forks[i])  # Vector from origin to design fork endpoint\n        \n        # Calculate the angle between the vectors\n        angle = calculate_angle(tree_vector, design_vector)\n        \n        # Convert the angle to a match score (0 = worst match, 1 = perfect match)\n        match_score = normalize_angle_to_match_score(angle)\n        matching_scores.append(match_score)\n    \n    return matching_scores\n\n# Compare the first tree fork (tree_forks_1) with the design fork\nmatching_scores_1 = compare_forks(tree_forks_1, design_forks)\n\n# Compare the second tree fork (tree_forks_2) with the design fork\nmatching_scores_2 = compare_forks(tree_forks_2, design_forks)\n\n# Average match score for each tree fork\navg_match_score_1 = sum(matching_scores_1) / len(matching_scores_1)\navg_match_score_2 = sum(matching_scores_2) / len(matching_scores_2)\n\n# Output the match scores for each tree fork\na = avg_match_score_1  # Match score for tree_forks_1\nb = avg_match_score_2  # Match score for tree_forks_2",
+      "language": "python",
+      "author": "khasan_magomadov",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 89
+}

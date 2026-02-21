@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pdf-file-size-when-printing-with-rhinocommon/166747",
+  "topic_id": 166747,
+  "title": "PDF file size when printing with RhinoCommon",
+  "question": "Hello dear Rhino colleagues. I have created layout to pdf a batch export command (C# command). However, if file is opened for the first time and printed pdfs file size are huge. If same command is immediately repeated, file size get to app. 6-8 smaller size (same size as if it is printed manually with RhinoPDF). Time for command run is also shorter. See video…\n\n\nI overcome that problem with running printing twice during one command. In first print huge sizes are created. In second there are replaced by smaller one. Both runs uses same C# code.\n\n\nDo anyone knows what why files sizes varies?\n\n\nThank you for your time and reply,\n\n\nOndřej",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            string dummyFileName = \"Do not override me!!\";\n            SaveFileDialog sf = new SaveFileDialog();\n            sf.FileName = dummyFileName;\n            sf.Title = \"Select directory.\";\n            sf.RestoreDirectory = true;\n            string dir = \"\";\n            if (sf.ShowDialog() == DialogResult.OK)\n            {\n                dir = System.IO.Path.GetDirectoryName(sf.FileName);\n            }\n            else\n            {\n                return Result.Cancel;\n            }\n\n            Rhino.DocObjects.Tables.ViewTable viewTable = Rhino.RhinoDoc.ActiveDoc.Views;\n            int dpi = 600;\n            for (int i = 0; i < 2; i++)\n            {\n                foreach (Rhino.Display.RhinoView view in viewTable)\n                {\n                    var pdf = Rhino.FileIO.FilePdf.Create();\n                    if (view as Rhino.Display.RhinoPageView != null)\n                    {\n                            Rhino.Display.RhinoPageView actuaView = view as Rhino.Display.RhinoPageView;\n                            int w = Convert.ToInt32(actuaView.PageHeight);\n                            int h = Convert.ToInt32(actuaView.PageWidth);\n                            System.Drawing.Size size = new System.Drawing.Size(Convert.ToInt32(h * 600 / 25.4), Convert.ToInt32(w * 600 / 25.4));\n                            Rhino.Display.ViewCaptureSettings settings = new Rhino.Display.ViewCaptureSettings(view, size, dpi);\n                            settings.RasterMode = false;\n                            double res = settings.Resolution;\n                            pdf.AddPage(settings);\n                            string filePath = System.IO.Path.Combine(dir, actuaView.PageName + \".pdf\");\n                            pdf.Write(filePath);\n                    }\n                }\n            }\n            return Result.Success;\n        }\n    }",
+      "language": "csharp",
+      "author": "janotaondrej91",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\nimport os\ngh = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\n\n# USER INPUT\nfile_dir = r\"<your dir>\"\noutput_dir = r\"<your dir>\"\n\n\n# DON'T NEED TO TOUCH THE REST\nshould_run = True\nif should_run:\n    # Get all the .3dm files\n    files = os.listdir(file_dir)\n    rhino_files = [f for f in files if os.path.splitext(f)[1] == '.3dm']\n    rhino_files = [os.path.join(file_dir, f) for f in rhino_files]\n    # Print to PDF for all\n    for rf in rhino_files:\n        # Open each Rhino file in the file_dir\n        rs.Command('_-Open \"{}\" _Enter'.format(rf), 0)\n        # Run grasshopper\n        gh.RunSolver(True)\n        \n        # Save PDF of the file to output_dir\n        fn = os.path.splitext(os.path.basename(rf))[0] + '.pdf'\n        pdf_path = os.path.join(output_dir, fn)\n        pages = sc.doc.Views.GetPageViews()\n        if len(pages) > 0:\n            pdf = Rhino.FileIO.FilePdf.Create()\n            dpi = 300\n            for page in pages:\n                capture = Rhino.Display.ViewCaptureSettings(page, dpi)\n                # Use DisplayColors for printing\n                capture.OutputColor = 0\n                capture.RasterMode = False\n                capture.DrawBackground = False\n                capture.DrawBackgroundBitmap = False\n                pdf.AddPage(capture)\n            pdf.Write(pdf_path)\n            # Try to run again to get vector output?\n            pdf = Rhino.FileIO.FilePdf.Create()\n            dpi = 300\n            for page in pages:\n                capture = Rhino.Display.ViewCaptureSettings(page, dpi)\n                # Use DisplayColors for printing\n                capture.OutputColor = 0\n                capture.RasterMode = False\n                capture.DrawBackground = False\n                capture.DrawBackgroundBitmap = False\n                pdf.AddPage(capture)\n            pdf.Write(pdf_path)\n            \n            # Save the 3dm file with markups to go to next file\n            rs.Command('_-Save \"{}\"'.format(rf), 0)",
+      "language": "python",
+      "author": "Alex46",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 790
+}

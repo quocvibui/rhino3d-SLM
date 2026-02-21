@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/preview-mesh-for-created-objects-in-rhinocommon-file3dm/163081",
+  "topic_id": 163081,
+  "title": "Preview mesh for created Objects in rhinocommon File3dm",
+  "question": "When exporting a 3dm file from rhinocommon (ghpython); and loading that with ThreeJS 3dm loader. the brep objects don’t have a “mesh” attribute.\n\nIf I open this file in Rhino and save again. They would have the mesh for preview in threeJS.\n\n\nMy guess is that the objects don’t have a “Preview” mesh by default. Is there a way to add that to the attributes?\n\nhere is my code:\n\n\nimport Rhino\n\n# create new rhino file\nrh_file = Rhino.FileIO.File3dm()\n\n# add layers\npart_layer_index = rh_file.AllLayers.AddLayer(\"part\", part_color)\n\n# add objects to layer\nattributes = Rhino.DocObjects.ObjectAttributes()\n\n# add breps\nattributes.LayerIndex = part_layer_index\n    \nfor part in parts:\n    rh_file.Objects.AddBrep(part, attributes)",
+  "code_blocks": [
+    {
+      "code": "...\n\nmesh_part = Rhino.Geometry.Mesh.CreateFromBrep(part, meshingParameters)\nrh_file.Objects.AddMesh(mesh_part , attributes)",
+      "language": "unknown",
+      "author": "coroush",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\n# create new rhino file\nrh_file = Rhino.FileIO.File3dm()\n\n# add layers\npart_layer_index = rh_file.AllLayers.AddLayer(\"part\", part_color)\n\n# add objects to layer\nattributes = Rhino.DocObjects.ObjectAttributes()\n\n# add breps\nattributes.LayerIndex = part_layer_index\n    \nfor part in parts:\n    rh_file.Objects.AddBrep(part, attributes)",
+      "language": "python",
+      "author": "coroush",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 487
+}

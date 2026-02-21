@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-reselected-curves-create-planar-breps/107669",
+  "topic_id": 107669,
+  "title": "How to reselected curves Create Planar Breps?",
+  "question": "I create planar breps with closed curves. How i can reselected them?\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport math\ndef CrtBep(crvs):\n    curves = [rs.coercecurve(id,-1,True) for id in crvs]\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    breps = Rhino.Geometry.Brep.CreatePlanarBreps(curves, tolerance)  \n    return breps\nif __name__=='__main__':\n    crvFind=rs.GetObjects('Select crv',4)\n    CrtBep(crvFind)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport math\ndef CrtBep(crvs):\n    curves = [rs.coercecurve(id,-1,True) for id in crvs]\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    breps = Rhino.Geometry.Brep.CreatePlanarBreps(curves, tolerance)  \n    return breps\nif __name__=='__main__':\n    crvFind=rs.GetObjects('Select crv',4)\n    #collect breps output\n    breps = CrtBep(crvFind)\n    #use python generator to get a list of id's from adding each brep to the document\n    brep_ids = [sc.doc.Objects.AddBrep(brep) for brep in breps]",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport math\ndef CrtBep(crvs):\n    curves = [rs.coercecurve(id,-1,True) for id in crvs]\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    breps = Rhino.Geometry.Brep.CreatePlanarBreps(curves, tolerance)  \n    return breps\nif __name__=='__main__':\n    crvFind=rs.GetObjects('Select crv',4)\n    CrtBep(crvFind)",
+      "language": "python",
+      "author": "TheLionMad",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 502
+}

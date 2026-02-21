@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/255ribeiro/LPACAF/blob/a9d170b0feff9a66624dcb3b3fa181aae502130c/Aula_10/aula_10_final.py",
+  "repo": "255ribeiro/LPACAF",
+  "repo_stars": 3,
+  "repo_description": "Repositório do curso Lógica de programação Aplicada à Criação e Análise da Forma. ",
+  "license": "unknown",
+  "filepath": "Aula_10/aula_10_final.py",
+  "instruction": "Aula 10 final",
+  "code": "﻿#Curso de Extensão:\n#Lógica de programação aplicada à criação e análise da forma\n#UFBa - Faculdade de Arquitetura - 2017.2\n#Professor: Fernando Ferraz Ribeiro\n#Exemplo pavimentos multiplos\n\n\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Point3d\n\nif P2D is None:\n    P2D = Point3d(0,0,0)\n\n\nif P3D is None:\n    P3D = Point3d(0,0,0)\n\n\n#--- Entradas:\n# P2D - ponto no desenho -- (item, Point3d)\n# P3D - ponto no terreno -- (item, Point3d)\n# Contorno - contorno da laje -- (list, ghdoc)\n# PD - distancia piso a piso-- (item, float)\n# h_laje - altura da laje -- (item, float)\n# N_andares - Numerod e andares y -- (item, int)\n# Rot - rotação dos andares -- (item, float)\n\n\n\n#Saidas\n# lista de pavimentos\nPav = []\n#lista para teste de codigo\nTeste = []\n\n\n#função principal\n\n# - criando uma face atravez das curvas de contorno\nface = rs.AddPlanarSrf(Contorno)\n# - ponto auxxiliar para extrusão da face\nPaux = rs.PointAdd(P3D, [0,0,h_laje])\n# linha auxiliar para a extrusão da face\nlAux = rs.AddLine(P3D, Paux)\n\n# - extrusão da face - criação da laje\nlaje = rs.ExtrudeSurface(face,lAux )\n\n# - movendo laje do ponto 2d para o ponto 3d\n# vetos auxiliar do movimento\nvecAux = rs.VectorCreate(P3D, P2D)\n# movendo lage\nrs.MoveObject(laje,vecAux)\n\n\n#criando multiplos andares\nfor i in range(N_andares +1):\n    # calculando altura do pavimento\n    zAux = P3D.Z + (i *PD) \n    # criando ponto na altura do pavimento\n    pAux = Point3d(P3D.X, P3D.Y, zAux)\n    # vetor auxiliar para mover o pavimento\n    vecAux2 = rs.VectorCreate(pAux, P3D)\n    # saida de teste para o vetor vecaux\n    Teste.append(vecAux2)\n    # copiando laje para altura do pavimento\n    ljAux = rs.CopyObject(laje, vecAux2)\n    # rotacionando laje\n    ljAux = rs.RotateObject(ljAux, P3D, Rot*i, [0,0,1] )\n    #colocando laje na saida dos pavimentos\n    Pav.append(ljAux)\n    \n# --- FIM\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

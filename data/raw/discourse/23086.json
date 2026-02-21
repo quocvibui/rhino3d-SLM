@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/circle-closest-points/23086",
+  "topic_id": 23086,
+  "title": "Circle Closest Points",
+  "question": "Hi:\n\nIn this script, why Rhino.Display.DrawLine() and Rhino.Display.Draw2dText() no work?\n\n\nimport Rhino\n\nimport rhinoscriptsyntax as rs\n\nimport System.Drawing\n\nimport scriptcontext\n\n\ndef GetDrawStringPoint():\n\npoi = rs.GetPoint(“get st poi”)\n\nc = rs.AddCircle(poi,0.5)\n\nline_color_1 = System.Drawing.Color.FromArgb(255,0,0)\n\nline_color_2 = System.Drawing.Color.FromArgb(0,0,255)\n\ndef GetPointDynamicDrawFunc( sender, args ):\n\nci0 = rs.coerceguid©\n\ncurrent_point = args.CurrentPoint\n\nci = Rhino.Geometry.Circle(current_point, 0.5)\n\nci1 = Rhino.Geometry.ArcCurve(ci)\n\nargs.Display.DrawCircle(ci,System.Drawing.Color.Red)\n\nt, t1, t2, t3 = ci0.ClosestPoints(ci,0.0)\n\nvec = rs.VectorCreate(t2,t1)\n\nmd_p = rs.PointAdd(poi,rs.VectorScale(vec,0.4))\n\nds = t1.DistanceTo(t2)\n\nmsg = str(’%.2f’ % (ds))\n\nview = rs.CurrentView()\n\npt2 = rs.XformWorldToScreen(md_p, view)\n\nargs.Display.DrawLine(t1,t2,line_color_2,2)\n\nargs.Display.Draw2dText(msg, line_color_1, pt2,False,25)\n\ngp = Rhino.Input.Custom.GetPoint()\n\ngp.DynamicDraw += GetPointDynamicDrawFunc\n\ngp.Get()\n\nif( gp.CommandResult() == Rhino.Commands.Result.Success ):\n\npt = gp.Point()\n\nrs.AddCircle(pt,0.5)\n\n\nif \nname\n == “\nmain\n”:\n\nGetDrawStringPoint()\n\n\nSorry for my English skill.",
+  "code_blocks": [
+    {
+      "code": "def GetPointDynamicDrawFunc(sender, args):\n    pt1 = Rhino.Geometry.Point3d(0, 0, 0)\n    pt2 = Rhino.Geometry.Point3d(10, 10, 0)\n    args.Display.DrawLine(pt1, args.CurrentPoint, System.Drawing.Color.Red, 1)\n    args.Display.DrawLine(pt2, args.CurrentPoint, System.Drawing.Color.Blue, 1)\n\ndef TestGetPointDynamicDraw():\n    # Create an instance of a GetPoint class and\n    # add a delegate for the DynamicDraw event,\n    # which is defined above.\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    gp.Get()\n\nif __name__ == \"__main__\":\n    TestGetPointDynamicDraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1079
+}

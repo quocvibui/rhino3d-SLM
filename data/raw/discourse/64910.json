@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-initialize-an-array-of-surface-objects-in-rhinopython/64910",
+  "topic_id": 64910,
+  "title": "How to initialize an array of surface objects in RhinoPython?",
+  "question": "Hi everyone,\n\n\nI would like to dynamically add surfaces to an object array through Rhinopython.\n\n\nI tried doing this but it did not work out:\n\n\nimport rhinoscriptsyntax as rs\n\ncenter=(0,0,0)\n\nradius=1\n\nj=0\n\nwhile j<4:\n\n\n   surf = rs.AddSphere(center,radius+j)\n   if j==0:\n            objs={surf}  \n   else:\n            objs={objs,surf} \n\n\n\nI am getting an error, “set objects are unhashable”.\n\nDoes anyone have any suggestions of any other way to go about it?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ncenter=(0,0,0)\nradius=1\nj=0\nids = []\nwhile j<4:\n\n   surfId = rs.AddSphere(center,radius+j)\n   if surfId: ids.append(surfId)\n   j += 1",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ncenter=(0,0,0)\nradius=1\n\nids = [rs.AddSphere(center,radius+j) for j in range(4)]",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "surf = rs.AddSphere(center,radius+j)\n   if j==0:\n            objs={surf}  \n   else:\n            objs={objs,surf}",
+      "language": "unknown",
+      "author": "Rhino_Gandalf",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 592
+}

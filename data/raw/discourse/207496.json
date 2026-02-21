@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pullpoints/207496",
+  "topic_id": 207496,
+  "title": "PullPoints",
+  "question": "Hi,\n\n\nIf I use the Pull command in Rhino 8 to pull a point to a surface then the new pulled points has the same name as the original point. If I do the same operation in Python 3 using rs.PullPoints then the new point does not inherit the name of the original, how can I make it the same as the manual command.\n\n\nSecondly the Pull help states below that the points are pulled according to the surface normal is this also the case for rs.PullPoints or is this also different.\n\n\n“The Pull command moves the toward the normal direction of the target objects to find the intersections.”",
+  "code_blocks": [
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nobj = rs.GetSurfaceObject(\"Select surface to project to\", select=True)[0]\npnts = rs.GetObjects(\"Select points\", 1)\n\nlayer_name = \"ProjectedPoints\"\nif not rs.IsLayer(layer_name):\n    rs.AddLayer(layer_name)\nrs.CurrentLayer(layer_name)\n\nfor i in pnts:\n    objn = rs.ObjectName(i)\n\n    pulled = rs.PullPoints(obj, [i])\n    if not pulled:\n        print(\"No pulled point for: \" + objn)\n        continue \n\n    npnt = pulled[0]\n\n    pt = rs.coerce3dpoint(npnt)\n    point_id = rs.AddPoint(npnt)\n    rs.ObjectLayer(point_id, layer_name)\n    ln = rs.AddLine(i,npnt)\n    rs.AddTextDot(round(rs.CurveLength(ln),2),rs.CurveMidPoint(ln))\n\n    rPnt = sc.doc.Objects.Find(point_id)\n    rPnt.Attributes.Name = objn",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nsobj = rs.GetSurfaceObject(\"Select surface to project to\", select=True)\nif not sobj:\n    print(\"No surface selected\")\nelse:\n    obj = sobj[0]\npnts = rs.GetObjects(\"Select points\", 1)\n\nlayer_name = \"ProjectedPoints\"\nif not rs.IsLayer(layer_name):\n    rs.AddLayer(layer_name)\nrs.CurrentLayer(layer_name)\nif pnts:\n    for i in pnts:\n        objn = str(rs.ObjectName(i))\n\n        pulled = rs.PullPoints(obj, [i])\n        if not pulled:\n            print(\"No pulled point for: \" + objn)\n            continue \n\n        npnt = pulled[0]\n\n        pt = rs.coerce3dpoint(npnt)\n        point_id = rs.AddPoint(npnt)\n        rs.ObjectLayer(point_id, layer_name)\n        ln = rs.AddLine(i,npnt)\n        rs.AddTextDot(round(rs.CurveLength(ln),2),rs.CurveMidPoint(ln))\n\n        rPnt = sc.doc.Objects.Find(point_id)\n        rPnt.Attributes.Name = objn\n        rPnt.CommitChanges()\nelse: print(\"No Points selected\")",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 191
+}

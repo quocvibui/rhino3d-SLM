@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-curve-simplify-requires-rebuildarcs-to-create-line/196329",
+  "topic_id": 196329,
+  "title": "Bug: Curve.Simplify requires RebuildArcs to create line",
+  "question": "In 8.13.24317.13001, 2024-11-12,\n\n\n\n\n\nrunning this script\n\n\n#! python 2  Must be on a line number less than 32.\nfrom __future__ import absolute_import, division, print_function, unicode_literals\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef main():\n\n    cso = rg.CurveSimplifyOptions\n\n    res, objref = Rhino.Input.RhinoGet.GetOneObject(\n        \"Select curve\",\n        acceptNothing=False,\n        filter=Rhino.DocObjects.ObjectType.Curve)\n    if res != Rhino.Commands.Result.Success: return\n\n    rgC_In = objref.Curve()\n\n    for options in (\n        cso.RebuildLines,\n        cso.RebuildArcs,\n        cso.RebuildLines | cso.RebuildArcs):\n\n        print(\"\\nCurveSimplifyOptions: {}\".format(options))\n\n        rv = rg.Curve.Simplify(\n            rgC_In,\n            options=options,\n            distanceTolerance=sc.doc.ModelAbsoluteTolerance,\n            angleToleranceRadians=sc.doc.ModelAngleToleranceRadians)\n\n        print(\"Result: {}\".format(type(rv)))\n\nif __name__ == '__main__': main()\n\n\n\n\n\non the (linear within half of model tolerance) spline in\n\n\nCurve_Simplify_RequiresArcOpt.3dm\n (41.9 KB) ,\n\nthe results are\n\n\n\n\nCurveSimplifyOptions: RebuildLines\n\nResult: <type ‘NoneType’>\n\n\nCurveSimplifyOptions: RebuildArcs\n\nResult: <type ‘ArcCurve’>\n\n\nCurveSimplifyOptions: RebuildLines, RebuildArcs\n\nResult: <type ‘LineCurve’>\n\n\n\n\nPlease fix Curve.Simplify so that the first result is also a LineCurve.\n\n\n(I tested various arguments for distanceTolerance and angleToleranceRadians parameters but didn’t find any where just RebuildLines outputs LineCurve.)",
+  "code_blocks": [
+    {
+      "code": "#! python 2  Must be on a line number less than 32.\nfrom __future__ import absolute_import, division, print_function, unicode_literals\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef main():\n\n    cso = rg.CurveSimplifyOptions\n\n    res, objref = Rhino.Input.RhinoGet.GetOneObject(\n        \"Select curve\",\n        acceptNothing=False,\n        filter=Rhino.DocObjects.ObjectType.Curve)\n    if res != Rhino.Commands.Result.Success: return\n\n    rgC_In = objref.Curve()\n\n    for options in (\n        cso.RebuildLines,\n        cso.RebuildArcs,\n        cso.RebuildLines | cso.RebuildArcs):\n\n        print(\"\\nCurveSimplifyOptions: {}\".format(options))\n\n        rv = rg.Curve.Simplify(\n            rgC_In,\n            options=options,\n            distanceTolerance=sc.doc.ModelAbsoluteTolerance,\n            angleToleranceRadians=sc.doc.ModelAngleToleranceRadians)\n\n        print(\"Result: {}\".format(type(rv)))\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 1,
+  "views": 43
+}

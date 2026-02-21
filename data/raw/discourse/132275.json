@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/baking-from-grasshopper-using-c-script/132275",
+  "topic_id": 132275,
+  "title": "Baking from Grasshopper using C# script",
+  "question": "I want to make a C# script in GH that will bake a brep into my Rhino document.  This will eventually be part of a larger program using a button in UI.  I don’t want to have to go back to the GH document and right click on the Swp2 component in order to bake the brep.\n\nHere is a very simple GH file that creates a thing and the C# module that I have started.  It shows that it recognizes the object as a Brep.\nsimple-bake-C#.gh\n (8.7 KB)\n\n\nI did something similar to this a while ago in Python but that was only a curve where I used code like this\n\n\n#switch contect to Rhino\n scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n #add the geometry\ncurve= scriptcontext.doc.Objects.Add(geometry)\n #switch contect back to gh\n scriptcontext.doc = ghdoc\n\n\n\nBut now I am in C# and I can’t figure out the equivalent C# thing for “scriptcontext.doc”.\n\nIt’s probably very simple, but remember I’m just learning C# and still have a long way to go learning the Rhino classes.",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(bool Go, Brep B)\n  {\n    if(Go)\n    {\n      Rhino.DocObjects.ObjectAttributes objectAttributes = new Rhino.DocObjects.ObjectAttributes();\n      objectAttributes.LayerIndex = 2;\n      Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(B, objectAttributes);\n    }\n  }",
+      "language": "csharp",
+      "author": "johnharding",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(Brep B, bool T, string L, System.Drawing.Color C)\n  {\n    if(T)\n    {\n      Rhino.RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;\n\n      //add layer\n      System.Drawing.Color col = new System.Drawing.Color();\n      //col = System.Drawing.Color.FromArgb(255, 0, 0, 255);\n      col = C;\n\n      var layer = doc.Layers.FindName(L, RhinoMath.UnsetIntIndex);\n      if (layer == null)\n      {\n        doc.Layers.Add(L, col);\n      }\n\n      int layerIndex = doc.Layers.FindName(L, RhinoMath.UnsetIntIndex).Index;\n      //set attributes\n      Rhino.DocObjects.ObjectAttributes att = new Rhino.DocObjects.ObjectAttributes();\n      att.Name = \"AjourCutter\";\n      att.LayerIndex = layerIndex;\n      //bake with attributes\n      RhinoDocument.Objects.AddBrep(B, att);\n    }\n  }",
+      "language": "csharp",
+      "author": "benedict",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(string parent, string child, System.Drawing.Color colour, GeometryBase Geo, bool toggle)\n  {\n\n    if(colour.GetHashCode() == 0) colour = System.Drawing.Color.Black;\n\n    if (toggle){\n\n      int index = doc.Layers.FindByFullPath(parent, -1);\n      if (index < 0) doc.Layers.Add(parent, System.Drawing.Color.Black);\n      index = doc.Layers.FindByFullPath(parent, -1);\n      Rhino.DocObjects.Layer parent_layer = doc.Layers[index];\n\n\n      // Create a child layer\n\n      string child_name = child;\n      Rhino.DocObjects.Layer childlayer = new Rhino.DocObjects.Layer();\n      childlayer.ParentLayerId = parent_layer.Id;\n      childlayer.Name = child_name;\n      childlayer.Color = colour;\n\n      string children_name = parent + \"::\" + child;\n\n      index = doc.Layers.FindByFullPath(children_name, -1);\n      if (index < 0) index = doc.Layers.Add(childlayer);\n\n      Rhino.DocObjects.ObjectAttributes att = new Rhino.DocObjects.ObjectAttributes();\n\n      att.LayerIndex = index;\n      doc.Objects.Add(Geo, att);\n\n\n    }\n  }",
+      "language": "csharp",
+      "author": "acichocki1",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "#switch contect to Rhino\n scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n #add the geometry\ncurve= scriptcontext.doc.Objects.Add(geometry)\n #switch contect back to gh\n scriptcontext.doc = ghdoc",
+      "language": "python",
+      "author": "Joe4",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 12,
+  "views": 3375
+}

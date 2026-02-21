@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/best-way-to-structure-python-script-with-using-eto/132983",
+  "topic_id": 132983,
+  "title": "Best way to structure Python script with using Eto",
+  "question": "What’s the best approach to building a script in a sense of structure and imports linkage?\n\n\nHere’s what I mean: let’s say my program will use the ETO interface with which you can select Rhino objects, make different calculations, change different parameters with ETO widgets, and so on. As a result, a certain object should turn out, which will contain many variables and different data arrays. But this is not a Rhino object, i.e. not a surface, not a Mesh. It will just be a Python object with data (let’s call it XYZ Object). I also need that after closing the ETO window, this Python object remains in memory so that I can refer to it again if I re-run the ETO interface without having to reset all the parameters and recalculate everything again.\n\nLet’s say I have a separate file with the ETO class, a separate file with the XYZ Object class, and a separate file with functions and calculation procedures for the XYZ Object.\n\n\nMy question is this: how is it better to build the overall structure?\n\nFor example, I can make the main running the ETO class file, and import the XYZ Object and all the functions into it. Then, what is the best way to do it: make the new XYZ Object Global, or as a variable of the ETO class (as in ETO Init: ~ self.this_XYZ_Object = import XYZ_Object)\n\nMy question may seem confusing, but I’m sure experienced programmers will understand what my problem is. Maybe there is a ready-made simple example with the use of ETO and several imports.\n\nThank you in advance.",
+  "code_blocks": [
+    {
+      "code": "# FIRST -- EtoModelessForm with global XYZ\n################################################################################\nimport Rhino, andAllOthers\n\nfrom XYZ_obj_class import XYZ_obj\nthis_XYZ = XYZ_obj()\n\n# SampleEtoModelessForm class\nclass SampleEtoModelessForm(forms.Form):\n    global this_XYZ\n\n    def __init__(self):\n        this_XYZ.Do_smth()\n\n################################################################################\n# SECOND -- EtoModelessForm with local XYZ\n################################################################################\nimport Rhino, andAllOthers\n\nfrom XYZ_obj_class import XYZ_obj\n\n# SampleEtoModelessForm class\nclass SampleEtoModelessForm(forms.Form):\n    def __init__(self):\n        self.this_XYZ = XYZ_obj()\n        self.this_XYZ.Do_smth()",
+      "language": "python",
+      "author": "monkelisha",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 694
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dimensions-through-space/119573",
+  "topic_id": 119573,
+  "title": "Dimensions Through Space",
+  "question": "I typically use the ‘Distance’ command to get distances on the fly when modeling but I’d like to create an actual dimension object similar to the output of ‘_Dim’ but across whatever points I am dimensioning, regardless of active cplane. Is there a command that I’m unaware of that can do this? I’ve attached a screen shot from Inventor that demonstrates what I’m aiming for. Thanks in advance for any help!\n\n\nI’m using Rhino6 on Windows.\n\n\n\n\ndimension wish\n1140×877 29.6 KB",
+  "code_blocks": [
+    {
+      "code": "def markLength():\n    \n    import Rhino\n    import rhinoscriptsyntax as rs\n    import scriptcontext as sc\n    \n    \n    result = rs.GetLine(0,message1 = \"pick two points\")\n    if not result:\n        return\n    else:\n        pt1, pt2 = result\n    if not pt1 or not pt2:\n        return\n        \n    \n    line  = Rhino.Geometry.Line(pt1, pt2)\n    length = round(line.Length,3)\n    \n    mid = (pt1+pt2)/2\n    \n    \n    rs.EnableRedraw(False)\n    newline = sc.doc.Objects.AddLine(line)\n    rs.CurveArrows(newline,3)\n    dot = rs.AddTextDot(str(length),mid)\n    groupname = rs.AddGroup(\"dim-3d : \"+str(length))\n    rs.AddObjectsToGroup([newline, dot],groupname)\n    rs.EnableRedraw(True)\n    sc.doc.Views.Redraw()\nmarkLength()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 147,
+  "posts_count": 5,
+  "views": 301
+}

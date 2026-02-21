@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/dantaeyoung/GrasshopperArsenal/blob/004569c313e22cf788c262e0d8b97d8282252eb1/GrasshopperGRBL/pyserial_arduino.py",
+  "repo": "dantaeyoung/GrasshopperArsenal",
+  "repo_stars": 129,
+  "repo_description": "Rhino/Grasshopper components to share / play with.",
+  "license": "unknown",
+  "filepath": "GrasshopperGRBL/pyserial_arduino.py",
+  "instruction": "Pyserial arduino",
+  "code": "import ghhops_server as hs\nimport rhino3dm\nimport serial\nimport time\n\nhops = hs.Hops()\n\nser = None\n\ndef open_serial(port, baud, message):\n    ser = serial.Serial(port, baud, timeout=1)\n    try: \n        ser.open()\n    except e:\n        yield 'event:error\\n' + 'data:' + 'Serial port error({0}): {1}\\n\\n'.format(e.errno, e.strerror)\n\n        \n\n@hops.component(\n    \"/serialmessage\",\n    name=\"Serial\",\n    nickname=\"Serial\",\n    description=\"send Serial Message\",\n    icon=\"examples/pointat.png\",\n    inputs=[\n        hs.HopsString(\"Port\", \"Port\", \"Port\"),\n        hs.HopsNumber(\"Baud\", \"Baud\", \"Baud\"),\n        hs.HopsString(\"Message\", \"Message\", \"Message to Send\"),\n    ],\n    outputs=[\n        hs.HopsString(\"Status\", \"Status\", \"Status\"),\n    ]\n)\ndef serialmessage(port, baud, message):\n\n    global ser\n    \n    print(\"hey\")\n    print(\"message!!!\", message)\n\n    if(message.startswith(\"0x\")):\n        print(\"yup it does 0x\")\n        message = '\\\\x' + message.removeprefix(\"0x\")\n    else:\n        message += \"\\n\"\n\n\n    try: \n        ser.write(message.encode())\n        return ser.readline().decode(\"utf-8\").strip()\n    except:\n        print(\"Opening serial port\")\n        ser = serial.Serial('/dev/tty.usbmodem1301', 115200, timeout=1)\n        ser.close()\n        ser.open()\n        time.sleep(2)\n        #ser.write('$J=G20G91Y0.1F6\\n'.encode())\n        ser.write(message.encode())\n        time.sleep(2)\n        return ser.readline().decode(\"utf-8\").strip()\n        return \"Connected + Sent\"\n\n\n    \nif __name__ == \"__main__\":\n    hops.start(debug=True)\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

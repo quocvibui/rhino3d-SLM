@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_insertknot.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_insertknot.py",
+  "instruction": "Ex insertknot",
+  "code": "import Rhino\nimport scriptcontext\n\ndef InsertKnot():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve for knot insertion\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc\n    \n    curve = objref.Curve()\n    if not curve: return Rhino.Commands.Result.Failure\n    nurb = curve.ToNurbsCurve()\n    if not nurb: return Rhino.Commands.Result.Failure\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Point on curve to add knot\")\n    gp.Constrain(nurb, False)\n    gp.Get()\n    if gp.CommandResult() == Rhino.Commands.Result.Success:\n        crv, t = gp.PointOnCurve()\n        if crv and nurb.Knots.InsertKnot(t):\n            scriptcontext.doc.Objects.Replace(objref, nurb)\n            scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    InsertKnot()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

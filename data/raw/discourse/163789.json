@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-with-createsofteditsurface-parameters/163789",
+  "topic_id": 163789,
+  "title": "Problem with CreateSoftEditSurface parameters",
+  "question": "I am having trouble making the CreateSoftEditSurface method change a surface.  I think the parameters are correct, but the surface is not moving.  There isn’t any error messages.\n\n\nHere is the test script that I am working on:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nsurfaceGUID = rs.GetObject('Pick the surface to soft edit...', rs.filter.surface)\npointOnSurface = rs.GetPointOnSurface(surfaceGUID, 'Pick point on the surface to edit...')\n \n# List of U and V parameters at the point\nUV = rs.SurfaceClosestPoint(surfaceGUID, pointOnSurface)\nP2d = rs.coerce2dpoint(UV)\n \n# Surface normal at the point (should be a unit vector)\nN  = rs.SurfaceNormal(surfaceGUID, UV)\n \n# Move 6 units in the surface normal direction\nMove = rs.VectorScale(N, 6)\n \n# Get the current \"model absolute tolerance\"\nTol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n \nSurf = rs.coercesurface(surfaceGUID)\n \nSO = Rhino.Geometry.Surface.CreateSoftEditSurface(Surf, P2d, Move, 2, 2, Tol, False)\n\n\n\nCould somebody please let me know what I am doing wrong?\n\n\nThanks for your time.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nsurfaceGUID = rs.GetObject('Pick the surface to soft edit...', rs.filter.surface)\npointOnSurface = rs.GetPointOnSurface(surfaceGUID, 'Pick point on the surface to edit...')\n \n# List of U and V parameters at the point\nUV = rs.SurfaceClosestPoint(surfaceGUID, pointOnSurface)\nP2d = rs.coerce2dpoint(UV)\n \n# Surface normal at the point (should be a unit vector)\nN  = rs.SurfaceNormal(surfaceGUID, UV)\n \n# Move 6 units in the surface normal direction\nMove = rs.VectorScale(N, 6)\n \n# Get the current \"model absolute tolerance\"\nTol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n \nSurf = rs.coercesurface(surfaceGUID)\n \nSO = Rhino.Geometry.Surface.CreateSoftEditSurface(Surf, P2d, Move, 2, 2, Tol, False)",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 372
+}

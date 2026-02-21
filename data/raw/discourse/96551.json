@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-list-partition/96551",
+  "topic_id": 96551,
+  "title": "GhPython : list partition",
+  "question": "Hello i tried list partition with \nghpythonlib.components\n but didn’t work,\n\nwhat is the problem and is there another method to do it ?\n\n\n\n\nimage\n988×350 21.2 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\nimport Rhino.Geometry as rg\n\n\nlist = ['a','b','c','d','e','f']\n#num = [2,3,1]\nnum = 2\na = ghc.PartitionList(list,num)",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib import treehelpers\n\ndef split(lt, size=2, out_tree=False):\n    nested_lt = []\n\n    while len(lt) > size:\n        seg = lt[:size]\n        nested_lt.append(seg)\n        lt   = lt[size:]\n    nested_lt.append(lt)\n\n    if not out_tree:\n        return nested_lt\n\n    return treehelpers.list_to_tree(nested_lt)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib import treehelpers\n\n\ndef partition(lt, size=[2,3,2], tree_out=False):\n    \"\"\"Partitions a list into sub-lists.\n    \n    Args:\n        lt: A list to partition\n        size: Optional list of partition sizes\n        tree_out: Optional, if True a tree is returned,\n                  by default a nested list is put out. \n    Returns:\n        A partioned list or tree.\n    \"\"\"\n    nested_lt = []\n    n = 0\n     \n    while len(lt) > size[n]:\n        sub_lt = lt[:size[n]]\n        nested_lt.append(sub_lt)\n        lt = lt[size[n]:]\n        if n == len(size)-1:\n            n = 0\n        else:\n            n += 1\n    nested_lt.append(lt)\n    \n    if tree_out:\n        return treehelpers.list_to_tree(nested_lt)\n    return nested_lt\n    \n\nC = partition(L, S, True)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\nimport Rhino.Geometry as rg\n\n\nlist = ['a','b','c','d','e','f']\n#num = [2,3,1]\nnum = 2\na = ghc.PartitionList(list,num)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1236
+}

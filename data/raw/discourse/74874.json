@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/use-coerced-objects-in-rhinoscriptsyntax-functions/74874",
+  "topic_id": 74874,
+  "title": "Use coerced objects in rhinoscriptsyntax functions",
+  "question": "Hello,\n\n\nis there a method to convert coerced objects to guid so that they can be used in rhinoscriptsyntax functions? Look on my code below (If I run the script I get an error \"Parameter must be a Guid or string representing a Guid. It’s clear for me why.):\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rh\nimport scriptcontext as sc\n\n\nif C and S and D and N:\n    curve = C\n    surface = S\n    distance = float(D)\n    number = int(N)\n\n    curve_coe = rs.coercecurve(curve)\n    surface_coe = rs.coercesurface(surface)\n    curve_ext = curve_coe.ExtendOnSurface(rh.Geometry.CurveEnd.Both, surface_coe)\n\n    rs.PullCurve(surface_coe, curve_ext) #<= Error\n\n\n\nI know it can be done easily with rhino common, but what is when I want to continue with rhinoscriptsyntax. Thx.\n\n\nDimitrij",
+  "code_blocks": [
+    {
+      "code": "def PullCurve(surface, curve, delete_input=False):\n    \"\"\"Pulls a curve object to a surface object\n    Parameters:\n      surface (guid): the surface's identifier\n      curve (guid): the curve's identifier\n      delete_input (bool, optional) should the input items be deleted\n    Returns:\n      list(guid, ...): of new curves if successful\n      None: on error\n    Example:\n      import rhinoscriptsyntax as rs\n      curve = rs.GetObject(\"Select curve to pull\", rs.filter.curve )\n      surface = rs.GetObject(\"Select surface that pulls\", rs.filter.surface )\n      rs.PullCurve(surface, curve)\n    See Also:\n      IsSurface\n    \"\"\"\n    crvobj = rhutil.coercerhinoobject(curve, True, True)\n    brep = rhutil.coercebrep(surface, True)\n    curve = rhutil.coercecurve(curve, -1, True)\n    tol = scriptcontext.doc.ModelAbsoluteTolerance\n    curves = Rhino.Geometry.Curve.PullToBrepFace(curve, brep.Faces[0], tol)\n    rc = [scriptcontext.doc.Objects.AddCurve(curve) for curve in curves]\n    if rc:\n        if delete_input and crvobj:\n            scriptcontext.doc.Objects.Delete(crvobj, True)\n        scriptcontext.doc.Views.Redraw()\n        return rc",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def MyPullCurve(surface, curve):\n\n    brep = surface.ToBrep()\n    curve = rhutil.coercecurve(curve, -1, True)\n    tol = scriptcontext.doc.ModelAbsoluteTolerance\n    curves = Rhino.Geometry.Curve.PullToBrepFace(curve, brep.Faces[0], tol)\n    return curves",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport scriptcontext as sc\n\n\nif C and S and D and N:\n    curve = C\n    surface = S\n    distance = float(D)\n    number = int(N)\n\n    curve_coe = rs.coercecurve(curve)\n    surface_coe = rs.coercesurface(surface)\n    curve_ext = curve_coe.ExtendOnSurface(rh.Geometry.CurveEnd.Both, surface_coe)\n\n    rs.PullCurve(surface_coe, curve_ext) #<= Error",
+      "language": "python",
+      "author": "dimitrij.m",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 3810
+}

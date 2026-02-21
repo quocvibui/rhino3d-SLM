@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_addchildlayer.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_addchildlayer.py",
+  "instruction": "Ex addchildlayer",
+  "code": "import Rhino\nimport scriptcontext\nimport System.Drawing.Color\n\ndef AddChildLayer():\n    # Get an existing layer\n    default_name = scriptcontext.doc.Layers.CurrentLayer.Name\n    # Prompt the user to enter a layer name\n    gs = Rhino.Input.Custom.GetString()\n    gs.SetCommandPrompt(\"Name of existing layer\")\n    gs.SetDefaultString(default_name)\n    gs.AcceptNothing(True)\n    gs.Get()\n    if gs.CommandResult()!=Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    # Was a layer named entered?\n    layer_name = gs.StringResult().Trim()\n    index = scriptcontext.doc.Layers.Find(layer_name, True)\n    if index<0: return Rhino.Commands.Result.Cancel\n\n    parent_layer = scriptcontext.doc.Layers[index]\n\n    # Create a child layer\n    child_name = parent_layer.Name + \"_child\"\n    childlayer = Rhino.DocObjects.Layer()\n    childlayer.ParentLayerId = parent_layer.Id\n    childlayer.Name = child_name\n    childlayer.Color = System.Drawing.Color.Red\n\n    index = scriptcontext.doc.Layers.Add(childlayer)\n    if index<0:\n      print \"Unable to add\", child_name, \"layer.\"\n      return Rhino.Commands.Result.Failure\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    AddChildLayer()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

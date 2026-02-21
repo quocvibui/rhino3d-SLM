@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/changequeue-how-to-get-background-color/215479",
+  "topic_id": 215479,
+  "title": "ChangeQueue: how to get background color?",
+  "question": "Hi all,\n\n\nI am building a renderer plugin and I have some difficulties of how to get the background color (i) at my renderer start up and (ii) while the renderer is running. In the \nChangeQueue\n the \nApplyRenderSettingsChanges\n function is only called once, when starting my renderer:\n\n\nvoid ChangeQueue::ApplyRenderSettingsChanges(const ON_3dmRenderSettings& onRenderSettings) const\n{\n\tauto that = const_cast<ChangeQueue*>(this);\n\n\tif (onRenderSettings.m_bCustomImageSize)\n\t{\n\t\tthat->_scene->renderSize.x = onRenderSettings.m_image_width;\n\t\tthat->_scene->renderSize.y = onRenderSettings.m_image_height;\n\t\tthat->_scene->renderRect.upper.x = onRenderSettings.m_image_width;\n\t\tthat->_scene->renderRect.upper.y = onRenderSettings.m_image_height;\n\t}\n\n\tswitch (onRenderSettings.m_background_style)\n\t{\n\tcase 1: that->_scene->background.type = BackgroundType::Image; break;\n\tcase 2: that->_scene->background.type = BackgroundType::Gradient; break;\n\tcase 3: that->_scene->background.type = BackgroundType::Environment; break;\n\tdefault: that->_scene->background.type = BackgroundType::Solid; break;\n\t}\n\tthat->_scene->background.color = fromRhino(onRenderSettings.m_background_color);\n\tthat->_scene->background.color2 = fromRhino(onRenderSettings.m_background_bottom_color);\n}\n\n\n\n\nAfter that, when I go to the right Panel Display→Solid color and change the color I am having the the \nApplyRenderSettingsChanges\n called again.\n\n\nWhat is the proper way to get the background color in these two cases? Should I try to do it in the Display Mode instead? I am not sure how, any suggestion would be more than welcome!\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "if(eds.IntegratorHash!=_oldIntegratorHash)\n          \t\t\t\t{\n          \t\t\t\t\tintegratorSettings = new IntegratorSettings(eds);\n          \t\t\t\t\t_oldIntegratorHash = eds.IntegratorHash;\n          \t\t\t\t\t_integratorChanged = true;\n          \t\t\t\t}\n          \t\t\t\tvar trbg = TransparentBackground;\n          \t\t\t\tTransparentBackground = rs.TransparentBackground;\n          \t\t\t\tDisplayPipelineAttributesChanged |= trbg != TransparentBackground;\n          \t\t\t\t_environmentDatabase.SetGamma(PreProcessGamma);\n          \t\t\t\t_environmentDatabase.SetBackgroundData(rs.BackgroundStyle, rs.BackgroundColorTop, rs.BackgroundColorBottom);\n          \t\t\t\tif (rs.BackgroundStyle == BackgroundStyle.WallpaperImage)\n          \t\t\t\t{\n          \t\t\t\t\tvar view = GetQueueView();\n          \t\t\t\t\tvar y = string.IsNullOrEmpty(view.WallpaperFilename);\n          \t\t\t\t\tRcCore.It.AddLogStringIfVerbose(\n          \t\t\t\t\t\t$\"\\t\\tview has {(y ? \"no\" : \"\")} wallpaper {(y ? \"\" : \"with filename \")} {(y ? \"\" : view.WallpaperFilename)} {(y ? \"\" : \"its grayscale bool\")} {(y ? \"\" : $\"{view.ShowWallpaperInGrayScale}\")} {(y ? \"\" : \"its hidden bool\")} {(y ? \"\" : $\"{view.WallpaperHidden}\")}\");\n          \t\t\t\t\t_environmentDatabase.BackgroundWallpaper(view, rs.ScaleBackgroundToFit);\n          \t\t\t\t\t_wallpaperInitialized = true;\n          \t\t\t\t}\n          \t\t\t\t_previousScaleBackgroundToFit = rs.ScaleBackgroundToFit;",
+      "language": "csharp",
+      "author": "jesterking",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 42
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/GEL-Dev/RebarRIRToolkit/blob/677b93783a0288e5b411858c133cb7e04a6a0a06/gh_scripts/gh_uninstall.py",
+  "repo": "GEL-Dev/RebarRIRToolkit",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "gh_scripts/gh_uninstall.py",
+  "instruction": "Provides a scripting component.\n    Inputs:\n        _uninstall: bool:\n    Output:\n        message: string:  The a output variable",
+  "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        _uninstall: bool:\n    Output:\n        message: string:  The a output variable\"\"\"\n\n__author__ = \"ykish\"\n__version__ = \"2023.11.28\"\n\nghenv.Component.Name = 'RebarToolkit Installer'\nghenv.Component.NickName = 'RTUninstall'\n\nghenv.Component.Category = 'RebarToolkit'\n\nimport clr\nimport os\nimport shutil\nclr.AddReference(\"System\")\nfrom System import Array\nimport Rhino\n\ndef remove_directory(path):\n    \"\"\" Remove a directory and all its contents \"\"\"\n    if os.path.exists(path):\n        shutil.rmtree(path)\n        message = \"Removed directory: {}\".format(path)\n    else:\n        message = \"Directory not found: {}\".format(path)\n    return message\n\ndef remove_from_python_search_paths(path):\n    \"\"\" Remove a path from Rhino's Python script search paths \"\"\"\n    current_paths = list(Rhino.Runtime.PythonScript.SearchPaths)\n    if path in current_paths:\n        current_paths.remove(path)\n        Rhino.Runtime.PythonScript.SearchPaths = Array[str](current_paths)\n        message = \"Removed from Python search paths: {}\".format(path)\n    else:\n        message = \"Path not found in Python search paths: {}\".format(path)\n    return message\n\n\nif _uninstall:\n    message =[]\n    print(\"start uninstall\")\n    save_dir = os.path.join(os.environ[\"LOCALAPPDATA\"], \"GEL\", \"RebarToolkit\")\n    message.append(remove_directory(save_dir))\n    package_dir= os.path.join(save_dir,'my_package')\n    message.append(remove_from_python_search_paths(package_dir))",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": true
+}

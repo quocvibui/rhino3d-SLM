@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-python-intersect-list-of-surfaces-in-rhino-geometry/134676",
+  "topic_id": 134676,
+  "title": "GH Python - Intersect List of Surfaces in Rhino.Geometry",
+  "question": "Hi\n\nI have a list of UnTrimmed Surfaces which are a part of a Pyramid Geometry, I want to extract the intersections for all of the surfaces and trim all the extra parts except “Solid Difference” parts.\n\nin another way, at the end I want to have Some surfaces like the picture below:\n\n\n\n\nIntersections Sample\n784×573 121 KB\n\n\n\n\nI know in Rhino, I can Use the “Intersect” Command simply and trim or split the surfaces with the curves extracted from that command. But in ghpython in Grasshopper, I can’t figure it out!\n\nI wrote some script for that but the output is null and I don’t know whats wrong with it. I wonder if someone can solve the issue.\n\nthanks.\n\n\n\n\narray Curve\n1278×1034 42.8 KB\n\n\n\n\nintersect command in rhino.3dm\n (198.9 KB)\n\n\n\n\nintersect command in rhino\n880×811 163 KB\n\n\n\n\nSurfaceList Intersections.gh\n (39.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\n\ntol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\na = []\n\nfor i in x:\n    for j in x:\n        if j == i: continue\n        trmd = i.Trim(j, tol)\n        if trmd!=None and len(trmd)>0:\n            i = trmd[0]\n    a.append(i)\n\nintersections = a",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib import parallel \ndef trim_with_all(a):\n    for b in breps:\n        if b == a: continue\n        trimmed = a.Trim(b, 0.01)\n        if trimmed != None and len(trimmed) > 0:\n            a = trimmed[0]\n    return a\nresult = parallel.run(trim_with_all, breps)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 16,
+      "is_solution": true
+    },
+    {
+      "code": "from ghpythonlib import parallel \ndef trim_with_all(a):\n    for b in breps:\n        if b == a: continue\n        trimmed = a.Trim(b, 0.01)\n        if trimmed != None and len(trimmed) > 0:\n            a = trimmed[0]\n    return a\nresult = parallel.run(trim_with_all, breps)",
+      "language": "python",
+      "author": "alirahi32",
+      "post_number": 18,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 20,
+  "views": 2609
+}

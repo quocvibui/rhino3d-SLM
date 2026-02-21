@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-code-does-not-work-correctly/85712",
+  "topic_id": 85712,
+  "title": "Python code does not work correctly!",
+  "question": "Hi\n\nI am trying to run the following code in PythonScript:\n\nSource: \nhttps://developer.rhino3d.com/samples/rhinocommon/add-radial-dimension/\n\n\nfrom Rhino import *\n\nfrom Rhino.DocObjects import *\n\nfrom Rhino.Commands import *\n\nfrom Rhino.Geometry import *\n\nfrom Rhino.Input import *\n\nfrom scriptcontext import doc\n\n\ndef RunCommand():\n\nrc, obj_ref = RhinoGet.GetOneObject(“Select curve for radius dimension”, True, ObjectType.Curve)\n\nif rc != Result.Success:\n\nreturn rc\n\ncurve, curve_parameter = obj_ref.CurveParameter()\n\nif curve == None:\n\nreturn Result.Failure\n\n\nif curve.IsLinear() or curve.IsPolyline():\n    print \"Curve must be non-linear.\"\n    return Result.Nothing\n\n# in this example just deal with planar curves\nif not curve.IsPlanar():\n    print \"Curve must be planar.\"\n    return Result.Nothing\n\npoint_on_curve = curve.PointAt(curve_parameter)\ncurvature_vector = curve.CurvatureAt(curve_parameter)\nlen = curvature_vector.Length\nif len < RhinoMath.SqrtEpsilon:\n    print \"Curve is almost linear and therefore has no curvature.\"\n    return Result.Nothing\n\ncenter = point_on_curve + (curvature_vector/(len*len))\n_, plane = curve.TryGetPlane()\nradial_dimension = RadialDimension(center, point_on_curve, plane.XAxis, plane.Normal, 5.0)\ndoc.Objects.AddRadialDimension(radial_dimension)\ndoc.Views.Redraw()\nreturn Result.Success\n\n\n\nif \nname\n==“\nmain\n”:\n\nRunCommand()\n\n\nPrompt error, because RadialDimension() does not require parameters!\n\nHint: “Message: RadialDimension() takes no arguments (5 given)”\n\nIs it wrong? How to correct?\n\n\nthanks!",
+  "code_blocks": [
+    {
+      "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select curve for radius dimension\", True, ObjectType.Curve)\n    if rc != Result.Success:\n        return rc\n    curve, curve_parameter = obj_ref.CurveParameter()\n    if curve == None:\n        return Result.Failure\n    if curve.IsLinear() or curve.IsPolyline():\n        print \"Curve must be non-linear.\"\n        return Result.Nothing\n    # in this example just deal with planar curves\n    if not curve.IsPlanar():\n        print \"Curve must be planar.\"\n        return Result.Nothing\n    point_on_curve = curve.PointAt(curve_parameter)\n    curvature_vector = curve.CurvatureAt(curve_parameter)\n    len = curvature_vector.Length\n    if len < RhinoMath.SqrtEpsilon:\n        print \"Curve is almost linear and therefore has no curvature.\"\n        return Result.Nothing\n    center = point_on_curve + (curvature_vector/(len*len))\n    _, plane = curve.TryGetPlane()\n    radial_dimension = RadialDimension()\n    doc.Objects.AddRadialDimension(radial_dimension)\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 588
+}

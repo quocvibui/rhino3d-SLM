@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Donghyun-Edit/rhino-class/blob/7df8a730d15f1aaa485b522ea971ca574c5781ed/logic/exercise/attractor_bars.py",
+  "repo": "Donghyun-Edit/rhino-class",
+  "repo_stars": 0,
+  "repo_description": "강의에서 사용되는 라이노와 파이썬 세팅",
+  "license": "MIT",
+  "filepath": "logic/exercise/attractor_bars.py",
+  "instruction": "Attractor bars",
+  "code": "import Rhino.Geometry as geo\nimport Rhino.Display as dis\nimport scriptcontext as sc\n\n\nSCALE = 5.0\nDISPLAY_KEY = \"my_display\"\n\n\ndef draw_bars_with_attractors(attractors: list[geo.Point3d]):\n    # `CustomDisplay` 객체를 재사용하기 위해 보관해 두고,\n    # 이미 보관되어 있다면 그것을 꺼내 쓴다.\n    # `sticky`는 라이노 파이썬에서 객체를 보관해 두고\n    # 영구적으로 재사용할 수 있는 `dict` 공간이다.\n    if DISPLAY_KEY in sc.sticky:\n        custom_display: dis.CustomDisplay = sc.sticky[DISPLAY_KEY]\n        custom_display.Clear()\n    else:\n        custom_display = dis.CustomDisplay(True)\n        sc.sticky[DISPLAY_KEY] = custom_display\n\n    # 최소 1개의 Attractor가 있어야 한다.\n    if not attractors:\n        raise ValueError\n\n    # Attractor별로 색상을 지정해 준다.\n    colors: dict[geo.Point3d, dis.ColorHSL] = {}\n    for i, attractor in enumerate(attractors):\n        colors[attractor] = dis.ColorHSL(\n            1.0,  # Alpha\n            i / len(attractors) + 0.1,  # Hue\n            1.0,  # Saturation\n            0.7,  # Value\n        )\n\n    # 그리드 배치점을 나열해 놓는다.\n    grid_points: list[geo.Point3d] = []\n    for x in range(100):\n        for y in range(100):\n            grid_points.append(geo.Point3d(x, y, 0))\n\n    # Attractor와의 거리에 따라 높이가 변하는 막대를 그린다.\n    for grid_point in grid_points:\n        closest_attractor = min(\n            attractors,\n            key=lambda a, gp=grid_point: a.DistanceTo(gp),\n        )\n        distance = grid_point.DistanceTo(closest_attractor)\n        importance = SCALE / (SCALE + distance**2 / SCALE)  # 0 ~ 1\n        color = colors[closest_attractor]\n        color = dis.ColorHSL(color)  # 복제  # type: ignore\n        color.L = 1 - importance * 0.5\n        shift_vector = geo.Vector3d(0.0, 0.0, SCALE * importance)\n        extrusion = geo.Line(  # type: ignore\n            grid_point - shift_vector,  # type: ignore\n            grid_point + shift_vector,  # type: ignore\n        )\n        custom_display.AddLine(extrusion, color, 2)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

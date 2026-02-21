@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dimension-masking-via-python/205005",
+  "topic_id": 205005,
+  "title": "Dimension Masking via python",
+  "question": "Trying to set the mask to solid color via python (Rhinocode/ScriptEditor in R8 py3.9) - not able to get where I need to go.  Editing the style or dim itself is acceptable.  Appreciate the help!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n\ndef DoSomething():\n\n    dim_id = rs.GetObject(\"Select dimension\", rs.filter.annotation, True, False)\n    if not dim_id: return\n    \n    dim_obj = rs.coercerhinoobject(dim_id, True, True)\n    if not isinstance(dim_obj, Rhino.DocObjects.DimensionObject): return\n    \n    dim_obj.Geometry.MaskEnabled = True\n\n    new_style = Rhino.DocObjects.DimensionStyle()\n    new_style.CopyFrom(dim_obj.Geometry.DimensionStyle)\n    new_style.MaskColorSource = Rhino.DocObjects.DimensionStyle.MaskType.MaskColor\n    new_style.MaskColor = Color.CornflowerBlue\n    dim_obj.Geometry.SetOverrideDimStyle(new_style)\n    dim_obj.CommitChanges()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 108
+}

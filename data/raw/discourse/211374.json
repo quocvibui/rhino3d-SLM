@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curve-projecttoplane-regression-in-rhino-8/211374",
+  "topic_id": 211374,
+  "title": "Curve.ProjectToPlane regression in Rhino 8",
+  "question": "Hi,\n\n\nWe are working on upgrading one of our Rhino plugins from Rhino 7 to Rhino 8. We came across the following bug with ProjectToPlane for specific breps and curves.\n\n\nThe code below creates a sphere with a cylinder that removes the center of it. When you project the faces of the Brep to the world xy plane it works fine and generates the curves as shown below. In Rhino 7 it works fine, but in Rhino 8 it fails.\n\n\nvar rhinoDoc = RhinoDoc.ActiveDoc;\n\nPoint3d sphereCenter = new Point3d(0, 0, 0);\ndouble sphereRadius = 10;\nSphere sphere = new Sphere(sphereCenter, sphereRadius);\nBrep brepSphere = Brep.CreateFromSphere(sphere);\n\nCircle cylinderBase = new Circle(sphereCenter, 5);\ndouble cylinderHeight = 20;\nCylinder cylinder = new Cylinder(cylinderBase, cylinderHeight);\nBrep brepCylinder = Brep.CreateFromCylinder(cylinder, false, false);\n\nBrep[] brepDifference = Brep.CreateBooleanDifference(new[] { brepSphere }, new[] { brepCylinder }, 0.001);\nBrep brep = brepDifference[0];\n\nrhinoDoc.Objects.Add(brep);\n\nPlane testPlane = new Plane(Point3d.Origin, Vector3d.ZAxis);\n\nforeach (var face in brep.Faces)\n{\n\tvar loop = face.OuterLoop.To3dCurve();\n\tvar newLoop = Curve.ProjectToPlane(loop, testPlane);\n\tif (newLoop is not null)\n\t{\n\t\trhinoDoc.Objects.Add(newLoop);\n\t}\n}\n\n\n\n\n\nRhino 7\n1015×1104 114 KB\n\n\nIn case it matters, this was tested on Rhino 8.19.25132.1001 and Rhino 7.27.23032.13001 on Windows.\n\n\nThis particular API call is used quite a bit in our plugin, so it would be good to know what exactly triggers this failure. A workaround could go a long way as well.",
+  "code_blocks": [
+    {
+      "code": "var rhinoDoc = RhinoDoc.ActiveDoc;\n\nPoint3d sphereCenter = new Point3d(0, 0, 0);\ndouble sphereRadius = 10;\nSphere sphere = new Sphere(sphereCenter, sphereRadius);\nBrep brepSphere = Brep.CreateFromSphere(sphere);\n\nCircle cylinderBase = new Circle(sphereCenter, 5);\ndouble cylinderHeight = 20;\nCylinder cylinder = new Cylinder(cylinderBase, cylinderHeight);\nBrep brepCylinder = Brep.CreateFromCylinder(cylinder, false, false);\n\nBrep[] brepDifference = Brep.CreateBooleanDifference(new[] { brepSphere }, new[] { brepCylinder }, 0.001);\nBrep brep = brepDifference[0];\n\nrhinoDoc.Objects.Add(brep);\n\nPlane testPlane = new Plane(Point3d.Origin, Vector3d.ZAxis);\n\nforeach (var face in brep.Faces)\n{\n\tvar loop = face.OuterLoop.To3dCurve();\n\tvar newLoop = Curve.ProjectToPlane(loop, testPlane);\n\tif (newLoop is not null)\n\t{\n\t\trhinoDoc.Objects.Add(newLoop);\n\t}\n}",
+      "language": "csharp",
+      "author": "SK-Structurecraft",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "geometry",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 71
+}

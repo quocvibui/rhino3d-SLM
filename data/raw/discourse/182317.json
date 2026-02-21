@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/addpageview-has-no-effect/182317",
+  "topic_id": 182317,
+  "title": "AddPageView has no effect",
+  "question": "Hi All,\n\n\nI’m trying to export my drawings to PDF using Python. I’ve found the example below, but the AddPageView line return ‘None’. It’s a simple enough function I don’t know what to try… but I tried executing the code before and after saving the document - in case that made a difference.\n\n\ndef PDFExport(doc,FName:str):\n\n    dpi = 300\n    pdf_settings = Rhino.FileIO.FilePdf.Create()\n\n    layout_name = \"A4_Miller\"\n    page_height = 210\n    page_width = 297\n    \n    # Create a new view for printing\n    view = doc.Views.AddPageView(layout_name, page_width, page_height)\n\n\n\nI’m using Python via VSCode btw.\n\n\nAny Suggesions",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef PDFExport():\n\n    dpi = 300\n    pdf_settings = Rhino.FileIO.FilePdf.Create()\n\n    layout_name = \"A4_Miller\"\n    page_height = 210\n    page_width = 297\n    \n    # Create a new view for printing\n    view = scriptcontext.doc.Views.AddPageView(layout_name, page_width, page_height)\n    \nPDFExport()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\ndef PDFExport():\n\n    dpi = 300\n    pdf_settings = Rhino.FileIO.FilePdf.Create()\n\n    layout_name = \"A4_Miller\"\n    page_height = 210\n    page_width = 297\n    \n    # Create a new view for printing\n    doc = Rhino.RhinoDoc.ActiveDoc\n    view = doc.Views.AddPageView(layout_name, page_width, page_height)\n    \nPDFExport()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino\nimport scriptcontext\n\ndef AddLayout():\n    scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    page_number = 1\n    if page_views: page_number = len(page_views) + 1\n    pageview = scriptcontext.doc.Views.AddPageView(\"My Page {0}\".format(page_number), 1189, 841)\n    if pageview:\n        top_left = Rhino.Geometry.Point2d(20,821)\n        bottom_right = Rhino.Geometry.Point2d(1169, 20)\n        detail = pageview.AddDetailView(\"ModelView\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n        if detail:\n            pageview.SetActiveDetail(detail.Id)\n            detail.Viewport.ZoomExtents()\n            detail.DetailGeometry.IsProjectionLocked = True\n            detail.DetailGeometry.SetScale(1, scriptcontext.doc.ModelUnitSystem, 10, scriptcontext.doc.PageUnitSystem)\n            # Commit changes tells the document to replace the document's detail object\n            # with the modified one that we just adjusted\n            detail.CommitChanges()\n        pageview.SetPageAsActive()\n        scriptcontext.doc.Views.ActiveView = pageview\n        scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    AddLayout()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 372
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/change-mesh-edge-thickness-from-python/202047",
+  "topic_id": 202047,
+  "title": "Change Mesh Edge Thickness from python",
+  "question": "Hi all!\n\n\nI’m trying to change the Mesh Edge Thickness from a Rhino Display mode directly in Python. I could save a custom display mode somewhere in the server and use it company-wide but there are some IT issues that I cannot bypass at the moment, that’s why I need to change the display mode in each machine.\n\n\nI can change the Mesh Wireframe Thickness using “DisplayAttributes.MeshSpecificAttributes.MeshWireThickness = int”, but that doesn’t overwrite the mesh edge thicknesses. If you set the MeshWireThickness to 0 but the MeshEdgeThickness is 2, edges will still show with a thickness of 2.\n\n\nDoes anybody know what’s the method to use and if it can be accessed via Python? I read the documentation, but the methods proposed do not work for Python so maybe I’m missing something out (\nhttps://developer.rhino3d.com/api/rhinocommon/rhino.display.displaypipelineattributes\n).\n\n\nThis is my code so far:\n\n\nimport Rhino\n\ndef SetMeshEdgeThickness(display_mode_name, edge_thickness):\n    # Find the display mode by name\n    display_mode = Rhino.Display.DisplayModeDescription.FindByName(display_mode_name)\n    \n    # Modify the mesh edge thickness\n    display_mode.DisplayAttributes.MeshSpecificAttributes.MeshEdgeThickness = edge_thickness\n    \n    # Save the changes to the display mode\n    if Rhino.Display.DisplayModeDescription.UpdateDisplayMode(display_mode):\n        print(\"Set mesh edge thickness to {} for display mode '{}'.\".format(edge_thickness, display_mode_name))\n    else:\n        print(\"Failed to update display mode '{}'.\".format(display_mode_name))\n\n# Example\nSetMeshEdgeThickness(\"Shaded\", 10)\n\n\n\nAnd here is the error message:\n\n\nRuntime error (MissingMemberException): 'MeshDisplayAttributes' object has no attribute 'MeshEdgeThickness'\n\nTraceback:\n  line 18, in SetMeshEdgeThickness, \"<string>\"\n  line 27, in script",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ndef SetMeshEdgeThickness(display_mode_name, edge_thickness):\n    # Find the display mode by name\n    display_mode = Rhino.Display.DisplayModeDescription.FindByName(display_mode_name)\n    \n    # Modify the mesh edge thickness\n    display_mode.DisplayAttributes.MeshSpecificAttributes.MeshEdgeThickness = edge_thickness\n    \n    # Save the changes to the display mode\n    if Rhino.Display.DisplayModeDescription.UpdateDisplayMode(display_mode):\n        print(\"Set mesh edge thickness to {} for display mode '{}'.\".format(edge_thickness, display_mode_name))\n    else:\n        print(\"Failed to update display mode '{}'.\".format(display_mode_name))\n\n# Example\nSetMeshEdgeThickness(\"Shaded\", 10)",
+      "language": "python",
+      "author": "Pablo_Antuna_Molina",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 100
+}

@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-createbooleandifference-question/1565",
+  "topic_id": 1565,
+  "title": "RhinoCommon CreateBooleanDifference question",
+  "question": "I am experimenting with RhinoCommon in Python…  I am doing essentially the same thing as Rhino’s BooleanDifference command, but I ran across something I wasn’t expecting…\n\n\nIf you have two disjoint volumes, Rhino’s BooleanDifference (also union, intersect) doesn’t do anything - correct, it shouldn’t.  If you do the same thing with vb Rhinoscript, the same thing occurs, you get a Null return from the operation.\n\n\nHowever, in RhinoCommon a volume IS created, one that is the same as the base volume…  So if you delete the original input objects, the volume to subtract disappears, leaving a new object (new ID) identical to the base volume…  This is also the case with the Python Rhinoscriptsyntax method, as it just calls the RhinoCommon method.\n\n\nShouldn’t the RhinoCommon method return None if there is no intersection between the volumes?\n\n\nBelow is the code I used to test…\n\n\nThanks, --Mitch\n\n\nPython/Rhinoscriptsyntax/RhinoCommon\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino, scriptcontext\n\ntol=scriptcontext.doc.ModelAbsoluteTolerance\nmsg=\"Select base volume, then difference volume\"\nsrfs=rs.GetObjects(msg,8+16,minimum_count=2,maximum_count=2)\n\nsolid0 = rs.coercebrep(srfs[0])\nsolid1 = rs.coercebrep(srfs[1])\n\nsolDiff = Rhino.Geometry.Brep.CreateBooleanDifference(solid0, solid1, tol)    \nif solDiff:\n    for i in range(len(solDiff)):\n        scriptcontext.doc.Objects.AddBrep(solDiff[i])\n    scriptcontext.doc.Objects.Delete(srfs[0],True)\n    scriptcontext.doc.Objects.Delete(srfs[1],True)\nscriptcontext.doc.Views.Redraw()\n\n\n\nPython/Rhinoscriptsyntax\n\n\nimport rhinoscriptsyntax as rs\n\nmsg=\"Select base volume, then difference volume\"\nsrfs=rs.GetObjects(msg,8+16,minimum_count=2,maximum_count=2)\nrs.BooleanDifference(srfs[0],srfs[1],True\n\n\n\nvbRhinoscript\n\n\nOption Explicit\nCall Test()\nSub Test()\n\tDim msg,srfs,result\t\n\tmsg=\"Select base volume, then difference volume\"\n\tsrfs=Rhino.GetObjects(msg,8+16,,,,,2,2)\n\tresult=Rhino.BooleanDifference(srfs(0),srfs(1),True)\n\tIf IsNull(result) Then Ca...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino, scriptcontext\n\ntol=scriptcontext.doc.ModelAbsoluteTolerance\nmsg=\"Select base volume, then difference volume\"\nsrfs=rs.GetObjects(msg,8+16,minimum_count=2,maximum_count=2)\n\nsolid0 = rs.coercebrep(srfs[0])\nsolid1 = rs.coercebrep(srfs[1])\n\nsolDiff = Rhino.Geometry.Brep.CreateBooleanDifference(solid0, solid1, tol)    \nif solDiff:\n    for i in range(len(solDiff)):\n        scriptcontext.doc.Objects.AddBrep(solDiff[i])\n    scriptcontext.doc.Objects.Delete(srfs[0],True)\n    scriptcontext.doc.Objects.Delete(srfs[1],True)\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmsg=\"Select base volume, then difference volume\"\nsrfs=rs.GetObjects(msg,8+16,minimum_count=2,maximum_count=2)\nrs.BooleanDifference(srfs[0],srfs[1],True",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\nCall Test()\nSub Test()\n\tDim msg,srfs,result\t\n\tmsg=\"Select base volume, then difference volume\"\n\tsrfs=Rhino.GetObjects(msg,8+16,,,,,2,2)\n\tresult=Rhino.BooleanDifference(srfs(0),srfs(1),True)\n\tIf IsNull(result) Then Call Rhino.Print (\"Null\")\nEnd Sub",
+      "language": "unknown",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2033
+}

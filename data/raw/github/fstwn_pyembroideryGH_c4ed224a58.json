@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/fstwn/pyembroideryGH/blob/ee7fd47316b364962a69976b4168ce9fef2702cf/usrobj_src/pyembroideryGH_CreatePattern.py",
+  "repo": "fstwn/pyembroideryGH",
+  "repo_stars": 11,
+  "repo_description": "Set of UserObjects enabling Grasshopper to directly read, write and manipulate various kinds of embroidery formats. It is based on an IronPython-compatible fork of the original pyembroidery library.",
+  "license": "MIT",
+  "filepath": "usrobj_src/pyembroideryGH_CreatePattern.py",
+  "instruction": "Create one or a collection of empty embroidery patterns as\ninstances of pyembroidery.EmbPattern.\n    Inputs:\n        N: The number of empty patterns to be created, 1 if left blank.\n           {item,...",
+  "code": "\"\"\"\nCreate one or a collection of empty embroidery patterns as\ninstances of pyembroidery.EmbPattern.\n    Inputs:\n        N: The number of empty patterns to be created, 1 if left blank.\n           {item, int}\n    Output:\n        Pattern: The empty pattern as a pyembroidery.EmbPattern instance.\n                 {item/list/tree, EmbPattern}\n    Remarks:\n        Author: Max Eschenbach\n        License: MIT License\n        Version: 201022\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS\nfrom __future__ import division\n\n# GHPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"CreatePattern\"\nghenv.Component.NickName = \"CP\"\nghenv.Component.Category = \"pyembroideryGH\"\nghenv.Component.SubCategory = \"3 Pattern Creation\"\n\n# LOCAL MODULE IMPORTS\ntry:\n    import pyembroidery\nexcept ImportError:\n    errMsg = (\"The pyembroidery python module seems to be not correctly \" +\n              \"installed! Please make sure the module is in you search \" +\n              \"path, see README for instructions!.\")\n    raise ImportError(errMsg)\n\nclass CreatePattern(component):\n\n    def RunScript(self, N):\n        # default for N\n        if N is None:\n            N = 1\n        \n        # initialize output\n        Pattern = System.Collections.Generic.List[object]()\n        \n        # create empty patterns\n        for i in range(N):\n            pat = pyembroidery.EmbPattern()\n            Pattern.Add(pat)\n        \n        # return outputs if you have them; here I try it for you:\n        return Pattern\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

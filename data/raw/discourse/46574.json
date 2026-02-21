@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-run-a-python-script-with-options/46574",
+  "topic_id": 46574,
+  "title": "How to run a python script with options?",
+  "question": "For example:\n\nIn a macro I can run: “line b”, and i will run the line function with the both sides option, in one step.\n\nBut if I have a python script and I execute it using an alias like “myline”, can I have “myline 100” where 100 is a variable used inside the script?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    '''prompt for a number and create vertical line at origin'''\n    \n    # prompt for a line length\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    length = rs.GetReal(\"LineLength\", 10.0, minimum=tolerance)\n    if not length: return\n    \n    # create a line\n    p0 = Rhino.Geometry.Point3d(0, 0, 0)\n    p1 = Rhino.Geometry.Point3d(0, 0, length)\n    line = Rhino.Geometry.Line(p0, p1)\n    \n    # add to document\n    scriptcontext.doc.Objects.AddLine(line)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1789
+}

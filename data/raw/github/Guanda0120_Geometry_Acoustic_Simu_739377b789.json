@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Guanda0120/Geometry_Acoustic_Simu/blob/fe0e445521fcfee6406f3605783387410ec1848c/FileIO/st_2_rhino.py",
+  "repo": "Guanda0120/Geometry_Acoustic_Simu",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "FileIO/st_2_rhino.py",
+  "instruction": "St 2 rhino",
+  "code": "import numpy as np\nimport rhino3dm\nimport pickle\nimport os\nfrom Acoustic.ImageSourceRay import ImageSourceRay\nfrom Acoustic.Receiver import Receiver\n\n\ndef st2rhino(pickle_dir: str, out_sir: str):\n    \"\"\"\n\n    :param pickle_dir:\n    :param out_sir:\n    :return:\n    \"\"\"\n    assert os.path.exists(pickle_dir), ValueError(\"Pickle dir is not exist!\")\n\n    with open(pickle_dir, 'rb') as f:\n        rec = pickle.load(f)\n\n        # Create a Rhino file\n        rh_file = rhino3dm.File3dm()\n        # Layer setting\n        cur_layer = rhino3dm.Layer()\n        cur_layer.Name = 'Stochastic_Ray'\n        cur_layer.Visible = True\n        cur_layer.Color = (255, 128, 128, 255)\n        rh_file.Layers.Add(cur_layer)\n\n\n        # Get layer index\n        layer_index = [each.Index for each in rh_file.Layers]\n\n        if isinstance(rec, Receiver):\n\n            for st_ray in rec.stochastic_ray:\n                # Point Container\n                point_container = []\n                src_point = rhino3dm.Point3d(st_ray.init_location[0], st_ray.init_location[1], st_ray.init_location[2])\n                point_container.append(src_point)\n                for pt in st_ray.start_point:\n                    tmp_pt = rhino3dm.Point3d(pt[0], pt[1], pt[2])\n                    point_container.append(tmp_pt)\n\n                polyline_rh = rhino3dm.Polyline(point_container)\n                polycur = rhino3dm.Curve.CreateControlPointCurve(polyline_rh, degree=1)\n                id = rh_file.Objects.AddCurve(polycur)\n                # Add Layer\n                cur_obj = rh_file.Objects.FindId(str(id))\n                cur_obj.Attributes.LayerIndex = layer_index[0]\n\n            rh_file.Settings.ModelUnitSystem = rhino3dm.UnitSystem.Meters\n            rh_file.Write(out_sir, 6)\n\n\nif __name__ == '__main__':\n    pickle_dir = r\"D:\\\\PlanningHall\\\\rec_0.pkl\"\n    rhino_dir = r'C:\\Users\\12748\\Desktop\\Real_rec0.3dm'\n    st2rhino(pickle_dir, rhino_dir)\n\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

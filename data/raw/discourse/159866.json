@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/selecting-object-faces-in-python/159866",
+  "topic_id": 159866,
+  "title": "Selecting object faces in python",
+  "question": "Hi,\n\n\nIn Rhino it is possible to select a specific face on an polysurface (like on a box) and assign a material just for this face. The final result can be that the box has 6 different materials (one for each face). Is it possible to achieve the same operation with a python scrip? The only thing that i managed to do at this point is to explode my polysurface and assign a material to the newly created surfaces. The problem is when i join the surfaces together to recreate the polysurface, the materials do not copy on the new polysurface…",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select surfaces\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    go.SubObjectSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n    \n    for objref in go.Objects():\n        obj = objref.Object()\n        face = objref.Face()\n        if obj and face:\n            print(\"Id: {0}, Face: {1}\".format(obj.Id, face.FaceIndex))\n\ntest()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "class Wood(object):\n\tdef __init__(self,b=38,d=89,start=(0,0,0),end=(1000,0,0)):\n\t\t\"Instance attribute for wood members\"\n\t\tself.b = b\n\t\tself.d = d\n\t\tself.start = start\n\t\tself.end = end\n\nclass SawnLumber:\n\tdef __init__(self,**kwargs):\n\t\tWood.__init__(self,**kwargs)\n\t\t\n\tdef Mod(self,start,end):\n\t\t\"This function create the 3D model of the member in Rhino\"\n\t\trs.EnableRedraw(False)\n\t\tstart = rs.CreatePoint(start)\t\t\t#Create a point object for start coord\n\t\tend = rs.CreatePoint(end)\t\t\t\t#Create a point object for end coord\n\t\tvec = rs.VectorCreate(end,start)\t\t#Creation of unitized vector of the member\n\t\tx = rs.VectorUnitize(vec)\t\t\t\t#\n\t\tif rs.VectorCompare(x,(0,0,1))==0:\t\t#\n\t\t\trs.MessageBox(\"vectorcompare ok\")\t#\n\t\t\ty = rs.CreateVector(0,1,0)\t\t\t#\n\t\telse:\t\t\t\t\t\t\t\t\t#\n\t\t\ty = rs.VectorCrossProduct(x,(0,0,1))#\n\t\tz = rs.VectorCrossProduct(y,x)\t\t\t#\n\t\tpt1 = start + self.b*y/2 + self.d*z/2 \t#Modeling member\n\t\tpt2 = pt1 - self.b*y\t\t\t\t\t#\n\t\tpt3 = pt2 - self.d*z\t\t\t\t\t#\n\t\tpt4 = pt3 + self.b*y\t\t\t\t\t#\n\t\tbase = rs.AddSrfPt([pt1,pt2,pt3,pt4])\t#\n\t\tline = rs.AddLine(start,end)\t\t\t#\n\t\tmembrure = rs.ExtrudeSurface(base,line)\t#\n\t\trs.DeleteObjects([base,line])\t\t\t#\n\t\t\n##########HERE I WANT TO ITERATE OVER THE FACES OF membrure\n\t\tmembrure_faces = \"A script that get the IDs of the faces  of membrure\"\n\t\tfor face in membrure_faces:\n\t\t\tnormale = rs.SurfaceNormal(face,[0,0])\t\t#obtiens un vecteur normal a la surface\n\t\t\tcompare = rs.VectorCrossProduct(x,normale)\n\t\t\tif compare <> rs.CreateVector(0,0,0):\n\t\t\t\trs.SelectObject(face,False)\n\t\t\t\trs.Command(\"-_RenderAssignMaterialToObjects NL_face\") :  #assign a side face texture\n\t\t\telse:\n\t\t\t\trs.SelectObject(face,False)\n\t\t\t\trs.Command(\"-_RenderAssignMaterialToObjects NL_end_grain\")  #assign end grain texture",
+      "language": "python",
+      "author": "Julien_Labrie",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 746
+}

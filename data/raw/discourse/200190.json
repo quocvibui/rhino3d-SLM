@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/replacing-existing-text-through-python-script/200190",
+  "topic_id": 200190,
+  "title": "Replacing existing text through python script?",
+  "question": "Hey there,\n\n\nso my problem is that I have an existing text in my rhino document (Bauherr: Max Mustermann), that I want to replace through grasshopper via cvs. file that has the actual name, that I want to change.\n\n\nI already wrote a script that finds the new name from the .cvs file and should change the existing name (Max Mustermann) with the name from the .cvs.\n\nGoing through a lot of debugging, rhino is still not able to find the ‘Text’ in my document, even though it’s the only object in the whole project:\n\n\n‘Runtime error (MissingMemberException): ‘CustomTable’ object has no attribute ‘GetObjectList’’\n\n\nIs there any way to get Rhino to find my text-properties via script or component ?\n\n\nthank you in advance!",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n\nif new_text is None:\n    new_text = \"Bauherr: Feathers McGraw\"\n\ndef set_text(to: str) -> None:\n    # https://developer.rhino3d.com/api/RhinoScriptSyntax/#selection-ObjectsByType\n    guids = rs.ObjectsByType(0) \n    for guid in guids:\n        # obj = sc.doc.Objects.Find(guid)\n        geom = sc.doc.Objects.FindGeometry(guid)\n        if geom.__class__ not in [Rhino.Geometry.TextEntity]:\n            continue\n        rs.TextObjectText(guid,to)\n\n\ntry:\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    set_text(new_text)\nexcept BaseException as e:\n    raise e\nfinally:\n    sc.doc = ghdoc",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 120
+}

@@ -1,0 +1,22 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-view-to-blender-camera-exporter/202932",
+  "topic_id": 202932,
+  "title": "Rhino view to blender camera exporter",
+  "question": "Hi,\n\nWhen I export file in fbx format to blender, I get unexpected results for the views; 9/10 times the view/camera is messed up, not sure what causes it but here’s a quick solution that I found very useful.\n\n\nHere’s the rhino part:\n\n\nimport Rhino\nimport pickle\nimport os\n\n\n# Get the current document\ndoc = Rhino.RhinoDoc.ActiveDoc\n\n# Get the named views\nnamed_views = doc.NamedViews\n\nname_of_named_views = [i.Name for i in named_views]\n\n# Extracting needed data\nvp = [i.Viewport for i in named_views]\n\ncamera_angle = [i.GetCameraAngles() for i in vp]\ncamera_up_vec = [i.CameraUp for i in vp]\ncamera_location = [i.CameraLocation for i in vp]\ncamera_direction = [i.CameraDirection for i in vp]\n\ncamera_pt_location = []\nfor i in camera_location:\n    camera_pt_location.append([round(i.X, 3), round(i.Y,3), round(i.Z,3)])\n\ncamera_normal_vec = []\nfor i in camera_direction:\n    i = i.ToString()\n    i = i.split(\",\")\n    i = [round(float(n),3) for n in i] \n    camera_normal_vec.append(i)\n\ncamera_up_vec2 = []\nfor i in camera_up_vec:\n    i = i.ToString()\n    i = i.split(\",\")\n    i = [round(float(n),3) for n in i] \n    camera_up_vec2.append(i)\n\n# Pack data into dictionary\ndictionary = {\"names\":name_of_named_views, \"location\":camera_pt_location, \"direction\": camera_normal_vec, \"camera_up\":camera_up_vec2, \"angle\":camera_angle}\n\n# Specify the path and name of the new folder\ndocs_folder = os.path.join(os.path.expanduser(\"~\"), \"Documents\")\nnew_folder_path = docs_folder + \"/CCMP\"\n\n\n# Create the folder\ntry:\n    os.mkdir(new_folder_path)\n\nexcept FileExistsError:\n    pass\n\nexcept OSError as e:\n    print(f\"Error creating folder: {e}\")\n\n\n\nnew_file_path = new_folder_path + \"/rhino_camera_export.pkl\"\n\n\nwith open(new_file_path, \"wb\") as f:\n    pickle.dump(dictionary, f)\n\n\n\nHere’s the blender part:\n\n\nimport bpy\nimport pickle\nimport os\nfrom mathutils import Vector\n#import math\n\nnew_collection = bpy.data.collections.new(\"Rhino_Cams\")\nbpy.context.scene.collection.children.link(new_collection)\n\n\ndef look_...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport pickle\nimport os\n\n\n# Get the current document\ndoc = Rhino.RhinoDoc.ActiveDoc\n\n# Get the named views\nnamed_views = doc.NamedViews\n\nname_of_named_views = [i.Name for i in named_views]\n\n# Extracting needed data\nvp = [i.Viewport for i in named_views]\n\ncamera_angle = [i.GetCameraAngles() for i in vp]\ncamera_up_vec = [i.CameraUp for i in vp]\ncamera_location = [i.CameraLocation for i in vp]\ncamera_direction = [i.CameraDirection for i in vp]\n\ncamera_pt_location = []\nfor i in camera_location:\n    camera_pt_location.append([round(i.X, 3), round(i.Y,3), round(i.Z,3)])\n\ncamera_normal_vec = []\nfor i in camera_direction:\n    i = i.ToString()\n    i = i.split(\",\")\n    i = [round(float(n),3) for n in i] \n    camera_normal_vec.append(i)\n\ncamera_up_vec2 = []\nfor i in camera_up_vec:\n    i = i.ToString()\n    i = i.split(\",\")\n    i = [round(float(n),3) for n in i] \n    camera_up_vec2.append(i)\n\n# Pack data into dictionary\ndictionary = {\"names\":name_of_named_views, \"location\":camera_pt_location, \"direction\": camera_normal_vec, \"camera_up\":camera_up_vec2, \"angle\":camera_angle}\n\n# Specify the path and name of the new folder\ndocs_folder = os.path.join(os.path.expanduser(\"~\"), \"Documents\")\nnew_folder_path = docs_folder + \"/CCMP\"\n\n\n# Create the folder\ntry:\n    os.mkdir(new_folder_path)\n\nexcept FileExistsError:\n    pass\n\nexcept OSError as e:\n    print(f\"Error creating folder: {e}\")\n\n\n\nnew_file_path = new_folder_path + \"/rhino_camera_export.pkl\"\n\n\nwith open(new_file_path, \"wb\") as f:\n    pickle.dump(dictionary, f)",
+      "language": "python",
+      "author": "Lawand_Noa_man",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 170
+}

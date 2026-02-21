@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/generate-local-rx-ry-rz-values-to-transform-a-plane-into-a-target-plane/173991",
+  "topic_id": 173991,
+  "title": "Generate Local Rx Ry Rz Values To Transform a Plane into a Target Plane",
+  "question": "Hey, I bet this Question has already been answered somewhere on here but i can´t find a Solution that works. I have two planes Plane A and Plane B. I would like to Orient Plane A to the same orientation as Plane B by Rotating Plane A around its local axis, x y z(in this order). I tried to decompose the transformation result from the orient Component but with this method i could only get the global x y z rotations. I specifically need to know the angles. Thanks in advance",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\ndef extract_rotation_angles(plane_a, plane_b):\n    rotation = rg.Transform.PlaneToPlane(plane_a, plane_b)\n    angle_x, angle_y, angle_z = decompose_rotation_matrix(rotation)\n    return angle_x, angle_y, angle_z\n\ndef decompose_rotation_matrix(transform):\n    angle_y = math.asin(-clamp(transform.M20, -1.0, 1.0))\n    if abs(transform.M20) < 0.99999:\n        angle_x = math.atan2(transform.M21, transform.M22)\n        angle_z = math.atan2(transform.M10, transform.M00)\n    else:\n        angle_x = math.atan2(-transform.M12, transform.M11)\n        angle_z = 0\n    return angle_x, angle_y, angle_z\n\ndef clamp(val, min_val, max_val):\n    return max(min(val, max_val), min_val)\n\ndef apply_rotation(plane, angle_x, angle_y, angle_z):\n    rotation_x = rg.Transform.Rotation(angle_x, rg.Vector3d.XAxis, plane.Origin)\n    rotation_y = rg.Transform.Rotation(angle_y, rg.Vector3d.YAxis, plane.Origin)\n    rotation_z = rg.Transform.Rotation(angle_z, rg.Vector3d.ZAxis, plane.Origin)\n    combined_rotation = rotation_z * rotation_y * rotation_x\n    rotated_plane = rg.Plane(plane)\n    rotated_plane.Transform(combined_rotation)\n    return rotated_plane\n\nplane_a = rg.Plane.WorldXY\nplane_b = rg.Plane.WorldYZ\nangles = extract_rotation_angles(plane_a, plane_b)\nprint(\"Rotation Angles (in radians):\", angles)\n\nrotated_plane = apply_rotation(plane_a, *angles)\nis_aligned = rotated_plane.Normal.IsParallelTo(plane_b.Normal, 1e-6) and rotated_plane.Origin.DistanceTo(plane_b.Origin) < 1e-6\nprint(\"Planes are aligned:\", is_aligned)",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 485
+}

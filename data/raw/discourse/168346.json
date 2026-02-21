@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-executing-python-script-from-alias/168346",
+  "topic_id": 168346,
+  "title": "Error executing Python script from alias",
+  "question": "I’ve got a Python script that I’m trying to run from an alias.\n\n\nCapture2\n1454×39 14.1 KB\n\n\nWhen I attempt to use the alias, I get an error.\n\n\n\n\nIs there something obvious here that I’m doing wrong?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nimport System\nimport System.Collections.Generic\nimport Rhino\n\ndef ProcessBlock(guid, biName):\n    currLayer = rs.CurrentLayer()\n    blockChildrenIDs = rs.BlockObjects(biName)\n\n    # print (\"processing block: \" + biName)\n    # print (\"\")\n\n    for bcId in blockChildrenIDs:\n        if rs.IsBlockInstance(bcId):\n            bcName = rs.BlockInstanceName(bcId)\n            ProcessBlock(bcId, bcName)\n            rs.ObjectColorSource(bcId, source=3)\n            rs.ObjectLayer(bcId, currLayer)\n        else:\n            objType = rs.ObjectType(bcId)\n            # print(\"Processing non-block-object: \" + str(bcId) + \" : \" + str(objType))\n            rs.ObjectColorSource(bcId, source=3)\n            rs.ObjectLayer(bcId, currLayer)\n\n    rs.ObjectLayer(guid, currLayer)\n\n    # print (\"----------------------------------------------------\")\n    \n    return True\n\n\ndef main():\n    objs = rs.SelectedObjects()\n    \n    if len(objs) == 0:\n        rs.MessageBox(\"Please select an object\")\n        return False\n\n    if len(objs) == 1:\n        objGUID = objs[0]\n        if rs.IsBlockInstance(objGUID):\n            currLayerId = rs.CurrentLayer()\n            biName = rs.BlockInstanceName(objGUID)\n            currLayerName =rs.LayerName(currLayerId)\n            rs.RenameLayer(currLayerName, biName)\n\n\n    # Make sure we've got a BlockInstance\n    # if not rs.IsBlockInstance(objGUID):\n    #     rs.MessageBox(\"Object is not a BlockInstance\")\n    #     return False\n\n    for i in objs:\n        if rs.IsBlockInstance(i):\n            ProcessBlock(i, rs.BlockInstanceName(i))\n        rs.ObjectColorSource(i, source=3)\n    \n    return True\n\n\nmain()",
+      "language": "python",
+      "author": "terrence.mitchem",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef activate_layer(layer_name):\n    # Check if the layer exists\n    if not rs.IsLayer(layer_name):\n        # Optionally create the layer if it does not exist\n        rs.AddLayer(layer_name)\n        print(f\"Layer '{layer_name}' created.\")\n\n    # Set the layer as current\n    rs.CurrentLayer(layer_name)\n    print(f\"Layer '{layer_name}' is now the active layer.\")\n\n# Specify the layer name\nlayer_name = \"test\"\nactivate_layer(layer_name)",
+      "language": "python",
+      "author": "barden00",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef activate_layer(layer_name):\n    # Check if the layer exists\n    if not rs.IsLayer(layer_name):\n        # Optionally create the layer if it does not exist\n        rs.AddLayer(layer_name)\n        print(\"Layer '{}' created.\").format(layer_name)\n\n    # Set the layer as current\n    rs.CurrentLayer(layer_name)\n    print(\"Layer '{}' is now the active layer.\").format(layer_name)\n\n# Specify the layer name\nlayer_name = \"test\"\nactivate_layer(layer_name)",
+      "language": "python",
+      "author": "barden00",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 664
+}

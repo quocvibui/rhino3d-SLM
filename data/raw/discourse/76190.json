@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/optimize-ghpython-random-2d-points-component-for-faster-population/76190",
+  "topic_id": 76190,
+  "title": "Optimize GHPython random 2D points component for faster population?",
+  "question": "Hi,\n\n\nI’ve ported the \nPopulation\n method from the Vector GHa lib, mentioned by \n@DavidRutten\n in this \nthread\n to GHPython. Now I’m looking for advice, on how to optimise the code in order to make it run faster, since I need it to produce about 10 000 to 20 000 points (tuples with 3 coordinates) for me.\n\n\nHere are the current speeds of the Python component:\n\n\n\n\n\n\n\n\n\n\nPopulation\n\n\nTime\n\n\nPercentage\n\n\n\n\n\n\n\n\n\n\n10\n\n\n6 ms\n\n\n28 %\n\n\n\n\n\n\n100\n\n\n853 ms\n\n\n85 %\n\n\n\n\n\n\n1000\n\n\n1.3 min\n\n\n100 %\n\n\n\n\n\n\n10 000\n\n\n60 min\n\n\n>100 %\n\n\n\n\n\n\n\n\nThis is what the code looks like! The most interesting section to optimise might be the \npopulate()\n method of the \nPopulation\n class.\n\n\nimport Rhino.Geometry as rg\nimport random\nimport math\nimport sys\n\n\nclass Population:\n    \"\"\"A population of random points within a region.\n    \n    To use:\n    >>> ppl = Population(10, (25,25))\n    >>> ppl.populate()\n    \n    >>> ppl.get_coordinates()\n    [(x0, y0, z0), (x1, y1, y2), ..., (x10, y10, z10)]\n    \n    >>> ppl.get_points()\n    [Rhino.Geometry.Point3d, Rhino.Geometry.Point3d, ..., Rhino.Geometry.Point3d]\n    \"\"\"\n    \n    \n    def __init__(self, count, region):\n        self.count = int(count)\n        self.region = region\n        self.population = []\n        \n    \n    def distance_to(self, ptA, ptB):\n        \"\"\"Calculate the distance between two 3-dimensional points.\n\n        Args:\n          ptA: 3-dimensional point A (Rhino.Geometry.Point3d, tuple or list)\n          ptB: 3-dimensional point B (Rhino.Geometry.Point3d, tuple or list)\n        Returns:\n          The distance between point A and point B.\n        \"\"\"\n        dist = math.sqrt((ptA[0] -  ptB[0])**2 + (ptA[1] -  ptB[1])**2 + (ptA[2] -  ptB[2])**2)\n        return dist\n    \n\n    def next_point(self, domain):\n        \"\"\"Constructs a random 2-dimensional point coordinate.\n        \n        Args:\n          domain: Tuple of 2 maximum values in x and y. \n        Returns:\n          Returns a tuple of random 2D point coordinates.\n        \"\"\"\n        maxX = doma...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.EnableRedraw(False)\n...code here...\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport sys\nimport Rhino.Geometry as rg\n\n\nptcoords = (1000.,1000.,1000.)\npt = rs.AddPoint(ptcoords)\nrhpt = rg.Point3d(*ptcoords)\n\nprint (ptcoords, sys.getsizeof(ptcoords))\nprint (pt, sys.getsizeof(pt))\nprint (rhpt, sys.getsizeof(rhpt))",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport sys\nimport Rhino.Geometry as rg\n\n\nptcoords = (1000.,1000.,1000.)\npt = rs.AddPoint(ptcoords)\nrhpt = rg.Point3d(*ptcoords)\n\nprint (ptcoords, sys.getsizeof(ptcoords))\nprint (pt, sys.getsizeof(pt))\nprint (rhpt, sys.getsizeof(rhpt))",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport random\nimport math\nimport sys\n\n\nclass Population:\n    \"\"\"A population of random points within a region.\n    \n    To use:\n    >>> ppl = Population(10, (25,25))\n    >>> ppl.populate()\n    \n    >>> ppl.get_coordinates()\n    [(x0, y0, z0), (x1, y1, y2), ..., (x10, y10, z10)]\n    \n    >>> ppl.get_points()\n    [Rhino.Geometry.Point3d, Rhino.Geometry.Point3d, ..., Rhino.Geometry.Point3d]\n    \"\"\"\n    \n    \n    def __init__(self, count, region):\n        self.count = int(count)\n        self.region = region\n        self.population = []\n        \n    \n    def distance_to(self, ptA, ptB):\n        \"\"\"Calculate the distance between two 3-dimensional points.\n\n        Args:\n          ptA: 3-dimensional point A (Rhino.Geometry.Point3d, tuple or list)\n          ptB: 3-dimensional point B (Rhino.Geometry.Point3d, tuple or list)\n        Returns:\n          The distance between point A and point B.\n        \"\"\"\n        dist = math.sqrt((ptA[0] -  ptB[0])**2 + (ptA[1] -  ptB[1])**2 + (ptA[2] -  ptB[2])**2)\n        return dist\n    \n\n    def next_point(self, domain):\n        \"\"\"Constructs a random 2-dimensional point coordinate.\n        \n        Args:\n          domain: Tuple of 2 maximum values in x and y. \n        Returns:\n          Returns a tuple of random 2D point coordinates.\n        \"\"\"\n        maxX = domain[0]\n        minX = -maxX\n        maxY = domain[1]\n        minY = -maxY\n        return (random.uniform(minX, maxX), random.uniform(minY, maxY), 0)\n\n\n    def populate(self):\n        \"\"\"Populates a 2-dimensional region with random 2-dimensional points.\"\"\"\n        distance_threshold = sys.maxint\n    \n        for i in range(self.count):\n            if (len(self.population) == 0): # first point\n                pt = self.next_point(self.region)\n                self.population.append(pt)\n            \n            else: # other points\n                attempts = int(max(50, math.sqrt(i)))\n                max_dist = -sys.maxint\n                max_pt = 0\n            \n                for k in range(attempts):\n                    if (k > 100) and (max_dist > distance_threshold * 0.9):\n                        break\n                    elif (k > 50) and (max_dist > distance_threshold * 0.92):\n                        break\n                    elif (k > 25) and (max_dist > distance_threshold * 0.95):\n                        break\n                \n                    pt = self.next_point(self.region)\n                    dist = sorted(self.distance_to(pt, prev_pt) for prev_pt in self.population)[0]\n                    if dist == sys.maxint:\n                        break\n                    if dist > max_dist:\n                        max_dist = dist\n                        max_pt = pt\n                        if (max_dist > distance_threshold * 1.25):\n                            break\n        \n                distance_threshold = max_dist\n                self.population.append(max_pt)\n    \n    \n    def get_coordinates(self):\n        \"\"\"Returns a list of random 2-dimensional point coordinates witihn a region.\"\"\"\n        return self.population\n    \n    \n    def get_points(self):\n        \"\"\"Returns a list of Rhino.Geometry.Point3d witin a redion.\"\"\"\n        pts = [rg.Point3d(c[0], c[1], c[2]) for c in self.population]\n        return pts\n\n\n# Variables\ncount = 10 # number of random points to produce\ndomain = (5.0, 5.0) # max. extends of the region in x and y\n\n# Initialise class\nppl = Population(count, domain)\nppl.populate()\n\n# Output\na = ppl.get_points()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 6,
+  "views": 1470
+}

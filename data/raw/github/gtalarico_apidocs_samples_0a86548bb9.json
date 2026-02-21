@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/py/modify-object-color.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/py/modify-object-color.py",
+  "instruction": "Modify object color",
+  "code": "from System.Drawing import *\nfrom Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.Commands import *\nfrom Rhino.UI.Dialogs import ShowColorDialog\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select object\", False, ObjectType.AnyObject)\n    if rc != Result.Success:\n        return rc\n    rhino_object = obj_ref.Object()\n    color = rhino_object.Attributes.ObjectColor\n    b, color = ShowColorDialog(color)\n    if not b: return Result.Cancel\n\n    rhino_object.Attributes.ObjectColor = color\n    rhino_object.Attributes.ColorSource = ObjectColorSource.ColorFromObject\n    rhino_object.CommitChanges()\n\n    # an object's color attributes can also be specified\n    # when the object is added to Rhino\n    sphere = Sphere(Point3d.Origin, 5.0)\n    attributes = ObjectAttributes()\n    attributes.ObjectColor = Color.CadetBlue\n    attributes.ColorSource = ObjectColorSource.ColorFromObject\n    doc.Objects.AddSphere(sphere, attributes)\n\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

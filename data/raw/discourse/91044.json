@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/best-way-to-improve-the-speed-of-a-python-script/91044",
+  "topic_id": 91044,
+  "title": "Best way to improve the speed of a Python script",
+  "question": "Dear all,\n\n\nI am all new to Rhino / Grasshopper and would like to know how to improve the speed of a Python script.\n\n\nI am particularly interested in 2 options:\n\n\n\n\nusing Numba and its \n@jit\n operator for parallelization\n\n\nreplacing all the \nfor\n loops by matrix operations with Numpy\n\n\n\n\nI haven’t tested the first option yet since I can’t seem to install “GH_CPython” on Rhino 6. I don’t know whether it is a compatibility issue or not, and if by chance \n@Mahmoud_Mohamed_Ouf\n reads this message, I would really appreciate to have some information regarding that matter.\n\n\nI should also mention that the “GH_PythonRemote” component that I am currently testing instead doesn’t work with \njit\n operators.\n\n\nNow, the problem that I have with Numpy is when I need to convert numpy arrays of vectors to Rhino Geometry objects like \nPoint3d\n. It takes forever.\n\n\nIn the example below I have a simple line growth algorithm where positions, distances and forces computation is entirely vectorized with numpy.   Without converting the vectors array to Point3d the script runs faster than the regular \nfor\n loop version and computes the position of about 2000 points under 100 ms per iteration (without RTrees or KDTrees). However, when I iterate over the numpy array to convert the vectors to Point3D the script slows down drastically (23 times slower in this example) and becomes much slower than the \nfor\n loop version.\n\n\n\n\nss210%20(2)\n1573×635 53 KB\n\n\n\n\ndefinition: \nLine Growth (numpy).gh\n (8.7 KB)\n\n\n\n\n\nscript\n\n\nimport Rhino.Geometry as rg\nimport ghpythonremote\nimport scriptcontext\n\nnp = scriptcontext.sticky['numpy']\nsp = scriptcontext.sticky['scipy.spatial']\ndistance = sp.distance\n\n\ndef setup():\n    \n    global arr\n\n    #Take every consecutive pair of points on a curve and insert a new one in between\n    pts = np.array([[p.X, p.Y, p.Z] for p in iPoints])\n    avg = (pts[:-1] + pts[1:]) * .5\n    arr = np.insert(avg, range(pts.shape[0]), pts, 0)\n    \n    print \"loaded\"\n\n\n\nif iDraw:\n    push()\n  ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport ghpythonremote\nimport scriptcontext\n\nnp = scriptcontext.sticky['numpy']\nsp = scriptcontext.sticky['scipy.spatial']\ndistance = sp.distance\n\n\ndef setup():\n    \n    global arr\n\n    #Take every consecutive pair of points on a curve and insert a new one in between\n    pts = np.array([[p.X, p.Y, p.Z] for p in iPoints])\n    avg = (pts[:-1] + pts[1:]) * .5\n    arr = np.insert(avg, range(pts.shape[0]), pts, 0)\n    \n    print \"loaded\"\n\n\n\nif iDraw:\n    push()\n    subdivide()\n    \n    #Convert numpy vectors array to Point3d\n    oPoints = [rg.Point3d(p[0], p[1], p[2]) for p in arr]\n    \nelse:\n    setup()\n\n\n\ndef subdivide():\n    global arr\n    \n    #Check distances between each consecutive pair of points\n    #insert a new point if distance is below the specified threshold\n    d = np.sqrt(np.sum(np.diff(arr, axis=0)**2,1)) \n    idc = np.nonzero(d>iDiameter)[0]\n    means = (arr[idc] + arr[idc+1]) * .5\n    arr = np.insert(arr, idc+1, means, 0) \n\n\n\ndef push():\n    \n    global arr\n\n    #Computes distances matrix and set self-comparisons to NaN\n    d = distance.cdist(arr, arr)\n    np.fill_diagonal(d, None)\n    \n    #Find pairs of vectors whose separation distance is < iDiameter\n    id1, id2 = np.nonzero(d<iDiameter)\n    \n    #Count (number of \"too close\" vectors for each vector)\n    count = np.vstack(np.bincount(id1))\n    \n    #Difference between pairs of selected vectors\n    dif = arr[id2] - arr[id1]\n    \n    #Distances between pairs of selected vectors\n    dis = np.vstack(d[id1, id2])\n    \n    #Normalized differences \n    dif /= dis\n    \n    #Scaled differences\n    dif *= .5 * (iDiameter - dis)\n    \n    #Average of differences (0 at start)\n    avg = np.zeros([arr.shape[0], 3])\n    \n    #Indicates where to sum (indices)\n    idx = np.flatnonzero(np.concatenate(([1], np.diff(id1))))\n    \n    #Average sums of differences\n    avg[np.unique(id1)] = np.add.reduceat(dif, idx, axis = 0) / count\n\n    #Push\n    arr -= avg",
+      "language": "python",
+      "author": "lexi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1790
+}

@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-for-mac-python-script-for-batch-converting-stp-to-obj/45855",
+  "topic_id": 45855,
+  "title": "Rhino for Mac / Python script for batch-converting .stp to .obj",
+  "question": "I tried to write the following script for opening all files from one folder and saving them in an other one.\n\nHowever, it’s not working and I can’t figure out what I’m doing wrong. Im working with Version 5.3.2\n\n\nSomeone here that can point me to what exactly is wrong with this script?\n\n\nimport rhinoscriptsyntax as rs\nimport os.path\n\ndef BatchSaveAs():\n\n    folder = rs.BrowseForFolder(\"/Users/jehrenstein/Desktop/TEST/stp\")\n\n    if folder: print folder\n\n    saveFolder = rs.BrowseForFolder(\"/Users/jehrenstein/Desktop/TEST/obj\")\n\n    if saveFolder: print saveFolder\n\n    for filename in os.listdir(folder):\n        if filename.endswith(\".stp\"):\n            fullpath = os.path.join(folder,filename).lower()\n            rs.EnableRedraw(False)\n            rs.DocumentModified(False)\n            rs.Command(\"_-New _None\",False)\n\n\n            rs.Command('_-Open {} _Enter'.format(fullpath))\n            comm=\"_-Export\"\n            rs.Command(comm + chr(34) + saveFolder + \"/\" + filename + chr(34) + \".obj\" + \"_Enter\")\n\n\n    rs.DocumentModified(False)\n    rs.Command(\"_-New _None\",False)\n    rs.EnableRedraw(True)\n\nBatchSaveAs()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os.path\n\ndef BatchSaveAs():\n\n    folder = \"/Users/jehrenstein/Desktop/TEST/stp\"\n\n    if folder: print folder\n\n    saveFolder = \"/Users/jehrenstein/Desktop/TEST/obj\"\n\n    if saveFolder: print saveFolder\n\n    for filename in os.listdir(folder):\n        if filename.endswith(\".stp\"):\n            fullpath = os.path.join(folder,filename).lower()\n            rs.EnableRedraw(False)\n            rs.DocumentModified(False)\n            rs.Command(\"_-New _None\",False)\n\n\n            rs.Command('_-Open {} _Enter'.format(fullpath))\n            rs.Command(\"_-SelAll\")\n            comm=\"_-Export\"\n            rs.Command(comm + chr(34) + saveFolder + \"/\" + filename + chr(34) + \".obj\" + \"_Enter\")\n\n\n    rs.DocumentModified(False)\n    rs.Command(\"_-New _None\",False)\n    rs.EnableRedraw(True)\n\nBatchSaveAs()",
+      "language": "python",
+      "author": "Jonas_Ehstein",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os.path\n\ndef BatchSaveAs():\n\n    folder = \"/Users/jeff/Desktop/stp\"\n    saveFolder = \"/Users/jeff/Desktop/obj\"\n\n    for filename in os.listdir(folder):\n        if filename.endswith(\".stp\"):\n            fullpath = os.path.join(folder,filename).lower()\n            rs.Command(\"-Import {} _Enter\".format(fullpath))\n            comm=\"_-ExportAll \"\n            rs.Command(comm + chr(34) + saveFolder + \"/\" + filename + \".obj\" + chr(34)  + \" _Enter\" + \" _Enter\")\n            rs.Command(\"Delete\")\n    \nBatchSaveAs()",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os.path\n\ndef BatchSaveAs():\n\n#folder = \"/Users/Owner/Desktop/hold/\"\n#saveFolder = \"/Users/Owner/Desktop/hold1/\"\n\nfolder = \"C:\\Users\\Owner\\Desktop\\hold\"\nsaveFolder = \"C:\\Users\\Owner\\Desktop\\hold1\"\n\nfor filename in os.listdir(folder):\n    if filename.endswith(\".3dm\"):\n        fullpath = os.path.join(folder,filename).lower()\n        rs.Command(\"-Import {} _Enter\".format(fullpath))\n       \n        \n        rs.Command (\"_Import \" \"C:\\Desktop\\Parts\\Sphere.3dm \")\n\n        \n        rs.Command (\"_SelAll \")\n        comm=\"_Export \"\n        rs.Command(comm + chr(34) + saveFolder + \"/\" + filename + \".3dm\" + chr(34)  + \" _Enter\" + \" _Enter\")\n        rs.Command(comm + chr(34) + saveFolder + \"/\" + filename + \".3dm\" + chr(34)  + \" _Enter\" + \" _Enter\")\n        rs.Command (\"_SelAll \")\n        rs.Command(\"_Delete \")\n   BatchSaveAs()",
+      "language": "python",
+      "author": "J11",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os.path\n\ndef BatchSaveAs():\n\n    folder = rs.BrowseForFolder(\"/Users/jehrenstein/Desktop/TEST/stp\")\n\n    if folder: print folder\n\n    saveFolder = rs.BrowseForFolder(\"/Users/jehrenstein/Desktop/TEST/obj\")\n\n    if saveFolder: print saveFolder\n\n    for filename in os.listdir(folder):\n        if filename.endswith(\".stp\"):\n            fullpath = os.path.join(folder,filename).lower()\n            rs.EnableRedraw(False)\n            rs.DocumentModified(False)\n            rs.Command(\"_-New _None\",False)\n\n\n            rs.Command('_-Open {} _Enter'.format(fullpath))\n            comm=\"_-Export\"\n            rs.Command(comm + chr(34) + saveFolder + \"/\" + filename + chr(34) + \".obj\" + \"_Enter\")\n\n\n    rs.DocumentModified(False)\n    rs.Command(\"_-New _None\",False)\n    rs.EnableRedraw(True)\n\nBatchSaveAs()",
+      "language": "python",
+      "author": "Jonas_Ehstein",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 2396
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-rhinoscript-macros-renders-gh-unresponsive/51031",
+  "topic_id": 51031,
+  "title": "Using Rhinoscript Macros renders GH unresponsive",
+  "question": "I am trying to use the following code to bake geometry into Rhino, export an .stl and then delete the geometry immediately.\n\n\n#inputs: geometries, filename, run, dir, index\n\nimport rhinoscriptsyntax as rs\nprint filename\nname = filename.replace(\".3dm\",\".stl\")\nsavename = dir + '\\\\' + str(int(index)) + name\nprint savename\nprint ghdoc\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nif run:\n  for i in range(len(geometries)):\n    geo = geometries[i]\n    print geo\n  \n    sc.doc = ghdoc\n    #we obtain the reference in the Rhino doc\n    doc_object = rs.coercerhinoobject(geo)\n    print doc_object\n    attributes = doc_object.Attributes\n    geometry = doc_object.Geometry\n    \n    #we change the scriptcontext\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    \n    #we add both the geometry and the attributes to the Rhino doc\n    rhino_geo = sc.doc.Objects.Add(geometry, attributes)\n    \n    #we put back the original Grasshopper document as default\n    sc.doc = ghdoc\n\n  rs.Command(\"-SelAll\")\n  rs.Command(\"-_Export\\n\\\"\" + savename + \"\\\"\\n _Enter\\n _Enter\")\n  rs.Command(\"-SelAll\")\n  rs.Command(\"-_Delete\\n _Enter\\n _Enter\")\n\n\n\nHowever, when I run this, the GH window becomes semi-unresponsive. I can still pan around and click toggle buttons, for instance, but I can’t move the GH components or perform most actions.\n\n\nI’ll assume I am doing something wrong when performing the macros, but what?\n\n\ntest.gh\n (6.1 KB)",
+  "code_blocks": [
+    {
+      "code": "#inputs: geometries, filename, run, dir, index\n\nimport rhinoscriptsyntax as rs\nprint filename\nname = filename.replace(\".3dm\",\".stl\")\nsavename = dir + '\\\\' + str(int(index)) + name\nprint savename\nprint ghdoc\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nif run:\n  for i in range(len(geometries)):\n    geo = geometries[i]\n    print geo\n  \n    sc.doc = ghdoc\n    #we obtain the reference in the Rhino doc\n    doc_object = rs.coercerhinoobject(geo)\n    print doc_object\n    attributes = doc_object.Attributes\n    geometry = doc_object.Geometry\n    \n    #we change the scriptcontext\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    \n    #we add both the geometry and the attributes to the Rhino doc\n    rhino_geo = sc.doc.Objects.Add(geometry, attributes)\n    \n    #we put back the original Grasshopper document as default\n    sc.doc = ghdoc\n\n  rs.Command(\"-SelAll\")\n  rs.Command(\"-_Export\\n\\\"\" + savename + \"\\\"\\n _Enter\\n _Enter\")\n  rs.Command(\"-SelAll\")\n  rs.Command(\"-_Delete\\n _Enter\\n _Enter\")",
+      "language": "python",
+      "author": "toivosawen",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 1320
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sweep-two-rail-maintain-height/26807",
+  "topic_id": 26807,
+  "title": "Sweep Two Rail, Maintain Height",
+  "question": "Hi, I am trying to do a Sweep Two Rail in Grasshopper with the Maintain Height property. I’ve tried using the Sweep2 component, however the Maintain Height (H) property is not working. Any ideas on why this might be? I tried to script it, but I can’t find a function with the Maintain Height option.\n\n\nSweepTwoRailPython_AHD.gh\n (12.7 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef Sweep2Rails(r1, r2, s, maintain_height=False, closed=False):\n    sweep = Rhino.Geometry.SweepTwoRail()\n    sweep.AngleToleranceRadians = scriptcontext.doc.ModelAngleToleranceRadians\n    sweep.SweepTolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    sweep.MaintainHeight = maintain_height\n    sweep.ClosedSweep = closed\n    return sweep.PerformSweep(r1, r2, s)\n    \ndef DoSomething():\n    id_r1 = rs.GetObject(\"Select first rail\", 4, True, False)\n    if not id_r1: return\n    id_r2 = rs.GetObject(\"Select second rail\", 4, False, False)\n    if not id_r2: return\n    id_s = rs.GetObjects(\"Select cross section curves\", 4, False, False, False)\n    if not id_s: return\n    \n    r1 = rs.coercecurve(id_r1, -1, True)\n    r2 = rs.coercecurve(id_r2, -1, True)\n    s = [rs.coercecurve(id, -1, True) for id in id_s]\n    \n    rc = Sweep2Rails(r1, r2, s, maintain_height=True, closed=False)\n    if rc: \n        breps = [scriptcontext.doc.Objects.AddBrep(brep) for brep in rc]\n        scriptcontext.doc.Views.Redraw()\n        return breps\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 4596
+}

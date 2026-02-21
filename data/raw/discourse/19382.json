@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/self-intersecting-curves-using-rs-addplanarsrf/19382",
+  "topic_id": 19382,
+  "title": "Self-intersecting curves using rs.AddPlanarSrf",
+  "question": "Hi,\n\nI have a procedure that turns 1D lines into 2D rectangles (both in the x-y plane). Where the lines intersect the curve-boolean is used. The results are shown in the attached file.\n\nLines1/Boolean1 have a separation of 0.003 units compared to Lines2/Booelan2 which is 0.005 units.\n\nThe last step is to create a planar surface with the command PlanarSrf. Here is where I come across the problem. For some reason the PlanarSrf command thinks there is a self-intersecting object in Boolean1 but doesn’t have a problem in Boolean2.\n\nHas this got anything to do with unit tolerance? Is there a way of solving this?\n\n\nThanks\n\n\nIssue.3dm\n (64.2 KB)",
+  "code_blocks": [
+    {
+      "code": "# enclose the parallel lines\n    line1 = rs.AddLine(rs.CurveStartPoint(offset_obj1), rs.CurveStartPoint(offset_obj2))\n    line2 = rs.AddLine(rs.CurveEndPoint(offset_obj1), rs.CurveEndPoint(offset_obj2))\n\n    # Join curves\n    _obj = rs.JoinCurves([offset_obj1, offset_obj2, line1, line2])\n    rs.ObjectLayer(_obj, \"Offsets\")\n    rs.DeleteObjects([offset_obj1, offset_obj2, line1, line2])",
+      "language": "python",
+      "author": "Hossam_Osman",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "geometry",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 5,
+  "posts_count": 4,
+  "views": 1588
+}

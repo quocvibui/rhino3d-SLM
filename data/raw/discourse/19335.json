@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/about-the-rhino-pop-up-window-and-the-drawing-area-problem/19335",
+  "topic_id": 19335,
+  "title": "About the Rhino pop-up window and the drawing area problem",
+  "question": "I would like to ask Rhino to run “Loft” such a window of the command, the drawing area can only view cannot choose objects or other action. The function and how to make it come true.",
+  "code_blocks": [
+    {
+      "code": "Imports Rhino.Display\nImports Rhino.Geometry\nImports System.Drawing\nImports Rhino\n\nPublic Class PatchConduitLeft\n\n    Inherits DisplayConduit\n\n    Private _bbox As BoundingBox\n    Dim 'Brep as Geometry.Brep = Br.Brep             'Defined somewhere else\n\n    Protected Overrides Sub CalculateBoundingBox(ByVal e As CalculateBoundingBoxEventArgs)\n        MyBase.CalculateBoundingBox(e)\n        e.BoundingBox.Union(_bbox)\n    End Sub\n\n    Public Sub New()\n                   _bbox = Brep.GetBoundingBox(True)\n    End Sub\n\n    Protected Overrides Sub PostDrawObjects(ByVal e As DrawEventArgs)\n            e.Display.PushCullFaceMode(CullFaceMode.DrawFrontAndBack)\n            MyBase.PostDrawObjects(e)\n            Dim vp = e.Display.Viewport\n            e.Display.EnableLighting(True)\n            e.Display.DrawBrepShaded(Brep, Mat)\n        End If\n    End Sub\n\nEnd Class",
+      "language": "csharp",
+      "author": "jordy1989",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1368
+}

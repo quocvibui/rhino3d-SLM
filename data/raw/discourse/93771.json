@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issue-with-selection-of-the-mesh-faces/93771",
+  "topic_id": 93771,
+  "title": "Issue with selection of the mesh faces",
+  "question": "Hi,\n\nwe are trying to create a command that selects only trianglular faces for a given mesh. I prototype that in python looking at a pre-existing forum entry and everything is working nice and dandy. Now I created the C# code for that and it does not behave the same way. Any idea why this is? Am I missing a command style or some settings?\n\n\npublic class TriangleSelectCmd : Command\n{\n    static TriangleSelectCmd _instance;\n    public TriangleSelectCmd()\n    {\n      _instance = this;\n    }\n\n    public static TriangleSelectCmd Instance\n    {\n      get {\n        return _instance;\n      }\n    }\n\n    public override string EnglishName\n    {\n      get {\n        return \"SelectTriangles\";\n      }\n    }\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      var objects = new List<MeshObject>();\n\n      RhinoGet.GetOneObject(\"Get Mesh\", false, ObjectType.Mesh, out var objref);\n      SelectFaces(objref.Object() as MeshObject, true);\n\n      doc.Views.Redraw();\n      return Result.Success;\n    }\n\n\n    private void SelectFaces(MeshObject obj, bool selectTris)\n    {\n      var mesh = obj.MeshGeometry;\n      \n      for (int i = 0; i < mesh.Faces.Count; ++i) {\n        var componentIndex = new ComponentIndex(ComponentIndexType.MeshFace, i);\n        if (selectTris && mesh.Faces[i].IsTriangle) {\n          obj.SelectSubObject(componentIndex, true, true, true);\n        } else if (!selectTris && mesh.Faces[i].IsQuad) {\n          obj.SelectSubObject(componentIndex, true, true, true);\n        }\n      }\n\n    }\n\n}",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelectOnlyTriangles():\n    \n    obj_type = Rhino.DocObjects.ObjectType.Mesh\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Mesh\", False, obj_type)\n    if rc != Rhino.Commands.Result.Success: return\n    \n    # must unselect before...\n    scriptcontext.doc.Objects.UnselectAll()\n    \n    obj = objref.Object()\n    mesh = obj.MeshGeometry\n    index_type = Rhino.Geometry.ComponentIndexType.MeshFace\n    \n    for i in xrange(mesh.Faces.Count):\n        ci = Rhino.Geometry.ComponentIndex(index_type, i)\n        if mesh.Faces[i].IsTriangle:\n            obj.SelectSubObject(ci, True, True, True)\n    \n    scriptcontext.doc.Views.Redraw()\n    \nSelectOnlyTriangles()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n      RhinoGet.GetOneObject(\"Get Mesh\", false, ObjectType.Mesh, out var objref);\n      // de-select the mesh before continuing.\n      doc.Objects.Select(objref.ObjectId, false);\n      \n      var obj = objref.Object();\n      if (obj is MeshObject meshObj)\n        SelectFaces(meshObj, true);\n\n      return Result.Success;\n    }\n\n\n    private void SelectFaces(MeshObject obj, bool selectTris)\n    {\n      var mesh = obj.MeshGeometry;\n      \n      for (int i = 0; i < mesh.Faces.Count; ++i) {\n        var componentIndex = new ComponentIndex(ComponentIndexType.MeshFace, i);\n        if (selectTris && mesh.Faces[i].IsTriangle) {\n          obj.SelectSubObject(componentIndex, true, true, true);\n        } else if (!selectTris && mesh.Faces[i].IsQuad) {\n          obj.SelectSubObject(componentIndex, true, true, true);\n        }\n      }\n    }",
+      "language": "csharp",
+      "author": "menno",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "public class TriangleSelectCmd : Command\n{\n    static TriangleSelectCmd _instance;\n    public TriangleSelectCmd()\n    {\n      _instance = this;\n    }\n\n    public static TriangleSelectCmd Instance\n    {\n      get {\n        return _instance;\n      }\n    }\n\n    public override string EnglishName\n    {\n      get {\n        return \"SelectTriangles\";\n      }\n    }\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      var objects = new List<MeshObject>();\n\n      RhinoGet.GetOneObject(\"Get Mesh\", false, ObjectType.Mesh, out var objref);\n      SelectFaces(objref.Object() as MeshObject, true);\n\n      doc.Views.Redraw();\n      return Result.Success;\n    }\n\n\n    private void SelectFaces(MeshObject obj, bool selectTris)\n    {\n      var mesh = obj.MeshGeometry;\n      \n      for (int i = 0; i < mesh.Faces.Count; ++i) {\n        var componentIndex = new ComponentIndex(ComponentIndexType.MeshFace, i);\n        if (selectTris && mesh.Faces[i].IsTriangle) {\n          obj.SelectSubObject(componentIndex, true, true, true);\n        } else if (!selectTris && mesh.Faces[i].IsQuad) {\n          obj.SelectSubObject(componentIndex, true, true, true);\n        }\n      }\n\n    }\n\n}",
+      "language": "csharp",
+      "author": "Alberto",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 550
+}

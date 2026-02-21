@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problems-in-rhinoscriptsyntax-recognizing-guids/163556",
+  "topic_id": 163556,
+  "title": "Problems in rhinoscriptsyntax recognizing GUIDs",
+  "question": "Hello everyone,\n\n\nI have been coding in python in grasshopper for about 7 or 8 months now, so I there is plenty I still do not understand. One of the biggest problems I have is getting rhinoscriptsyntax functions (always imported as rs) to do the things they are supposed to do.\n\n\nFor example: I create a brep or a surface component in grasshopper as an input for geometry. I give it list access and type hint GUID.\n\nThen, after making sure the GUID is readable in the script (I always double check, and I save the ID as both a string type and keep the GUID type) I try to use the guid in some rs function, lets say for example rs.GetUserText (to get a value from a key saved in the objects attributes) or rs.SurfaceArea. I input the GUID as I am supposed to, but now in Rhino 7 it returns the error that \" ‘NoneType’ object has no attribute ‘GetUserString’, or rs.SurfaceArea simply returns ‘None’ (which means error). I double check the object type to make sure it isnt NoneType… it is always either GUID or str, so I don’t know why rs is telling me it is NoneType.\n\n\nCan somebody please shine some light on this situation? It has worked many times in the past for me, but all of a sudden doesnt work anymore.\n\nAlso, I do not want to program in C#, I would really like to use rhinoscriptsyntax (thats why it is there!)\n\n\nThanks for your help!\n\nBrad",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ndef get_geometry_of_id_from_rhino(obj_guid):\n    try:\n        sc.doc = Rhino.RhinoDoc.ActiveDoc\n        brep_list = []\n        for g in obj_guid:\n            if isinstance(g, str):\n                guid_obj = Guid.Parse(g)\n            else:\n                guid_obj = g\n            rhino_obj = sc.doc.Objects.FindId(guid_obj)\n            if rhino_obj is None:\n                print(\"Object with GUID\", guid_obj, \"not found.\")\n                continue\n            geometry = rhino_obj.Geometry\n            if isinstance(geometry, Rhino.Geometry.Brep):\n                brep_list.append(geometry)\n            else:\n                print(\"Object with GUID\", guid_obj, \"is not a Brep; it is a\", type(geometry))\n        print(\"Found\", len(brep_list), \"Brep geometries.\")\n    finally:\n        sc.doc = ghdoc",
+      "language": "python",
+      "author": "peter_osah",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 667
+}

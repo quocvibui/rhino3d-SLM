@@ -1,0 +1,50 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/not-sure-how-to-debug-mac-gh-python-error/88527",
+  "topic_id": 88527,
+  "title": "Not sure how to debug Mac GH Python error",
+  "question": "A bunch of issues related to debugging and integration of Python in GH.\n\n\nTrying to do the Exploded Box Python example (pg 31) from \nEssential Mathematics for Computational Design\n. I’m not sure how to debug this since it doesn’t tell me what line the error is at. Not sure what “balloon” is (if not red comment icon…) Not sure if error is due to a dif between Rhino 5 and 6, Rhino WIn and Mac, or other.\n\n\nMy code:\n\n\n\n\n“”“Provides a scripting component.\n\nInputs:\n\nbox: The geometry being exploded\n\ndis: The distance to explode\n\nOutput:\n\na: The a output variable”“”\n\n\nauthor\n = “kmochel”\n\n\nimport rhinoscriptsyntax as rs\n\nimport Rhino\n\n\n#get\n the brep center\n\narea = Rhino.Geometry.AreaMassProperties.Compute(box)\n\nbox_center = area.Centroid\n\n\n#get\n a list of faces\n\nfaces = box.Faces\n\n\n#declare\n variables\n\nexploded_faces = \n\n\nloop\n through all faces\n\nfor i, face in enumerate(faces):\n\n\n#get a duplicate of the face\nextracted_face = faces.ExtractFace(i)\n\n#get the center of each face\narea = Rhino.Geometry.AreaMassProperties.Compute(extracted_face)\ncenter = area.Centroid\n\n#calculate move direction (from box centroid to face center)\ndir = center - box_center\ndir.Unitize()\ndir *= dis\n\n#move the extracted face\nmove = Rhino.Geometry.Transform.Translation(dir)\nextracted_face.Transform(move)\n\n#add to exploded_faces list\nexploded_faces.append(extracted_face)\n\n\n\n#assign\n exploded list of faces output\n\nA = exploded_faces\n\n\n\n\nThis is the components in GH:\n\n\nimage\n709×153 68.3 KB",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Explodes a box geometry and offsets its faces along their normal vectors.\n    Inputs:\n        box: A box geometry\n        dist: An offset distance\n    Output:\n        a: The exploded, offset box faces\"\"\"\n\n__author__ = \"p1r4t3b0y\"\n__version__ = 0.2\n\nimport Rhino\n\n# Get the box center\nbox_center = box.Center\n# Convert the box to a brep \nbbrep = Rhino.Geometry.Box.ToBrep(box)\n# Get a list of faces\nfaces = bbrep.Faces\n\nexploded_faces = [] # empty faces list\n\nfor i in xrange(faces.Count):\n    face = faces[i] # current face\n    # Reparameterise the current face\n    face.SetDomain(0, Rhino.Geometry.Interval(0,1))\n    face.SetDomain(1, Rhino.Geometry.Interval(0,1))\n    # Get the center of the current face\n    face_center = face.PointAt(0.5, 0.5)\n    # Calculate the translation vector\n    vec = face_center - box_center\n    vec.Unitize()\n    vec *= dist\n    # Convert the face to a brep\n    fbrep = face.ToBrep()\n    # Move the face brep\n    fbrep.Translate(vec)\n    # Store the moved brep\n    exploded_faces.append(fbrep)\n\n# Output\na = exploded_faces",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport inspect\n\nprint inspect.getsource(rs.GetPointOnCurve)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "def GetPointOnCurve(curve_id, message=None):\n    \"\"\"Pauses for user input of a point constrainted to a curve object\n    Parameters:\n      curve_id (guid): identifier of the curve to get a point on\n      message (str, optional): a prompt of message\n    Returns:\n      point: 3d point if successful\n      None: on error\n    Example:\n      import rhinoscriptsyntax as rs\n      obj = rs.GetObject(\"Pick a curve\")\n      if rs.IsCurve(obj):\n          point = rs.GetPointOnCurve(obj, \"Point on curve\")\n          if point: rs.AddPoint(point)\n    See Also:\n      GetPoint\n      GetPointOnMesh\n      GetPointOnSurface\n      GetPoints\n    \"\"\"\n    curve = rhutil.coercecurve(curve_id, -1, True)\n    gp = Rhino.Input.Custom.GetPoint()\n    if message: gp.SetCommandPrompt(message)\n    gp.Constrain(curve, False)\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return scriptcontext.errorhandler()\n    pt = gp.Point()\n    gp.Dispose()\n    return pt",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "#get a duplicate of the face\nextracted_face = faces.ExtractFace(i)\n\n#get the center of each face\narea = Rhino.Geometry.AreaMassProperties.Compute(extracted_face)\ncenter = area.Centroid\n\n#calculate move direction (from box centroid to face center)\ndir = center - box_center\ndir.Unitize()\ndir *= dis\n\n#move the extracted face\nmove = Rhino.Geometry.Transform.Translation(dir)\nextracted_face.Transform(move)\n\n#add to exploded_faces list\nexploded_faces.append(extracted_face)",
+      "language": "unknown",
+      "author": "kalmdown",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 58,
+  "posts_count": 5,
+  "views": 1075
+}

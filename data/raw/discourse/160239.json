@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-a-new-layer-using-python-script/160239",
+  "topic_id": 160239,
+  "title": "Creating a new layer using Python script",
+  "question": "Hi all,\n\n\nI have a question about the creating a new layer using Python script.\n\n\nI want to create 10 layers and naming 01 to 10 separately as below shown\n\n\n\n\nI also tried to adapt the Python script from Dale’s script.\n\nLink:\nCreating a new layer and renaming automatically using Python script - #3 by dale\n\n\n\n\nimage\n555×573 17.5 KB\n\n\n\nThank you so much",
+  "code_blocks": [
+    {
+      "code": "sc.doc = Rhino.RhinoDoc.ActiveDoc\n\nred = System.Drawing.Color.Red\nfor i in range(1,11):\n    sc.doc.Layers.Add(str(i).zfill(2), red)\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef AddNumberedLayers():\n    count=rs.GetInteger(\"Number of layers to add\",minimum=1)\n    if count is None: return\n    \n    for i in range(1,count+1):\n        layername=\"{}\".format(i).zfill(3)\n        if not rs.IsLayer(layername): rs.AddLayer(layername)\nAddNumberedLayers()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef AddNumberedLayersStartFin():\n    start_n=rs.GetInteger(\"Number to start with\",minimum=0)\n    if start_n is None: return\n    end_n=rs.GetInteger(\"Number to end with\",minimum=start_n+1)\n    if end_n is None: return\n    \n    for i in range(start_n,end_n):\n        layername=\"{}\".format(i).zfill(3)\n        if not rs.IsLayer(layername): rs.AddLayer(layername)\nAddNumberedLayersStartFin()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1030
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/merging-point-clouds-via-python/90754",
+  "topic_id": 90754,
+  "title": "Merging Point Clouds via Python",
+  "question": "Dear Rhino Users and Developers,\n\n\nI continue working on point clouds. I am trying to find a way that will merge or append few point clouds into one, and preserve their colour with python in Rhino 5.\n\n\nI have found a rhinocommon method \nAppendNew\n which could help, but I don’t now how to use it. Could someone give me some advice how to succed with this task?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport random\n\n\n#generate 2 random pointclouds\nptc1_A = Rhino.Geometry.PointCloud()\nfor i in range(100):\n    color = rs.coercecolor([random.randint(0,255), random.randint(0,255),random.randint(0,255)])\n    pt = Rhino.Geometry.Point3d(random.random(),random.random(),random.random())\n    ptc1_A.Add(pt, color)\nid_A = sc.doc.Objects.Add(ptc1_A)\n\nptc1_B = Rhino.Geometry.PointCloud()\nfor i in range(100):\n    color = rs.coercecolor([random.randint(0,255), random.randint(0,255),random.randint(0,255)])\n    pt = Rhino.Geometry.Point3d(-random.random(),-random.random(),random.random())\n    ptc1_B.Add(pt, color)\nid_B = sc.doc.Objects.Add(ptc1_B)\n\nrs.Redraw()\n# Generated 2 pointclouds for testing\n\n\ncloud_id_A = id_A\ncloud_id_B = id_B\n\nnew_cloud_A = rs.coercegeometry(cloud_id_A)\ncloud_B = rs.coercegeometry(cloud_id_B)\n\n\nfor cloud_B_item in cloud_B:\n    pass\n    new_cloud_A.Add(cloud_B_item.Location , cloud_B_item.Color)\n    \nsc.doc.Objects.Delete(cloud_id_B, True)\nsc.doc.Objects.Replace(cloud_id_A, new_cloud_A)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport random\n\n\n#generate 2 random pointclouds\nptc1_A = Rhino.Geometry.PointCloud()\nfor i in range(100):\n    color = rs.coercecolor([random.randint(0,255), random.randint(0,255),random.randint(0,255)])\n    vec_n = Rhino.Geometry.Vector3d(random.random(),random.random(),random.random())\n    vec_n.Unitize()\n    pt = Rhino.Geometry.Point3d(random.random(),random.random(),random.random())\n    ptc1_A.Add(pt, vec_n, color)\nid_A = sc.doc.Objects.Add(ptc1_A)\n\nptc1_B = Rhino.Geometry.PointCloud()\nfor i in range(100):\n    color = rs.coercecolor([random.randint(0,255), random.randint(0,255),random.randint(0,255)])\n    vec_n = Rhino.Geometry.Vector3d(random.random(),random.random(),random.random())\n    vec_n.Unitize()\n    pt = Rhino.Geometry.Point3d(-random.random(),-random.random(),random.random())\n    ptc1_B.Add(pt, vec_n, color)\nid_B = sc.doc.Objects.Add(ptc1_B)\n\nrs.Redraw()\n# Generated 2 pointclouds for testing\n\n\ncloud_id_A = id_A\ncloud_id_B = id_B\n\nnew_cloud_A = rs.coercegeometry(cloud_id_A)\ncloud_B = rs.coercegeometry(cloud_id_B)\n\n\nfor cloud_B_item in cloud_B:\n    pass\n    new_cloud_A.Add(cloud_B_item.Location , cloud_B_item.Normal, cloud_B_item.Color)\n    \nsc.doc.Objects.Delete(cloud_id_B, True)\nsc.doc.Objects.Replace(cloud_id_A, new_cloud_A)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 3295
+}

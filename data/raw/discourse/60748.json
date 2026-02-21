@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/a-better-approach-replicating-curves-in-curves/60748",
+  "topic_id": 60748,
+  "title": "A better approach replicating 'Curves in Curves'",
+  "question": "Hi all,\n\n\nI’m attempting to create a sort of ‘Curve In Curve’ operation. My approach however is not particularly efficient as it relies on an Area calc and ‘Point In Curves’ method.\n\n\nCurve%20In%20Curve\n1525×655 46.7 KB\n\n\nThe Problem:\n I have several thousand (200K+) closed polylines some of which contain smaller polylines but not all. The goal is to assign a unique colour to all polylines \nhowever\n, I wish for these ‘Internal courtyards’ (inner polylines) to be assigned the same colour as its parent building outline (outer polyline).\n\n\nThe solution I have works but its extremely heavy with so many thousand curves to process. Can anyone advise on a more effective solution.\n\n\nimage\n1542×506 78.1 KB\n\n\nMuch appreciated.\n\n\nCurve In Curve Test.gh\n (17.5 KB)",
+  "code_blocks": [
+    {
+      "code": "bool[] sampled = new bool[cList.Count];\nint branch = 0;\ndouble tol = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n\n//RTree improvment - start\nvar boundingBoxes = cList.Select((objR, index) => new { index, objR }).ToDictionary(x => x.index, y => y.objR.GetBoundingBox(true));\nRTree tree = new RTree();\nfor (int i = 0; i < boundingBoxes.Count; i++)\n{\n  tree.Insert(boundingBoxes[i], i);\n}\nDataTree<Curve> curveClustersLocal = new DataTree<Curve>();\nDataTree<int> connClustersLocal = new DataTree<int>();\n\nfor (int i = 0; i < cList.Count; i++)\n{\n  if (sampled[i]) continue;\n  Curve crvA = cList[i];\n  var bboxA = boundingBoxes[i];\n  tree.Search(bboxA, (to, ta) =>\n    {\n    int j = ta.Id;\n    if (i != ta.Id && !sampled[j])\n    {\n      Curve crvB = cList[j];\n      RegionContainment rg = Curve.PlanarClosedCurveRelationship(crvA, crvB, plane, tol);\n      if (rg == RegionContainment.BInsideA)\n      {\n        if (!sampled[i]) UpdateTrees(crvA, ref curveClustersLocal, ref connClustersLocal, ref sampled, i, branch, true);\n        if (!sampled[j]) UpdateTrees(crvB, ref curveClustersLocal, ref connClustersLocal, ref sampled, j, branch, true);\n      }\n    }\n    });\n  branch++;\n}\ncurveClusters = curveClustersLocal;\nconnClusters = connClustersLocal;\n//RTree improvment - end\n\nRebuildTree<Curve>(ref curveClusters);\nRebuildTree<int>(ref connClusters);\n\nif(singleItemCluster == 2){\n  int bCount = curveClusters.BranchCount;\n  for(int i = 0; i < sampled.Length;i++){\n    bool bs = sampled[i];\n    if(!bs) {\n      curveClusters.Add(cList[i], new GH_Path(bCount));\n      connClusters.Add(i, new GH_Path(bCount));\n      bCount++;\n    }\n  }\n}",
+      "language": "csharp",
+      "author": "RadovanG",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Geometry import *\nfrom Rhino.RhinoDoc import ActiveDoc as rhdoc\ntol = rhdoc.ModelAbsoluteTolerance\n\nids = range(len(crvs))\n# initialize with dictionary of sets containing its own key\n# i.e all curves in separate clusters\nclusters = {i: set([i]) for i in ids}\n\nrtree = RTree()\nfor i, crv in enumerate(crvs):\n    # populate the RTree with bounding boxes\n    rtree.Insert(crv.GetBoundingBox(True), i)\n\n\ndef check_containment(crvA, crvB):\n    # checks if either A contains B or B contains A\n    # relatively expensive, so further optimizations can be made here eg. for polylines\n    rg = Curve.PlanarClosedCurveRelationship(crvA, crvB, Plane.WorldXY, tol)\n    return (rg in (RegionContainment.AInsideB, RegionContainment.BInsideA))\n\n\ndef callback(sender, e):\n    a, b = e.Id, e.IdB\n    if a == b:\n        return\n    if b in clusters[a] or a in clusters[b]:\n        return\n    if check_containment(crvs[a], crvs[b]):\n        clusters[a].add(b)\n        clusters[b].add(a)\n\n\nRTree.SearchOverlaps(rtree, rtree, 0.01, callback) # O(n)\n\n\n# iterate through the clusters from the highest to lowest index\nfor i in reversed(ids):\n    # still O(n) despite nested for loop, because inner loop is ~O(1)\n    for j in list(clusters[i]):  # create new list to avoid changing the iterable\n        # merge with sets of a greater index\n        if j > i:\n            try:\n                clusters[i].update(clusters.pop(j))\n            except KeyError:  # j has already been popped\n                pass\n\nmapping = [0] * len(crvs)\nfor k, vals in clusters.items():\n    for v in vals:\n        mapping[v] = k\n\nnum_clusters = len(clusters)",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 21,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 46,
+  "views": 11908
+}

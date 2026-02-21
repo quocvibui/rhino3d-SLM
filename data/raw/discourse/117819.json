@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/qrcode-with-ghpython/117819",
+  "topic_id": 117819,
+  "title": "QrCode with GhPython?",
+  "question": "Hello; i installpyqrcode and when i test it in GhPython i got this error\n\n\nRuntime error (LookupException): unknown encoding: shiftjis\n\n\nIs there a solution or alternative tool?\n\n\n\n\n\n\n\n\nPyPI\n\n\n\n\n\n\n\n\nPyQRCode\n\n\nA QR code generator written purely in Python with SVG, EPS, PNG and terminal output.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nI test this one, looks it work but i don’t know where is the result and how to save it\n\n\n\n\n\n\n\n\nPyPI\n\n\n\n\n\n\n\n\nqrcode\n\n\nQR Code image generator\n\n\n\n\n\n\n\n\n\n\n\n\nimport qrcode\nimport qrcode.image.svg\n\nif method == 'basic':\n# Simple factory, just a set of rects.\nfactory = qrcode.image.svg.SvgImage\nelif method == 'fragment':\n# Fragment factory (also just a set of rects)\nfactory = qrcode.image.svg.SvgFragmentImage\nelse:\n# Combined path factory, fixes white space that may occur when zooming\nfactory = qrcode.image.svg.SvgPathImage\n\nimg = qrcode.make('Some data here', image_factory=factory)\n\n\n\n\n\nimage\n1235×578 54.5 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\nimport qrcode.image.base\n\nclass RhinoImage(qrcode.image.base.BaseImage):\n\"\"\"\nRhino QRCode image output class.\n\"\"\"\nkind = \"Rhino\"\nallowed_kinds = (\"Rhino\",)\n\ndef __init__(self, *args, **kwargs):\n    super(RhinoImage, self).__init__(*args, **kwargs)\n\ndef drawrect(self, row, col):\n    \"\"\"\n    Draw point location of the QR code.\n    \"\"\"\n    point = rg.Point3d(col, -row, 0)\n    self._img.append(point)\n\ndef new_image(self, **kwargs):\n    \"\"\"\n    Build the image class. Subclasses should return the class created.\n    \"\"\"\n    return []\n\ndef get_image(self, **kwargs):\n    \"\"\"\n    Return the image class for further processing.\n    \"\"\"\n    return self._img",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 22,
+  "views": 3046
+}

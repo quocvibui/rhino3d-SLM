@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ibois-epfl/catalogue-exporter/blob/c7bea3508e7dcdb08ef71184efde207e37a4c5c1/Cockroach_MeshPoissonBatch_cmd.py",
+  "repo": "ibois-epfl/catalogue-exporter",
+  "repo_stars": 1,
+  "repo_description": "A Rhinoceros 3D plugin for exporting point cloud dataset to a web-based catalogue.",
+  "license": "unknown",
+  "filepath": "Cockroach_MeshPoissonBatch_cmd.py",
+  "instruction": "Cockroach mesh poisson batch cmd",
+  "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport scriptcontext\n\n__commandname__ = \"Cockroach_MeshPoissonBatch\"\n\ndef RunCommand(is_interactive):\n\n    doc = sc.doc.ActiveDoc\n\n    # get point clouds\n    pcGUIDList = rs.GetObjects(\n        message = \"Select point clouds to mesh\",\n        filter = 2,\n        preselect = True,\n        minimum_count = 1,\n    )\n\n    rs.UnselectAllObjects()\n\n    if pcGUIDList != None:\n        \n        # get params\n        downsample = rs.GetInteger(\n            message = \"Downsample\",\n            number = 0,\n        )\n        normalsNeighbours = rs.GetInteger(\n            message = \"NormalsNeighbours\",\n            number = 30,\n        )\n        poisonMaxDepth = rs.GetInteger(\n            message = \"PoisonMaxDepth\",\n            number = 10,\n        )\n        poisonMinDepth = rs.GetInteger(\n            message = \"PoisonMinDepth\",\n            number = 0,\n        )\n        poisonScale = rs.GetReal(\n            message = \"PoisonScale\",\n            number = 1.1,\n        )\n        poissonLinear = rs.GetBoolean(\n            message=\"PoissonLinear\",\n            items = [(\"PoissonLinear\", \"False\", \"True\")],\n            defaults = [False],\n        )[0]\n        \n        for pcGUID in pcGUIDList:\n            objMostRecent = doc.Objects.MostRecentObject()\n            doc.Objects.UnselectAll()\n            doc.Objects.Select(pcGUID)\n            Rhino.RhinoApp.RunScript(\n                \"Cockroach_MeshPoisson\"\n                + \" Downsample=\"\n                + str(downsample)\n                + \" NormalsNeighbours=\"\n                + str(normalsNeighbours)\n                + \" PoisonMaxDepth=\"\n                + str(poisonMaxDepth)\n                + \" PoisonMinDepth=\"\n                + str(poisonMinDepth)\n                + \" PoisonScale=\"\n                + str(poisonScale)\n                + \" PoisonLinear=\"\n                + str(poissonLinear)\n                + \" -Enter\"\n                + \" -Enter\"\n                + \" -Cancel\", True\n            )\n            objListLastCreated = doc.Objects.AllObjectsSince(\n                objMostRecent.RuntimeSerialNumber)\n            for item in objListLastCreated:\n                if(item.ObjectType != Rhino.DocObjects.ObjectType.Mesh):\n                    doc.Objects.Delete(item, True)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

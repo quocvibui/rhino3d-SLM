@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/fillet-curves.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/fillet-curves.py",
+  "instruction": "Fillet curves",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    gc1 = GetObject()\n    gc1.DisablePreSelect()\n    gc1.SetCommandPrompt(\"Select first curve to fillet (close to the end you want to fillet)\")\n    gc1.GeometryFilter = ObjectType.Curve\n    gc1.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\n    gc1.Get()\n    if gc1.CommandResult() != Result.Success:\n        return gc1.CommandResult()\n    curve1_obj_ref = gc1.Object(0)\n    curve1 = curve1_obj_ref.Curve()\n    if curve1 == None: return Result.Failure\n    curve1_point_near_end = curve1_obj_ref.SelectionPoint()\n    if curve1_point_near_end == Point3d.Unset:\n        return Result.Failure\n\n    gc2 = GetObject()\n    gc2.DisablePreSelect()\n    gc2.SetCommandPrompt(\"Select second curve to fillet (close to the end you want to fillet)\")\n    gc2.GeometryFilter = ObjectType.Curve\n    gc2.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\n    gc2.Get()\n    if gc2.CommandResult() != Result.Success:\n        return gc2.CommandResult()\n    curve2_obj_ref = gc2.Object(0)\n    curve2 = curve2_obj_ref.Curve()\n    if curve2 == None: return Result.Failure\n    curve2_point_near_end = curve2_obj_ref.SelectionPoint()\n    if curve2_point_near_end == Point3d.Unset:\n        return Result.Failure\n\n    radius = 0.0\n    rc, radius = RhinoGet.GetNumber(\"fillet radius\", False, radius)\n    if rc != Result.Success: return rc\n\n    fillet_curve = Curve.CreateFilletCurves(curve1, curve1_point_near_end, curve2, curve2_point_near_end, radius, True, True, True, doc.ModelAbsoluteTolerance, doc.ModelAngleToleranceDegrees)\n    if fillet_curve == None or fillet_curve.Length != 1:\n        return Result.Failure\n\n    doc.Objects.AddCurve(fillet_curve[0])\n    doc.Views.Redraw()\n    return rc\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

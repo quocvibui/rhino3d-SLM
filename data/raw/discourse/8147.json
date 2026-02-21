@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/leap-motion-rhino-python/8147",
+  "topic_id": 8147,
+  "title": "Leap motion + rhino python",
+  "question": "Hi all,\n\n\nI have been toying around with the Leap Motion controller and it’s API in Python.\n\n\nMy goal is to write some scripts in Rhino Python which leverage the data acquired from the Leap controller. I thought I’d share my findings so that others may benefit but also to ask questions relating to the stability of running Leap within Rhino Python.\n\n\nThe setup process to access the Leap libraries from within Rhino Python is as follows:\n\nCreated a rhino python script called \nleapTst.py\n in a folder\n\nTo the folder I added the relevant files from the Leap SDK Dev Kit. The files in the folder are the following, including the \nleapTst.py\n test script:\n\nLeap.dll\n\n\nLeap.py\n\nLeap.pyc\n\nLeapCSharp.dll\n\nLeapCSharp.NET4.0.dll\n\n\nleapTst.py\n\n\nAt the beginning of the \nleapTst.py\n script I use clr.AddReferenceToFileAndPath and point it to the LeapCSharp.NET4.0.dll assembly inside the folder.\n\n\nAlso in the script, the path to the Leap SDK x64 libraries folder is appended to sys.path to reference the correct libraries.\n\n\nI then adapted the \nSample.py\n file from the Leap SDK samples folder in Rhino Python to create a custom SampleListener which retrieves frame data from the Leap controller and prints it to the Rhino console.\n\n\nI noticed that while using the listener callback function and the OnFrame() method to retrieve frame data, Rhino would crash as soon as the listener began ‘listening’ to the incoming stream of data. In order to debug the script I customized the SampleListener class so that it would just return the Frame ID and Timestamp of the current frame from the Leap controller. This is very stable and Rhino does not crash.\n\n\nAs soon as I make the OnFrame  method retrun any other frame data, such as the Fingers.TipPosition or HandSphereRadius, then the script crashes Rhino.\n\n\nReading the Leap API, there is a note on using the listener callback functions to retrieve frame data that mentions the process is multithreaded and therefore one must ensure that it is run in a threadsa...",
+  "code_blocks": [
+    {
+      "code": "import sys\nimport clr\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport time\n\nclr.AddReferenceToFileAndPath(\"C:\\Users\\GMAC\\Desktop\\leap RHINO test\\LeapCSharp.NET4.0.dll\")\n\npathsToLibs = [\"C:\\\\Users\\\\GMAC\\\\Documents\\\\PROJECTS\\\\CODING\\\\LEAP MOTION\\\\LeapDeveloperKit\\\\LeapDeveloperKit\\\\LeapSDK\\\\lib\\\\x64\"]\n\nfor path in pathsToLibs:\n    sys.path.append(path)\n\nprint sys.path\n\nimport Leap\n\nfrom Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture\n\nclass SampleListener(Leap.Listener):\n    def OnInit(self, controller):\n        print \"Initialized\"\n\n    def OnConnect(self, controller):\n        print \"Connected\"\n\n    def OnDisconnect(self, controller):\n        # Note: not dispatched when running in a debugger.\n        print \"Disconnected\"\n\n    def OnExit(self, controller):\n        print \"Exited\"\n\n    def OnFrame(self, controller):\n        # Get the most recent frame and report some basic information\n        print \"This is a frame\"\n        frame = controller.Frame()\n        print frame\n        \n        hands = frame.Hands\n        if hands.Count > 0:\n            print \"Found {} hands\".format(hands.Count)\n            if hands.Count == 1:\n                hand = hands[0]\n                Leap.Hand.SphereRadius\n                handSphereRadius = hand.SphereRadius\n                handSphereCentre = hand.SphereCentre\n                print handSphereRadius\n                print handSphereCentre\n\n              \n\ndef main():\n    # Create a sample listener and controller\n    listener = SampleListener()\n    controller = Leap.Controller()\n\n    # Have the sample listener receive events from the controller\n    controller.AddListener(listener)\n\n    # Keep this process running until Enter is pressed\n    print \"Press ESCape to quit...\"\n    running = True\n    while running:\n        escape = scriptcontext.escape_test(False)\n        if escape:\n            running = False\n    # Remove the sample listener when done\n    print \"Shutting down\"\n    controller.RemoveListener(listener)\n\n\nif __name__ == \"__main__\":\n    \n    main()",
+      "language": "python",
+      "author": "gmacarchitect",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 2676
+}

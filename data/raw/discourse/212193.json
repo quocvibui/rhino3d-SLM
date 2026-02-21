@@ -1,0 +1,72 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hit-a-strange-snag-where-i-cant-get-geometrys-id/212193",
+  "topic_id": 212193,
+  "title": "Hit a strange snag where I can't get Geometry's ID",
+  "question": "I swear I’ve done this before but every function seems to want the object’s ID (to return it’s ID!!!).",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# set up the plane and radius\nplane = rs.WorldXYPlane()\nradius = 5.0\n\n# create the circle with rhinoscriptsyntax\n# rhinoscriptsyntax creates the object AND adds it to the document\n# and it returns the guid\ncircle_id = rs.AddCircle(plane, radius)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\n# set up the plane and radius\nplane = rg.Plane.WorldXY\nradius = 5.0\n\n# create the object with RhinoCommon\n# RhinoCommon's Circle function returns the actual circle object\n# and, as the circle object has not yet been added to the document,\n# no guid exists for it yet\ncircle_ob = rg.Circle(plane, radius)\n\n# add the circle to the document with scriptcontext's appropriate\n# AddCircle method, and the guid will be returned\ncircle_id = sc.doc.Objects.AddCircle(circle_ob)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobject_id = rs.GetObject('Select an object', rs.filter.allobjects, preselect = False, select = False)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# create the object with RhinoCommon\n# RhinoCommon's Circle function returns the actual circle object\n# and, as the circle object has not yet been added to the document,\n# no guid exists for it yet\ncircle_ob = rg.Circle(plane, radius)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\n\nimport rhinoscriptsyntax as rs\n\n# let user select an object to get the object's guid\nobject_id = rs.GetObject('Select an object', rs.filter.allobjects, preselect = False, select = False)\n\n# write text to the object's usertext\nkey = 'key'\nvalue = '25' # note: values must be strings\nrs.SetUserText(object_id, key, value)\n\n# now you can look at the object's usertext and see the new field you created",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n# Select an object\nobj_id = rs.GetObject(\"Select an object to attach data to\")\nif obj_id:\n    # Get the RhinoObject\n    rhino_obj = sc.doc.Objects.Find(obj_id)\n    if rhino_obj:\n        # Attach data to the geometry's UserDictionary (persistent with geometry)\n        rhino_obj.Geometry.UserDictionary.Set(\"MyHiddenKey\", \"Some hidden value\")\n        rhino_obj.Geometry.UserDictionary.Set(\"AnotherKey\", 42)  # Example with integer\n        \n        # Alternatively, attach to attributes if preferred\n        # rhino_obj.Attributes.UserDictionary.Set(\"MyHiddenKey\", \"Some hidden value\")\n        \n        # Commit changes to update the object in the document\n        rhino_obj.CommitChanges()\n        \n        # Retrieve the data to verify\n        retrieved_value = rhino_obj.Geometry.UserDictionary.GetString(\"MyHiddenKey\")\n        print(\"Retrieved value:\", retrieved_value)  # Outputs: Some hidden value\n        \n        # Remove data if needed\n        # rhino_obj.Geometry.UserDictionary.Remove(\"MyHiddenKey\")\n        # rhino_obj.CommitChanges()\n        \n        print(\"Data attached successfully. Save the file and reopen Rhino to confirm persistence.\")",
+      "language": "python",
+      "author": "keithscadservices",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef store_gem_data():\n    # 1. Get an object from the document\n    rc, obj_ref = Rhino.Input.RhinoGet.GetOneObject(\"Select gem to tag\", False, Rhino.DocObjects.ObjectType.AnyObject)\n    if rc != Rhino.Commands.Result.Success: return\n    \n    rhino_obj = obj_ref.Object()\n    # Always use Attributes for metadata to avoid heavy geometry copies\n    attr = rhino_obj.Attributes\n    \n    # 2. STORE data in the UserDictionary\n    # Unlike Python dicts, use .Set() to ensure proper .NET serialization\n    attr.UserDictionary.Set(\"GemType\", \"Diamond\")\n    attr.UserDictionary.Set(\"GemSize\", 5.5)\n    attr.UserDictionary.Set(\"IsEditable\", True)\n    \n    # Commit changes back to the Rhino document\n    rhino_obj.CommitChanges()\n    print(\"Gem data stored successfully.\")\n\ndef retrieve_gem_data():\n    rc, obj_ref = Rhino.Input.RhinoGet.GetOneObject(\"Select gem to read\", False, Rhino.DocObjects.ObjectType.AnyObject)\n    if rc != Rhino.Commands.Result.Success: return\n    \n    attr = obj_ref.Object().Attributes\n    udict = attr.UserDictionary\n    \n    # 3. RETRIEVE data\n    if udict.Count > 0:\n        # Check if a specific key exists before grabbing\n        if udict.Contains(\"GemType\"):\n            gem_type = udict[\"GemType\"]\n            gem_size = udict[\"GemSize\"]\n            print(\"Gem found: {0} (Size: {1}mm)\".format(gem_type, gem_size))\n    else:\n        print(\"No metadata found on this object.\")\n\nif __name__ == \"__main__\":\n    store_gem_data()\n    retrieve_gem_data()",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 20,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 21,
+  "views": 314
+}

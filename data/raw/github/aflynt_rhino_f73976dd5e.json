@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/aflynt/rhino/blob/a0d0737bd0ca36db4e11cb8938df59781adce19d/samples/python/spherelines.py",
+  "repo": "aflynt/rhino",
+  "repo_stars": 0,
+  "repo_description": "rhino3dm",
+  "license": "NOASSERTION",
+  "filepath": "samples/python/spherelines.py",
+  "instruction": "spherelines.py Sample script that demonstrates how to use Rhino3dm.py https://github.com/mcneel/rhino3dm This sample creates a 3dm file containing a group of randomly distributed lines defining an sphere.",
+  "code": "# spherelines.py\n# Sample script that demonstrates how to use Rhino3dm.py\n# https://github.com/mcneel/rhino3dm\n# This sample creates a 3dm file containing a group of randomly\n# distributed lines defining an sphere.\n\nimport rhino3dm\nimport random\nimport math\nimport os\n\n# Initial parameters\ntheta_min = 0.0\ntheta_max = math.pi\nalpha_min = 0.0\nalpha_max = math.pi * 2.0\nsphere_radius = 100.0\nnum_lines = 1500\n\n# Create a center point\ncenter_pt = rhino3dm.Point3d(0.0, 0.0, 0.0)\n\n# Create a File3dm object\nmodel = rhino3dm.File3dm()\n\nfor i in range(num_lines):\n   # Calculate random line end point\n   random.seed(i * 100)\n   theta = random.uniform(theta_min, theta_max)\n   alpha = random.uniform(alpha_min, alpha_max)\n   x = sphere_radius * math.sin(theta) * math.cos(alpha)\n   y = sphere_radius * math.sin(theta) * math.sin(alpha)\n   z = sphere_radius * math.cos(theta)\n   end_pt = rhino3dm.Point3d(x, y, z)\n   # Create line curve\n   line_curve = rhino3dm.LineCurve(center_pt, end_pt)\n   # Add to model\n   model.Objects.AddCurve(line_curve)\n\n# Full path to 3dm file to save\n#desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop') \nfilename = 'spherelines.3dm'\n#path = os.path.join(desktop, filename)\n\n# Write model to disk\n#model.Write(path, 6)\nmodel.Write(filename, 6)\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

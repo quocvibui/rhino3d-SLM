@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/code/mTwist.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "code/mTwist.py",
+  "instruction": "Creates a twist around the normal of a specified plane.\n    Inputs:\n        x: the solid sdf object to be twisted\n        a: the twist angle per distance from plane p\n        p: the plane around...",
+  "code": "\"\"\"Creates a twist around the normal of a specified plane.\n    Inputs:\n        x: the solid sdf object to be twisted\n        a: the twist angle per distance from plane p\n        p: the plane around which's normal to twist\n    Output:\n        d: the twist object (sdf)\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT'\n__license__    = 'MIT License'\n__email__      = ['<bernhard@arch.ethz.ch>']\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math\n\nclass Twist(object):\n    def __init__(self,obj=None, ang=0.0, plane=None):\n        self.o = obj\n        self.angle = float(ang)\n        self.plane = plane\n        worldxy = rg.Plane.WorldXY\n        self.transform = rg.Transform.PlaneToPlane(self.plane, worldxy)\n        success, self.inverse = self.transform.TryGetInverse()\n\n    def get_distance(self,x,y,z):\n        p = rg.Point3d(x,y,z)\n        p.Transform(self.transform)\n        t = p.Z\n        theta = t * self.angle\n        nx = (p.X * math.cos(theta) - p.Y * math.sin(theta))\n        ny = (p.X * math.sin(theta) + p.Y * math.cos(theta))\n        pi = rg.Point3d(nx,ny,p.Z)\n        pi.Transform(self.inverse)\n        return self.o.get_distance(pi.X, pi.Y, pi.Z)\n\nif __name__==\"__main__\":\n    if x is not None:\n        if a is None:\n            a = 1.0\n        if p is None:\n            p = rg.Plane.WorldXY\n        d = Twist(x, a, p)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

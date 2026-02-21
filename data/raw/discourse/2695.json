@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-python-scripting-orientobject-or-translateobject/2695",
+  "topic_id": 2695,
+  "title": "GH Python scripting OrientObject or TranslateObject",
+  "question": "I wanted to Orient a box to a plane or on a direction, but the box is scaling down in every situation. Please see the attached image. I do not want the box become smaller after translate or orient. Please some one help me. I want to copy the box then translate and orient in certain direction . I want to make 100s of copies.\n\nI am new for Python. I usually work in C# dot net. This is why I am stuck. Please help.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry \nimport math\n\ndepth = 10\nreflist=[]\ntargetlist=[]\n\n\n\npt1 = Rhino.Geometry.Point3d(0, 0, 0)\npt2 = Rhino.Geometry.Point3d(depth, 0, 0)\npt3 = Rhino.Geometry.Point3d(depth, depth, 0)\npt4 = Rhino.Geometry.Point3d(0, depth, 0)\npt5 = Rhino.Geometry.Point3d(0, 0, depth)\npt6 = Rhino.Geometry.Point3d(depth, 0, depth)\npt7 = Rhino.Geometry.Point3d(depth, depth, depth)\npt8 = Rhino.Geometry.Point3d(0, depth, depth)\n\ncorners = [pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8]\nbox = rs.AddBox(corners)\n#----------------------------------------------\nreflist.append(Rhino.Geometry.Point3d(100,0,0))\nreflist.append(Rhino.Geometry.Point3d(0,0,0))\nreflist.append(Rhino.Geometry.Point3d(0,100,0))\np1=Rhino.Geometry.Point3d(200,200,200)\np2=Rhino.Geometry.Point3d(100,10,0)\np3=Rhino.Geometry.Point3d(100,10,100)\ntargetlist.append(p1)\ntargetlist.append(p2)\ntargetlist.append(p3)\nreference=reflist\ntarget=targetlist\n\nbx=rs.CopyObject(box)\nby=rs.MoveObject(bx,p1)\nbxx=rs.OrientObject( box, reference, target, flags=1 )\na=bxx\n# Here box is scaling down. But it should not . The box should be of same size after orientation.\n\n\n\n\n\n\n\n#for TranslateObject we can use as below, but still it scale down the box , as you can see in the image.\n#How to get read of this scale down and I also want to move the box not inside the original box.\nfrom_plane = Rhino.Geometry.Plane(pt1,pt2,pt3)\nto_plane = Rhino.Geometry.Plane(p1, p2, p3)\nxform_final = Rhino.Geometry.Transform.PlaneToPlane(from_plane, to_plane)\n\nbxx=rs.TransformObject(by,xform_final,True)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry \nimport math\n\ndepth = 10\nreflist=[]\ntargetlist=[]\n\n\n\npt1 = Rhino.Geometry.Point3d(0, 0, 0)\npt2 = Rhino.Geometry.Point3d(depth, 0, 0)\npt3 = Rhino.Geometry.Point3d(depth, depth, 0)\npt4 = Rhino.Geometry.Point3d(0, depth, 0)\npt5 = Rhino.Geometry.Point3d(0, 0, depth)\npt6 = Rhino.Geometry.Point3d(depth, 0, depth)\npt7 = Rhino.Geometry.Point3d(depth, depth, depth)\npt8 = Rhino.Geometry.Point3d(0, depth, depth)\n\ncorners = [pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8]\nbox = rs.AddBox(corners)\n#----------------------------------------------\nreflist.append(Rhino.Geometry.Point3d(100,0,0))\nreflist.append(Rhino.Geometry.Point3d(0,0,0))\nreflist.append(Rhino.Geometry.Point3d(0,100,0))\np1=Rhino.Geometry.Point3d(200,200,200)\np2=Rhino.Geometry.Point3d(100,10,0)\np3=Rhino.Geometry.Point3d(100,10,100)\ntargetlist.append(p1)\ntargetlist.append(p2)\ntargetlist.append(p3)\nreference=reflist\ntarget=targetlist\n\nbx=rs.CopyObject(box)\nby=rs.MoveObject(bx,p1)\nbxx=rs.OrientObject( box, reference, target, flags=1 )\na=bxx\n# Here box is scaling down. But it should not . The box should be of same size after orientation.\n\n\n\n\n\n\n\n#for TranslateObject we can use as below, but still it scale down the box , as you can see in the image.\n#How to get read of this scale down and I also want to move the box not inside the original box.\nfrom_plane = Rhino.Geometry.Plane(pt1,pt2,pt3)\nto_plane = Rhino.Geometry.Plane(p1, p2, p3)\nxform_final = Rhino.Geometry.Transform.PlaneToPlane(from_plane, to_plane)\n\nbxx=rs.TransformObject(by,xform_final,True)",
+      "language": "python",
+      "author": "gh_scripting",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 2762
+}

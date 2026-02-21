@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multiple-parameters-and-options-in-one-command-line-with-python/39900",
+  "topic_id": 39900,
+  "title": "Multiple parameters and options in one command line with Python",
+  "question": "Is there a way in Rhino python to address multiple dimensions or options in one single the Rhino command line?\n\nLike in a normal Rhino command where you for example have to define the extrusion distance in the command line and then in parenthesis have the possibility to change the direction, delete input etc.\n\nThis would be very useful so that you don’t have to hit enter 5 times to confirm parameters that you usually don’t want to change.\n\nI’m not sure if I’m clear. I’m new to Rhino python and not sure about the whole terminology. So it might be possible that I oversaw a thread or an example that explains my question.\n\nIn my example I would like to select one or multiple curves and then have a toggle option and some dimension values.",
+  "code_blocks": [
+    {
+      "code": "#coding: utf-8\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\n\ndef getOptions( eppnx,lgmort,decalmort,espmax ):\n    while True:\n        scriptcontext.escape_test()\n        gnu = Rhino.Input.Custom.GetString()\n        gnu.SetCommandPrompt( 'Option de mortaise' )\n        gnu.SetDefaultString( 'Ok?' )\n        gnu.AddOptionInteger(\"Epaisseur Panneaux\", Rhino.Input.Custom.OptionInteger(eppnx, 5, 50))\n        gnu.AddOptionInteger(\"Longueur de la mortaise\", Rhino.Input.Custom.OptionInteger(lgmort,80,300))\n        gnu.AddOptionInteger(\"Decalage de la mortaise/Ext\", Rhino.Input.Custom.OptionInteger(decalmort,80,300))\n        gnu.AddOptionInteger(\"Espace Max entre mortaise\",Rhino.Input.Custom.OptionInteger(espmax,600,1300))\n        gnu.Get()\n        if gnu.CommandResult() == Rhino.Commands.Result.Cancel:\n            return\n        res = gnu.Result()\n        if res == Rhino.Input.GetResult.Option:\n            opind = gnu.OptionIndex()\n            \n        elif res == Rhino.Input.GetResult.String:\n            number = gnu.Number()\n            break\n    result = 1\n    return result\n\ns=getOptions( 16,100,150,600 )\nprint s",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 4128
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-transformation-from-plane-in-python/47108",
+  "topic_id": 47108,
+  "title": "Get 'Transformation' from 'Plane' in Python",
+  "question": "Hello!\n\nWhat’s the simplest way to derive a ‘Transform’ object from a ‘Plane’ in Python?\n\nThanks!!\n\nBest regards\n\nEugen",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n...\nverts = mesh.Vertices\ntrafo = ??? # get from a plane\nfor iVert in range(verts.Count):\n    vP = verts[iVert]\n    vP.Transform(trafo)\n    verts.SetVertex(iVert, rg.Point3d(vP))",
+      "language": "python",
+      "author": "Eugen",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\ndef transformFromPlane(plane):\n        # Create a Transform object from a Plane object.\n        trafo = rg.Transform.Identity\n        vX = rg.Vector3d(plane.XAxis)\n        vY = rg.Vector3d(plane.YAxis)\n        vZ = rg.Vector3d(plane.ZAxis)\n        # row|column\n        trafo.M00 = vX.X\n        trafo.M10 = vX.Y\n        trafo.M20 = vX.Z\n        trafo.M01 = vY.X\n        trafo.M11 = vY.Y\n        trafo.M21 = vY.Z\n        trafo.M02 = vZ.X\n        trafo.M12 = vZ.Y\n        trafo.M22 = vZ.Z\n        trafo.M03 = plane.OriginX\n        trafo.M13 = plane.OriginY\n        trafo.M23 = plane.OriginZ\n        return trafo",
+      "language": "python",
+      "author": "Eugen",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 16,
+  "views": 4505
+}

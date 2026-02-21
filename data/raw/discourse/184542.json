@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/preserving-attributes-of-copied-and-pasted-objects/184542",
+  "topic_id": 184542,
+  "title": "Preserving attributes of copied and pasted objects",
+  "question": "Hello everyone,\n\n\nI am developing a new plugin for Grasshopper. The object has a number of properties, and the issue that I am facing is that when you change the properties and then copy and paste the object, the properties of the new one are the default properties instead of those of the copied object. I would be very thankful if someone could help me fix this as I havent been able to find a solution yet.\n\n\nThese are the properties, and a set of defaults are set in SetDefault():\n\n\nusing System.Drawing;\n\nnamespace Grasshopper.Kernel.Special\n{\n    public struct SD_FenceProperties\n  {\n    public void SetDefault()\n    {\n        this.Width = 3f;\n        this.Colour = Color.Black;\n        this.Pattern = \"Continuous\";\n    }\n    public float Width { get; set; }\n    public Color Colour { get; set; }\n    public string Pattern { get; set; }\n    }\n}\n\n\n\nI imagine here I would need to add some check to only run SetDefaul() if there are no existing properties but I am not sure how to implement this.\n\n\npublic class FenceAttributes : SD_ResizableAttributes<Fence>\n{\n    private GH_Document ghDocument;\n    public FenceAttributes(Fence owner) : base(owner)\n    {\n        // set value to ghDocument\n        ghDocument = this.Owner.OnPingDocument();\n\n        SD_FenceProperties fenceProperties = new SD_FenceProperties();\n        fenceProperties.SetDefault();\n        this.Properties = fenceProperties;\n    }\n}\n\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "using System.Drawing;\n\nnamespace Grasshopper.Kernel.Special\n{\n    public struct SD_FenceProperties\n  {\n    public void SetDefault()\n    {\n        this.Width = 3f;\n        this.Colour = Color.Black;\n        this.Pattern = \"Continuous\";\n    }\n    public float Width { get; set; }\n    public Color Colour { get; set; }\n    public string Pattern { get; set; }\n    }\n}",
+      "language": "csharp",
+      "author": "PabloDuran",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "public class FenceAttributes : SD_ResizableAttributes<Fence>\n{\n    private GH_Document ghDocument;\n    public FenceAttributes(Fence owner) : base(owner)\n    {\n        // set value to ghDocument\n        ghDocument = this.Owner.OnPingDocument();\n\n        SD_FenceProperties fenceProperties = new SD_FenceProperties();\n        fenceProperties.SetDefault();\n        this.Properties = fenceProperties;\n    }\n}",
+      "language": "csharp",
+      "author": "PabloDuran",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "grasshopper"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 190
+}

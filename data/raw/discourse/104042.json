@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-curve-createbooleandifference-method-curve-ienumerable-curve-works/104042",
+  "topic_id": 104042,
+  "title": "How Curve.CreateBooleanDifference Method (Curve, IEnumerable<Curve>) works",
+  "question": "I have a question about the behavior of CreateBooleanDifference.\n\n\nI want to get a green curve by subtracting a blue curve from a red curve.\n\n\nimage\n1173×573 1.2 KB\n\n\nimage\n1188×571 1.22 KB\n\n\nCurve.CreateBooleanDifference Method (Curve, IEnumerable), the result is as shown below.\n\n\nimage\n1149×566 8.7 KB\n\n\nIs this behavior correct?\n\nBelow is a sample code and sample model\n\n\nCreateBooleanDifference.3dm\n (24.9 KB)\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nimport Rhino.Geometry as rg\n\nimport scriptcontext as sc\n\n\nobj1 = rs.GetObject(“Get the first closed, planar curve.”)\n\nobj2 = rs.GetObjects(“Get curves to subtract from the first closed curve.”)\n\n\ncurve1 = rs.coercecurve(obj1)\n\ncurve2 = [rs.coercecurve(ob) for ob in obj2]\n\n\nbcurve = rg.Curve.CreateBooleanDifference(curve1, curve2)\n\n\nfor crv in bcurve:\n\nsc.doc.Objects.AddCurve(crv)\n\n\n\n\nWe avoided the problem by creating the first boolean outline as shown below.\n\nIs there anything else I can do?\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nimport Rhino.Geometry as rg\n\nimport scriptcontext as sc\n\n\nobj1 = rs.GetObject(“Get the first closed, planar curve.”)\n\nobj2 = rs.GetObjects(“Get curves to subtract from the first closed curve.”)\n\n\ncurve1 = rs.coercecurve(obj1)\n\ncurve2 = [rs.coercecurve(ob) for ob in obj2]\n\n\nunionList = [curve1]\n\nunionList.extend(curve2)\n\nucurve = rg.Curve.CreateBooleanUnion(unionList)\n\n\nbcurve = rg.Curve.CreateBooleanDifference(ucurve[0], curve2)\n\n\nfor crv in bcurve:\n\nsc.doc.Objects.AddCurve(crv)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nfrom scriptcontext import doc\ncurve_a = rs.GetObject(\"First closed, planar curve\", rs.filter.curve) \ncurves_b = rs.GetObjects(\"Curves to subtract from\", rs.filter.curve)\ncurve_a = rs.coercecurve(curve_a)\ncurves_b = [rs.coercecurve(x) for x in curves_b]\nresult = rg.Curve.CreateBooleanDifference(curve_a, curves_b)[0]\ndoc.Objects.AddCurve(result)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 585
+}

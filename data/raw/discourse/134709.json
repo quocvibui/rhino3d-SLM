@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-extrudesurface-issue/134709",
+  "topic_id": 134709,
+  "title": "Rhinoscriptsyntax.ExtrudeSurface issue",
+  "question": "Applying the Extrude Surface method of the Rhinoscriptsyntax module reverts surprisingly the corrupted result whereas the curve excursion method of the Rhino common works totally fine. Maybe someone knows what is the cause here?\n\n\n\n\nScreenshot 2021-12-09 at 13.46.44\n1172×852 48.1 KB\n\n\n\n\n\n\nScreenshot 2021-12-09 at 13.29.25\n958×490 72.7 KB\n\n\n\n\n#Surface extrusion\nimport rhinoscriptsyntax as rs\nSr2 = rs.AddPlanarSrf(Cr)\nNorPar = rs.SurfaceParameter(Sr2,(0.5, 0.5))\nNormVect = rs.SurfaceNormal(Sr2,NorPar)\nNormVect = NormVect*20\nrs.MoveObject(Sr2,-NormVect/2)\nDirLine = rs.AddLine((0,0,0), NormVect)\nWrong = rs.ExtrudeSurface(Sr2,DirLine,False)\n\n\n#Curve extrusion\nimport Rhino as R\nCr = rs.coercecurve(Cr)\nFine = R.Geometry.Extrusion.Create(Cr,10,True)\n\n\n\nExtrusion.gh\n (4.7 KB)",
+  "code_blocks": [
+    {
+      "code": "#Surface extrusion\nimport rhinoscriptsyntax as rs\nSr2 = rs.AddPlanarSrf(Cr)\nNorPar = rs.SurfaceParameter(Sr2,(0.5, 0.5))\nNormVect = rs.SurfaceNormal(Sr2,NorPar)\nNormVect = NormVect*20\nrs.MoveObject(Sr2,-NormVect/2)\nDirLine = rs.AddLine((0,0,0), NormVect)\nWrong = rs.ExtrudeSurface(Sr2,DirLine,False)\n\n\n#Curve extrusion\nimport Rhino as R\nCr = rs.coercecurve(Cr)\nFine = R.Geometry.Extrusion.Create(Cr,10,True)",
+      "language": "python",
+      "author": "sadovshikov",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 909
+}

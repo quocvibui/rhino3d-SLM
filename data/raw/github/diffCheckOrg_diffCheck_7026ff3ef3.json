@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_build_assembly/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_build_assembly/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport System\nimport typing\n\nimport Rhino\n\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom diffCheck.df_geometries import DFBeam, DFAssembly\n\n\nclass DFBuildAssembly(component):\n    def RunScript(self,\n            i_assembly_name,\n            i_breps : System.Collections.Generic.IList[Rhino.Geometry.Brep],\n            i_is_roundwood : bool):\n        beams: typing.List[DFBeam] = []\n\n        if i_assembly_name is None or i_breps is None:\n            return None\n\n        if i_is_roundwood is None:\n            i_is_roundwood = False\n\n        for brep in i_breps:\n            beam = DFBeam.from_brep_face(brep, i_is_roundwood)\n            beams.append(beam)\n\n        o_assembly = DFAssembly(beams, i_assembly_name)\n\n        return o_assembly\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,22 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unintended-behavior-of-components-with-viewport-as-a-parameter/197162",
+  "topic_id": 197162,
+  "title": "Unintended behavior of components with Viewport as a parameter",
+  "question": "For the purpose of visualization in a specific Viewport, the \nParam_ModelStandardViewport\n class was added to the input of the component as follows, with Viewport as the parameter input.\n\n\nint ivp = pManager.AddParameter(new Param_ModelStandardViewport(),\n    \"Viewport\", \"Viewport\", \"Viewport Input\", GH_ParamAccess.list);\n\n\n\nThe component can now have a Viewport input as intended, but if I set a Viewport to this Input, the component’s \nSolveInstance()\n is called whenever that Viewport is updated, for example, by a mouse viewpoint operation. Is there any way to prevent the \nSolveInstance()\n call due to Viewport updates?",
+  "code_blocks": [
+    {
+      "code": "private bool is_viewport_param_raise_expire_solution = false;\nprivate Param_ModelStandardViewport m_viewport_param = new Param_ModelStandardViewport();\nprotected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)\n{\n    pManager.AddParameter(m_viewport_param,\n        \"Viewport\", \"Viewport\", \"Viewport Input\", GH_ParamAccess.list);\n\n    m_viewport_param.SolutionExpired += (s, e) => {\n        RhinoApp.WriteLine(\"Solution Expire Event\");\n        is_viewport_param_raise_expire_solution = true;\n        // -> Check in SolveInstance?\n    };\n\n    this.SolutionExpired += (s, e) =>\n    {\n        RhinoApp.WriteLine(\"Solution Expired Event(Component)\");\n        // -> How do I know when an event occurs due to a viewport parameter?\n    };\n}",
+      "language": "csharp",
+      "author": "ymz.ptr",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 64
+}

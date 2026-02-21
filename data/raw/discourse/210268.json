@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-text-tag-3d-visual-studio/210268",
+  "topic_id": 210268,
+  "title": "C# text tag 3d / visual studio",
+  "question": "trying to implement what text tag 3d component does, but in c# so that i can have text curves in the end (with size parameter and justification) or even better surfaces, but cant seem to find the solution. i dont want to use another plugin because i am building my own functionality, but can’t find a way to create text as geo.\n\n\ncan anybody point me to the right direction?",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing Rhino;\nusing Rhino.Geometry;\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\nusing System.IO;\nusing System.Linq;\nusing System.Data;\nusing System.Drawing;\nusing System.Reflection;\nusing System.Windows.Forms;\nusing System.Xml;\nusing System.Xml.Linq;\nusing System.Runtime.InteropServices;\nusing Rhino.DocObjects;\nusing Rhino.Collections;\nusing GH_IO;\nusing GH_IO.Serialization;    \n\nprotected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)\n{\npManager.AddNumberParameter(“size”, “S”, “text size”, GH_ParamAccess.item);\npManager.AddTextParameter(“text”, “T”, “text content”, GH_ParamAccess.item);\npManager.AddPlaneParameter(“plane”, “P”, “position plane”, GH_ParamAccess.item);\n}\n/// <summary>\n    /// Registers all the output parameters for this component.\n    /// </summary>\n    protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)\n    {\n        pManager.AddCurveParameter(\"curves\", \"C\", \"the font's outline curves\", GH_ParamAccess.list);\n    }\n\n    /// <summary>\n    /// This is the method that actually does the work.\n    /// </summary>\n    /// <param name=\"DA\">The DA object is used to retrieve from inputs and store in outputs.</param>\n    protected override void SolveInstance(IGH_DataAccess DA)\n    {\n        double size = new double();\n        DA.GetData(\"size\", ref size);\n\n        string text = \"\";\n        DA.GetData(\"text\", ref text);\n\n        Plane pln = new Plane();\n        DA.GetData(\"plane\", ref pln);\n\n\n        if(size == 0) size = 1;\n\n        if(!string.IsNullOrEmpty(\"Arial\") && size > 0 && !string.IsNullOrEmpty(text) && pln.IsValid)\n        {\n\n            var te = RhinoDoc.ActiveDoc.Objects.AddText(text, pln, size, \"Arial\", true, false);\n            Rhino.DocObjects.TextObject txt = RhinoDoc.ActiveDoc.Objects.Find(te) as Rhino.DocObjects.TextObject;\n\n            if (txt != null)\n            {\n                var tt = txt.Geometry as Rhino.Geometry.TextEntity;\n                Curve[] tmp = tt.Explode ();\n                List<Curve> crvLst = new List<Curve>();\n                for (int i = 0; i < tmp.Count(); i++)\n                {\n                    crvLst.Add(tmp[i]);\n                }\n                    DA.SetDataList(\"curves\", crvLst);\n\n            }\n\n            RhinoDoc.ActiveDoc.Objects.Delete(te, true);\n        }\n    }",
+      "language": "csharp",
+      "author": "benedict",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "var te = RhinoDoc.ActiveDoc.Objects.AddText(\"myText\", pln, size, \"Arial\", true, false);\n            Rhino.DocObjects.TextObject txt = RhinoDoc.ActiveDoc.Objects.Find(te) as Rhino.DocObjects.TextObject;\n            if (txt != null)\n            {\n                var tt = txt.Geometry as Rhino.Geometry.TextEntity;\n                Curve[] tmp = tt.Explode ();\n                List<Curve> crvLst = new List<Curve>();\n                for (int i = 0; i < tmp.Count(); i++) crvLst.Add(tmp[i]);\n                DA.SetDataList(\"curves\", crvLst);\n            }\n            RhinoDoc.ActiveDoc.Objects.Delete(te, true);",
+      "language": "csharp",
+      "author": "benedict",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "/// This list gets cleared and populated again during each SolveInstance()\n        private List<Text3d> TextTags = new List<Text3d>();\n\n\n        public override void DrawViewportWires(IGH_PreviewArgs args)\n        {\n            if (this.Locked) \n                return;\n            var color = this.Attributes.Selected ? args.WireColour_Selected : args.WireColour;\n            this.TextTags.ForEach(text3d =>\n            {\n                args.Display.Draw3dText(text3d, color);\n            });\n        }\n\n        public override void BakeGeometry(RhinoDoc doc, ObjectAttributes att, List<Guid> obj_ids)\n        {\n            att = att ?? doc.CreateDefaultAttributes();\n            this.TextTags.ForEach(text3d =>\n            {\n                var id = doc.Objects.AddText(text3d, att);\n                obj_ids.Add(id);\n            });\n        }",
+      "language": "csharp",
+      "author": "ondrej",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 6,
+  "views": 149
+}

@@ -1,0 +1,22 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/keyboard-input-issue-for-dropdown-in-eto/208054",
+  "topic_id": 208054,
+  "title": "Keyboard input issue for Dropdown in ETO",
+  "question": "We wanted to use certain keyboard inputs to increment or decrement the dropdown index.\n\nHowever, whenever we press the specific key/s, the dropdow items gets cleared.\n\nWe are assuming since dropdown uses keys to autocomplete, it might be causing the issue.\n\nBelow is a sample code.\n\nKindly guide how we can still use keyboard inputs for increment & decrement\n\n\npublic static DropDown CreateDropdown(Size size, IEnumerable<string> items)\n{\n    var dropDown = new DropDown\n    {\n        Size = size,\n        TextColor = Colors.Gold,\n        Font = new Font(SystemFont.Bold, 10),\n        BackgroundColor = new Color(36f / 255f, 36f / 255f, 36f / 255f),\n        DataStore = items.ToArray(),\n    };\n    return dropDown;\n}\nmyDropdown = ETOUtils.CreateDropdown(new Size(90, 25), new List<string>() {\"A\",\"B\",\"C\",\"D\" });\nprivate void RhinoApp_KeyboardEvent(int key)\n{\n    if (!IsKeyDown(key))\n        return;\n    \n    Application.Instance.Invoke(() =>\n    {\n        if (key == VK_Q)\n        {\n            if (myDropdown.SelectedIndex < myDropdown.Items.Count - 1)\n                myDropdown.SelectedIndex += 1;\n        }\n        else if (key == VK_E)\n        {\n            if (myDropdown.SelectedIndex > 0)\n                myDropdown.SelectedIndex -= 1;\n        }\n    });\n}\n[DllImport(\"user32.dll\")]\nprivate static extern short GetAsyncKeyState(int vKey);\nprivate bool IsKeyDown(int key)\n{\n    return (GetAsyncKeyState(key) & 0x8000) != 0;\n}\n\n\n\n@stevebaer\n , \n@dale",
+  "code_blocks": [
+    {
+      "code": "public static DropDown CreateDropdown(Size size, IEnumerable<string> items)\n{\n    var dropDown = new DropDown\n    {\n        Size = size,\n        TextColor = Colors.Gold,\n        Font = new Font(SystemFont.Bold, 10),\n        BackgroundColor = new Color(36f / 255f, 36f / 255f, 36f / 255f),\n        DataStore = items.ToArray(),\n    };\n    return dropDown;\n}\nmyDropdown = ETOUtils.CreateDropdown(new Size(90, 25), new List<string>() {\"A\",\"B\",\"C\",\"D\" });\nprivate void RhinoApp_KeyboardEvent(int key)\n{\n    if (!IsKeyDown(key))\n        return;\n    \n    Application.Instance.Invoke(() =>\n    {\n        if (key == VK_Q)\n        {\n            if (myDropdown.SelectedIndex < myDropdown.Items.Count - 1)\n                myDropdown.SelectedIndex += 1;\n        }\n        else if (key == VK_E)\n        {\n            if (myDropdown.SelectedIndex > 0)\n                myDropdown.SelectedIndex -= 1;\n        }\n    });\n}\n[DllImport(\"user32.dll\")]\nprivate static extern short GetAsyncKeyState(int vKey);\nprivate bool IsKeyDown(int key)\n{\n    return (GetAsyncKeyState(key) & 0x8000) != 0;\n}",
+      "language": "csharp",
+      "author": "maya_puundale",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 88
+}

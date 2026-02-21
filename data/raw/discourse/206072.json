@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/remove-conduit-display-when-py-component-is-disabled-or-file-switch-close/206072",
+  "topic_id": 206072,
+  "title": "Remove Conduit Display When Py Component is Disabled or File Switch/Close",
+  "question": "I had a Python script to control \ndisplay.conduit\n in Rhino, using an input toggle to switch the display on or off in the viewport. This works as expected when the component is enabled.\n\n\nHowever, when I \ndisable\n the Python component in the Grasshopper canvas, the conduit display remains visible in the viewport. In other words, the drawing stays on the screen even though the component is no longer active - the same issue occurs when toggling or closing the Grasshopper file.\n\n\nMy question is: how can I ensure that the conduit is also removed from the viewport when the component is disabled (also when switch/close GH file)?\n\n\npy_ds.conduit_2.gh\n (6.3 KB)\n\n\nInput toggle = True:\n\n\n圖片\n1167×396 25.7 KB\n\n\nInput toggle = False:\n\n\n圖片\n1190×399 25.6 KB\n\n\nComponent = disable (Red-box still showing):\n\n\n圖片\n1214×417 25.1 KB\n\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport scriptcontext as sc\nimport System.Drawing\n\n# ✅ Switch to Rhino document\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\n# ✅ Create a test planar surface\norigin = rg.Point3d(0, 0, 0)\nplane = rg.Plane(origin, rg.Vector3d.ZAxis)\nrect = rg.Rectangle3d(plane, x, 60)\ncrv = rect.ToNurbsCurve()\nbreps = rg.Brep.CreatePlanarBreps(crv)\nsurface = breps[0].Faces[0] if breps else None\n\n# ✅ Define Conduit class\nclass SurfaceConduit(rd.DisplayConduit):\n    def __init__(self, surface):\n        self.surface = surface\n        self.color = System.Drawing.Color.Red\n\n    def DrawForeground(self, e):\n        if self.surface:\n            e.Display.DrawSurface(self.surface, self.color, 1)\n\n# ✅ Sticky key identifier\nkey = \"preview_conduit\"\n\n# ✅ Toggle display (controlled by toggle_input)\nif surface:\n    # toggle_input is a boolean input from Grasshopper\n    if toggle_input:\n        # If conduit has not been created yet, create and enable it\n        if not sc.sticky.has_key(key):\n            conduit = SurfaceConduit(surface)\n            sc.sticky[key] = conduit\n            conduit.Enabled = True\n        else:\n            # ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport scriptcontext as sc\nimport System.Drawing\n\n# ✅ Switch to Rhino document\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\n# ✅ Create a test planar surface\norigin = rg.Point3d(0, 0, 0)\nplane = rg.Plane(origin, rg.Vector3d.ZAxis)\nrect = rg.Rectangle3d(plane, x, 60)\ncrv = rect.ToNurbsCurve()\nbreps = rg.Brep.CreatePlanarBreps(crv)\nsurface = breps[0].Faces[0] if breps else None\n\n# ✅ Define Conduit class\nclass SurfaceConduit(rd.DisplayConduit):\n    def __init__(self, surface):\n        self.surface = surface\n        self.color = System.Drawing.Color.Red\n\n    def DrawForeground(self, e):\n        if self.surface:\n            e.Display.DrawSurface(self.surface, self.color, 1)\n\n# ✅ Sticky key identifier\nkey = \"preview_conduit\"\n\n# ✅ Toggle display (controlled by toggle_input)\nif surface:\n    # toggle_input is a boolean input from Grasshopper\n    if toggle_input:\n        # If conduit has not been created yet, create and enable it\n        if not sc.sticky.has_key(key):\n            conduit = SurfaceConduit(surface)\n            sc.sticky[key] = conduit\n            conduit.Enabled = True\n        else:\n            # If conduit already exists, just update the surface\n            conduit = sc.sticky[key]\n            conduit.surface = surface\n            conduit.Enabled = True\n    else:\n        # Disable and remove conduit\n        if sc.sticky.has_key(key):\n            conduit = sc.sticky[key]\n            conduit.Enabled = False\n            del sc.sticky[key]\n\n# ✅ Force view redraw\nsc.doc.Views.Redraw()\n\n# ✅ Switch back to GH document\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 40
+}

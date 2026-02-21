@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-objects-with-unique-name/131968",
+  "topic_id": 131968,
+  "title": "Select Objects With Unique Name",
+  "question": "Hi,\n\n\nI´ve tried searching around a bit but I didn´t find anything so I´m here.\n\n\nIs there a way to select all objects with unique names?\n\n\nThank´s",
+  "code_blocks": [
+    {
+      "code": "#Purpose: This script will select all objects with the same name.\n\nimport rhinoscriptsyntax as rs\n\ndef SelectByName():\n    objects = rs.GetObjects(\"Select named objects\", 0, True, True)\n    if objects is None:\n        return\n    else:\n        for object in objects:\n            name = rs.ObjectName(object)\n            if name:\n                rs.ObjectsByName(name, True)\n            else:\n                print \"The selected object is unnamed.\"\n                rs.UnselectAllObjects()\n                return\n\nif __name__ == \"__main__\":\n    SelectByName()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#Purpose: This script will select all objects that match the typed name.\n\nimport rhinoscriptsyntax as rs\n\ndef SelectByName():\n    name = rs.StringBox(\"Type the name of the objects you wish to select\")\n    if name is None:\n        return\n    else:\n        rs.ObjectsByName(name, True)\n\nif __name__ == \"__main__\":\n    SelectByName()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n\nCall Main()\nSub Main()\n\n\t'get all object names\n\tIf isnull(Rhino.AllObjects()) Then Exit Sub\n\tDim arrN : arrN = Rhino.ObjectNames(Rhino.AllObjects())\n\tDim i,o\n\t'change Null for objects with no name to empty string\n\tFor i=0 To Ubound(arrN)\n\t\tIf isnull(arrN(i))Then arrN(i) = \"\"\n\tNext\n\t'remove duplicates\n\tarrN = Rhino.CullDuplicateStrings(arrN)\n\tCall Rhino.UnselectAllObjects()\n\tRhino.EnableRedraw False\n\tFor i=0 To Ubound(arrN)\n\t\tIf arrN(i) <> \"\" Then\n\t\t\to = Rhino.ObjectsByName(arrN(i))\n\t\t\t'add to selection if only one with given name:\n\t\t\tIf Ubound(o) = 0 Then Call Rhino.SelectObject(o(0))\n\t\tEnd If\n\tNext\n\tRhino.EnableRedraw True\nEnd Sub",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n\nCall SelUniqueNamedObjects()\nSub SelUniqueNamedObjects()\n\n\tDim blnIgnoreLockedAndHidden\n\t'setting for ignore or use not Normal objects for the unique name detection\n\tDim r : r = Rhino.GetBoolean(\"Settings:\", array(\"IgnoreLockedAndHidden\", \"No\", \"Yes\"), array(True))\n\tIf isnull(r) Then Exit Sub\n\tblnIgnoreLockedAndHidden = r(0)\n\t\n\t'get all object names\n\tIf isnull(Rhino.NormalObjects()) Then Exit Sub\n\tDim arrN : arrN = Rhino.ObjectNames(Rhino.NormalObjects())\n\tDim i,o\n\t'change Null for objects with no name to empty string\n\tFor i=0 To Ubound(arrN)\n\t\tIf isnull(arrN(i))Then arrN(i) = \"\"\n\tNext\n\t\n\tDim arrUnique : arrUnique = array()\n\t\n\t'remove duplicates\n\tarrN = Rhino.CullDuplicateStrings(arrN)\n\tRhino.EnableRedraw False\n\tFor i=0 To Ubound(arrN)\n\t\tCall Rhino.UnselectAllObjects()\n\t\tIf arrN(i) <> \"\" Then\n\t\t\to = Rhino.ObjectsByName(arrN(i), True)\n\t\t\tIf blnIgnoreLockedAndHidden Then\n\t\t\t\t'ignore hidden/locked for name determination:\n\t\t\t\tIf Not isnull(Rhino.SelectedObjects()) Then\n\t\t\t\t\tIf Ubound(Rhino.SelectedObjects()) = 0 Then\n\t\t\t\t\t\tarrUnique = Rhino.JoinArrays(arrUnique, Rhino.SelectedObjects())\n\t\t\t\t\tEnd If\n\t\t\t\tEnd If\n\t\t\tElse 'don't ignore hidden/locked\n\t\t\t\tIf Ubound(o) = 0 Then arrUnique = Rhino.JoinArrays(arrUnique, o)\n\t\t\tEnd If\n\t\tEnd If\n\tNext\n\tCall Rhino.SelectObjects(arrUnique)\n\tRhino.EnableRedraw True\nEnd Sub",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 8,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 147,
+  "posts_count": 14,
+  "views": 1945
+}

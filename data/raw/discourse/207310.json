@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/opening-3dm-files-in-c-plugin/207310",
+  "topic_id": 207310,
+  "title": "Opening 3dm files in C++ plugin",
+  "question": "Hi all!\n\n\nI really appreciate any help you can provide ^^\n\n\nI’m developing a plugin for Rhino using C++, and I’d like to automate the following process:\n\n\n\n\nIterate over all \n.3dm\n files in a given folder.\n\n\nFor each file, open it (ideally in the background, without replacing the active document).\n\n\nRead only the objects that are on a specific layer (e.g., \n\"TargetLayer\"\n).\n\n\nCollect all these objects into a single new \n.3dm\n file.\n\n\n\n\nMy goal is to generate a consolidated Rhino file that contains only the objects from that specific layer, extracted from multiple source files.\n\n\nAt the moment, I’m using \nCRhinoObjectIterator\n to iterate over the objects in the opened file. However, the code never enters the loop, meaning the iterator is not finding any objects.\n\n\nI suspect this is because after running the \n_Open\n command using \nRhinoApp().RunScript\n, the active document (\nRhinoApp().ActiveDoc()\n) is still the original one, not the newly opened file.\n\n\nMy questions are:\n\n\n\n\nIs it possible to switch the active document to the newly opened one from the plugin?\n\n\nIs there a better way to open \n.3dm\n files and access their contents programmatically?\n\n\nCan this be done entirely with the Rhino C++ SDK, or do I need to use \nopenNURBS\n for reading files outside the context of the current document?\n\n\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "static unsigned int RhOpenHeadlessDocument(const wchar_t* pszPath)\n{\n  if (nullptr == pszPath || 0 == pszPath[0])\n    return 0;\n\n  if (!CRhinoFileUtilities::FileExists(pszPath))\n    return 0;\n\n  CRhinoOpenDocumentOptions options;\n  options.SetCreateHeadless(true);\n  options.SetMakeVisible(false);\n  options.SetAddToMRU(false);\n  options.SetUpdateDefaultDirectory(false);\n  options.SetUserQueriesPermitted(false);\n  options.SetFileReadingPlugInId(ON_nil_uuid, 0);\n\n  return CRhinoDoc::OpenDocument(pszPath, &options);\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "nurbs"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 72
+}

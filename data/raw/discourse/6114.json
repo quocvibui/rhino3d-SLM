@@ -1,0 +1,62 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multi-threading-point-cloud-processing/6114",
+  "topic_id": 6114,
+  "title": "Multi-Threading Point Cloud Processing",
+  "question": "Greetings All,\n\nI have been attempting to import point clouds into Rhino.\n\nThe point cloud is a scanned building facade, the file is over 5 GB as a .pts file.\n\nWhen I attempt to open the file in Rhino it becomes unresponsive and eventually crashes.\n\n\nIt seems like it should be possible to write a script which reads the .pts file line by line and adds a point to the Rhino document at the appropriate location.  I have devised the following script to read the  large pts file one line at a time and add a point to the document.\n\n\nrs.EnableRedraw(False)\nwith open(path) as infile:\n    for line in infile:\n        if line.count(\" \")<=2:\n            Splits=line.split(\" \")\n            x=float(Splits[0])\n            y=float(Splits[1])\n            z=float(Splits[2])\n            rs.AddPoint(x,y,z)\nrs.EnableRedraw(True)\nprint \"Finished\"\n\n\n\nThis script more or less works to transfer all of the points into the Rhino Document but is very time consuming.  When the script is running it is using a very small percentage of the CPU available so it occurred to me that this process could be sped up by taking advantage of System.Threading.Tasks.  I looked through Steve’s blog post on multi-threading but I am not sure how to apply it.  In his example the intersection calculation is multi-threaded while adding the curves to the document takes place on a single thread, is there a reason the points are added to the document in a single thread?  I understand how multi-threading is very useful for preforming multiple independent calculations but could it be useful for something like adding 70 million points to a single document?\n\nThanks in advance,\n\n5chmidt",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom System.Collections.Generic import IEnumerable\nimport Rhino\nimport scriptcontext as sc\n\n#get your file\npts=[]\nwith open(path) as infile:\n    for line in infile:\n        if line.count(\" \")<=2:\n            Splits=line.split(\" \")\n            pts.append(Rhino.Geometry.Point3d(Splits[0],Splits[1],Splits2])\nsc.doc.Objects.AddPoints.Overloads[IEnumerable[Point3d]](pts)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os\nimport time\nimport System.Drawing.Color as color\n\nfile=rs.OpenFileName(\"Find .pts file\")\nif file:\n    start=time.ctime()\n    Pt_Clouds=[]\n    Pts=[]\n    Colors=[]\n    i=0\n    j=0\n    CloudSize=500000\n    rs.EnableRedraw(False)\n    with open(file) as infile:\n        for line in infile:\n            if i>CloudSize:\n                \"\"\"\n                If there are 1000 Points in the List,\n                Add the List as a Point Cloud to the Document.\n                \"\"\"\n                if Colors!=[]:\n                    if len(Colors)==len(Pts):\n                        Pt_Clouds.append(rs.AddPointCloud(Pts,Colors))\n                    else:\n                        Pt_Clouds.append(rs.AddPointCloud(Pts))\n                else:\n                    Pt_Clouds.append(rs.AddPointCloud(Pts))\n                Pts=[]      #Clear Pts List\n                Colors=[]\n                j+=1        #Count Number of Clouds Added\n                i=0         #Count Number of Pts in List\n            \n            if line.count(\" \")>=5:\n                Split=line.split(\" \")\n                \n                x=float(Split[0])\n                y=float(Split[1])\n                z=float(Split[2])\n                \n                a=float(Split[3])\n                r=float(Split[4])\n                g=float(Split[5])\n                b=float(Split[6])\n                \n                Colors.append(color.FromArgb(a,r,g,b))\n                \n            elif line.count(\" \")>=2:\n                Cords=line.split(\" \")\n                x=float(Cords[0])\n                y=float(Cords[1])\n                z=float(Cords[2])\n                \n            Pts.append([x,y,z]) #Add Point to List\n            i+=1\n                \n            \n    end=time.ctime()\n    TimePassed=start-end\n    Minutes=round((TimePassed/60)-.5)\n    Seconds=TimePassed-(Minutes*60)\n    msg=\"Added (\"+str(j)+\"), \"+str(CloudSize)+\" Point Clouds to Document \\n\"\n    msg+=\"Adding Point Cloud took \"+str(Minutes)+\" and \"+str(Seconds)\n    \n    rs.MessageBox(msg)\n    print msg",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os, time\nfrom System.Drawing import Color\nimport scriptcontext, Rhino\n\n\nfile=rs.OpenFileName(\"Find .pts file\")\nif file:\n    start=time.ctime()\n    i=0\n    clouds_added=0\n    CLOUDSIZE=500000\n    rs.EnableRedraw(False)\n    cloud = Rhino.Geometry.PointCloud()\n    with open(file) as infile:\n        for line in infile:\n            if i>CLOUDSIZE:\n                scriptcontext.doc.Objects.AddPointCloud(cloud)\n                # create a new cloud for adding points\n                cloud = Rhino.Geometry.PointCloud()\n                clouds_added+=1\n                i=0\n\n            pieces = line.split(\" \")\n            if len(pieces)>=3:\n                x = float(pieces[0])\n                y = float(pieces[1])\n                z = float(pieces[2])\n                point = Rhino.Geometry.Point3d(x,y,z)\n                if len(pieces)>=7:\n                    a=float(pieces[3])\n                    r=float(pieces[4])\n                    g=float(pieces[5])\n                    b=float(pieces[6])\n                    color = Color.FromArgb(a,r,g,b)\n                    cloud.Add(point, color)\n                else:\n                    cloud.Add(point)\n                i+=1\n\n\n    end=time.ctime()\n    TimePassed=start-end\n    Minutes=round((TimePassed/60)-.5)\n    Seconds=TimePassed-(Minutes*60)\n    msg=\"Added (\"+str(clouds_added)+\"), \"+str(CLOUDSIZE)+\" Point Clouds to Document \\n\"\n    msg+=\"Adding Point Cloud took \"+str(Minutes)+\" and \"+str(Seconds)\n\n    rs.MessageBox(msg)\n    print msg",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os, time\nfrom System.Drawing import Color\nimport scriptcontext, Rhino\n\n\nReadTimers=[]\nAddCloudTimers=[]\n\nfile=rs.OpenFileName(\"Find .pts file\")\nif file:\n    start=time.time()\n    i=0\n    clouds_added=0\n    CLOUDSIZE=500000\n    rs.EnableRedraw(False)\n    cloud = Rhino.Geometry.PointCloud()\n    \n    #Start Read Timer#\n    ReadStart=time.time()\n    \n    with open(file) as infile:\n        for line in infile:\n            if i>CLOUDSIZE:\n                #Stop Read Timer#\n                ReadStop=time.time()\n                ReadTimers.append(ReadStop-ReadStart)\n                \n                #Start Add Cloud Timer#\n                AddStart=time.time()\n                \n                scriptcontext.doc.Objects.AddPointCloud(cloud)\n                # create a new cloud for adding points\n                cloud = Rhino.Geometry.PointCloud()\n                clouds_added+=1\n                i=0\n                \n                #Stop Add Cloud Timer#\n                AddStop=time.time()\n                AddCloudTimers.append(AddStop-AddStart)\n                \n                #Start New Read Timer#\n                ReadStart=time.time()\n\n            pieces = line.split(\" \")\n            if len(pieces)>=3:\n                x = float(pieces[0])\n                y = float(pieces[1])\n                z = float(pieces[2])\n                point = Rhino.Geometry.Point3d(x,y,z)\n                if len(pieces)>=7:\n                    a=float(pieces[3])\n                    r=float(pieces[4])\n                    g=float(pieces[5])\n                    b=float(pieces[6])\n                    color = Color.FromArgb(a,r,g,b)\n                    cloud.Add(point, color)\n                else:\n                    cloud.Add(point)\n                i+=1\n\n\n    end=time.time()\n    TimePassed=end-start\n    Minutes=round((TimePassed/60)-.5)\n    Seconds=TimePassed-(Minutes*60)\n    msg=\"Added (\"+str(clouds_added)+\"), \"+str(CLOUDSIZE)+\" Point Clouds to Document \\n\"\n    msg+=\"Adding Point Cloud took \"+str(Minutes)+\" minutes and \"+str(Seconds)+\" seconds.\"\n    print msg\n\n\n    for i in range(len(ReadTimers)):\n        try:\n            print \"Read/Split File Time: \"+str(ReadTimers[i])+\" seconds\"\n            print \"Add Point Cloud Time: \"+str(AddCloudTimers[i])+\" seconds\"\n        except:\n            pass",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "pieces = map(float, line.split(\" \"))\n    if len(pieces)>=3:\n        point = Rhino.Geometry.Point3d(pieces[0],pieces[1],pieces[2])",
+      "language": "unknown",
+      "author": "clement",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "rs.EnableRedraw(False)\nwith open(path) as infile:\n    for line in infile:\n        if line.count(\" \")<=2:\n            Splits=line.split(\" \")\n            x=float(Splits[0])\n            y=float(Splits[1])\n            z=float(Splits[2])\n            rs.AddPoint(x,y,z)\nrs.EnableRedraw(True)\nprint \"Finished\"",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 4739
+}

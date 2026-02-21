@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/baharmon/computational-design-library/blob/3b49802218466afb9dcdb0452cb0afe566b51382/07-point-clouds/point-cloud-planting.py",
+  "repo": "baharmon/computational-design-library",
+  "repo_stars": 8,
+  "repo_description": "A collection of Python scripts and Grasshopper definitions for the book Computational Design for Landscape Architects",
+  "license": "MIT",
+  "filepath": "07-point-clouds/point-cloud-planting.py",
+  "instruction": "Scatter plants with a Gaussian distribution in Rhino",
+  "code": "\"\"\"\r\nScatter plants with a Gaussian distribution in Rhino\r\n\"\"\"\r\n\r\n__author__ = \"Brendan Harmon\"\r\n__copyright__ = \"Copyright 2023, Brendan Harmon\"\r\n__email__ = \"brendan.harmon@gmail.com\"\r\n__license__ = \"MIT\"\r\n__version__ = \"1.0.0\"\r\n\r\n# requirements: numpy\r\nimport numpy as np\r\nimport rhinoscriptsyntax as rs\r\n\r\n# instantiate random number generator\r\nrng = np.random.default_rng()\r\n\r\n# generate x, y, and z values\r\nn = 10\r\nmu = 0 # mean\r\nsigma = 1.5 # standard deviation\r\nx = rng.normal(mu, sigma, n)\r\ny = rng.normal(mu, sigma, n)\r\nz = np.zeros(n)\r\n\r\n# interweave coordinates\r\ncoordinates = np.column_stack((x, y, z))\r\n\r\n# create points\r\npoints = rs.AddPoints(coordinates)\r\n\r\n# select objects by layer\r\nlayer = \"polystichum-acrostichoides-01-s\"\r\nobj = rs.ObjectsByLayer(layer, True)\r\nobj = rs.GetObjects(\r\n    \"Select point cloud\",\r\n    rs.filter.pointcloud,\r\n    preselect=True\r\n    )\r\n\r\n# loop\r\nmu = 0.75\r\nsigma = 0.25\r\nfor point in points:\r\n\r\n    # set variables\r\n    angle = rng.uniform(0.0, 360.0)\r\n    factor = np.absolute(rng.normal(mu, sigma))\r\n    scale = (factor, factor, factor)\r\n\r\n    # transform\r\n    transform = rs.CopyObject(obj, point)\r\n    transform = rs.RotateObject(transform, point, angle)\r\n    transform = rs.ScaleObject(transform, point, scale)\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

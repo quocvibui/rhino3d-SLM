@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas-RV/blob/6764c66911729f5ca48f1ea8a714e297980622c5/commands/RV_dem_blocks.py",
+  "repo": "BlockResearchGroup/compas-RV",
+  "repo_stars": 14,
+  "repo_description": "Rhino plugin for form finding of spatial networks of compression forces in equilibrium with vertical loads using two-dimensional, reciprocal form and force diagrams.",
+  "license": "NOASSERTION",
+  "filepath": "commands/RV_dem_blocks.py",
+  "instruction": "venv: brg-csd r: compas_rv>=0.9.5",
+  "code": "#! python3\n# venv: brg-csd\n# r: compas_rv>=0.9.5\n\nimport rhinoscriptsyntax as rs  # type: ignore\nfrom compas_dem.models import BlockModel\nfrom compas_libigl.mapping import TESSAGON_TYPES\n\nimport compas_rhino.layers\nfrom compas.datastructures import Mesh\nfrom compas.scene import Scene\nfrom compas_rv.session import RVSession\n\n\ndef RunCommand():\n    session = RVSession()\n\n    thrust = session.find_thrustdiagram()\n    if not thrust:\n        print(\"There is no ThrustDiagram in the scene.\")\n        return\n\n    option = rs.GetString(message=\"DEM Blocks From\", strings=[\"Dual\", \"MeshPattern\"])\n\n    mesh: Mesh = thrust.diagram.copy()\n    for face in list(mesh.faces_where(_is_loaded=False)):\n        mesh.delete_face(face)\n\n    if option == \"Dual\":\n        model = BlockModel.from_triangulation_dual(mesh)\n\n    elif option == \"MeshPattern\":\n        option2 = rs.GetString(message=\"Pattern Name\", strings=sorted(TESSAGON_TYPES.keys()))\n\n        if option2 not in TESSAGON_TYPES:\n            raise NotImplementedError\n\n        model = BlockModel.from_meshpattern(mesh, option2)\n\n    else:\n        raise NotImplementedError\n\n    # =============================================================================\n    # Scene\n    # =============================================================================\n\n    compas_rhino.layers.clear_layer(\"RhinoVAULT::DEM\")\n\n    scene = Scene()\n\n    for block in model.blocks():\n        scene.add(block.modelgeometry, layer=\"RhinoVAULT::DEM\", disjoint=True)  # type: ignore\n\n    scene.draw()\n\n    del scene\n\n    # =============================================================================\n    # Autosave\n    # =============================================================================\n\n    if session.settings.autosave:\n        session.record(name=\"Create BlockModel\")\n\n\n# =============================================================================\n# Run as main\n# =============================================================================\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

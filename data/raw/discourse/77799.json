@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/net-abstract-class-usage-with-ironpython/77799",
+  "topic_id": 77799,
+  "title": ".net abstract class usage with IronPython",
+  "question": "Hi All,\n\n\nI have a hypothetical/theoretical question:\n\n\nCould anyone provide a script snippet showing how a .net abstract class is used in IronPython?\n\nHow do I use (override) its properties, methods, attributes?\n\nBasically explaining this topic if possible in plain text.\n\n\nMuch obliged!\n\n\nUPDATE:\n\nAlso \ngetset_descriptors\n.\n\nI always get \nTypeError\ns when I try to use \nAbstract Class\n and \ngetset_descriptors\n.\n\n\nTypeError('Cannot create instances of \nSomeClass\n because it is abstract)\n\nTypeError(‘getset_descriptor is not callable’,))\n\nwhen I try \nSomeClass.__new__(OtherClass)\n I get TypeError(\nOtherClass\n does not define any public constructors)\n\netc.",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Provides a scripting component.\nInputs:\n    x: The x script variable\n    y: The y script variable\nOutput:\n    a: The a output variable\"\"\"\n\n__author__ = \"tomj\"\n\nimport rhinoscriptsyntax as rs\n\n\nimport Rhino \nfrom Rhino.Geometry import Vector3d,Point3d\n\nclass MyZMorpher(Rhino.Geometry.SpaceMorph):\n  def __init__(self):\n      Rhino.Geometry.SpaceMorph.__init__(self)\n  def Morph(self,geom):\n      geom.Translate(Vector3d(0,0,10))\n  def MorphPoint(self,point):\n      return Point3d(point.X,point.Y,-10)\n\n\"\"\"\n public abstract Point3d MorphPoint(\n\tPoint3d point)\n\"\"\"\n\nmyMorpher = MyZMorpher()\n\nif (isinstance(geom,Point3d)):\n  print \"its a point\"\n  geom = myMorpher.MorphPoint(geom)\nelse:\n  print \"its not a point\"\n  myMorpher.Morph(geom)\n\na = geom",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 42,
+  "views": 2790
+}

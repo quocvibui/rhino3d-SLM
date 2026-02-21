@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Teakomatic/RETools-6d40c603-c950-4785-9bb8-cc46930ae150-/blob/eba4673906419c4113e196b14d0fa16304b13823/dev/geometry/points.py",
+  "repo": "Teakomatic/RETools-6d40c603-c950-4785-9bb8-cc46930ae150-",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "dev/geometry/points.py",
+  "instruction": "Points",
+  "code": "import random\r\nimport math\r\n\r\nfrom Rhino.Geometry import Point3d\r\n\r\n\r\nclass Point:\r\n    def __init__(self, x, y):\r\n        self.x = x\r\n        self.y = y\r\n\r\n    def __add__(self, p2):\r\n        return Point(self.x + p2.x, self.y + p2.y)\r\n\r\n    def __sub__(self, p2):\r\n        return Point(self.x - p2.x, self.y - p2.y)\r\n\r\n    def dot(self, p2):\r\n        return self.x * p2.x + self.y * p2.y\r\n\r\n    def dist(self, p2):\r\n        diff = self - p2\r\n        return math.sqrt(diff.dot(diff))\r\n\r\n    def __eq__(self, p2):\r\n        return self.x == p2.x and self.y == p2.y\r\n\r\n    def __hash__(self):\r\n        return hash((self.x, self.y))\r\n\r\n    def __lt__(self, other):\r\n\r\n        return self.y < other.y or (self.y == other.y and self.x < other.x)\r\n\r\n\r\ndef toPoint3d(point):\r\n    return Point3d(point.x, point.y, 0)\r\n\r\n\r\ndef fromPoint3d(point):\r\n    #    assert(isinstance(point, Point3d))\r\n\r\n    return Point(point.X, point.Y)\r\n\r\n\r\ndef Points(points):\r\n\r\n    results = []\r\n\r\n    for point in points:\r\n        results.append(fromPoint3d(point))\r\n\r\n    return results\r\n\r\n\r\ndef horizontal_grid(rows, spacing):\r\n    index = 0\r\n\r\n    while True:\r\n        column = index // rows\r\n        row = index % rows\r\n        index += 1\r\n        yield column * spacing, row * spacing\r\n\r\n\r\ndef nearest_neighbor(base_point, points):\r\n    return min(points, key=base_point.dist)\r\n\r\n\r\ndef random_nearest_pair(points):\r\n\r\n    points = set(points)\r\n    base_point = random.choice(list(points))\r\n    points.remove(base_point)\r\n\r\n    neighbor = nearest_neighbor(base_point, points)\r\n\r\n    return base_point, neighbor\r\n\r\n\r\ndef test_random_nearest_neighbor():\r\n\r\n    A, B, C = Point(0, 0), Point(1, 0), Point(0, 1)\r\n\r\n    point_name = {\r\n        Point(0, 0): \"A\",\r\n        Point(1, 0): \"B\",\r\n        Point(0, 1): \"C\",\r\n    }\r\n\r\n    pts = [A, B, C]\r\n\r\n    for i in range(1000):\r\n\r\n        r1, r2 = random_nearest_pair(pts)\r\n\r\n        #        result_name \r\n\r\n        rset = {r1, r2}\r\n        print(\"Attempt\", i, \"of\", 1000)\r\n        print(\"Result:\", r1, r2)\r\n        print(\"Result:\", point_name[r1], point_name[r2])\r\n        assert A in rset\r\n\r\n    print(\"Success!\")\r\n\r\nif __name__ == \"__main__\":\r\n\r\n    test_random_nearest_neighbor()\r\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

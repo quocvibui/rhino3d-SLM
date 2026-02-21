@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/section-cut-in-rhino-python-script-could-you-help-me-on-this/148005",
+  "topic_id": 148005,
+  "title": "Section cut in rhino python script - could you help me on this",
+  "question": "import rhinoscriptsyntax as rs\n\n\nSt = rs.GetObjects(“select 3D object”)\n\n\np1 = rs.GetObject(“p1”)\n\n\np2 = rs.GetObject(“p2”)\n\n\nrs.UnselectAllObjects()\n\nrs.SelectObjects(St)\n\nrs.Command(\"Section _SelId \" + str(p1) + \"  \" + \" SelId \" + str(p2) + \" \")\n\n\nThe code is not running… please help",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nSt = rs.GetObjects(\"Select 3D objects to section\")\np1 = rs.GetPoint(\"First point for section\")\np2 = rs.GetPoint(\"Second point for section\")\n\nrs.UnselectAllObjects()\nrs.SelectObjects(St)\nrs.Command(\"Section \"+ str(p1) + \" \" + str(p2) + \" _Enter\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nSt = rs.GetObjects(\"Select 3D objects to section\")\np1 = rs.GetPoint(\"First point for section\")\np2 = rs.GetPoint(\"Second point for section\")\n\n#get active view's CPlane\nplane=rs.ViewCPlane()\n#transform p1 and p2 to CPlane coordinates\np1=rs.XformWorldToCPlane(p1,plane)\np2=rs.XformWorldToCPlane(p2,plane)\n#now do your section\nrs.UnselectAllObjects()\nrs.SelectObjects(St)\nrs.Command(\"Section \"+ str(p1) + \" \" + str(p2) + \" _Enter\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjs=rs.GetObjects(\"Select 3D objects to section\")\npt1,pt2=rs.GetLine(1)\n#you need to create an actual line curve for this to work\nline_crv=rs.AddLine(pt1,pt2)\n\n#get active view's CPlane\nplane=rs.ViewCPlane()\n#get active CPlane's Z-Axis (projection direction)\nproj_vec=plane.ZAxis\n#project line to surfaces in CPlane Z direction\nsections=rs.ProjectCurveToSurface(line_crv,objs,proj_vec)\n#select the results (if any)\nif sections: rs.SelectObjects(sections)\n#delete the line curve\nrs.DeleteObject(line_crv)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 516
+}

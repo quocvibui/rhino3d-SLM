@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/i-dont-know-when-should-i-use-rhinoscriptsyntax-scriptcontext-and-rhinocommand/29376",
+  "topic_id": 29376,
+  "title": "I don't know when should I use rhinoscriptsyntax, scriptcontext and rhinocommand",
+  "question": "In GH_Python, I used scriptcontext to create some geometry, and it would create geometry directly , means I had no need to bake it. I don’t know when should I use rhinoscriptsyntax, scriptcontext and rhinocommand.\n\n\nimport rhinoscriptsyntax as rs \nimport random as rnd\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nuinc = 1/unum\nvinc = 1/vnum\n\npanels = []\nfor i in range(unum):\n    for j in range(vnum):\n        vlen = rnd.randint(1,10)\n        if j + vlen > vnum:\n            vlen = vnum - j\n        cpts = []\n        depth = rnd.randint(0,1)\n        for k in range(vlen+1):\n             cpts.append(srf.PointAt(i*uinc, (j + k)*vinc))\n             cpts.append(srf.PointAt((i+1)*uinc, (j + k)*vinc))\n       panel = rg.NurbsSurface.CreateFromPoints(cpts,2,vlen+1,1,1)\n       panels.append(panel)\n\n        materialIndex = sc.doc.Materials.Add()\n        material = sc.doc.Materials[materialIndex]\n        material.DiffuseColor = sd.Color.FromArgb(i/unum*255, j/vnum*255, 0)\n        material.CommitChanges()\n        attr = rd.ObjectAttributes()\n        attr.MaterialSource = rd.ObjectMaterialSource.MaterialFromObject\n        attr.MaterialIndex = materialIndex\n\n        panels.append(sc.doc.Objects.AddSurface(panel, attr))\n         #rs.ObjectColor(rs.coercesurface(panel),sd.Color.FromArgb(i/unum*255, j/vnum*255, 0)\n\na=panels\n\n\n\nAnother question:\n\n\nrs.ObjectColor(rs.coercesurface(panel),sd.Color.FromArgb(i/unum\n255, j/vnum\n255, 0))\n\nAfter I added this line, why it told me that \" Runtime error (TypeErrorException): iteration over non-sequence of type NurbsSurface\"?\n\n\nThanks for your patience to explain these!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs \nimport random as rnd\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nuinc = 1/unum\nvinc = 1/vnum\n\npanels = []\nfor i in range(unum):\nfor j in range(vnum):\nvlen = rnd.randint(1,10)\nif j + vlen > vnum:\nvlen = vnum - j\ncpts = []\ndepth = rnd.randint(0,1)\nfor k in range(vlen+1):\ncpts.append(srf.PointAt(i*uinc, (j + k)*vinc))\ncpts.append(srf.PointAt((i+1)uinc, (j + k)vinc))\npanel = rg.NurbsSurface.CreateFromPoints(cpts,2,vlen+1,1,1)\npanels.append(panel)\n\n    materialIndex = sc.doc.Materials.Add()\n    material = sc.doc.Materials[materialIndex]\n    material.DiffuseColor = sd.Color.FromArgb(i/unum*255, j/vnum*255, 0)\n    material.CommitChanges()\n    attr = rd.ObjectAttributes()\n    attr.MaterialSource = rd.ObjectMaterialSource.MaterialFromObject\n    attr.MaterialIndex = materialIndex\n\n    panels.append(sc.doc.Objects.AddSurface(panel, attr))\n     #rs.ObjectColor(rs.coercesurface(panel),sd.Color.FromArgb(i/unum*255, j/vnum*255, 0)\n\na=panels",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs \nimport random as rnd\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nuinc = 1/unum\nvinc = 1/vnum\n\npanels = []\nfor i in range(unum):\n    for j in range(vnum):\n        vlen = rnd.randint(1,10)\n        if j + vlen > vnum:\n            vlen = vnum - j\n        cpts = []\n        depth = rnd.randint(0,1)\n        for k in range(vlen+1):\n             cpts.append(srf.PointAt(i*uinc, (j + k)*vinc))\n             cpts.append(srf.PointAt((i+1)*uinc, (j + k)*vinc))\n       panel = rg.NurbsSurface.CreateFromPoints(cpts,2,vlen+1,1,1)\n       panels.append(panel)\n\n        materialIndex = sc.doc.Materials.Add()\n        material = sc.doc.Materials[materialIndex]\n        material.DiffuseColor = sd.Color.FromArgb(i/unum*255, j/vnum*255, 0)\n        material.CommitChanges()\n        attr = rd.ObjectAttributes()\n        attr.MaterialSource = rd.ObjectMaterialSource.MaterialFromObject\n        attr.MaterialIndex = materialIndex\n\n        panels.append(sc.doc.Objects.AddSurface(panel, attr))\n         #rs.ObjectColor(rs.coercesurface(panel),sd.Color.FromArgb(i/unum*255, j/vnum*255, 0)\n\na=panels",
+      "language": "python",
+      "author": "daizhuo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 1347
+}

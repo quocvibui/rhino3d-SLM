@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jhorikawa/GrasshopperProgrammingTutorials/blob/6e5b830b481bc0fbf5390d6b5504f5df180d1433/0002%20Getting%20Started%20with%20compute.rhino3d%20for%20Python/compute%20rhino3d%20example.py",
+  "repo": "jhorikawa/GrasshopperProgrammingTutorials",
+  "repo_stars": 173,
+  "repo_description": "File repo for Rhino / Grasshopper programming tutorial videos.",
+  "license": "unknown",
+  "filepath": "0002 Getting Started with compute.rhino3d for Python/compute rhino3d example.py",
+  "instruction": "Compute rhino3d example",
+  "code": "import rhino3dm\nimport random\nimport compute_rhino3d\nimport compute_rhino3d.Util\nimport compute_rhino3d.Curve\nimport compute_rhino3d.Mesh\n\ncompute_rhino3d.Util.authToken = \"\"\n#compute_rhino3d.Util.url = \"http://127.0.0.1:8081/\"\n\nmodel = rhino3dm.File3dm()\ncurves = []\nfor i in range(20):\n    pt = rhino3dm.Point3d(random.uniform(-10, 10), random.uniform(-10, 10), 0)\n    #model.Objects.AddPoint(pt)\n    circle = rhino3dm.Circle(pt, random.uniform(1, 4))\n    #model.Objects.AddCircle(circle)\n    curve = circle.ToNurbsCurve()\n    curves.append(curve)\n\nbcurves = compute_rhino3d.Curve.CreateBooleanUnion(curves)\n\nfor bcurve in bcurves:\n    bcurveObj = rhino3dm.CommonObject.Decode(bcurve)\n\n    extrusion = rhino3dm.Extrusion.Create(bcurveObj, 5, True)\n    #model.Objects.AddExtrusion(extrusion)\n\n    brep = extrusion.ToBrep(True)\n    meshes = compute_rhino3d.Mesh.CreateFromBrep(brep)\n    for i in range(len(meshes)):\n        meshObj = rhino3dm.CommonObject.Decode(meshes[i])\n        model.Objects.AddMesh(meshObj)\n\n\nmodel.Write('mesh.3dm', 5)\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

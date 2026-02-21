@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/various-rhinocommon-input-clarifications-needed-should-be-easy/189835",
+  "topic_id": 189835,
+  "title": "Various Rhinocommon.Input clarifications needed. Should be easy",
+  "question": "Problem.\n\n\nHow can I get this to work like Rhino, where the user can customize the options but still run the command, select objects etc\n\n\ndef get_options():\n    # Retrieve stored values or set to defaults\n    symbol_radius = get_custom_value(\"symbol_radius\", 5)\n    text_height = get_custom_value(\"text_height\", 2)\n    accuracy = get_custom_value(\"accuracy\", 1)  # Default to 1m\n\n    # Create option objects\n    symbol_radius_opt = Rhino.Input.Custom.OptionDouble(symbol_radius)\n    text_height_opt = Rhino.Input.Custom.OptionDouble(text_height)\n    accuracy_opt = Rhino.Input.Custom.OptionDouble(accuracy)\n\n    while True:\n        go = Rhino.Input.Custom.GetOption()\n        go.SetCommandPrompt(\"Specify options for spot coordinate (Press Enter or Right-click to confirm)\")\n\n        go.AddOptionDouble(\"SymbolRadius\", symbol_radius_opt)\n        go.AddOptionDouble(\"TextHeight\", text_height_opt)\n        go.AddOptionDouble(\"Accuracy\", accuracy_opt)\n\n        result = go.Get()\n\n        if result == Rhino.Input.GetResult.Option:\n            continue\n        elif result in (Rhino.Input.GetResult.Nothing, Rhino.Input.GetResult.Cancel):  # Press Enter or Right-click\n            break\n        else:\n            return None, None, None\n\n    # Update stored values based on user input\n    set_custom_value(\"symbol_radius\", symbol_radius_opt.CurrentValue)\n    set_custom_value(\"text_height\", text_height_opt.CurrentValue)\n    set_custom_value(\"accuracy\", accuracy_opt.CurrentValue)\n\n    return symbol_radius_opt.CurrentValue, text_height_opt.CurrentValue, accuracy_opt.CurrentValue\n\n\n\nBasically the user wants to be able to use the command, and have this strong running on the command line so he can change it as he works, some rhino commands have this behavoir\n\n\nIf the user clicks on the model, then it confirms the values that are currently being used\n\nThere are many commands like this\n\n\nHow is it reached",
+  "code_blocks": [
+    {
+      "code": "def get_options():\n    # Retrieve stored values or set to defaults\n    symbol_radius = get_custom_value(\"symbol_radius\", 5)\n    text_height = get_custom_value(\"text_height\", 2)\n    accuracy = get_custom_value(\"accuracy\", 1)  # Default to 1m\n\n    # Create option objects\n    symbol_radius_opt = Rhino.Input.Custom.OptionDouble(symbol_radius)\n    text_height_opt = Rhino.Input.Custom.OptionDouble(text_height)\n    accuracy_opt = Rhino.Input.Custom.OptionDouble(accuracy)\n\n    while True:\n        go = Rhino.Input.Custom.GetOption()\n        go.SetCommandPrompt(\"Specify options for spot coordinate (Press Enter or Right-click to confirm)\")\n\n        go.AddOptionDouble(\"SymbolRadius\", symbol_radius_opt)\n        go.AddOptionDouble(\"TextHeight\", text_height_opt)\n        go.AddOptionDouble(\"Accuracy\", accuracy_opt)\n\n        result = go.Get()\n\n        if result == Rhino.Input.GetResult.Option:\n            continue\n        elif result in (Rhino.Input.GetResult.Nothing, Rhino.Input.GetResult.Cancel):  # Press Enter or Right-click\n            break\n        else:\n            return None, None, None\n\n    # Update stored values based on user input\n    set_custom_value(\"symbol_radius\", symbol_radius_opt.CurrentValue)\n    set_custom_value(\"text_height\", text_height_opt.CurrentValue)\n    set_custom_value(\"accuracy\", accuracy_opt.CurrentValue)\n\n    return symbol_radius_opt.CurrentValue, text_height_opt.CurrentValue, accuracy_opt.CurrentValue",
+      "language": "python",
+      "author": "ReyMysterio",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 87
+}

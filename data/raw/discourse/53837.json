@@ -1,0 +1,70 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-layer-of-an-object-with-rs-objectlayer-x-inside-python-compnent/53837",
+  "topic_id": 53837,
+  "title": "Get layer of an object with rs.ObjectLayer(x) inside Python compnent",
+  "question": "I want to get the layer of an object inside grasshopper with Python component using\n\n\nimport rhinoscriptsyntax as rs\n\na = rs.ObjectLayer(x)\n\n\nType hint Brep\n\nAnd I get 1. Solution exception:Parameter must be a string or Guid\n\n\nWhat’s the correct way to do this?\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nobj = Rhino.RhinoDoc.ActiveDoc.Objects.Find(x)\n\ndef MyGetObjectLayer(obj):\n    index = obj.Attributes.LayerIndex\n    layer = Rhino.RhinoDoc.ActiveDoc.Layers[index]\n    return layer.Name\n\na = MyGetObjectLayer(obj)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\nobj = sc.doc.Objects.Find(x)\n\ndef MyGetObjectLayer(obj):\n    index = obj.Attributes.LayerIndex\n    layer = sc.doc.Layers[index]\n    return layer.Name\n    \na = MyGetObjectLayer(obj)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\nobj = sc.doc.Objects.Find(x)\n\ndef MyGetObjectLayer(obj):\n    index = obj.Attributes.LayerIndex\n    layer = sc.doc.Layers[index]\n    return layer.Name\n    \na = MyGetObjectLayer(obj)",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "prev = scriptcontext.doc\nscriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n#do everything required\nscriptcontext.doc = prev",
+      "language": "python",
+      "author": "piac",
+      "post_number": 30,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\na = rs.ObjectLayer(x)\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 36,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nold_doc = sc.doc\ntry:\n    \n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    a = rs.ObjectLayer(x)\n    \nfinally:\n    sc.doc = old_doc",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 37,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\na = rs.ObjectLayer(x)\n\nsc.doc = ghdoc #important, set it back to default",
+      "language": "python",
+      "author": "piac",
+      "post_number": 40,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 42,
+  "views": 10801
+}

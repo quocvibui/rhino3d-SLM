@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-create-scribble-on-the-canvas-and-set-its-position/73013",
+  "topic_id": 73013,
+  "title": "ghPython : create Scribble on the canvas and set its position",
+  "question": "I would like to create scribbles at specific locations on the canvas; relative to the bounds of a group.\n\nMetaHopper does this, but I’d like to do it in a ghPython component. I cannot find the attributes, like Pivot, for Special.GH_Scribble that would set its position.\n\n\nWhere should I look for help on this?\n\n\nThank you,\n\n\nJonah\n\nedit:category",
+  "code_blocks": [
+    {
+      "code": "// Grasshopper Script Instance\n#region Usings\nusing System;\nusing System.Drawing;\n\nusing Grasshopper;\nusing Grasshopper.Kernel.Special;\n#endregion\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    // Keep track of the last scribble created\n    private static Guid lastScribbleId = Guid.Empty;\n\n    private void RunScript(string Text, bool Create)\n    {\n        var doc = GrasshopperDocument;\n        if (!Create || doc == null) return;\n\n        // Schedule changes to run after the current solution\n        doc.ScheduleSolution(1, _ =>\n        {\n            // Remove previous scribble\n            if (lastScribbleId != Guid.Empty)\n            {\n                var old = doc.FindObject(lastScribbleId, true);\n                if (old != null) doc.RemoveObject(old, true);\n                lastScribbleId = Guid.Empty;\n            }\n\n            // Create new scribble\n            var scrib = new GH_Scribble();\n            scrib.CreateAttributes();\n            scrib.Text = string.IsNullOrWhiteSpace(Text) ? \"Scribble\" : Text;\n\n            // Font: Microsoft Sans Serif, size 5\n            scrib.Font = new Font(\"Microsoft Sans Serif\", 6f, FontStyle.Regular);\n\n            // Fixed position\n            scrib.Attributes.Pivot = new PointF(980f, 900f);\n\n            // Add to document\n            doc.AddObject(scrib, false);\n\n            // Store ID\n            lastScribbleId = scrib.InstanceGuid;\n\n            // Refresh canvas\n            Grasshopper.Instances.InvalidateCanvas();\n        });\n    }\n}",
+      "language": "csharp",
+      "author": "bbalbastre",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 492
+}

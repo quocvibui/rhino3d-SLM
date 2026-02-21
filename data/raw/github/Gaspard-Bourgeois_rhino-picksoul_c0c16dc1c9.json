@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Gaspard-Bourgeois/rhino-picksoul/blob/9431b8335b62d43ec3539852d1a1af603f0ce1c5/dev/gumball/alignGumballToSpecificBlock.py",
+  "repo": "Gaspard-Bourgeois/rhino-picksoul",
+  "repo_stars": 1,
+  "repo_description": "Generic plugin to manage blocs, materials and trajectories in rhino.",
+  "license": "Apache-2.0",
+  "filepath": "dev/gumball/alignGumballToSpecificBlock.py",
+  "instruction": "Align gumball to specific block",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef AlignGumballToSpecificBlock():\n    # 1. Récupérer les objets déjà sélectionnés\n    targets = rs.SelectedObjects()\n    if not targets:\n        print(\"Veuillez sélectionner des objets avant de lancer le script.\")\n        return\n\n    # 2. Demander le bloc de référence (l'orientation à copier)\n    # On désactive la présélection pour choisir le bloc\n    rs.UnselectAllObjects()\n    ref_block = rs.GetObject(\"Sélectionnez le bloc dont vous voulez copier l'orientation\", rs.filter.instance)\n    \n    if not ref_block:\n        rs.SelectObjects(targets) # Restaurer la sélection si annulé\n        return\n\n    # 3. Calculer le plan du bloc\n    matrix = rs.BlockInstanceXform(ref_block)\n    new_plane = rg.Plane.WorldXY\n    new_plane.Transform(matrix)\n\n    # 4. Appliquer les changements\n    rs.EnableRedraw(False)\n    \n    # Aligner le CPlane sur le bloc\n    rs.ViewCPlane(None, new_plane)\n    \n    # Aligner le Gumball sur le CPlane\n    rs.Command(\"_GumballAlignment _CPlane\", False)\n    \n    # Resélectionner les objets initiaux pour mettre à jour le Gumball\n    rs.SelectObjects(targets)\n    \n    rs.EnableRedraw(True)\n    print(\"Gumball aligné sur l'orientation du bloc.\")\n\nif __name__ == \"__main__\":\n    AlignGumballToSpecificBlock()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

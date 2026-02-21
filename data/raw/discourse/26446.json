@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-do-you-build-a-capsule-solid-in-python-script/26446",
+  "topic_id": 26446,
+  "title": "How do you build a capsule solid in python script",
+  "question": "en.wikipedia.org\n\n\n\n\n\n\n\n\nCapsule (geometry)\n\n\nA capsule (from Latin capsula, \"small box or chest\"), or stadium of revolution, is a basic three-dimensional geometric shape consisting of a cylinder with hemispherical ends. Another name for this shape is spherocylinder. The shape is used for containers for pressurised gasses and for pharmaceutical capsules. The volume of a capsule is calculated by the formula \n  \n    \n      \n        V\n        =\n        π\n        \n          r\n          \n            2\n          \n        \n        \n          (\n    ...\n\n\n\n\n\n\n\n\n\n\n\n\nwhat is the fastest way to build a generic capsule with give any orientation by a vector, given the following parameters\n\n\nA length of cylindrical height\n\nr  radius of cylinder and hemispheres\n\nx y z location of the center of the solid\n\n\nalpha, beta, gamma as the vector determining the orientation of the capsule( ahpha^2+beta^2+gamma^2=1), say 1,0,0 meaning it is along x axis, but would like to extend it to any generic direction not just on x or y or z axis by giving the proper orientation vector.\n\n\nimport Rhino\nimport scriptcontext\nimport System.Guid\n\nr=4\nh=8\nx = 5\ny = 10\nz = 4\nalpha = 1 # Along x axis\nbeta  = 0\ngamma = 0 \n\n\n\ncenter = Rhino.Geometry.Point3d(x, y, z)\nc = Rhino.Geometry.Circle(center, r)\n# how to rotate the circle then move it to the ends of the cylinder so you could sweep to generate the cylinder surface\n# then copy the center to the end of the cylinder top/bottom to generate the hemi-spheres and join 3 surfaces together? # I got stuck at the rotation part and am not quite familiar with the syntax...\n\n\n\nThank you for your help.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, random, System\n\ndef MakeCapsule(rad,ht,tol):\n    #makes capsule oriented along X-axis, centered at 0\n    #I prefer to create this as 3 separate surfaces and join\n    #points\n    ptA=Rhino.Geometry.Point3d(-ht,rad,0)\n    ptB=Rhino.Geometry.Point3d(-(ht+rad),0,0)\n    ptC=Rhino.Geometry.Point3d(ht,rad,0)\n    ptD=Rhino.Geometry.Point3d(ht+rad,0,0)\n    \n    #curve geometry\n    x_vec=Rhino.Geometry.Vector3d(1,0,0)\n    line_crv=Rhino.Geometry.LineCurve(ptA,ptC)\n    arc_R=Rhino.Geometry.Arc(ptA,-x_vec,ptB).ToNurbsCurve()\n    arc_L=Rhino.Geometry.Arc(ptC,x_vec,ptD).ToNurbsCurve()\n    \n    #revolve surfaces\n    axis=Rhino.Geometry.Line(ptB,ptD)\n    srf_R=Rhino.Geometry.RevSurface.Create(arc_R,axis).ToBrep()\n    srf_C=Rhino.Geometry.RevSurface.Create(line_crv,axis).ToBrep()\n    srf_L=Rhino.Geometry.RevSurface.Create(arc_L,axis).ToBrep()\n    \n    #join\n    brep=Rhino.Geometry.Brep.JoinBreps([srf_R,srf_C,srf_L],tol)\n    return brep[0]\n    \ndef Get3RandomValues(min,max):\n    x=random.randrange(min,max)\n    y=random.randrange(min,max)\n    z=random.randrange(min,max)\n    return x,y,z\n    \ndef CreateOrientCapsules():\n    #test will create n number of capsules at different locations\n    tol=sc.doc.ModelAbsoluteTolerance\n    radius=rs.GetReal(\"Capsule radius?\",1,minimum=tol)\n    if not radius: return\n    height=rs.GetReal(\"Cylinder section height?\",2,minimum=tol)\n    if not height: return\n    extents=rs.GetReal(\"Extents cube?\",100,minimum=tol)\n    if not extents: return\n    count=rs.GetInteger(\"Number of capsules?\",10,minimum=1)\n    if not count: return\n    \n    vecs=[] ; pts=[] ; colors=[]\n    x_vec=Rhino.Geometry.Vector3d(1,0,0)\n    origin=Rhino.Geometry.Point3d(0,0,0)\n    \n    for i in range(count):\n        x,y,z=Get3RandomValues(-extents/2,extents/2)\n        pts.append(Rhino.Geometry.Point3d(x,y,z))\n        x,y,z=Get3RandomValues(-extents/2,extents/2)\n        vecs.append(Rhino.Geometry.Vector3d(x,y,z))\n        r,g,b=Get3RandomValues(0,255)\n        colors.append(System.Drawing.Color.FromArgb(r,g,b))\n    \n    sc.doc.Views.RedrawEnabled=False\n    for i in range(count):\n        cap=MakeCapsule(radius,height,tol)\n        xform=Rhino.Geometry.Transform.Rotation(x_vec,vecs[i],origin)\n        cap.Transform(xform)\n        xform=Rhino.Geometry.Transform.Translation(pts[i]-origin)\n        cap.Transform(xform)\n        objID=sc.doc.Objects.AddBrep(cap)\n        rs.ObjectColor(objID,colors[i])\nCreateOrientCapsules()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef Capsule(curve, radius):\n    brep = Rhino.Geometry.Brep()\n    mode = Rhino.Geometry.PipeCapMode.Round\n    t1 = scriptcontext.doc.ModelAbsoluteTolerance\n    t2 = scriptcontext.doc.ModelAngleToleranceRadians\n    rc = brep.CreatePipe(curve, radius, False, mode, False, t1, t2)\n    if rc: return rc[0]\n    \ndef GetCapsulePoints():\n    pts = rs.GetPoints(True, False, \"first point\", \"second point\", 2)\n    if not pts: return\n    if len(pts) == 1: return\n    if pts[0] == pts[1]: return\n    curve = Rhino.Geometry.Line(pts[0], pts[1]).ToNurbsCurve()\n    capsule = Capsule(curve, radius=0.5*pts[0].DistanceTo(pts[1]))\n    if capsule:\n        scriptcontext.doc.Objects.AddBrep(capsule)\n        scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    GetCapsulePoints()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Guid\n\nr=4\nh=8\nx = 5\ny = 10\nz = 4\nalpha = 1 # Along x axis\nbeta  = 0\ngamma = 0 \n\n\n\ncenter = Rhino.Geometry.Point3d(x, y, z)\nc = Rhino.Geometry.Circle(center, r)\n# how to rotate the circle then move it to the ends of the cylinder so you could sweep to generate the cylinder surface\n# then copy the center to the end of the cylinder top/bottom to generate the hemi-spheres and join 3 surfaces together? # I got stuck at the rotation part and am not quite familiar with the syntax...",
+      "language": "python",
+      "author": "ludicris",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 2635
+}

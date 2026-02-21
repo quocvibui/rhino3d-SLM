@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/fonts-findorcreate-fails-to-find-font/121121",
+  "topic_id": 121121,
+  "title": "Fonts.FindOrCreate fails to find font",
+  "question": "Hi \n@Pascal\n and \n@dale\n,\n\n\ni am trying to create a \nTextEntity\n using the “Arial Black” font. To locate it, i use:\n\n\nte.FontIndex = scriptcontext.doc.Fonts.FindOrCreate(\"Arial_Black\", False, False)\n\n\n\nUnfortunately the font is never found after Rhino is freshly opened. Only if i run eg. the \n_TextObject\n command before, and create something using the Arial Black font, it is then found with my script. If i then open a new file, the font is also found using \nFindOrCreate\n. But if i reopen Rhino, the font is not found again.\n\n\nHow to reliably locate the font and use it ? Things i’ve tried allready:\n\n\nI’ve iterated over \nSystem.Drawing.Text.InstalledFontCollection().Families\n (slow) which lists my required \nfont.Name\n as “Arial Black”. Unfortunately, this is not the proper \nName\n to use with \nFindOrCreate\n, it only can use the font if i put an underscore between the words and do before what i’ve described above.\n\n\nDo i really need to script the Rhino command as shown \nhere\n ?\n\n\nNote: this is R6, i try to find a way to do this reliable in R6 and R7\n\n\nthank you,\n\nc.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef AddText():\n    font = Rhino.DocObjects.Font.FromQuartetProperties(\"Arial Black\", False, False)\n    te = Rhino.Geometry.TextEntity()\n    te.Plane = Rhino.Geometry.Plane.WorldXY\n    te.Text = \"ABCDEFG\"\n    te.Justification = Rhino.Geometry.TextJustification.MiddleCenter\n    te.TextHeight = 1.0\n    te.FontIndex = scriptcontext.doc.Fonts.FindOrCreate(font.QuartetName, False, False)\n    \n    curves = te.CreateCurves(te.DimensionStyle, False, 1.0, 0.0)\n    for crv in curves:\n        scriptcontext.doc.Objects.AddCurve(crv)\n    \n    # below crashes Rhino 6\n    # breps = te.CreatePolySurfaces(te.DimensionStyle, 4.0, 1.0, 0.0)\n    \n    scriptcontext.doc.Views.Redraw()\n\nAddText()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef AddText():\n    font = Rhino.DocObjects.Font.FromQuartetProperties(\"Arial Black\", False, False)\n    te = Rhino.Geometry.TextEntity()\n    te.Plane = Rhino.Geometry.Plane.WorldXY\n    te.Text = \"ABCDEFG\"\n    te.Justification = Rhino.Geometry.TextJustification.MiddleCenter\n    te.TextHeight = 1.0\n    te.FontIndex = scriptcontext.doc.Fonts.FindOrCreate(font.QuartetName, False, False)\n   \n    # below crashes Rhino 6\n    breps = te.CreatePolySurfaces(te.DimensionStyle, 4.0, 1.0, 0.0)\n    for b in breps:\n        scriptcontext.doc.Objects.AddBrep(b)\n        \n    scriptcontext.doc.Views.Redraw()\n\nAddText()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef test_arial_black_text():\n    \n    text = 'Hello Rhino!'\n    plane = Rhino.Geometry.Plane.WorldXY\n    height = 2.0\n    qname = 'Arial Black'\n    qbold = False\n    qitalic = False\n    \n    ds = scriptcontext.doc.DimStyles.Current\n    if not ds: return\n    ds_bold = ds.Font.Bold\n    ds_italic = ds.Font.Italic\n    \n    te = Rhino.Geometry.TextEntity.Create(text, plane, ds, False, 0, 0)\n    if not te: return\n    te.TextHeight = height\n    \n    f = Rhino.DocObjects.Font.FromQuartetProperties(qname, False, False)\n    if f:\n        te.Font = f\n        if qbold != ds_bold:\n            if Rhino.DocObjects.Font.FromQuartetProperties(qname, qbold, False):\n                te.SetBold(qbold)\n        if qitalic != ds_italic:\n            if Rhino.DocObjects.Font.FromQuartetProperties(qname, False, qitalic):\n               te.SetItalic(qitalic)\n           \n    scriptcontext.doc.Objects.Add(te)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    test_arial_black_text()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 10,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 864
+}

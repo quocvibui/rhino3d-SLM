@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-rs-zoomextents-with-rs-enableredraw-false/5452",
+  "topic_id": 5452,
+  "title": "Bug rs.ZoomExtents() with rs.EnableRedraw(False)",
+  "question": "Greetings,\n\nI have written the following script to set a specific layout as the current view then for each detail in the layout I call the rs.ZoomExtents() command.  However I get different results depending on weather or not rs.EnableRedraw() is True or False.\n\nWhen I set EnableRedraw(False) all of the views on the layout are not set to the proper zoom, but when I commented out rs.EnableRedraw() the script functioned as anticipated.  However I am not sure why turning off redraw would have an effect on this.\n\nAny assistance would be greatly appreciated.\n\nBelow is my short bit of code as well as images of before and after images with and without redraw enabled.\n\n\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\nLayoutNames=scriptcontext.doc.Views.GetPageViews()\nLayouts=[]\nfor name in LayoutNames:\n    Layouts.append(name.PageName)\nLayout=rs.GetString(\"Select which layout the block should be place into.\",Layouts[0],Layouts)\nif rs.IsLayout(Layout)==True:\n    rs.CurrentView(Layout)\n    Details = scriptcontext.doc.Views.ActiveView.GetDetailViews()\n    #rs.EnableRedraw(False)\n    for detail in Details:\n        guid = rs.coerceguid(detail)\n        rs.CurrentDetail(\"DRAWING\",guid)\n        rs.DetailLock(guid,False)\n        rs.ZoomExtents()\n\n\n\nBefore the script was run:\n\n\n\n\nScript with rs.EnableRedraw(False)\n\n\n\n\nScript with \n#rs\n.EnableRedraw(False) commented out\n\n\n\n\nAlso, I should note that this is happening with SR 5.8.40128",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\n\nLayoutNames=scriptcontext.doc.Views.GetPageViews()\nLayouts=[]\nfor name in LayoutNames:\n    Layouts.append(name.PageName)\nLayout=rs.GetString(\"Select which layout the block should be place into.\",Layouts[0],Layouts)\nif rs.IsLayout(Layout)==True:\n    rs.CurrentView(Layout)\n    Details = scriptcontext.doc.Views.ActiveView.GetDetailViews()\n    #rs.EnableRedraw(False)\n    for detail in Details:\n        guid = rs.coerceguid(detail)\n        rs.CurrentDetail(\"DRAWING\",guid)\n        rs.DetailLock(guid,False)\n        rs.ZoomExtents()",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1423
+}

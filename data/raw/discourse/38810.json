@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-question-and-different-results-win-vs-mac/38810",
+  "topic_id": 38810,
+  "title": "Python question and different results Win vs Mac",
+  "question": "I have a basic script that draws a poly line through points, then revolves to make a closed poly surface.\n\n\nQuestion 1:\n\n\nIs there a more efficient way to do the points, like a list for example? If so. is it possible to make 3-4 lists of different points and chose one of them to revolve in the same script?\n\n\nimport rhinoscriptsyntax as rs\n\npt1 = (0,0,0)\npt2 = (-3.6,0,0)\npt3 = (-3.6,0,1.2)\npt4 = (-2.4,0,1.2)\npt5 = (-2.4,0,3.8)\npt6 = (-6,0,3.8)\npt7 = (-6,0,5.5)\npt8 = (-5.3,0,5.5)\npt9 = (-5.3,0,4.5)\npt10 = (0,0,4.5)\n\ncurve = rs.AddPolyline((pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9, pt10))\n\nlayer01 = rs.AddLayer(\"pop outline\")\n\nrs.ObjectLayer(curve, layer01)\nif not rs.IsLayer(layer01):\n    rs.AddLayer(layer01, (0,127,0))\n\npolysurface = rs.AddRevSrf( curve, ((0,0,0), (0,0,1)) )\n\nlayer02 = rs.AddLayer(\"pop\")\n\nrs.ObjectLayer(polysurface, layer02)\nif not rs.IsLayer(layer02):\n    rs.AddLayer(layer02, (0,0,0))\n\nrs.LayerVisible(layer01, 0)\n\nrs.PurgeLayer(\"pop outline\")\n\n\n\nQuestion 2: I get a different object when I run this script on Windows than when I run it on my Mac. Windows gives my a polysurface, which is what I would expect.\n\n\n\n\nWhile on my Mac I get a single surface. I haven’t run this in a while but it seems to me it used to be a polysurface on my Mac as well.\n\n\n\n\nScreen Shot 2016-11-16 at 7.19.23 AM.png\n821×476 58.2 KB\n\n\n\n\npopInclear.py\n (666 Bytes)\n\n\nPlug-Windows.3dm\n (131.0 KB)\n\n\nPlug-Mac.3dm\n (125.2 KB)\n\n\nThanks, «Randy",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npt1 = (0,0,0)\npt2 = (-3.6,0,0)\npt3 = (-3.6,0,1.2)\npt4 = (-2.4,0,1.2)\npt5 = (-2.4,0,3.8)\npt6 = (-6,0,3.8)\npt7 = (-6,0,5.5)\npt8 = (-5.3,0,5.5)\npt9 = (-5.3,0,4.5)\npt10 = (0,0,4.5)\n\ncurve = rs.AddPolyline((pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9, pt10))\n\nlayer01 = rs.AddLayer(\"pop outline\")\n\nrs.ObjectLayer(curve, layer01)\nif not rs.IsLayer(layer01):\n    rs.AddLayer(layer01, (0,127,0))\n\npolysurface = rs.AddRevSrf( curve, ((0,0,0), (0,0,1)) )\n\nlayer02 = rs.AddLayer(\"pop\")\n\nrs.ObjectLayer(polysurface, layer02)\nif not rs.IsLayer(layer02):\n    rs.AddLayer(layer02, (0,0,0))\n\nrs.LayerVisible(layer01, 0)\n\nrs.PurgeLayer(\"pop outline\")",
+      "language": "python",
+      "author": "rhinorudi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1336
+}

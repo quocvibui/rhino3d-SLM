@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/kleerkoat/rhinoScripts/blob/5e78e1ef675cb867cd45b3a201b337ab54381018/scripts/_tools/GetMap.py",
+  "repo": "kleerkoat/rhinoScripts",
+  "repo_stars": 24,
+  "repo_description": "collected scripts, mostly not mine",
+  "license": "unknown",
+  "filepath": "scripts/_tools/GetMap.py",
+  "instruction": "Written by Lorenz Lachauer, 28.6.2011 License: CC-BY-NC-SA eat-a-bug.blogspot.com This script imports a static map form OpenStreetMaps, based on an adress entered by the user",
+  "code": "# Written by Lorenz Lachauer, 28.6.2011\n# License: CC-BY-NC-SA\n# eat-a-bug.blogspot.com\n# This script imports a static map form OpenStreetMaps, \n# based on an adress entered by the user\n\n\nimport urllib,urllib2,time\nimport os, Rhino, scriptcontext\nimport rhinoscriptsyntax as rs\nimport re, socket, math\n\n\ndef GetMap():\n    socket.setdefaulttimeout(10)\n    filename='c:\\\\map.jpg' # you migth hve to change this path\n    street = rs.GetString('Street')\n    city = rs.GetString('City')\n    country = rs.GetString('Country')\n    zoom = rs.GetInteger('Zoom', 17, 1, 19)\n    rs.UnitSystem(4, True)\n    url='http://nominatim.openstreetmap.org/search?q='+street+','+city+','+country+'&format=xml'\n    rs.CurrentView('Top')\n    try:\n        xml = urllib.urlopen(url).read()\n    except:\n        print 'http://nominatim.openstreetmap.org produced an error'\n        return\n    temp = xml[xml.find(\"lat=\")+5:-1]\n    lat= temp[0:temp.find(\"'\")]\n    temp = xml[xml.find(\"lon=\")+5:-1]\n    lng= temp[0:temp.find(\"'\")]\n    print 'Latitude, Longitude: '+lat+\", \"+lng\n    picture_page = 'http://osm-tah-cache.firefishy.com/MapOf/?lat='+lat+'&long='+lng+'&z='+str(zoom)+'&w=1000&h=1000&format=jpeg'\n    opener1 = urllib2.build_opener()\n    try:\n        page1 = opener1.open(picture_page)\n        my_picture = page1.read()\n    except:\n        print 'http://osm-tah-cache.firefishy.com produced an error'\n        return\n    try:\n        fout = open(filename, 'wb')\n        fout.write(my_picture)\n        fout.close()\n    except:\n        print 'writing of '+path+' produced an error'\n        return\n    res =  40075017 * math.cos(float(lat)/180*math.pi) / (256 * 2 ** zoom) *1000\n    rs.Command('_-BackgroundBitmap Remove _Enter',False)\n    rs.Command('_-BackgroundBitmap '+filename+' '+str(-res/2)+','+str(-res/2)+',0 '+str(res/2)+','+str(res/2)+',0 _Enter',True)\n    rs.Command('_-BackgroundBitmap Grayscale=No _Enter', False)\n    rs.Command('_-EarthAnchorPoint Latitude '+lat+' Longitude '+lng+' _Enter _Enter _Enter _Enter _Enter', False)\n\nGetMap()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

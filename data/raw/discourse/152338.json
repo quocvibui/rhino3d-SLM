@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-pick-object-in-a-detail-within-a-layout/152338",
+  "topic_id": 152338,
+  "title": "Select / Pick Object in a detail within a layout",
+  "question": "Hi all,\n\n\nI am using following code (LayerDot) to label (tag) the objects with textdots using layernames. As the code is used mostly on layout view, i need help for select/pick object in a detail within a layout view.\n\n\nThank you in advance\n\nYA\n\n\n\n\nimport Rhino\n\nimport rhinoscriptsyntax as rs\n\n\ndef LayerDot():\n\nwhile True:\n\nrs.Command(“_Cplane _View”)\n\nobject = rs.GetObjectEx(“Select part to label”, 0, False )\n\nif object is None: return\n\nlayer = rs.ObjectLayer(object[0])\n\nif layer is None: return\n\ncolour = rs.ObjectColor(object[0])\n\npoint1 = rs.AddPoint(object[3])\n\nif object[3]:\n\nlayerName = layer.split(“::”)[-1]\n\npoint2=rs.GetPoint()\n\nif not point2: return\n\nif layerName:\n\ndot = rs.AddTextDot(layerName, point2)\n\nrs.TextDotHeight(dot, height=10)\n\nline = rs.AddLine(point1,point2)\n\nmy_group = rs.AddGroup()\n\nobjs = [dot, point1, line]\n\nrs.AddObjectsToGroup(objs, my_group)\n\nrs.ObjectColor(point1, (170,5,5))\n\nrs.ObjectLayer(point1, layer)\n\nrs.ObjectColor(line, (170,5,5))\n\nrs.ObjectLayer(line, layer)\n\nrs.ObjectColor(dot, (170,5,5))\n\nrs.ObjectLayer(dot, layer)\n\nrs.ObjectPrintWidth(objs, 0.2)\n\nLayerDot()",
+  "code_blocks": [
+    {
+      "code": "def annotation_name():\n\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select object to annotate:\")\n    go.InactiveDetailPickEnabled = True\n    rc = go.Get()\n    if rc == Rhino.Input.GetResult.Object:\n        objref = go.Object(0)\n       # restrict to pick selection, prevent window selection\n        if objref.SelectionMethod()!= Rhino.DocObjects.SelectionMethod.MousePick:\n            print \"Selection should be performed by picking\"\n            return\n        obj = objref.Object()\n        name = rs.ObjectName(obj.Id)\n        name1 = \"%<ObjectName(\" + \"'\" + obj.Id.ToString() + \"'\" + \")>%\"\n        pickPt = objref.SelectionPoint()\n\n        if not pickPt: return\n        \n        detail_sn = objref.SelectionViewDetailSerialNumber()\n        if detail_sn > 0:\n            detail = sc.doc.Objects.Find(detail_sn)\n            if isinstance(detail, Rhino.DocObjects.DetailViewObject):\n                pickPt.Transform(detail.WorldToPageTransform)\n        \n        point2 = rs.GetPoint(\"\", pickPt)\n        if not point2: return\n        point3 = rs.GetPoint(\"Text location\", pickPt)\n        if not point3: return\n        pts=[]\n        pts.extend([pickPt, point2, point3])\n        leader = rs.AddLeader(pts, text=name1)\n        # Rhino.Geometry.Leader.LeaderHasLanding(leader) = True\n\n\n\nif __name__ == '__main__':\n    annotation_name()",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 16,
+  "views": 1066
+}

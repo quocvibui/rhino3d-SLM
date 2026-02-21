@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/making-a-series-of-circles-on-a-curve-with-grasshopper-and-python/81653",
+  "topic_id": 81653,
+  "title": "Making a series of circles on a curve with grasshopper and python",
+  "question": "Hi guys,\n\n\ni started using python in grasshopper not long ago. Right now I am trying to create a series of chain linked circles with increasing radius on a rail curve. And the centre of each circle is determined by the intersection of previous circle and the rail curve. I was hoping to create something like the evaluate length component in grasshopper which will create a set of points on a curve. And i was hoping my will work with a set of given values as distance between points. I have made the grasshopper definition of it as shown in the files attached. Meanwhile when i tried to recreate it in python but i can’t get it to work. can someone help me with this?\ntest evaluate distance.gh\n (23.9 KB)\n\n\ncheers much appreciated\n\n\n1.jpg\n1853×643 179 KB\n\n\n \ntest evaluate distance.3dm\n (25.7 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\n\ndiv_points = []\ndiv_points.append(Curve.PointAtStart)\n\ncirs = []\nprev_div_len = 0\n\nfor i in range(CircleCount):\n    t = InitialLength * (PercentageAdded * 0.01)\n    div_len = InitialLength + i * t\n    \n    total_div_len = prev_div_len + div_len\n    prev_div_len = total_div_len\n    \n    div_pt = Curve.PointAtLength(total_div_len)\n    div_points.append(div_pt)\n    \n    cir = rg.Circle(div_pt, div_len)\n    cirs.append(cir)\n \n# Outputs\nPoints = div_points\nCircles = cirs",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n\ndef average_points(points):\n    \"\"\"Solves the arithmetic average for a collection of points.\n    \n    Args:\n      points: list of three-dimensional points.\n    \n    Returns:\n      The average point.\n    \"\"\"\n    sums = [0] * len(points[0])\n    for pt in points:\n        for i in range(len(pt)):\n            sums[i] += pt[i]\n    avgs = [s / len(points) for s in sums]\n    return rg.Point3d(avgs[0], avgs[1], avgs[2])\n\n\n# --- FIND THE DESIRED NUMBER OF DIVISION POINTS\ndiv_points = []\ndiv_points.append(Curve.PointAtStart)\n\nprev_div_len = 0\n\nfor i in range(CircleCount):\n    # Calculate the division length of the current curve segement\n    t = InitialLength * (PercentageAdded * 0.01)\n    div_len = InitialLength + i * t\n    # Calculate the total division length from the start of the curve\n    total_div_len = prev_div_len + div_len\n    # Prevent the search for division points beyond the curve length\n    if total_div_len <= Curve.GetLength():\n        # Find the current division point\n        div_pt = Curve.PointAtLength(total_div_len)\n        div_points.append(div_pt)\n        # Update the previous total division length\n        prev_div_len = total_div_len\n\n\n# --- CREATE THE CHAINED CIRCLES\ncenter_pts = []\ncirs = []\n\nfor i in range(len(div_points)):\n    if i == 0: # first division point / start point\n        continue # skip this iteration\n    elif (i > 0) and (i + 1 < len(div_points)): # other division point / inbetween points\n        # Calculate the circle radius, which is half the distance between the previous and next division point\n        radius = div_points[i - 1].DistanceTo(div_points[i + 1]) / 2\n        # Get the circle center point by averaging the previous and next division point\n        center_pt = average_points([div_points[i - 1], div_points[i + 1]])\n    else: # last division point / end point\n        # Calculate the circle radius, which is the distance between the current and previous division point\n        radius = div_points[i - 1].DistanceTo(div_points[i])\n        # Get the circle center point, which is the current division point\n        center_pt = div_points[i]\n    center_pts.append(center_pt)\n    # Create the chain circles\n    cir = rg.Circle(center_pt, radius)\n    cirs.append(cir)\n    \n\n\n# --- OUTPUTS\nPoints = div_points\nCircles = cirs\nCenters = center_pts",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 3826
+}

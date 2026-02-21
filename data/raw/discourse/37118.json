@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gives-me-swish/37118",
+  "topic_id": 37118,
+  "title": "Gives me swish",
+  "question": "Something that really annoys me is this:\n\n\nWhen i want to carry out an extrusion of a curve, I select the curve, call the extrude command, and the object is immediately previewed extruded to wherever my cursor is, giving me good feedback.\n\nNow by moving the cursor, i can see this phantom extrusion change in real time. Good. So I decide, in conjunction with this feedback, to enter the extrude distance of lets say 30mm in the direction the phantom is showing in all the viewports, press enter, and as often as not, it extrudes in the opposite direction.\n\n\nNow I know, because the readout at the bottom of the screen  is telling me, if it is 30mm or minus 30mm, so all I need to do is observe this, and enter the correct distance, or negative distance.\n\n\nSo whats the problem? The problem is that I’ve already “told” rhino which way I want the extrusion to go - I see it happening on screen. So why doesn’t rhino just do it, instead of making me check the little numbers down the bottom of the screen to ensure it is going to do what I actually see in the preview?\n\n\nIt obviously can be made to work like that, “other” programs work like that, and it seems to me one of those things that makes sense in a programmers mind, but it gives me swish in my designers mind (modeling tools for designers!).\n\n\nI’d like to see this command updated to work taking into account what is actually shown on the screen…\n\n\ncheers\n\ntony",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport System\n\ndef main():\n  gid = rs.GetObject( 'Curve ?' )\n  obref = Rhino.DocObjects.ObjRef( gid )\n  cu = obref.Curve()\n  pla = rs.CurvePlane( gid )\n  xtaxis = pla.ZAxis\n  xtbase = pla.Origin\n  back = [ False ]\n\n  class getpt ( Rhino.Input.Custom.GetPoint ):\n\n    def __init__( self, back ):\n          self.back = back\n\n    def OnDynamicDraw( self, eventargs ):\n      mousep = eventargs.CurrentPoint\n      vec = mousep - xtbase\n      uvec = Rhino.Geometry.Vector3d( vec )\n      uvec.Unitize()\n      leng = vec * xtaxis\n      xtvec = uvec * leng\n      self.back[ 0 ] = ( leng < 0 )\n      ext = Rhino.Geometry.Extrusion.Create( cu, leng, False )\n      su = ext.ToNurbsSurface()\n      eventargs.Display.DrawSurface( su, System.Drawing.Color.Cyan, 0 )\n\n  gep = getpt( back )\n  gep.SetCommandPrompt( '?' )\n  gep.AcceptNumber( True, False )\n  gep.Get()\n  res = gep.Result()\n  if res == Rhino.Input.GetResult.Point:\n    pt = gep.Point()\n    leng = ( pt - xtbase ) * xtaxis\n  elif res == Rhino.Input.GetResult.Number:\n    leng = gep.Number() \n    if back[ 0 ]:\n      leng = -leng\n  ext = Rhino.Geometry.Extrusion.Create( cu, leng, False )\n  scriptcontext.doc.Objects.AddExtrusion( ext )\n  scriptcontext.doc.Views.Redraw()\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 23,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 64,
+  "views": 5614
+}

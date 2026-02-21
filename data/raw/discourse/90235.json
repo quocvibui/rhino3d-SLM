@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/memorize-objects-for-easily-finding-in-a-later-command-session/90235",
+  "topic_id": 90235,
+  "title": "Memorize objects for easily finding in a later command/session?",
+  "question": "If I have a file with 500 objects, and I use a command to set the Attribute user text of 15 objects. Is there a way to store the guid’s of those objects somewhere within the file so that I can access them easily in a later stage?\n\nLet’s say I in a new rhino session want to set attribute user texts to other objects, is there a way that I can immediately call a group of guid’s (which I created earlier) and lock them without having to loop through all objects and check if they have attribute user text?\n\nI was thinking of creating a reference layer with point objects that contain different attribute user texts with all the GUID’s written in there but I’m thinking there must be a built-in way of doing this?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport time\n\nstime = time.time()\n\nfound = []\nfor id in rs.AllObjects():\n    if rs.GetUserText(id,'should_be_locked') == 'yes':\n        found.append(id)\n\netime = time.time()\n\nrs.LockObjects(found)\n\nprint 'searched {} objects in {} sec'.format(len(rs.AllObjects()), etime-stime)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\nids = rs.GetObjects()\nall_string = ','.join([str(id) for id in ids])\nrs.SetDocumentUserText('my_stored_ids', all_string)\n\nread_string = rs.GetDocumentUserText('my_stored_ids')\nread_ids = read_string.split(',')\nrs.FlashObject(read_ids)\nrs.FlashObject(read_ids)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 376
+}

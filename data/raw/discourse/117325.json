@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/expected-point-got-point/117325",
+  "topic_id": 117325,
+  "title": "Expected Point, got Point",
+  "question": "Why?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\npos = Rhino.UI.MouseCursor.Location\n\nres = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView.ScreenToClient(pos)\n\nprint res",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nfrom System.Drawing import *\n\ndef RunCommand():\n    gp = GetPoint()\n    gp.SetCommandPrompt(\"Center point\")\n    gp.Get()\n    if gp.CommandResult() != Result.Success:\n        return gp.CommandResult()\n    center_point = gp.Point()\n    if center_point == Point3d.Unset:\n        return Result.Failure\n\n    gcp = GetCircleRadiusPoint(center_point)\n    gcp.SetCommandPrompt(\"Radius\")\n    gcp.ConstrainToConstructionPlane(False)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 499
+}

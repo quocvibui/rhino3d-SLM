@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/example-of-createfilletedges/104794",
+  "topic_id": 104794,
+  "title": "Example of CreateFilletEdges",
+  "question": "Is there an example posted somewhere using this command:  Brep.CreateFilletEdges Method\n\nGoal is to chamfer the edge of a polysurface.\n\n\nEric",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\n\ntol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n\nBEI_L = [9,2,0,7]  # brep edge index to chamfer\nradius = 2\n\n\nid = rs.GetObject(\"select brep\", preselect=True)\nbrep = rs.coercegeometry(id)\n\nblendType = Rhino.Geometry.BlendType.Chamfer\nrailType = rg.RailType.RollingBall\n\nradiusStart_L = [float(radius)   for k in range(BEI_L.Count)]\nradiusEnd_L = [float(radius)   for k in range(BEI_L.Count)]\n\nbrep_chamfer_L = rg.Brep.CreateFilletEdges(brep, BEI_L, radiusStart_L, radiusEnd_L, blendType, railType, tol)\n\nbrep_chamfer_id = Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep( brep_chamfer_L[0] )",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 571
+}

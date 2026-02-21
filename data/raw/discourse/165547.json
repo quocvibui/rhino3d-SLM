@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/prevent-ui-from-freezing-during-long-running-python-script-windows/165547",
+  "topic_id": 165547,
+  "title": "Prevent UI from freezing during long running Python script - Windows",
+  "question": "I was about to post this earlier today but found the solution some time later, so consider this a little public service announcement:\n\n\nIs there any way from preventing Rhino’s UI from locking up and the Rhino window from ‘Not Responding’ during the execution of a long python script?\n\n\nAmazingly, I just searched the developer forum and couldn’t find anything on this subject, as it’s been a constant issue for me over the past few years.\n\n\nI’m working on a deeply recursive, single threaded script that takes ages to complete and needed some indication of what was going on (via StatusBar messages), which of course don’t update when Rhino’s UI freezes.\n\n\nWhat ended up working for me was to sprinkle:\n\n\nRhino.RhinoApp.Wait()  # Pauses to keep Windows message pump alive so views will update and windows will repaint.\n\n\n\nAt those points in the loops where I’d like Rhino’s main window to update.",
+  "code_blocks": [
+    {
+      "code": "def Redraw():\n    \"\"\"Redraws all views\n    Returns:\n      None \n    Example:\n      import rhinoscriptsyntax as rs\n      rs.Redraw()\n    See Also:\n      EnableRedraw\n    \"\"\"\n    old = scriptcontext.doc.Views.RedrawEnabled\n    scriptcontext.doc.Views.RedrawEnabled = True\n    scriptcontext.doc.Views.Redraw()\n    Rhino.RhinoApp.Wait()\n    scriptcontext.doc.Views.RedrawEnabled = old",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 756
+}

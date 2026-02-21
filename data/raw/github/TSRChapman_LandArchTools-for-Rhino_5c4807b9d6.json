@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/TSRChapman/LandArchTools-for-Rhino/blob/43036cbbcab2bf756216f6a752f65e83aac3fccb/IsolateObjLayer.py",
+  "repo": "TSRChapman/LandArchTools-for-Rhino",
+  "repo_stars": 5,
+  "repo_description": "Custom Tools for Rhino made for Landscape Architects",
+  "license": "BSD-3-Clause",
+  "filepath": "IsolateObjLayer.py",
+  "instruction": "Copyright <2021> <Thomas Chapman>\r\n\r\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE\r\nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A...",
+  "code": "'''\r\n\r\nCopyright <2021> <Thomas Chapman>\r\n\r\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE\r\nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR\r\nCOPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR\r\nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\r\n\r\n'''\r\n\r\nimport rhinoscriptsyntax as rs\r\n\r\n\r\ndef IsolateObjLayer():\r\n    try:\r\n\r\n        # Get object and find layer it is on\r\n        obj = rs.GetObjects(\r\n            'select an object on the layer to isolate', preselect=True)\r\n\r\n        if obj:\r\n\r\n            rs.EnableRedraw(False)\r\n\r\n            # Create list of selected obj layers\r\n            selectedlayers = []\r\n            for i in obj:\r\n                layer = rs.ObjectLayer(i)\r\n                selectedlayers.append(layer)\r\n\r\n            # Select all objects on each layer\r\n\r\n            for i in selectedlayers:\r\n                rs.ObjectsByLayer(i, True)\r\n            isolate = rs.SelectedObjects()\r\n\r\n            allObjects = rs.AllObjects()\r\n\r\n            for i in isolate:\r\n                allObjects.remove(i)\r\n\r\n            # Hide selected objects\r\n\r\n            rs.HideObjects(allObjects)\r\n\r\n            rs.UnselectAllObjects()\r\n\r\n            rs.EnableRedraw(True)\r\n\r\n    except:\r\n        print(\"Failed to execute\")\r\n        rs.EnableRedraw(True)\r\n        return\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    IsolateObjLayer()\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

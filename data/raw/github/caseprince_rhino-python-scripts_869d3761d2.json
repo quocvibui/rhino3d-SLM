@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caseprince/rhino-python-scripts/blob/639ae6ea1dd6cc00408db4f7a97ae689e61fc589/fib-sphere-pyramids.py",
+  "repo": "caseprince/rhino-python-scripts",
+  "repo_stars": 0,
+  "repo_description": "Parametric lampshades for 3D Printing in RhinoScript",
+  "license": "unknown",
+  "filepath": "fib-sphere-pyramids.py",
+  "instruction": "Fib sphere pyramids",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math, random\n\ndef fibonacci_sphere(samples=1, randomize=True, radius=2.5):\n    rnd = 1.\n    if randomize:\n        rnd = random.random() * samples\n\n    points = []\n    offset = 2./samples\n    increment = math.pi * (3. - math.sqrt(5.));\n\n    for i in range(samples):\n        z = (((i * offset) - 1) + (offset / 2));\n        r = math.sqrt(1 - pow(z,2))\n\n        phi = ((i + rnd) % samples) * increment\n\n        x = math.cos(phi) * r * radius\n        y = math.sin(phi) * r * radius\n        z *= -radius\n\n        points.append([x,y,z])\n\n    return points\n\ndef addPts(pt1, pt2):\n    return [pt1[0]+pt2[0], pt1[1]+pt2[1], pt1[2]+pt2[2]]\n\ndef box2pt(p1, p2):\n\n    pt0 = p1\n    pt1 = rs.coerce3dpoint([p2[0], p1[1], p1[2]])\n    pt2 = rs.coerce3dpoint([p2[0], p2[1], p1[2]])\n    pt3 = rs.coerce3dpoint([p1[0], p2[1], p1[2]])\n    pt4 = rs.coerce3dpoint([p1[0], p1[1], p2[2]])\n    pt5 = rs.coerce3dpoint([p2[0], p1[1], p2[2]])\n    pt6 = p2\n    pt7 = rs.coerce3dpoint([p1[0], p2[1], p2[2]])\n\n    return rs.AddBox([pt0, pt1, pt2, pt3, pt4, pt5, pt6, pt7])\n\ndef reset():\n    arr1 = rs.AllObjects()\n    if arr1: rs.DeleteObjects(arr1)\n    rs.Command(\"ClearAllMeshes\")\n    rs.Command(\"ClearUndo\")\n\n# reset()\n\n# pyramids\nradius_mm = 32\npetals = 120\n\n# truncated pyramids\nradius_mm = 140 # 130\npetals = 189 # 188\nangle = 38\n\n# sm truncated pyramids\n# radius_mm = 43\n# petals = 23\n# angle = 58\n\n\npoints = fibonacci_sphere(petals, False, radius_mm)\n\npetal = rs.GetObjects(\"Pick some object\")\n\nfor pt in points:\n\n    vector = rs.VectorCreate(pt, [0,0,0])\n    newPetal = rs.CopyObject(petal)\n\n    # angle = math.atan2(pt[1], pt[2]) * 45 / math.pi\n    # angle = angle + pt[2]\n    rs.RotateObject(newPetal, [0,0,0], angle, rg.Vector3d.ZAxis)\n    rs.MoveObject(newPetal, vector)\n\n    rs.OrientObject(newPetal, [pt, addPts(pt,[0,0,-1]), addPts(pt,[0,1,0])], [pt, [0,0,0], addPts(pt,[0,0,1])])\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

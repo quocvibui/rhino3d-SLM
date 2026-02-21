@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sr12-parent-layer-bug/23955",
+  "topic_id": 23955,
+  "title": "SR12 - Parent Layer Bug?",
+  "question": "Hello,\n\n\ntoday I updated to SR12(5.12.50810.13095, 10.08.2015) - 64bit.\n\nNow adding a childlayer under a parent layer using pyhton script does not work any more.\n\n\nimport rhinoscriptsyntax as rs\n\nprint “New layer:”, rs.AddLayer(“MyLayer3”)\n\nprint “New layer:”, rs.AddLayer(“MyLayer4”,parent=“MyLayer3”)\n\n\nAbove code results in two layers: “MyLayer3” and “MyLayer4” without childs.\n\nUsing rhinoscript adding a childlayer still works.\n\nThat causes big trouble to me because I have nearly hundred scripts here at work that rely on childlayers…\n\nOn another computer yesterday I had the same issue after updating - but now it works again. Don’t know why.\n\nDoes anyone have the same problem?\n\nPlease help!\n\n\nThanks,\n\nPhilip",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\n\nprint \"New layer: {0}\".format(rs.AddLayer(\"MyLayer3\"))\n\nlayer_idx = scriptcontext.doc.Layers.FindByFullPath(\"MyLayer3\", True)\nif layer_idx >= 0:\n    layer = scriptcontext.doc.Layers[layer_idx]\n    print \"layer name: {0}\".format(layer.Name)\n\nprint \"New layer: {0}\".format(rs.AddLayer(\"MyLayer4\",parent=\"MyLayer3\"))",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\nrs.AddLayer(\"MyLayer3\")\n\nidx = scriptcontext.doc.Layers.FindByFullPath(\"MyLayer3\", True)\nif idx >= 0:\n    pl = scriptcontext.doc.Layers[idx]\n    print \"pl n:{0}, pf:{1}, id:{2}, idx:{3}\".format(pl.Name, pl.FullPath, pl.Id, idx)\n    \n    nl = Rhino.DocObjects.Layer.GetDefaultLayerProperties()\n    nl.ParentLayerId = pl.Id\n    nl.Name = \"MyLayer4\"\n    idx = scriptcontext.doc.Layers.Add(nl)\n    print \"cl n:{0}, fp:{1}, id:{2}, pid:{3}, idx:{4}\".format(nl.Name, nl.FullPath, nl.Id, nl.ParentLayerId, idx)\n    nl = scriptcontext.doc.Layers[idx]\n    print \"cl n:{0}, fp:{1}, id:{2}, pid:{3}, idx:{4}\".format(nl.Name, nl.FullPath, nl.Id, nl.ParentLayerId, idx)",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nprint \"New layer:\", rs.AddLayer(\"MyLayer3\")\nprint \"New layer:\", rs.AddLayer(\"MyLayer4\",parent=\"MyLayer3\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 22,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.EnableRedraw(False)\nprint \"New layer:\", rs.AddLayer(\"MyLayer3\")\nprint \"New layer:\", rs.AddLayer(\"MyLayer4\",parent=\"MyLayer3\")\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Tim_Williams",
+      "post_number": 23,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 29,
+  "views": 3606
+}

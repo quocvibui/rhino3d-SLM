@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_prepostpick.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_prepostpick.py",
+  "instruction": "Ex prepostpick",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\n\ndef RunCommand():\n  go = GetObject()\n  go.SetCommandPrompt(\"Select objects\")\n  go.EnablePreSelect(True, True)\n  go.EnablePostSelect(True)\n  go.GetMultiple(0, 0)\n  if go.CommandResult() != Result.Success:\n    return go.CommandResult()\n\n  selected_objects = []\n  for obj in go.Objects():\n    selected_objects.Add(obj)\n\n  if go.ObjectsWerePreselected:\n    go.EnablePreSelect(False, True)\n    go.DeselectAllBeforePostSelect = False\n    go.EnableUnselectObjectsOnExit(False)\n    go.GetMultiple(0, 0)\n    if go.CommandResult() == Result.Success:\n      for obj in go.Objects():\n        selected_objects.Add(obj)\n        # The normal behavior of commands is that when they finish,\n        # objects that were pre-selected remain selected and objects\n        # that were post-selected will not be selected. Because we\n        # potentially could have both, we'll try to do something\n        # consistent and make sure post-selected objects also stay selected\n        obj.Object().Select(True)\n  return Result.Success if selected_objects.Count > 0 else Result.Nothing\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": false
+}

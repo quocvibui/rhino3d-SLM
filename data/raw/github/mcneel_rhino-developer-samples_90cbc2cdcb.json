@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/divide-by-length-points.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/divide-by-length-points.py",
+  "instruction": "Divide by length points",
+  "code": "import Rhino\nimport scriptcontext\n\ndef DivideByLengthPoints():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to divide\", False, filter)\n    if not objref or rc!=Rhino.Commands.Result.Success: return rc\n\n    crv = objref.Curve()\n    if not crv or crv.IsShort(Rhino.RhinoMath.ZeroTolerance):\n        return Rhino.Commands.Result.Failure\n\n    crv_length = crv.GetLength()\n    s = \"Curve length is {0:.3f}. Segment length\".format(crv_length)\n    seg_length = crv_length / 2.0\n    rc, length = Rhino.Input.RhinoGet.GetNumber(s, False, seg_length, 0, crv_length)\n    if rc!=Rhino.Commands.Result.Success: return rc\n    t_vals = crv.DivideByLength(length, True)\n    if not t_vals:\n        return Rhino.Commands.Result.Failure\n\n    [scriptcontext.doc.Objects.AddPoint(crv.PointAt(t)) for t in t_vals]\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    DivideByLengthPoints()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

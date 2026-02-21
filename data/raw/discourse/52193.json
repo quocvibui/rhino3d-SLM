@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/no-error-before-compile-get-error-after-compile-ghpython-into-component-says-that-cant-recognize-ghdoc/52193",
+  "topic_id": 52193,
+  "title": "No error before compile. Get error after compile GHpython into component. Says that can't recognize ghdoc",
+  "question": "I have 2 ghpython, I hope they can work together after compile. Tried to get the object’s name in RhinoDoc.\n\nNo error before I compile it.\n\nBut after compile into component it get error: Solution exception: global name “ghdoc” is not defined.\n\nIt seems that can’t recognize ghdoc after compile.\n\n\nHere’s the code and original file.\n\n\nGHpython 1:\n\n\nclass MyComponent(component):\n    def RunScript(self, ):\n        def getIDName(ID):\n            sc.doc = Rhino.RhinoDoc.ActiveDoc\n            try:\n                obj = sc.doc.Objects.Find(ID)\n                name = obj.Attributes.Name\n                sc.doc = ghdoc\n                return name\n            except:\n                sc.doc = ghdoc\n                return None\n        sc.sticky[\"getIDName\"] = getIDName\n        return \n\n\n\nGHpython 2:\n class MyComponent(component):\n     def RunScript(self, x, y):\n         a = sc.sticky[\"getIDName\"](x)\n         return a\n\n\n\n\n\n1.jpg\n435×546 29.6 KB\n\n\n\n\nObjectName.3dm\n (55.4 KB)\n\n\nObjectName.gh\n (8.3 KB)",
+  "code_blocks": [
+    {
+      "code": "def getIDName(ID):\n            predoc = sc.doc\n            try:\n                sc.doc = Rhino.RhinoDoc.ActiveDoc\n                obj = sc.doc.Objects.Find(ID)\n                name = obj.Attributes.Name\n                sc.doc = predoc\n                return name\n            except:\n                return None\n            finally:\n                sc.doc = predoc",
+      "language": "python",
+      "author": "piac",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "class MyComponent(component):\n    def RunScript(self, ):\n        def getIDName(ID):\n            sc.doc = Rhino.RhinoDoc.ActiveDoc\n            try:\n                obj = sc.doc.Objects.Find(ID)\n                name = obj.Attributes.Name\n                sc.doc = ghdoc\n                return name\n            except:\n                sc.doc = ghdoc\n                return None\n        sc.sticky[\"getIDName\"] = getIDName\n        return \n\n\n\nGHpython 2:\n class MyComponent(component):\n     def RunScript(self, x, y):\n         a = sc.sticky[\"getIDName\"](x)\n         return a",
+      "language": "python",
+      "author": "RetroPost.LT",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 964
+}

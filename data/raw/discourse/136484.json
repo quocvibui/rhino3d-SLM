@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-fileio-filepdf-crashes/136484",
+  "topic_id": 136484,
+  "title": "Rhino.FileIO.FilePdf crashes",
+  "question": "Hi \n@stevebaer\n,\n\n\ni am using \nRhino.FileIO.FilePdf\n to write some lines and polylines to a pdf file. This works fine so far, however i need a litle bit more control, eg. exporting beziers, linetypes or gradient fills etc. All this is available in XFinium so i tried to access:\n\n\ndoc = pdf.PdfDocumentImplementation()\n\n\n\non Windows and Mac. The problem is, it only gets me the \nPdfFixedDocument\n subclass, but i need to get the parent class. Using below works on Windows to get it:\n\n\ndoc.GetType().BaseType.Assembly.Xfinium\n\n\n\nbut crashes Rhino 7 for Mac SR14 immediately. It actually crashes using \ndoc.GetType()\n so i’ve sent in 2 crash reports.\n\n\nWhy do i want to access this ? In order to create a pen (PdfPen) and color (PdfRgbColor) i need to define the full namespace. Can you tell how to get there using \nPdfDocumentImplementation()\n ?\n\n\n(i know how to import using \nclr.AddReference\n under Windows, but on Mac the required dll does not exist).\n\n\nthanks,\n\nc.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\nimport rhinoscriptsyntax as rs\n\npdf = Rhino.FileIO.FilePdf.Create()\ndpi = 300\nsize = System.Drawing.Size(8.5*dpi,11*dpi)\nsettings = Rhino.Display.ViewCaptureSettings(sc.doc.Views.ActiveView, size, dpi)\nsettings.OutputColor = Rhino.Display.ViewCaptureSettings.ColorMode.DisplayColor\nsettings.RasterMode = False\npdf.AddPage(settings)\n\nfixed_doc = pdf.PdfDocumentImplementation()\n# this line crashes\nprint fixed_doc.GetType().BaseType.Assembly.Xfinium",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\nimport rhinoscriptsyntax as rs\nimport clr\n\npdf = Rhino.FileIO.FilePdf.Create()\ndpi = 300\nsize = System.Drawing.Size(8.5*dpi,11*dpi)\nsettings = Rhino.Display.ViewCaptureSettings(sc.doc.Views.ActiveView, size, dpi)\nsettings.OutputColor = Rhino.Display.ViewCaptureSettings.ColorMode.DisplayColor\nsettings.RasterMode = False\npdf.AddPage(settings)\n\nfixed_doc = pdf.PdfDocumentImplementation()\n# this line crashes too\nprint clr.GetClrType(type(fixed_doc))",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\nimport rhinoscriptsyntax as rs\n\npdf = Rhino.FileIO.FilePdf.Create()\ndpi = 300\nsize = System.Drawing.Size(8.5*dpi,11*dpi)\nsettings = Rhino.Display.ViewCaptureSettings(sc.doc.Views.ActiveView, size, dpi)\nsettings.OutputColor = Rhino.Display.ViewCaptureSettings.ColorMode.DisplayColor\nsettings.RasterMode = False\npdf.AddPage(settings)\n\nfixed_doc = pdf.PdfDocumentImplementation()\nprint fixed_doc",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 703
+}

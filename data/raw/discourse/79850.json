@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-do-i-scale-an-object-brep-taking-its-centroid-as-reference-in-rhinocommon/79850",
+  "topic_id": 79850,
+  "title": "How do I scale an object (brep) taking it's centroid as reference in RhinoCommon?",
+  "question": "preferably with python",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    # get the object (surface, polysurface or extrusion)\n    obj_id = rs.GetObject(\"Brep to scale\", 8+16+1073741824, True, False)\n    if not obj_id: return\n    \n    # get area centroid and error bounds\n    rc = rs.SurfaceAreaCentroid(obj_id)\n    if not rc: return\n    \n    # the centroid and error bound\n    centroid, error_bound = rc\n    \n    # scale 0.5 in xyz\n    rs.ScaleObject(obj_id, centroid, [0.5, 0.5, 0.5], copy=False)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "transfIn = Rhino.Geometry.Transform.Scale(Rhino.Geometry.Plane(Rhino.Geometry.AreaMassProperties.Compute(B).Centroid,Rhino.Geometry.Vector3d.XAxis,Rhino.Geometry.Vector3d.YAxis),0.999,0.999,0.999)\n    transfOut = Rhino.Geometry.Transform.Scale(Rhino.Geometry.Plane(Rhino.Geometry.AreaMassProperties.Compute(B).Centroid,Rhino.Geometry.Vector3d.XAxis,Rhino.Geometry.Vector3d.YAxis),1.001,1.001,1.001)\n    BdupIn.Transform(transfIn)\n    BdupOut.Transform(transfOut)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1217
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/defenestrated/rhinoscripts/blob/89419e6e00c59d28e92a8e6625236f07961f47f7/bf_enclosure.py",
+  "repo": "defenestrated/rhinoscripts",
+  "repo_stars": 1,
+  "repo_description": "collection of my rhino python scripts",
+  "license": "unknown",
+  "filepath": "bf_enclosure.py",
+  "instruction": "use rhinoscriptsyntax to get all the functions in one shot",
+  "code": "# use rhinoscriptsyntax to get all the functions in one shot\nimport rhinoscriptsyntax as rs\nimport random\nimport time\nimport Rhino\n\ndef main():\n\n    cyls = []\n    radius = 0\n\n    gname = \"Enclosure\"\n\n    extantGroups = rs.GroupNames();\n    print \"groups: \", extantGroups\n    enclosures = [s for s in extantGroups if \"Enclosure\" in s]\n    print \"enclosures: \", enclosures\n\n    if rs.IsGroup(\"Enclosure\"):\n    \tnum = len(enclosures)\n        gname += \"_\" + `num`\n    encGroup = rs.AddGroup(gname)\n    print \"group: \", encGroup\n\n    focus = rs.GetPoint(\"center of fence\")\n    if (focus is None): return\n    rpt = rs.GetPoint(\"enclosure radius\", focus)\n    if (rpt is None): return\n    else:\n        radius = (rpt - focus).Length\n        rs.AddObjectsToGroup(rs.AddCircle(focus, radius), encGroup)\n\n    count = rs.GetInteger(\"number of cylinders\")\n    if (count is None): return\n    cyldiam = rs.GetReal(\"cylinder diameter\")\n    if (cyldiam is None): return\n    minheight = rs.GetReal(\"minimum height\")\n    if (minheight is None): return\n    maxheight = rs.GetReal(\"maximum height\")\n    if (maxheight is None): return\n#   arcjitter = rs.GetReal(\"amount of arc jitter\")\n#   if (arcjitter is None): return\n#   radialjitter = rs.GetReal(\"amount of radial jitter\")\n#   if (radialjitter is None): return\n\n\n\n    for i in range(count):\n        cyl = rs.AddCylinder(rpt, random.uniform(minheight, maxheight), cyldiam/2, True)\n        rs.RotateObject(cyl, focus, (360/count)*(i+1))\n        cyls.append(cyl)\n    if cyls: rs.AddObjectsToGroup(cyls, encGroup)\n    print \"Enclosure built:\"\n    print \"focus: (\", focus, \")\"\n    print \"radius:\", radius\n    print \"cylinders:\", count, \"ranging from\", minheight, \"to\", maxheight, \"units in length.\"\n\nmain()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

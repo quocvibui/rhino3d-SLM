@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_printinstancedefinitiontree.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_printinstancedefinitiontree.py",
+  "instruction": "Ex printinstancedefinitiontree",
+  "code": "from scriptcontext import doc\nimport Rhino\n\ndef RunCommand():\n  instanceDefinitions = doc.InstanceDefinitions\n  instanceDefinitionCount = instanceDefinitions.Count\n\n  if instanceDefinitionCount == 0:\n    print \"Document contains no instance definitions.\"\n    return\n\n  dump = Rhino.FileIO.TextLog()\n  dump.IndentSize = 4\n\n  for i in range(0, instanceDefinitionCount):\n    DumpInstanceDefinition(instanceDefinitions[i], dump, True)\n\n  print dump.ToString()\n\ndef DumpInstanceDefinition(instanceDefinition, dump, isRoot):\n  if instanceDefinition != None and not instanceDefinition.IsDeleted:\n    if isRoot:\n      node = '-'\n    else:\n      node = '+'\n    dump.Print(u\"{0} Instance definition {1} = {2}\\n\".format(node, instanceDefinition.Index, instanceDefinition.Name))\n\n    if instanceDefinition.ObjectCount  > 0:\n      dump.PushIndent()\n      for i in range(0, instanceDefinition.ObjectCount):\n        obj = instanceDefinition.Object(i)\n        if obj != None and type(obj) == Rhino.DocObjects.InstanceObject:\n          DumpInstanceDefinition(obj.InstanceDefinition, dump, False) # Recursive...\n        else:\n          dump.Print(u\"+ Object {0} = {1}\\n\".format(i, obj.ShortDescription(False)))\n      dump.PopIndent()\n\nif __name__ == \"__main__\":\n  RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

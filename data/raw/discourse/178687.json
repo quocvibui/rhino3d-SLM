@@ -1,0 +1,76 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-a-custom-command-with-python-seldimless/178687",
+  "topic_id": 178687,
+  "title": "Creating a custom command with python SelDimLess",
+  "question": "Hi,\n\n\nI am new to Python. I am trying to see if I can come up with a script for a command that selects any Dimensions that are less than a certain value (layout unit). I am not sure what went wrong here posting here to see if there is anyone who can help.\n\n\nThanks in advance.\n\n\nimport rhinoscriptsyntax as rs\n\ndef select_dimensions_less_than(length_threshold):\n    # Get all dimension objects in the document\n    dimensions = rs.ObjectsByType(rs.filter.Annotation)\n    \n    if not dimensions:\n        print(\"No dimensions found in the document.\")\n        return\n    \n    # Select dimensions with length less than the threshold\n    selected_dimensions = []\n    for dim_id in dimensions:\n        length = rs.DimensionValue(dim_id)\n        if length < length_threshold:\n            selected_dimensions.append(dim_id)\n    \n    # Select the dimensions in Rhino\n    if selected_dimensions:\n        rs.SelectObjects(selected_dimensions)\n        print(\"Selected dimensions with length less than\", length_threshold)\n    else:\n        print(\"No dimensions found with length less than\", length_threshold)\n\ndef Command_SelectDimensionsLessThan():\n    # Get user input for the threshold value\n    length_threshold = rs.GetReal(\"Enter the threshold length:\", 10)\n    if length_threshold is None:\n        print(\"Invalid threshold value.\")\n        return\n    \n    # Call the function to select dimensions\n    select_dimensions_less_than(length_threshold)\n\n# Register the command\nif __name__ == \"__main__\":\n    Command_SelectDimensionsLessThan()\n\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "def select_dimensions_less_than(length_threshold):\n    # Get all dimension objects in the document\n    dimensions = rs.ObjectsByType(rs.filter.annotation) #lowercase annotation",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def find_dims():\n    dim_ids = []\n    ids = rs.NormalObjects()\n    if len(ids) == 0:\n        return dim_ids\n    \n    return [Id for Id in ids if rs.IsDimension(Id)]",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef find_dims():\n    dim_ids = []\n    ids = rs.NormalObjects()\n    if len(ids) == 0:\n        return dim_ids\n    \n    return [Id for Id in ids if rs.IsDimension(Id)]\n\n\n\ndef select_dimensions_less_than(length_threshold):\n    # Get all dimension objects in the document\n    dimensions = find_dims()\netc etc",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef select_dimensions_less_than(length_threshold):\n    # Get all dimension objects in the document\n    dimensions = rs.ObjectsByType(rs.filter.annotation)\n    \n    if not dimensions:\n        print(\"No dimensions found in the document.\")\n        return\n    \n    # Select dimensions with length less than the threshold\n    selected_dimensions = []\n    for dim_id in dimensions:\n        length = rs.DimensionValue(dim_id)\n        if length < length_threshold:\n            selected_dimensions.append(dim_id)\n    \n    # Select the dimensions in Rhino\n    if selected_dimensions:\n        rs.SelectObjects(selected_dimensions)\n        print(\"Selected dimensions with length less than\", length_threshold)\n    else:\n        print(\"No dimensions found with length less than\", length_threshold)\n\ndef Command_SelectDimensionsLessThan():\n    # Get user input for the threshold value\n    length_threshold = rs.GetReal(\"Enter the threshold length:\", 10)\n    if length_threshold is None:\n        print(\"Invalid threshold value.\")\n        return\n    \n    # Call the function to select dimensions\n    select_dimensions_less_than(length_threshold)\n\n# Register the command\nif __name__ == \"__main__\":\n    Command_SelectDimensionsLessThan()",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "selected_dimensions = []\n    for dim_id in dimensions:\n\n        ##add this check\n        if rs.ObjectType(dim_id) != 512:\n            continue\n        ## add this\n\n        length = rs.DimensionValue(dim_id)",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "for dim_id in dimensions:\n\n        ##add this check\n        if rs.ObjectType(dim_id) != 512:\n            continue\n        ## add this\n\n        ## also add this check\n        try:\n            #checks if the length can be extracted\n            length = rs.DimensionValue(dim_id)\n        except:\n            #on fail skips this dim_id\n            continue\n       \n        #rest of code->>",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelDimLess():\n    \n    length_threshold = rs.GetReal(\"Enter the threshold length:\", 10)\n    if not length_threshold: return\n    \n    my_filter = Rhino.DocObjects.ObjectType.Annotation\n    for rh_obj in scriptcontext.doc.Objects.FindByObjectType(my_filter):\n        if isinstance(rh_obj.Geometry, Rhino.Geometry.LinearDimension):\n            length = rh_obj.Geometry.NumericValue\n            if length < length_threshold:\n                scriptcontext.doc.Objects.Select(rh_obj.Id, True, True)\n    \n    scriptcontext.doc.Views.Redraw()\n    \nSelDimLess()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef select_dimensions_less_than(length_threshold):\n    # Get all dimension objects in the document\n    dimensions = rs.ObjectsByType(rs.filter.Annotation)\n    \n    if not dimensions:\n        print(\"No dimensions found in the document.\")\n        return\n    \n    # Select dimensions with length less than the threshold\n    selected_dimensions = []\n    for dim_id in dimensions:\n        length = rs.DimensionValue(dim_id)\n        if length < length_threshold:\n            selected_dimensions.append(dim_id)\n    \n    # Select the dimensions in Rhino\n    if selected_dimensions:\n        rs.SelectObjects(selected_dimensions)\n        print(\"Selected dimensions with length less than\", length_threshold)\n    else:\n        print(\"No dimensions found with length less than\", length_threshold)\n\ndef Command_SelectDimensionsLessThan():\n    # Get user input for the threshold value\n    length_threshold = rs.GetReal(\"Enter the threshold length:\", 10)\n    if length_threshold is None:\n        print(\"Invalid threshold value.\")\n        return\n    \n    # Call the function to select dimensions\n    select_dimensions_less_than(length_threshold)\n\n# Register the command\nif __name__ == \"__main__\":\n    Command_SelectDimensionsLessThan()",
+      "language": "python",
+      "author": "hoganjasonlee1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 311
+}

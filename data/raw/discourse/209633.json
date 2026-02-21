@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-subsurface-selection-and-using-alias/209633",
+  "topic_id": 209633,
+  "title": "Scripting SubSurface selection and using Alias?",
+  "question": "I have a small Python script that selects the highest SubSurface of a Polysurface.\n\nWhen I run it from Script Editor it works as expected, my SubSurface is selected.\n\n\nBut I assigned an alias for this script using -RunPythonScript() and I notice that my selection gets deselected in this case, when the script ends.\n\n\nHow to keep a sub-object selection done by a script, when that script is run with an alias?\n\n\nHere’s the script for testing:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nobj_id = rs.GetObject(\"Pick polysurface\", rs.filter.polysurface)\nbrep = rs.coercebrep(obj_id)\n\nmax_i = max(range(brep.Faces.Count),key=lambda i: Rhino.Geometry.AreaMassProperties.Compute(brep.Faces[i]).Centroid.Z)\n\nrs.UnselectAllObjects()\n\nrhobj = sc.doc.Objects.FindId(obj_id)\nci = Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.BrepFace, max_i)\nrhobj.SelectSubObject(ci, True, True) #Sub-surface selection\nsc.doc.Views.Redraw()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nobj_id = rs.GetObject(\"Pick polysurface\", rs.filter.polysurface)\nbrep = rs.coercebrep(obj_id)\n\nmax_i = max(range(brep.Faces.Count),key=lambda i: Rhino.Geometry.AreaMassProperties.Compute(brep.Faces[i]).Centroid.Z)\n\nrs.UnselectAllObjects()\n\nrhobj = sc.doc.Objects.FindId(obj_id)\nci = Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.BrepFace, max_i)\nrhobj.SelectSubObject(ci, True, True) #Sub-surface selection\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 81
+}

@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/offset-problem/78364",
+  "topic_id": 78364,
+  "title": "Offset Problem",
+  "question": "Hi, Greetings! I wanted to offset a curve (which is a 2d curve represented in 3d).\n\n\n\n\nimage.png\n1046×646 7.22 KB\n\n\n\n\nThe length of offset is \n-30 mm\n\n\n[\nExpected curves\n] The offset curve i expect is,\n\n\n\n\nimage.png\n1138×613 4.28 KB\n\n\n\n\n[\nReality\n]The offset i am getting is,\n\n\n\n\nimage.png\n1027×594 3.84 KB\n\n\n\n\nCan you suggest me some Rhinoscriptsyntax’s function that does my job, The code and the cad file i am using is attached below.\n\n\nThanks in advance\n\n\nPlease Note: I am using Rhino for Windows and I am using Rhino python (rhinoscriptsyntex) for my code.\n\n\nimport rhinoscriptsyntax as rs\n\nid = rs.ObjectsByName(\"Sketch.1\")\ndirection = (0,0,0)\ndistance = -30\nrs.OffsetCurve(id, direction, distance)\n\n\n\noffset_problem.stp\n (3.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\npolyline = rs.GetObject(\"Select a polyline\", rs.filter.curve)\ndistance = rs.GetReal(\"Offset Distance\", -30)\nsegments = rs.ExplodeCurves(polyline)\nrhinoPolyline = rs.coercecurve(polyline)\nsuccess,plane = rhinoPolyline.TryGetPlane()\nids = []\nrs.EnableRedraw(False)\nfor segment in segments:\n    rhinoSegment = rs.coercecurve(segment)\n    rs.DeleteObject(segment)\n    rhinoSegment = rhinoSegment.Offset(plane, distance, 0.1, rg.CurveOffsetCornerStyle.None)[0]\n    ids.append(sc.doc.Objects.AddCurve(rhinoSegment))\nrs.SelectObjects(ids)\nrs.Command(\"_CurveBoolean _DeleteInput=All _CombineRegions=Yes _Output=Curves _AllRegions _Enter\")",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\npolyline = rs.GetObject(\"Select a polyline\", rs.filter.curve)\ndistance = rs.GetReal(\"Offset Distance\", -30)\nsegments = rs.ExplodeCurves(polyline)\nrhinoPolyline = rs.coercecurve(polyline)\nsuccess,plane = rhinoPolyline.TryGetPlane()\nids = []\nrs.EnableRedraw(False)\nfor segment in segments:\n    rhinoSegment = rs.coercecurve(segment)\n    rs.DeleteObject(segment)\n    rhinoSegment = rhinoSegment.Offset(plane, distance, 0.1, rg.CurveOffsetCornerStyle.None)[0]\n    ids.append(sc.doc.Objects.AddCurve(rhinoSegment))\nrs.SelectObjects(ids)\nrs.Command(\"_CurveBoolean _DeleteInput=All _CombineRegions=Yes _Output=Curves _AllRegions _Enter\")\nresults = rs.SelectedObjects()\nif results:\n    for result in results:\n        if not rs.IsCurveClosed(result):\n            rs.DeleteObject(result) \nresults = rs.SelectedObjects()\nif len(results) == 0:\n    rhinoPolyline = rhinoPolyline.Offset(plane, distance, 0.1, rg.CurveOffsetCornerStyle.Sharp)[0]\n    sc.doc.Objects.AddCurve(rhinoPolyline)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nid = rs.ObjectsByName(\"Sketch.1\")\ndirection = (0,0,0)\ndistance = -30\nrs.OffsetCurve(id, direction, distance)",
+      "language": "python",
+      "author": "sumuk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 1505
+}

@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/field-of-view-getcameraangle-issues/146861",
+  "topic_id": 146861,
+  "title": "Field of View GetCameraAngle Issues",
+  "question": "Hello!\n\n\nI’m currently trying to set up a camera so that it chooses a random position in spherical coordinates around the origin (within specified ranges) and then zooms the camera into the extents of the object. The models should be loaded in with the object centered on the origin, but I correct for this anyways in the script. Later in the script, I need to use the FOV of the camera, but I’ve been having difficulty consistently getting it. \nGetting Field of View of a ViewPort inside of RhinoCommon\n recommended I use the function GetCameraAngle(), which is my current way of doing it, but for some reason the function occasionally fails, and even when it succeeds, the angle returned is inconsistent.\n\n\nHere’s a snippet of the Python code I’m using (with extra comments and slightly modified indentation due to the removal of irrelevant code):\n\n\ncurrent_view = sc.doc.Views.ActiveView.ActiveViewport\n\n... # Loading Model Code ...\n\nobject = Rhino.RhinoDoc.ActiveDoc.Objects.FindByLayer(\"CustomLayer\")[0]\ngeom = object.BrepGeometry\nbb_object = object.BrepGeometry.GetBoundingBox(True)\nrs.MoveObject(object, -bb_object.Center)\n\n# Number of times the call to GetCameraAngle() returned False    \nfail_iters = 0\n\n# To avoid infinite looping, I have a maximum number of attempts, currently set to 10    \nwhile fail_iters < 10:\n\n    # Choose random spherical coordinates within range\n    phi = math.radians(random.randint(30,150))\n    theta = math.radians(random.randint(0,359))\n    radius = 40\n    \n    # Set camera location based on coordinates    \n    camLoc = Rhino.Geometry.Point3d(radius*math.sin(phi)*math.cos(theta), radius*math.sin(phi)*math.sin(theta), radius*math.cos(phi))\n                \n    # Zoom into object \n    rs.ViewCameraTarget(camera=camLoc, target=rg.Point3d(0,0,0))\n    bb_object = object.BrepGeometry.GetBoundingBox(True)\n    rs.ZoomBoundingBox(bb_object)\n        \n    # Re-aquire new camera position post-zoom\n    camLoc, _ = rs.ViewCameraTarget(target=rg.Point3d(0,0,0))\n   ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport clr\n\ncurrent_view = sc.doc.Views.ActiveView.ActiveViewport\n\n# I have a dataset of models with each model contained in an indexed folder, \n# so here I open the first model; normally I would replace str(0) with str(index)\n# and loop through all of the folders\ndataset_path = \"<PATH_TO_DATASET>\" # Loading Line 1\nmodel_dir = dataset_path + \"Model_\" + str(0) + \"\\\\\" # Loading Line 2\nrs.Command(\"_-Open \" + model_dir + \"Model.3dm\", True) # Loading Line 3\n\nd_hangle = clr.StrongBox[float]()\nv_hangle = clr.StrongBox[float]()\nh_hangle = clr.StrongBox[float]()\n\nif current_view.GetCameraAngle(d_hangle, v_hangle, h_hangle):\n    print(\"Horizontal HalfAngle: \" + str(h_hangle.Value))\nelse:\n    print(\"FAILURE\")",
+      "language": "python",
+      "author": "John_Wolford",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport clr\nimport Rhino\nimport time\n\ndataset_path = \"<PATH_TO_DATASET>\"\n\nold_doc = sc.doc\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nqr_params = Rhino.Geometry.QuadRemeshParameters()\nqr_params.AdaptiveQuadCount=True\nqr_params.TargetQuadCount = 200\nqr_params.AdaptiveSize = 50\nqr_params.DetectHardEdges=True\n\nfor h in range(10):\n    model_dir = dataset_path + \"Model_\" + str(h) + \"\\\\\"\n    rs.Command(\"_-Open \" + model_dir + \"Model.3dm\", True)\n    \n    object = Rhino.RhinoDoc.ActiveDoc.Objects.FindByLayer(\"CustomLayer\")[0]\n    geom = object.BrepGeometry\n    bb_object = object.BrepGeometry.GetBoundingBox(True)\n    rs.MoveObject(object, -bb_object.Center)\n    \n    mesh = rg.Mesh.QuadRemeshBrep(object.BrepGeometry, qr_params)\n    verts = mesh.Vertices\n    \n    # Save verts using csv library\n\n    print(h)\n    \nprint(\"Complete.\")\n\nsc.doc = old_doc",
+      "language": "python",
+      "author": "John_Wolford",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "current_view = sc.doc.Views.ActiveView.ActiveViewport\n\n... # Loading Model Code ...\n\nobject = Rhino.RhinoDoc.ActiveDoc.Objects.FindByLayer(\"CustomLayer\")[0]\ngeom = object.BrepGeometry\nbb_object = object.BrepGeometry.GetBoundingBox(True)\nrs.MoveObject(object, -bb_object.Center)\n\n# Number of times the call to GetCameraAngle() returned False    \nfail_iters = 0\n\n# To avoid infinite looping, I have a maximum number of attempts, currently set to 10    \nwhile fail_iters < 10:\n\n    # Choose random spherical coordinates within range\n    phi = math.radians(random.randint(30,150))\n    theta = math.radians(random.randint(0,359))\n    radius = 40\n    \n    # Set camera location based on coordinates    \n    camLoc = Rhino.Geometry.Point3d(radius*math.sin(phi)*math.cos(theta), radius*math.sin(phi)*math.sin(theta), radius*math.cos(phi))\n                \n    # Zoom into object \n    rs.ViewCameraTarget(camera=camLoc, target=rg.Point3d(0,0,0))\n    bb_object = object.BrepGeometry.GetBoundingBox(True)\n    rs.ZoomBoundingBox(bb_object)\n        \n    # Re-aquire new camera position post-zoom\n    camLoc, _ = rs.ViewCameraTarget(target=rg.Point3d(0,0,0))\n        \n    # Half-angle arguments for the GetCameraAngle() method\n    d_hangle = clr.StrongBox[float]()\n    v_hangle = clr.StrongBox[float]()\n    h_hangle = clr.StrongBox[float]()\n        \n    # If GetCameraAngle() succeeds, then break out of the loop, otherwise continue\n    if current_view.GetCameraAngle(d_hangle, v_hangle, h_hangle):\n        break\n        \n    fail_iters += 1\n    \nprint(\"Number of failures: \" + str(fail_iters))\nprint(\"Horizontal Half-Angle: \" + str(h_hangle.Value))\n\n... # Additional working code for hopefully cool stuff ...",
+      "language": "python",
+      "author": "John_Wolford",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 623
+}

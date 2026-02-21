@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/iterating-over-mesh-faces-to-check-for-various-conditions/157192",
+  "topic_id": 157192,
+  "title": "Iterating over mesh faces, to check for various conditions",
+  "question": "I am trying to write a Python script that iterates over all the faces of a mesh, checks various conditions, and selects only a few faces. I was successful in determining the orientation of the surface, which excluded most of the surfaces. Now, I would like to further narrow down my selection of faces, but I’m stuck. Most rhinoscriptsyntax functions require a GUID, which I apparently lose once I coerce the geometry. As far as I know, I can’t access the GUID with a function like face.guid() or similar. Is there a better way of doing this? Could I take note of the GUID at the start?\n\n(It seems, that the guid from the start is not iterable.)\n\nThanks in advance for any assistance!\n\n\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport math\nimport Rhino\n\nangle_threshold_degrees = 40\nmesh = rs.coercemesh(mesh)\n\n#mesh = rs.ExplodeMeshes(mesh)\nfaces = rs.MeshFaces(mesh)\nnormals = rs.MeshFaceNormals(mesh)\n\nfiltered_faces = []\n\nfor i in range(0, len(normals)):\n    normal = normals [i]\n    angle = rg.Vector3d.VectorAngle(-normal, rg.Vector3d.ZAxis)\n    angle_degrees = math.degrees(angle)\n\n    if -angle_threshold_degrees < angle_degrees < angle_threshold_degrees:\n        face = faces[i]\n        filtered_faces.append(face)\n    else:\n        continue\n        \n    direction = -rg.Vector3d.ZAxis\n    area = rs.MeshArea(face)\n\n\t#detect if a vector starting at the face center (to direction -z) would collide with the mesh\n\t#I would use the face centre as available above. However, how do I figure out the intersection with the mesh & in code?\n\t\n\t#calculate the area of the face, exclude if smaller than treshold\n\t#I was thinking of using the vertices and calculating it myself\n\t\n\t#check if the remaining faces are neighbours\n\t#could omit this if to difficult\n\t\n\t#if close enough merge them\n\t#I was thinking of using cull duplicates here",
+  "code_blocks": [
+    {
+      "code": "vertices = rs.MeshVertices(mesh)\nvertices_index = rs.MeshFaceVertices(mesh)\n\nfor loop:\n    #[...]\n    verts = [vertices[k] for k in vertices_index[i][0:3]]",
+      "language": "python",
+      "author": "Philip7",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    mesh_id = rs.GetObject(\"Mesh\", rs.filter.mesh, True, False)\n    if not mesh_id: return\n    \n    mesh_obj = rs.coercerhinoobject(mesh_id, True, True)\n    face_indices = []\n    \n    for index, face in enumerate(mesh_obj.Geometry.Faces):\n        if face.IsTriangle:\n            a,b,c = face.A, face.B, face.C\n            print \"Face: {} -> Triangle [{},{},{}]\".format(index, a, b, c)\n        elif face.IsQuad:\n            a,b,c,d = face.A, face.B, face.C, face.D\n            print \"Face: {} -> Quadrangle [{},{},{}]\".format(index, a, b, c, d)\n            \n        if index %2 == 0: face_indices.append(index)\n    \n    comp_type = Rhino.Geometry.ComponentIndexType.MeshFace\n    for index in face_indices:\n        comp_index = Rhino.Geometry.ComponentIndex(comp_type, index)\n        mesh_obj.SelectSubObject(comp_index, True, True, True) \n    \n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 17,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport math\nimport Rhino\n\nangle_threshold_degrees = 40\nmesh = rs.coercemesh(mesh)\n\n#mesh = rs.ExplodeMeshes(mesh)\nfaces = rs.MeshFaces(mesh)\nnormals = rs.MeshFaceNormals(mesh)\n\nfiltered_faces = []\n\nfor i in range(0, len(normals)):\n    normal = normals [i]\n    angle = rg.Vector3d.VectorAngle(-normal, rg.Vector3d.ZAxis)\n    angle_degrees = math.degrees(angle)\n\n    if -angle_threshold_degrees < angle_degrees < angle_threshold_degrees:\n        face = faces[i]\n        filtered_faces.append(face)\n    else:\n        continue\n        \n    direction = -rg.Vector3d.ZAxis\n    area = rs.MeshArea(face)\n\n\t#detect if a vector starting at the face center (to direction -z) would collide with the mesh\n\t#I would use the face centre as available above. However, how do I figure out the intersection with the mesh & in code?\n\t\n\t#calculate the area of the face, exclude if smaller than treshold\n\t#I was thinking of using the vertices and calculating it myself\n\t\n\t#check if the remaining faces are neighbours\n\t#could omit this if to difficult\n\t\n\t#if close enough merge them\n\t#I was thinking of using cull duplicates here",
+      "language": "python",
+      "author": "Philip7",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 18,
+  "views": 1547
+}

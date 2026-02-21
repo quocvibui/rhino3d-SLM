@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/why-it-doesnt-bake-can-someone-help/164017",
+  "topic_id": 164017,
+  "title": "Why it doesn't BAKE? can someone help?",
+  "question": "import rhinoscriptsyntax as rs\nimport System.Drawing as sd\nimport Rhino.Geometry as rg\nimport Rhino.DocObjects as rd\nimport scriptcontext as sc\nimport Rhino\n\n\nspaceX = int(spaceX)\nspaceY = int(spaceY)\nspaceZ = int(spaceZ)\nmin= int(min)\nmax = int(max)\n\n# Get the input point from Grasshopper\ninput_point = p  # \"x\" is the default input parameter name for the first input in Grasshopper\n\nif input_point:\n    # Convert the Grasshopper point to a Rhino point\n    rhino_point = rg.Point3d(input_point.X, input_point.Y, input_point.Z)\n\n    # Deconstruct the Rhino point into X, Y, and Z components\n    px = rhino_point.X\n    py = rhino_point.Y\n    pz = rhino_point.Z\n\ngeo = []\ncolour = []\n\nprint(\"Length of geo before loop:\", len(geo))\nprint(\"Length of colour before loop:\", len(colour))\n\n\nfor x in range(min, max, spaceX):\n    for y in range(min, max, spaceY):\n        pt1 = rg.Point3d(x + px, y + py, pz)\n        pt2 = rg.Point3d(x + px + spaceX, y + py, pz)\n        pt3 = rg.Point3d(x + px, y + py + spaceY, pz)\n        plane = rs.PlaneFromPoints(pt1, pt2, pt3)\n        dist = rs.Distance(pt, pt1)\n        geo.append(rg.Box(plane, rg.Interval(spaceX / 2 * -gap, spaceX / 2 * gap), rg.Interval(spaceY / 2 * -gap, spaceY / 2 * gap), rg.Interval(dist / 2, spaceZ / 2 * -1)))\n        colour.append(sd.Color.FromArgb(x / max * 255, y / max * 255, 150))\n\nprint(\"Length of geo after loop:\", len(geo))\nprint(\"Length of colour after loop:\", len(colour))\n\ndef baker():\n    # Store the current Grasshopper document\n    ghdoc = sc.doc\n    \n    # Switch to Rhino document\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n\n    # Create and add geometry\n    for k in range(len(geo)):\n        brep = rg.Brep.CreateFromBox(geo[k])\n        attr = rd.ObjectAttributes()\n        attr.ColorSource = rd.ObjectColorSource.ColorFromObject\n        attr.ObjectColor = colour[k]\n        rebrep = sc.doc.Objects.AddBrep(brep, attr)\n\n    # Switch back to Grasshopper document\n    sc.doc = ghdoc\n\n# Call the baker function if bake is True\nif ba...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System.Drawing as sd\nimport Rhino.Geometry as rg\nimport Rhino.DocObjects as rd\nimport scriptcontext as sc\nimport Rhino\n\n\nspaceX = int(spaceX)\nspaceY = int(spaceY)\nspaceZ = int(spaceZ)\nmin= int(min)\nmax = int(max)\n\n# Get the input point from Grasshopper\ninput_point = p  # \"x\" is the default input parameter name for the first input in Grasshopper\n\nif input_point:\n    # Convert the Grasshopper point to a Rhino point\n    rhino_point = rg.Point3d(input_point.X, input_point.Y, input_point.Z)\n\n    # Deconstruct the Rhino point into X, Y, and Z components\n    px = rhino_point.X\n    py = rhino_point.Y\n    pz = rhino_point.Z\n\ngeo = []\ncolour = []\n\nprint(\"Length of geo before loop:\", len(geo))\nprint(\"Length of colour before loop:\", len(colour))\n\n\nfor x in range(min, max, spaceX):\n    for y in range(min, max, spaceY):\n        pt1 = rg.Point3d(x + px, y + py, pz)\n        pt2 = rg.Point3d(x + px + spaceX, y + py, pz)\n        pt3 = rg.Point3d(x + px, y + py + spaceY, pz)\n        plane = rs.PlaneFromPoints(pt1, pt2, pt3)\n        dist = rs.Distance(pt, pt1)\n        geo.append(rg.Box(plane, rg.Interval(spaceX / 2 * -gap, spaceX / 2 * gap), rg.Interval(spaceY / 2 * -gap, spaceY / 2 * gap), rg.Interval(dist / 2, spaceZ / 2 * -1)))\n        colour.append(sd.Color.FromArgb(x / max * 255, y / max * 255, 150))\n\nprint(\"Length of geo after loop:\", len(geo))\nprint(\"Length of colour after loop:\", len(colour))\n\ndef baker():\n    # Store the current Grasshopper document\n    ghdoc = sc.doc\n    \n    # Switch to Rhino document\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n\n    # Create and add geometry\n    for k in range(len(geo)):\n        brep = rg.Brep.CreateFromBox(geo[k])\n        attr = rd.ObjectAttributes()\n        attr.ColorSource = rd.ObjectColorSource.ColorFromObject\n        attr.ObjectColor = colour[k]\n        rebrep = sc.doc.Objects.AddBrep(brep, attr)\n\n    # Switch back to Grasshopper document\n    sc.doc = ghdoc\n\n# Call the baker function if bake is True\nif bake:\n    baker()",
+      "language": "python",
+      "author": "lishiqi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 2,
+  "views": 530
+}

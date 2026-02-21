@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/babivillanova/AIA-GeoOpt/blob/8aaecb9efc4989d662324b1bf213cf974a986a0a/A2/a02.py",
+  "repo": "babivillanova/AIA-GeoOpt",
+  "repo_stars": 0,
+  "repo_description": "Repo for the GeoOpt course of MaCAD",
+  "license": "unknown",
+  "filepath": "A2/a02.py",
+  "instruction": "Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\n        b: The b output variable\n        c: The c output variable\n        d: The...",
+  "code": "#Provides a scripting component.\n\"\"\" Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\n        b: The b output variable\n        c: The c output variable\n        d: The d output variable\n\"\"\"\n        \nimport Rhino.Geometry as rg\n\n#1.\n#compute face normals using rg.Mesh.FaceNormals.ComputeFaceNormals()\n#output the vectors to a\n\na = []\nnumberfaces =  len(m.Faces)\nfor i in range(numberfaces):\n    normals = m.FaceNormals[i]\n    reversesn = rg.Vector3d.Negate(normals)\n    a.append(reversesn)\n\n\n#2.\n#get the centers of each faces using rg.Mesh.Faces.GetFaceCenter()\n#store the centers into a list called centers \n#output that list to b\n\nb = []\nfor i in range(numberfaces):\n    face = m.Faces.GetFaceCenter(i)\n    b.append(face)\n\n\n#b = centers\n\n#3.\n#calculate the angle between the sun and each FaceNormal using rg.Vector3d.VectorAngle()\n#store the angles in a list called angleList and output it to c\n\n#c = angleList\n\nc = []\nfor i in range(numberfaces):\n    angle = rg.Vector3d.VectorAngle(a[i],s)\n    c.append(angle)\n\n\n#4. explode the mesh - convert each face of the mesh into a mesh\n#for this, you have to first copy the mesh using rg.Mesh.Duplicate()\n#then iterate through each face of the copy, extract it using rg.Mesh.ExtractFaces\n#and store the result into a list called exploded in output d\n\n#d = explodedmesh\n\nexplodedmesh = []\nnovo = len(rg.Mesh.Duplicate(m).Faces)\nm_novo = m.Duplicate()\nfor i in range(novo):\n    face_mesh = m_novo.Faces.ExtractFaces([0])\n    explodedmesh.append(face_mesh)\n\nd = explodedmesh\n\nf = novo\n\n#after here, your task is to apply a transformation to each face of the mesh\n#the transformation should correspond to the angle value that corresponds that face to it... \n#the result should be a mesh that responds to the sun position... its up to you!\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

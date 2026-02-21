@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/969flash/UrbanFrame/blob/0f253b7a73233f7217608b7815c1a99f71e14f35/block_generator.py",
+  "repo": "969flash/UrbanFrame",
+  "repo_stars": 0,
+  "repo_description": "Generate Urban Frame",
+  "license": "unknown",
+  "filepath": "block_generator.py",
+  "instruction": "Grasshopper runner for a single building, mirroring previous main.py usage.\nPlace this script in a GhPython component and wire inputs accordingly.",
+  "code": "# -*- coding:utf-8 -*-\n\"\"\"\nGrasshopper runner for a single building, mirroring previous main.py usage.\nPlace this script in a GhPython component and wire inputs accordingly.\n\"\"\"\n\ntry:\n    from typing import List\nexcept ImportError:\n    pass\nimport Rhino.Geometry as geo\nimport scriptcontext as sc\nimport units\nimport utils\nimport importlib\n\nimportlib.reload(utils)\nimportlib.reload(units)\n\nfrom units import Node, Edge, Road, Junction, RoadNetwork, Block\n\n\nclass BlockGenerator:\n    def __init__(self):\n        pass\n\n    def generate(self, road_network: RoadNetwork) -> List[Block]:\n        \"\"\"Road/Junction 영역 합집합에서 내부(블록) 영역 추출.\"\"\"\n        if not road_network:\n            return []\n        road_regions = [r.region for r in road_network.roads if r.region]\n        junction_regions = [j.region for j in road_network.junctions if j.region]\n\n        all_regions = road_regions + junction_regions\n\n        all_regions = utils.get_regions_from_crvs(all_regions)\n\n        edge_crvs = [e.curve for e in road_network.edges]\n\n        # all_regions 중 edge_crvs와 겹치는 영역 제거\n        if edge_crvs:\n            # edge_crvs와 교차하지 않는 영역만 유지\n            filtered = []\n            for r in all_regions:\n                if not any(utils.has_intersection(r, ec) for ec in edge_crvs):\n                    filtered.append(r)\n            all_regions = filtered\n\n        blocks = []\n        for i, r in enumerate(all_regions):\n            block = Block(r, block_id=i + 1)\n            # 블록에 인접한 도로/교차로 찾기\n            for road in road_network.roads:\n                if utils.has_intersection(r, road.region):\n                    block.roads.append(road)\n            for junction in road_network.junctions:\n                if utils.has_intersection(r, junction.region):\n                    block.junctions.append(junction)\n            blocks.append(block)\n\n        return blocks\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

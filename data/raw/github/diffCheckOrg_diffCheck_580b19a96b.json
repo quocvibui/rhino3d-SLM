@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_export_results/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_export_results/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport System\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper\n\n\ndef add_button(self,\n    nickname: str,\n    indx: int,\n    X_param_coord: float,\n    Y_param_coord: float,\n    X_offset: int=45\n    ) -> None:\n    \"\"\"\n        Adds a button to the component input\n\n        :param nickname: the nickname of the button\n        :param indx: the index of the input parameter\n        :param X_param_coord: the x coordinate of the input parameter\n        :param Y_param_coord: the y coordinate of the input parameter\n        :param X_offset: the offset of the button from the input parameter\n    \"\"\"\n    param = ghenv.Component.Params.Input[indx]    # noqa: F821\n    if param.SourceCount == 0:\n        button = Grasshopper.Kernel.Special.GH_ButtonObject()\n        button.NickName = \"\"\n        button.Description = \"\"\n        button.CreateAttributes()\n        button.Attributes.Pivot = System.Drawing.PointF(\n            X_param_coord - (button.Attributes.Bounds.Width) - X_offset,\n            Y_param_coord - (button.Attributes.Bounds.Height / 2 - 0.1)\n            )\n        button.Attributes.ExpireLayout()\n        Grasshopper.Instances.ActiveCanvas.Document.AddObject(button, False)\n        ghenv.Component.Params.Input[indx].AddSource(button)    # noqa: F821\n\nclass DFExportResults(component):\n    def __init__(self):\n        super(DFExportResults, self).__init__()\n        ghenv.Component.ExpireSolution(True)  # noqa: F821\n        ghenv.Component.Attributes.PerformLayout()    # noqa: F821\n        params = getattr(ghenv.Component.Params, \"Input\")    # noqa: F821\n        for j in range(len(params)):\n            X_cord = params[j].Attributes.Pivot.X\n            Y_cord = params[j].Attributes.InputGrip.Y\n            if params[j].Name == \"i_dump\":\n                add_button(self, \"\", j, X_cord, Y_cord)\n\n    def RunScript(self, i_dump: bool, i_export_dir: str, i_results):\n        if i_dump is None or i_export_dir is None or i_results is None:\n            return None\n\n        o_path = None\n        if i_dump:\n            o_path = i_results.dump_serialization(i_export_dir)\n\n        return o_path\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

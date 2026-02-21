@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dbt-ethz/open-plans-rhino/blob/6cbb4f56d948dbd3b00c301323963bcbe61642d5/src/rhino/dev/OPFetchPlan_cmd.py",
+  "repo": "dbt-ethz/open-plans-rhino",
+  "repo_stars": 0,
+  "repo_description": "Rhino3D plugin to interact with open plans",
+  "license": "unknown",
+  "filepath": "src/rhino/dev/OPFetchPlan_cmd.py",
+  "instruction": "Opfetch plan cmd",
+  "code": "from __future__ import print_function\nfrom __future__ import absolute_import\nfrom __future__ import division\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System\nimport Rhino.UI\nimport Eto.Drawing as drawing\nimport Eto.Forms as forms\nimport Rhino.Display as rd\n\nimport rhino.rhino_helpers as rhh\nimport datamodels\nimport urllib2\n\n\n__commandname__ = \"OPFetchPlan\"\n\n\ndef fetch_plan_by_id(id):\n    return datamodels.OpenPlansProject.from_project_id(id)\n\n\ndef fetch_project_by_id(id):\n    return datamodels.OpenPlansProject.from_project_id(id)\n\n\ndef get_file_location_image():\n    return rs.OpenFileName(\"File location for floorplan image\", \"JPEG Files (*.jpeg)|*.jpeg||\")\n\n\ndef export_image(img_url, filepath):\n    response = urllib2.urlopen(img_url)\n    output = open(filepath, \"wb\")\n    output.write(response.read())\n    output.close()\n\n\ndef draw_image_plan(img_url, mms_per_pixel):\n    # Rhino Bitmap\n    bitmap = rd.DisplayBitmap.Load(img_url)\n\n    fpath = get_file_location_image()\n\n    if fpath:\n        export_image(img_url, fpath)\n        # get active view\n        RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n        view = RhinoDocument.Views.Find(\"Top\", False)\n\n        plane = view.ActiveViewport.ConstructionPlane()\n\n        # load image into Rhino view\n        view.ActiveViewport.SetTraceImage(\n            fpath, plane, bitmap.Size.Width * mms_per_pixel, bitmap.Size.Height * mms_per_pixel, True, False)\n        view.Redraw()\n\n    else:\n        print('Background image can not be displayed. Please export image to your device')\n\n\ndef RunCommand(is_interactive):\n    plan_id = rs.GetInteger(\"Plan id\")\n\n    if plan_id:\n        plan = datamodels.OpenPlansPlan.from_plan_id(id=plan_id)\n        project_id = plan.get_project_id()\n\n        op_project = fetch_project_by_id(id=project_id)\n\n        # add project to rhino layers\n        rhh.project_to_rhino_layers(op_project, plan_ids=[plan_id])\n\n        draw_image_plan(plan.image_path, mms_per_pixel=plan.mms_per_pixel)\n\n\nif __name__ == \"__main__\":\n    RunCommand(True)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

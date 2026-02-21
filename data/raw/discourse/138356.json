@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cleaning-up-offset-result/138356",
+  "topic_id": 138356,
+  "title": "Cleaning up offset result",
+  "question": "Hello\n\n\nI’ve hit a bit of a wall with trying to clean up the result of an offset.\n\n\nThe majority of the offset is completing successfully but, there are a few places in which extra pieces of line result.\n\n\nI’ve tried to use “multiple curves (MCX)” to isolate the points at which these extra lines are, and from that try and trim them out, but I’m not getting anywhere.\n\n\nI’ve attached the .3dm of the curves in question.\n\n\nAny help is greatly appreciated\n\n\n20220222_offset problem.3dm\n (348.5 KB)\n\n\n\n\n20220222_offset problem\n853×814 9.59 KB",
+  "code_blocks": [
+    {
+      "code": "__author__ = \"Seghier Mohamed Abdelaziz\"\n__version__ = \"2021.01.26\"\n\nimport Rhino as rh\nimport Rhino.Geometry as rg\nfrom System.Collections.Generic import List\n\ncrvs = List[rg.Curve]()\nfor c in curves:\n    crvs.Add(c)\n\nif not plane:\n    plane = rg.Plane.WorldXY\ntol = rh.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n\nrc = rg.Curve.CreateBooleanRegions(crvs, plane, points, combineRegions, tol)\n\nif rc:\n    regions = List[rg.Curve]()\n    for i in range(rc.RegionCount):\n        regions.AddRange(rc.RegionCurves(i))\n    regions = regions.ToArray()",
+      "language": "python",
+      "author": "henri1",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 9,
+  "views": 1007
+}

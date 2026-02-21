@@ -1,0 +1,67 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-sc-sticky-change-event-call-python-code-components-from-another-python-component/108709",
+  "topic_id": 108709,
+  "title": "GH sc.sticky change event / call python code components from another python component",
+  "question": "Hello,\n\n\nI would like to load and save a configuration from and to a file in Grasshopper using python, which works, apart from the right save function trigger.\n\n\nOnce loaded, the configuration is saved in a dict in the sc.sticky. The config file should automatically (without for example pressing a button) reflect changes made to the configuration, but I don’t know how to properly trigger the save function.\n\n\nRight now, I am using a \nTimer\n-component to periodically trigger a save config python component.\n\n\nI checked if there is an event that I could use for this (\nhttps://developer.rhino3d.com/wip/api/grasshopper/html/N_Grasshopper_Kernel.htm\n), but I didn’t find a suitable one. Additionally, it doesn’t seem like one can even use these events from Python, only from VB and C#. Is it possible in GH to call python from a VB or C# script?\n\n\nAnother solution would be calling some python component from another python component. I did not find anything on this here either.\n\n\nOf course, I could trigger the update directly by connecting all of the components, but I’d rather not do this.\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "from scriptcontext import sticky\nid = ghenv.Component.InstanceGuid\nif sticky.has_key('i'):\n   a = sticky['i']",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import sticky\ncomp = ghenv.Component.OnPingDocument().FindObject(id, False)\nsticky['i'] = v\ncomp.ExpireSolution(True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#ID\nfrom scriptcontext import sticky\ncomp = ghenv.Component.OnPingDocument().FindObject(id, False)\nsticky['i'] = v\ncomp.ExpireSolution(True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "#Name\nfrom scriptcontext import sticky\nsticky['i'] = v\nfor obj in ghenv.Component.OnPingDocument().Objects:\n    if obj.NickName in names:\n        obj.ExpireSolution(True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "#Group\nfrom scriptcontext import sticky\nimport Grasshopper as gh\n\ndef FindPythonObjectInCurrentGroup():\n    pythonObjects = []\n    ghObjects = ghenv.Component.OnPingDocument().Objects\n    for obj in ghObjects:\n        if type(obj) is gh.Kernel.Special.GH_Group:\n            if obj.ObjectIDs.Contains(ghenv.Component.InstanceGuid):\n                group = obj\n                for obj in ghObjects:\n                    if ghenv.Component.ComponentGuid == obj.ComponentGuid:\n                        if ghenv.Component.InstanceGuid != obj.InstanceGuid:\n                            if group.ObjectIDs.Contains(obj.InstanceGuid):\n                                pythonObjects.append(obj)\n    return pythonObjects\n\nsticky['i'] = v\npythonObjects = FindPythonObjectInCurrentGroup()\nfor obj in pythonObjects: \n    obj.ExpireSolution(True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "using System;\nusing Grasshopper.Kernel;\n\npublic class SenderComponent : GH_Component\n{\n    public SenderComponent() : base(\"Sender\", \"S\", \"Send numeric data to receiver\", \"Test\", \"Data\") { }\n\n    protected override void RegisterInputParams(GH_InputParamManager pManager)\n    {\n        pManager.AddNumberParameter(\"Data\", \"D\", \"Numeric data to send\", GH_ParamAccess.item);\n    }\n\n    protected override void RegisterOutputParams(GH_OutputParamManager pManager) { }\n\n    protected override void SolveInstance(IGH_DataAccess DA)\n    {\n        double data = 0;\n\n        if (!DA.GetData(0, ref data)) return;\n\n        // Get the nickname of the target receiver\n        string targetNickname = \"ReceiverNickname\";\n\n        // Find the remote component with the given nickname within the cluster\n        GH_Component targetComponent = null;\n        foreach (IGH_DocumentObject obj in OnPingDocument().Objects)\n        {\n            if (obj is GH_Cluster)\n            {\n                GH_Cluster cluster = obj as GH_Cluster;\n                foreach (IGH_Component clusterComponent in cluster.ClusterObjects(true))\n                {\n                    if (clusterComponent.NickName == targetNickname && clusterComponent is GH_Component)\n                    {\n                        targetComponent = clusterComponent as GH_Component;\n                        break;\n                    }\n                }\n            }\n        }\n\n        // Check if the target component was found\n        if (targetComponent != null)\n        {\n            // Send data to the target component\n            targetComponent.Params.Input[0].AddVolatileData(new GH_Path(0), 0, data);\n        }\n\n        // Expire solution to update the changes\n        ExpireSolution(true);\n    }\n\n    public override Guid ComponentGuid\n    {\n        get { return new Guid(\"GUID_HERE\"); }\n    }\n}",
+      "language": "csharp",
+      "author": "Carlos_Yaver",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing Grasshopper.Kernel;\n\npublic class ReceiverComponent : GH_Component\n{\n    public ReceiverComponent() : base(\"Receiver\", \"R\", \"Receive numeric data from sender\", \"Test\", \"Data\") { }\n\n    protected override void RegisterInputParams(GH_InputParamManager pManager) { }\n\n    protected override void RegisterOutputParams(GH_OutputParamManager pManager)\n    {\n        pManager.AddNumberParameter(\"Data\", \"D\", \"Received numeric data\", GH_ParamAccess.item);\n    }\n\n    protected override void SolveInstance(IGH_DataAccess DA)\n    {\n        double data = 0;\n\n        // Receive data from the sender component\n        DA.GetData(0, ref data);\n\n        // Do something with the received data...\n\n        // Output the received data\n        DA.SetData(0, data);\n    }\n\n    public override bool Read(GH_IReader reader)\n    {\n        // Perform any additional reading here if needed\n        return base.Read(reader);\n    }\n\n    public override bool Write(GH_IWriter writer)\n    {\n        // Perform any additional writing here if needed\n        return base.Write(writer);\n    }\n\n    protected override void ExpireDownStreamObjects()\n    {\n        // Expire downstream objects to trigger a re-computation when data is received\n        OnPingDocument().NewSolution(true);\n        base.ExpireDownStreamObjects();\n    }\n\n    public override Guid ComponentGuid\n    {\n        get { return new Guid(\"GUID_HERE\"); }\n    }\n}",
+      "language": "csharp",
+      "author": "Carlos_Yaver",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1428
+}

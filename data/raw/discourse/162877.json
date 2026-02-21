@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-selection-methods-no-longer-working/162877",
+  "topic_id": 162877,
+  "title": "RhinoScriptSyntax Selection Methods No Longer Working?",
+  "question": "Hello,\n\n\nI had the following script utilizing RhinoScriptSyntax to select/unselect objects in the Rhino document based on an input of GUIDs from within a grasshopper scripting component.\n\n\nAll was working well and suddenly the RS methods “stopped” working, returning the following error message:\n\n\n\n\nSolution exception:‘CustomTable’ object has no attribute ‘GetSelectedObjects’\n\n\n\n\nI’ve tested in the legacy IronPython component, and the new script component in IronPython2 and Python3 to no avail. I’ve also tested in both Rhino 8 WIP and Rhino 7 (both most recent updates)\n\n\nCould this be because of a recent update/conflict or am I overlooking something in my code?\n\n\nHere is the code in question:\n\n\nInputs:\n\n\nID (Type Hint: GUID, List Access, Flattened)\n\nS (Type Hint: Boolean, Item Access)\n\nE (Type Hint: Boolean, Item Access)\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n#Select Objects By ID\ndef Select_Objects(ID, S):\n    if S and ID:\n        rs.EnableRedraw(False)  # Disable redraw to improve performance\n        rs.SelectObjects(ID)\n        rs.EnableRedraw(True)  # Enable redraw after selection\n    else:\n        return\n\n#Handle Component Info Message\nif ID:\n    if S:\n        Select_Objects(ID, S)\n        ghenv.Component.Message = str(len(ID)) + \" Selected\"\n    else:\n        if rs.SelectedObjects():\n            if E:\n                rs.UnselectObjects(ID)\n            else:\n                rs.UnselectAllObjects()\n\n        ghenv.Component.Message = str(len(ID)) + \" IDs Listed\"\nelse:\n    if rs.SelectedObjects():\n        if E:\n            rs.UnselectObjects(ID)\n        else:\n            rs.UnselectAllObjects()\n    ghenv.Component.Message = \"No IDs\"\n\n\n\nSelect False (error):\n\n\nimage\n1034×225 25.7 KB\n\n\nSelect True (no error, yet no selection in Rhino either):\n\n\nimage\n738×274 27.9 KB\n\n\nThank you for your help!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nrs.EnableRedraw(False)  # Disable redraw to improve performance\n\n# Select Objects By ID\ndef Select_Objects(ID, S):\n    if S and ID:\n        ghenv.Component.Message = str(len(ID)) + \" Selected\"\n        for obj_id in ID:\n            Rhino.RhinoDoc.ActiveDoc.Objects.Select(obj_id, True)\n    else:\n        ghenv.Component.Message = None\n        return\n\nif ID:\n    if S:\n        Select_Objects(ID, S)\n    else:\n        ghenv.Component.Message = str(len(ID)) + \" IDs Listed\"\n        if E:\n            for obj_id in ID:\n                Rhino.RhinoDoc.ActiveDoc.Objects.Select(obj_id, False)\n        else:\n            Rhino.RhinoDoc.ActiveDoc.Objects.UnselectAll()\n\nelse:\n    ghenv.Component.Message = \"No IDs\"\n\nrs.EnableRedraw(True)  # Enable redraw after selection",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\n#Select Objects By ID\ndef Select_Objects(ID, S):\n    if S and ID:\n        rs.EnableRedraw(False)  # Disable redraw to improve performance\n        rs.SelectObjects(ID)\n        rs.EnableRedraw(True)  # Enable redraw after selection\n    else:\n        return\n\n#Handle Component Info Message\nghenv.Component.Message = None\nif ID:\n    if S:\n        sc.doc = Rhino.RhinoDoc.ActiveDoc\n        Select_Objects(ID, S)\n        sc.doc = ghdoc\n        ghenv.Component.Message = str(len(ID)) + \" Selected\"\n    else:\n        sc.doc = Rhino.RhinoDoc.ActiveDoc\n        if rs.SelectedObjects():\n            if E:\n                rs.UnselectObjects(ID)\n            else:\n                rs.UnselectAllObjects()\n        sc.doc = ghdoc\n\n        ghenv.Component.Message = str(len(ID)) + \" IDs Listed\"\nelse:\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    if rs.SelectedObjects():\n        if E:\n            rs.UnselectObjects(ID)\n        else:\n            rs.UnselectAllObjects()\n    sc.doc = ghdoc\n    ghenv.Component.Message = \"No IDs\"",
+      "language": "python",
+      "author": "jeremy5",
+      "post_number": 8,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n#Set Script Context To Rhino Doc\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\n# Disable redraw to improve performance\nrs.EnableRedraw(False)\n\n# Select Objects By ID\ndef Select_Objects(ID, S):\n\n    if S and ID:\n        if E:\n            rs.SelectObjects(ID)\n        else:\n            rs.UnselectAllObjects()\n            rs.SelectObjects(ID)\n    else:\n        ghenv.Component.Message = \"No IDs\"\n        return\n\n# Unselect Objects By ID\ndef Unselect_Objects(ID, E):\n    # sc.doc = Rhino.RhinoDoc.ActiveDoc\n    if rs.SelectedObjects():\n        if E:\n            rs.UnselectObjects(ID)\n        else:\n            rs.UnselectAllObjects()\n\n# Check if the input parameter exists\nif \"ID\" in globals():\n    if S:\n        Select_Objects(ID, S)\n        # Update Message With Item Count Selected\n        ghenv.Component.Message = str(len(ID)) + \" Selected\"\n    else:\n        Unselect_Objects(ID, E)\n        # Update Message To Show How Many IDs Are Present\n        ghenv.Component.Message = str(len(ID)) + \" IDs Listed\"\nelse:\n    ID = None\n    # When No IDs Are Present, Update Message Accordingly\n    ghenv.Component.Message = \"No IDs\"\n\n# Enable redraw after selection\nrs.EnableRedraw(True)\n\n#Set Script Context To Grasshopper Doc\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "Help on function SelectedObjects in module rhinoscript.selection:\n\n |  SelectedObjects(include_lights=False, include_grips=False) |      Returns the identifiers of all objects that are currently selected\n |          Parameters:\n |            include_lights (bool, optional): include light objects\n |            include_grips (bool, optional): include grip objects\n |          Returns:\n |            list(guid, ...) identifiers of selected objects\n |          Example:\n |            import rhinoscriptsyntax as rs\n |            objects = rs.SelectedObjects()\n |            for obj in objects: print \"Object identifier: \", obj\n |          See Also:\n |            InvertSelectedObjects\n |            UnselectAllObjects\n |",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n#Select Objects By ID\ndef Select_Objects(ID, S):\n    if S and ID:\n        rs.EnableRedraw(False)  # Disable redraw to improve performance\n        rs.SelectObjects(ID)\n        rs.EnableRedraw(True)  # Enable redraw after selection\n    else:\n        return\n\n#Handle Component Info Message\nif ID:\n    if S:\n        Select_Objects(ID, S)\n        ghenv.Component.Message = str(len(ID)) + \" Selected\"\n    else:\n        if rs.SelectedObjects():\n            if E:\n                rs.UnselectObjects(ID)\n            else:\n                rs.UnselectAllObjects()\n\n        ghenv.Component.Message = str(len(ID)) + \" IDs Listed\"\nelse:\n    if rs.SelectedObjects():\n        if E:\n            rs.UnselectObjects(ID)\n        else:\n            rs.UnselectAllObjects()\n    ghenv.Component.Message = \"No IDs\"",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 16,
+  "views": 886
+}

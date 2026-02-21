@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/keyboard-event-handle-in-rhinocommon/7578",
+  "topic_id": 7578,
+  "title": "Keyboard event handle in RhinoCommon",
+  "question": "Currently dealing with an interactive tool , but quite stuck with windows.form.keys. Which should be a small part but I am not known to the associated class, methods and delegates. in RhinoCommon for keyboard event… no example so far online and it is hard to locate the right classes and methods. Only one Python code found and I am not able to convert it, because it does not show classes and methods of RhinoCommon…\n\n\nI mean keyboard events from Rhino side. I need to implement “enter” press after some draw operation interactively, but I should not get out of the command, by that enter pressing. So I know, I will need System.Windows.Forms.Keys.Enter, from Windows side. But I am not aware of associated Rhino class just for this event handle.\n\n\nBut unfortunately I could not find related event args for keyboard in c# dot net RhinoCommon.\n\n. I do not want to use windows form buttons in the process… I want to do it un-interrupted without any windows form buttons hence, want to know how you would write those few lines to call KeyboardCallBackEvent Args? I know these name KeyboardCallBackEvent Args does not exist in Rhino common, I wrote it comparing mouseCallBackEventArgs\n\nin short my question is, how you would relate System.Windows.Forms.Keys.Enter to event args for keyboard  inside RhinoCommon.\n\nOnly sample found by Steve as below written in Python, again he used form button, I do not want to use for keyboard event handle. A small sample or few lines of code to deal with keyboard event will be a big help. Many thanks !\n\n:\n\n\nimport Rhino\nimport System.Drawing\nimport System.Windows.Forms\nimport scriptcontext\n\nclass Form1(System.Windows.Forms.Form):\n    def __init__(self):\n        self.InitializeComponent()\n    def InitializeComponent(self):\n        self.SuspendLayout()\n        self.ClientSize = System.Drawing.Size(250, 102)\n        self.Controls.Add(self._button)\n        self.KeyPreview = True\n        seljf.Text = \"Press J or K\"\n        self.FormBorderStyle = System.Windows....",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  Random random = new Random();\n\n  Result res = Result.Success;\n  while (res == Result.Success)\n  {\n    Rhino.Geometry.Point3d center = new Point3d(\n      RandomDouble(random, -20.0, 20.0),\n      RandomDouble(random, -20.0, 20.0),\n      0.0\n      );\n\n    double radius = RandomDouble(random, 1.0, 10.0);\n\n    Rhino.Geometry.Circle circle = new Circle(center, radius);\n\n    doc.Objects.AddCircle(circle);\n    doc.Views.Redraw();\n\n    string str = null;\n    res = Rhino.Input.RhinoGet.GetString(\"Press <Enter> to continue, <Esc> to cancel\", true, ref str);\n    if (res == Result.Nothing)\n      res = Result.Success;\n  }\n     \n  return Result.Success;\n}\n\npublic double RandomDouble(Random random, double minimum, double maximum)\n{\n  return random.NextDouble() * (maximum - minimum) + minimum;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "if (e.KeyCode == System.Windows.Forms.Keys.Enter)\n        {\n             RhinoApp.WriteLine(\"Tah is entered\");\n            \n            done = true;\n        }\n        e.Handled = true;\n\n    }",
+      "language": "csharp",
+      "author": "tsiddikee",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System.Drawing\nimport System.Windows.Forms\nimport scriptcontext\n\nclass Form1(System.Windows.Forms.Form):\n    def __init__(self):\n        self.InitializeComponent()\n    def InitializeComponent(self):\n        self.SuspendLayout()\n        self.ClientSize = System.Drawing.Size(250, 102)\n        self.Controls.Add(self._button)\n        self.KeyPreview = True\n        seljf.Text = \"Press J or K\"\n        self.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow\n        self.KeyDown += self.OnKeyDownEvent\n        self.Closing += self.OnClosingEvent\n        self.ResumeLayout(False)\n\n\n\n    def OnKeyDownEvent(self, sender, e):\n        left = e.KeyCode == System.Windows.Forms.Keys.J\n        right = e.KeyCode == System.Windows.Forms.Keys.K\n        if left or right:\n            amount = 0.1\n            if right: amount = -0.1\n            viewport = scriptcontext.doc.Views.ActiveView.MainViewport\n            z = viewport.ConstructionPlane().ZAxis\n            viewport.Rotate(amount, z, Rhino.Geometry.Point3d.Origin)\n            scriptcontext.doc.Views.Redraw()\n        finish = e.KeyCode == System.Windows.Forms.Keys.Escape\n        finish = finish or e.KeyCode == System.Windows.Forms.Keys.Enter\n        if finish:\n            self.Close()\n        e.Handled = True\n    def OnClosingEvent(self, sender, e):\n        Rhino.Input.Custom.GetBaseClass.PostCustomMessage(\"exit\")\n\nf = Form1()\nf.Show(Rhino.RhinoApp.MainWindow())\ngs = Rhino.Input.Custom.GetString()\ngs.SetCommandPrompt(\"press escape to exit\")\ngs.AcceptCustomMessage(True)\ngs.Get()\nif not f.IsDisposed:\n    f.Close()",
+      "language": "python",
+      "author": "tsiddikee",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 13,
+  "views": 5575
+}

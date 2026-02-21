@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/iteration-over-non-sequence-of-type-nonetype/79545",
+  "topic_id": 79545,
+  "title": "Iteration over non-sequence of type NoneType",
+  "question": "I can’t figure out what is happening here:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\nsurfaces = rs.GetObjects(\"sel all\",rs.filter.surface)\nnames = []\nfor srf_ids in surfaces:\n    srf = rs.coercerhinoobject(srf_ids)\n    \n    names.append(srf.Attributes.Name)\nnormalized_names = list(dict.fromkeys(names))\nset_names = list(set(names))\n\n\nprint normalized_names\nprint len(normalized_names)\nprint set_names\nprint len(set_names)\n\"\"\"\"\"\"\nfor i in range(len(surfaces)):\n    for nm in normalized_names:\n        ps = []\n        for srf_ids in surfaces:\n            \n            srf = rs.coercerhinoobject(srf_ids)\n            try:\n                tmp = srf.Attributes.Name\n                if tmp == nm:\n                    ps.append(srf_ids)\n            except:\n                pass\n        ps_id = rs.JoinSurfaces(ps,True)\n        #ps_obj = rs.coercerhinoobject(ps_id)\n        rs.ObjectName(ps_id,nm)\n\n\n\n\n\n\n\n\nMessage: iteration over non-sequence of type NoneType\n\n\nTraceback:\n\nline 1156, in ObjectName, “C:\\Users\\peychev\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\object.py”",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\nsurfaces = rs.GetObjects(\"sel all\",rs.filter.surface)\nnames = []\nfor srf_ids in surfaces:\n    srf = rs.coercerhinoobject(srf_ids)\n    \n    names.append(srf.Attributes.Name)\nnormalized_names = list(dict.fromkeys(names))\n#set_names = list(set(names))\n\n\n#print normalized_names\n#print len(normalized_names)\n#print set_names\n#print len(set_names)\n\"\"\"\"\"\"\nfor i in range(len(surfaces)):\n    for nm in normalized_names:\n        ps = []\n        for srf_ids in surfaces:\n            \n            srf = rs.coercerhinoobject(srf_ids)\n            try:\n                tmp = srf.Attributes.Name\n                if tmp == nm:\n                    ps.append(srf_ids)\n            except:\n                pass\n        #print ps\n        if len(ps) > 1:\n            ps_id = rs.JoinSurfaces(ps,True)\n            #ps_obj = rs.coercerhinoobject(ps_id)\n            rs.ObjectName(ps_id,nm)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\nsurfaces = rs.GetObjects(\"sel all\",rs.filter.surface)\nnames = []\nfor srf_ids in surfaces:\n    srf = rs.coercerhinoobject(srf_ids)\n    \n    names.append(srf.Attributes.Name)\nnormalized_names = list(dict.fromkeys(names))\nset_names = list(set(names))\n\n\nprint normalized_names\nprint len(normalized_names)\nprint set_names\nprint len(set_names)\n\"\"\"\"\"\"\nfor i in range(len(surfaces)):\n    for nm in normalized_names:\n        ps = []\n        for srf_ids in surfaces:\n            \n            srf = rs.coercerhinoobject(srf_ids)\n            try:\n                tmp = srf.Attributes.Name\n                if tmp == nm:\n                    ps.append(srf_ids)\n            except:\n                pass\n        ps_id = rs.JoinSurfaces(ps,True)\n        #ps_obj = rs.coercerhinoobject(ps_id)\n        rs.ObjectName(ps_id,nm)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 548
+}

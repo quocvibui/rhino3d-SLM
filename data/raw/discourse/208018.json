@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/isosurface-meshing-with-rhinocommon-in-rhino-wip/208018",
+  "topic_id": 208018,
+  "title": "Isosurface meshing with RhinoCommon in Rhino WIP",
+  "question": "The latest Rhino 9 WIP contains a new method in RhinoCommon -\n\n\nMesh.CreateFromIsosurface\n\nfor creating meshes from \nisosurfaces,\n also known as \nimplicit surfaces\n or \nlevel sets\n.\n\n\nnote - this post is only relevant for those using scripting or Grasshopper and is not about any new Rhino command.\n\n\nAn implicit surface is defined by a field or function which returns a number (a scalar value) for any point in 3d space, and an iso-value (typically 0). The surface is where the field crosses the given value (like contouring a heightfield, but in one dimension higher).\n\nThese scalar fields can be defined using distances, mathematical equations, or any other method you want to write which returns a value for any given point. This allows the creation of some types of surfaces which would be tricky to define directly using NURBS/SubD/Mesh.\n\n\nWhile an implicit form fully defines a surface, and we can use functions of one implicit surface to define new implicit surfaces, to actually add it to the Rhino document and interact with it, we still need to convert it into an explicit form, in this case a mesh, and that is what this function does.\n\n\nThis is similar functionality to that found in the \nIsopod\n plugin, but now available as part of Rhino, so it can be used in scripting.\n\n\nHere is a basic example of how to use this function in a C# script.\n\nIt asks the user to select a mesh, an inset distance and a resolution, and creates a new mesh which shells that mesh towards the inside, while leaving the outer surface unchanged.\n\n\nIsoMeshExampleScript.cs\n (1.7 KB)\n\n(You can run this using the Rhino Script Editor, found under Tools>Script>Edit)\n\n\nusing Rhino.Input;\nusing Rhino.Geometry;\nusing Rhino.DocObjects;\n\nvar doc = Rhino.RhinoDoc.ActiveDoc;\nObjectType filter = Rhino.DocObjects.ObjectType.Mesh;\nObjRef objref = null;\nRhino.Commands.Result rc = Rhino.Input.RhinoGet.GetOneObject(\"Select mesh to shell\", false, filter, out objref);\ndouble thickness = 1.0;\nRhino.Input.RhinoGet.GetNumbe...",
+  "code_blocks": [
+    {
+      "code": "using Rhino.Input;\nusing Rhino.Geometry;\nusing Rhino.DocObjects;\n\nvar doc = Rhino.RhinoDoc.ActiveDoc;\nObjectType filter = Rhino.DocObjects.ObjectType.Mesh;\nObjRef objref = null;\nRhino.Commands.Result rc = Rhino.Input.RhinoGet.GetOneObject(\"Select mesh to shell\", false, filter, out objref);\ndouble thickness = 1.0;\nRhino.Input.RhinoGet.GetNumber(\"Input thickness\",true,ref thickness,0.1,100);\nint resolution = 10;\nRhino.Input.RhinoGet.GetInteger(\"Input resolution\",true,ref resolution,5,50);\n\nif (rc == Rhino.Commands.Result.Success && objref != null)\n{\n  Rhino.Geometry.Mesh mesh = objref.Mesh();        \n  if (null != mesh)\n  {    \n    Point3d check = mesh.ClosestPoint(Point3d.Origin);\n\n//This is where the field is defined.\n//It is a function which takes a Point3d as input and returns a double\n\n    double myField(Point3d p) \n    {      \n      double d = p.DistanceTo(mesh.ClosestPoint(p)); //this gives us an unsigned distance field from the mesh\n      if(mesh.IsPointInside(p,0.001,false))  \n      {\n        d=-d; //this turns it into a *signed* distance field, or SDF, where the value is negative inside the shape and positive outside\n      }    \n      d+= thickness; //adding a constant scalar value to the field effectively insets the surface\n      return d;      \n    }\n\n    BoundingBox bbox = mesh.GetBoundingBox(false);    \n    Mesh isoMesh = Mesh.CreateFromIsosurface(myField,bbox,resolution,1);   \n    \n    //If we flip our new inset mesh and join it with the original input mesh, we get a solid shell with the same outer surface as the original\n    isoMesh.Flip(true,true,true);\n    isoMesh.Append(mesh);\n\n    doc.Objects.AddMesh(isoMesh);\n    doc.Views.Redraw();\n  }        \n}",
+      "language": "csharp",
+      "author": "DanielPiker",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "nurbs",
+    "rhinocommon",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 4,
+  "views": 170
+}

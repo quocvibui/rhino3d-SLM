@@ -1,0 +1,77 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/split-surface-and-select-surface-which-has-biggest-area/33918",
+  "topic_id": 33918,
+  "title": "Split surface and select surface which has biggest area",
+  "question": "Hi everyone!\n\n\nI am trying to write script which split surface and select surface which has biggest area from splitted surfaces.\n\nScript is following.\n\nBut I get error message “‘NoneType’ object is not subscriptable”\n\nCould anyone give me some advice why I am getting this message and how to solve the problem?\n\n\nsplitted=rs.SplitBrep(surface,Obj,False)\nbase=splitted[0]\nbaseArea=rs.SurfaceArea(base)[0]\nfor sur in splitted:\n\tarea=rs.SurfaceArea(sur)[0]\n\tif area < baseArea:\n\t\trs.DeleteObject(sur)\n\telse:\n\t\trs.DeleteObject(base)\n\t\tbaseArea=area\t\n\n\n\nThank you in advance.\n\nKatsuya",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsurface = rs.GetSurfaceObject('select surface')\ncutter = rs.GetCurveObject('select curve')\n\nsplit = rs.SplitBrep(surface, cutter)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsurface = rs.GetObject('select surface')\ncutter = rs.GetObjects('select curves')",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsurface_id = rs.GetObject('select surface',8)\ncutter_ids = rs.GetObjects('select curves',4)\ntol=sc.doc.ModelAbsoluteTolerance\n\n#get the Rhinocommon Brep geometry from the surface object ID\nbrep=rs.coercebrep(surface_id)\n#get all the Rhinocommon curve geometries with a list comprehension\ncut_crvs=[rs.coercecurve(cutter_id) for cutter_id in cutter_ids]\n\n#as it is a single surface, you can get the brep's face list and use index 0\n# - the brep only has one face...\nface=brep.Faces[0]\nsplit_brep=face.Split(cut_crvs,tol)\n#if something happened, split_brep will be a joined polysurface\n#To have separate surfaces, you need to 'explode' the brep by duplicating all faces\nfor split_face in split_brep.Faces:\n    new_brep=split_face.DuplicateFace(True)\n    #add the duplicate face (brep) to the document\n    sc.doc.Objects.AddBrep(new_brep)\n#redraw the scene\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n\n  rc, boundary_obj_refs = RhinoGet.GetMultipleObjects(\"Select boundary objects\", False, ObjectType.AnyObject)\n  if rc <> Result.Success:\n    return rc\n  if boundary_obj_refs == None or boundary_obj_refs.Length == 0:\n    return Result.Nothing\n\n  gc = GetObject()\n  gc.SetCommandPrompt(\"Select curve to extend\")\n  gc.GeometryFilter = ObjectType.Curve\n  gc.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\n  gc.Get()\n  if gc.CommandResult() <> Result.Success:\n    return gc.CommandResult()\n  curve_obj_ref = gc.Object(0)\n\n  curve = curve_obj_ref.Curve()\n  if curve == None: return Result.Failure\n  b, t = curve.ClosestPoint(curve_obj_ref.SelectionPoint())\n  if not b: return Result.Failure\n  curve_end = CurveEnd.Start if t <= curve.Domain.Mid else CurveEnd.End\n\n  geometry = [obj.Geometry() for obj in boundary_obj_refs]\n  extended_curve = curve.Extend(curve_end, CurveExtensionStyle.Line, geometry)\n  if extended_curve <> None and extended_curve.IsValid:\n    if not doc.Objects.Replace(curve_obj_ref.ObjectId, extended_curve):\n      return Result.Failure\n    doc.Views.Redraw()\n    return Result.Success\n  else:\n    RhinoApp.WriteLine(\"No boundary object was intersected so curve not extended\")\n    return Result.Nothing\n\nif __name__ == \"__main__\":\n  RunCommand()",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef Plan(surf):\n    Usurfdomain=rs.SurfaceDomain(surf,0)\n    Vsurfdomain=rs.SurfaceDomain(surf,1)\n    u=(Usurfdomain[0]+Usurfdomain[1])/2\n    v=(Vsurfdomain[0]+Vsurfdomain[1])/2\n    eval=rs.EvaluateSurface(surf,u,v)\n    vect=rs.SurfaceNormal(surf,[u,v])\n    plan=rs.PlaneFromNormal(eval,vect)\n    return plan\n    \n    \nsurf1=rs.GetSurfaceObject('surface 1')\nsurf2=rs.GetSurfaceObject('surface 2')\ninter=rs.PlanePlaneIntersection(Plan(surf1[0]),Plan(surf2[0]))\nline=rs.AddLine(inter[0],inter[1])\nline=rs.coercecurve(line)\nbrepFace=rs.coercebrep(surf2[0])\n\nline.ExtendOnSurface(?????????, brepFace.Faces[0])",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino.Geometry.CurveEnd.Start\nRhino.Geometry.CurveEnd.End\nRhino.Geometry.CurveEnd.Both",
+      "language": "unknown",
+      "author": "Mahdiyar",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "from System.Collections.Generic import IEnumerable\n\n#...\n\nsplits=brep.Split.Overloads[IEnumerable[Rhino.Geometry.Curve],System.Double]([crv], tol)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "splitted=rs.SplitBrep(surface,Obj,False)\nbase=splitted[0]\nbaseArea=rs.SurfaceArea(base)[0]\nfor sur in splitted:\n\tarea=rs.SurfaceArea(sur)[0]\n\tif area < baseArea:\n\t\trs.DeleteObject(sur)\n\telse:\n\t\trs.DeleteObject(base)\n\t\tbaseArea=area",
+      "language": "python",
+      "author": "obakatsu",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 20,
+  "views": 4143
+}

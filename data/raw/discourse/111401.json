@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-csv-to-list-script/111401",
+  "topic_id": 111401,
+  "title": "C# csv to List script",
+  "question": "Hello everybody\n\nTell me, can anyone have a node code for a grasshopper to read a csv file and then write data from this file, for example, to List<>?",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\n\nusing Rhino;\nusing Rhino.Geometry;\n\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n\nusing System.IO;\n\n/// <summary>\n/// This class will be instantiated on demand by the Script component.\n/// </summary>\npublic class Script_Instance : GH_ScriptInstance\n{\n#region Utility functions\n  /// <summary>Print a String to the [Out] Parameter of the Script component.</summary>\n  /// <param name=\"text\">String to print.</param>\n  private void Print(string text) { /* Implementation hidden. */ }\n  /// <summary>Print a formatted String to the [Out] Parameter of the Script component.</summary>\n  /// <param name=\"format\">String format.</param>\n  /// <param name=\"args\">Formatting parameters.</param>\n  private void Print(string format, params object[] args) { /* Implementation hidden. */ }\n  /// <summary>Print useful information about an object instance to the [Out] Parameter of the Script component. </summary>\n  /// <param name=\"obj\">Object instance to parse.</param>\n  private void Reflect(object obj) { /* Implementation hidden. */ }\n  /// <summary>Print the signatures of all the overloads of a specific method to the [Out] Parameter of the Script component. </summary>\n  /// <param name=\"obj\">Object instance to parse.</param>\n  private void Reflect(object obj, string method_name) { /* Implementation hidden. */ }\n#endregion\n\n#region Members\n  /// <summary>Gets the current Rhino document.</summary>\n  private readonly RhinoDoc RhinoDocument;\n  /// <summary>Gets the Grasshopper document that owns this script.</summary>\n  private readonly GH_Document GrasshopperDocument;\n  /// <summary>Gets the Grasshopper script component that owns this script.</summary>\n  private readonly IGH_Component Component;\n  /// <summary>\n  /// Gets the current iteration count. The first call to RunScript() is associated with Iteration==0.\n  /// Any subsequent call within the same solution will increment the Iteration count.\n  /// </summary>\n  private readonly int Iteration;\n#endregion\n\n  /// <summary>\n  /// This procedure contains the user code. Input parameters are provided as regular arguments,\n  /// Output parameters as ref arguments. You don't have to assign output parameters,\n  /// they will have a default value.\n  /// </summary>\n  private void RunScript(string file, string key, ref object data)\n  {\n    var csv = File.ReadAllLines(file);\n    if(csv.Length == 0)\n      return;\n    var keyList = csv[0].Split(',');\n    var index = -1;\n    for(var i = 0;i < keyList.Length;i++)\n    {\n      if(keyList[i].Trim() == key)\n      {\n        index = i;\n        break;\n      }\n    }\n\n    if(index == -1)\n      return;\n\n    var list = new List<string>(csv.Length - 1);\n    for(var i = 1;i < csv.Length;i++)\n    {\n      var dataRow = csv[i].Split(',');\n      if(dataRow.Length <= index){\n        list.Add(null);\n      }else{\n        list.Add(dataRow[index].Trim());\n      }\n    }\n    data = list;\n  }\n\n  // <Custom additional code> \n\n  // </Custom additional code> \n}",
+      "language": "csharp",
+      "author": "gankeyu",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 11,
+  "views": 2116
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/execute-objects-in-gh-document-in-rhinopythoneditor/82157",
+  "topic_id": 82157,
+  "title": "Execute objects in GH_Document in RhinoPythonEditor",
+  "question": "New to Grasshopper, so I am tyring to get the \nGH_Document\n object from the opened GH document, but I am not sure what’s next to get the GH_Document object so that I can do something with it? Below is all I have and I don’t know what to do next:\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\nGrasshopper = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\n\nGrasshopper.OpenDocument(\"z:\\unnamed.gh\")\nGrasshopper.DisableSolver()",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper\nfrom Rhino import RhinoApp, RhinoDoc\nfrom Rhino.Geometry import *\n\ndocServer = Grasshopper.GH_InstanceServer.DocumentServer\ndoc = docServer[0] # first opened document\ndef FindBatteryByNickname(docObjects, name):\n    if docObjects is None: return None\n\n    for obj in docObjects:\n        attr = obj.Attributes\n\n        if attr.PathName == name:\n            return obj\n    raise Exception(name + \" was not found in document\")\n    \n\nfor obj in doc.Objects:\n        attr = obj.Attributes\n        print attr.PathName\n\nparam = FindBatteryByNickname(doc.Objects, \"Python (GhPython Script)\")\npp = param.Params.Input[0]\npp.PersistentData.ClearData();\npp.PersistentData.Append(Grasshopper.Kernel.Types.GH_Number(5))\nparam.ExpireSolution(True);\ndoc = Grasshopper.Kernel.GH_Document()\ndoc.AddObject(param, False);",
+      "language": "python",
+      "author": "eduszh",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Grasshopper\nfrom Rhino import RhinoApp, RhinoDoc\nfrom Rhino.Geometry import *\n\n#gh = RhinoApp.GetPlugInObject(\"Grasshopper\")\n#gh.LoadEditor()\n#gh.CloseAllDocuments()\n#gh.ShowEditor()\n#gh.OpenDocument(\"z:\\unnamed.ghx\")\n\ndocServer = Grasshopper.GH_InstanceServer.DocumentServer\ndoc = docServer[0] # first opened document\ndef FindBatteryByNickname(docObjects, name):\n    if docObjects is None: return None\n\n    for obj in docObjects:\n        attr = obj.Attributes\n\n        if attr.PathName == name:\n            return obj\n    raise Exception(name + \" was not found in document\")\n    \n\nfor obj in doc.Objects:\n        attr = obj.Attributes\n        print attr.PathName\n\nparam = FindBatteryByNickname(doc.Objects, \"input1\")\nprint dir(param)\nparam.Script_ClearPersistentData()\nparam.AddPersistentData(85)\nparam.ExpireSolution(True) \n\nparam = FindBatteryByNickname(doc.Objects, \"output1\")\nresults  = param.VolatileData[0][0].Value\nf = open(\"z://data2.txt\", \"w\")\n\n\nf.write( repr(results))      # str() converts to string\nf.close()",
+      "language": "python",
+      "author": "eduszh",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\nGrasshopper = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\n\nGrasshopper.OpenDocument(\"z:\\unnamed.gh\")\nGrasshopper.DisableSolver()",
+      "language": "python",
+      "author": "eduszh",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 1890
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/random_lines_from_points.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/random_lines_from_points.py",
+  "instruction": "Random lines from points",
+  "code": "import math\nimport random\nimport Rhino\n\ndef random_lines_from_points(P: list, L: float):\n    \"\"\"\n    Generate random lines from a list of points with a given length.\n\n    Args:\n        P (list[Rhino.Geometry.Point3d]): List of points.\n        L (float): Length of each line.\n\n    Returns:\n        list[Rhino.Geometry.LineCurve]: List of lines as curves.\n    \"\"\"\n\n    if not P:\n        raise ValueError(\"Add Point Input\")\n\n    L = L or 0.01\n    domain_min, domain_max = 0.0, 2 * math.pi\n\n    curves = []\n    for p in P:\n        angle = random.uniform(domain_min, domain_max)\n\n        # Startvektor\n        vec = Rhino.Geometry.Vector3d(L, 0, 0)\n        vec.Rotate(angle, Rhino.Geometry.Vector3d.ZAxis)\n\n        # Linie erzeugen\n        line = Rhino.Geometry.Line(p, p + vec)\n        curves.append(Rhino.Geometry.LineCurve(line))\n\n    return curves\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

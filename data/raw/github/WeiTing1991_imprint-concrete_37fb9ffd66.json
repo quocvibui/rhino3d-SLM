@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/WeiTing1991/imprint-concrete/blob/f4f5112d78c336c568b06cd353ba065e6f802e0d/src/geometry/geometry.py",
+  "repo": "WeiTing1991/imprint-concrete",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/geometry/geometry.py",
+  "instruction": "Geometry",
+  "code": "try:\n    import Rhino.Geometry as rg\nexcept ImportError:\n    import platform\n    if platform.python_implementation() == 'IronPython':\n        raise\n\nfrom copy import copy, deepcopy\nfrom itertools import chain\nfrom compas.geometry import Point\nimport numpy as np\n\nclass Wall(object):\n    \"\"\" This class gerenates the shape for concerte 3D printing wall\n        base on Rhino Geometry.\n    \"\"\"\n\n    def __init__(self, curve):\n\n        self.curve = curve\n\n\ndef average_pt(pts):\n    \"\"\" create the average pt of inputs points \"\"\"\n    new = points[:]\n    count = len(new_points)\n    \n    pt_X = sum([pt.X for pt in new_points])/count\n    pt_Y = sum([pt.Y for pt in new_points])/count\n    pt_Z = sum([pt.Z for pt in new_points])/count\n\n    average_pt = rg.Point3d(pt_X, pt_Y, pt_Z)\n    return average_pt\n\n\ndef divide_sruface(srf, u_size, v_size):\n    \"\"\" \n    \"\"\"\n    # reparameterize surface\n    srf.SetDomain(0,rg.Interval(0,1))\n    srf.SetDomain(1,rg.Interval(0,1))\n    \n    pts_grid = []\n    # set grid pts\n    for i in range(0, u_size+1):\n        pts_column = []\n        for j in range(0, v_size+1):\n            \n            u = 1/u_size *i\n            v = 1/v_size *j\n            pts_column.append(srf.PointAt(u, v))\n        pts_grid.append(pts_column)\n    \n    # create surface and center points\n    sub_srfs = []\n    sub_srfs_cpts = []\n    for i in range(len(pts_grid)-1):\n        sub_srfs_column = []\n        sub_srfs_column_cpts = []\n        for j in range(len(pts_grid[i])-1):\n            sub_srf = rg.NurbsSurface.CreateFromCorners(pts_grid[i][j], pts_grid[i+1][j], pts_grid[i+1][j+1], pts_grid[i][j+1])\n            \n            # reparameterize surface\n            sub_srf.SetDomain(0,rg.Interval(0,1))\n            sub_srf.SetDomain(1,rg.Interval(0,1))\n            \n            sub_srfs_column.append(sub_srf)\n            sub_srfs_column_cpts.append(sub_srf.FrameAt(0.5,0.5)[1])\n        sub_srfs.append(sub_srfs_column)\n        sub_srfs_cpts.append(sub_srfs_column_cpts)\n        \n    return sub_srfs, sub_srfs_cpts",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

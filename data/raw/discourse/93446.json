@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/eto-combobox-in-gridview-python/93446",
+  "topic_id": 93446,
+  "title": "Eto combobox in gridview (Python)",
+  "question": "Trying to show a combobox in a gridview:\n\n\nimport Eto.Drawing as drawing\nimport Eto.Forms as forms\n\nform = forms.Dialog()\nform.Title = \"test combobox in gridview\"\nform.ClientSize = drawing.Size(800, 600)\nform.Resizable = False\n\ncomboMaterialType = forms.ComboBox(DataStore = ['Wood', 'Plastic'], SelectedIndex = 0)\n\ndataStoreRow1 = ['Surface 01: Front_Planes', comboMaterialType]\ndataStoreRow2 = ['Surface 02: Front_Edges', comboMaterialType]\n\ngridOption1 = forms.GridView()\ngridOption1.ShowHeader = False\ngridOption1.DataStore = (dataStoreRow1, dataStoreRow2)\ngridOption1.Columns.Add(forms.GridColumn(Editable = False, DataCell = forms.TextBoxCell(0)))\ngridOption1.Columns.Add(forms.GridColumn(Editable = True, DataCell = forms.ComboBoxCell(1)))\n\nlayout = forms.DynamicLayout(DefaultSpacing = drawing.Size(5, 5), Padding = drawing.Padding(10))\nlayout.AddRow(gridOption1)\n\nform.Content = layout\nform.ShowModal()\n\n\n\nThe combobox is there but shows empty. You don’t see it immediately because the content is not shown.\n\nWhen you click the combobox the first time (just behind the text), you have to click it a second time to see it’s a dropdown and a third time to actually see the dropdown list, which still shows empty:\n\n\neto_empty_combobox\n233×199 2.63 KB\n\n\nWhat am I doing wrong?\n\n\nPS: it’s a pity the documentation about Eto is so fragmented and in different languages. As I am not aquainted with C++ or C#, I can’t understand the code or translate it to Python …",
+  "code_blocks": [
+    {
+      "code": "import Rhino.UI\nimport rhinoscriptsyntax as rs\nimport Eto.Forms as forms\nimport Eto.Drawing as drawing\n\n\nclass EtoGridView(forms.Dialog[bool]):\n\n\t# Initialize\n\tdef __init__(self):\n\t\t\n\t\t# Default dialogue box\n\t\tself.Title = \"Gridview Test\"\n\t\tself.Padding = drawing.Padding(10)\n\t\tself.Resizable = True\n\t\t\n\t\t #Create Gridview\n\t\tself.m_gridview = forms.GridView()\n\t\tself.m_gridview.ShowHeader = True\n\t\tself.m_gridview.DataStore = (['Row 1', 'Option 1'],['Row 2','Option 2'], ['Row 3','Option 3'])\n\t\tself.m_gridview.Width = 300\n\n\t\tcolumn1 = forms.GridColumn()\n\t\tcolumn1.HeaderText = 'Column 1'\n\t\tcolumn1.Editable = False\n\t\tcolumn1.DataCell = forms.TextBoxCell(0)\n\t\tself.m_gridview.Columns.Add(column1)\n\n\t\tcolumn2 = forms.GridColumn()\n\t\tcolumn2.HeaderText = 'Column 2'\n\t\tcolumn2.Editable = True\n\t\tcolumn2.DataCell = forms.ComboBoxCell(1)\n\t\tcolumn2.DataCell.DataStore = ['Option 1', 'Option 2', 'Option 3', 'Option 4']\n\t\tself.m_gridview.Columns.Add(column2)\n\n\n\t\t# Button OK\n\t\tself.DefaultButton = forms.Button(Text = \"OK\")\n\t\tself.DefaultButton.Click += self.OnOKButtonClick\n\n\n\t\t# Create the layout of the form\n\t\tlayout = forms.DynamicLayout()\n\t\tlayout.Spacing = drawing.Size(5,5)\n\t\tlayout.AddRow(self.m_gridview)\n\t\tlayout.AddRow(self.DefaultButton)\n\t\tself.Content = layout\n\n\t# OK Button Handler\n\tdef OnOKButtonClick(self, sender, e):\n\t\tself.Close(False)\n\n\n# Main script\nif __name__ == \"__main__\":\n\tdialog = EtoGridView()\n\trc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)",
+      "language": "python",
+      "author": "etiennekasteel",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 29,
+  "views": 3078
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/when-split-brep-fails-what-to-use-to-split-and-untrimmed-surface/149230",
+  "topic_id": 149230,
+  "title": "When split brep fails, what to use to split and Untrimmed Surface?",
+  "question": "So I’m trying to split an untrimmed surface with a plane, I created a Plane Srf and use it on the Split Brep. Sometimes this fails and the surfaces doesn’t split which kills everything else down the line.\n\n\nIs there anything more stable to Split/Trim a surface with a plane?\n\n\nI tried in python but didn’t had much luck\n\n\nRhino.Geometry.Brep.Split(B,C,0.001)\n\n\n\nSplit fails, returns nothing.\n\n\nRhino.Geometry.Surface.Split(\n\n\n\nNeeds a parameter as a float, but I can’t find any information about parameters and how to get it.\n\n\nRhino.Geometry.BrepFace.Split(\n\n\nwhich uses a curve to trim, but I can’t convert a surface into a brepface\n\n\nRhino.Geometry.Surface.Trim(\n\n\nHow do I get the U V intervals of the plane, and will it work if the plane is not in the direction of the U V of the surface?\n\n\nAny help would be great.\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\nbrp = rg.Surface.ToBrep(srf)\nbrpf = brp.Faces[0]\ncrv = rg.Intersect.Intersection.BrepPlane(brp,pl,0.001)[1][0]\nsbrp = rg.BrepFace.Split(brpf, [crv],0.001)\na = [i for i in sbrp.Faces]",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 592
+}

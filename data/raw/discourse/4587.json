@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/approximating-to-a-grid/4587",
+  "topic_id": 4587,
+  "title": "Approximating to a grid",
+  "question": "Hi, this is my fist post here, and I’m a newcomer to rhino too.\n\n\nI hope someone can help me out.  I’ve got a model of some terrain made up of various surfaces and I want to use this to populate a list representing an x,y grid with height values, I’m using python to script this.\n\n\nAs I see it, the way to achieve this would be to set up a couple of a nested for loops to draw out a regular field of vertical lines and record the intersection point of each line.\n\n\nDoes this seem like a sensible way to do things?  If so, what function do I need to use to check the intersection?\n\n\nI hope I’ve made sense, let me know if you need me to go into any more details.  Thanks.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n'''populate your surfaces, polysurfaces and extrusions with projected regular grid of points, and assign it's elevation as annotation text dot'''\n\ndef surfacePointHeight(ptsInU,ptsInV):\n    if ptsInU and ptsInV:\n        # selecting, creating a top surface of a boundingbox\n        select = rs.Command(\"_SelSrf \")\n        select = rs.Command(\"_SelPolysrf \")\n        select = rs.Command(\"_SelExtrusion \")\n        allSrfPlsrf = rs.GetObjects(\"\",0,False,True,False)\n        if allSrfPlsrf:\n            rs.EnableRedraw(False)\n            boxPts = rs.BoundingBox(allSrfPlsrf)\n            rectanglePts = boxPts[-4:]\n            rectanglePts.append(boxPts[-4])\n            rectangle = rs.AddPolyline(rectanglePts)\n            srf = rs.AddPlanarSrf(rectangle)\n            rs.DeleteObject(rectangle)\n            centroid = rs.SurfaceAreaCentroid(srf)\n            srfScaled = rs.ScaleObject(srf,centroid[0],[0.95,0.95,0.95])\n\n            # generating points on top surface\n            domainU = rs.SurfaceDomain(srfScaled, 0)\n            domainV = rs.SurfaceDomain(srfScaled, 1)\n            uRange = domainU[1]-domainU[0]\n            vRange = domainV[1]-domainV[0]\n            stepU = uRange/(ptsInU - 1)\n            stepV = vRange/(ptsInV - 1)\n            startDomainU = domainU[0]\n            startDomainV = domainV[0]\n            uvList = []\n            for i in range(ptsInU):\n                u =  startDomainU + i*stepU\n                for j in range(ptsInV):\n                    v = startDomainV + j*stepV\n                    uvList.append([u,v])\n            ptsHorz = []\n            for uv in uvList:\n                pt = rs.EvaluateSurface(srfScaled, uv[0], uv[1])\n                pt_id = rs.AddPoint(pt)\n                ptsHorz.append(pt_id)\n            rs.DeleteObject(srfScaled)\n\n            # projecting points to lower srfs,polysrfs and extrusions\n            ptsProj = rs.ProjectPointToSurface(ptsHorz, allSrfPlsrf, [0,0,-1])\n            rs.DeleteObjects(ptsHorz)\n            for ptProj in ptsProj:\n                text = ptProj[2]\n                text = \"%1.0f\" % text\n                ptZ = rs.AddTextDot(text,ptProj)\n                pt_id = rs.AddPoint(ptProj)\n                rs.AddLayer(\"TextDot\")\n                rs.ObjectLayer(ptZ,\"TextDot\")\n                rs.AddLayer(\"Point_Z\",[0,120,255])\n                rs.ObjectLayer(pt_id,\"Point_Z\")\n                rs.Redraw()\n\n        else:\n            print \"Something went wrong. You probably do not have any surfaces, polysurfaces or extrusions\"\n            return\n    else:\n        print \"You did not enter the number of points in X and/or Y direction\"\n        return\n\n\n# function input\nx = rs.GetInteger(\"How many points in X direction do you want\")\ny = rs.GetInteger(\"How many points in Y direction do you want?\")\n\n# function call\nsurfacePointHeight(x,y)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\nobjs = rs.ObjectsByType(8)\nheightarray=[[0 for j in range(600)] for i in range(800)]\n\nrs.EnableRedraw(False)\n\nfor x in range(0,800000,1000):\n  for y in range(0,600000,1000): \n    currentheight=0;\n    for currentobject in objs:\n      spotheight = rs.ProjectPointToSurface([-x,y,13000],currentobject,(0,0,-1))\n      if(spotheight):\n        if(spotheight[0][2]>currentheight):\n          currentheight=spotheight[0][2]\n    print x,y,int(currentheight)\n    heightarray[int(x/1000)][int(y/1000)]=int(currentheight)\n\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Mekon",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "# export point coordinates\n            filename = rs.SaveFileName(\"Save csv file\",\"*.csv||\", None, \"projectedPoints\", \"csv\")\n            file = open(filename, 'w')\n            headerline = \"X,Y,Z\\n\"\n            file.write(headerline)\n            for ptProj in ptsProj:\n                x = ptProj[0]\n                y = ptProj[1]\n                z = ptProj[2]\n                line = \"%.4f,%.4f,%.4f \\n\" %(x,y,z)\n                file.write(line)\n            file.close()",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 2559
+}

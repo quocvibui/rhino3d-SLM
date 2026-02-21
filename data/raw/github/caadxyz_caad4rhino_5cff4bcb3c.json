@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caadxyz/caad4rhino/blob/d3df5a030b2bd0ab58954fb341f04a4e814835d9/dev/frame_cmd.py",
+  "repo": "caadxyz/caad4rhino",
+  "repo_stars": 22,
+  "repo_description": " Caad4Rhino is a python package whose purpose is to provide computer aided architectural design tools in rhino 3d software",
+  "license": "LGPL-3.0",
+  "filepath": "dev/frame_cmd.py",
+  "instruction": "Copyright\ncreate on 2020.03.28\n@author mahaidong",
+  "code": "#coding=utf-8\n'''\nCopyright\ncreate on 2020.03.28\n@author mahaidong\n\ndescription:\n'''\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport caad.utility as util\nimport caad.Dimension as Dim\nimport caad.config as config\nimport System.Drawing\n\ndef GetPointDynamicDrawFunc( sender, args ):\n  (width, height) = Dim.GetFrameSize( config.FRAMESIZE )\n  points= []\n  points.append( args.CurrentPoint )\n  points.append( args.CurrentPoint + Rhino.Geometry.Point3d( width*config.DRAWINGSCALE,0,0) )\n  points.append( args.CurrentPoint + Rhino.Geometry.Point3d( width*config.DRAWINGSCALE,height*config.DRAWINGSCALE,0) )\n  points.append( args.CurrentPoint + Rhino.Geometry.Point3d( 0,height*config.DRAWINGSCALE,0) )\n  points.append( args.CurrentPoint )\n  args.Display.DrawPolyline( points, System.Drawing.Color.Cyan )\n\n__commandname__ = \"Frame\"\ndef RunCommand( is_interactive ):\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt( \"get a point as a locaiton and setting frame size, scale 1:\"+str( config.DRAWINGSCALE) )\n    sizeValues = \"A5\", \"A4\", \"A3\",\"A2\",\"A1\",\"A0\"\n    sizeValue = config.FRAMESIZE\n    sizeIndex = sizeValues.index(sizeValue)\n    opList = gp.AddOptionList(\"FrameSize\", sizeValues, sizeIndex)\n\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    while True:\n        get_rc = gp.Get()\n        if gp.CommandResult()!=Rhino.Commands.Result.Success:\n            return gp.CommandResult()\n\n        if get_rc==Rhino.Input.GetResult.Point:\n            point = gp.Point()\n            if not rs.IsLayer(\"Dim\"): \n                util.initCaadLayer(\"Dim\")\n            oldLayer = rs.CurrentLayer(\"Dim\")\n            Dim.DrawFrameBySize( sizeValue, point ,config.FRAMERIGHTMARGIN, config.FRAMELEFTMARGIN )\n            rs.CurrentLayer(oldLayer)\n\n        elif get_rc==Rhino.Input.GetResult.Option:\n            if gp.OptionIndex() == opList:\n                sizeIndex = gp.Option().CurrentListOptionIndex\n                sizeValue = sizeValues[sizeIndex]\n                config.FRAMESIZE = sizeValue\n            continue\n        break\n    return Rhino.Commands.Result.Success\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

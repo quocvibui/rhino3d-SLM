@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/PH-Tools/honeybee_REVIVE_grasshopper/blob/c991bcb8f39e68544e9627b8531e82e562d799c4/honeybee_revive_grasshopper/src/HB-REVIVE%20-%20Load%20REVIVE%20CO2-Measures%20from%20Standards%20Library.py",
+  "repo": "PH-Tools/honeybee_REVIVE_grasshopper",
+  "repo_stars": 0,
+  "repo_description": "Grasshopper Components for Modeling Phius REVIVE",
+  "license": "GPL-3.0",
+  "filepath": "honeybee_revive_grasshopper/src/HB-REVIVE - Load REVIVE CO2-Measures from Standards Library.py",
+  "instruction": "Load a CO2-Reduction-Measure from the Honeybee-REVIVE Standards Library.\n-\nEM OCtober 1, 2024\n    Args:\n        _measuere_names: (list[str]) The name or names of the Measures to search the \n         ...",
+  "code": "#\n# Honeybee-REVIVE: A Plugin for calculating Phius REVIVE using LadybugTools Honeybee-Energy Models\n# \n# This component is part of the PH-Tools toolkit <https://github.com/PH-Tools>.\n# \n# Copyright (c) 2024, PH-Tools and bldgtyp, llc <phtools@bldgtyp.com> \n# Honeybee-REVIVE is free software; you can redistribute it and/or modify \n# it under the terms of the GNU General Public License as published \n# by the Free Software Foundation; either version 3 of the License, \n# or (at your option) any later version. \n# \n# Honeybee-REVIVE is distributed in the hope that it will be useful,\n# but WITHOUT ANY WARRANTY; without even the implied warranty of \n# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the \n# GNU General Public License for more details.\n# \n# For a copy of the GNU General Public License\n# see <https://github.com/PH-Tools/honeybee_revive/blob/main/LICENSE>.\n# \n# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>\n#\n\"\"\"\nLoad a CO2-Reduction-Measure from the Honeybee-REVIVE Standards Library.\n-\nEM OCtober 1, 2024\n    Args:\n        _measuere_names: (list[str]) The name or names of the Measures to search the \n            Standards library for.\n\n    Returns:\n        measures_: (list[CO2ReductionMeasure]) The Measures, if found.\n\"\"\"\n\nimport scriptcontext as sc\nimport Rhino as rh\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\nimport Grasshopper as gh\n\ntry:\n    from ph_gh_component_io import gh_io\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import ph_gh_component_io:\\n\\t{}'.format(e))\n\ntry:\n    from honeybee_revive_rhino import gh_compo_io\nexcept ImportError as e:\n    raise ImportError('\\nFailed to import honeybee_revive_rhino:\\n\\t{}'.format(e))\n\n\n# ------------------------------------------------------------------------------\nimport honeybee_revive_rhino._component_info_\nreload(honeybee_revive_rhino._component_info_)\n\nghenv.Component.Name = \"HB-REVIVE - Load REVIVE CO2-Measures from Standards Library\"\nDEV = honeybee_revive_rhino._component_info_.set_component_params(ghenv, dev=False)\nif DEV:\n    from honeybee_revive_rhino.gh_compo_io.standards import load_CO2_measure_from_standards as gh_compo_io\n    reload(gh_compo_io)\n\n# ------------------------------------------------------------------------------\n# -- GH Interface\nIGH = gh_io.IGH( ghdoc, ghenv, sc, rh, rs, ghc, gh )\n\n# ------------------------------------------------------------------------------\ngh_compo_interface = gh_compo_io.GHCompo_LoadCO2ReductionMeasure(\n        IGH,\n        _measure_names,\n)\nmeasures_ = gh_compo_interface.run()\nfor m in measures_:\n    print(m)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

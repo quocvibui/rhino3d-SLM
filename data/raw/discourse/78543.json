@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getpoint-result-on-option-change/78543",
+  "topic_id": 78543,
+  "title": "GetPoint result on option change",
+  "question": "I’m playing around with the script posted in the forum \nhere\n and I am trying to add a command line option.\n\n\nWhen running the script, changing an option triggers the GetPoint event, even though I don’t select a point with a mouse click. Also, the resulting point is always this:\n\n\n-1.23432101234321E+308,-1.23432101234321E+308,-1.23432101234321E+308\n\n\nIs there a way to prevent this from happening? Maybe I have something out of order.\n\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n\ndef DoSomething():\n    radius = 5\n    optionRad = Rhino.Input.Custom.OptionDouble(radius, True, 0.5)\n\n    mesh_id = rs.GetObject(\"Select mesh\", 32, True, False)\n    if not mesh_id: return\n    \n    mesh = rs.coercemesh(mesh_id, True)\n    plane = Rhino.Geometry.Plane.WorldXY\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    radius = 4.0\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.Constrain(mesh, False)\n    gp.Tag = None\n    gp.SetCommandPrompt(\"Point on mesh\")\n    gp.AddOptionDouble(\"Radius\", optionRad)\n\n    radius = optionRad.CurrentValue\n\n    def GetPointDynamicDrawFunc(sender, args):\n        plane.Origin = args.CurrentPoint\n        circle = Rhino.Geometry.Circle(plane, radius)\n        curve = circle.ToNurbsCurve()\n        rc = Rhino.Geometry.Curve.ProjectToMesh(curve, mesh, plane.ZAxis, tolerance)\n        if rc.Count != 0:\n            args.Display.DrawCurve(rc[0], Color.Red, 3)\n            sender.Tag = rc[0]\n\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    getres = gp.Get()\n    if gp.CommandResult() != Rhino.Commands.Result.Success: \n        return None\n\n    if gp.Tag:\n        crv_id = scriptcontext.doc.Objects.AddCurve(gp.Tag)\n        rs.SelectObject(crv_id)\n\n    gp.Dispose()\n\nif __name__==\"__main__\":\n    DoSomething()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef Test():\n    toggle_val = False\n    toggle_opt = Rhino.Input.Custom.OptionToggle(toggle_val, \"False\", \"True\")\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Pick a point\")\n\n    while True:\n        gp.ClearCommandOptions()\n        gp.AddOptionToggle(\"Add\", toggle_opt)\n        res = gp.Get()\n        if res == Rhino.Input.GetResult.Option:\n            toggle_val = toggle_opt.CurrentValue\n            continue\n        if res != Rhino.Input.GetResult.Point:\n            return\n        break\n    \n    if toggle_val:\n        sc.doc.Objects.AddPoint(gp.Point())\n        sc.doc.Views.Redraw()\n        \nTest()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n\ndef DoSomething():\n    radius = 5\n    optionRad = Rhino.Input.Custom.OptionDouble(radius, True, 0.5)\n\n    mesh_id = rs.GetObject(\"Select mesh\", 32, True, False)\n    if not mesh_id: return\n    \n    mesh = rs.coercemesh(mesh_id, True)\n    plane = Rhino.Geometry.Plane.WorldXY\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    radius = 4.0\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.Constrain(mesh, False)\n    gp.Tag = None\n    gp.SetCommandPrompt(\"Point on mesh\")\n    gp.AddOptionDouble(\"Radius\", optionRad)\n\n    radius = optionRad.CurrentValue\n\n    def GetPointDynamicDrawFunc(sender, args):\n        plane.Origin = args.CurrentPoint\n        circle = Rhino.Geometry.Circle(plane, radius)\n        curve = circle.ToNurbsCurve()\n        rc = Rhino.Geometry.Curve.ProjectToMesh(curve, mesh, plane.ZAxis, tolerance)\n        if rc.Count != 0:\n            args.Display.DrawCurve(rc[0], Color.Red, 3)\n            sender.Tag = rc[0]\n\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    getres = gp.Get()\n    if gp.CommandResult() != Rhino.Commands.Result.Success: \n        return None\n\n    if gp.Tag:\n        crv_id = scriptcontext.doc.Objects.AddCurve(gp.Tag)\n        rs.SelectObject(crv_id)\n\n    gp.Dispose()\n\nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "kyle_faulkner",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 626
+}

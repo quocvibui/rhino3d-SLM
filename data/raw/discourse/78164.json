@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rest-block-transformations/78164",
+  "topic_id": 78164,
+  "title": "Rest Block Transformations?",
+  "question": "Hi everyone,\n\n\nI am currently looking for a way to reset block transformations, it would come in real handy.\n\n\nI found this thread by some scripts uploaded but the link seems broken.\n\n\nReset (or change) block instances transformations (scale, rotation)\n’\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\ndef RunCommand( is_interactive ):\n    if sc.escape_test(False):\n        print \"script cancelled\" #do something\n    print \"Resetting...\"\n    objectIds = rs.GetObjects(\"Pick some blocks\", 4096, preselect=True)\n    if not objectIds:\n        print \"No objects\"\n        return False\n    rs.EnableRedraw(False)\n    for id in objectIds:\n        blockXForm = rs.BlockInstanceXform(id)\n        inverseBlockXForm = blockXForm.TryGetInverse()[1]\n        rs.TransformObject(id, inverseBlockXForm)\n    rs.SelectObjects(objectIds)\n    rs.EnableRedraw(True)\n    print \"...aaand its done.\"\n    return 0\nRunCommand(True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nids = rs.GetObjects(filter=4096, preselect=True)\n\nif ids:\n    for id in ids: \n        rs.InsertBlock(rs.BlockInstanceName(id), [0,0,0])\n        rs.DeleteObject(id)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nids = rs.GetObjects(filter=4096, preselect=True)\n\nif ids:\n    for id in ids: \n        rs.InsertBlock(rs.BlockInstanceName(id), rs.BlockInstanceInsertPoint(id))\n        rs.DeleteObject(id)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 9,
+  "views": 2894
+}

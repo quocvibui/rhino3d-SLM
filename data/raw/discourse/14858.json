@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multiple-object-selection-w-options/14858",
+  "topic_id": 14858,
+  "title": "Multiple Object Selection w/ Options",
+  "question": "Hello,\n\n\nI am trying to enable multiple objects to be selected w/ command line options & as soon as the command line options change, the selection switched to one object from multiple, code below:\n\n\n\nimport Rhino\nimport scriptcontext\n\ndef CommandLineOptions():\n    # For this example we will use a GetPoint class, but all of the custom\n    # \"Get\" classes support command line options.\n    gp = Rhino.Input.Custom.GetObject()\n    gp.SetCommandPrompt(\"Get Points & curves\")\n    \n    gFilter = Rhino.DocObjects.ObjectType.Point \n    gFilter |= Rhino.DocObjects.ObjectType.Curve\n    gp.GeometryFilter = gFilter\n    \n    \n\n    # set up the options\n    intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n    dblOption = Rhino.Input.Custom.OptionDouble(2.2, 0, 99.9)\n    boolOption = Rhino.Input.Custom.OptionToggle(True, \"Off\", \"On\")\n    listValues = \"Item0\", \"Item1\", \"Item2\", \"Item3\", \"Item4\"\n\n    gp.AddOptionInteger(\"Integer\", intOption)\n    gp.AddOptionDouble(\"Double\", dblOption)\n    gp.AddOptionToggle(\"Boolean\", boolOption)\n    listIndex = 3\n    opList = gp.AddOptionList(\"List\", listValues, listIndex)\n    \n    gp.GetMultiple(1, 0)\n    \n    while True:\n        # perform the get operation. This will prompt the user to\n        # input a point, but also allow for command line options\n        # defined above\n        \n        get_rc = gp.Get()\n        ids = [gp.Object(i).ObjectId for i in range(gp.ObjectCount)]\n        if gp.CommandResult()!=Rhino.Commands.Result.Success:\n            return gp.CommandResult()\n        #if len(ids)>0:\n        if get_rc!=Rhino.Input.GetResult.Point:\n            #point = gp.Point()\n            #scriptcontext.doc.Objects.AddPoint(point)\n            #scriptcontext.doc.Views.Redraw()\n            print \"Command line option values are\"\n            print \" Integer =\", intOption.CurrentValue\n            print \" Double =\", dblOption.CurrentValue\n            print \" Boolean =\", boolOption.CurrentValue\n            print \" List =\", listValues[listIndex]\n        ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef CommandLineOptions():\n    # For this example we will use a GetPoint class, but all of the custom\n    # \"Get\" classes support command line options.\n    gp = Rhino.Input.Custom.GetObject()\n    gp.SetCommandPrompt(\"Get Points & curves\")\n    \n    gFilter = Rhino.DocObjects.ObjectType.Point \n    gFilter |= Rhino.DocObjects.ObjectType.Curve\n    gp.GeometryFilter = gFilter\n    \n    \n\n    # set up the options\n    intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n    dblOption = Rhino.Input.Custom.OptionDouble(2.2, 0, 99.9)\n    boolOption = Rhino.Input.Custom.OptionToggle(True, \"Off\", \"On\")\n    listValues = \"Item0\", \"Item1\", \"Item2\", \"Item3\", \"Item4\"\n\n    gp.AddOptionInteger(\"Integer\", intOption)\n    gp.AddOptionDouble(\"Double\", dblOption)\n    gp.AddOptionToggle(\"Boolean\", boolOption)\n    listIndex = 3\n    opList = gp.AddOptionList(\"List\", listValues, listIndex)\n    \n    gp.GetMultiple(1, 0)\n    \n    while True:\n        # perform the get operation. This will prompt the user to\n        # input a point, but also allow for command line options\n        # defined above\n        \n        get_rc = gp.Get()\n        ids = [gp.Object(i).ObjectId for i in range(gp.ObjectCount)]\n        if gp.CommandResult()!=Rhino.Commands.Result.Success:\n            return gp.CommandResult()\n        #if len(ids)>0:\n        if get_rc!=Rhino.Input.GetResult.Point:\n            #point = gp.Point()\n            #scriptcontext.doc.Objects.AddPoint(point)\n            #scriptcontext.doc.Views.Redraw()\n            print \"Command line option values are\"\n            print \" Integer =\", intOption.CurrentValue\n            print \" Double =\", dblOption.CurrentValue\n            print \" Boolean =\", boolOption.CurrentValue\n            print \" List =\", listValues[listIndex]\n        elif get_rc==Rhino.Input.GetResult.Option:\n            #if gp.OptionIndex()==opList:\n                #listIndex = gp.Option().CurrentListOptionIndex\n            \n            continue\n        break\n    \n    return Rhino.Commands.Result.Success\n\n\nif __name__ == \"__main__\":\n    CommandLineOptions()",
+      "language": "python",
+      "author": "bradrothenberg",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 2509
+}

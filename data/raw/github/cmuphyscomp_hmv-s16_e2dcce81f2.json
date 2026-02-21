@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/cmuphyscomp/hmv-s16/blob/7863c66ed645b463b72aef98a5c484a18cc9f396/Grasshopper/MocapDemo/PlaneRecord.py",
+  "repo": "cmuphyscomp/hmv-s16",
+  "repo_stars": 5,
+  "repo_description": "Course resources for the Human-Machine Virtuosity course at Carnegie Mellon University, Spring 2016.",
+  "license": "BSD-3-Clause",
+  "filepath": "Grasshopper/MocapDemo/PlaneRecord.py",
+  "instruction": "Plane record",
+  "code": "﻿# PlaneRecord.py - the plane data recording script in the ghpython object in MocapDemo.gh.\n#\n# inputs\n#  inputs   - list of Plane objects\n#  capture  - None or integer sample time offset indicating which recent object should be added to the set\n#  clear    - Boolean indicating the the data set should be erased\n#  N.B. the 'inputs' input must be set to 'List Access'\r\n#  N.B. the 'capture' input should have a type hint of Int\r\n\n# other ideas:\n#   path       - string with the full path to the CSV file\n#   selection  - currently selected set\n\n# outputs\n#   out      - debugging text stream\n#   planes   - list of Plane objects\n\n# use RhinoCommon API\nimport Rhino\n\n# use persistent state context\nimport scriptcontext\n\r\n# use the history utility class\r\nimport historybuffer\r\n\n################################################################\nclass PlaneRecorder(object):\n    def __init__(self):\r\n        # list of selected objects\n        self.planes = []\r\n \r\n        # keep track of about a quarter-second of mocap data\r\n        self.buffer = historybuffer.History(30)\n        return\n\r\n    def add_planes(self, planes):\r\n        if planes is not None:\n            self.buffer.append(planes)\n        return\r\n    \r\n    def capture_plane(self, offset):\r\n        self.planes.append(self.buffer[offset])\r\n        return\n\n################################################################\nif clear:\n    # create an empty data recorder\n    recorder = PlaneRecorder()\n    scriptcontext.sticky['plane_recorder'] = recorder\n\nelse:\n    # fetch or create a persistent data recorder\n    recorder = scriptcontext.sticky.get('plane_recorder')\n    if recorder is None:\n        recorder = PlaneRecorder()\n        scriptcontext.sticky['plane_recorder'] = recorder\n    recorder.add_planes(inputs)\r\n\nif capture is not None:\r\n    # The capture index is non-positive: zero means 'now', negative means a recent sample.  So the value is\r\n    # biased by -1 to be an index relative to the end of the recorded poses.\r\n    recorder.capture_plane(capture-1)\r\n \nplanes = recorder.planes\nprint \"Buffer has seen %d planes, currently holding %d selected planes.\" % (recorder.buffer.samples, len(planes))\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

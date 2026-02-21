@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/find-point-in-a-particular-distance/85869",
+  "topic_id": 85869,
+  "title": "Find point in a particular distance",
+  "question": "Hi,\n\nGreetings!\n\nI have a problem, I need to find a point in a particular distance\n\n\nexample:\n\nconsider a curve which has points on it\n\n\n\n\nConsider this point on the curve, lets call A\n\n\n\n\nSuppose if i need to find all the points which are at a distance of 8mm to 11 mm, but \nalong the curve\n like this\n\n\n\n\nbut though the point D satisfy the condition, I dont want to be my output,\n\nMy expected output would be a list [B,C]\n\n\n\n\nThis article would help to find length of points along curve: \nGet distance between 2 points on line\n\n\nMy input would be list of guids of all point and guid of point A, expected output to be guid of Point B and Point C\n\n\nRequesting help from all on the forum\n\n\nThanks in advance.\n\n\nPlease find the attachment\n\n\ncurve_with_equidistant_pts.stp\n (21.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\ndef disOnCrv(crv, pt1, pt2):\n    a = rs.CurveClosestPoint(crv, pt1)\n    b = rs.CurveClosestPoint(crv, pt2)\n    if a > b:\n        a , b = b , a\n    distance = rg.Curve.GetLength(rs.coercecurve(crv), rg.Interval(a, b))\n    return min(distance, rs.CurveLength(crv) - distance)\n\ncrv = rs.GetCurveObject(\"Curve\")[0]\npts = rs.GetObjects(\"All Points\", rs.filter.point)\nptA = rs.GetObject(\"Point A\", rs.filter.point)\nminimum = rs.GetReal(\"minimum\")\nmaximum = rs.GetReal(\"maximum\")\nindexes = []\nfor i in range(len(pts)):\n    d = disOnCrv(crv, ptA, pts[i])\n    if d >= minimum and d <= maximum:\n        indexes.append(i)\nprint indexes\nrs.SelectObjects(pts[min(indexes): max(indexes)])",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\ndef disOnCrv(crv, pt1, pt2):\n    a = rs.CurveClosestPoint(crv, pt1)\n    b = rs.CurveClosestPoint(crv, pt2)\n    if a > b:\n        a , b = b , a\n    distance = rg.Curve.GetLength(rs.coercecurve(crv), rg.Interval(a, b))\n    return distance\n\ncrv = rs.GetCurveObject(\"Curve\")[0]\npts = rs.GetObjects(\"All Points\", rs.filter.point)\nptA = rs.GetObject(\"Point A\", rs.filter.point)\nminimum = rs.GetReal(\"minimum\")\nmaximum = rs.GetReal(\"maximum\")\nindexes = []\nfor i in range(len(pts)):\n    d = disOnCrv(crv, ptA, pts[i])\n    if minimum <= d <= maximum:\n        indexes.append(i)\nprint indexes\nrs.SelectObjects(pts[min(indexes): max(indexes)])",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef findPointsOnCurveByDistance():\n    \n    # set distance\n    dMinDistance = 8\n    dMaxDistance = 11\n    \n    # get tolerance from document\n    dTol = sc.doc.ModelAbsoluteTolerance\n    \n    # empty list to hold points that match distance\n    arrPtsFound = []\n    \n    # get point\n    rc, objRef = Rhino.Input.RhinoGet.GetOneObject(\"Pick start point on curve\", False, Rhino.DocObjects.ObjectType.Point)\n    if rc != Rhino.Commands.Result.Success: return rc\n    \n    ptPicked = objRef.Point().Location\n    \n    # get curve\n    rc, objRef = Rhino.Input.RhinoGet.GetOneObject(\"Pick curve\", False, Rhino.DocObjects.ObjectType.Curve)\n    if rc != Rhino.Commands.Result.Success: return rc\n    \n    crvPicked = objRef.Curve()\n    \n    # duplicate curve, as we might move its seam\n    crv = crvPicked.DuplicateCurve()\n    \n    # test if closed\n    if crv.IsClosed:\n        # test if ptPicked is too close to the curve seam\n        if ptPicked.DistanceTo(crv.PointAtStart) <= dMaxDistance:\n            # change the seam, as this curve is just a copy, this is safe to do\n            crv.ChangeClosedCurveSeam(crv.Domain.Mid)\n            \n    # get all points\n    rc, arrObjRefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Pick all points\", False, Rhino.DocObjects.ObjectType.Point)\n    if rc != Rhino.Commands.Result.Success:\n        return rc\n        \n    arrPtPicked = [obj.Point().Location for obj in arrObjRefs]\n    \n    \n    # determine length parameter of ptPicked along the curve\n    bSuccess, dPickedParam = crv.ClosestPoint(ptPicked, dTol)\n    if not bSuccess:\n        print \"ERROR: Picked point was not on the picked curve!\"\n        return Rhino.Commands.Result.Failure\n    dPickedLength = crv.GetLength(Rhino.Geometry.Interval(crv.Domain.Min, dPickedParam))\n    \n    # iterate over all points\n    for pt in arrPtPicked:\n        # skip the picked point\n        if pt.EpsilonEquals(ptPicked, dTol): continue\n        \n        # determine length parameter of pt along the curve\n        _, dParam = crv.ClosestPoint(pt, dTol)\n        dLength = crv.GetLength(Rhino.Geometry.Interval(crv.Domain.Min, dParam))\n        \n        # check if dLength is close to dPickedLength\n        dDistanceToPicked = abs(dPickedLength - dLength)\n        if dMinDistance <= dDistanceToPicked <= dMaxDistance:\n            arrPtsFound.append(pt)\n       \n    # add found points to doc\n    for pt in arrPtsFound:\n        sc.doc.Objects.AddPoint(pt)\n        \n    # redraw the views\n    sc.doc.Views.Redraw()\n    \n    \nif __name__ == \"__main__\":\n    findPointsOnCurveByDistance()",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 864
+}

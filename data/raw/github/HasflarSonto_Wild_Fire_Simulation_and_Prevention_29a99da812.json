@@ -1,0 +1,19 @@
+{
+  "source_url": "https://github.com/HasflarSonto/Wild_Fire_Simulation_and_Prevention/blob/4408ce1c860a8f7823953dc12ea05d197e2db8bf/CentralSimulationModule/CombinedParser.py",
+  "repo": "HasflarSonto/Wild_Fire_Simulation_and_Prevention",
+  "repo_stars": 1,
+  "repo_description": "Parametric algorithm which simulates how wild fires grow and then suggests infrastructural improvements to combat fire",
+  "license": "unknown",
+  "filepath": "CentralSimulationModule/CombinedParser.py",
+  "instruction": "Combined parser",
+  "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport clr\nclr.AddReference(\"Grasshopper\")\nclr.AddReference(\"RhinoCommon\")\nfrom Grasshopper import DataTree\nfrom Grasshopper.Kernel.Data import GH_Path\nfrom Rhino.Geometry import Point3d\n\ndef scale_to_fit(points, max_size=100):\n    \"\"\"Scales all points proportionally while keeping them aligned, including elevation.\"\"\"\n    min_x = min(p[0] for p in points)\n    max_x = max(p[0] for p in points)\n    min_y = min(p[1] for p in points)\n    max_y = max(p[1] for p in points)\n    min_z = min(p[2] for p in points)\n    max_z = max(p[2] for p in points)\n    \n    range_x = max_x - min_x\n    range_y = max_y - min_y\n    range_z = max_z - min_z\n    scale_factor = max_size / max(range_x, range_y, range_z)\n\n    scaled_points = [\n        ((p[0] - min_x) * scale_factor, (p[1] - min_y) * scale_factor, (p[2] - min_z) * scale_factor)\n        for p in points\n    ]\n    return scaled_points\n\n# Example lists of strings for topography and fuel model data\ntopo_data = [\n    \"X,Y,Elevation\",\n    \"-2010645.0,2765325.0,547.0\",\n    \"-2010615.0,2765325.0,560.0\",\n    \"-2010585.0,2765325.0,32767.0\"  # No-data elevation\n]\n\nfuel_data = [\n    \"X,Y,Fuel_Model,Burn_Probability\",\n    \"-2010645.0,2765325.0,10.0,0.5\",\n    \"-2010615.0,2765325.0,9.0,0.4\",\n    \"-2010585.0,2765325.0,8.0,0.3\"\n]\n\n# Extract valid points\ntopo_data.pop(0)  # Remove header\nfuel_data.pop(0)\n\ntopo_points, fuel_points, burn_probs = [], [], []\nfor topo_line, fuel_line in zip(topo_data, fuel_data):\n    x_t, y_t, elevation = map(float, topo_line.split(\",\"))\n    x_f, y_f, fuel_model, burn_prob = map(float, fuel_line.split(\",\"))\n    \n    # Exclude no-data elevation values\n    if elevation == 32767.0:\n        continue\n    \n    # Ensure coordinates match\n    if (x_t, y_t) == (x_f, y_f):\n        topo_points.append((x_t, y_t, elevation))\n        fuel_points.append((x_f, y_f, fuel_model))\n        burn_probs.append(burn_prob)\n\nif not topo_points:\n    a = \"No valid points found.\"\nelse:\n    # Scale all points together\n    scaled_topo = scale_to_fit(topo_points, max_size=100)\n\n    # Create Rhino points\n    rhino_points = [Point3d(x, y, z) for (x, y, z) in scaled_topo]\n\n    # Assign outputs for Grasshopper\n    a = rhino_points  # Aligned list of scaled points\n    b = burn_probs    # Burn probability values\n\nprint(\"Elevation and Fuel Model Data Processed, No-Data Values Removed, and Scaled Successfully!\")\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "RhinoCommon",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

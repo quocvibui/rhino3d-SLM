@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TheoArchi/EsquisSons/blob/00d1b02f7ce3e190b5c4c3429d3e84756c29bfdb/Components_Uncompiled_for%20ghpython/Built_Environment.py",
+  "repo": "TheoArchi/EsquisSons",
+  "repo_stars": 3,
+  "repo_description": "Esquissons is a grasshopper plugin which help you to design with sound ;)",
+  "license": "NOASSERTION",
+  "filepath": "Components_Uncompiled_for ghpython/Built_Environment.py",
+  "instruction": "EsquisSons Built Environment allows to transform geometries into envirronment for the sonic sketch.\nYou can connect multiple brep to one component, Avoid flat surfaces. \n-\nAAU / Theo Marchal / BETA...",
+  "code": "\n\"\"\"EsquisSons Built Environment allows to transform geometries into envirronment for the sonic sketch.\nYou can connect multiple brep to one component, Avoid flat surfaces. \n-\nAAU / Theo Marchal / BETA VERSION / AVRIL2020\"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, Geo, _Opacity, _AbsCoef):\n        \n        \n        __author__ = \"theomarchal\"\n        self.Params.Input[0].Description = \"Built Environment : Use brep ; You can connect multiple brep, Avoid flat surfaces and meshes ;)\"\n        self.Params.Input[1].Description = \"*optional* Geometry acoustic opacity [Btw 1 and 10]  (if none or 0 default = 4)\"\n        self.Params.Input[2].Description =  \"*optional* Absorption Coefficient of the geometry [Float number btw 0.01 and 0.99] (if none = 0.4)\"\n        self.Params.Output[0].Description = \"Built environment representation\"\n        self.Params.Output[1].Description = \"Built environment as a geometry object\"\n        self.Name = \"Built Environment\"\n        self.NickName = \"Environment\"\n        self.Message = \"EsquisSons V3\"\n        self.Category = \"EsquisSons\"\n        self.SubCategory = \"1/ Scene\"\n        \n        import Grasshopper.Kernel as gh\n        import rhinoscriptsyntax as rs\n        \n        rem = gh.GH_RuntimeMessageLevel.Remark\n        ero = gh.GH_RuntimeMessageLevel.Error\n        war = gh.GH_RuntimeMessageLevel.Warning\n        \n        if Geo is None :\n            self.AddRuntimeMessage(war, 'You must provide a geometry')\n        \n        if rs.IsMesh(Geo):\n            self.AddRuntimeMessage(ero, \"You cannot use meshes here... sorry about that we'll figure it out !\")\n        Preview = Geo\n        if _Opacity <= 0 :\n            _Opacity = 4\n        if _AbsCoef <= 0 :\n            _AbsCoef = 0.4\n        Geo_Obj = [Geo,_Opacity,_AbsCoef]\n        Geometry=[Geo_Obj]\n        print Geometry\n        return (Preview, Geometry)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/texture-issues-on-mesh-far-from-origin/141715",
+  "topic_id": 141715,
+  "title": "Texture issues on mesh \"far\" from origin",
+  "question": "Hi \n@stevebaer\n\nI see some strange texture issues on a mesh that is x592.000 y6.614.700 units from origin:\n\n\nimage\n1447×880 58 KB\n\n\nThere are no objects close to origin so this shouldn’t happen. Is it a bug? The mesh handles just fine at this location. IMO it’s important that Rhino handle this with so many architects and landscape architects as customers. Sometimes we just need to work with real world locations. Could double precision be added to texture handling too?\n\n\nHere the mesh is moved close to origin:\n\n\nimage\n1447×880 56.9 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport Rhino.Geometry.Mesh as mesh\nimport scriptcontext as sc\n\ndef planarMapping(mesh_id):\n    rs.EnableRedraw(False)\n    ### MAKE NEW MESH\n    mesh = rs.coercemesh(mesh_id)\n    newMesh = Rhino.Geometry.Mesh()\n    for vertex in mesh.Vertices:\n        newMesh.Vertices.Add(vertex)\n    for face in mesh.Faces:\n        newMesh.Faces.AddFace(face)\n    \n    ### GET BOUNDING BOX\n    bbox = rs.BoundingBox(mesh)\n    length= bbox[1][0]-bbox[0][0]\n    height = bbox[3][1]-bbox[0][1]\n    \n    ### CALCULATE TEXTURE COORDINATES\n    for vertex in mesh.Vertices:\n        pt = vertex\n        pt.X -= bbox[0][0]\n        pt.X /= length\n        pt.Y -= bbox[0][1]\n        pt.Y /= height\n        newMesh.TextureCoordinates.Add(pt.X,pt.Y)\n    \n    ### FIX MESH\n    newMesh.RebuildNormals()\n    newMesh.Faces.CullDegenerateFaces()\n    newMesh.Vertices.CullUnused()\n    newMesh.Vertices.CombineIdentical(True, True)\n    \n    ### REPLACE MESH\n    newMesh_id = sc.doc.Objects.AddMesh(newMesh) \n    layer = rs.ObjectLayer(mesh_id)\n    rs.ObjectLayer(newMesh_id, layer)\n    materialsource = rs.ObjectMaterialSource(mesh_id)\n    rs.ObjectMaterialSource(newMesh_id, materialsource)\n    material = rs.ObjectMaterialIndex(mesh_id)\n    rs.ObjectMaterialIndex(newMesh_id, material)\n    color = rs.ObjectColor(mesh_id)\n    rs.ObjectColor(newMesh_id, color)\n    \n    ### DELETE OLD MESH\n    rs.DeleteObject(mesh_id)\n    rs.SelectObject(newMesh_id)\n    rs.EnableRedraw(True)\n\nmesh_id = rs.GetObject(\"Select Mesh to planarmap\", rs.filter.mesh, preselect=True)\nif mesh_id:\n    planarMapping(mesh_id)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "bool SetSurfaceParametersAndSurfaceMapping(RhinoDoc doc, Guid objectId, int mappingChannel)\n  {\n    if (doc.Objects.FindId(objectId) is MeshObject rhinoObject)\n    {\n      Mesh newMesh = rhinoObject.MeshGeometry.DuplicateMesh();\n      if (null != newMesh)\n      {\n        // Get the texture mapping and object transform from the given channel\n        TextureMapping mapping = rhinoObject.GetTextureMapping(mappingChannel, out Transform objectTransform);\n        if (null == mapping)\n        {\n          // There is no texture mapping on the given channel, nothing can be done.\n          return false;\n        }\n        else\n        {\n          // Apply textrue mapping to the new mesh - this sets up the texture coordinates\n          newMesh.SetTextureCoordinates(mapping, objectTransform, false);\n          // Set surface parameters from the texture coordinates\n          newMesh.SetSurfaceParametersFromTextureCoordinates();\n\n          //Replace mesh object geometry with the one that has surface parameters set according to the texture mapping\n          if (!doc.Objects.Replace(objectId, newMesh))\n          {\n            // Something wrong\n            return false;\n          }\n\n          // Find the modified mesh object\n          if (doc.Objects.FindId(objectId) is MeshObject modifiedRhinoObject)\n          {\n            if (0 == modifiedRhinoObject.SetTextureMapping(mappingChannel, TextureMapping.CreateSurfaceParameterMapping(), Transform.Identity))\n            {\n              // For some reason the mapping could not be set on the object\n              return false;\n            }\n          }\n          else\n          {\n            // Something wrong\n            return false;\n          }\n        }\n      }\n    }\n    else\n    {\n      // No object found with the given id.\n      return false;\n    }\n    return true;\n  }",
+      "language": "csharp",
+      "author": "Jussi_Aaltonen",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 17,
+  "views": 686
+}

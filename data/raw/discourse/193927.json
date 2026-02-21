@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/run-code-on-plugin-load/193927",
+  "topic_id": 193927,
+  "title": "Run code on plugin load",
+  "question": "Is it possible to have code running globally on a Grasshopper plugin which would trigger when the plugin is active? For example, a static class which subscribes to some events of the rhino document or grasshopper canvas and lives throughout the lifetime of the plugin regardless of any of the components/parameters actually being placed in a Grasshopper document?",
+  "code_blocks": [
+    {
+      "code": "public class Loading : GH_AssemblyPriority\n{\n    public override GH_LoadingInstruction PriorityLoad()\n    {\n        RhinoDoc.AddRhinoObject += RhinoDocOnAddRhinoObject;\n        return GH_LoadingInstruction.Proceed;\n    }\n\n    private static void RhinoDocOnAddRhinoObject(object sender, RhinoObjectEventArgs e)\n    {\n        var objectType = e.TheObject.ObjectType.ToString();\n        RhinoApp.WriteLine(\n            $\"I saw what you're up to! You just added a new {objectType} to the document. Watch out—I’m keeping an eye on you!\");\n    }\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 73
+}

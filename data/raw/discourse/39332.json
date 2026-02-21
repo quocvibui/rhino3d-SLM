@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-select-objects-made-by-script-and-group/39332",
+  "topic_id": 39332,
+  "title": "Python: Select objects made by script and group?",
+  "question": "First try in really trying to write a script and I’m stuck on something that is probably obvious.\n\n\nHow can I group the created objects at the end of the script? any tips would also be appreciated. \n thanks in advance.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef AddBalloon():\n\n    # some constants\n    radius = 0.25\n    fontSize = 0.125\n    fontOffsetDist = 0.1\n    printWidth = 0.60\n\n    # draw leader line\n    LeaderPoints = rs.GetPoints(\n        True, False, \"Select leader LeaderPoints\")\n    rs.AddLeader(LeaderPoints)\n    point = LeaderPoints[-1]\n\n    rs.EnableRedraw(False)\n\n    # draw circle\n    circle_id = rs.AddCircle(point, radius)\n    rs.ObjectPrintWidth(circle_id, printWidth)\n\n    # hatch circle\n    newHatch = rs.AddHatch(circle_id)\n    rs.ObjectPrintColor(newHatch, (255, 255, 255))\n\n    # find number\n    findNumber = rs.GetString(\"Enter part find number:\")\n\n\n    # quantity text\n    partQuantity = rs.GetInteger(\"Enter part quantity:\")\n\n    if partQuantity > 1:\n        # add part quantity and midline\n        circleEndPt = rs.CurveEndPoint(circle_id)  # get circle end point\n        circlePerpPt = rs.Polar(point, 180, radius) # create perpendicular point\n        midLine = rs.AddLine(circleEndPt, circlePerpPt)  # create line\n        rs.ObjectPrintWidth(midLine, printWidth)\n        rs.SelectObject(midLine)\n        rs.Command(\"_BringToFront _SelNone\")\n        upperTextPoint = rs.Polar(point, 90, fontOffsetDist)\n        rs.AddText(findNumber, upperTextPoint, fontSize, justification=2 + 131072)\n        lowerTextPoint = rs.Polar(point, 270, fontOffsetDist)\n        rs.AddText(str(partQuantity) + \"X\", lowerTextPoint, fontSize, justification=2 + 131072)\n        rs.EnableRedraw(True)\n    else:\n        rs.AddText(findNumber, point, fontSize, justification=2 + 131072) # only add find number\n        rs.EnableRedraw(True)\n\nAddBalloon()",
+  "code_blocks": [
+    {
+      "code": "my_group = rs.AddGroup(group_name=None)\nobjs = [circle_id, newHatch, midLine]\nrs.AddObjectsToGroup(objs, my_group)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef AddBalloon():\n\n    # some constants\n    radius = 0.25\n    fontSize = 0.125\n    fontOffsetDist = 0.1\n    printWidth = 0.60\n\n    # draw leader line\n    LeaderPoints = rs.GetPoints(\n        True, False, \"Select leader LeaderPoints\")\n    rs.AddLeader(LeaderPoints)\n    point = LeaderPoints[-1]\n\n    rs.EnableRedraw(False)\n\n    # draw circle\n    circle_id = rs.AddCircle(point, radius)\n    rs.ObjectPrintWidth(circle_id, printWidth)\n\n    # hatch circle\n    newHatch = rs.AddHatch(circle_id)\n    rs.ObjectPrintColor(newHatch, (255, 255, 255))\n\n    # find number\n    findNumber = rs.GetString(\"Enter part find number:\")\n\n\n    # quantity text\n    partQuantity = rs.GetInteger(\"Enter part quantity:\")\n\n    if partQuantity > 1:\n        # add part quantity and midline\n        circleEndPt = rs.CurveEndPoint(circle_id)  # get circle end point\n        circlePerpPt = rs.Polar(point, 180, radius) # create perpendicular point\n        midLine = rs.AddLine(circleEndPt, circlePerpPt)  # create line\n        rs.ObjectPrintWidth(midLine, printWidth)\n        rs.SelectObject(midLine)\n        rs.Command(\"_BringToFront _SelNone\")\n        upperTextPoint = rs.Polar(point, 90, fontOffsetDist)\n        rs.AddText(findNumber, upperTextPoint, fontSize, justification=2 + 131072)\n        lowerTextPoint = rs.Polar(point, 270, fontOffsetDist)\n        rs.AddText(str(partQuantity) + \"X\", lowerTextPoint, fontSize, justification=2 + 131072)\n        rs.EnableRedraw(True)\n    else:\n        rs.AddText(findNumber, point, fontSize, justification=2 + 131072) # only add find number\n        rs.EnableRedraw(True)\n\nAddBalloon()",
+      "language": "python",
+      "author": "kleerkoat",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1484
+}

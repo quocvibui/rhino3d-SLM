@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinopython/SampleCurveDivideByCount.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinopython/SampleCurveDivideByCount.py",
+  "instruction": "SampleCurveDivideByCount.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleCurveDivideByCount.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext as sc\nimport clr\nimport System\n\ndef SampleCurveDivideByCount():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select curve\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.Get()\n    if go.CommandResult() == Rhino.Commands.Result.Success:\n        curve = go.Object(0).Curve()\n        if curve:\n            #parameters = curve.DivideByCount(5, True)\n            points = clr.StrongBox[System.Array[Rhino.Geometry.Point3d]]()\n            parameters = curve.DivideByCount(5, True, points)\n            points = list(points.Value)\n            for pt in points:\n                sc.doc.Objects.AddPoint(pt)\n            sc.doc.Views.Redraw()\n\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    SampleCurveDivideByCount() # Call the function defined above",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/better-paste-options/19394",
+  "topic_id": 19394,
+  "title": "Better paste options?",
+  "question": "Hi\n\nI like to paste remembering the point, it is useful when projects gets big and I tend to keep facade and different floors on different files since it lags so much. However, I would also like to be able to paste something in the center of the viewport or paste wherever the cursor is.\n\n\nAny smoother way to do this?",
+  "code_blocks": [
+    {
+      "code": "! _-RunPythonScript (\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\ndef PasteToCursor():\n       \n   rs.EnableRedraw(False)\n   rs.Command(\"_Paste\")\n   if rs.LastCommandResult() != 0: return\n       \n   Ids = rs.LastCreatedObjects()\n   if Ids is None: return\n       \n   pt = rs.BoundingBox(Ids)[0]\n   rs.EnableRedraw(True)\n   rs.Command(\"_Move W\" + str(pt) )\n           \n\nPasteToCursor()\n   )",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript (\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef PasteAtCursor():\n    \n    rs.EnableRedraw(False)\n    rs.Command(\"_Paste\")\n    if rs.LastCommandResult() != 0: return\n    \n    Ids = rs.LastCreatedObjects()\n    if Ids is None: return\n    \n    pt = rs.BoundingBox(Ids)[0]\n    \n    targ = rs.GetCursorPos()[0]\n    \n    rs.MoveObjects(Ids, targ - pt)    \n    rs.EnableRedraw(True)\n    \n     \nPasteAtCursor()\n)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 35,
+  "views": 21079
+}

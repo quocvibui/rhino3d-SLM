@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/json-deserialization-in-rhinocommon/91984",
+  "topic_id": 91984,
+  "title": "JSON Deserialization in RhinoCommon",
+  "question": "I’ve looked around at some existing threads… but I can’t quite find what I’m after. Apologies if I’ve overlooked something in these:\n\n\n\n\n\n\n\n\n\n\nCreating Brep from JSON\n \nRhino Developer\n\n\n\n\n\n    A, I was actually using Newtonsoft already. Did not know the Brep class is serializable. \nThis will work for GH-to-GH transfers. However, I would also like to be able to rebuild the geometry in other software (i.e. dynamo), but then I’ll have to look into the interpretation in dynamo probably. \nAnyway, thanks!\n  \n\n\n\n\n\n\n\n\n\n\n\n\nSerialisation of GeometryBase Types\n \ncompute.rhino3d\n\n\n\n\n\n    I’ve been playing around in Python with the API a bit and ran into issues with deserialization when the API returns a Rhino.Geometry object. For example, I’m trying to convert this Curve back into a rhino3dm representation: \ncurve_dict = {'version': 10000, 'archive3dm': 60, 'opennurbs': -1912574355, 'data': '+n8CAF0BAAAAAAAA+/8CABQAAAAAAAAAGRGvXlEL1BG//gAQgwEi8EoaeRf8/wIAJQEAAAAAAAAQAwAAAAAAAAAEAAAABgAAAAAAAAAAAAAAAAAAAAAA8D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAAAAAAAAAAAAAAAACAAAAFsC8SGcPHVAWw…\n  \n\n\n\n\n\n\n\n\n\n\n\n\nSaving geometry for easy access in C#\n \nGrasshopper Developer\n\n\n\n\n\n    My next version of Peacock has several assets libraries, as default geometries. What I’ve done is serialize those geometries in an XML (it could also be a JSON, but I already had experience with XML) and load that files as resources in Visual Studio. When the plugin is loaded, I deserialize all the libraries and store the geometries in their respective object galleries. Some components take care of finding, cloning and using them. \nConsider loading them only when you need them (like instantiatin…\n  \n\n\n\n\nI want to add functionality to a GH plugin that will automatically deserialize JSON of the form:\n\n\n{\n  \"version\": 10000,\n  \"archive3dm\": 70,\n  \"opennurbs\": -1912573523,\n  \"data\": \"+n8CAMkMAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAkQwAAAAAAAAQZAAAAHfJ54u75BNAJXAjxBK48T8AAAAAAAAAAGfqN8Iz9TNAaghbxjSEIUAAAAA...",
+  "code_blocks": [
+    {
+      "code": "var c = new Rhino.Geometry.Circle(12);\nvar extrusion = Rhino.Geometry.Extrusion.Create(c.ToNurbsCurve(), 12, true);\nvar json = Newtonsoft.Json.JsonConvert.SerializeObject(extrusion);\nvar geometry = Newtonsoft.Json.JsonConvert.DeserializeObject<Rhino.Geometry.Extrusion>(json);",
+      "language": "csharp",
+      "author": "stevebaer",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 20,
+  "views": 5488
+}

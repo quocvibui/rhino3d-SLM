@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/localsoftware/localsoftware_rhino-grasshopper/blob/4aafec57e33b9f09cce6fd73dcda12b17cf794a5/python/SHPExtractUserStrings.py",
+  "repo": "localsoftware/localsoftware_rhino-grasshopper",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "BSD-2-Clause",
+  "filepath": "python/SHPExtractUserStrings.py",
+  "instruction": "Extracts object attribute names and attribute values from geometries imported from SHP files.",
+  "code": "\"\"\"Extracts object attribute names and attribute values from geometries imported from SHP files.\n\nExtracts the User Strings from geometries imported with the ReadShapefile component.\nSeparates the GIS Attributes into DataTrees for every GIS geometry from the shapefile.\nBased on the work of Jackie Berry.\n\n    Typical usage:\n        Connect the output geometry from a ReadShapefile component into the geometry input.\n        You can plug a panel to the Attributes and Values outputs to browse their specific values.\n        You can select the values of specific geometries with any List Management component, such as List Item.\n\n    Input:\n        geometry: imported geometry from shapefile.\n\n    Outputs:\n        Attributes: Tree of attributes per object from shapefile\n        Values: Value per attribute per object from shapefile.\"\"\"\n\n__author__ = \"palomagr\"\n__version__ = \"2020.07.09\"\n\n#ghenv.Component.Name = \"ShapeFile Extract User Strings\"\n#ghenv.Component.NickName = \"ShapeFile Extract User Strings\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython, System, Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n\n    def RunScript(self, geometry):\n        Attributes, Values = None, None\n        if geometry:\n            data = geometry.GetUserStrings()\n            d = {}\n            k = []\n            v = []\n            for u in data:\n                k.append(u)\n                d[u] = data[u]\n                v.append(d[u])\n            U = d\n            Attributes = k\n            Values = v\n\n        # return outputs if you have them; here I try it for you:\n        return (Attributes, Values)\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

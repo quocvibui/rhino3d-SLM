@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-set-display-colours-to-material-colours/166067",
+  "topic_id": 166067,
+  "title": "How to set display colours to material colours",
+  "question": "Hey there,\n\n\nSorry to reactivate this topic years later.\n\nI would like to create Materials for objects from their Display Color, and not from their Layer Color.\n\nThe idea is to get the same colors, on both the Shaded View and in the Rendered View. Very basic stuff.\n\nIs there some command to do that ?\n\nOr should I do some scripting ?\n\n\n@dale\n you might have an idea maybe.\n\n\nThanks a lot in advance and best regards,\n\n\nLoïc",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\ndef CreateMaterialFromDisplayColor():\n    rhino_objects = scriptcontext.doc.Objects\n    for obj in rhino_objects:\n        try:\n            display_color = obj.Attributes.DrawColor(scriptcontext.doc)\n            material_index = scriptcontext.doc.Materials.Add()\n            material = scriptcontext.doc.Materials[material_index]\n            material.DiffuseColor = System.Drawing.Color.FromArgb(display_color.A, display_color.R, display_color.G, display_color.B)\n            material.CommitChanges()\n            obj.Attributes.MaterialIndex = material_index\n            obj.Attributes.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n            obj.CommitChanges()\n        except Exception as e:\n            print(\"An error occurred while processing object {obj.Id}: {e}\")\nCreateMaterialFromDisplayColor()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 147,
+  "posts_count": 4,
+  "views": 625
+}

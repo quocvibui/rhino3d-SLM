@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-set-component-options-programmatically/213851",
+  "topic_id": 213851,
+  "title": "How to set component options programmatically?",
+  "question": "I am able to instantiate components on the canvas with python code.\n\nWhat I have \nnot\n been able to figure out so far is how to (un)set component options like these:\n\n\nScreenshot 2025-12-19 at 21.26.12\n1104×736 133 KB\n\n\nI assume it must be possible somehow. Does anyone know?",
+  "code_blocks": [
+    {
+      "code": "gh_python_comp = GhPython.Component.ZuiPythonComponent()\n        gh_python_comp.Code = tool_code\n        gh_python_comp.IsAdvancedMode = True\n\n        ...\n\n        gh_python_comp.Description = description\n    \n        gh_python_comp.SubCategory = subcategory \n        gh_python_comp.Category = plug_in_name\n\n\n        gh_python_comp.Locked = locked \n\n        gh_python_comp.NickName = name\n        gh_python_comp.Name = name   \n\n        GH_doc = ghdoc.Component.Attributes.Owner.OnPingDocument()\n        GH_doc.AddObject(docObject = gh_python_comp, update = False)",
+      "language": "unknown",
+      "author": "James_Parrott",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "GH_DOC = ghdoc.Component.Attributes.DocObject.OnPingDocument()\n    \n    # search Grasshopper.Kernel.GH_ComponentServer().ExternalFiles(True, True)\n    # e.g. for the file_obj with a particular plug-in name in its path                \n    user_obj = Grasshopper.Kernel.GH_UserObject(file_obj.FilePath)\n\n    comp_obj = user_obj.InstantiateObject()\n    \n    comp_obj.Locked = False\n    \n    \n    \n    sizeF = System.Drawing.SizeF(x, y)\n    \n    \n    comp_obj.Attributes.Pivot = System.Drawing.PointF.Add(\n                                            comp_obj.Attributes.Pivot,\n                                            sizeF\n                                            )\n    \n    success = GH_DOC.AddObject(docObject = comp_obj, update = False)\n    \n    if not success:\n        raise Exception('Could not add comp: %s to GH canvas' % comp_obj)",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import clr\nclr.AddReference('Grasshopper')\n\nimport System\nimport Grasshopper as gh\nimport System.Windows.Forms as WinForms\n\ndoc = gh.Instances.ActiveCanvas.Document\n\ncompName = 'Graft Tree'\nproxy = gh.Instances.ComponentServer.FindObjectByName(compName, True, True)\ncomp = proxy.CreateInstance()\ncomp.CreateAttributes()\ncomp.Attributes.Pivot = System.Drawing.PointF(100, 100)\ndoc.AddObject(comp, False)\n\n# https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.toolstripmenuitem?view=windowsdesktop-10.0#properties\ntry:\n\tmenu = WinForms.ToolStripDropDown()\n\tcomp.AppendAdditionalMenuItems(menu)\n\tfor item in menu.Items:\n\t\titem.Checked = False # <- has no effect\n\t\tprint(item.Text, item.Checked)\n\tdoc.NewSolution(True)\nexcept:\n\tprint('failed')",
+      "language": "python",
+      "author": "component_confusion",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 9,
+  "views": 126
+}

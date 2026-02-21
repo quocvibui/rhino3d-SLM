@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/layout-making-projected-views/117878",
+  "topic_id": 117878,
+  "title": "Layout - making projected views",
+  "question": "I’m working on a script to make projected views, spoiler:\n\n\n\n\n\n\n\n\nhttps://global.discourse-cdn.com/mcneel/uploads/default/original/4X/2/4/c/24cfc671a5b8dda60410f0d097a30ffddf239dbf.mp4\n\n\n\n\n\n\nbut I have trouble finding out which view the detail is, currently I’ve done it through a hack which introduces some limitations. How can I know if the View’s projection is world top, front, left, bottom, or back?\n\nAny ideas how I can make it work that clicking left of the top view also gives me the left view instead of a tilted top view?\n\n\nprojectedview-demo.3dm\n (279.9 KB)\n\n\ncode:\n\n\n\n\ngithub.com\n\n\n\n\n\n\nstudiogijs/pythonscripts/blob/master/layout-tools/projectedView.py\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\nfrom Rhino.Geometry import *\n\ndef createProjectedDetail():\n    \"\"\"\n    This script will create a projected view from a selected detail\n    front/back from top view\n    left/right from front view\n    back from right or left view\n    \n    version 0.6\n    \n    new in 0.2:\n        - locked details should now work better\n    new in 0.3:\n        - projected views now have their cplane set to the view, which should result in better behavior when editing the detail\n        - projected views from top or bottom views to right or left are ignored with user message.\n\n\n\n  This file has been truncated. \nshow original",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n    import scriptcontext as sc\n    import rhinoscriptsyntax as rs\n\n\n    detailview = rs.GetObject(\"select detail for projected view\",32768, preselect=True)\n\n    d=rs.coercerhinoobject(detailview)\n            \n    print d.Viewport.Name #prints 'Top'\n    d.Viewport.Name = \"newtitle\"\n    d.Name=\"detailname\"\n    d.CommitChanges()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_rename_detail():\n    \n    filter = Rhino.DocObjects.ObjectType.Detail\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select detail to rename\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return\n    \n    detail_obj = objref.Object()\n    if not isinstance(detail_obj, Rhino.DocObjects.DetailViewObject):\n        return\n    \n    viewport = detail_obj.Viewport\n    title = viewport.Name\n    viewport.Name = title + \"-Modified\"\n    \n    detail_obj.CommitViewportChanges()\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_rename_detail()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\nfrom Rhino.Geometry import *\n\ndef createProjectedDetail():\n    \"\"\"\n    This script will create a projected view from a selected detail\n    front/back from top view\n    left/right from front view\n    back from right or left view\n    \n    version 0.6\n    \n    new in 0.2:\n        - locked details should now work better\n    new in 0.3:\n        - projected views now have their cplane set to the view, which should result in better behavior when editing the detail\n        - projected views from top or bottom views to right or left are ignored with user message.",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 1053
+}

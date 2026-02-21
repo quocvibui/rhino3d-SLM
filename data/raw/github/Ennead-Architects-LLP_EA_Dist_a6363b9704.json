@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/_rhino/Tailor.tab/xiong_an_facade_hori.button/xiong_an_facade_hori_left.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/_rhino/Tailor.tab/xiong_an_facade_hori.button/xiong_an_facade_hori_left.py",
+  "instruction": "note to self:\r\nit is important to use type hint for GH input.\r\nOnly consider process it with rhino common, do not use rhinoscriptsyntax as it cannot process gh guid correctly to the funcs.",
+  "code": "\"\"\"note to self:\r\nit is important to use type hint for GH input.\r\nOnly consider process it with rhino common, do not use rhinoscriptsyntax as it cannot process gh guid correctly to the funcs.\r\n\"\"\"\r\n__title__ = \"2419_Facade move\"\r\n__doc__ = \"\"\"Xiong'an Facade Movement Tool\r\n\r\nProcesses facade curves to extract specific points for facade movement operations.\r\nFeatures:\r\n- Works with Grasshopper input/output for facade geometry\r\n- Extracts points at 20% and 80% along curve domains\r\n- Handles curve parameterization for facade manipulation\r\n- Supports multiple curve sets for batch processing\r\n- Designed for Xiong'an project facade studies\r\n\r\nUsage:\r\n- Input: Two sets of curves (crv_set_1, crv_set_2)\r\n- Output: Points at 20% and 80% positions along curves\r\n- Designed for facade movement and positioning workflows\"\"\"\r\n\r\nimport Rhino # pyright: ignore\r\nimport rhinoscriptsyntax as rs\r\nimport scriptcontext as sc\r\n\r\n\r\nimport Grasshopper # pyright: ignore\r\nsc.doc = Grasshopper.Instances.ActiveCanvas.Document\r\n\r\n\r\n\r\nimport os\r\nimport sys\r\ntab_folder = os.path.dirname(os.path.dirname(__file__))\r\napps_folder = os.path.dirname(os.path.dirname(tab_folder))\r\nsys.path.append(\"{}\\\\lib\".format(apps_folder))\r\nimport EnneadTab\r\n\r\n\r\ndef main(crv_set_1, crv_set_2):\r\n    OUT = []\r\n    \r\n\r\n    for curve in crv_set_2:\r\n        domain = curve.Domain\r\n        print (domain)\r\n        t1 = (domain[1]-domain[0])*0.2 + domain[0]\r\n        t2 = (domain[1]-domain[0])*0.8 + domain[0]\r\n        print (t1, t2)\r\n        start_point, end_point = curve.PointAt(t1), curve.PointAt(t2)\r\n        OUT.append(start_point)\r\n    \r\n\r\n\r\n   \r\n\r\n    return OUT\r\n\r\nif is_run: # pyright: ignore\r\n    a = main(crv_set_1, crv_set_2) # pyright: ignore\r\n\r\nsc.doc = Rhino.RhinoDoc.ActiveDoc",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

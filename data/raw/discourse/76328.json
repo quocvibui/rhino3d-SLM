@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-take-the-default-command-line-option-as-the-chosen-option/76328",
+  "topic_id": 76328,
+  "title": "How to take the default command line option as the chosen option?",
+  "question": "I’m looking at the python script on this page which I literally just copied here since it shows what I’m wondering about. \nhttps://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Input_Custom_GetBaseClass_AddOptionList_1.htm\n\n\nSo it asks for an object and then there is an option in the commandline to change the display mode for that object. When I click on that option in the menu and choose the display mode all works fine.\n\n\nThe problem is:\n\n\n\nI would assume, based on how rhino commands work, that if I press enter here that it chooses the “Wireframe” default option. But instead, it now just exits the script without changing the display mode, as if you would press esc. How do I take the default input from this option when pressing enter and still cancel when pressing esc instead?\n\n\nimport Rhino\nimport scriptcontext\n\ndef ObjectDisplayMode():\n    filter = Rhino.DocObjects.ObjectType.Brep | Rhino.DocObjects.ObjectType.Mesh\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select mesh or surface\", True, filter)\n    if rc != Rhino.Commands.Result.Success: return rc;\n    viewportId = scriptcontext.doc.Views.ActiveView.ActiveViewportID\n\n    attr = objref.Object().Attributes\n    if attr.HasDisplayModeOverride(viewportId):\n        print \"Removing display mode override from object\"\n        attr.RemoveDisplayModeOverride(viewportId)\n    else:\n        modes = Rhino.Display.DisplayModeDescription.GetDisplayModes()\n        mode = None\n        if len(modes) == 1:\n            mode = modes[0]\n        else:\n            go = Rhino.Input.Custom.GetOption()\n            go.SetCommandPrompt(\"Select display mode\")\n            str_modes = []\n            for m in modes:\n                s = m.EnglishName.replace(\" \",\"\").replace(\"-\",\"\")\n                str_modes.append(s)\n            go.AddOptionList(\"DisplayMode\", str_modes, 0)\n            if go.Get()==Rhino.Input.GetResult.Option:\n                mode = modes[go.Option().CurrentListOptionIndex]\n        if not mode: return Rhino.Commands....",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef ObjectDisplayMode():\n    filter = Rhino.DocObjects.ObjectType.Brep | Rhino.DocObjects.ObjectType.Mesh\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select mesh or surface\", True, filter)\n    if rc != Rhino.Commands.Result.Success: return rc;\n    viewportId = scriptcontext.doc.Views.ActiveView.ActiveViewportID\n\n    attr = objref.Object().Attributes\n    if attr.HasDisplayModeOverride(viewportId):\n        print \"Removing display mode override from object\"\n        attr.RemoveDisplayModeOverride(viewportId)\n    else:\n        modes = Rhino.Display.DisplayModeDescription.GetDisplayModes()\n        mode = None\n        if len(modes) == 1:\n            mode = modes[0]\n        else:\n            go = Rhino.Input.Custom.GetOption()\n            go.SetCommandPrompt(\"Select display mode\")\n            str_modes = []\n            for m in modes:\n                s = m.EnglishName.replace(\" \",\"\").replace(\"-\",\"\")\n                str_modes.append(s)\n            go.AddOptionList(\"DisplayMode\", str_modes, 0)\n            if go.Get()==Rhino.Input.GetResult.Option:\n                mode = modes[go.Option().CurrentListOptionIndex]\n        if not mode: return Rhino.Commands.Result.Cancel\n        attr.SetDisplayModeOverride(mode, viewportId)\n    scriptcontext.doc.Objects.ModifyAttributes(objref, attr, False)\n    scriptcontext.doc.Views.Redraw()\n\n\nif __name__==\"__main__\":\n    ObjectDisplayMode()",
+      "language": "python",
+      "author": "siemen",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 825
+}

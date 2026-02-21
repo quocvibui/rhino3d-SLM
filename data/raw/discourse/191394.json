@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-createpatch-trim/191394",
+  "topic_id": 191394,
+  "title": "Brep.CreatePatch Trim?",
+  "question": "Hi,\n\n\nI am trying to build a patch out of points and a boundary curve in C #. Below is the code. It creates the Brep, but no matter what, it doesn’t trim the Brep along the boundary. Do you have any suggestions?\n\n\nprivate void RunScript(Curve edg, List<Point3d> pnts, ref object a)\n{\n    var gmtrs = new List<GeometryBase>();\n\n    gmtrs.Add(edg); \n    gmtrs.AddRange(pnts.Select(p => new Rhino.Geometry.Point(p)));\n    \n    var tangency = new bool[4]{false, false, false, false};\n\n    var m = Brep.CreatePatch(gmtrs, null, 10, 10, true, false, 0.7, 100, 100, tangency, 0.01);\n\n    a = m;\n}",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(List<Curve> curves, List<Point3d> points, ref object a)\n{\n    var tolerance = RhinoDocument.ModelAbsoluteTolerance;\n    var geometry = new List<GeometryBase>();\n    geometry.AddRange(curves);\n    geometry.AddRange(points.Select(p => new Rhino.Geometry.Point(p)));\n\n    // Create a starting surface\n    var startingSurface = Brep.CreatePatch(geometry, 20, 20, tolerance).Faces[0];\n\n    // Create the final trimmed Brep\n    a = Brep.CreatePatch(geometry, startingSurface, 20, 20, true, false, 0.7, 100.0, 0.01, new bool[4], tolerance);\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(Curve edg, List<Point3d> pnts, ref object a)\n{\n    var gmtrs = new List<GeometryBase>();\n\n    gmtrs.Add(edg); \n    gmtrs.AddRange(pnts.Select(p => new Rhino.Geometry.Point(p)));\n    \n    var tangency = new bool[4]{false, false, false, false};\n\n    var m = Brep.CreatePatch(gmtrs, null, 10, 10, true, false, 0.7, 100, 100, tangency, 0.01);\n\n    a = m;\n}",
+      "language": "csharp",
+      "author": "woojsung",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 63
+}

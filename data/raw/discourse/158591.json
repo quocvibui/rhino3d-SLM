@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/selectionfiltersettings-problem/158591",
+  "topic_id": 158591,
+  "title": "SelectionFilterSettings problem",
+  "question": "Hi \n@dale\n,\n\n\ni have a command which requires to temporarily enable sub object selection by enabling the \nSelectionFilterSettings.SubObjectSelect\n property to \nTrue\n. As soon as i enable my own \ntmp_settings\n using:\n\n\n\n\nSelectionFilterSettings.UpdateFromState(tmp_settings)\n\n\n\n\nthe Selection Filter panel pops up. I want to control this, preferrably it should not pop up at all. I’m aware that i can close it after my command finished by scripting it:\n\n\nrs.Command(\"! _SelectionFilter\", False)\n\n\nbut this would close it if a user had it open, either docked or floating before running my command. Is there a way to access this panel and check if it was visible before my command has been started ? Or is there a way to prevent it popping up ?\n\n\nthanks,\n\nc.",
+  "code_blocks": [
+    {
+      "code": "settings = Rhino.ApplicationSettings.SelectionFilterSettings.GetDefaultState()\nsettings.SubObjectSelect = True\nsettings.GlobalGeometryFilter = Rhino.DocObjects.ObjectType.MeshFace\nRhino.ApplicationSettings.SelectionFilterSettings.UpdateFromState(settings)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System\n\ndef DoSomething():\n\n    panel_id = System.Guid.Parse(\"918191ca-1105-43f9-a34a-dda4276883c1\")\n    is_panel_visible = Rhino.UI.Panels.IsPanelVisible(panel_id)\n    print is_panel_visible\n    \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 447
+}

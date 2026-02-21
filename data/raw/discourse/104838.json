@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trying-to-create-multiple-views-and-clipping-planes-that-clip-them-but-only-seems-to-create-clipping-planes-on-last-item/104838",
+  "topic_id": 104838,
+  "title": "Trying to create multiple views and clipping planes that clip them, but only seems to create clipping planes on last item",
+  "question": "I am trying to create multiple plan views in my model with each view clipped by two planes,one for hiding objects below level and one for cut level. currently, it creates the right views, but i fail to create the clipping planes when i reference the view in AddClippingPlane parameter.\n\n\nimport rhinoscriptsyntax as rs \nimport ast\n\ncutHeight = 1200\n\nobjdict = ast.literal_eval(rs.GetDocumentUserText(\"levels\"))\n\ndef planClips(lvl):\n    viewname = lvl[\"level\"] + \"_view\"\n    view = rs.AddNamedView( viewname, \"Top\" )\n    print view\n    elevation = float(lvl[\"elevation\"])\n    lvlPlane = rs.CreatePlane((0,0,elevation))\n    cutPlane = rs.PlaneFromNormal((0,0,elevation+cutHeight), (0,0,-1))\n    planes = [lvlPlane, cutPlane]\n    clips = [rs.AddClippingPlane(x, 1000, 1000, view) for x in planes]\n    group = rs.AddGroup()\n    rs.AddObjectsToGroup(clips, group)\n\nmap(planClips, objdict)\n\n\n\nwith view parameter not included what i get is this:\n\n\nimage\n788×732 25.5 KB\n\n\nview parameter included:\n\n\nimage\n1242×741 51.8 KB\n\n\nnot sure if im doing something wrong in the script or maybe not understanding clipping planes, but any help would be appreciated.\n\n\nalso, for the data level info the script is iterating a list of dicts that have been saved in the document user text as string,\n\n\ncreatePlanViews.3dm\n (2.7 MB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs \nimport ast\n\ncutHeight = 1200\n\nobjdict = ast.literal_eval(rs.GetDocumentUserText(\"levels\"))\n\ndef planClips(lvl):\n    viewname = lvl[\"level\"] + \"_view\"\n    view = rs.AddNamedView( viewname, \"Top\" )\n    print view\n    elevation = float(lvl[\"elevation\"])\n    lvlPlane = rs.CreatePlane((0,0,elevation))\n    cutPlane = rs.PlaneFromNormal((0,0,elevation+cutHeight), (0,0,-1))\n    planes = [lvlPlane, cutPlane]\n    clips = [rs.AddClippingPlane(x, 1000, 1000, view) for x in planes]\n    group = rs.AddGroup()\n    rs.AddObjectsToGroup(clips, group)\n\nmap(planClips, objdict)",
+      "language": "python",
+      "author": "tkahng",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 514
+}

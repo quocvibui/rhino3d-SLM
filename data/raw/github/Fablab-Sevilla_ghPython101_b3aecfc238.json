@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Fablab-Sevilla/ghPython101/blob/176caf1c854234051661b0d3bbdf458b39447cc6/D%C3%ADa_002/01_EJ/T_002/SV_EJ02.py",
+  "repo": "Fablab-Sevilla/ghPython101",
+  "repo_stars": 9,
+  "repo_description": "Documentation and exercises from ghPython101 course",
+  "license": "MIT",
+  "filepath": "Día_002/01_EJ/T_002/SV_EJ02.py",
+  "instruction": "Sv ej02",
+  "code": "﻿\"\"\"Alumno: Sergi Viel\n    usuario: evokraken\n    version 04.00\n\"\"\"\n\"\"\"\nCONTROL DE CAMBIOS\n\nLa direccion se controla mediante un giro aleatorio 'cabeceo'.\nEl modulo controlado por un random de cero a 'magnitDePaso'.\nObtenemos el punto medio de cada paso. Trazamos un vector perpendicular\ny a partir de el obtenemos dos puntos mas para cerra una celosia con los\npuntos del siguiente paso. Debemos dejar dos variables en memoria de ciclo\n\n\"\"\"\n\nimport random as rd\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\n#configuramos random para un seed aportado por usuario.\nrd.seed(sSeed)\n\n#punto pUno aportado por usuario y acumulador de resultados\npUno = (PtoO)\nresultado=[]\nVtoF = rg.Vector3d(1,1,0)\naxisZ = rg.Vector3d(0,0,1)\n\nfor i in range(intN):\n    #vector de recta\n    #VtoF = rg.Vector3d(rd.randint(-1,1),rd.randint(-1,1),0)\n    radian = rd.randrange(-cabeceo,cabeceo,1)\n    modulo = rd.randrange(1, magnitDePaso+1, 1)\n    VtoFF = modulo*rs.VectorUnitize((rs.VectorRotate(VtoF,radian,axisZ)))\n    VtoNormal = 0.5*rs.VectorRotate(VtoFF,90,axisZ)\n    \n    #Obtenemos recta 'trazoEje' y los puntos a conectar\n    trazoEje = rg.Line(pUno,VtoFF)\n    pDos = (trazoEje).To\n    pMed = rg.Line(pUno,VtoFF).PointAt(0.5)\n    pTres = rg.Line(pMed,VtoNormal).To\n    pCuatro = rg.Line(pMed,-VtoNormal).To\n\n    #Polilinea cerrada de cada paso con los puntos obtenidos\n    poli = rg.Polyline([pUno,pTres,pDos,pCuatro,pUno])\n    \n    \n    #obtenemos los resultados de cada paso\n    resultado.append(trazoEje)\n    resultado.append(poli)\n    #resultado.append(pDos)\n    #resultado.append(pMed)\n    #resultado.append(pTres)\n    #resultado.append(pCuatro)\n    \n    #excluimos en el bucle el primer y ultimo paso para esta linea\n    #para evitar introducir en la lista resultado elementos vacíos\n    #que puedan provocar errores.\n    if i != 0 or i==intN:\n        nexo1 = rg.Line(pTresPrima, pTres)\n        nexo2 = rg.Line(pCuatroPrima, pCuatro)\n        resultado.append(nexo1)\n        resultado.append(nexo2)\n    \n    #preparamos para el siguiente bucle\n    pTresPrima = pTres\n    pCuatroPrima = pCuatro\n    pUno = (pUno+VtoFF) #el inicio del trazo en el final del anterior\n    VtoF = VtoFF #la direccion del anterior a partir del cual se genera el nuevo\n    \n#suma de todos los trazos lo dejamos para la salida\na = resultado\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

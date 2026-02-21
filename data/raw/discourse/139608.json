@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/test-rhinoinside-first-step-with-python-but/139608",
+  "topic_id": 139608,
+  "title": "Test rhinoinside: first step with Python but",
+  "question": "Hello\n\nI try this to send and receive data between two components, it’s clear that the second component\n\nresponds to slider changes but the string always empty\n\nWhat am I missing here?\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport Grasshopper as gh\n        \nclass Receiver:\n        \n    def __init__(self):\n        self.comp = None\n        self.registered = False\n        self.str = ''\n        \n    def RunScript(self):\n        self.Receive(ghenv.Component)\n        self.Receive_str = self.str\n        \n    def Receive(self,component):\n        if not self.registered:\n            Rhino.Runtime.HostUtils.RegisterNamedCallback(\"Send_data\", self.RiRhino)\n            self.comp = component\n            self.registered = True\n                    \n    def RiRhino(self, sender, args):\n        if args.TryGetString(\"data\"):\n            self.str = args.TryGetString(\"data\")[1]\n        self.comp.ExpireSolution(True)\n        \n\nReceive_str = Receiver()\n\nprint Receive_str\n\n\n\n\n\n\n\n\n\nhttps://global.discourse-cdn.com/mcneel/uploads/default/original/4X/c/9/8/c984eda4ec865978e76b0ea94545fd8dee7853f6.mp4",
+  "code_blocks": [
+    {
+      "code": "from System import *\nfrom System.IO import *\nfrom System.Reflection import *\nfrom Rhino.Runtime.InProcess import *\nfrom Rhino.Geometry import *\n\nclass Program(object):\n\tdef __init__():\n\t\tRhinoInside.Resolver.Initialize()\n\n\tdef Main(args):\n\t\ttry:\n\t\texcept Exception, ex:\n\t\t\tConsole.Error.WriteLine(ex.Message)\n\t\tfinally:\n\n\tMain = staticmethod(Main)\n\n\tdef MeshABrep():\n\t\tsphere = Sphere(Point3d.Origin, 12)\n\t\tbrep = sphere.ToBrep()\n\t\tmp = MeshingParameters(0.5)\n\t\tmesh = Mesh.CreateFromBrep(brep, mp)\n\t\tConsole.WriteLine(\"Mesh with {mesh[0].Vertices.Count} vertices created\")\n\n\tMeshABrep = staticmethod(MeshABrep)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport Grasshopper as gh\n        \nclass Receiver:\n        \n    def __init__(self):\n        self.comp = None\n        self.registered = False\n        self.str = ''\n        \n    def RunScript(self):\n        self.Receive(ghenv.Component)\n        self.Receive_str = self.str\n        \n    def Receive(self,component):\n        if not self.registered:\n            Rhino.Runtime.HostUtils.RegisterNamedCallback(\"Send_data\", self.RiRhino)\n            self.comp = component\n            self.registered = True\n                    \n    def RiRhino(self, sender, args):\n        if args.TryGetString(\"data\"):\n            self.str = args.TryGetString(\"data\")[1]\n        self.comp.ExpireSolution(True)\n        \n\nReceive_str = Receiver()\n\nprint Receive_str",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 16,
+  "views": 1463
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/eto-help-with-showing-a-bitmap-and-a-button/202748",
+  "topic_id": 202748,
+  "title": "ETO help with showing a bitmap and a button",
+  "question": "Hi, when I add a button it only shows the button, what did I do wrong?\n\n\n### Sketch render v01.py\n### Copyright by Holo 2025\n\n\n#! python 3\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport System\nimport Eto\n\nrs.Prompt(\"Installing numpy and opencv\")\n\nimport numpy as np\nimport cv2\n\ndef ShowBitmap(bitmap):\n    width = bitmap.Width\n    height = bitmap.Height\n    Ratio = width / height\n    dialog = Eto.Forms.Dialog()\n    dialog.Title = \"Holo's SketchRender\"\n    dialog.Width = 1024\n    dialog.Height = int(dialog.Width/Ratio)\n    dialog.Padding = Eto.Drawing.Padding(5)\n    dialog.Resizable = True\n\n    EtoBitmap = Rhino.UI.EtoExtensions.ToEto(bitmap)\n\n    image_view = Eto.Forms.ImageView()\n    image_view.Image = EtoBitmap\n    dialog.Content = image_view\n    \n    \n    ### Add a button\n    def copyToClipboard(sender, e):\n        System.Windows.Forms.Clipboard.SetImage(bitmap)\n        rs.Prompt(\"Image copied to clipboard\")\n    button = Eto.Forms.Button()\n    button.Click += copyToClipboard\n    button.Text = \"Copy to clipboard\"\n    dialog.Content = button\n    \n    ### Show the content\n    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)\n\nbitmap = sc.doc.Views.ActiveView.CaptureToBitmap()\nShowBitmap(bitmap)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport System\nimport Eto\nimport Eto.Forms as ef\n\nrs.Prompt(\"Installing numpy and opencv\")\ndef ShowBitmap(bitmap):\n    width = bitmap.Width\n    height = bitmap.Height\n    Ratio = width / height\n    dialog = Eto.Forms.Dialog()\n    dialog.Title = \"Holo's SketchRender\"\n    dialog.Width = 1024\n    dialog.Height = int(dialog.Width/Ratio)\n    dialog.Padding = Eto.Drawing.Padding(5)\n    dialog.Resizable = True\n\n    EtoBitmap = Rhino.UI.EtoExtensions.ToEto(bitmap)\n\n    image_view = Eto.Forms.ImageView()\n    image_view.Image = EtoBitmap\n    dialog.Content = image_view\n    \n    \n    ### Add a button\n    def copyToClipboard(sender, e):\n        System.Windows.Forms.Clipboard.SetImage(bitmap)\n        rs.Prompt(\"Image copied to clipboard\")\n    button = Eto.Forms.Button()\n    button.Click += copyToClipboard\n    button.Text = \"Copy to clipboard\"\n\n    button_2 = Eto.Forms.Button()\n    button_2.Text = \"this_bu_2\"\n\n    lou = ef.DynamicLayout()\n    lou.AddRow(button,button_2)\n    lou.AddRow(None)\n\n    dialog.Content = lou\n    \n    ### Show the content\n    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)\n\nbitmap = sc.doc.Views.ActiveView.CaptureToBitmap()\nShowBitmap(bitmap)",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "### Sketch render v01.py\n### Copyright by Holo 2025\n\n\n#! python 3\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport System\nimport Eto\n\nrs.Prompt(\"Installing numpy and opencv\")\n\nimport numpy as np\nimport cv2\n\ndef ShowBitmap(bitmap):\n    width = bitmap.Width\n    height = bitmap.Height\n    Ratio = width / height\n    dialog = Eto.Forms.Dialog()\n    dialog.Title = \"Holo's SketchRender\"\n    dialog.Width = 1024\n    dialog.Height = int(dialog.Width/Ratio)\n    dialog.Padding = Eto.Drawing.Padding(5)\n    dialog.Resizable = True\n\n    EtoBitmap = Rhino.UI.EtoExtensions.ToEto(bitmap)\n\n    image_view = Eto.Forms.ImageView()\n    image_view.Image = EtoBitmap\n    dialog.Content = image_view\n    \n    \n    ### Add a button\n    def copyToClipboard(sender, e):\n        System.Windows.Forms.Clipboard.SetImage(bitmap)\n        rs.Prompt(\"Image copied to clipboard\")\n    button = Eto.Forms.Button()\n    button.Click += copyToClipboard\n    button.Text = \"Copy to clipboard\"\n    dialog.Content = button\n    \n    ### Show the content\n    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)\n\nbitmap = sc.doc.Views.ActiveView.CaptureToBitmap()\nShowBitmap(bitmap)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 101
+}

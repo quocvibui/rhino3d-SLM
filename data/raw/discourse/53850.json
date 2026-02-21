@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-loft-circle-through-rhinocommon/53850",
+  "topic_id": 53850,
+  "title": "How to loft Circle through RhinoCommon?",
+  "question": "Maybe this question is kind of simple but it really troubles me a lot.\n\nArcCurve type should be inherited from Curve type. But why curve can generate brep through “Rhino.Geometry.CreateFromLoft” , while circle as ArcCurve type can not?\n\n\nHere’s the code\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ncircle_1 = rs.coercecurve(c1)\ncircle_2 = rs.coercecurve(c2)\n\nbrep = rg.Brep.CreateFromLoft([circle_1,circle_2], circle_1.PointAtStart, circle_2.PointAtStart, rg.LoftType.Normal, True)\nbrep = rg.Brep.CreateFromLoft([circle_1,circle_2], rg.Point3d.Unset, rg.Point3d.Unset, rg.LoftType.Normal, True)\n\n\n\nFor both brep, I got empty \nArray[Brep](())\n.\n\n\nIs there anyway to convert ArcCurve into Curve? I only find how to convert ArcCurve type into NurbsCurve type, and still failed to get loft with NurbsCurve - type - circle. And it can’t construct a new curve through Rhino.Geometry.curve(circle).\n\n\nOr how to get loft shape with circle in RhinoCommon?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nc1=rs.GetObject(\"Select a circle\",4)\nc2=rs.GetObject(\"Select a circle\",4)\n\ncircle_1 = rs.coercecurve(c1)\ncircle_2 = rs.coercecurve(c2)\nno_pt=rg.Point3d.Unset\nnorm_loft=rg.LoftType.Normal\n\nbreps = rg.Brep.CreateFromLoft([circle_1,circle_2],no_pt,no_pt,norm_loft,False) #False\nnew_IDs=[sc.doc.Objects.AddBrep(brep) for brep in breps]\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\nc1=rs.GetObject(\"Select a circle\",4)\nc2=rs.GetObject(\"Select a circle\",4)\nc3=rs.GetObject(\"Select a circle\",4)\n\ncircle_1 = rs.coercecurve(c1)\ncircle_2 = rs.coercecurve(c2)\ncircle_3 = rs.coercecurve(c3)\nno_pt=rg.Point3d.Unset\nnorm_loft=rg.LoftType.Normal\n\nbreps = rg.Brep.CreateFromLoft([circle_1,circle_2,circle_3],no_pt,no_pt,norm_loft,True)\nnew_IDs=[sc.doc.Objects.AddBrep(brep) for brep in breps]\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ncircle_1 = rs.coercecurve(c1)\ncircle_2 = rs.coercecurve(c2)\n\nbrep = rg.Brep.CreateFromLoft([circle_1,circle_2], circle_1.PointAtStart, circle_2.PointAtStart, rg.LoftType.Normal, True)\nbrep = rg.Brep.CreateFromLoft([circle_1,circle_2], rg.Point3d.Unset, rg.Point3d.Unset, rg.LoftType.Normal, True)",
+      "language": "python",
+      "author": "RetroPost.LT",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 4,
+  "views": 1586
+}

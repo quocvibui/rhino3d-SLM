@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-viewnames-return-names-true-view-type-1-in-order/43531",
+  "topic_id": 43531,
+  "title": "rs.ViewNames(return_names=True, view_type=1) in order",
+  "question": "Hi all,\n\n\nI don’t know if this is found in any other topic.\n\nBut if I’m correct the rs.ViewNames() returns the views in a list as they are created.\n\nIs there a way to sort them in the order as they are place in the document?\n\n\nfor example:\n\nI create  view A, then B, then C. rs.ViewNames() will now return A,B,C\n\nWhen I later move the “tabs” to C,A,B rs.ViewNames() still returns A,B,C.\n\n\nI want to return the names of the “viewTabs” in a list as they are placed in the document (C,A,B)\n\n\nHope this makes sence\n\n\nThanks in advance",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nnames = rs.ViewNames()\nnames.sort()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef OrderedPageViewNames(return_names=True):\n    views = list(scriptcontext.doc.Views.GetPageViews())\n    if views is None: return scriptcontext.errorhandler()\n    views.sort(key=lambda view: view.PageNumber)\n    if return_names: return [view.MainViewport.Name for view in views]\n    return [view.MainViewport.Id for view in views]\n\nprint OrderedPageViewNames()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 975
+}

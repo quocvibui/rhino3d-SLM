@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-addcutplane-bug/124263",
+  "topic_id": 124263,
+  "title": "rs.AddCutPlane() bug",
+  "question": "In testing something from \nanother thread\n I stumbled across a bug in the \nrs.AddCutPlane()\n method which tracks back to a bug in \nRhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, box)\n where the box (bounding box) is flat (i.e. 0 height in the Z direction).\n\n\nIn the simple file below which contains a single plane surface flat on the WorldXY plane and two points, run the following code and pick first the surface, then the two points in the Top or Perspective views:\n\n\nimport rhinoscriptsyntax as rs\n\nobj = rs.GetObject(\"Select surface for cut plane\",8,preselect=True)\nif obj:\n    msg1=\"Pick first point\"\n    msg2=\"Pick second point\"\n    pts=rs.GetPoints(True,False,msg1,msg2,2)\n    if pts and len(pts)==2:\n        rs.AddCutPlane([obj],pts[0],pts[1])\n\n\n\nPlane2Points.3dm\n (42.6 KB)\n\n\nYou will see that the cut plane added does not cut through the surface as it should, it remains at the level of the first picked point (above the surface).  If you “thicken” the surface a bit by extruding or even just moving a corner point vertically so it’s no longer planar, the method succeeds, because the bounding box then has some volume.\n\n\nTherefore I conclude that \nRhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, box)\n - which is the basis method called to generate the cut plane - fails to create the correct geometry when the box has 0 height in the normal direction…\n\n\nI filed a bug report on this:\n\n\nhttps://mcneel.myjetbrains.com/youtrack/issue/RH-64216",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobj = rs.GetObject(\"Select surface for cut plane\",8,preselect=True)\nif obj:\n    msg1=\"Pick first point\"\n    msg2=\"Pick second point\"\n    pts=rs.GetPoints(True,False,msg1,msg2,2)\n    if pts and len(pts)==2:\n        rs.AddCutPlane([obj],pts[0],pts[1])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 383
+}

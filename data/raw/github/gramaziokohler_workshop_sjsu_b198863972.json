@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gramaziokohler/workshop_sjsu/blob/4de3a3f860cd4a743d67b7d903b5118050cb7aef/src/workshop_sjsu/rhino/utilities.py",
+  "repo": "gramaziokohler/workshop_sjsu",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/workshop_sjsu/rhino/utilities.py",
+  "instruction": "Utilities",
+  "code": "import math\nimport Rhino.Geometry as rg\nfrom compas_fab.utilities import map_range\nfrom ghpythonlib.treehelpers import tree_to_list\nfrom compas.utilities import color_to_rgb\n\n\ndef cartesian_to_polar(x, y):\n    rho = math.sqrt(x**2 + y**2)\n    phi = math.atan2(y, x)\n    return(rho, phi)\n\n\ndef map2sphere(sphere, circle, points2d, scale):\n    points3d = []\n    for pt2d in points2d:\n        rho, phi = cartesian_to_polar(pt2d.X, pt2d.Y)\n        crv = sphere.IsoCurve(1, phi)\n        rho_mapped = map_range(rho, 0, circle.Radius, -\n                               math.pi/2, math.pi/2 - scale)\n        pt3d = crv.PointAt(rho_mapped)\n        points3d.append(pt3d)\n    return points3d\n\n\ndef format_data_for_export(points3d, gradients, colors):\n\n    gradients_list = []\n    for i in range(gradients.BranchCount):\n        path = gradients.Path(i)\n        alist = list(gradients.Branch(path))\n        gradients_list.append(list(alist))\n\n    colors_list = []\n    for i in range(colors.BranchCount):\n        path = colors.Path(i)\n        alist = list(colors.Branch(path))\n        colors_list.append(\n            [color_to_rgb([c.R, c.G, c.B], normalize=True) for c in alist])\n\n    points3d_list = []\n    for i in range(points3d.BranchCount):\n        path = points3d.Path(i)\n        alist = list(points3d.Branch(path))\n        points3d_list.append([[p.X, p.Y, p.Z] for p in alist])\n\n    for g, p, c in zip(gradients_list, points3d_list, colors_list):\n        assert(len(g) == len(p))\n        assert(len(g) == len(c))\n\n    data = {}\n    data['points3d'] = points3d_list\n    data['gradients'] = gradients_list\n    data['colors'] = colors_list\n\n    return data\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

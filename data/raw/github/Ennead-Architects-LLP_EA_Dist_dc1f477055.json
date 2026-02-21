@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/_revit/EnneaDuck.extension/EnneadTab.tab/Import%20Export.panel/Rhino.pulldown/revit2rhino.pushbutton/revit2rhino_script.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/_revit/EnneaDuck.extension/EnneadTab.tab/Import Export.panel/Rhino.pulldown/revit2rhino.pushbutton/revit2rhino_script.py",
+  "instruction": "Revit2rhino script",
+  "code": "#!/usr/bin/python\r\n# -*- coding: utf-8 -*-\r\n\r\n__doc__ =\"\"\"\r\nScript for exporting Revit Family Instances to Rhino.\r\nIt converts each FamilyInstance's geometry into a Rhino block containing all its Breps\r\n(or fallback Meshes). \r\n\r\nBlock names in Rhino follow the format: \"FamilyName_TypeName\"\r\nEach export includes a timestamp in the filename.\r\n\"\"\"\r\n\r\n__title__ = \"Revit2Rhino\"\r\n\r\nimport clr  # pyright: ignore\r\nimport logging\r\n\r\n# Configure logging\r\nlogger = logging.getLogger(\"Revit2Rhino\")\r\nlogger.setLevel(logging.INFO)\r\nconsole_handler = logging.StreamHandler()\r\nconsole_handler.setLevel(logging.INFO)\r\nformatter = logging.Formatter('%(levelname)s - %(message)s')\r\nconsole_handler.setFormatter(formatter)\r\nlogger.addHandler(console_handler)\r\n\r\ndef enable_debug_logging():\r\n    logger.setLevel(logging.DEBUG)\r\n    console_handler.setLevel(logging.DEBUG)\r\n    logger.debug(\"Debug logging enabled\")\r\n\r\ntry:\r\n    import System  # pyright: ignore\r\n    clr.AddReference('RhinoCommon')\r\n    import Rhino  # pyright: ignore\r\n    clr.AddReference('RhinoInside.Revit')\r\n    from RhinoInside.Revit.Convert.Geometry import GeometryDecoder as RIR_DECODER  # pyright: ignore\r\n    IMPORT_OK = True\r\nexcept:\r\n    IMPORT_OK = False\r\n\r\n\r\nimport proDUCKtion  # pyright: ignore\r\nproDUCKtion.validify()\r\n\r\nfrom EnneadTab import ERROR_HANDLE, LOG, NOTIFICATION, USER\r\nfrom EnneadTab.REVIT import REVIT_APPLICATION, REVIT_VIEW\r\n\r\nUIDOC = REVIT_APPLICATION.get_uidoc()\r\nDOC = REVIT_APPLICATION.get_doc()\r\n\r\n@LOG.log(__file__, __title__)\r\n@ERROR_HANDLE.try_catch_error()\r\ndef revit2rhino(doc):\r\n    \"\"\"Main entry point for Revit to Rhino export.\"\"\"\r\n    # Check if Rhino.Inside is available\r\n    if not IMPORT_OK:\r\n        NOTIFICATION.messenger(\"Please initiate [Rhino.Inside] First\")\r\n        return\r\n\r\n    if REVIT_VIEW.is_focused_on_system_view():\r\n        NOTIFICATION.messenger(\"You are focused on either ProjectBrower or PropetyPanel. Please activate an Architectural View such as 3D View.\")\r\n        return\r\n    \r\n    if not REVIT_VIEW.is_archi_view(doc.ActiveView):\r\n        NOTIFICATION.messenger(\"Please activate an Architectural View such as 3D View.\")\r\n        return\r\n    \r\n    # Enable debug logging for developers\r\n    if USER.IS_DEVELOPER:\r\n        enable_debug_logging()\r\n    \r\n    # Launch the UI - everything else is handled by the UI\r\n    import revit2rhino_UI\r\n    revit2rhino_UI.show_dialog()\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    revit2rhino(DOC)\r\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon"
+  ],
+  "has_docstring": false
+}

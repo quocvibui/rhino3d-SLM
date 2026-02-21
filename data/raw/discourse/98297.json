@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-similar/98297",
+  "topic_id": 98297,
+  "title": "Create similar?",
+  "question": "Hello!\n\nIs there some kind of ‘create similar’ command (á la Revit)?\n\nYou know, select a line > CS > create another line. Select an annotation > CS > create another…\n\nMakes sense only when there’s one thing selected (or the first in the selection is taken).\n\nThanks!\n\nBest regards",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef create_similar():\n    # Check if an object is preselected\n    selected_object = rs.GetObject(\"Select an object to create a similar one\", preselect=True)\n    if selected_object:\n        print(\"Object preselected.\")\n    else:\n        # If no object is preselected, prompt the user to select one\n        selected_object = rs.GetObject(\"Select an object to create a similar one\")\n        if not selected_object:\n            print(\"No object selected. Aborting.\")\n            return\n\n    # Get the Rhino document\n    doc = Rhino.RhinoDoc.ActiveDoc\n    # Get the Rhino object corresponding to the selected object\n    rhino_object = doc.Objects.Find(selected_object)\n\n    if rhino_object:\n        # Get the geometry of the Rhino object\n        geometry = rhino_object.Geometry\n        # Check if the geometry is a curve\n        if isinstance(geometry, Rhino.Geometry.Curve):\n            # Check if the curve is a line\n            if isinstance(geometry, Rhino.Geometry.LineCurve):\n                start_point = rs.GetPoint()\n                end_point = rs.GetPoint()\n                new_curve = rs.AddLine(start_point, end_point)\n            # Check if the curve is an arc\n            elif isinstance(geometry, Rhino.Geometry.ArcCurve):\n                start_point = rs.GetPoint()\n                end_point = rs.GetPoint()\n                center_point = rs.GetPoint()\n                new_curve = rs.AddArc3Pt(start_point, end_point, center_point)\n            # Check if the curve is a polyline\n            elif isinstance(geometry, Rhino.Geometry.PolylineCurve):\n                polyline = geometry.ToPolyline()\n                user_points = rs.GetPoints()\n                new_curve = rs.AddPolyline(user_points)\n            else:\n                print(\"Unsupported curve type. Aborting.\")\n                return\n\n            # Match properties including layer and user text\n            if new_curve:\n                rs.MatchObjectAttributes(new_curve, selected_object)\n        elif isinstance(geometry, Rhino.Geometry.Point):\n            # Prompt the user to create a new point\n            point_location = rs.GetPoint(\"Pick a location to add point\")\n            if point_location:\n                # Create a new point object\n                new_point_object = rs.AddPoint(point_location)\n                # Match properties including layer and user text\n                rs.MatchObjectAttributes(new_point_object, selected_object)\n        else:\n            print(\"Unsupported object type. Aborting.\")\n            return\n    else:\n        print(\"Unable to find Rhino object. Aborting.\")\n\n# Call the function to execute the script\ncreate_similar()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 16,
+  "views": 2397
+}

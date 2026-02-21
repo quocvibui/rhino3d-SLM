@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/accessing-ghpythonlib-components-from-rhino-pythoneditor/72042",
+  "topic_id": 72042,
+  "title": "Accessing ghpythonlib.components from Rhino PythonEditor?",
+  "question": "What is the proper way to use it?",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nfrom ghpythonlib import components as ghcomp\n\npt=ghcomp.ConstructPoint(0.0,0.0,0.0)\nsc.doc.Objects.AddPoint(pt)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 8,
+      "is_solution": true
+    },
+    {
+      "code": "ToBrep(...)\n |          ToBrep(data: object, rc: Brep, conversion_level: GH_Conversion) -> (bool, Brep)\n |          \n |              Convert data into Rhino.Geometry.Brep.\n |          \n |              data: Data to convert\n |              conversion_level: Level of conversion.\n |",
+      "language": "unknown",
+      "author": "ivelin.peychev",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ncircle=Rhino.Geometry.Circle(Rhino.Geometry.Plane.WorldXY,10.0)\ncylinder=Rhino.Geometry.Cylinder(circle,10.0)\nbrep=cylinder.ToBrep(True,True) #convert to brep + add caps top and bottom\nsc.doc.Objects.AddBrep(brep)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ncircle=Rhino.Geometry.Circle(Rhino.Geometry.Plane.WorldXY,10.0)\ncylinder=Rhino.Geometry.Cylinder(circle,10.0)\nbrep=cylinder.ToBrep(True,True) #convert to brep + add caps top and bottom\nsc.doc.Objects.AddBrep(brep)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nfrom ghpythonlib import components as cp\n\na = cp.ConstructPoint(0,0,0)\nb = cp.XYPlane(a)\nc = cp.Cylinder(b,30,30)\nd = cp.CapHoles(c)\nsc.doc.Objects.AddBrep(d)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport scriptcontext as sc\n\nxy = rc.Geometry.Plane.WorldXY\ncrc = rc.Geometry.Circle(xy,10.0)\ncyl = rc.Geometry.Cylinder(crc,10.0)\ncyl = cyl.ToBrep(True,True)\nsc.doc.Objects.AddBrep(cyl)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 22,
+  "views": 3511
+}

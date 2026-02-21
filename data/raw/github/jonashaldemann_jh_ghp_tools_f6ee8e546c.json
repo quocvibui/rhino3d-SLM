@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/point_two_closest_points.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/point_two_closest_points.py",
+  "instruction": "Point two closest points",
+  "code": "import Rhino.Geometry as rg\n\n\ndef point_two_closest_points(points):\n\n    lines = []\n    for i, pt in enumerate(points):\n        # Calculate distances to all other points\n        dists = [(j, pt.DistanceTo(points[j])) for j in range(len(points)) if j != i]\n        # Sort by distance and get indices of two closest\n        closest = sorted(dists, key=lambda x: x[1])[:2]\n        for idx, _ in closest:\n            line = rg.Line(pt, points[idx])\n            lines.append(line)\n\n    # Join lines that are contiguous\n    joined_curves = rg.Curve.JoinCurves([rg.LineCurve(line) for line in lines])\n\n    return joined_curves\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscript-onmesh/201290",
+  "topic_id": 201290,
+  "title": "Rhinoscript_onmesh?",
+  "question": "I want to use python to convert brep or subd to mesh, I haven’t found a suitable api so far, I think I prefer to use RhinoScriptSyntax api but there is no such method as “onmesh()” in this api, there seems to be such method in rhinocommon, But rhinocommon is obscure and I’m not very good at using it. Can anyone provide a start or a hint? Thanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rh\nfrom Rhino.Input.Custom import *\nfrom Rhino.DocObjects import ObjectType\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import Result\n\ndef RunCommand():\n  gm = rh.Input.Custom.GetObject()\n  gm.SetCommandPrompt(\"Select\")\n  gm.GeometryFilter = ObjectType.AnyObject\n  gm.GeometryAttributeFilter = GeometryAttributeFilter.ClosedMesh\n  gm.SubObjectSelect = False\n  gm.GroupSelect = True\n  gm.GetMultiple(1, 0)\n  if gm.CommandResult() != Result.Success:\n    return gm.CommandResult()\ngo = RunCommand()\nrt = rh.DocObjects.RhinoObject.MeshObjects(go)",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\nimport System\n\ndef __MeshableTypes():\n    types = Rhino.DocObjects.ObjectType.Surface\n    types = types | Rhino.DocObjects.ObjectType.PolysrfFilter\n    types = types | Rhino.DocObjects.ObjectType.Extrusion\n    types = types | Rhino.DocObjects.ObjectType.SubD\n    return types\n\ndef TestTom():\n    rc, objrefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Select objects to mesh\", False, __MeshableTypes())\n    if rc != Rhino.Commands.Result.Success:\n        return\n    \n    in_objects = []\n    for objref in objrefs:\n        in_objects.append(objref.Object())\n    \n    mp = Rhino.Geometry.MeshingParameters.DocumentCurrentSetting(sc.doc)\n    rc, meshes, attributes = Rhino.DocObjects.RhinoObject.MeshObjects(in_objects, mp)\n    if rc == Rhino.Commands.Result.Success:\n        for i in range(0, len(meshes)):\n            id = sc.doc.Objects.AddMesh(meshes[i], attributes[i])\n            if id != System.Guid.Empty:\n                sc.doc.Objects.Select(id, True, True, True)\n\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    TestTom()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "# scriptcontext module\nimport rhinocompat as compat\n\n'''The Active Rhino document (Rhino.RhinoDoc in RhinoCommon) while a script\nis executing. This variable is set by Rhino before the exection of every script.\n'''\ndoc = None\n\n\n'''Identifies how the script is currently executing\n1 = running as standard python script\n2 = running inside grasshopper component\n3... potential other locations where script could be running\n'''\nid = 1\n\n\nclass __Py2StickyWrapper(dict):\n    '''A dictionary of values that can be reused between execution of scripts\n    '''",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 146
+}

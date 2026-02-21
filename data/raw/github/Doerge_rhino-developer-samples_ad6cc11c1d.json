@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Doerge/rhino-developer-samples/blob/beb34e5f5daf7f8da651d732aadf165bdf32a74d/rhinocommon/snippets/py/find-curve-parameter-at-point.py",
+  "repo": "Doerge/rhino-developer-samples",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/find-curve-parameter-at-point.py",
+  "instruction": "Find curve parameter at point",
+  "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef RunCommand():\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", True, Rhino.DocObjects.ObjectType.Curve)\n    if(rc!= Rhino.Commands.Result.Success):\n        return rc\n    crv = objref.Curve()\n    if( crv == None ):\n        return Rhino.Commands.Result.Failure\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Pick a location on the curve\")\n    gp.Constrain(crv, False)\n    gp.Get()\n    if (gp.CommandResult() != Rhino.Commands.Result.Success):\n        return gp.CommandResult();\n\n    p = gp.Point()\n    b, cp = crv.ClosestPoint(p)\n    if (b):\n        print \"point: ({0},{1},{2}), parameter: {3}\".format(p.X, p.Y, p.Z, cp)\n        scriptcontext.doc.Objects.AddPoint(p)\n        scriptcontext.doc.Views.Redraw()\n\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Gaspard-Bourgeois/rhino-picksoul/blob/9431b8335b62d43ec3539852d1a1af603f0ce1c5/dev/orient/copyBlockOrientation.py",
+  "repo": "Gaspard-Bourgeois/rhino-picksoul",
+  "repo_stars": 1,
+  "repo_description": "Generic plugin to manage blocs, materials and trajectories in rhino.",
+  "license": "Apache-2.0",
+  "filepath": "dev/orient/copyBlockOrientation.py",
+  "instruction": "Author: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 05/01/26",
+  "code": "\"\"\"\nAuthor: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 05/01/26\n\"\"\"\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef CopyBlockOrientation():\n    # 1. Sélection des blocs à modifier (Cibles) avec gestion de la présélection\n    targets = rs.GetObjects(\"Sélectionnez les blocs à réorienter\", rs.filter.instance, preselect=True)\n    if not targets: return\n    \n    # On vide la sélection pour choisir les sources proprement\n    rs.UnselectAllObjects()\n    \n    # 2. Sélection du ou des blocs sources\n    sources = rs.GetObjects(\"Sélectionnez le ou les blocs sources\", rs.filter.instance, preselect=False)\n    if not sources: return\n\n    rs.EnableRedraw(False)\n    \n    num_sources = len(sources)\n    \n    for i, target_id in enumerate(targets):\n        # Choix de la source selon l'ordre (boucle modulo)\n        source_id = sources[i % num_sources]\n        \n        # Récupérer la matrice (Transform) de la source et de la cible\n        # rs.BlockInstanceXform renvoie un objet Rhino.Geometry.Transform\n        source_xform = rs.BlockInstanceXform(source_id)\n        target_xform = rs.BlockInstanceXform(target_id)\n        \n        # Récupérer les points d'insertion\n        source_pos = rs.BlockInstanceInsertPoint(source_id)\n        target_pos = rs.BlockInstanceInsertPoint(target_id)\n        \n        # ÉTAPE A : Aligner l'orientation de la source sur la position de la cible\n        # On déplace la matrice source vers la position cible\n        translation_vec = target_pos - source_pos\n        translation_xform = rg.Transform.Translation(translation_vec)\n        final_target_xform = translation_xform * source_xform\n        \n        # ÉTAPE B : Calculer la transformation RELATIVE\n        # Pour ne pas \"ajouter\" un déplacement, on calcule ce qu'il manque \n        # entre l'état actuel de la cible et l'état final désiré\n        # Formule : Relative = Finale * Inverse(Actuelle)\n        \n        success, inverse_target_xform = target_xform.TryGetInverse()\n        if success:\n            relative_xform = final_target_xform * inverse_target_xform\n            \n            # Appliquer la transformation relative\n            rs.TransformObject(target_id, relative_xform)\n        \n    rs.EnableRedraw(True)\n    print(\"Succès : {} blocs réorientés sur place.\".format(len(targets)))\n\nif __name__ == \"__main__\":\n    CopyBlockOrientation()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

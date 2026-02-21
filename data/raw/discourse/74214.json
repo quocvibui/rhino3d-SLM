@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/usertext-lost-after-rs-explodeblockinstance/74214",
+  "topic_id": 74214,
+  "title": "Usertext lost after rs.explodeblockinstance()",
+  "question": "Hi,\n\n\nI believe there is an issue with rs.ExplodeBlock() in rhino6. I have a block instance containing an object with object attactched user text (see .3dm the rectangle), if I run the following code snippet to explode the block, the usertext is lost. I expected it to be in the resulting objects as well, like when I run the command ‘Explode’\n\n\nimport rhinoscriptsyntax as rs\n\nobjs = rs.GetObjects('select')\n\nif objs:\n    for obj in objs:\n       result = rs.ExplodeBlockInstance(obj)\n\n\n\nuserText_test.3dm\n (81.0 KB)\n\n\nthe same occurs with\n\n\nresult = scriptcontext.doc.Objects.AddExplodedInstancePieces(rh_block)\n\n\ncheers,\n\nTim\n\n\nVersion 6 SR9\n\n(6.9.18271.20591, 28-9-2018)\n\nEducational",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ExplodeBlock(thing,instance_xform):\n    expStatus = True #check for failure so I know not to delete the input object\n    \n    xform = thing.InstanceXform\n    \n    \n    # if this is looping through nested blocks there will be\n    # an incoming transgform to take into account\n    if instance_xform:\n        xform = instance_xform * xform\n\n    inst = thing.InstanceDefinition\n\n    objList = []\n    # get all the objects in the definition\n    for i in range(inst.ObjectCount):\n        temp = []\n        x = inst.Object(i)\n        objList.append(x)\n    \n    \n    # look through the definition objects and send them back  \n    # through if they are instances themselves, \n    # else, apply the accumulated transform, the attributes and\n    # put them in the document\n    \n    for n in range(len(objList)):\n        if isinstance(objList[n], Rhino.DocObjects.InstanceObject):\n            ExplodeBlock(objList[n], xform)\n            \n        else:\n            \n            geo = objList[n].Geometry\n            geo.Transform(xform)\n            new = sc.doc.Objects.Add(geo, objList[n].Attributes)\n            \n            #check for failure so I know not to delete the input object\n            if not new: expStatus = False\n\n    return expStatus\n    \ndef test():\n    \n    id = rs.GetObject(\"Select a block instance.\", filter = rs.filter.instance,  preselect=True)\n    if not id: return\n    \n    thing = sc.doc.Objects.Find(id)\n    \n    rc = ExplodeBlock(thing, None)\n    \n    if rc:\n        rs.DeleteObject(id)\n        \n    sc.doc.Views.Redraw()\n\n    \ntest()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjs = rs.GetObjects('select')\n\nif objs:\n    for obj in objs:\n       result = rs.ExplodeBlockInstance(obj)",
+      "language": "python",
+      "author": "timcastelijn",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 5,
+  "views": 823
+}

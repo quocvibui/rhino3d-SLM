@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/booleansplit-produces-closed-solid-polysurface-while-more-primitive-splits-produce-open-polysurfaces-how-to-wind-up-with-closed-solid-polysurfaces/92198",
+  "topic_id": 92198,
+  "title": "BooleanSplit produces closed solid polysurface while more primitive splits produce open polysurfaces. How to wind up with closed solid polysurfaces?",
+  "question": "Given a closed solid polysurface, when split with BooleanSplit (say in two for simplicity), you wind up with closed solid polysurfaces.  But when you do the same thing with Split, or SplitBrep, you wind up with open polysurfaces.\n\n\nHow does BooleanSplit close these open polysurfaces?  More specifically, what do I have to do to produce (or at least, wind up with) closed solid polysurfaces when using SplitBrep?\n\n\nUPDATE FOR CLARITY: I didn’t explicitly state this, but sort of implied it by mentioning the use of \nSplitBrep\n, but my objective is to do all the splitting within a script, not from the Rhino command prompt.",
+  "code_blocks": [
+    {
+      "code": "def BooleanSplit(input0, input1, delete_input=True):\n    \"\"\"Performs a boolean split operation on two sets of input surfaces\n    and polysurfaces. For more details, see the BooleanSplit command in\n    the Rhino help file\n    Parameters:\n        input0 ([guid, ...]): list of surfaces to subtract from\n        input1 ([guid, ...]): list of surfaces to be subtracted\n        delete_input (bool, optional): delete all input objects\n    Returns:\n        list(guid, ...): of identifiers of newly created objects on success\n        None: on error\n    Example:\n      import rhinoscriptsyntax as rs\n      filter = rs.filter.surface | rs.filter.polysurface\n      input0 = rs.GetObjects(\"Select first set of surfaces or polysurfaces\", filter)\n      if input0:\n          input1 = rs.GetObjects(\"Select second set of surfaces or polysurfaces\", filter)\n          if input1: rs.BooleanSplit(input0, input1)\n    See Also:\n      BooleanDifference\n      BooleanIntersection\n      BooleanUnion\n    \"\"\"\n    if type(input0) is list or type(input0) is tuple: pass\n    else: input0 = [input0]\n    \n    if type(input1) is list or type(input1) is tuple: pass\n    else: input1 = [input1]\n\n    breps0 = [rhutil.coercebrep(id, True) for id in input0]\n    breps1 = [rhutil.coercebrep(id, True) for id in input1]\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    newbreps = Rhino.Geometry.Brep.CreateBooleanSplit(breps0, breps1, tolerance)\n    if newbreps is None: return scriptcontext.errorhandler()\n    \n    rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in newbreps]\n    if delete_input:\n        for id in input0: scriptcontext.doc.Objects.Delete(id, True)\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\ndef MySplit(sObjToCut, sCutter):\n    aObjToCut = rs.ObjectsByName(sObjToCut)\n    aCutter = rs.ObjectsByName(sCutter)\n    \n    for objToCut in aObjToCut:\n        for cutter in aCutter:\n            BooleanSplit(objToCut, cutter)\n    \ndef BooleanSplit(input0, input1, delete_input=True):\n\n    \"\"\"Performs a boolean split operation on two sets of input surfaces\n\n    and polysurfaces. For more details, see the BooleanSplit command in\n\n    the Rhino help file\n\n    Parameters:\n\n        input0 ([guid, ...]): list of surfaces to subtract from\n\n        input1 ([guid, ...]): list of surfaces to be subtracted\n\n        delete_input (bool, optional): delete all input objects\n\n    Returns:\n\n        list(guid, ...): of identifiers of newly created objects on success\n\n        None: on error\n\n    Example:\n\n      import rhinoscriptsyntax as rs\n\n      filter = rs.filter.surface | rs.filter.polysurface\n\n      input0 = rs.GetObjects(\"Select first set of surfaces or polysurfaces\", filter)\n\n      if input0:\n\n          input1 = rs.GetObjects(\"Select second set of surfaces or polysurfaces\", filter)\n\n          if input1: rs.BooleanSplit(input0, input1)\n\n    See Also:\n\n      BooleanDifference\n\n      BooleanIntersection\n\n      BooleanUnion\n\n    \"\"\"\n\n    if type(input0) is list or type(input0) is tuple: pass\n\n    else: input0 = [input0]\n\n    \n\n    if type(input1) is list or type(input1) is tuple: pass\n\n    else: input1 = [input1]\n\n\n\n    breps0 = [rs.coercebrep(id, True) for id in input0]\n\n    breps1 = [rs.coercebrep(id, True) for id in input1]\n\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n\n    newbreps = Rhino.Geometry.Brep.CreateBooleanSplit(breps0, breps1, tolerance)\n\n    if newbreps is None: return scriptcontext.errorhandler()\n\n    rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in newbreps]\n\n    #mbmast added check for emptiness\n    if not rc:\n        return rc\n\n    #mbmast - kludge, I'm sure there's a better way to do this.\n    for newObj in rc:\n        rs.ObjectName(newObj, rs.ObjectName(input0))\n\n    if delete_input:\n        for id in input0: scriptcontext.doc.Objects.Delete(id, True)\n\n        #mbmast don't delete the cutter\n        #for id in input1: scriptcontext.doc.Objects.Delete(id, True)\n\n    scriptcontext.doc.Views.Redraw()\n\n    return rc\n    \nif __name__ == \"__main__\":\n    # call the function defined above\n    #MySplit(\"Block\", \"Plane\")\n    MySplit(\"RectTrackInteriorWide\", \"ShellEyeExterior\")\n    MySplit(\"RectTrackInteriorWide\", \"ShellTrackOverhangInterior\")\n    MySplit(\"RectTrackExterior\", \"ShellEyeExterior\")\n    MySplit(\"RectTrackExterior\", \"ShellTrackOverhangExterior\")\n    \n    aObjToSubtractFrom = rs.ObjectsByName(\"RectTrackExterior\")\n    aObjToSubtractWith = rs.ObjectsByName(\"RectTrackInteriorWide\")\n    \n    for objToSubtractFrom in aObjToSubtractFrom:\n        if not rs.IsObjectNormal(objToSubtractFrom):\n            continue\n    \n        if not rs.IsObjectValid(objToSubtractFrom):\n            continue\n    \n        for objToSubtractWith in aObjToSubtractWith:\n            if not rs.IsObjectNormal(objToSubtractWith):\n                continue\n    \n            if not rs.IsObjectValid(objToSubtractWith):\n                continue\n                \n            print \"sub from type: \" + str(rs.ObjectType(objToSubtractFrom)) + \", sub with type: \" + str(rs.ObjectType(objToSubtractWith))\n     \n            rs.BooleanDifference(objToSubtractFrom, objToSubtractWith)",
+      "language": "python",
+      "author": "mike15",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "Traceback:\n  line 1065, in coercerhinoobject, \"C:\\Users\\mbmas\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py\"\n  line 1364, in ObjectType, \"C:\\Users\\mbmas\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\object.py\"\n  line 126, in <module>, \"C:\\Users\\mbmas\\Documents\\3D Objects\\Martian Eye\\MyScript.py\"",
+      "language": "unknown",
+      "author": "mike15",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 1537
+}

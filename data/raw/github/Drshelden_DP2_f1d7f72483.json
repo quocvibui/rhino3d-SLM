@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Drshelden/DP2/blob/5a4943a031847a44ecc295153ef08068443de42d/Classes/Week%2001/DP2%20-%20Class%2001%20-%20Scripts/Class01.08%20spherical%20coordinates%20with%20boolean.py",
+  "repo": "Drshelden/DP2",
+  "repo_stars": 0,
+  "repo_description": "Design Programming 2 Course Locker",
+  "license": "unknown",
+  "filepath": "Classes/Week 01/DP2 - Class 01 - Scripts/Class01.08 spherical coordinates with boolean.py",
+  "instruction": "Testing pip install specific packages",
+  "code": "#! python3\n\"\"\"Testing pip install specific packages\"\"\"\n# r: numpy\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nimport System\nimport System.Collections.Generic\nimport Rhino\nimport random\nimport math\nimport numpy as np\n\n\nxCount = 16.0\nyCount = 10.0\nzCount = 5\nxScale = 10\nyScale = 10\nzScale = 10\nrSphere = 2\n\nthetaValues = np.arange(0, 2 * math.pi, 2 * math.pi /xCount) # 0 to 2PI in 16 steps\nalphaValues = np.arange(0, math.pi / 2.0, math.pi / 2.0 / yCount) # 0 to 1 in 0.1 steps\nprint(len(thetaValues), \" \" , len(alphaValues))\n\npointIds = []\nsphereIds = []\n\n\n# Print out the coordinates of each point\ni = 0\n\npointIds = [[0 for _ in range(len(alphaValues))] for _ in range(len(thetaValues))]\n\nfor theta in thetaValues:\n    j = 0\n    for alpha in alphaValues:\n\n        x = math.cos(theta) * math.cos(alpha)\n        y = math.sin(theta) * math.cos(alpha)\n        z = math.sin(alpha)\n\n        pointId = rs.AddPoint( (x * xScale, y * yScale, z * zScale) )\n        print (i, \" \" , j)\n        pointIds[i][j] = pointId\n\n        sphereId = rs.AddSphere( (x * xScale, y * yScale, z * zScale), rSphere )\n        sphereIds.append(sphereId)\n        #print(sphereId)\n        #rs.ObjectColor(sphereId, [int(random.random() * 255), int(random.random() * 255), int(random.random() * 255) ])\n\n        j = j + 1\n    i = i + 1\n\nnewSphereId = rs.AddSphere( (0,0,0), xScale )\n\nrs.BooleanDifference(newSphereId, sphereIds)\n\n # done!",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/find-curves-that-are-contained-within-another-curve/214336",
+  "topic_id": 214336,
+  "title": "Find curves that are contained within another curve",
+  "question": "I am looking for a script, RVB, to find curves that are contained within another curve\n\n\nAll the curves lay on the same plane\n\n\nAll the curves are closed and do not intersect, no self-intersections\n\n\nI am not concerned with multiple nesting, curves within at a second level, I can have the script that finds nested curves move them to a new layer and rerun the script on that layer",
+  "code_blocks": [
+    {
+      "code": "Const rhObjectCurve = 4\n\nDim strCurve1, strCurve2, intResult\n\nstrCurve1 = Rhino.GetObject(\"Select first curve\", rhObjectCurve)\nstrCurve2 = Rhino.GetObject(\"Select second curve\", rhObjectCurve)\n\nIf Rhino.IsCurvePlanar(strCurve1) And Rhino.IsCurvePlanar(strCurve2) Then\n    If Rhino.IsCurveClosed(strCurve1) And Rhino.IsCurveClosed(strCurve2) Then\n        If Rhino.IsCurveInPlane(strCurve1) And Rhino.IsCurveInPlane(strCurve2) Then\n\n            intResult = Rhino.PlanarClosedCurveContainment(strCurve1, strCurve2)\n\n            If intResult = 0 Then\n                Rhino.Print \"The regions bounded by the curves are disjoint.\"\n            ElseIf intResult = 1 Then\n                Rhino.Print \"The two curves intersect.\"\n            ElseIf intResult = 2 Then\n                Rhino.Print \"The region bounded by Curve1 is inside of Curve2.\"\n            Else\n                Rhino.Print \"The region bounded by Curve2 is inside of Curve1.\"\n            End If\n\n        End If\n    End If\nEnd If",
+      "language": "unknown",
+      "author": "Tom_P",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "layers",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 153
+}

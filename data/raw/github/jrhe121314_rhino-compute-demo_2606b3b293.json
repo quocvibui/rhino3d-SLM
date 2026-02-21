@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jrhe121314/rhino-compute-demo/blob/0ec00779fbd01a92428cd35b4eb7c0c515bcbd13/compute.rhino3d/src/ghhops-server-py/examples/app.py",
+  "repo": "jrhe121314/rhino-compute-demo",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "compute.rhino3d/src/ghhops-server-py/examples/app.py",
+  "instruction": "Hops flask middleware example",
+  "code": "\"\"\"Hops flask middleware example\"\"\"\r\nfrom flask import Flask\r\nimport ghhops_server as hs\r\nimport rhino3dm\r\n\r\n\r\n# register hops app as middleware\r\napp = Flask(__name__)\r\nhops: hs.HopsFlask = hs.Hops(app)\r\n\r\n\r\n# flask app can be used for other stuff drectly\r\n@app.route(\"/help\")\r\ndef help():\r\n    return \"Welcome to Grashopper Hops for CPython!\"\r\n\r\n\r\n@hops.component(\r\n    \"/binmult\",\r\n    inputs=[hs.HopsNumber(\"A\"), hs.HopsNumber(\"B\")],\r\n    outputs=[hs.HopsNumber(\"Multiply\")],\r\n)\r\ndef BinaryMultiply(a: float, b: float):\r\n    return a * b\r\n\r\n\r\n@hops.component(\r\n    \"/add\",\r\n    name=\"Add\",\r\n    nickname=\"Add\",\r\n    description=\"Add numbers with CPython\",\r\n    inputs=[\r\n        hs.HopsNumber(\"A\", \"A\", \"First number\"),\r\n        hs.HopsNumber(\"B\", \"B\", \"Second number\"),\r\n    ],\r\n    outputs=[hs.HopsNumber(\"Sum\", \"S\", \"A + B\")]\r\n)\r\ndef add(a: float, b: float):\r\n    return a + b\r\n\r\n\r\n@hops.component(\r\n    \"/pointat\",\r\n    name=\"PointAt\",\r\n    nickname=\"PtAt\",\r\n    description=\"Get point along curve\",\r\n    icon=\"examples/pointat.png\",\r\n    inputs=[\r\n        hs.HopsCurve(\"Curve\", \"C\", \"Curve to evaluate\"),\r\n        hs.HopsNumber(\"t\", \"t\", \"Parameter on Curve to evaluate\")\r\n    ],\r\n    outputs=[hs.HopsPoint(\"P\", \"P\", \"Point on curve at t\")]\r\n)\r\ndef pointat(curve: rhino3dm.Curve, t=0.0):\r\n    return curve.PointAt(t)\r\n\r\n\r\n@hops.component(\r\n    \"/srf4pt\",\r\n    name=\"4Point Surface\",\r\n    nickname=\"Srf4Pt\",\r\n    description=\"Create ruled surface from four points\",\r\n    inputs=[\r\n        hs.HopsPoint(\"Corner A\", \"A\", \"First corner\"),\r\n        hs.HopsPoint(\"Corner B\", \"B\", \"Second corner\"),\r\n        hs.HopsPoint(\"Corner C\", \"C\", \"Third corner\"),\r\n        hs.HopsPoint(\"Corner D\", \"D\", \"Fourth corner\")\r\n    ],\r\n    outputs=[hs.HopsSurface(\"Surface\", \"S\", \"Resulting surface\")]\r\n)\r\ndef ruled_surface(a: rhino3dm.Point3d,\r\n                  b: rhino3dm.Point3d,\r\n                  c: rhino3dm.Point3d,\r\n                  d: rhino3dm.Point3d):\r\n    edge1 = rhino3dm.LineCurve(a, b)\r\n    edge2 = rhino3dm.LineCurve(c, d)\r\n    return rhino3dm.NurbsSurface.CreateRuledSurface(edge1, edge2)\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    app.run(debug=True)\r\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

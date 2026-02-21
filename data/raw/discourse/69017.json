@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bake-component-in-ghpython-add-extra-options/69017",
+  "topic_id": 69017,
+  "title": "Bake component in ghPython - add extra options?",
+  "question": "I just discovered a wonderful set of ghPython scripts and in one of them I need to add some extra functionality.\n\n\nMore exactly, into the script listed bellow I need to add two additional options:\n\n\n\n\ninput for “layerColor”\n\n\nMake “obj” input to accept more object types like text and dimensions.\n\n\n\n\n4-8. Baking Input Objects with Attributes\n\n\nhttp://atlv.org/education/ghpython/\n\n\nhttp://atlv.org/education/ghpython/python_attributes8.gh\n\n\n# ================\n\n#  bake objects with attributes\n\n#  input type - obj: GeometryBase, objName: str, layerName: str, displayColor: Color, plotColor: Color, plotWeight: float, ambientColor: color, diffuseColor: Color, emissionColor: Color, specularColor: Color, transparency: float, shine: float, wireDensity: int, bake: bool (Item Access)\n\n import scriptcontext as sc\n import System.Drawing as sd\n import Rhino.DocObjects as rd\n import Rhino.Geometry as rg\n import Rhino\n \n sc.doc = Rhino.RhinoDoc.ActiveDoc\n if bake and obj is not None:\n     attr = rd.ObjectAttributes()\n     \n     if objName is not None: # setting object name\n         attr.Name = objName\n     \n     if layerName is not None: # setting layer\n         if rd.Layer.IsValidName(layerName):\n             layerIndex = sc.doc.Layers.Find(layerName, True)\n             if layerIndex < 0: # if the layer doesn't exist\n                 layer = rd.Layer()\n                 layer.Name = layerName\n                 layerIndex = sc.doc.Layers.Add(layer)\n             attr.LayerIndex = layerIndex\n      \n     if displayColor is not None: # setting display color\n         attr.ColorSource = rd.ObjectAttributes.ColorSource.PropertyType.ColorFromObject\n         attr.ObjectColor = displayColor\n     \n     if plotColor is not None: # setting plot color\n         attr.PlotColorSource = rd.ObjectAttributes.PlotColorSource.PropertyType.PlotColorFromObject\n         attr.PlotColor = plotColor\n     \n     if plotWeight >= 0: # setting plot weight\n         attr.PlotWeightSource = rd.ObjectAttributes.PlotWeigh...",
+  "code_blocks": [
+    {
+      "code": "finally:\n    #we put back the original Grasshopper document as default\n    scriptcontext.doc = ghdoc",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "# ================\n\n#  bake objects with attributes\n\n#  input type - obj: GeometryBase, objName: str, layerName: str, displayColor: Color, plotColor: Color, plotWeight: float, ambientColor: color, diffuseColor: Color, emissionColor: Color, specularColor: Color, transparency: float, shine: float, wireDensity: int, bake: bool (Item Access)\n\n import scriptcontext as sc\n import System.Drawing as sd\n import Rhino.DocObjects as rd\n import Rhino.Geometry as rg\n import Rhino\n \n sc.doc = Rhino.RhinoDoc.ActiveDoc\n if bake and obj is not None:\n     attr = rd.ObjectAttributes()\n     \n     if objName is not None: # setting object name\n         attr.Name = objName\n     \n     if layerName is not None: # setting layer\n         if rd.Layer.IsValidName(layerName):\n             layerIndex = sc.doc.Layers.Find(layerName, True)\n             if layerIndex < 0: # if the layer doesn't exist\n                 layer = rd.Layer()\n                 layer.Name = layerName\n                 layerIndex = sc.doc.Layers.Add(layer)\n             attr.LayerIndex = layerIndex\n      \n     if displayColor is not None: # setting display color\n         attr.ColorSource = rd.ObjectAttributes.ColorSource.PropertyType.ColorFromObject\n         attr.ObjectColor = displayColor\n     \n     if plotColor is not None: # setting plot color\n         attr.PlotColorSource = rd.ObjectAttributes.PlotColorSource.PropertyType.PlotColorFromObject\n         attr.PlotColor = plotColor\n     \n     if plotWeight >= 0: # setting plot weight\n         attr.PlotWeightSource = rd.ObjectAttributes.PlotWeightSource.PropertyType.PlotWeightFromObject\n         attr.PlotWeight = plotWeight\n     \n     if ambientColor is not None or diffuseColor is not None or emissionColor is not None or specularColor is not None or transparency >= 0 or shine >=0: # setting material\n         materialIndex = sc.doc.Materials.Add()\n         material = sc.doc.Materials[materialIndex]\n         if ambientColor is not None:\n             material.AmbientColor = ambientColor\n         if diffuseColor is not None:\n             material.DiffuseColor = diffuseColor\n         if emissionColor is not None:\n             material.EmissionColor = emissionColor\n         if specularColor is not None:\n             material.SpecularColor = specularColor\n         if transparency >= 0:\n             material.Transparency = transparency\n         if shine >= 0:\n             material.Shine = shine\n         material.CommitChanges()\n         attr.MaterialSource = rd.ObjectMaterialSource.MaterialFromObject\n         attr.MaterialIndex = materialIndex\n     \n     if wireDensity > 0 or wireDensity == -1: # setting wire density\n         attr.WireDensity = wireDensity\n     \n     # bake by type\n     type = obj.ObjectType\n     if type == rd.ObjectType.Point:\n         sc.doc.Objects.AddPoint(obj.Location, attr)\n     elif type == rd.ObjectType.Curve:\n         sc.doc.Objects.AddCurve(obj, attr)\n     elif type == rd.ObjectType.Surface:\n         sc.doc.Objects.AddSurface(obj, attr)\n     elif type == rd.ObjectType.Brep:\n         sc.doc.Objects.AddBrep(obj, attr)\n     elif type == rd.ObjectType.Mesh:\n         sc.doc.Objects.AddMesh(obj, attr)\n     else:\n         print \"object type \"+str(type)+ \" is not baked\"\n \n# ================",
+      "language": "python",
+      "author": "Macuso",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 2519
+}

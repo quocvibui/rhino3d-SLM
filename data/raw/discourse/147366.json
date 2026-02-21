@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-accumulated-random-movement-of-a-point/147366",
+  "topic_id": 147366,
+  "title": "Create accumulated random movement of a point",
+  "question": "Hi,\n\nI’m trying to create a random moving point using for loop but the script outputs always all the points in the same location although the print command says otherwise. If someone could explain why this is happening I’ll be thankful.\n\n\nNB: in the attached gh file I created two examples in another way that makes the script work fine but my question here is why I have those messages in the panel that doesn’t match with the outputs?\n\n\n\nimport rhinoscriptsyntax as rs\nimport random as r\n\n#initial point \npt = rs.AddPoint(0,0,0)\n#point list creation\nlistPt = []\n\n#if condition for button as seed\nif toggle == False:\n    #initializing for loop to move the initial point in random directions\n    for i in range (0,iteration):\n        pt1= rs.coerce3dpoint(pt)\n        v = rs.CreateVector(r.randint(-20,20), r.randint(-20,20), r.randint(-20,20))\n        print (\"intial Point location for loop number \" + str(i+1) + \" is \" + str(pt1))\n        print (\"random vector is \" + str(v))\n        movedPt = rs.MoveObject(pt, v)\n        listPt.append(movedPt)\n        pt = movedPt\n    #out putting the list\n    OutPts = listPt\n\n\n\n\n\n\n\nrandom moving point\n1915×1019 301 KB\n\n\n\n\naccumulated random movement of a point.gh\n (18.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rc\nimport random as rd\n\n# Make empty polyline and add start point\npl = rc.Geometry.Polyline()\npl.Add(0,0,0)\n\n# Set random seed\nrd.seed(Seed)\n\n# Perform random walk\nfor i in range(Steps):\n    \n    # Make random vector\n    x = rd.uniform(-1,1)\n    y = rd.uniform(-1,1)\n    z = rd.uniform(-1,1)\n    rdVec = rc.Geometry.Vector3d(x,y,z)\n    \n    # Get/move/add polyline point by random vector\n    newPt = pl.Last + rdVec\n    pl.Add(newPt)\n    \n# Cast and output polyline to Grasshopper\nWalk = pl.ToNurbsCurve()",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random as r\n\n#initial point \npt = rs.AddPoint(0,0,0)\n#point list creation\nlistPt = []\n\n#if condition for button as seed\nif toggle == False:\n    #initializing for loop to move the initial point in random directions\n    for i in range (0,iteration):\n        pt1= rs.coerce3dpoint(pt)\n        v = rs.CreateVector(r.randint(-20,20), r.randint(-20,20), r.randint(-20,20))\n        print (\"intial Point location for loop number \" + str(i+1) + \" is \" + str(pt1))\n        print (\"random vector is \" + str(v))\n        movedPt = rs.MoveObject(pt, v)\n        listPt.append(movedPt)\n        pt = movedPt\n    #out putting the list\n    OutPts = listPt",
+      "language": "python",
+      "author": "Faried",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 839
+}

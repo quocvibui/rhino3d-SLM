@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Cybernaut0815/RC10_2025/blob/0c1b8554be725469968a4a9573e638dc27580dc9/Lesson_1/02_Cube_walk_rhino.py",
+  "repo": "Cybernaut0815/RC10_2025",
+  "repo_stars": 1,
+  "repo_description": "Collection of the different scripts for the python and AI class in RC 10.",
+  "license": "unknown",
+  "filepath": "Lesson_1/02_Cube_walk_rhino.py",
+  "instruction": "02 cube walk rhino",
+  "code": "#! python3\n# r: numpy\n\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\nimport sys\nimport os\n\nsys.path.append(os.path.expandvars(r'%USERPROFILE%\\Documents\\RC10\\2025_2026\\RC10_2025\\Lesson_1\\external_imports'))\nimport Cube_walk\n\n\n# Get state from sticky variables\ngrid = sc.sticky.get(\"cube_walk_grid\")\ncurrent_position = sc.sticky.get(\"cube_walk_current_position\")\ngame_over = sc.sticky.get(\"cube_walk_game_over\", False)\n\n# Initialize on reset or if not yet initialized\nif _reset or grid is None:\n    grid, current_position, game_over = Cube_walk.initialize_cube_walk(_xSize, _ySize)\n    sc.sticky[\"cube_walk_grid\"] = grid\n    sc.sticky[\"cube_walk_current_position\"] = current_position\n    sc.sticky[\"cube_walk_game_over\"] = game_over\n    # Reset geometry list on initialization\n    sc.sticky[\"geo_out\"] = []\n    sc.sticky[\"rendered_path_length\"] = 0\n\n# Step forward when ticker runs\nif _run:\n    grid, current_position, game_over = Cube_walk.step_cube_walk(\n        grid, current_position, game_over\n    )\n    sc.sticky[\"cube_walk_grid\"] = grid\n    sc.sticky[\"cube_walk_current_position\"] = current_position\n    sc.sticky[\"cube_walk_game_over\"] = game_over\n\n# Get saved geometry list and only add new cubes\ngeo_out = sc.sticky.get(\"geo_out\", [])\n\n# Only add new cubes if path has grown and still running\nis_running = not game_over\nif is_running and grid is not None and _run:\n    cell_size = 1.0\n    # Add cube for the current position (newly visited cell)\n    base_plane = rg.Plane(rg.Point3d(current_position[1] * cell_size, current_position[0] * cell_size, 0), rg.Vector3d.ZAxis)\n    box = rg.Box(base_plane, \n                rg.Interval(0, cell_size),\n                rg.Interval(0, cell_size),\n                rg.Interval(0, cell_size))\n    geo_out.append(box.ToBrep())\n    sc.sticky[\"geo_out\"] = geo_out\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

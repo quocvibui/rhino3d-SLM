@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/automating-layout-creation-using-rhinoscriptsyntax/186197",
+  "topic_id": 186197,
+  "title": "Automating Layout Creation Using RhinoScriptSyntax",
+  "question": "Hi all,\n\n\nI am trying to automate a relatively tedious task. Basically, I am envisioning a script where one inputs any solid model, and it returns a new layout with (3) details:\n\n\n            -An isometric view of the input object\n            -A top section of the object\n            -A side section of the object\n\n\n\nWhere I am stuck: see script attached and some images of my current output vs. what my desired output would look like. In the RhinoScriptSyntax framework I am not yet sure how “activate” a specific clipping plane so it only references a specific detail.\n\n\nI do some variation of this dozens of times a day so any suggestions about how I may better approach automating a task like this would be greatly appreciated.\n\n\nThank you,\n\n\nParry\n\n\nInput (any solid model):\n\n\nInput\n801×572 26.1 KB\n\n\ncurrent output:\n\n\ncurrentOutput\n1421×880 67.9 KB\n\n\ndesired output:\n\n\ndesiredOutput\n1429×884 86.8 KB\n\n\nautoLayout-07-01.py\n (1.2 KB)\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef auto_layout(objects):\n    # Construct bounding box\n    bounding_box = rs.BoundingBox(objects)\n    box = rs.AddBox(bounding_box)\n    center_of_box = rs.SurfaceAreaCentroid(box)[0]\n    box_centroid = rs.AddPoint(center_of_box)\n    \n    # Delete temporary box\n    rs.DeleteObject(box)\n    \n    # Construct clipping planes\n    equator_plane = add_clipping_plane(box_centroid, 180)\n    prime_meridian_plane = add_clipping_plane(box_centroid, 90)\n    \n    # Capture views and add to layout\n    layout = rs.AddLayout(\"Layout\", (17, 11))\n    if layout:\n        perspective_view = rs.AddDetail(layout, (0.5, 0.5), (8, 10.5), None, 7)\n        top_view = rs.AddDetail(layout, (5, 5), (12, 12), None, 1)\n        rs.DetailScale(top_view, 18, 1)\n        side_view = rs.AddDetail(layout, (16.7, 11.51), (10.7, -0.5), None, 4)\n        rs.DetailScale(side_view, 18, 1)\n\ndef add_clipping_plane(center, angle):\n    plane = rs.RotatePlane(rs.MovePlane(rs.WorldXYPlane(), center), angle, (0, -1, 0))\n    return rs.Add...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef auto_layout(objects):\n    # Construct bounding box\n    bounding_box = rs.BoundingBox(objects)\n    box = rs.AddBox(bounding_box)\n    center_of_box = rs.SurfaceAreaCentroid(box)[0]\n    box_centroid = rs.AddPoint(center_of_box)\n    \n    # Delete temporary box\n    rs.DeleteObject(box)\n    \n    # Construct clipping planes\n    equator_plane = add_clipping_plane(box_centroid, 180)\n    prime_meridian_plane = add_clipping_plane(box_centroid, 90)\n    \n    # Capture views and add to layout\n    layout = rs.AddLayout(\"Layout\", (17, 11))\n    if layout:\n        perspective_view = rs.AddDetail(layout, (0.5, 0.5), (8, 10.5), None, 7)\n        top_view = rs.AddDetail(layout, (5, 5), (12, 12), None, 1)\n        rs.DetailScale(top_view, 18, 1)\n        side_view = rs.AddDetail(layout, (16.7, 11.51), (10.7, -0.5), None, 4)\n        rs.DetailScale(side_view, 18, 1)\n\ndef add_clipping_plane(center, angle):\n    plane = rs.RotatePlane(rs.MovePlane(rs.WorldXYPlane(), center), angle, (0, -1, 0))\n    return rs.AddClippingPlane(plane, 5.0, 5.0)\n\nif __name__ == \"__main__\":\n    input_objects = rs.GetObjects()\n    if input_objects:\n        auto_layout(input_objects)",
+      "language": "python",
+      "author": "Parry_Heavlin",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 335
+}

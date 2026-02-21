@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-fix-the-result-of-rhinoscriptsyntax-sortpointlist-command/127528",
+  "topic_id": 127528,
+  "title": "How to fix the result of rhinoscriptsyntax.SortPointList command",
+  "question": "Hi, friends on the Forum:\n\nI just meet a problem while programming. I try to use a piece of script like follows to get the result, it will return a polyline linked by intersections points in my plan. While, when I use 'SortPointList ’ to sort the sequence of the list of points, the command does not return the result I am looking forward to (see in the picture). I trying to change the ‘tolerance’ parameter, but it still does not work. I guess that should be determined by some internal mechanism of SortPointList. So I want to know if there is any way to fix this problem.\n\n\n\n\nI put the code on the next level",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport itertools\n\ndef get_directions(curve, direction):\n    directions_dict = {\n                'north': rs.coerce3dvector([0, 1, 0]),\n                'south': rs.coerce3dvector([0, -1, 0]),\n                'east' : rs.coerce3dvector([1, 0, 0]),\n                'west': rs.coerce3dvector([-1, 0, 0]),\n                }\n    offset_pt = rs.CurveMidPoint(curve)+directions_dict[direction]\n    \n    return offset_pt\n\nline_list = rs.ExplodeCurves(x)\n\nline1 = rs.OffsetCurve(line_list[0], get_directions(line_list[0], \"north\"), 1)\nline2 = rs.OffsetCurve(line_list[1], get_directions(line_list[1], \"west\"), 1)\nline3 = rs.OffsetCurve(line_list[2], get_directions(line_list[2], \"south\"), 1)\nline4 = rs.OffsetCurve(line_list[3], get_directions(line_list[3], \"east\"), 1)\n\nnew_list = [line1, line2, line3, line4]\n\nline_pair =  itertools.combinations_with_replacement(new_list, 2)\nline_pair_list = [i for i in line_pair if i[0] != i[1]]\n\nintersections = [rs.CurveCurveIntersection(i[0], i[1])[0][1] for i in line_pair_list if rs.CurveCurveIntersection(i[0], i[1]) != None]\n\nrmv_duplicate = []\nfor i in intersections:\n    if i not in rmv_duplicate:\n        rmv_duplicate.append(i)\n\nsort = rs.SortPointList(rmv_duplicate)\nsort.append(sort[0])\n\npolyline = rs.AddPolyline(sort)",
+      "language": "python",
+      "author": "eastnoob",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 546
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas-Masonry/blob/41cf6ce10135782dcef8de413281702f3702775e/src/compas_masonry/scene/blockobject.py",
+  "repo": "BlockResearchGroup/compas-Masonry",
+  "repo_stars": 4,
+  "repo_description": "Rhino plugin for the design and equilibrium analysis of block models and for the stability assessment of (historic) masonry structures.",
+  "license": "NOASSERTION",
+  "filepath": "src/compas_masonry/scene/blockobject.py",
+  "instruction": "Blockobject",
+  "code": "import scriptcontext as sc  # type: ignore\n\nimport compas_rhino.conversions\nfrom compas.colors import Color\nfrom compas.datastructures import Mesh\nfrom compas.scene.descriptors.color import ColorAttribute\nfrom compas_dem.elements import Block\nfrom compas_masonry.session import MasonrySession as Session\nfrom compas_rhino.scene import RhinoSceneObject\n\n\nclass RhinoBlockObject(RhinoSceneObject):\n    \"\"\"Class for representing a block in a Rhino scene.\"\"\"\n\n    session: Session = Session()\n\n    defaultcolor = ColorAttribute(default=Color.grey().lightened(50))\n    supportcolor = ColorAttribute(default=Color.red())\n\n    def __init__(self, show_wireframe=False, **kwargs):\n        super().__init__(**kwargs)\n        self.show_wireframe = show_wireframe\n\n    @property\n    def block(self) -> Block:\n        \"\"\"The COMPAS DEM Block element.\n\n        Returns\n        -------\n        :class:`compas_dem.elements.Block`\n\n        \"\"\"\n        return self.item  # type: ignore\n\n    @block.setter\n    def block(self, block: Block) -> None:\n        self.item = block  # type: ignore\n\n    def draw(self) -> list[str]:\n        \"\"\"Draw the block in Rhino.\n\n        Returns\n        -------\n        list[str]\n            A list of GUIDs of the drawn objects.\n\n        \"\"\"\n        guids = []\n\n        mesh: Mesh = self.block.modelgeometry  # type: ignore\n\n        color = self.supportcolor if self.block.is_support else self.defaultcolor\n\n        if self.session.settings.blockmodel.show_wireframe:\n            for edge in mesh.edges():\n                line = mesh.edge_line(edge)\n                geometry = compas_rhino.conversions.line_to_rhino(line)\n                attr = self.compile_attributes(name=self.name, color=color)\n                guid = sc.doc.Objects.AddLine(geometry, attr)\n                guids.append(guid)\n                self.add_to_group(self.group, guids)\n        else:\n            geometry = compas_rhino.conversions.mesh_to_rhino(mesh)\n            attr = self.compile_attributes(name=self.name, color=color)\n            guid = sc.doc.Objects.AddMesh(geometry, attr)\n            guids.append(guid)\n\n        self._guids = guids\n        return guids\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/force-render-mesh-creation-on-object-without-displaying-it/172683",
+  "topic_id": 172683,
+  "title": "Force render mesh creation on object without displaying it?",
+  "question": "I am looking at creating arrays of thousands of identical objects, my idea is to force the render mesh on the first object before arraying it so the render mesh is copied along with the object (otherwise afterwards it has to mesh them all).\n\n\nCurrently I just show the first object in a shaded Rhino viewport which creates the render mesh for the object, then I cut the redraw and do my array.  But it would be nice to avoid this and if it happens that the active viewport has a wireframe display mode, the first mesh won’t be created anyway.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    pts = []\n    pts.append(Rhino.Geometry.Point3d(0,0,0))\n    pts.append(Rhino.Geometry.Point3d(8,8,8))\n    box = Rhino.Geometry.Box(Rhino.Geometry.Plane.WorldXY, pts)\n    brep = Rhino.Geometry.Brep.CreateFromBox(box)\n    new_id = scriptcontext.doc.Objects.AddBrep(brep)\n    rh_obj = scriptcontext.doc.Objects.FindId(new_id)\n    m_type = Rhino.Geometry.MeshType.Render\n    m_param = Rhino.Geometry.MeshingParameters.DocumentCurrentSetting(scriptcontext.doc)\n    rh_obj.CreateMeshes(m_type, m_param, True)\n    rh_obj.CommitChanges()\n    \n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 271
+}

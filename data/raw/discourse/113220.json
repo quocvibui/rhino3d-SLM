@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unrolling-reverses-the-additional-geometry-order/113220",
+  "topic_id": 113220,
+  "title": "Unrolling reverses the additional geometry order",
+  "question": "Hello,\n\n\nI have two surfaces: one flat, one curved, with the similar UV direction.\n\nI would like to unroll them, and unrolled the points on them as well:\n\n\nimage\n906×399 10.4 KB\n\n\nFor the curved surface, after unrolling, the point order remains the same:\n\n\nHowever, for the flat surface, the order of the points gets reversed:\n\n\nimage\n695×271 3.78 KB\n\n\nWhat is causing the difference between these two?\n\n\nI get the same result in both Rhino 6 SR30, and Rhino 7 Beta (7.0.20301.12003)\n\n\nAttached is an example code, and both surfaces.\n\nIf this is expected Rhino behavior I can always check if the surfaces are curved or not.\n\nI still want to know if it is intentionally set up like this.\n\n\nunroll flat, curved srfs.3dm\n (43.8 KB)\n\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\n\n\n# a) inputs\nid = rs.GetObject(\"select brep to unroll\")\nbrep = rs.coercegeometry(id)\n\n\n\n# for flat 'brep'\npt_L = [\n        rg.Point3d(161.381105, -4.70594, 13.736569),\n        rg.Point3d(171.388057, -4.691688, 18.407002),\n        rg.Point3d(181.024381, -4.677964, 22.802705)]\n\"\"\"\n# for curved 'brep'\npt_L = [\n        rg.Point3d(212.118075, -8.081183, 3.022045),\n        rg.Point3d(219.292585, -12.429482, 12.362912),\n        rg.Point3d(230.643013, -13.730152, 21.154316)]\n\"\"\"\n\n\n\n\n\n\n# b) perform unroll\nunroller = rg.Unroller(brep)\n\n# add addtional geometry to the unroller\nfor pt in pt_L:\n    unroller.AddFollowingGeometry(pt)\n\nunrolledGeom = unroller.PerformUnroll()\nbrep_unrolled = unrolledGeom[0][0]\npt_L_unrolled = unrolledGeom[2]\nRhino.RhinoDoc.ActiveDoc.Objects.Add(brep_unrolled)\n\n\n\n\n\n\n# c) label\n# label pt_L before unrolling\nfor i in range(pt_L.Count):\n    rs.AddTextDot(str(i), pt_L[i])\n\n# label pt_L after unrolling\nfor i in range(pt_L_unrolled.Count):\n    rs.AddTextDot(str(i), pt_L_unrolled[i])",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\n\n\n# a) inputs\nid = rs.GetObject(\"select brep to unroll\")\nbrep = rs.coercegeometry(id)\n\n\n\n# for flat 'brep'\npt_L = [\n        rg.Point3d(161.381105, -4.70594, 13.736569),\n        rg.Point3d(171.388057, -4.691688, 18.407002),\n        rg.Point3d(181.024381, -4.677964, 22.802705)]\n\"\"\"\n# for curved 'brep'\npt_L = [\n        rg.Point3d(212.118075, -8.081183, 3.022045),\n        rg.Point3d(219.292585, -12.429482, 12.362912),\n        rg.Point3d(230.643013, -13.730152, 21.154316)]\n\"\"\"\n\n\n\n\n\n\n# b) perform unroll\nunroller = rg.Unroller(brep)\n\n# add addtional geometry to the unroller\nfor pt in pt_L:\n    unroller.AddFollowingGeometry(pt)\n\nunrolledGeom = unroller.PerformUnroll()\nbrep_unrolled = unrolledGeom[0][0]\npt_L_unrolled = unrolledGeom[2]\nRhino.RhinoDoc.ActiveDoc.Objects.Add(brep_unrolled)\n\n\n\n\n\n\n# c) label\n# label pt_L before unrolling\nfor i in range(pt_L.Count):\n    rs.AddTextDot(str(i), pt_L[i])\n\n# label pt_L after unrolling\nfor i in range(pt_L_unrolled.Count):\n    rs.AddTextDot(str(i), pt_L_unrolled[i])",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 703
+}

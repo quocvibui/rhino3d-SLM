@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/delaunay-mesh-in-rhinocommon/197925",
+  "topic_id": 197925,
+  "title": "Delaunay mesh in rhinocommon",
+  "question": "Hi\n\nUsing Mesh.CreateFromTessellation in rhinocommon I’m able to get a mesh similar to what the delaunay mesh component in Grasshopper produces except for some extra faces along the outer edges. I managed to get rid of most of these faces by checking if the face normals are close to vertical, but this process is slow and does not get rid of all of them. Does anyone know how to get a similar result as the delaunay mesh component in Grasshopper?\n\n\nimport Rhino.Geometry as rg\n\nmesh = rg.Mesh.CreateFromTessellation(points, list(), rg.Plane.WorldXY, False)\nnormals = mesh.FaceNormals\nmask = [normal.EpsilonEquals(rg.Vector3d.ZAxis, 0.99) for normal in normals]\nmesh = rg.Mesh.CreateFromFilteredFaceList(mesh, mask)\n\n\n\nScreenshot 2025-01-16 182225\n1351×992 292 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nMAX_ASPECT_RATIO = 200\n\nmesh = rg.Mesh.CreateFromTessellation(points, list(), rg.Plane.WorldXY, False)\nnormals = mesh.FaceNormals\nfaces = mesh.Faces\nmask = [faces.GetFaceAspectRatio(i) < MAX_ASPECT_RATIO and normal.EpsilonEquals(rg.Vector3d.ZAxis, 0.99) for i, normal in enumerate(normals)]\nmesh = rg.Mesh.CreateFromFilteredFaceList(mesh, mask)",
+      "language": "python",
+      "author": "Bendiko",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\nmesh = rg.Mesh.CreateFromTessellation(points, list(), rg.Plane.WorldXY, False)\nnormals = mesh.FaceNormals\nmask = [normal.EpsilonEquals(rg.Vector3d.ZAxis, 0.99) for normal in normals]\nmesh = rg.Mesh.CreateFromFilteredFaceList(mesh, mask)",
+      "language": "python",
+      "author": "Bendiko",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 202
+}

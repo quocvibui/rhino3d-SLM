@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-pick-polysurface-and-find-intersection-with-plane/16813",
+  "topic_id": 16813,
+  "title": "Rhinocommon pick polysurface and find intersection with plane",
+  "question": "Hi!\n\nI’m very new to Rhino common and \nVB.net\n but I do have a lot of C programming experience.\n\n\nI’m trying to pick a polysurface and find the intersection curve(s) with another planar surface. How do I do that? I managed to pick one surface and intersect it using \nIntersection.SurfaceSurface\n. That works great. I can also pick the polysurface but the intersection fails. Is there a trick to intersect a polysurface or do I first have to divide the polysurface into its component surfaces and then intersect one after the other?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "protected Result RunCommand(RhinoDoc doc, RunMode mode) {\nObjRef bRef;\nResult res = RhinoGet.GetOneObject(\"Select BREP\", false, ObjectType.PolysrfFilter, out bRef);\nif (res != Result.Success)\n    return res;\n\nPlane p = Plane.WorldXY; // as an example\n\nusing (Brep b = bRef.Brep())\n{\n    Curve[] curves;\n    Point3d[] points;\n    if (Intersection.BrepPlane(b, p, doc.ModelAbsoluteTolerance, out curves, out points))\n    {\n        if (null != curves)\n        {\n            foreach (Curve crv in curves)\n            {\n                if (null == crv || !crv.IsValid) continue;\n                doc.Objects.AddCurve(crv);\n            }\n        }\n        if (null != points)\n        {\n            foreach (Point3d pt in points)\n            {\n                if (pt.IsValid)\n                    doc.Objects.AddPoint(pt);\n            }\n        }\n    }\n}\n}\ndoc.Views.Redraw();\nreturn Result.Success;",
+      "language": "csharp",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Dim gs As New Rhino.Input.Custom.GetObject()\n        gs.SetCommandPrompt(\"Please select the hull surface\")\n        gs.GeometryFilter = Rhino.DocObjects.ObjectType.PolysrfFilter And DocObjects.ObjectType.Surface\n        gs.SubObjectSelect = True\n        gs.DeselectAllBeforePostSelect = False\n        gs.OneByOnePostSelect = True\n        gs.Get()\n        If gs.CommandResult() <> Rhino.Commands.Result.Success Then\n            Rhino.RhinoApp.WriteLine(\"Can't get Object\")\n            Return gs.CommandResult()\n        End If\n\n        Dim objref As Rhino.DocObjects.ObjRef = gs.[Object](0)\n\n        Dim brep As Rhino.Geometry.Brep = objref.Brep()\n        If brep Is Nothing Then\n            Rhino.RhinoApp.WriteLine(\"Can't get brep\")\n            Return Rhino.Commands.Result.Failure\n        End If\n\n        Dim plane As Plane = plane.WorldXY\n\n        If Not Rhino.Geometry.Intersect.Intersection.BrepPlane(brep, plane, doc.ModelAbsoluteTolerance, waterlines, Pts) Then\n            Rhino.RhinoApp.WriteLine(\"No intersection found.\")\n            Return Rhino.Commands.Result.[Nothing]\n        End If",
+      "language": "unknown",
+      "author": "kjarke",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef IntersectBrepWithPlane():\n    brep_id = rs.GetObject(\"Brep\", 8+16, True, False)\n    if not brep_id: return\n    \n    brep = rs.coercebrep(brep_id, True)\n    plane = Rhino.Geometry.Plane.WorldXY\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    rc, crvs, pts = Rhino.Geometry.Intersect.Intersection.BrepPlane(\n                                                                    brep,\n                                                                    plane,\n                                                                    tolerance\n                                                                    )\n                                                                    \n    if not rc: return\n\n    for crv in crvs: scriptcontext.doc.Objects.AddCurve(crv)\n    scriptcontext.doc.Views.Redraw()\n    \nIntersectBrepWithPlane()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 2424
+}

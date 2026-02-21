@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/what-script-function-to-select-a-group-of-points-by-point-cloud-or-mouse-click-drag/26451",
+  "topic_id": 26451,
+  "title": "What script function to select a group of points by point cloud or mouse click & drag",
+  "question": "Hi, I just started Python and am using this script that draws circles around points.\n\n\npoints = rs.GetPoints(“Pick points”)\n\nradius = rs.GetInteger(“What’s the radius?”)\n\n\nfor point in points:\n\nrs.AddCircle(point, radius)\n\n\nHowever, I’d like it to allow me to select the points either by point cloud or by grouping using the mouse click & drag function. Currently, the script requires me to select these points individually by mouse click. Any help would be much appreciated.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npoints=rs.GetObjects(\"Pick points\",1,preselect=True)\n#points is a list of Rhino point objects\nif points:\n    rad=rs.GetReal(\"Radius?\",minimum=0)\n    if rad:\n        #create a list of 3d points\n        pts=[]\n        for point in points:\n            pts.append(rs.coerce3dpoint(point))\n        rs.EnableRedraw(False)\n        #add circles\n        for pt in pts:\n            rs.AddCircle(pt,rad)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npoints=rs.GetObjects(\"Pick points\",1,preselect=True)\nif points:\n    rad=rs.GetReal(\"Radius?\",minimum=0)\n    if rad:\n        rs.EnableRedraw(False)\n        for point in points:\n            rs.AddCircle(rs.coerce3dpoint(point),rad)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 801
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/layer-names-of-sub-nested-reference-blocks-not-recognized-by-rhinoscriptsyntax/46002",
+  "topic_id": 46002,
+  "title": "Layer names of sub-nested reference blocks not recognized by rhinoscriptsyntax",
+  "question": "In \n3LevelDeepRef.zip\n (56.7 KB),\n\nD.3dm is referenced in C.3dm with a linked definition and a reference layer style.  C.3dm is referenced similar in B.3dm, which is referenced similar in A.3dm.\n\n\nIn V5’s Layers panel:\n\n\n\n\nV6:\n\n\n\n\nWhen this script is run in V5 and V6:\n\n\nimport rhinoscriptsyntax as rs\n\nlayers = rs.LayerNames()\n\nif layers:\n    for layer in layers:\n        print rs.IsLayer(layer), layer\n\n\n\nV5’s rs.IsLayer() recognizes all the layer names returned by rs.LayerNames():\n\n\nTrue Default\nTrue UniqueLayerNameInA\nTrue B.3dm\nTrue B.3dm::Default\nTrue B.3dm::UniqueLayerNameInB\nTrue C.3dm\nTrue C.3dm::Default\nTrue C.3dm::UniqueLayerNameInC\nTrue D.3dm\nTrue D.3dm::Default\nTrue D.3dm::UniqueLayerNameInD\n\n\n\nWhereas V6 doesn’t with layer names in sub-nested references:\n\n\nTrue Default\nTrue UniqueLayerNameInA\nTrue B.3dm\nTrue B.3dm::Default\nTrue B.3dm::UniqueLayerNameInB\nTrue C.3dm B.3dm : C\nFalse C.3dm B.3dm : C::Default\nFalse C.3dm B.3dm : C::UniqueLayerNameInC\nTrue D.3dm B.3dm : C.3dm : B.3dm : D\nFalse D.3dm B.3dm : C.3dm : B.3dm : D::Default\nFalse D.3dm B.3dm : C.3dm : B.3dm : D::UniqueLayerNameInD\n\n\n\nThis problem doesn’t occur when the ID’s of the layers are used instead of their names:\n\n\nlayers = rs.LayerIds()\n\n\n\nThank you,\n\nSteve",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nlayers = rs.LayerNames()\n\nif layers:\n    for layer in layers:\n        print rs.IsLayer(layer), layer",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 59,
+  "posts_count": 5,
+  "views": 902
+}

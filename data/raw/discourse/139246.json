@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/transform-a-group-of-rhinoobject-with-some-hidden-objects-in-rhinocommon/139246",
+  "topic_id": 139246,
+  "title": "Transform a Group of RhinoObject with some hidden objects in RhinoCommon",
+  "question": "Hi,\n\n\nI have a plugin that handles the user input with groups of RhinoObject.\n\nEach group has some of the RhinoObject hidden, and I’m trying to avoid the use of the hide-show of the layers to decouple the complexity of the user from the layer list.\n\n\nThe only part that I’m missing is that a group of RhinoObject with a part of them hidden is translated as expected from Rhino.Geometry.GeometryBase.Transform (with RhinoObjects.CommitChanges() afterwards and optional show of the hidden objects in the call stack); if instead the user translates the group from the Rhinoceros viewport, in a certain sequence the hidden objects of the group are not moved.\n\n\nWith the solution attached and the sequence obtained from executing\n\n1- the commands of \nstep1.txt\n\n2- move from viewport with mouse of the group of rhnoobject as reported in \na move from Rhinoceros UI after step1.txt.png\n\n3- the commands of \nstep2.txt\n\n4- move from viewport as reported in \nb move from Rhinoceros UI after 'step2.txt'.png\n\n5- the commands of \nstep3.txt\n\n6- I obtain the pieces with the position as in the print screen \nc result of 'step3.txt'.PNG\n\neven if the group is made as in print screen \ngroup with 20 lines created from 'valueExpectedAsGroupWithPartialHidden.txt'.PNG\n\n\n\n\na move from Rhinoceros UI after step1.txt\n1396×715 100 KB\n\n\n\n\n\n\nb move from Rhinoceros UI after &#39;step2.txt&#39;\n1920×984 118 KB\n\n\n\n\n\n\n\n\nSolution.7z\n (61.0 KB)\n\n\nstep1.txt\n (45 Bytes)\n\n\nstep2.txt\n (21 Bytes)\n\n\nstep3.txt\n (51 Bytes)\n\n\nvalueExpectedAsGroupWithPartialHidden.txt\n (52 Bytes)",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  var group = doc.Groups.FindName(m_group_name);\n  if (null == group)\n  {\n    RhinoApp.WriteLine(\"Group \\\"{0}\\\" not found.\", m_group_name);\n    return Result.Nothing;\n  }\n\n  var rhinoObjects = doc.Objects.FindByGroup(group.Index);\n  if (null == rhinoObjects || 0 == rhinoObjects.Length)\n  {\n    RhinoApp.WriteLine(\"Group \\\"{0}\\\" contains 0 objects.\", m_group_name);\n    return Result.Nothing;\n  }\n\n  var xform = Transform.Translation(Vector3d.XAxis * 10.0);\n  foreach (var rhObject in rhinoObjects)\n  {\n    var geometry = rhObject.Geometry.Duplicate();\n    if (null != geometry && geometry.Transform(xform))\n      doc.Objects.Replace(rhObject.Id, geometry, true);\n  }\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "layers",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 1616
+}

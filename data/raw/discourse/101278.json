@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/setting-layer-id/101278",
+  "topic_id": 101278,
+  "title": "Setting Layer.Id",
+  "question": "Hi messing up with baking layers assigning a custom Id…\n\n\nI found that sometimes (!?) I’m not able to change a freshly baked layer Id because its Layer.IdIsLocked state is set to True.\n\n\nI particular: I don’t understand what needs to happen for a layer to be set as IdIsLocked=True\n\n\nalready hours spent trying to figure out a pattern for this behavior. Some doc layers are blocked, others no ?!\n\n\nIn the end, what I just want to do is to bake a layer which ID is set by me, but “IdIsLocked” is blocking my attempts…\n\n\nby the way, this is on WIP…",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\nimport System\n\ndoc = Rhino.RhinoDoc.ActiveDoc\nnewGuid = System.Guid.NewGuid()\nprint newGuid\nlayer = Rhino.DocObjects.Layer()\nlayer.Id = newGuid\nlayer.Name = 'TestName01'\nlayerIndex = doc.Layers.Add(layer)\nlayer = doc.Layers[layerIndex]\nprint layer.Id",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\nimport System\n\ndoc = Rhino.RhinoDoc.ActiveDoc\nlayer = doc.Layers.FindName('test',True)\nprint 'found layer name: {0}'.format(layer.Id)\nprint layer.IdIsLocked\n\ndoc.Layers.Delete(layer)\nlayer.Id=System.Guid.NewGuid()\nlayer.Name = 'test'\nprint 'new layer id: {0}'.format(layer.Id)\nprint layer.IdIsLocked\n\nindex = doc.Layers.Add(layer)\nlayer = doc.Layers[index]\nprint 'new layer id: {0}'.format(layer.Id)\nprint layer.IdIsLocked",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\ndef dump_layer(layer):\n    if layer:\n        print 'Name: {0}'.format(layer.Name)\n        print 'Index: {0}'.format(layer.Index)\n        print 'ID: {0}'.format(layer.Id)\n        print 'ID Locked: {0}'.format(layer.IdIsLocked)\n\ndef test_layer_id(name):\n    \n    # Try finding the layer in the document\n    index = sc.doc.Layers.FindByFullPath(name, Rhino.RhinoMath.UnsetIntIndex)\n    if index == Rhino.RhinoMath.UnsetIntIndex: return\n    layer = sc.doc.Layers[index]\n    if not layer: return\n    \n    # dump\n    dump_layer(layer)\n    \n    # Cannot delete current layer\n    if index == sc.doc.Layers.CurrentLayerIndex: return\n    \n    # Delete layer\n    sc.doc.Layers.Delete(layer)\n    \n    # Since the document layer has been deleted, our reference it\n    # no longer valid. So, set it to None so we don't try to use it.\n    layer = None\n\n    # Create a new layer and set its properties\n    new_layer = Rhino.DocObjects.Layer()\n    new_layer.Name = name\n    new_layer.Id = System.Guid.NewGuid()\n\n    # dump\n    dump_layer(new_layer)\n    \n    # Add the new layer to the document\n    index = sc.doc.Layers.Add(new_layer)\n    \n    # Get the layer from the document\n    layer = sc.doc.Layers[index]\n\n    # dump\n    dump_layer(layer)\n\n# Test the above\ntest_layer_id('test')",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\ndef dump_layer(layer):\n    if layer:\n        print 'Name: {0}'.format(layer.Name)\n        print 'Index: {0}'.format(layer.Index)\n        print 'ID: {0}'.format(layer.Id)\n        print 'ID Locked: {0}'.format(layer.IdIsLocked)\n\ndef test_layer_id(name):\n    \n    # Try finding the layer in the document\n    index = sc.doc.Layers.FindByFullPath(name, Rhino.RhinoMath.UnsetIntIndex)\n    if index == Rhino.RhinoMath.UnsetIntIndex: return\n    layer = sc.doc.Layers[index]\n    if not layer: return\n    \n    # dump\n    dump_layer(layer)\n    \n    # Cannot delete current layer\n    if index == sc.doc.Layers.CurrentLayerIndex: return\n    \n    # Delete layer\n    sc.doc.Layers.Delete(layer)\n    \n    # Since the document layer has been deleted, our reference it\n    # no longer valid. So, set it to None so we don't try to use it.\n    layer = None\n\n    # Create a new layer and set its properties\n    new_layer = Rhino.DocObjects.Layer()\n    new_layer.Name = name\n                                         # AITOR'S COMMENT\n    new_layer.Id = System.Guid.NewGuid() # AITOR'S COMMENT: What I need is to set the old Layers id\n                                         # AITOR'S COMMENT: Not a new random one. Is this possible? \n\n    # dump\n    dump_layer(new_layer)\n    \n    # Add the new layer to the document\n    index = sc.doc.Layers.Add(new_layer)\n    \n    # Get the layer from the document\n    layer = sc.doc.Layers[index]\n\n    # dump\n    dump_layer(layer)\n\n# Test the above\ntest_layer_id('test')",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 687
+}

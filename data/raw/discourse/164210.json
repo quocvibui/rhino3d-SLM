@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/drawing-a-constant-slope-spiral-on-a-sphere/164210",
+  "topic_id": 164210,
+  "title": "Drawing a constant slope spiral on a sphere",
+  "question": "Hi, I am trying to draw a spiral with a constant slope on top of a sphere, I am encountering an error with rs.vectorAngle which I can’t manage to solve (to keep my script going clockwise along the sphere). Can anyone help or letting me know what I am doing wrong?\n\n\nimage\n730×503 188 KB\n\n\nthis is the procedure:\n\n\n\n\nThe script starts by getting user inputs: the step between contour lines, a sphere object, and a set of curves.\n\n\nIt calculates the center of the sphere and sets the initial radius of the contour circles.\n\n\nThe script starts processing curves from a specified index. It begins by getting the starting point of the first curve.\n\n\nIt creates a circle at the starting point and calculates a vector from the center of the sphere to this point.\n\n\nThen, it iterates through the remaining curves. For each curve:\n\n\n\n\n\n\nThe script copies the curve downward by the specified step.\n\n\nIt finds intersection points between the circle and the new curve.\n\n\nCalculates the angle between the original vector and the vector to the intersection point.\n\n\nDecides whether to add the first or second intersection point as the new point based on the angle.\n\n\nCreates a new circle at the new point’s location and moves it up by the step.\n\n\n\n\n\n\nThe script accumulates all the generated points in a list.\n\n\nFinally, it creates a curve through all the points, generating the contour line.\n\n\n\n\nthis is the script\n\n\nimport rhinoscriptsyntax as rs\n\n# Get the step between contour lines from the user\nstep = 1 #\nrs.GetReal(\"Insert the step between contour lines\")\n\n# Get the sphere object and curves from the user\nsphere = rs.GetObject(\"Select the sphere\", 8)\ncurves = rs.GetObjects(\"Select curves\", 4)\n\n# Calculate the center of the sphere\ncenter = rs.SurfaceAreaCentroid(sphere)[0]\n\n# Define the initial radius of the circle\ncircleRadius = 4\n\n# Set the starting index for processing curves\nindex = 23\n\n# Get the starting point for the contour creation\npoint = rs.CurveStartPoint(curves[index])\n\n# Create the firs...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# Get the step between contour lines from the user\nstep = 1 #\nrs.GetReal(\"Insert the step between contour lines\")\n\n# Get the sphere object and curves from the user\nsphere = rs.GetObject(\"Select the sphere\", 8)\ncurves = rs.GetObjects(\"Select curves\", 4)\n\n# Calculate the center of the sphere\ncenter = rs.SurfaceAreaCentroid(sphere)[0]\n\n# Define the initial radius of the circle\ncircleRadius = 4\n\n# Set the starting index for processing curves\nindex = 23\n\n# Get the starting point for the contour creation\npoint = rs.CurveStartPoint(curves[index])\n\n# Create the first circle at the starting point\ncircle = rs.AddCircle(point, circleRadius)\n\n# Calculate the vector from the center of the sphere to the starting point\nvector1 = rs.VectorCreate([center[0], center[1], 0], [point[0], point[1], 0])\n\n# Initialize the angle variable\nangle = 0\n\n# Store the points that will form the final contour\nallpoints = [point]\n\n# Loop through the remaining curves for contour creation\nfor i in range(index, len(curves) - 1):\n    # Copy the current curve downward by the specified step\n    newcurve = rs.CopyObject(curves[i + 1], [0, 0, -step])\n    \n    # Find the intersection points between the circle and the new curve\n    intersect = rs.CurveCurveIntersection(circle, newcurve, 1)\n    newpointcoord = intersect[0][1]\n    \n    # Calculate the vector from the center of the sphere to the new intersection point\n    vector2 = rs.VectorCreate([center[0], center[1], 0], [newpointcoord[0], newpointcoord[1], 0])\n    \n    # Calculate the angle between the two vectors\n    newangle = rs.VectorAngle(vector1, vector2)\n    \n    # Determine the direction of the new point based on the angle\n    if newangle > angle:\n        newpoint = rs.AddPoint(intersect[0][1])\n    else:\n        newpoint = rs.AddPoint(intersect[1][1])\n        print(\"other dir\")\n        \n    # Update the angle variable and create a new circle\n    angle = newangle\n    circle = rs.AddCircle(newpoint, circleRadius)\n    \n    # Move the circle upwards by the specified step\n    rs.MoveObject(circle, [0, 0, step])\n    \n    # Add the new point to the list of all points\n    allpoints.append(newpoint)\n\n# Create a curve through all the generated points\nrs.AddCurve(allpoints)```\n\n[spiral input.3dm|attachment](upload://pSTWtxbmPxzZSrDTt6414aAwCKV.3dm) (267.3 KB)",
+      "language": "python",
+      "author": "revink",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 551
+}

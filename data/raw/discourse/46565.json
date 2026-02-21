@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-dimensions-workflow/46565",
+  "topic_id": 46565,
+  "title": "Rhinocommon Dimensions WORKFLOW?",
+  "question": "I’m on the Grasshopper forum, uber confused about how to make real Rhino dimensions at some angle other than horizontal. There are several posts out there about dimensions being just odd. And Grasshopper developers avoided Rhino dimensions altogether, perhaps for this reason.\n\n\nPlease go here to comment:\n\n\n\n\n\n\n\n\ngrasshopper3d.com\n\n\n\n\n\n\n\n\nPython Rhinocommon Dimensions Fail in Rhino 6 WIP\n\n\nThis little script works fine in Rhino 5 from Grasshopper Python, to create a linear dimension, but it fails in Rhino 6 WIP which creates an invisible dimensio…",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n    \ndef AddAlignedDimension(p1, p2, p_text):\n    plane = Rhino.Geometry.Plane(p1, p2, p_text)\n    style = scriptcontext.doc.DimStyles.Current\n    align = Rhino.Geometry.AnnotationType.Aligned\n    dim = Rhino.Geometry.LinearDimension.Create(\n        align,\n        style,\n        plane,\n        plane.XAxis,\n        p1, p2, p_text, 0.0)\n    scriptcontext.doc.Objects.Add(dim)\n    scriptcontext.doc.Views.Redraw()\n    \ndef DoSomething():\n    if not Rhino.RhinoApp.ExeVersion == 6: return\n    p1 = Rhino.Geometry.Point3d( 3.0, 3.0, 1.0)\n    p2 = Rhino.Geometry.Point3d( 8.0, 8.0, 3.0)\n    p_text = Rhino.Geometry.Point3d( 5.0, 5.0, 0)\n    AddAlignedDimension(p1, p2, p_text)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1283
+}

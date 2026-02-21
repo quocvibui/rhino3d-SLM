@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-trigger-conduit-clear-on-input-disconnect/209996",
+  "topic_id": 209996,
+  "title": "How to trigger conduit clear on input disconnect?",
+  "question": "Hi everyone,\n\n\nI’m struggling to clear a custom preview from a DisplayConduit when the component’s input is disconnected. My current approach in SolveInstance isn’t working as expected.\n\n\nI’m using the standard !DA.GetData(0, ref data) || data == null check to check if the input is disconnected but my ClearPreview() function doesn’t seem to execute when the wire is removed, leaving the old preview visible.\n\n\nusing System;\nusing System.Collections.Generic;\nusing Grasshopper.Kernel;\nusing Rhino.Geometry;\n\nnamespace Toolpaths.Fdm.Components\n{\n    public class ClearDebug_Component : GH_Component\n    {\n        public ClearDebug_Component()\n          : base(\"Clear Debug\", \"ClearDbg\",\n              \"A minimal component to debug preview clearing.\",\n              \"FDM TP\", \"DEV\")\n        {\n        }\n\n        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)\n        {\n            pManager.AddCurveParameter(\"Curve\", \"C\", \"Curve input\", GH_ParamAccess.item);\n        }\n\n        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)\n        {\n            pManager.AddTextParameter(\"Message\", \"M\", \"Debug message\", GH_ParamAccess.item);\n        }\n\n        protected override void SolveInstance(IGH_DataAccess DA)\n        {\n            Curve curve = null;\n            if (!DA.GetData(0, ref curve) || curve == null)\n            {\n                ClearPreview();\n                DA.SetData(\"Message\", \"Input is invalid, clearing preview.\");\n                return;\n            }\n\n            // If input is valid\n            DA.SetData(\"Message\", \"Input is valid.\");\n        }\n\n        private void ClearPreview()\n        {\n            // This is the function to be called when input is invalid.\n            // In the real component, this would clear the conduit.\n        \n        }\n\n        protected override System.Drawing.Bitmap Icon => null;\n        public override Guid ComponentGuid => new Guid(\"c1a6c5f1-2a31-4a8e-8b6a-1...",
+  "code_blocks": [
+    {
+      "code": "using System;\n  using System.Collections.Generic;\n  using System.Drawing;\n  using Grasshopper.Kernel;\n  using Rhino.Geometry;\n  using Rhino.Display;\n\n  public class ClearDebug_Component : GH_Component\n  {\n      private TextDot _dot;\n\n      public ClearDebug_Component()\n        : base(\"Clear Debug\", \"ClearDbg\",\n            \"A minimal component to debug preview clearing.\",\n            \"FDM TP\", \"DEV\")\n      {\n      }\n\n      protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)\n      {\n          pManager.AddPointParameter(\"Point\", \"P\", \"Point for text dot\", GH_ParamAccess.item);\n      }\n\n      protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)\n      {\n      }\n\n      protected override void BeforeSolveInstance()\n      {\n          // Clear the preview data before each solution.\n          _dot = null;\n      }\n\n      protected override void SolveInstance(IGH_DataAccess DA)\n      {\n          Point3d point = Point3d.Unset;\n          if (!DA.GetData(0, ref point))\n          {\n              return;\n          }\n\n          // If the input is valid, create the preview data.\n          _dot = new TextDot(\"Valid Input\", point);\n      }\n\n      public override void DrawViewportWires(IGH_PreviewArgs args)\n      {\n          // Draw whatever is in our preview data.\n          // If it was cleared in BeforeSolveInstance, nothing will be drawn.\n          if (_dot != null)\n          {\n              args.Display.DrawDot(_dot, Color.Black, Color.Black, Color.Black);\n          }\n      }\n\n      protected override System.Drawing.Bitmap Icon => null;\n      public override Guid ComponentGuid => new Guid(\"c1a6c5f1-2a31-4a8e-8b6a-1b3da1b1a0e1\");\n  }",
+      "language": "csharp",
+      "author": "Konrad",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing System.Collections.Generic;\nusing Grasshopper.Kernel;\nusing Rhino.Geometry;\n\nnamespace Toolpaths.Fdm.Components\n{\n    public class ClearDebug_Component : GH_Component\n    {\n        public ClearDebug_Component()\n          : base(\"Clear Debug\", \"ClearDbg\",\n              \"A minimal component to debug preview clearing.\",\n              \"FDM TP\", \"DEV\")\n        {\n        }\n\n        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)\n        {\n            pManager.AddCurveParameter(\"Curve\", \"C\", \"Curve input\", GH_ParamAccess.item);\n        }\n\n        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)\n        {\n            pManager.AddTextParameter(\"Message\", \"M\", \"Debug message\", GH_ParamAccess.item);\n        }\n\n        protected override void SolveInstance(IGH_DataAccess DA)\n        {\n            Curve curve = null;\n            if (!DA.GetData(0, ref curve) || curve == null)\n            {\n                ClearPreview();\n                DA.SetData(\"Message\", \"Input is invalid, clearing preview.\");\n                return;\n            }\n\n            // If input is valid\n            DA.SetData(\"Message\", \"Input is valid.\");\n        }\n\n        private void ClearPreview()\n        {\n            // This is the function to be called when input is invalid.\n            // In the real component, this would clear the conduit.\n        \n        }\n\n        protected override System.Drawing.Bitmap Icon => null;\n        public override Guid ComponentGuid => new Guid(\"c1a6c5f1-2a31-4a8e-8b6a-1b3da1b1a0e1\");\n    }\n}",
+      "language": "csharp",
+      "author": "Konrad",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 57
+}

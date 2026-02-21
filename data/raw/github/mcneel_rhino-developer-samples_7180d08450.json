@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/8462fc3487f8b7a58595ef73f6a5c09f92717f60/rhinopython/SampleAddRenderMaterials.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinopython/SampleAddRenderMaterials.py",
+  "instruction": "SampleAddRenderMaterials.py Copyright (c) 2018 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleAddRenderMaterials.py\n# Copyright (c) 2018 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport System\nimport scriptcontext as sc\n\n# Demonstrates how to create render materials\ndef SampleAddRenderMaterials():\n\n    # The properties of a Rhino material define what is required to draw an object\n    # using OpenGL. Most rendering plug-ins require a much richer definition than\n    # this. And, not all rendering plug-ins support the same material properties.\n    # This is where Render materials  come in. A Render material is an abstract\n    # material - one that is defined by the owning rendering plug-in. But a basic\n    # Render material does share some properties with a Rhino material.\n\n    # This example demonstrates how to create a basic Render material. This material\n    # will appear in Rhino's Materials panel. It it called a basic material because\n    # it does not target any particular rendering plug-in.\n\n    # 1.) Create a Rhino material.\n    rhino_material = Rhino.DocObjects.Material()\n    rhino_material.Name = \"Burly\"\n    rhino_material.DiffuseColor = System.Drawing.Color.BurlyWood\n\n    # 2.) Create a basic Render material from the Rhino material.\n    render_material = Rhino.Render.RenderMaterial.CreateBasicMaterial(rhino_material)\n\n    # 3.) Add a basic Render material to the document.\n    sc.doc.RenderMaterials.Add(render_material)\n\n    # At this point, you will see a Render material appear in Rhino's\n    # Materials panel. Note, RhinoDoc.Materials.Count will equal 0. This\n    # is because we have not added any Rhino materials. We've only added\n    # a Render material. When you assign a Render material to an object\n    # or a layer, a compatible Rhino material will be added RhinoDoc.Materials,\n    # and this material will be referenced by the Render material.\n \n\n    # NOTE: It is still possible to add plain Rhino materials to the document.\n    # However, this is no longer recommended because Render materials should always be used.\n\n    # 4.) Now we will create a sphere and assign the Render material to it.\n    sphere = Rhino.Geometry.Sphere(Rhino.Geometry.Plane.WorldXY, 5.0)\n    id = sc.doc.Objects.AddSphere(sphere);\n    obj = sc.doc.Objects.Find(id);\n    if obj is not None:\n        obj.RenderMaterial = render_material;\n        obj.CommitChanges();\n\n    sc.doc.Views.Redraw();\n\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    SampleAddRenderMaterials()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

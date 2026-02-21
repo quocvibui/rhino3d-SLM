@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/text-frame-size-elefront/164390",
+  "topic_id": 164390,
+  "title": "Text frame size Elefront",
+  "question": "Hi,\n\n\nIs it somehow possible to define text frame width and height.\n\n\nimage\n798×189 5.26 KB\n\n\nI dont see it anywhere in text node but this function would be very useful.\n\n\nimage\n248×255 4.95 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ndimstyle_name = \"ENV_INFO\"\nif not rs.IsDimStyle(dimstyle_name):\n    rs.AddDimStyle(dimstyle_name)\n\ndimstyle = sc.doc.DimStyles.FindName(dimstyle_name)\nds = dimstyle.Duplicate()\n\nrs.DimStyleFont(dimstyle_name, font_name)\n\nif font_size:\n    try:\n        ds.TextHeight = float(font_size)\n    except:\n        pass\n\nif max_width is None or max_width < 0:\n    max_width = 0.0\nelse:\n    max_width = float(max_width)\n\njustification_map = {\n    \"Left\": rg.TextJustification.Left,\n    \"Center\": rg.TextJustification.Center,\n    \"Right\": rg.TextJustification.Right\n}\njustification_value = justification_map.get(justification, rg.TextJustification.Left)\n\nplane = rg.Plane(position, rg.Vector3d.ZAxis)\n\ntextblock = rg.TextEntity.Create(text, plane, ds, wrap, max_width, 0.0)\ntextblock.Justification = justification_value\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 132,
+  "posts_count": 7,
+  "views": 555
+}

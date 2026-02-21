@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/the-custom-preview-component-has-lost-shadows-in-rhino-8/174547",
+  "topic_id": 174547,
+  "title": "The Custom Preview component has lost shadows in Rhino 8",
+  "question": "Screen\n897×670 131 KB\n\n\nThe component inherits GH_CustomPreviewComponent and overrides the AppendRenderGeometry method.\n\nI followed the recommendations of \n@andy\n and \n@DavidRutten\n in the thread \n@enmerk4r\n\n\n\n\n\n\n\n\nGrasshopper Raytraced Display Pipeline\n \nGrasshopper Developer\n\n\n\n\n\n    Solved off-screen by \n@andy\n and \n@DavidRutten\n. If anyone else comes across the same issue, the solution was to directly inherit from GH_CustomPreviewComponent and then override the AppendRenderGeometry(GH_RenderArgs args) method. \n \n[image]\n\n\n\n\n\n\n\nHowever, this does not work, the debugger does not hit the breakpoint, and the AppendRenderGeometry method is not called. I suspect something has changed in Rhino 8. The component worked fine in Rhino 7, but stopped working correctly in Rhino 8.\n\n\nI have attached a test cs file of the Component, as well as 3dm and gh files of the test scene.\n\n\nHelp me understand the problem.\n\n\ntest.3dm\n (816.4 KB)\n\n\ntest.gh\n (433.9 KB)\n\n\nTestPreviewComponent.cs\n (4.8 KB)",
+  "code_blocks": [
+    {
+      "code": "public override void AppendRenderGeometry(GH_RenderArgs args)\n{\n    // You don't need to check Preview Mode,\n    // this method is only called when Grasshopper shows meshes so only in Shaded.\n    //\n    //GH_Document gH_Document = OnPingDocument();\n    //if (gH_Document is null) return;\n    //if (gH_Document.PreviewMode != GH_PreviewMode.Shaded) return;\n\n    if (_items is null) return;\n    foreach (var item in _items)\n        item.PushToRenderPipeline(args);\n}",
+      "language": "csharp",
+      "author": "kike",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "namespace SimplifiedColour\n{\n    public class SimplePreview : GH_CustomPreviewComponent\n    {\n        public SimplePreview()\n        : base()\n        {\n            Name = \"Render colour2\";\n            NickName = \"Colour2\";\n            Description = \"Colour\";\n            Category = \"Robots\";\n            SubCategory = \"Utility\";\n        }\n\n        public override Guid ComponentGuid => new(\"{47AEFE2F-21CD-4F92-ABB5-14D136006102}\");\n        private readonly static Color lightBlack = Color.FromArgb(92, 92, 92);\n        private BoundingBox _boundingBox;\n        public override BoundingBox ClippingBox => _boundingBox;\n        private List<GH_CustomPreviewItem> _items;\n\n        protected override void RegisterInputParams(GH_InputParamManager pManager)\n        {\n            pManager.AddBrepParameter(\"breps\", \"b\", \"breps to colour\", GH_ParamAccess.list);\n        }\n\n        protected override void RegisterOutputParams(GH_OutputParamManager pManager)\n        {\n            pManager.AddBrepParameter(\"breps\", \"b\", \"Coloured breps\", GH_ParamAccess.list);\n            pManager.AddColourParameter(\"Colour\", \"C\", \"\", GH_ParamAccess.list);\n        }\n\n        protected override void BeforeSolveInstance()\n        {\n            _items = [];\n            _boundingBox = BoundingBox.Empty;\n        }\n        override protected void AfterSolveInstance()\n        { }\n\n        protected override void SolveInstance(IGH_DataAccess DA)\n        {\n            List<GH_Brep> breps = [];\n            DA.GetDataList(0, breps);\n\n            Color colors = lightBlack;\n            DA.SetDataList(0, breps);\n            DA.SetData(1, colors);\n\n            foreach (GH_Brep brep in breps)\n            {\n                GH_Material material = new(colors);\n                GH_CustomPreviewItem item = new()\n                {\n                    Geometry = brep,\n                    Shader = material.Value,\n                    Colour = material.Value.Diffuse,\n                    Material = material,\n                };\n                _items.Add(item);\n                _boundingBox.Union(brep.Value.GetBoundingBox(false));\n            }\n        }\n        public override void DrawViewportMeshes(IGH_PreviewArgs args)\n        {\n            if (this.Locked || _items.Count == 0)\n                return;\n            if (this.Attributes.Selected)\n            {\n                GH_PreviewMeshArgs args2 = new(args.Viewport, args.Display, args.ShadeMaterial_Selected, args.MeshingParameters);\n                foreach (GH_CustomPreviewItem item in _items)\n                    item.Geometry.DrawViewportMeshes(args2);\n                return;\n            }\n            foreach (GH_CustomPreviewItem item in _items)\n            {\n                GH_PreviewMeshArgs args2 = new(args.Viewport, args.Display, item.Shader, args.MeshingParameters);\n                item.Geometry.DrawViewportMeshes(args2);\n            }\n        }\n\n        [Obsolete]\n        public override void AppendRenderGeometry(GH_RenderArgs args)\n        {\n            if (_items != null || _items.Count == 0)\n                return;\n            foreach (var item in _items)\n                item.PushToRenderPipeline(args);\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "victorlin",
+      "post_number": 20,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "materials",
+    "mesh"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 52,
+  "views": 1500
+}

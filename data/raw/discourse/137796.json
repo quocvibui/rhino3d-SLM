@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-mesh-texture-coordinates-via-script-rs/137796",
+  "topic_id": 137796,
+  "title": "Set mesh texture coordinates via script? (RS)",
+  "question": "Is there a way to SET texture coordinates for an existing mesh?\n\nI can read it via Rhino.MeshTextureCoordinates (RhinoScript) but I don’t see a way to set new ones on the existing mesh. Currently rebuilding the mesh and replacing the old one but ideally I need to keep the same object ID etc.\n\n\nthanks,\n\n\n–jarek",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef DoSomething():\n    \n    # create a mesh sphere\n    plane = Rhino.Geometry.Plane.WorldXY\n    sphere = Rhino.Geometry.Sphere(plane, radius=10.0)\n    mesh = Rhino.Geometry.Mesh.CreateFromSphere(sphere, 32, 64)\n    \n    t = System.Array.CreateInstance(Rhino.Geometry.Point2f, mesh.Vertices.Count)\n    \n    for i, v in enumerate(mesh.Vertices.ToPoint3dArray()):\n        t[i] = Rhino.Geometry.Point2f(v.X, v.Y)\n    \n    mesh.TextureCoordinates.SetTextureCoordinates(t)\n    \n    scriptcontext.doc.Objects.AddMesh(mesh)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1079
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-nurbcrv/110221",
+  "topic_id": 110221,
+  "title": "Python nurbCrv",
+  "question": "hello! hope u doing very well!\n\n\ni need some help with python to generate a nurbsCrv from a list of points created in python script.\n\n\nany idea?\n\n\nthanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\ncurve = rg.Curve.CreateInterpolatedCurve(points, 3) # 3 = degree\ncurve.ToNurbsCurve() # maybe redundant ?",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport random\n\n# Create an interpolated curve\ncurve = rg.Curve.CreateInterpolatedCurve(points, 3) # 3 = degree\n# Make it rational which means that it has weighted control points\ncurve.Points.MakeRational()\nprint curve.IsRational\n\n# Randomly change the weights\ncontrol_points = []\nfor i in range(curve.Points.Count): # loop through the control points by index\n    curve.Points.SetWeight(i, random.random()) # set a random weight for the control point at index i\n    control_points.append(curve.Points[i].Location) # optional",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 8,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 862
+}

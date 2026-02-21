@@ -1,0 +1,77 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/export-command-line-options/87537",
+  "topic_id": 87537,
+  "title": "-export command line options?",
+  "question": "Hi!  I’m making an alias to help automate exporting files for solidworks, rotating the model etc.  when using “-export” there is an option to specify rhino version, but not file type in the command line. If I want to do a STP file.  Is there any way to specify stp in the command line?  Right now I’m just using browse and selecting step in the drop down, but it would be nice to not have to hunt for it every time.\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\ndef test_export_iges():\n    path = sc.doc.Path\n    if path:\n        path = System.IO.Path.ChangeExtension(path, \".igs\")\n    else:\n        folder = Rhino.ApplicationSettings.FileSettings.WorkingFolder\n        path = System.IO.Path.Combine(folder, \"Untitled.igs\")\n        \n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\n    Rhino.RhinoApp.RunScript(script, True)\n\nif __name__ == \"__main__\":\n    test_export_iges()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef test_export_iges():\n    folder = r'M:\\CNC_Data\\Struts\\Drill\\2x4'\n    name = rs.DocumentName()\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    print path\n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\n    Rhino.RhinoApp.RunScript(script, True)\n\nif __name__ == \"__main__\":\n    test_export_iges()",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Cut():\n    script = \"_-Explode\"\n    Rhino.RhinoApp.RunScript(script, True)\n    Rhino.RhinoApp.RunScript(script, True)\n    Rhino.RhinoApp.RunScript(script, True)\n    folder = r'M:\\CNC_Data\\Cut\\2x4'\n    name = rs.DocumentName()\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    print path\n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\n    Rhino.RhinoApp.RunScript(script, True)\n\nExport_Cut()\n)\nUndo",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Drill():\n    #Restore Layer state\n    plugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\n    if plugin is not None:\n        plugin.RestoreLayerState(\"Wall Notch\")\n    rs.ObjectsByLayer(\"Drill Alignment\", True)\nExport_Drill()\n)\n_-Explode\n_-Explode\n_-Explode\n\n _-RunPythonScript (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Drill():\n    folder = r'M:\\CNC_Data\\ Drill\\2x4'\n    name = rs.DocumentName()\n    name = name.replace('Strut 2x4 ', '')\n    name = name.replace('Strut 2x6 ', '')\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    print path\n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\nExport_Drill()\n)\n_-Undo\n_-Undo\n_-Undo\n_-Undo",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "Command: _-RunPythonScript\nPython Script <import System (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Drill():\n    #Restore Layer state\n    plugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\n    if plugin is not None:\n        plugin.RestoreLayerState(\"Wall Notch\")\n    rs.ObjectsByLayer(\"Drill Alignment\", True)\nExport_Drill()\n)\nCommand: _-Explode\nCannot explode single curve segments.\nCannot explode 3 single surfaces.\nExploded an instance into 2 objects.\nCommand: _-Explode\nCannot explode single curve segments.\nCannot explode 3 single surfaces.\nExploded an instance into 12 objects.\nCommand: _-Explode\nCannot explode single curve segments.\nCannot explode 3 single surfaces.\nExploded 2 polysurfaces into 25 surfaces.\nExploded an instance into 684 objects.\nExploded 4 annotation objects into 16 curves.\nCommand: _-RunPythonScript\nPython Script <import System (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Drill():\n    folder = r'M:\\CNC_Data\\Drill\\2x4'\n    name = rs.DocumentName()\n    name = name.replace('Strut 2x4 ', '')\n    name = name.replace('Strut 2x6 ', '')\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    print path\n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\nExport_Drill()\n)\nM:\\CNC_Data\\Drill\\2x4\\C1C Upside Down test.igs\nCommand: _-Undo\nUndoing Explode\nCommand: _-Undo\nUndoing Explode\nCommand: _-Undo\nUndoing Explode\nCommand: _-Undo\nUndoing RunPythonScript",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "Command: _-RunPythonScript\nPython Script <import System (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Drill():\n    #Restore Layer state\n    plugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\n    if plugin is not None:\n        plugin.RestoreLayerState(\"Wall Notch\")\n    rs.ObjectsByLayer(\"Drill Alignment\", True)\nExport_Drill()\n)\nCommand: _-Explode\nExploded an instance into 2 objects.\nCommand: _-Explode\nExploded an instance into 12 objects.\nCommand: _-Explode\nExploded 2 polysurfaces into 25 surfaces.\nExploded an instance into 684 objects.\nExploded 4 annotation objects into 16 curves.\nCommand: _-RunPythonScript\nPython Script <import System (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Drill():\n    folder = r'M:\\CNC_Data\\Drill\\2x4'\n    name = rs.DocumentName()\n    name = name.replace('Strut 2x4 ', '')\n    name = name.replace('Strut 2x6 ', '')\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    print path\n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\n    Rhino.RhinoApp.RunScript(script, True)\nExport_Drill()\n)\nM:\\CNC_Data\\Drill\\2x4\\C1C Upside Down test.igs\nPython Script <import System _-Export\nPython Script <import System _Pause\nSave file name ( Version=7  SaveSmall=No  GeometryOnly=No  SaveTextures=Yes  SaveNotes=No  SavePlugInData=Yes  Browse ): \"M:\\CNC_Data\\Drill\\2x4\\C1C Upside Down test.igs\"\nIGES Export Type: Default ( ListTypes  UnitSystem=Inches  StringType=Unicode  Tolerance=1e-14 ): _Enter\nIGES Export Type: Default ( ListTypes  UnitSystem=Inches  StringType=Unicode  Tolerance=1e-14 )\nSaved M:\\CNC_Data\\Drill\\2x4\\C1C Upside Down test.igs.\nFile successfully saved as M:\\CNC_Data\\Drill\\2x4\\C1C Upside Down test.igs.\nCommand: _-Undo   <--- these undo's all ran while it was saving the file.. the script wasn't done yet\nNothing to undo.\nCommand: _-Undo\nNothing to undo.\nCommand: _-Undo\nNothing to undo.\nCommand: _-Undo\nNothing to undo.\nCommand: _-Undo\nNothing to undo.",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "pMeshObj->Select(true, true, true);\n\tON_wString script2 = L\"_-Export testExport.obj\";\n\tRhinoApp().RunScript(RhinoApp().ActiveDoc()->RuntimeSerialNumber(), static_cast<const wchar_t*>(script2), 0);",
+      "language": "unknown",
+      "author": "Liu2",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "ON_wString script;\nscript.Format(L\"_-Export \\\"%ls\\\" _Enter\", static_cast<const wchar_t*>(filename));\nRhinoApp().RunScript(context.m_doc.RuntimeSerialNumber(), static_cast<const wchar_t*>(script), 0);",
+      "language": "unknown",
+      "author": "dale",
+      "post_number": 20,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 19,
+  "views": 2734
+}

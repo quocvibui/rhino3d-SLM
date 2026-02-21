@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/merging-surface-edges-to-extend-surface/211923",
+  "topic_id": 211923,
+  "title": "Merging surface edges to extend surface",
+  "question": "My goal is to extend all the edges of a fairly boring surface.  Unfortunately, the 2 of the 4 edges need to be merged first.  I can use the MergeAllEdges command from the menu bar but it is not available in the RhinoScriptSyntax.  I thought that my journey into RhinoCommon was a solution but it is not working.  The Rhino.Geometry.Collections.BrepEdgeList.MergeAllEdges() says that is starts with six edges and ends with four, but Rhino disagrees.\n\n\nCould somebody provide a suggestion for merging the mergeable edges?\n\n\nLooking ahead, it seems that extending the edges may also be painful…  any suggestions for that task would also be appreciated.\n\n\nHere is the script that is supposed to merge the edges.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nselect = rs.GetSurfaceObject(\"Select surface\")\nsurfaceID = select[0]\n\nrhinoObject = sc.doc.Objects.Find(surfaceID)\nbrepObject = rhinoObject.Geometry\n\n# Get a Rhino.Geometry.Collections.BrepEdgeList object for the surface\nsurfaceEdges = brepObject.Edges\nmergedEdges = surfaceEdges.MergeAllEdges(0.1)\nprint(f'Attempting to merge {mergedEdges} edges in the surface')\nprint(f'Finishing with {surfaceEdges.Count} edges')\n\n\n\nAfter running the script, there are still six edges:\nMergeEdgeHelp\n704×598 39.5 KB",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nselect = rs.GetSurfaceObject(\"Select surface\")\nsurfaceID = select[0]\n\nrhinoObject = sc.doc.Objects.Find(surfaceID)\nbrepGeom = rhinoObject.Geometry\n\n# Get a Rhino.Geometry.Collections.BrepEdgeList object for the surface\nsurfaceEdges = brepGeom.Edges\nmergedEdges = surfaceEdges.MergeAllEdges(0.1)\n\n# To ensure the changed geometry ends up in the document\n# we need to replace the old object with the new geometry\nobjRef = Rhino.DocObjects.ObjRef(rhinoObject)\nsc.doc.Objects.Replace(objRef, brepGeom)\n\nprint(f'Attempting to merge {mergedEdges} edges in the surface')\nprint(f'Finishing with {surfaceEdges.Count} edges')",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nselect = rs.GetSurfaceObject(\"Select surface\")\nsurfaceID = select[0]\n\nrhinoObject = sc.doc.Objects.Find(surfaceID)\nbrepObject = rhinoObject.Geometry\n\n# Get a Rhino.Geometry.Collections.BrepEdgeList object for the surface\nsurfaceEdges = brepObject.Edges\nmergedEdges = surfaceEdges.MergeAllEdges(0.1)\nprint(f'Attempting to merge {mergedEdges} edges in the surface')\nprint(f'Finishing with {surfaceEdges.Count} edges')",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 104
+}

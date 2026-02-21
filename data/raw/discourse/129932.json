@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-kangaroo2-or-galapagos-in-ghpython/129932",
+  "topic_id": 129932,
+  "title": "Using kangaroo2 or Galapagos in GhPython",
+  "question": "Hi all,\n\nI am looking for some examples of using Kangaroo2 or Galapagos within GhPython. I wonder if it is possible and if there is anyone has done this before?\n\nThanks for any hints,",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper as gh\nimport clr\nclr.AddReferenceToFileAndPath(gh.Folders.PluginFolder+\"Components\\KangarooSolver.dll\")\nimport KangarooSolver as ks",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import sys\nimport clr\nsys.path.append(\"/Applications/Rhino 7.app/Contents/Frameworks/RhCore.framework/Versions/A/Resources/ManagedPlugIns/GrasshopperPlugin.rhp/Components/\")\nclr.AddReferenceToFile(\"KangarooSolver.dll\")\n\nimport KangarooSolver as ks",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport clr\nimport os\n\nif \"KangarooSolver\" in str(clr.References):\n    import KangarooSolver as ks\nelse:\n    try:\n        rhino_version = Rhino.RhinoApp.ExeVersion\n        if os.name == \"nt\":",
+      "language": "python",
+      "author": "efestwin",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import Grasshopper as gh\nimport Rhino as rc\nimport clr\nimport math\nclr.AddReferenceToFileAndPath(gh.Folders.PluginFolder+\"Components\\KangarooSolver.dll\")\nimport KangarooSolver as ks\nfrom System.Collections.Generic import List\n\n\ndef makeRodGoals(polyline,strength):\n    \n    # Return list\n    goals = []\n    \n    # Get polyline segments\n    segments = polyline.GetSegments()\n    \n    # Spring goals\n    for l in segments:\n        springGoal = ks.Goals.Spring(l.From,l.To,l.Length,strength)\n        goals.append(springGoal)\n    \n    # Angle goals\n    for i in range(len(segments)-1):\n        angleGoal = ks.Goals.Angle2(segments[i],segments[i+1],math.pi,100)\n        goals.append(angleGoal)\n    \n    return goals\n\n\nif Reset or \"counter\" not in globals():\n    # Make physical system and goals list (using .NET type list)\n    ps = ks.PhysicalSystem()\n    goalList = List[ks.IGoal]()\n    \n    # Get the polyline vertices and add them as particles\n    pts = []\n    for i in range(Geodesic.Count):\n        pts.Add(Geodesic[i])\n        ps.AddParticle(Geodesic[i],1)\n    \n    # Add anchor point\n    goalList.Add(ks.Goals.Anchor(pts[0],10000))\n    \n    # Add rod goals\n    rodGoals = makeRodGoals(Geodesic,100)\n    for g in rodGoals:\n        goalList.Add(g)\n    \n    # Add external goals to system and goalList list\n    for g in Goals:\n        ps.AssignPIndex(g,0.01)\n        goalList.Add(g)\n    \n    vList = List[rc.Geometry.Point3d](pts)\n    goalList.Add(ks.Goals.OnMesh(vList[1],M,100.0))\n    \n    # System state variables\n    counter = 0\n    \n    # Run state\nelse:\n    while counter < 100:\n        ps.Step(goalList,True,Tol)\n        counter += 1\n    #if ps.GetvSum() < Tol:\n        #break\n\n# Replace the mesh vertices with the relaxed ones\nGeodesic.Clear()\nGeodesic.AddRange(ps.GetPositions())\n\n# Output the mesh, and how many iterations it took to converge\nA = Geodesic\nB = counter",
+      "language": "python",
+      "author": "DavAndLar",
+      "post_number": 25,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 30,
+  "views": 2749
+}

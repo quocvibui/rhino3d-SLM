@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/update-points-update-brep-vertex-somewhere-it-fails/195963",
+  "topic_id": 195963,
+  "title": "Update Points <-> Update brep Vertex | Somewhere it fails",
+  "question": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n# Global variables to keep track of the Brep and point mappings\nbrep_id = None\nbrep = None\nvertex_point_ids = []\nvertex_point_mapping = {}\n\ndef extract_brep_vertices_with_update():\n    global brep_id, brep, vertex_point_ids, vertex_point_mapping\n\n    # Prompt the user to select a Brep (surface or polysurface)\n    brep_id = rs.GetObject(\"Select a Brep (surface or polysurface)\", rs.filter.polysurface | rs.filter.surface)\n    if not brep_id:\n        print(\"No Brep selected.\")\n        return\n\n    # Get the Brep geometry\n    brep_obj = sc.doc.Objects.FindId(brep_id)\n    if not brep_obj:\n        print(\"Unable to find the Brep in the document.\")\n        return\n\n    brep = brep_obj.Geometry.Duplicate()  # Make a copy of the Brep geometry\n    if not isinstance(brep, Rhino.Geometry.Brep):\n        print(\"The selected object is not a valid Brep.\")\n        return\n\n    # Initialize mappings\n    vertex_point_ids = []\n    vertex_point_mapping = {}\n\n    # Iterate over all vertices in the Brep\n    for i, vertex in enumerate(brep.Vertices):\n        # Get the vertex location\n        vertex_point = vertex.Location\n\n        # Add the point to the document\n        pt_id = rs.AddPoint(vertex_point)\n\n        # Store the mapping from point ID to vertex index\n        vertex_point_mapping[pt_id] = i\n\n        # Keep track of the point IDs\n        vertex_point_ids.append(pt_id)\n\n    # Subscribe to the ReplaceRhinoObject event\n    handler = BrepUpdateHandler()\n    sc.sticky[\"brep_update_handler\"] = handler  # Prevent garbage collection\n\n    print(\"Brep vertices added as points. Move the points to adjust the Brep geometry.\")\n\nclass BrepUpdateHandler:\n    def __init__(self):\n        # Enable the ReplaceRhinoObject event handler\n        Rhino.RhinoDoc.ReplaceRhinoObject += self.OnReplaceRhinoObject\n\n    def OnReplaceRhinoObject(self, sender, e):\n        # Called when an object is replaced in the document\n        if e.ObjectId in...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino.RhinoMath as rm\nimport scriptcontext as sc\n\ndef test_transform_brep_component():\n    \n    bbox = rg.BoundingBox(rg.Point3d.Origin, rg.Point3d(10.0, 10.0, 10.0))\n    brep = rg.Brep.CreateFromBox(bbox)\n    ci = rg.ComponentIndex(rg.ComponentIndexType.BrepVertex, 1)\n    \n    dir = rg.Vector3d(5.0, 0.0, 0.0)\n    xform = rg.Transform.Translation(dir)\n    tol = sc.doc.ModelAbsoluteTolerance\n    \n    brep.TransformComponent([ci], xform, tol, rm.UnsetValue, False)\n    \n    sc.doc.Objects.AddBrep(brep)\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    test_transform_brep_component()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 12,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n# Global variables to keep track of the Brep and point mappings\nbrep_id = None\nbrep = None\nvertex_point_ids = []\nvertex_point_mapping = {}\n\ndef extract_brep_vertices_with_update():\n    global brep_id, brep, vertex_point_ids, vertex_point_mapping\n\n    # Prompt the user to select a Brep (surface or polysurface)\n    brep_id = rs.GetObject(\"Select a Brep (surface or polysurface)\", rs.filter.polysurface | rs.filter.surface)\n    if not brep_id:\n        print(\"No Brep selected.\")\n        return\n\n    # Get the Brep geometry\n    brep_obj = sc.doc.Objects.FindId(brep_id)\n    if not brep_obj:\n        print(\"Unable to find the Brep in the document.\")\n        return\n\n    brep = brep_obj.Geometry.Duplicate()  # Make a copy of the Brep geometry\n    if not isinstance(brep, Rhino.Geometry.Brep):\n        print(\"The selected object is not a valid Brep.\")\n        return\n\n    # Initialize mappings\n    vertex_point_ids = []\n    vertex_point_mapping = {}\n\n    # Iterate over all vertices in the Brep\n    for i, vertex in enumerate(brep.Vertices):\n        # Get the vertex location\n        vertex_point = vertex.Location\n\n        # Add the point to the document\n        pt_id = rs.AddPoint(vertex_point)\n\n        # Store the mapping from point ID to vertex index\n        vertex_point_mapping[pt_id] = i\n\n        # Keep track of the point IDs\n        vertex_point_ids.append(pt_id)\n\n    # Subscribe to the ReplaceRhinoObject event\n    handler = BrepUpdateHandler()\n    sc.sticky[\"brep_update_handler\"] = handler  # Prevent garbage collection\n\n    print(\"Brep vertices added as points. Move the points to adjust the Brep geometry.\")\n\nclass BrepUpdateHandler:\n    def __init__(self):\n        # Enable the ReplaceRhinoObject event handler\n        Rhino.RhinoDoc.ReplaceRhinoObject += self.OnReplaceRhinoObject\n\n    def OnReplaceRhinoObject(self, sender, e):\n        # Called when an object is replaced in the document\n        if e.ObjectId in vertex_point_ids:\n            # If one of our points was replaced (moved), update the Brep\n            UpdateBrepGeometry()\n\n    def Dispose(self):\n        # Unsubscribe from events\n        Rhino.RhinoDoc.ReplaceRhinoObject -= self.OnReplaceRhinoObject\n\ndef UpdateBrepGeometry():\n    global brep_id, brep, vertex_point_ids, vertex_point_mapping\n\n    # Create a new Brep to modify\n    new_brep = brep.Duplicate()\n    if not new_brep:\n        return\n\n    # Update vertex positions\n    for pt_id in vertex_point_ids:\n        # Get the new location of the point\n        new_pt = rs.PointCoordinates(pt_id)\n        if new_pt is None:\n            continue\n\n        # Get the corresponding vertex index\n        vertex_index = vertex_point_mapping[pt_id]\n\n        # Update the vertex location\n        brep_vertex = new_brep.Vertices[vertex_index]\n        brep_vertex.Location = new_pt\n\n    # Rebuild edges and faces to reflect the new vertex positions\n    new_brep.RebuildEdges()\n    new_brep.Faces.ConvertSurfaceToNurbs()  # Ensure surfaces are NURBS for consistency\n\n    # Replace the old Brep with the new one in the document\n    sc.doc.Objects.Replace(brep_id, new_brep)\n    sc.doc.Views.Redraw()\n\n    # Update the global Brep variables\n    brep = new_brep\n    brep_id = sc.doc.Objects.Find(new_brep).Id\n\n# Run the function when the script is executed\nif __name__ == \"__main__\":\n    extract_brep_vertices_with_update()",
+      "language": "python",
+      "author": "Carlo_Lungiani",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 183
+}

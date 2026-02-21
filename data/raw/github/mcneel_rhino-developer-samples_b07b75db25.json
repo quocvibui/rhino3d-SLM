@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_unrollsurface.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_unrollsurface.py",
+  "instruction": "Ex unrollsurface",
+  "code": "import Rhino\nimport scriptcontext\n\ndef UnrollSurface():\n    filter = Rhino.DocObjects.ObjectType.Brep | Rhino.DocObjects.ObjectType.Surface\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface or brep to unroll\", False, filter)\n    if rc!=Rhino.Commands.Result.Success: return rc;\n    \n    unroll = Rhino.Geometry.Unroller(objref.Geometry())\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select points, curves, and dots to unroll with surface\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Point | Rhino.DocObjects.ObjectType.Curve | Rhino.DocObjects.ObjectType.TextDot\n    go.AcceptNothing(True)\n    go.GetMultiple(0, 0)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    \n    for i in range(go.ObjectCount):\n        objref = go.Object(i);\n        g = objref.Geometry();\n        unroll.AddFollowingGeometry(g)\n\n    unroll.ExplodeOutput = False\n    breps, curves, points, dots = unroll.PerformUnroll()\n    if not breps: return Rhino.Commands.Result.Failure\n    for brep in breps: scriptcontext.doc.Objects.AddBrep(brep)\n    for curve in curves: scriptcontext.doc.Objects.AddCurve(curve)\n    for point in points: scriptcontext.doc.Objects.AddPoint(point)\n    for dot in dots: scriptcontext.doc.Objects.AddTextDot(dot)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    UnrollSurface()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

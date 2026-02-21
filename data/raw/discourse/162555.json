@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dupborder-functionality-through-rhino-compute-or-rhino3dm/162555",
+  "topic_id": 162555,
+  "title": "DupBorder functionality through Rhino Compute or Rhino3dm",
+  "question": "Hi,\n\nI am new to the Rhino Compute and Rhino3dm world. I have it set-up and running and I was able to do this  \nGetting Started with compute.rhino3d for Python - YouTube\n\n\nBig picture - I want to find internal and external boundary of contiguous surfaces (/regions/mesh…). Each surface is planar, but the surfaces are not co-planar with each other.\n\n\n\n\n\n\nCreating a surface - cannot find an API call to create a surface given the points and connectivity order.\n\nI have a list of points and connectivity order and want to make a surface. Each surface is planar, and has 3 or 4 points. I couldn’t find any command in rhino3dm or rhino compute to create a surface from points. I found the commands to make points and circles but couldn’t figure out how to make a surface from points.\n\n\n\n\n\n\nI want to merge these surfaces, which I think I can do using this command\n\n\nBrepUnion\n\n\n\n\n\n\nDupBorder - I can’t find an API call for this.\n\n\n\n\n\n\nDifferentiate between exterior and interior borders - Is there a command to identify interior vs exterior curves?\n\n\n\n\n\n\nBelow is an image of what I want to achieve.\n\n\nI don’t necessarily have to create a surface from the points, so I am open to other suggestions as well.\n\n\nimage\n1491×654 159 KB\n\n\nAny help is much appreciated\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\n\nimport Rhino\nimport System\nimport Rhino.Geometry\n\n# rhino 3dm import\n# from rhino3dm import *\nimport rhino3dm as r3d\nimport random\nimport compute_rhino3d\nimport compute_rhino3d.Util\nimport compute_rhino3d.Curve\nimport compute_rhino3d.Mesh\nimport compute_rhino3d.Intersection\nimport compute_rhino3d.Brep\n\n# general pyhthon libs import\nimport base64\nimport json\nimport requests\n# import \n\n# Rhino compute by default launches on port 6500\ncompute_url = \"http://localhost:6500//\"\n\n# set the URL\ncompute_rhino3d.Util.url = compute_url\n# no auth token required\ncompute_rhino3d.Util.authToken = \"\"\n\n# test, should return version object\nversion_test = requests.get(compute_url + '/version')\njson.loads(version_test.content)",
+      "language": "unknown",
+      "author": "Aakk",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# create one reactanble surface\nsurface1 = Rhino.Geometry.Brep.CreateFromCornerPoints(\n    Rhino.Geometry.Point3d(0.0,0.0,0.0), \n    Rhino.Geometry.Point3d(10.0,0.0,0.0),\n    Rhino.Geometry.Point3d(10.0,10.0,0.0),\n    Rhino.Geometry.Point3d(0.0,10.0,0.0),\n    3\n    )\n\n# create one triangle surface\nsurface2 = Rhino.Geometry.Brep.CreateFromCornerPoints(\n    Rhino.Geometry.Point3d(10.0,0.0,0.0), \n    Rhino.Geometry.Point3d(10.0,10.0,0.0),\n    Rhino.Geometry.Point3d(20.0,0.0,0.0),\n    3\n    )",
+      "language": "unknown",
+      "author": "Aakk",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "breps = System.Collections.Generic.List[Rhino.Geometry.Brep]()\nbreps.Add(surface1)\nbreps.Add(surface2)\nbreps",
+      "language": "unknown",
+      "author": "Aakk",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import compute_rhino3d.Util\nimport compute_rhino3d.Grasshopper as gh\nimport rhino3dm\nimport json\n\ncompute_rhino3d.Util.url = \"http://localhost:6500/\"\n#compute_rhino3d.Util.apiKey = \"\"\n\n# create list of input trees\nsrf_tree = gh.DataTree(\"RH_IN:Surfaces\")\n# import model with surfaces\ninputModel = rhino3dm.File3dm().Read('FindBorderCurves.3dm')\n\nfor obj in inputModel.Objects:\n    s = json.dumps(obj.Geometry.Encode())\n    srf_tree.Append([0], [s])\n\ntrees = [srf_tree]\noutput = gh.EvaluateDefinition('FindBorderCurves.gh', trees)\n# print(output)\n\n# decode results\nbranch = output['values'][0]['InnerTree']['{0;0;0}']\nborders = [rhino3dm.CommonObject.Decode(json.loads(item['data'])) for item in branch]\n\nfilename = 'ExportedBorders.3dm'\n\nprint('Writing {} curves to {}'.format(len(borders), filename))\n\n# create a 3dm file with results\nmodel = rhino3dm.File3dm()\nfor b in borders:\n    model.Objects.AddCurve(b) \n\nmodel.Write(filename)",
+      "language": "python",
+      "author": "AndyPayne",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 9,
+  "views": 779
+}

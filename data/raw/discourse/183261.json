@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/opennest-for-rhino8-plugin-update/183261",
+  "topic_id": 183261,
+  "title": "OpenNest for Rhino8 - plugin update",
+  "question": "Hi,\n\n\nRhino 8 changed from .NET framework to .NET Core. It means some plugins have to be updated. One of them is OpenNest. I took this chance to update and clean up the code.\n\n\nimage\n436×118 15 KB\n\n\nThere are a few points to mention.\n\n\nOperating system for OpenNest2:\n\n\n\n\nWindows 11 AnyCPU\n, Rhino version \n8.8\n or newer\n\n\nMac Arm64 AnyCPU\n, Rhino version \n8.7\n or newer\n\n\n\n\nInstallation:\n\n\n\n\nUse \npackage manager\n.\n\n\nExamples are in \nfood4rhino\n\n\n\n\nimage\n1580×1186 96.2 KB\n\n\nInterface:\n\n\n\n\nSheets and Nest Geometry was separated from the main component. This was due to multiple questions how to create sheets in specific ways, and how to simplify curves for a faster nesting process.\n\n\nSheets can takes holes. And support data-tree as an input.\n\n\nElements can be copied while nesting.\n\n\nSupport for Rhino objects is better, since additional objects can be nested by simply selecting all the geometry at once. You just need to place closed outlines into a specific layer.\n\n\nBefore using the plugin please check the example files one by one.\n\n\nSeveral nesting optimization options were added to the nest component.\n\n\nAfter nesting you can see nest index.\n\n\nOther components stayed more or less the same, except of Box Packing, that had a bug that is now fixed.\n\n\n\n\nimage\n1711×865 125 KB\n\n\nimage\n1735×668 33.8 KB\n\n\nimage\n1920×925 91.7 KB\n\n\nimage\n1920×1102 148 KB\n\n\nRhino attributes are kept before and after nesting with detection of outlines with holes. The outlines must be stored in a layer defined in a grasshopper component:\n\n\nimage\n2946×1398 338 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\nimport math\n\n\n\n\ndef matrix_from_transform(tr):\n\n    m = []\n\n    for i in range(4):\n\n        row = []\n\n        for j in range(4):\n\n            row.append(tr[i, j])\n\n        m.append(row)\n\n    return m\n\n\n\n\ndef decompose_transform(tr):\n\n    # Extrai translação diretamente da matriz\n\n    tx = tr[0,3]\n\n    ty = tr[1,3]\n\n    tz = tr[2,3]\n\n    translation = rg.Vector3d(tx, ty, tz)\n\n\n\n\n    # Extrai escala (comprimento das colunas 0,1,2 da matriz)\n\n    sx = rg.Vector3d(tr[0,0], tr[1,0], tr[2,0]).Length\n\n    sy = rg.Vector3d(tr[0,1], tr[1,1], tr[2,1]).Length\n\n    sz = rg.Vector3d(tr[0,2], tr[1,2], tr[2,2]).Length\n\n    scale = (sx, sy, sz)\n\n\n\n\n    # Matriz de rotação sem escala\n\n    rx = rg.Vector3d(tr[0,0]/sx, tr[1,0]/sx, tr[2,0]/sx)\n\n    ry = rg.Vector3d(tr[0,1]/sy, tr[1,1]/sy, tr[2,1]/sy)\n\n    rz = rg.Vector3d(tr[0,2]/sz, tr[1,2]/sz, tr[2,2]/sz)\n\n\n\n\n    # Converte rotação para ângulos Euler ZYX\n\n    yaw = math.degrees(math.atan2(rx.Y, rx.X))    # rot Z\n\n    pitch = math.degrees(math.atan2(-rx.Z, math.sqrt(rx.X**2 + rx.Y**2)))  # rot Y\n\n    roll = math.degrees(math.atan2(ry.Z, rz.Z))   # rot X\n\n\n\n\n    rot_deg = (roll, pitch, yaw)  # (X,Y,Z)\n\n\n\n\n    return translation, scale, rot_deg\n\n\n\n\n\n\nmatrix_out = []\n\nmove_out = []\n\nscale_out = []\n\nrot_out = []\n\n\n\n\nfor tr in T:\n\n    if not isinstance(tr, rg.Transform):\n\n        matrix_out.append(\"Not Transform\")\n\n        move_out.append(None)\n\n        scale_out.append(None)\n\n        rot_out.append(None)\n\n        continue\n\n\n\n\n    matrix_out.append(matrix_from_transform(tr))\n\n\n\n\n    trans, scale, rot = decompose_transform(tr)\n\n\n\n\n    move_out.append(trans)\n\n    scale_out.append(scale)\n\n    rot_out.append(rot)\n\n\n\n\nmatrix = matrix_out\n\nmove = move_out\n\nscale = scale_out\n\nrot_deg = rot_out",
+      "language": "python",
+      "author": "Jef_Rod_bestfx",
+      "post_number": 163,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 131,
+  "posts_count": 166,
+  "views": 7163
+}

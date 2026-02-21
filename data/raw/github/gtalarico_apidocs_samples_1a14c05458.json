@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/unroll-surface-and-mesh.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/unroll-surface-and-mesh.py",
+  "instruction": "Unroll surface and mesh",
+  "code": "import Rhino\nimport scriptcontext\n\ndef UnrollSurface2():\n    filter = Rhino.DocObjects.ObjectType.Brep | Rhino.DocObjects.ObjectType.Surface\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface or brep to unroll\", False, filter)\n    if rc!=Rhino.Commands.Result.Success: return rc;\n\n    unroll = Rhino.Geometry.Unroller(objref.Geometry())\n    mesh = objref.Brep().Faces[0].GetMesh(0)\n    if not mesh: return Rhino.Commands.Result.Cancel\n\n    unroll.AddFollowingGeometry(mesh.Vertices.ToPoint3dArray())\n    unroll.ExplodeOutput = False\n    breps, curves, points, dots = unroll.PerformUnroll()\n    # change the mesh vertices to the flattened form and add it to the document\n    if points.Length==mesh.Vertices.Count:\n        for i, point in enumerate(points): mesh.Vertices.SetVertex(i, point)\n        mesh.Normals.ComputeNormals()\n    scriptcontext.doc.Objects.AddMesh(mesh, objref.Object().Attributes)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    UnrollSurface2()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/compas-dev/compas/blob/HEAD/src/compas_rhino/conduits/faces.py",
+  "repo": "compas-dev/compas",
+  "repo_stars": 352,
+  "repo_description": "Main library of the COMPAS framework and CAD integrations for Rhino/GH and Blender.",
+  "license": "MIT",
+  "filepath": "src/compas_rhino/conduits/faces.py",
+  "instruction": null,
+  "code": "from __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport Rhino  # type: ignore\nimport System  # type: ignore\n\nfrom compas.data.validators import is_sequence_of_iterable\nfrom compas.itertools import iterable_like\n\nfrom .base import BaseConduit\n\n\nclass FacesConduit(BaseConduit):\n    \"\"\"A Rhino display conduit for faces.\n\n    Parameters\n    ----------\n    vertices : list[[float, float, float] | :class:`compas.geometry.Point`]\n        The coordinates of the vertices of the faces.\n    faces : list[list[int]]\n        The faces defined as lists of indices in `vertices`.\n    color : tuple[int, int, int] or list[tuple[int, int, int]], optional\n        The colors of the faces.\n        Default is None, in which case the default color is used for all faces (:attr:`FacesConduit.default_color`).\n\n    Attributes\n    ----------\n    color : list[System.Drawing.Color]\n        The color specification per face.\n\n    Class Attributes\n    ----------------\n    default_color : System.Drawing.Color\n        The default color is ``FromArgb(255, 255, 255)``.\n\n    Examples\n    --------\n    .. code-block:: python\n\n        from compas.geometry import Polyhedron\n        from compas_rhino.conduits import FacesConduit\n\n        polyhedron = Polyhedron.generate(6)\n        conduit = FacesConduit(polyhedron.vertices, polyhedron.faces)\n\n        with conduit.enabled():\n            conduit.redraw(pause=5.0)\n\n    \"\"\"\n\n    default_color = System.Drawing.Color.FromArgb(255, 255, 255)\n\n    def __init__(self, vertices, faces, color=None, **kwargs):\n        super(FacesConduit, self).__init__(**kwargs)\n        self._color = None\n        self.vertices = vertices or []\n        self.faces = faces or []\n        self.color = color\n\n    @property\n    def color(self):\n        return self._color\n\n    @color.setter\n    def color(self, color):\n        if not color:\n            return\n        if not is_sequence_of_iterable(color):\n            color = [color]\n        color = [System.Drawing.Color.FromArgb(*c) for c in iterable_like(self.faces, color, self.default_color)]\n        self._color = color\n\n    def DrawForeground(self, e):\n        \"\"\"Draw the faces as polygons.\n\n        Parameters\n        ----------\n        e : Rhino.Display.DrawEventArgs\n\n        Returns\n        -------\n        None\n\n        \"\"\"\n        for i, face in enumerate(self.faces):\n            points = [Rhino.Geometry.Point3d(*self.vertices[key]) for key in face]\n            if self.color:\n                e.Display.DrawPolygon(points, self.color[i], True)\n            else:\n                e.Display.DrawPolygon(points, self.default_color, True)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

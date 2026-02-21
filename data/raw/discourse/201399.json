@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/define-the-form-as-transparent/201399",
+  "topic_id": 201399,
+  "title": "Define the form as transparent",
+  "question": "I want to define the form as transparent how to do that, control and form transparency separate\n\n\nimport Eto\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nfrom eto_image_py import Images_form\nform = ef.Form()\nform.Width = 300\nform.Height = 300\nform.WindowStyle = ef.WindowStyle.NONE\nform.Location = ed.PointF(120,120)\n\nimg = ef.ImageView()\nimg.Image = Images_form.title_bar_icon()\n\nbut = ef.Button()\nbut.Text = \"Transparency\"\n\nlayout = ef.DynamicLayout()\nlayout.Spacing = ed.Size(1,1)\nlayout.AddRow(img)\nlayout.AddRow(but,None)\nform.Content = layout\n\nform.Show()\n\n\n\nimage\n1182×642 102 KB",
+  "code_blocks": [
+    {
+      "code": "#! python 3\n\nimport Rhino\nimport Eto\n\n\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        super().__init__()\n\n        self.WindowStyle = Eto.Forms.WindowStyle.NONE\n\n        self.Styles.Add[Eto.Forms.Panel](\"transparent\", self.TransparentFormStyler)\n        self.Style = \"transparent\"\n\n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(300, 300)\n        self.Padding = Eto.Drawing.Padding(80)\n        self.MovableByWindowBackground = True\n        self.Location = Eto.Drawing.Point(100, 100)\n\n        self.Button = Eto.Forms.Button()\n        self.Button.Text = \"Close\"\n        self.Button.Click += self.OnButtonClick\n\n        self.layout = Eto.Forms.DynamicLayout()\n        self.layout.AddRow(self.Button)\n\n        self.Content = self.layout\n\n    def TransparentFormStyler(self, control):\n        self.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.1  # Modify this value to 0 on Windows for full transparency\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0, 0, 0, 25)  # Modify this value (the 25) to 0 on Mac for full transparency\n\n    def OnButtonClick(self, sender, e):\n        self.Close()\n\n\ndef EstablishForm():\n\n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\n\nif __name__ == \"__main__\":\n    EstablishForm()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "#! python2\n\nimport Rhino\nimport scriptcontext\nimport System\n\nimport Eto\n\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        \n        self.WindowStyle = Eto.Forms.WindowStyle.None\n        \n        self.Styles.Add[Eto.Forms.Panel](\"transparent\", self.MyFormStyler)\n        self.Style = \"transparent\"\n        \n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(300,300)\n        self.Padding = Eto.Drawing.Padding(80)\n        self.MovableByWindowBackground = True\n        self.Location = Eto.Drawing.Point(100,100)\n        \n        self.Button = Eto.Forms.Button(Text = \"Hello World\")\n        self.Button.Click += self.OnButtonClick\n        \n        self.layout = Eto.Forms.DynamicLayout()\n        self.layout.AddRow(self.Button)\n        \n        self.Content = self.layout\n    \n    def MyFormStyler(self, control):\n        self.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.0\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0,0,0,25)\n\n    def OnButtonClick(self, sender, e):\n        self.Close()\n\ndef DoSomething():\n    \n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "Tommy804",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 23,
+  "views": 504
+}

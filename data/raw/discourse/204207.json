@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-getpoint-wont-accept-a-pasted-coordinate-but-point-will/204207",
+  "topic_id": 204207,
+  "title": "rs.GetPoint() won't accept a pasted coordinate but \"_Point\" will",
+  "question": "Hi \n@dale\n, I use rs.GetPoint() to get a point (obviously) but sometimes I know the coordinate and have it copied to clipboard and want to paste that in instead, but that doesn’t work.\n\n\nBut this works for the command _Point, so I workaround this by first adding a point and then snapping to that with rs.GetPoint(). But that isn’t a smooth workaround, so could you add the ability to paste a coordinate for rs.GetPoint()?\n\n\nLet’s say I want to use this coordinate in the script: 10080,20085,0\n\n\nThe strange thing is that if I type it in then it works, but if I paste it then I get this error message:\n\n\nUnknown command: 119080,1191385,0\n\n\nPlease try it out with this super simple example\n\n\nimport rhinoscriptsyntax as rs\nprint rs.GetPoint()\n\n\n\n(I have a system where I set up a reference point as a local origin for architecture, and I often want to copy this data to another file)",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\n\ndef Test():\n    rc, point = Rhino.Input.RhinoGet.GetPoint(\"Location of point object\", False)\n    if rc == Rhino.Commands.Result.Success:\n        sc.doc.Objects.AddPoint(point)\n        sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":    \n    Test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "rc, point = Rhino.Input.RhinoGet.GetPoint(\"Location of point object\", False)\nif not rc == Rhino.Commands.Result.Success:\n    print (\"Error: No valid point chosen\")\n    return False",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 76
+}

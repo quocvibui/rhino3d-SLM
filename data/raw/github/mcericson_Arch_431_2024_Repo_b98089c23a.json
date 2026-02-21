@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcericson/Arch_431_2024_Repo/blob/1ef730ba3ba0d133c12706bc222a2bc84d19a5fe/02_08/point_clouds/point_clouds.py",
+  "repo": "mcericson/Arch_431_2024_Repo",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "02_08/point_clouds/point_clouds.py",
+  "instruction": "Point clouds",
+  "code": "import rhinoscriptsyntax as rs\nimport box_tools as bt\nimport color_tools as ct\n\ndef get_point_cloud():\n    rs.Command('Import ')\n    point_cloud = rs.GetObject('Select a point cloud object.', rs.filter.pointcloud)\n    return point_cloud\n\n\n\ndef main():\n    \n    cloud_id = get_point_cloud()\n    colors = rs.PointCloudPointColors(cloud_id)\n    points = rs.PointCloudPoints(cloud_id)\n    \n    for i in range(0, len(colors), 20):\n        r_value = colors[i][1]\n        rs.EnableRedraw(False)\n        if r_value > 100:\n            color_val = colors[i]\n            box = bt.center_cube(points[i], 10)\n            ct.assign_material_color(box, color_val)\n        \n    \n    rs.DeleteObject(cloud_id)\n\n\nmain()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

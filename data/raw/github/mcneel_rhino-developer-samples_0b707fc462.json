@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/modify-light-color.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/modify-light-color.py",
+  "instruction": "Modify light color",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input import *\nfrom Rhino.UI import *\nfrom Rhino.Commands import Result\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select light to change color\", True, ObjectType.Light)\n    if rc != Result.Success:\n        return rc\n    light = obj_ref.Light()\n    if light == None:\n        return Result.Failure\n\n    b, color = Dialogs.ShowColorDialog(light.Diffuse)\n    if b:\n        light.Diffuse = color\n\n    doc.Lights.Modify(obj_ref.ObjectId, light)\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

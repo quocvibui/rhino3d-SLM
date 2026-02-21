@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/explode-hatch.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/explode-hatch.py",
+  "instruction": "Explode hatch",
+  "code": "import Rhino\nimport scriptcontext\n\ndef ExplodeHatch():\n    filter = Rhino.DocObjects.ObjectType.Hatch\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select hatch to explode\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return\n\n    hatch = objref.Geometry()\n    if not hatch: return\n\n    hatch_geom = hatch.Explode()\n    if hatch_geom:\n        for geom in hatch_geom:\n            if geom.ObjectType == Rhino.DocObjects.ObjectType.Point:\n                scriptcontext.doc.Objects.AddPoint(geom)\n            elif geom.ObjectType == Rhino.DocObjects.ObjectType.Curve:\n                scriptcontext.doc.Objects.AddCurve(geom)\n            elif geom.ObjectType == Rhino.DocObjects.ObjectType.Brep:\n                scriptcontext.doc.Objects.AddBrep(geom)\n        scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    ExplodeHatch()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

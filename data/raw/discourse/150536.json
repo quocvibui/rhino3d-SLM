@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/easy-definition-bounding-box-in-rhinocommon/150536",
+  "topic_id": 150536,
+  "title": "Easy definition bounding box in RhinoCommon?",
+  "question": "In RhinoCommon is there an easy way to get the bounding box of an InstanceDefinition whose content I can’t know beforehand ?",
+  "code_blocks": [
+    {
+      "code": "def getDefinitionZLimit() :\n    \n    definition = getDef()\n    \n    firstObject = definition.GetObjects()[0]\n    \n    if isinstance( firstObject, Rhino.DocObjects.BrepObject ) :\n        \n        brepGeom = firstObject.BrepGeometry\n        \n        bbox = brepGeom.GetBoundingBox( False )\n        \n        return bbox.Max.Z\n    \n    return 0",
+      "language": "python",
+      "author": "felix.mariotto",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef BlockDefinitionBoundingBox():\n    blk_names=rs.BlockNames()\n    if not blk_names: return\n    \n    blk_name=rs.ListBox(blk_names)\n    if not blk_name: return\n    \n    blk_def=sc.doc.InstanceDefinitions.Find(blk_name)\n    rhobjs=blk_def.GetObjects()\n    #create 'empty' bounding box\n    bbox=Rhino.Geometry.BoundingBox()\n    for rhobj in rhobjs:\n        #get each object's geometry and bounding box\n        obj_bb=rhobj.Geometry.GetBoundingBox(True)\n        #union with current bb (bbox)\n        bbox.Union(obj_bb)\n    sc.doc.Objects.AddBox(Rhino.Geometry.Box(bbox))\n    sc.doc.Views.Redraw()\n    \nBlockDefinitionBoundingBox()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef GetBlockInstanceBB():\n    msg=\"Select block instance for bounding box\"\n    blk_inst=rs.GetObject(msg,4096,preselect=True)\n    if not blk_inst: return\n    geo=rs.coercegeometry(blk_inst)  #InstanceReferenceGeometry\n    bbox=geo.GetBoundingBox(True)\n    if bbox.IsValid:\n        sc.doc.Objects.AddBox(Rhino.Geometry.Box(bbox))\n        sc.doc.Views.Redraw()\nGetBlockInstanceBB()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 1070
+}

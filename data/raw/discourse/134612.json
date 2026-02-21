@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-userdictionary-data-from-commonobject-saved-with-the-file/134612",
+  "topic_id": 134612,
+  "title": "Is UserDictionary data from CommonObject saved with the file?",
+  "question": "I managed to store custom data in Rhino objects \nUserDictionary\n of the active document using a \nSet\n method of \nRhino.Collections.ArchivableDictionary\n. I can also retrieve the \nRhino.Collections.ArchivableDictionary.Values\n. Data is definitely stored in objects UserDictionary during runtime.\n\n\nProblem is \nUserDictionary\n is empty after saved Rhino file is reopened. Is \nUserDictionary\n meant to be saved with the file like \nUserText\n? Are there an additional steps to this process or is there an alternative simple approach to the whole issue of saving custom data with document objects in Rhino files?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nguid = rs.GetObject(\"Select object\", preselect=True)\n\nif guid:\n    o = rs.coercerhinoobject(guid, True, True)\n    o.UserDictionary.Set('Key', 'VALUE')",
+      "language": "python",
+      "author": "spineribjoint1",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nguid = rs.GetObject(\"Select object\", preselect=True)\n\nif guid:\n    o = rs.coercerhinoobject(guid, True, True)\n    print o.UserDictionary.TryGetString('Key')",
+      "language": "python",
+      "author": "spineribjoint1",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef test_set():\n    id = rs.GetObject(\"Select object\", preselect=True)\n    if id:\n        obj = rs.coercerhinoobject(guid, True, True)\n        atts = obj.Attributes.Duplicate()\n        atts.UserDictionary.Set('Key', 'VALUE')\n        sc.doc.Objects.ModifyAttributes(id, atts)\n\ndef test_get():\n    id = rs.GetObject(\"Select object\", preselect=True)\n    if id:\n        obj = rs.coercerhinoobject(id, True, True)\n        print obj.Attributes.UserDictionary.TryGetString('Key')",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 593
+}

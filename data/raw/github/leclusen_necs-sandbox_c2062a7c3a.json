@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/leclusen/necs-sandbox/blob/8d8006ae3c845c9f3e38154803caac6b03d298a9/structure-batiment/structure_aligner/transform/grid_lines.py",
+  "repo": "leclusen/necs-sandbox",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "structure-batiment/structure_aligner/transform/grid_lines.py",
+  "instruction": "Structural grid line generation.",
+  "code": "\"\"\"Structural grid line generation.\n\nPhase 5.5 - Creates unnamed horizontal PolylineCurves spanning\nthe building width for each Y axis line position.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport logging\n\nimport rhino3dm\n\nfrom structure_aligner.config import AxisLine\n\nlogger = logging.getLogger(__name__)\n\n\ndef generate_grid_lines(\n    model: rhino3dm.File3dm,\n    axis_lines_y: list[AxisLine],\n    x_extent: tuple[float, float],\n    z_level: float = 0.0,\n    default_layer_index: int = 0,\n    files_layer_index: int | None = None,\n    files_y_positions: list[float] | None = None,\n) -> int:\n    \"\"\"Add structural grid lines as unnamed PolylineCurves.\n\n    For each Y axis line, creates a horizontal PolylineCurve spanning\n    the full X extent of the building.\n\n    Args:\n        model: The rhino3dm model to add objects to.\n        axis_lines_y: Y axis lines defining grid positions.\n        x_extent: (x_min, x_max) building footprint extent.\n        z_level: Z position for grid lines (typically 0).\n        default_layer_index: Layer index for \"Defaut\" grid lines.\n        files_layer_index: Layer index for \"Files\" grid lines.\n        files_y_positions: Y positions that go on the \"Files\" layer\n            instead of default. If None, all go on default layer.\n\n    Returns:\n        Number of grid line curves added.\n    \"\"\"\n    x_min, x_max = x_extent\n    added = 0\n\n    files_set = set(files_y_positions) if files_y_positions else set()\n\n    for ay in axis_lines_y:\n        y = ay.position\n\n        p1 = rhino3dm.Point3d(x_min, y, z_level)\n        p2 = rhino3dm.Point3d(x_max, y, z_level)\n        curve = rhino3dm.PolylineCurve([p1, p2])\n\n        attr = rhino3dm.ObjectAttributes()\n        # Grid lines are unnamed\n        attr.Name = \"\"\n\n        if y in files_set and files_layer_index is not None:\n            attr.LayerIndex = files_layer_index\n        else:\n            attr.LayerIndex = default_layer_index\n\n        model.Objects.AddCurve(curve, attr)\n        added += 1\n\n    logger.info(\"Grid line generation: %d unnamed curves added\", added)\n    return added\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

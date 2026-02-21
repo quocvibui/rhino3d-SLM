@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/script-only-working-on-rhino6-wip-mac-an-not-on-rhino-5-mac/80520",
+  "topic_id": 80520,
+  "title": "Script only Working on Rhino6 WIP (Mac) an not on Rhino 5(Mac)",
+  "question": "Hi there\n\nI finished my first Script ever (feel a bit proud \n ) and it works fine (it’s not perfect but does the job).\n\n\nUnfortunately it’s only working in Rhino6 WIP (for Mac) and not on my Rhino5 Mac Version…\n\n\nHere’s my script. It produces a Rectangle with variable number of Rectangles inside and a fixed distance between them. It’s usefull for elevations of windowframes or to layout photos.\n\n\n(sorry, i don’t know how to porperly quote code…)\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nrs.AddLayer(\"inside\", color = (0, 0, 255))\nrs.AddLayer(\"outside\", color = (255,0,0))\n\nplane = rs.WorldXYPlane()\n\nFW = rs.GetReal(\"Frame Width\", number = 0.1)\t\t# Definiert Rahmenbreite\nQ = rs.GetInteger(\"Quantity\")\t\t\t\t# Anzahl Fenster\nS = rs.GetPoint(\"Holy Cow! Define the lower corner\")\t\t# Startpunkt\nE = rs.GetPoint(\"Define the upper corner\")\t\t# Endpunkt\noutrec =rs.AddRectangle(plane, S, E)\t\t# Zeichnet aeusseres Rechteck\nrs.ObjectLayer(outrec,\"outside\")\n\nSX = S[0]\nEX = E[0]\n\nSY = S[1]\nEY = E[1]\n\nW = (EX-SX)\t\t# Width, die gesamte Fensterbreite\nH = abs(EY-SY)\t\t# Height, die gesamte Fensterhoehe\nWW = (W-(Q+1)*FW)/Q\t# WindowWidth, Breite eines einzelnen Fensters\nWH = H-2*FW\t\t# WindowHeight, Hoehe des Fensters\n\n\nfor i in range(1,Q+1):\n\tA0X = SX + i*FW + (i-1)*WW\n\tA0Y = SY + FW\n\tA2X = SX + i*FW + i*WW\n\tA2Y = SY + FW + WH\n\n\tA0 = rs.CreatePoint(A0X, A0Y, 0)\n\tA2 = rs.CreatePoint(A2X, A2Y, 0)\n\n\trect = rs.AddRectangle(plane, A0, A2)\n\trs.ObjectLayer(rect, \"inside\")\n\n\n\n\n\nAny help, very much appreciated!\n\nThanks =)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.AddLayer(\"inside\", color = (0, 0, 255))\nrs.AddLayer(\"outside\", color = (255,0,0))\n\nplane = rs.WorldXYPlane()\n\nFW = rs.GetReal(\"Frame Width\", number = 0.1)\t\t# Definiert Rahmenbreite\nQ = rs.GetInteger(\"Quantity\")\t\t\t\t# Anzahl Fenster\nS = rs.GetPoint(\"Holy Cow! Define the lower corner\")\t\t# Startpunkt\nE = rs.GetPoint(\"Define the upper corner\")\t\t# Endpunkt\noutrec =rs.AddRectangle(plane, S, E)\t\t# Zeichnet aeusseres Rechteck\nrs.ObjectLayer(outrec,\"outside\")\n\nSX = S[0]\nEX = E[0]\n\nSY = S[1]\nEY = E[1]\n\nW = (EX-SX)\t\t# Width, die gesamte Fensterbreite\nH = abs(EY-SY)\t\t# Height, die gesamte Fensterhoehe\nWW = (W-(Q+1)*FW)/Q\t# WindowWidth, Breite eines einzelnen Fensters\nWH = H-2*FW\t\t# WindowHeight, Hoehe des Fensters\n\n\nfor i in range(1,Q+1):\n\tA0X = SX + i*FW + (i-1)*WW\n\tA0Y = SY + FW\n\tA2X = SX + i*FW + i*WW\n\tA2Y = SY + FW + WH\n\n\tA0 = rs.CreatePoint(A0X, A0Y, 0)\n\tA2 = rs.CreatePoint(A2X, A2Y, 0)\n\n\trect = rs.AddRectangle(plane, A0, A2)\n\trs.ObjectLayer(rect, \"inside\")",
+      "language": "python",
+      "author": "ric",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 463
+}

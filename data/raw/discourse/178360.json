@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extrudecrv-apply-this-command-to-circle/178360",
+  "topic_id": 178360,
+  "title": "ExtrudeCrv apply this command to circle",
+  "question": "Hi All,\n\n\nPlease help me for below query, i have two circle which i want to apply ExtrudeCrv as below , in rhino python\n\n\n\n\nfirst image is 2D image which is need to convert as second image\n\n\n\n\nneed rhino python code",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\nimport Rhino.Geometry as rg\nimport Rhino\n# Declare a global variable\nradius_big = 14\nradius_small_top = 4\nradius_small_right = 3\nradius_small_bottom = 2\nmin_radius=radius_small_bottom\nmax_radius=radius_small_top\n\ndef draw_circle(center, radius):\n    return rs.AddCircle(center, radius)\n\ndef main():\n    # Define the center of the large circle\n    center_big = (0, 0, 0)\n    # Define the radius of the large circle\n    #radius_big = 17\n     \n    # Draw the large circle\n    big_circle = draw_circle(center_big, radius_big)\n    # Define the Top of the small circle\n    #radius_small_top = 5\n    draw_point= radius_small_top+radius_big\n    center_small_top = (0, draw_point, 0)  # Place the small circle on top of the large circle\n    \n    # Define the Right side small Circle\n    #radius_small_right = 4\n    draw_point= radius_small_right+radius_big\n    center_small_right=(draw_point,0, 0)\n    \n        # Define the Left side small Circle\n    radius_small_Left = radius_small_right\n    draw_point= (radius_small_Left+radius_big)-((radius_small_Left+radius_big)*2)\n    center_small_Left=(draw_point,0, 0)\n    \n        # Define the Bottom side small Circle\n    #radius_small_bottom = 3\n    draw_point= (radius_small_bottom+radius_big)-((radius_small_bottom+radius_big)*2)\n    center_small_bottom=(0, draw_point, 0)\n    \n\n    \n    # Draw the all side small circles\n    top_small_circle = draw_circle(center_small_top, radius_small_top)\n    right_small_circle = draw_circle(center_small_right, radius_small_right)\n    Left_small_circle = draw_circle(center_small_Left, radius_small_Left)\n    bottom_small_circle = draw_circle(center_small_bottom, radius_small_bottom)\n    \n    # Define the Arc upside\n    draw_point= ((radius_small_Left*2)+radius_big)-(((radius_small_Left*2)+radius_big)*2)\n    center_small_Left=(draw_point,0, 0)\n    draw_point= (radius_small_right*2)+radius_big\n    center_small_right=(draw_point,0, 0)\n    draw_point= (radius_small_top*2)+radius_big\n    center_small_top = (0, draw_point, 0)\n    rs.AddArc3Pt(center_small_Left,center_small_right,center_small_top)\n\n    # Define the Arc Downside\n    draw_point= ((radius_small_Left*2)+radius_big)-(((radius_small_Left*2)+radius_big)*2)\n    center_small_Left=(draw_point,0, 0)\n    draw_point= (radius_small_right*2)+radius_big\n    center_small_right=(draw_point,0, 0)\n    draw_point= ((radius_small_bottom*2)+radius_big)-(((radius_small_bottom*2)+radius_big)*2)\n    center_small_bottom=(0, draw_point, 0)\n    rs.AddArc3Pt(center_small_Left,center_small_right,center_small_bottom)\n\n\nif __name__ == \"__main__\":\n    main()\n#Delete Small Circle \ndef delete_circle_by_radius(min_radius, max_radius):\n    circle_ids = rs.ObjectsByType(rs.filter.curve, select=True)\n    \n    if circle_ids:\n        for circle_id in circle_ids:\n            if rs.IsCircle(circle_id):\n                radius = rs.CircleRadius(circle_id)\n                if min_radius <= radius <= max_radius:\n                    rs.DeleteObject(circle_id)\n                    print(\"Circle with ID {} deleted.\".format(circle_id))\n            else:\n                print(\"Object with ID {} is not a circle.\".format(circle_id))\n    else:\n        print(\"No circles found in the scene.\")\n\ndelete_circle_by_radius(min_radius, max_radius)\n\n#Join arcs\narcs = rs.ObjectsByType(rs.filter.curve)\njoin_arc=rs.JoinCurves(arcs,delete_input=True)\n\n# Select Active circle\ndef select_circles():\n    # Get all objects in the document\n    #all_objects = rs.AllObjects()\n    all_objects = rs.ObjectsByType(rs.filter.curve, select=True)\n    if all_objects:\n        circles = [obj for obj in all_objects if rs.IsCircle(obj)]\n        \n        if circles:\n            # Select all circles\n            rs.SelectObjects(circles)\n            print(\"Selected circles:\", circles)\n            return circles\n        else:\n            print(\"No circles found in the document.\")\n            return None\n    else:\n        print(\"No objects found in the document.\")\n        return None\n\n# Call the function to select circles\nselected_circles = select_circles()",
+      "language": "python",
+      "author": "Ram_Gurav",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 211
+}

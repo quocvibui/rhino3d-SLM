@@ -1,0 +1,73 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-api-c-how-to-import-block-instances/208012",
+  "topic_id": 208012,
+  "title": "RhinoCommon API C#: How to import block instances",
+  "question": "Hi,\n\nCan you please tell me how to import block instances correctly?\n\n\nMy task is to load a \n.3dm\n model into a \nRhinoDoc\n, but before adding the geometry, I need to modify some of the input data (like materials and transformations). I’m currently stuck at the point of importing block instances properly.\n\n\nWhen I run my code, \ndoc.InstanceDefinitions.Add(...)\n seems to add one extra object - I expect 3 block instances, but I get 4. Also, the transformations applied to the instances are incorrect.\n\n\nHere’s a simplified snippet of what I’m doing:\n\n\nFile3dm model = scene.Floorplan.Model;\nforeach (var idef in model.AllInstanceDefinitions)\n{\n    var geometryList = idef.GetObjectIds()\n              .Select(id => model.Objects.FindId(id).Geometry.Duplicate())\n              .ToList();\n\n    int idef_index = doc.InstanceDefinitions.Add(idef.Name, idef.Description, Point3d.Origin, geometryList);\n    if (idef_index < 0)\n    {\n        RhinoApp.WriteLine(\"Unable to import block from file.\");\n    }\n}\n\nforeach (var obj in model.Objects)\n{\n    var geometry = obj.Geometry.Duplicate();\n    var attributes = obj.Attributes.Duplicate();\n\n    if (geometry is InstanceReferenceGeometry instance)\n    {\n        if (scene.Floorplan.Model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)\n        {\n            var guid = doc.Objects.AddInstanceObject(definition.Index, instance.Xform);\n        }\n    }\n    else\n    {\n        doc.Objects.Add(geometry, attributes);\n    }\n}",
+  "code_blocks": [
+    {
+      "code": "var model = fileName\nstring insertCommand = $\"-_Insert _F _L _L \\\"{model}\\\" _B 0,0,0 _Enter _Enter\"; \nRhinoApp.RunScript(insertCommand, true);",
+      "language": "csharp",
+      "author": "Lukxf",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "File3dm model = scene.Floorplan.Model;\nforeach (var idef in model.AllInstanceDefinitions)\n{\n    var geometryList = idef.GetObjectIds()\n          .Select(id => model.Objects.FindId(id).Geometry.Duplicate())\n          .ToList();\n\n    var attributesList = idef.GetObjectIds()\n        .Select(id => model.Objects.FindId(id).Attributes.Duplicate())\n        .ToList();\n\n    int idef_index = doc.InstanceDefinitions.Add(idef.Name, idef.Description, Point3d.Origin, geometryList, attributesList);\n    if (idef_index < 0)\n    {\n        RhinoApp.WriteLine(\"Unable to import block from file.\");\n    }\n\n    foreach (var obj in model.Objects)\n    {\n        var geometry = obj.Geometry.Duplicate();\n\n        // Check if instance parentIdefId matches the current idef\n        if (geometry is InstanceReferenceGeometry instance && instance.ParentIdefId == idef.Id)\n        {\n            // Only duplicate attributes when we need them\n            var attributes = obj.Attributes.Duplicate();\n\n            // If there is a match, create instance using the the new definition we created\n            // not the definition from the model we loaded\n            // also, add the attributes from the obj\n            doc.Objects.AddInstanceObject(idef_index, instance.Xform, attributes);\n        }\n    }\n}\n\n// Add everything else\nforeach (var obj in model.Objects)\n{\n    var geometry = obj.Geometry.Duplicate();\n    var attributes = obj.Attributes.Duplicate();\n\n    // These objects are used as part of instance definitions\n    // We probably don't want to add them to the model\n    // So we skip them\n    if (attributes.IsInstanceDefinitionObject)\n        continue;\n\n    doc.Objects.Add(geometry, attributes);\n}",
+      "language": "csharp",
+      "author": "Lukxf",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def importBlockInstanceFromFile(filePath, blockname):\n\n    def myfunction(idef):\n        objectIds = idef.GetObjectIds()\n        \n        for objectId in objectIds:\n            obj = rhino_file.Objects.FindId(objectId)\n            if obj.ComponentType == DocObjects.ModelComponentType.InstanceDefinition:\n                myfunction(obj)\n            else:\n                name = idef.Name\n                description = idef.Description\n                basePoint = Geometry.Point3d()\n                geometry_list = [rhino_file.Objects.FindId(id_).Geometry.Duplicate() for id_ in idef.GetObjectIds()]\n                attributes_list = [rhino_file.Objects.FindId(id_).Attributes.Duplicate() for id_ in idef.GetObjectIds()]\n                \n                for att in attributes_list:\n                    #Find linetype in the imported file\n                    linetypeRef = rhino_file.AllLinetypes.FindIndex(att.LinetypeIndex)\n                    if linetypeRef:\n                        linetypeNameRef = linetypeRef.Name\n\n                        linetype = RhinoDoc.ActiveDoc.Linetypes.FindIndex(att.LinetypeIndex)\n                        linetype_Name = linetype.Name\n\n                        if linetypeRef is not linetype_Name:\n                            correctIndex = RhinoDoc.ActiveDoc.Linetypes.FindName(linetypeNameRef).Index\n                            if correctIndex: att.LinetypeIndex=correctIndex\n                \n                RhinoDoc.ActiveDoc.InstanceDefinitions.Add(name,description,basePoint,geometry_list,attributes_list)\n    \n    #read the 3dm \n    rhino_file = FileIO.File3dm().Read(filePath)\n    #get table of objects in the 3dm file\n    idef = rhino_file.AllInstanceDefinitions.FindName(blockname)\n    myfunction(idef)",
+      "language": "python",
+      "author": "peter.zock",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def importromFile(filePath):\n    \n    # Get the starting object runtime serial number\n    start_sn = DocObjects.RhinoObject.NextRuntimeSerialNumber\n    #Import file\n    RhinoDoc.ActiveDoc.Import(filePath)\n    # Get the ending object runtime serial number\n    end_sn = DocObjects.RhinoObject.NextRuntimeSerialNumber\n\n    #Delete all objects that are not beeing used in a InstanceDefinition\n    rh_objects=[]\n    for sn in range(start_sn, end_sn):\n        rh_obj = sc.doc.Objects.Find(sn)\n        if rh_obj:\n            if not rh_obj.IsInstanceDefinitionGeometry:\n                sc.doc.Objects.Delete(rh_obj,True,True)\n            else:\n                rh_objects.append(rh_obj)\n    return rh_objects",
+      "language": "python",
+      "author": "peter.zock",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def importromFile(filePath):\n    \n    # Get the starting object runtime serial number\n    start_sn = DocObjects.RhinoObject.NextRuntimeSerialNumber\n    #Import file\n    RhinoDoc.ActiveDoc.Import(filePath)\n    # Get the ending object runtime serial number\n    end_sn = DocObjects.RhinoObject.NextRuntimeSerialNumber\n\n    #Delete all objects that are not beeing used in a InstanceDefinition\n    rh_objects=[]\n    for sn in range(start_sn, end_sn):\n        rh_obj = sc.doc.Objects.Find(sn)\n        if rh_obj:\n            if not rh_obj.IsInstanceDefinitionGeometry:\n                sc.doc.Objects.Delete(rh_obj,True,True)\n            else:\n                rh_objects.append(rh_obj)\n    return rh_objects",
+      "language": "python",
+      "author": "peter.zock",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport rhinoscriptsyntax as rs\nfrom Rhino import Geometry, DocObjects, RhinoDoc, FileIO\nimport scriptcontext as sc\n\ndef import_InstanceDefinition_FromFile(filePath):\n    \n    def reassign_attributes_indexes(attributes_list):\n        for attributes in attributes_list:\n            \n            if attributes.LinetypeIndex > -1:\n                key = importFile.AllLinetypes.FindIndex(attributes.LinetypeIndex).Name\n                if key in dic_attributes_match.keys():\n                    attributes.LinetypeIndex = dic_attributes_match[key]\n            \n            if attributes.LayerIndex:\n                key = importFile.AllLayers.FindIndex(attributes.LayerIndex).Name\n                if key in dic_attributes_match.keys():\n                    attributes.LayerIndex = dic_attributes_match[key]\n\n    def importBlockInstance(idefgeometry):\n        objectIds = idefgeometry.GetObjectIds()\n\n        geometry_list=[]\n        attributes_list=[]\n        for objectId in objectIds:\n            rhobj = importFile.Objects.FindId(objectId) #Get the objects in the InstanceDefinition\n\n            if rhobj.Geometry.ObjectType == DocObjects.ObjectType.InstanceReference: #If one of the object is ObjectType.InstanceReference:\n                #Get the parent InstanceDefinition\n                parentIdefId = rhobj.Geometry.ParentIdefId\n                parentIdef = importFile.AllInstanceDefinitions.FindId(parentIdefId)\n\n                #Add the parent InstanceDefinition to the active doc if not existing already\n                if not sc.doc.InstanceDefinitions.Find(parentIdef.Name):\n                    importBlockInstance(parentIdef)\n                \n                parentIdef_new = sc.doc.ActiveDoc.InstanceDefinitions.Find(parentIdef.Name) #Get the new copy of the parent InstanceDefinition in the doc\n                \n                geometry_list.append(Geometry.InstanceReferenceGeometry(parentIdef_new.Id, rhobj.Geometry.Xform)) #Get the geometry base\n                attributes_list.append(rhobj.Attributes.Duplicate()) #Get the attributes\n            else:\n                geometry_list.append(rhobj.Geometry.Duplicate()) \n                attributes_list += [rhobj.Attributes.Duplicate()]\n\n        #Reassign index\n        reassign_attributes_indexes(attributes_list)\n\n        #Add the InstanceDefinition to the active doc\n        idefName = idefgeometry.Name\n        description = idefgeometry.Description\n        basePoint = Geometry.Point3d()\n        index = sc.doc.InstanceDefinitions.Add(idefName,description,basePoint,geometry_list,attributes_list)\n    \n    importFile=FileIO.File3dm.Read(filePath)\n    if importFile:\n        dic_attributes_match = {}\n        for layer in importFile.AllLayers:\n            index  = sc.doc.Layers.FindByFullPath(layer.FullPath,-1)\n            if index > -1: #If the layer is already in the doc\n                dic_attributes_match[layer.Name] = index\n            else: #If the layer is not in the doc it has to be created\n                newLayerIndex = sc.doc.Layers.Add(layer)\n                dic_attributes_match[layer.Name] = newLayerIndex\n\n        for linetype in importFile.AllLinetypes:\n            linetype_match = sc.doc.Linetypes.FindName(linetype.Name) #If the linetype was found, the linetype index, >=0, is returned. If the linetype was not found, -1 is returned. Note, the linetype index of -1 denotes the default, or \"Continuous\" linetype.\n            if linetype_match.Index > -1: #If the linetype is already in the doc\n                dic_attributes_match[linetype.Name] = linetype_match.Index\n                #print('Layer -' + str(linetype.Name) + '- already in the file, New Index: ' + str(linetype_match.Index))\n            else: #If the layer is not in the doc it has to be created\n                newLinetypeIndex = sc.doc.Linetypes.Add(linetype)\n                dic_attributes_match[linetype.Name] = newLinetypeIndex\n                #print('Layer created. ' + str(linetype.Name) + '; New Index: ' + str(newLinetypeIndex) + ', Index in the imported file: ' + str(linetype.Index))\n\n        for idef in importFile.AllInstanceDefinitions:\n            if not sc.doc.InstanceDefinitions.Find(idef.Name):\n                importBlockInstance(idef)\n\n\nif __name__ == \"__main__\":\n    import_InstanceDefinition_FromFile(yourFilePath)",
+      "language": "python",
+      "author": "peter.zock",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "File3dm model = scene.Floorplan.Model;\nforeach (var idef in model.AllInstanceDefinitions)\n{\n    var geometryList = idef.GetObjectIds()\n              .Select(id => model.Objects.FindId(id).Geometry.Duplicate())\n              .ToList();\n\n    int idef_index = doc.InstanceDefinitions.Add(idef.Name, idef.Description, Point3d.Origin, geometryList);\n    if (idef_index < 0)\n    {\n        RhinoApp.WriteLine(\"Unable to import block from file.\");\n    }\n}\n\nforeach (var obj in model.Objects)\n{\n    var geometry = obj.Geometry.Duplicate();\n    var attributes = obj.Attributes.Duplicate();\n\n    if (geometry is InstanceReferenceGeometry instance)\n    {\n        if (scene.Floorplan.Model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)\n        {\n            var guid = doc.Objects.AddInstanceObject(definition.Index, instance.Xform);\n        }\n    }\n    else\n    {\n        doc.Objects.Add(geometry, attributes);\n    }\n}",
+      "language": "unknown",
+      "author": "Stepan_Radchenko",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 176
+}

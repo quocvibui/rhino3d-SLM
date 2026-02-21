@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/moving-grips-with-python/110995",
+  "topic_id": 110995,
+  "title": "Moving grips with python",
+  "question": "Hello all,\n\n\nI’m rather new to python and rhino scripting, please bear with me.\n\n\nI want to let the user select and move any type of object including grip in a certain direction, using python. I figured that \nrs.GetObjects\n ignores grips, so I’m doing the objects input like this :\n\n\nobjs = rs.GetObjects( \"my-prompt\", filter=2013524799, preselect=True )\n\n\nWhere 2013524799 is a bitwise OR of all the geometry filters.\n\nSo in \nobjs\n I successfully have any type of objects including grips. I want to translate each of these objects, but if I move them like this :\n\n\nfor obj in objs:\n    rs.MoveObject( obj, vector )\n\n\n\npoints, curves and surfaces are moved properly but grips are ignored. What is the reason for that ? Is there anything I can do using \nrhinoscriptsyntax\n ? It would have been a breeze…\n\n\nDigging for a workaround I’ve read this \nrelated post from Dale Fugier\n. However I had a rough time with this solution, because I want to move the grips and redraw at runtime. \nscriptcontext.doc.Objects.GripUpdate\n will update the grip, but either I set its \ndeleteOriginal\n argument to \nFalse\n and the objects are duplicated many times along the translation, either I set it to \nTrue\n, and nothing happen, I assume because the grip is removed from the \nTransformObjectList\n. I tried to add the new object returned by \nGripUpdate\n to the \nTransformObjectList\n, but it doesn’t seem to work.\n\n\nIs there an easier solution to move grips at runtime with python ? If not I will revert to trying to adapt \n@dale\n solution, but I’s been a few hours I struggled with this already…",
+  "code_blocks": [
+    {
+      "code": "def panObjs( newPoint ):\n\n        global startPoint\n\n        # move non-grip objects\n        for obj in objs:\n            rs.MoveObject( obj, newPoint - startPoint )\n\n        # move grip objects\n        for grip in grips:\n            gripObj = sc.doc.Objects.Find( grip )\n            if gripObj:\n                gripObj.Move( newPoint - startPoint )\n\n        # get list of selected grip owners\n        owners = []\n        for grip in grips:\n            gripObj = sc.doc.Objects.Find( grip )\n            if gripObj:\n                owners.append( gripObj.OwnerId )\n\n        # remove duplicates from owners\n        owners = list( set( owners ) )\n\n        # update owners\n        for ownerId in owners:\n            ownerObj = sc.doc.Objects.Find( ownerId )\n            ownerGrips = ownerObj.GetGrips()\n            indexes = [] # grip indexes under update\n            for ownerGrip in ownerGrips:\n                if ownerGrip.Id in grips:\n                    indexes.append( ownerGrip.Index )\n                    grips.remove( ownerGrip.Id )\n            ownerObj = sc.doc.Objects.Find( ownerId )\n            newOwner = sc.doc.Objects.GripUpdate( ownerObj, True )\n            ownerObj = newOwner or ownerObj\n            newGrips = ownerObj.GetGrips()\n            for index in indexes:\n                grips.append( newGrips[ index ].Id )\n\n        startPoint = newPoint",
+      "language": "python",
+      "author": "felix.mariotto",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1268
+}

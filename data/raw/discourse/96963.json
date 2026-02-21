@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/why-is-rs-redraw-so-slow/96963",
+  "topic_id": 96963,
+  "title": "Why is rs.Redraw() so slow?",
+  "question": "Hi,\n\n\n@stevebaer\n and \n@pascal\n\nI am running some tests for Holomark3 and wanted to clean up some code so I thought rs.Redraw() could be a nicer way to refresh the view than to use rs.EnableRedraw(False) and rs.EnableRedraw(True) but on a simple test where I add a spotlight and rotate it around (0,0,0) I get 2x the speed on the latter. Is that as expected, and if so why?\n\n\nHere are my scores on a simple test with a cube with soft edges:\n\n\n\n\nimage\n958×355 57.4 KB\n\n\n\n\ntest 1 - nothing : 3.59\n\ntest 2 - rs.EnableRedraw() : 3.83\n\ntest 3 - rs.Redraw() : 6.91\n\n\nAnd here is the code:\n\n\n\nimport rhinoscriptsyntax as rs\nimport time\n\ntest1=True\ntest2=True\ntest3=True\n\nif test1:\n    light = rs.AddSpotLight( (30,0,0), 15, (50,0,10) )\n    time1=time.time()\n    for i in range(100):\n        rs.RotateObject(light, (0,0,0), 3.6)\n    time2=time.time()\n    rs.DeleteObject(light)\n    print \"test 1 - nothing :\",round(time2-time1,2)\n\nif test2:\n    light = rs.AddSpotLight( (30,0,0), 15, (50,0,10) )\n    time1=time.time()\n    for i in range(100):\n        rs.EnableRedraw(False)\n        rs.RotateObject(light, (0,0,0), 3.6)\n        rs.Sleep(0)\n        rs.EnableRedraw(True)\n    time2=time.time()\n    rs.DeleteObject(light)\n    print \"test 2 - rs.EnableRedraw() :\",round(time2-time1,2)\n\nif test3:\n    light = rs.AddSpotLight( (30,0,0), 15, (50,0,10) )\n    rs.EnableRedraw(False)\n    time1=time.time()\n    for i in range(100):\n        rs.RotateObject(light, (0,0,0), 3.6)\n        rs.Redraw()\n    time2=time.time()\n    rs.EnableRedraw(True)\n    rs.DeleteObject(light)\n    print \"test 3 - rs.Redraw() :\",round(time2-time1,2)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport time\n\ntest1=True\ntest2=True\ntest3=True\n\nif test1:\n    light = rs.AddSpotLight( (30,0,0), 15, (50,0,10) )\n    time1=time.time()\n    for i in range(100):\n        rs.RotateObject(light, (0,0,0), 3.6)\n    time2=time.time()\n    rs.DeleteObject(light)\n    print \"test 1 - nothing :\",round(time2-time1,2)\n\nif test2:\n    light = rs.AddSpotLight( (30,0,0), 15, (50,0,10) )\n    time1=time.time()\n    for i in range(100):\n        rs.EnableRedraw(False)\n        rs.RotateObject(light, (0,0,0), 3.6)\n        rs.Sleep(0)\n        rs.EnableRedraw(True)\n    time2=time.time()\n    rs.DeleteObject(light)\n    print \"test 2 - rs.EnableRedraw() :\",round(time2-time1,2)\n\nif test3:\n    light = rs.AddSpotLight( (30,0,0), 15, (50,0,10) )\n    rs.EnableRedraw(False)\n    time1=time.time()\n    for i in range(100):\n        rs.RotateObject(light, (0,0,0), 3.6)\n        rs.Redraw()\n    time2=time.time()\n    rs.EnableRedraw(True)\n    rs.DeleteObject(light)\n    print \"test 3 - rs.Redraw() :\",round(time2-time1,2)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 1,
+  "views": 297
+}

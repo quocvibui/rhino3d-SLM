@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/subdobject-volume-calculation/161624",
+  "topic_id": 161624,
+  "title": "SubDObject Volume Calculation",
+  "question": "Hello fellow rhino users,\n\n\nI have the following python code to calculate volume of certain objects. I can get the volume of meshes, polysurfaces and surfaces but cannot get the volume of the subds. Does anyone know how to do it (without converting them into meshes of course)? (If you know how to display python code properly in the forum, could you please tell me how to do it?)\n\n\n  def cumulativeVolume():\n      obj = rs.GetObjects(\"Objects for weight calculation\", 8+16+32+262144+1073741824, True, True)\n      if not obj: return\n      \n      meshVol = []\n      brepVol = []\n      \n      for object in obj:\n          print \"Object type: \", rs.ObjectType(object)\n          \n          if rs.ObjectType(object) == 32:\n          \n              Vmesh = rs.MeshVolume(object)[1]\n              meshVol.append(Vmesh)\n          \n          # object is SubD\n          elif rs.ObjectType(object) == 262144:\n              Vmesh = rs.SurfaceVolume(object)[0]\n              meshVol.append(Vmesh)\n          else:\n              i = rs.coercebrep(object)\n              blockVolume = i.GetVolume()\n              brepVol.append(blockVolume)\n          \n      Vmm3 = sum(meshVol) + sum(brepVol)\n      return Vmm3\n  \n  V = cumulativeVolume() / 1000",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef CumulativeVolume(obj_ids):\n    breps=[]\n    mesh_vol_total=0\n    brep_vol_total=0\n    count=0\n    \n    #get all rhinocommon geometry from object ids\n    objs=[rs.coercegeometry(obj_id) for obj_id in obj_ids]\n    \n    for obj in objs:\n        #Sum volumes directly for valid meshes, or skip if not valid\n        if isinstance(obj,Rhino.Geometry.Mesh):\n            if obj.IsClosed:\n                mv=obj.Volume()\n                if mv is not None:\n                    mesh_vol_total+=mv\n                    count+=1\n        \n        #Convert other objects into breps before calculating volume\n        elif isinstance(obj,Rhino.Geometry.Brep):\n            if obj.IsSolid:\n                breps.append(obj)\n        elif isinstance(obj,Rhino.Geometry.Extrusion) or \\\n        isinstance(obj,Rhino.Geometry.SubD):\n            obj=obj.ToBrep()\n            if obj.IsSolid:\n                breps.append(obj)\n     \n    #Do brep volume calculation/sum\n    if breps:\n        for brep_obj in breps:\n            bv=brep_obj.GetVolume()\n            if bv is not None:\n                brep_vol_total+=bv\n                count+=1\n                \n    #return the sum of mesh and brep volumes\n    return mesh_vol_total+brep_vol_total, count\n\notype_filtr=8+16+32+262144+1073741824\nobj_ids= rs.GetObjects(\"Objects for weight calculation\", otype_filtr,True,True)\nif obj_ids:\n    cv=CumulativeVolume(obj_ids)\n    if cv:\n        msg=\"Cumulative volume of {} objects is {}\".format(cv[1],cv[0]*0.001)\n        skipped =len(obj_ids)-cv[1]\n        if skipped>0: msg+= \" | Skipped {} objects\".format(skipped)\n    else:\n        msg=\"Unable to calculate any volumes\"\n    print msg",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "object = rs.GetObject()\n            rs.SelectObject(object)\n            rs.Command(\"_volume\")\n            history = rs.CommandHistory()\n            history_lines = history.split(\"\\n\")\n            volume_info = history_lines[-2]\n            split_operation = volume_info.split(\"=\")[-1].split(\"(\")[0].strip()\n            volume = float(split_operation)",
+      "language": "python",
+      "author": "Erdem",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "def cumulativeVolume():\n      obj = rs.GetObjects(\"Objects for weight calculation\", 8+16+32+262144+1073741824, True, True)\n      if not obj: return\n      \n      meshVol = []\n      brepVol = []\n      \n      for object in obj:\n          print \"Object type: \", rs.ObjectType(object)\n          \n          if rs.ObjectType(object) == 32:\n          \n              Vmesh = rs.MeshVolume(object)[1]\n              meshVol.append(Vmesh)\n          \n          # object is SubD\n          elif rs.ObjectType(object) == 262144:\n              Vmesh = rs.SurfaceVolume(object)[0]\n              meshVol.append(Vmesh)\n          else:\n              i = rs.coercebrep(object)\n              blockVolume = i.GetVolume()\n              brepVol.append(blockVolume)\n          \n      Vmm3 = sum(meshVol) + sum(brepVol)\n      return Vmm3\n  \n  V = cumulativeVolume() / 1000",
+      "language": "python",
+      "author": "Erdem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 447
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/add-radial-dimension.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/add-radial-dimension.py",
+  "instruction": "Add radial dimension",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select curve for radius dimension\", True, ObjectType.Curve)\n    if rc != Result.Success:\n        return rc\n    curve, curve_parameter = obj_ref.CurveParameter()\n    if curve == None:\n        return Result.Failure\n\n    if curve.IsLinear() or curve.IsPolyline():\n        print \"Curve must be non-linear.\"\n        return Result.Nothing\n\n    # in this example just deal with planar curves\n    if not curve.IsPlanar():\n        print \"Curve must be planar.\"\n        return Result.Nothing\n\n    point_on_curve = curve.PointAt(curve_parameter)\n    curvature_vector = curve.CurvatureAt(curve_parameter)\n    len = curvature_vector.Length\n    if len < RhinoMath.SqrtEpsilon:\n        print \"Curve is almost linear and therefore has no curvature.\"\n        return Result.Nothing\n\n    center = point_on_curve + (curvature_vector/(len*len))\n    _, plane = curve.TryGetPlane()\n    radial_dimension = RadialDimension(center, point_on_curve, plane.XAxis, plane.Normal, 5.0)\n    doc.Objects.AddRadialDimension(radial_dimension)\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__==\"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

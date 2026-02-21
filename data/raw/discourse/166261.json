@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/make-python-script-get-brep-edges/166261",
+  "topic_id": 166261,
+  "title": "Make Python Script: Get Brep Edges",
+  "question": "Hey guys,\n\nI am trying to get familiar with Python scripting to write my own little components. I want to slowly dive into this topic by converting this small script into a component: I have a surface, that I want to extrude by a certain height and get all edges as curves.\n\n\nBrepEdges.gh\n (4.8 KB)\n\n\nDo you have a hint for me how to tackle this?\n\nBest\n\nMax\n\n\nScreenshot 2023-09-26 at 17.40.39\n945×259 35.1 KB\n\n\nScreenshot 2023-09-26 at 17.40.37\n850×621 55.4 KB",
+  "code_blocks": [
+    {
+      "code": "public DataTree<Brep> breps;\n  public DataTree<Curve> edges;\n\n  static double tol = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n\n  public void Thicken(int idx, Brep brep, double d, bool bothsides){\n\n    for(int i = 0; i < brep.Faces.Count;i++){\n      BrepFace face = brep.Faces[i];\n      Brep thick = Brep.CreateFromOffsetFace(face, d, tol, bothsides, true);\n      breps.Add(thick, new GH_Path(idx, i));\n\n      var be = thick.Edges;\n      int b = 0;\n      foreach(BrepEdge e in be){\n        edges.AddRange(e.DuplicateSegments(), new GH_Path(idx, i, b));\n        b++;\n      }\n    }\n  }",
+      "language": "csharp",
+      "author": "PeterFotiadis",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 58,
+  "posts_count": 9,
+  "views": 768
+}

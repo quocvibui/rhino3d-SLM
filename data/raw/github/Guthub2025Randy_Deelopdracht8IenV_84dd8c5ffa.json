@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Guthub2025Randy/Deelopdracht8IenV/blob/59943758f1fe89137dc0edc0438ca29869374563/Cees/posities%20voor%20transition%20pieces%20%2B%20uitleg%20hoe.py",
+  "repo": "Guthub2025Randy/Deelopdracht8IenV",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Cees/posities voor transition pieces + uitleg hoe.py",
+  "instruction": "Hoe stel ik dit op in Rhino en grasshopper?",
+  "code": "\"\"\"\nHoe stel ik dit op in Rhino en grasshopper?\n\n1) maak in punt op het punt dat je wil hebben in je txt bestand (in dit geval dus de transitionpieces)\n2) group dit punt met zijn object, zodat als je een tp verplaatst dit punt ook mee beweegt. \n3) in grasshopper: params-->point-->rechtermuis op point-->set multiple points--> klik al je gemaakte punten aan-->enter\n4) in grasshopper: maths--> scripts-->python 3 script\n5) voeg de onderstaande code toe aan dit script(rechtermuis --> open script editor)\n6) noem de bovenste input \"Pt_TP\" en de onderste \"version\"\n7) connect je point met Pt_TP en version met version\n8) rechter muisklik op Pt_TP en klik \"list acces\"\n\nin de txt file krijg je nu eerst van elke TP de LCG,VCG en TCG en het laatste getal is altijd het zwaartepunt van alle TPs\n\n\n\n\"\"\"\n\n\nimport os\nimport rhinoscriptsyntax as rs\n\nghdoc_path = ghenv.Component.OnPingDocument().FilePath\n\nif ghdoc_path:\n    folder = os.path.dirname(ghdoc_path)\n\n    version_value = version[0] if isinstance(version, list) else version\n    filename = f\"tpdata_V{int(version_value):2d}.0.txt\"\n    full_path = os.path.join(folder, filename)\n\n    if Pt_TP and len(Pt_TP) >= 1:\n        lines = []\n        sum_x = 0\n        sum_y = 0\n        sum_z = 0\n        valid_points = 0\n\n        for i, pt_guid in enumerate(Pt_TP):\n            pt = rs.coerce3dpoint(pt_guid)\n            if pt:\n                lines.append(f\"{pt.X},{pt.Y},{pt.Z}\")\n                sum_x += pt.X\n                sum_y += pt.Y\n                sum_z += pt.Z\n                valid_points += 1\n            else:\n                print(f\"Punt {i + 1} is geen geldig puntobject.\")\n\n        if valid_points > 0:\n            centroid_x = sum_x / valid_points\n            centroid_y = sum_y / valid_points\n            centroid_z = sum_z / valid_points\n            lines.append(f\"{centroid_x},{centroid_y},{centroid_z}\")\n\n            with open(full_path, \"w\") as f:\n                f.write(\"\\n\".join(lines))\n        else:\n            print(\"Geen geldige punten gevonden.\")\n    else:\n        print(\"Voer ten minste één punt in voor de Transition Pieces.\")\nelse:\n    print(\"Sla eerst het Grasshopper-bestand op.\")\n\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

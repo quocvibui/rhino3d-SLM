@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/accessing-developer-tools-panel-in-webview/203143",
+  "topic_id": 203143,
+  "title": "Accessing Developer Tools Panel in WebView",
+  "question": "If you are using Eto WebView controls in Rhino, this is an example of how to enable the developer tools panel. Note that Eto WebView control is tied to \nMicrosoft WebView2\n on Windows and \nWebKit\n on macOS so the details of enabling and accessing the developer tools panel is slightly different.\n\n\nOpen ScriptEditor in Rhino and run this C# code\n\n\n// #! csharp\nusing System;\nusing Rhino.UI;\nusing Eto.Forms;\nusing Eto.Drawing;\n\nclass MyWebView : Form\n{\n    public MyWebView()\n    {\n        Owner = RhinoEtoApp.MainWindow;\n        Size = new Size(500, 400);\n\n        var wv = new WebView();\n        wv.Url = new Uri(\"https://duckduckgo.com/\");\n\n        var b = new Button { Text = \"Enable Developer Panel\" };\n        b.Height = 40;\n        b.Click += (s, e) =>\n        {\n            dynamic c = wv.ControlObject;\n#if MACOS\n            // open developer panel from Safari\n            // Develop -> <computer> -> menu\n            c.Inspectable = true;\n#elif WINDOWS\n            c.CoreWebView2.OpenDevToolsWindow();\n#endif\n        };\n\n        Content = new TableLayout\n        {\n            Rows = { new TableRow { Cells = { wv }, ScaleHeight = true }, b }\n        };\n    }\n}\n\nvar f = new MyWebView();\nf.Show();\n\n\n\nThis will open a window with a WebView control browsing DuckDuckGo website.\n\n\n\n\nOn Windows:\n Clicking the \nEnable Developer Panel\n opens the developer panel. Easy\n\n\nOn macOS:\n Clicking the \nEnable Developer Panel\n enables inspection of this window from Safari. Open Safari and access the inspector for this window from Develop menu. The inspector is listed under your machine name and will highlight the WebView control when hovering over.\n\n\n\n\nScreenshot 2025-04-15 at 8.57.02 AM\n1632×1206 673 KB",
+  "code_blocks": [
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino.UI;\nusing Eto.Forms;\nusing Eto.Drawing;\n\nclass MyWebView : Form\n{\n    public MyWebView()\n    {\n        Owner = RhinoEtoApp.MainWindow;\n        Size = new Size(500, 400);\n\n        var wv = new WebView();\n        wv.Url = new Uri(\"https://duckduckgo.com/\");\n\n        var b = new Button { Text = \"Enable Developer Panel\" };\n        b.Height = 40;\n        b.Click += (s, e) =>\n        {\n            dynamic c = wv.ControlObject;\n#if MACOS\n            // open developer panel from Safari\n            // Develop -> <computer> -> menu\n            c.Inspectable = true;\n#elif WINDOWS\n            c.CoreWebView2.OpenDevToolsWindow();\n#endif\n        };\n\n        Content = new TableLayout\n        {\n            Rows = { new TableRow { Cells = { wv }, ScaleHeight = true }, b }\n        };\n    }\n}\n\nvar f = new MyWebView();\nf.Show();",
+      "language": "csharp",
+      "author": "eirannejad",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 140
+}

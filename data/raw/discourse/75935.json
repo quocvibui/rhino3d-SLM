@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-component-mysteriously-changing-list-data-from-class/75935",
+  "topic_id": 75935,
+  "title": "GHPython component mysteriously changing list data from class?",
+  "question": "Hello folks,\n\n\nLet’s say I have the following code inside a GHPython component:\n\n\nimport Rhino.Geometry as rg\nimport random\n\n\nTIME = 100\nrandom.seed(2)\n\nclass MyClass:\n    def __init__(self):\n       self.my_list = []\n    \n    def update(self):\n        pt = rg.Point3d(random.random(), random.random(), random.random())\n        self.my_list.append(pt)\n\n\nmc = MyClass()\n\ntime_list = []\n\nfor t in range(TIME): # moment in time\n    mc.update()\n    print mc.my_list\n    time_list.append(mc.my_list)\n\na = time_list\n\n\n\nThe goal is to output the list of lists \ntime_list\n, which includes a list of points, provided by the class \nMyClass\n for each moment in time. I have no problems converting the nested list to a tree, but my issue lies with how the component runs, at least I believe so.\n\n\nIf I output the nested list, all of its sublists are already populated with a \nTIME\n-number of points (here 100).\n\nHowever, what I want is an increasing number of points per sublist over time. For example, at the first iteration of the for loop, only one point should be in the first sublist, than 2 points, after that 3, … and 100 points at iteration \nTIME\n-1 (here 99).\n\n\nThis way I want to keep track of what happens at each moment in time. Furthermore, I could probably animate the process by looping through the tree branches with a Timer and Counter combo.\n\n\nI guess my problem stems from the refresh rate of the component itself, or something like that. When I \nprint mc.m_list\n inside the for loop, just before appending it to the \ntime_list\n, the printed output shows the right result (i-number of points per sublist). However, the sublists of the \ntime_list\n after the for loop, all have \nTIME\n-number of points inside (here 100). How can that even be?",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport random\n\n\nTIME = 100\nrandom.seed(2)\n\nclass MyClass:\n    def __init__(self):\n       self.my_list = []\n    \n    def update(self):\n        pt = rg.Point3d(random.random(), random.random(), random.random())\n        self.my_list.append(pt)\n\n\nmc = MyClass()\n\ntime_list = []\n\nfor t in range(TIME): # moment in time\n    mc.update()\n    print mc.my_list\n    time_list.append(mc.my_list)\n\na = time_list",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 24,
+  "views": 2091
+}

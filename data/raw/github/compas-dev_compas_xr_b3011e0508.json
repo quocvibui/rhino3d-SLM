@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_xr/blob/2ef8117009c9d775d61b4e8b5f412615aac480db/src/compas_xr/ghpython/components/Cx_SendTrajectory/code.py",
+  "repo": "compas-dev/compas_xr",
+  "repo_stars": 15,
+  "repo_description": "COMPAS XR streamlines extended reality workflows to ease the implementation of human-machine collaborative applications in architectural research and educational environments.",
+  "license": "MIT",
+  "filepath": "src/compas_xr/ghpython/components/Cx_SendTrajectory/code.py",
+  "instruction": "Component to handle execution of trajectory.",
+  "code": "\"\"\"\nComponent to handle execution of trajectory.\n\nGets trajectories to be executed by a robot.\n\nCOMPAS XR v1.0.0\n\"\"\"\n\nfrom compas_eve import Subscriber\nfrom compas_eve import Topic\nfrom compas_eve.ghpython import BackgroundWorker\nfrom compas_eve.mqtt import MqttTransport\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom compas_xr.mqtt import SendTrajectory\n\n\ndef start_server(worker, options):\n    topic_name_request = \"compas_xr/send_trajectory/\" + options.project_name\n\n    worker.count = 0\n\n    def execute_trajectory_requested(request_message):\n        worker.count += 1\n        worker.display_message(\"Request #{} started\".format(worker.count))\n        worker.update_result(request_message, 10)\n\n    tx = MqttTransport(options.host)\n    topic = Topic(topic_name_request, SendTrajectory)\n    worker.subscriber = Subscriber(topic, callback=execute_trajectory_requested, transport=tx)\n    worker.subscriber.subscribe()\n    worker.display_message(\"Subscribed\")\n\n\ndef stop_server(worker):\n    if hasattr(worker, \"subscriber\"):\n        worker.subscriber.unsubscribe()\n    worker.display_message(\"Stopped\")\n\n\nclass ExecuteTrajectoryServiceComponent(component):\n    def RunScript(self, options, reset, on):\n        if not on:\n            BackgroundWorker.stop_instance_by_component(ghenv)  # noqa: F821\n            return None\n\n        self.worker = BackgroundWorker.instance_by_component(\n            ghenv,  # noqa: F821\n            start_server,\n            dispose_function=stop_server,\n            force_new=reset,\n            auto_set_done=False,\n            args=(options,),\n        )\n\n        if not self.worker.is_working() and not self.worker.is_done() and reset:\n            self.worker.start_work()\n\n        if hasattr(self.worker, \"result\"):\n            element_id = self.worker.result.element_id\n            robot_name = self.worker.result.robot_name\n            return element_id, robot_name\n        else:\n            return None, None\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

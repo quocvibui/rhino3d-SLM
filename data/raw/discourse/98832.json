@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-volume-centroid-without-creating-the-point/98832",
+  "topic_id": 98832,
+  "title": "Get Volume Centroid without creating the point",
+  "question": "Hi,\n\n\nI’m trying to pull the volume centroid of polysurface using the code below and I get the following error:  “Message: getset_descriptor is not callable”.  Can anyone explain what I am doing wrong.  I only want the coordinates and not the physical point (the Rhino Command creates a physical point).  Yes I know I can get the bounding box and calculate it myself.  If I can do it in less code that would be better for me.\n\n\nThanks,\n\n\nEric\n\n\nimport Rhino\n\nimport rhinoscriptsyntax as rs\n\n\nobj = rs.GetObject(“Select”,0)\n\npt = Rhino.Geometry.VolumeMassProperties.Centroid(obj)\n\nprint(pt)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobj = rs.GetObject(\"Select\", 8+16)\ncentroid = rs.SurfaceVolumeCentroid(obj)\nif centroid: print centroid[0]",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nobj = rs.GetObject(\"Select\",8+16)\nbrep=rs.coercebrep(obj)\nvmp=Rhino.Geometry.VolumeMassProperties.Compute(brep)\nif vmp: print vmp.Centroid",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nobj = rs.coercegeometry(rs.GetObject(\"Select\", 0))\ncentroid = Rhino.Geometry.VolumeMassProperties.Compute(obj).Centroid",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 817
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sys-exit-shows-popup-window-instead-of-just-exiting/163811",
+  "topic_id": 163811,
+  "title": "Sys.exit() shows popup window instead of just exiting",
+  "question": "We are successfully launching Rhino 7 with command line parameters to run a script.  For testing, the script just waits a few seconds and then exits with the \nsys.exit()\n command.  Except that it always displays a popup window so that a user has to press a button.  Our goal is to run the system unattended.  Also, we are hoping to capture the “exit number” such as \nsys.exit(33)\n but have not been able to get that far yet.\n\n\nHere is the simple script that Rhino is running:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport os\nimport sys\nimport time\n\ntime.sleep(3)\nrs.DocumentModified(False)\nsys.exit(3)\n\n\n\nBoth the script above and the Python script that runs Rhino are attached below.  The output from the Python script running Rhino looks like this…\n\n\n\n\nC:\\Users\\henry\\Documents>python RunRhinoFromPython.py\n\nThe executable path exists\n\nThe script path exists\n\n“C:\\Program Files\\Rhino 7\\System\\Rhino.exe” /nosplash /runscript=“\n-RunPythonScript ““C:\\Users\\henry\\Documents\\rhino_sysexit.py””\" /runscript=\"\n-Exit”\n\nStarting the application…\n\nProcess has a PID = 8528\n\nb’’\n\nb’’\n\n\n\n\nwhich (I think) is good except that it requires a user to dismiss this popup window.\n\n\n\n\nRunRhinoFromPython.py\n (1.5 KB)\n\n\nrhino_sysexit.py\n (157 Bytes)\n\n\nThanks for your help.",
+  "code_blocks": [
+    {
+      "code": "import ctypes\nimport Rhino\nimport scriptcontext\n\ndef test_exit_without_saving():\n    scriptcontext.doc.Modified = False\n    hWnd = Rhino.RhinoApp.MainWindowHandle()\n    ctypes.windll.user32.PostMessageW(hWnd, 0x0010, 0, 0)\n    \ntest_exit_without_saving()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import ctypes\nimport time\nimport sys\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n\n# Pause for dramatic effect\ntime.sleep(3)\n\n# We don't want to save the document\n#rs.DocumentModified(False)\nsc.doc.Modified = False\n\n# Write to stderr and stdout\nsys.stderr.write('Using the write command')\nsys.stdout.write('Something from stdout')\n\nhWnd = Rhino.RhinoApp.MainWindowHandle()\nctypes.windll.user32.PostMessageW(hWnd, 0x0010, 0, 0)\n\n# Exit the application without and popup dialogs\nRhino.RhinoApp.Exit(True)\n\n# This will not work\n#sys.exit(3)",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport os\nimport sys\nimport time\n\ntime.sleep(3)\nrs.DocumentModified(False)\nsys.exit(3)",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 1176
+}

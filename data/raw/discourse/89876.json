@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/first-python-script-some-advice-please/89876",
+  "topic_id": 89876,
+  "title": "First Python Script - Some Advice Please",
+  "question": "Hi all,\n\n\nI am trying my hand with my first Python Script and wanted some help with making it work more cleanly.\n\n\nIt’s to create blended setback curves at adjacent edges on a surface, which I then use as rails in future. It’s really just a plaything for me to try and test what I’ve learnt so far, because I can kind of see the steps.\n\n\nMy first version worked perfectly fine on untrimmed surfaces. v1.01 I was trying to make work on trimmed surfaces, where adjacent edges aren’t necessarily following the clockwise rule when I’ve created the edge curves.\n\n\n\n\n\n\n\n\nwetransfer.com\n\n\n\n\n\n\n\n\n2019-10-04 11-40-23.mp4\n\n\n1 file sent via WeTransfer, the simplest way to send your files around the world\n\n\n\n\n\n\n\n\n\n\n\n\nI think I just need my \nif\n statement to work properly. It’s in a bit of a loop where I keep overwriting the curve directions with the \nelse\n from before. So it’s a logic issue that I can see but not code. There may be a lot of redundant steps covered in one command too if anybody knows of any.\n\n\nBlendCrvOnSrf_Radius_1.01.py\n (4.7 KB)",
+  "code_blocks": [
+    {
+      "code": "radius = rs.CurveRadius(pulled, midpoint)*\n\nprint \"Actual radius is\"\nprint radius",
+      "language": "python",
+      "author": "Jonathan_Hutchinson1",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "if len(pulled) >1:\n    pulled_joined=rs.JoinCurves(pulled)\n    rs.DeleteObjects(pulled)\n    pulled=pulled_joined",
+      "language": "python",
+      "author": "Jonathan_Hutchinson1",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ncrvs=rs.GetObjects(\"Select some curves\",4)\nsrf=rs.AddPlanarSrf(crvs)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef MakePlanarSrfFromCrvs():\n    crvs=rs.GetObjects(\"Select some curves\",4)\n    if not crvs: return\n    srf=rs.AddPlanarSrf(crvs)\n    if srf:\n        rs.SelectObject(srf)\nMakePlanarSrfFromCrvs()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 22,
+  "views": 1427
+}

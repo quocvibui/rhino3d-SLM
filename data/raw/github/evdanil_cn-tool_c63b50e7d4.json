@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/evdanil/cn-tool/blob/d83b0c68efb5aaf10f09f1b77ddd5c992157f4af/utils/app_lifecycle.py",
+  "repo": "evdanil/cn-tool",
+  "repo_stars": 1,
+  "repo_description": "Utility allowing to receive information from Infoblox API",
+  "license": "unknown",
+  "filepath": "utils/app_lifecycle.py",
+  "instruction": "App lifecycle",
+  "code": "import sys\nfrom core.base import ScriptContext\nfrom .display import console, get_global_color_scheme\nfrom .file_io import wait_for_all_saves, worker_thread\nfrom .cache import CacheManager\n\n\ndef exit_now(ctx: ScriptContext, exit_code: int = 0, message: str = '') -> None:\n    \"\"\"\n    Gracefully exits from application, closing resources and logging the exit reason.\n    \"\"\"\n    colors = get_global_color_scheme(ctx.cfg)\n    logger = ctx.logger\n    cache = ctx.cache\n\n    # Mark exiting early so any final UI render indicates graceful shutdown\n    ctx.cfg[\"exiting\"] = True\n\n    if worker_thread and worker_thread.is_alive():\n        logger.info(\"Waiting for background save operations to complete...\")\n        if exit_code == 0:\n            with console.status(f\"[{colors['success']}]Closing report file... Please do not interrupt...[/]\"):\n                wait_for_all_saves()\n        else:\n            # For interruptions, don't show the status spinner, just wait.\n            wait_for_all_saves()\n        logger.info(\"All save operations complete.\")\n\n    if cache and isinstance(cache, CacheManager):\n        logger.info(\"Closing disk cache...\")\n        cache.dc.close()\n        logger.info(\"Disk cache closed.\")\n\n    if exit_code == 0:\n        # Normal exit requested by user (e.g., pressing '0')\n        logger.info(\"Terminating by user request - Have a nice day!\")\n        console.print(f\"[{colors['success']}]Have a nice day![/]\")\n    elif exit_code == 1 and \"Interrupted\" in message:\n        # Specific case for CTRL+C\n        logger.warning(f\"Abnormal termination: {message}\")\n        console.print(f\"\\n[{colors['error']}]{message}[/]\")\n    else:\n        # Any other error exit\n        logger.error(f\"Abnormal termination: {message}\")\n        console.print(f\"[{colors['error']}]{message}[/]\")\n\n    # Disconnect global plugins >>>\n    ctx.logger.info(\"Shutting down application resources...\")\n    for plugin in ctx.plugins:\n        if plugin.manages_global_connection:\n            ctx.logger.info(f\"Disconnecting plugin: {plugin.name}\")\n            plugin.disconnect(ctx)\n\n    sys.exit(exit_code)\n",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

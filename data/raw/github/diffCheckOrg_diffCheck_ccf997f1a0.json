@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_brep_to_cloud/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_brep_to_cloud/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport Rhino\nfrom ghpythonlib.componentbase import executingcomponent as component\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\n\nfrom diffCheck import df_cvt_bindings\nimport System\n\n\nclass DFBrepToCloud(component):\n    def RunScript(self,\n            i_breps: System.Collections.Generic.IList[Rhino.Geometry.Brep],\n            i_num_points: int):\n        self.meshing_parameters = Rhino.Geometry.MeshingParameters.DefaultAnalysisMesh\n\n        mesh_versions = []\n\n        if i_breps is None or i_num_points is None:\n            return None\n\n        for i_brep in i_breps:\n            if not isinstance(i_brep, Rhino.Geometry.Brep):\n                self.AddRuntimeMessage(RML.Warning, \"Please provide a brep to convert to a cloud\")\n                return None\n            meshes = Rhino.Geometry.Mesh.CreateFromBrep(i_brep, self.meshing_parameters)\n            for mesh in meshes:\n                mesh_versions.append(mesh)\n\n        unified_mesh = mesh_versions[0]\n        unified_mesh.Append(mesh_versions)\n        unified_mesh.Faces.ConvertQuadsToTriangles()\n        df_mesh = df_cvt_bindings.cvt_rhmesh_2_dfmesh(unified_mesh)\n        df_cloud = df_mesh.sample_points_uniformly(i_num_points)\n        rgpoints = [Rhino.Geometry.Point3d(pt[0], pt[1], pt[2]) for pt in df_cloud.points]\n        rh_cloud = Rhino.Geometry.PointCloud(rgpoints)\n        print(rh_cloud)\n        return [rh_cloud]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

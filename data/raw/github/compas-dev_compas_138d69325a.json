@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/compas-dev/compas/blob/HEAD/src/compas_rhino/conduits/base.py",
+  "repo": "compas-dev/compas",
+  "repo_stars": 352,
+  "repo_description": "Main library of the COMPAS framework and CAD integrations for Rhino/GH and Blender.",
+  "license": "MIT",
+  "filepath": "src/compas_rhino/conduits/base.py",
+  "instruction": null,
+  "code": "from __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport time\nfrom contextlib import contextmanager\n\nimport Rhino  # type: ignore\nimport scriptcontext as sc  # type: ignore\n\n\nclass BaseConduit(Rhino.Display.DisplayConduit):\n    \"\"\"Base class for conduits.\n\n    Parameters\n    ----------\n    refreshrate : int, optional\n        The number of iterations after which the conduit should be redrawn.\n\n    \"\"\"\n\n    def __init__(self, refreshrate=1):\n        super(BaseConduit, self).__init__()\n        self.refreshrate = refreshrate\n\n    @contextmanager\n    def enabled(self):\n        \"\"\"Create a context for the conduit with automatic enabling and disabling.\n\n        Yields\n        ------\n        None\n\n        Notes\n        -----\n        The conduit is automatically enabled when the context is entered,\n        and is guaranteed to be disabled when the context is exited,\n        even when an error occurs during the execution of the code in the context.\n\n        Examples\n        --------\n        .. code-block:: python\n\n            with conduit.enabled():\n                for i in range(10):\n                    conduit.redraw(k=1)\n\n        \"\"\"\n        self.enable()\n        try:\n            yield\n        except Exception as e:\n            print(e)\n        finally:\n            self.disable()\n\n    def CalculateBoundingBox(self, e):\n        \"\"\"Calculate the model extents that should be included in the visualization.\n\n        Parameters\n        ----------\n        e : Rhino.DisplayCalculateBoundingBoxEventArgs\n\n        Returns\n        -------\n        None\n\n        \"\"\"\n        bbox = Rhino.Geometry.BoundingBox(-1000, -1000, -1000, 1000, 1000, 1000)\n        e.IncludeBoundingBox(bbox)\n\n    def enable(self):\n        \"\"\"Enable the conduit.\n\n        Returns\n        -------\n        None\n\n        \"\"\"\n        self.Enabled = True\n\n    def disable(self):\n        \"\"\"Disable the conduit.\n\n        Returns\n        -------\n        None\n\n        \"\"\"\n        self.Enabled = False\n\n    def redraw(self, k=0, pause=0.0):\n        \"\"\"Redraw the conduit.\n\n        Parameters\n        ----------\n        k : int, optional\n            The current iteration.\n            If the current iteration is a multiple of :attr:`BaseConduit.refreshrate`, the conduit will be redrawn.\n        pause : float, optional\n            Include a pause after redrawing.\n            The pause value should be provided in seconds.\n\n        Returns\n        -------\n        None\n\n        Raises\n        ------\n        ValueError\n            If `pause` is not a positive number.\n\n        \"\"\"\n        if pause < 0:\n            raise ValueError(\"The value of pause should be a positive number.\")\n\n        if k % self.refreshrate == 0:\n            sc.doc.Views.Redraw()\n        Rhino.RhinoApp.Wait()\n        if pause:\n            time.sleep(pause)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

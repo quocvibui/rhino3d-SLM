@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-selbox-and-selvolumesphere/14072",
+  "topic_id": 14072,
+  "title": "Scripting SelBox and SelVolumeSphere",
+  "question": "So, I’m trying to script selection of grips to make it easier to replicate a bug I’ve got in my own code.\n\n\nIf I type\n\n\n-SelVoumeSphere 0 4\n\n\n\ninto the Rhino window, I get the expected selection.\n\n\nHowever, if I paste the same string, the command runs, I see the arguments in the command history as expected, and it exits with no error message, but nothing is selected.\n\n\nI’m seeing the same behavior for -SelBox\n\n\nAny ideas?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ndef test_sel_box():\n    rc, box = Rhino.Input.RhinoGet.GetBox()\n    if rc == Rhino.Commands.Result.Success:\n        corners = box.GetCorners()\n        p0 = corners[0].ToString()\n        p1 = corners[1].ToString()\n        p3 = corners[3].ToString()\n        p4 = corners[4].ToString()\n        cmd = '_SelBox {0} {1} {2} {3}'.format(p0, p1, p3, p4)\n        Rhino.RhinoApp.RunScript(cmd, True)\n\ntest_sel_box()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1693
+}

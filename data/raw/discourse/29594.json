@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-object-color/29594",
+  "topic_id": 29594,
+  "title": "Set object color",
+  "question": "I am trying to set the color of a cylinder I created using python. Cylinder is created, but the color does not change.\n\n\nHere is the script. Any help is appreciated.\n\n\n\nimport Rhino\nimport utility as rhutil\nimport scriptcontext\nimport System.Guid\nimport re\nimport math\nimport time\nimport sys\n\nimport System.Windows.Forms.DialogResult\nimport System.IO.File\n\nimport object as rhobject\n\nfrom scriptcontext import doc\n\nimport Rhino.UI\nimport rhinoscriptsyntax\nimport System.Drawing.Color\nimport System.Enum\nimport System.Array\nimport System.Windows.Forms\nfrom view import __viewhelper\n\nimport os\n\ndef AddCylinder(base, height, radius, cap=True):\n    \"\"\"\n    Adds a cylinder-shaped polysurface to the document\n    Parameters:\n      base = The 3D base point of the cylinder or the base plane of the cylinder\n      height = if base is a point, then height is a 3D height point of the cylinder. The height\n        point defines the height and direction of the cylinder. If base is a plane, then height\n        is the numeric height value of the cylinder\n      radius = radius of the cylinder\n      cap[opt] = cap the cylinder\n    Returns:\n      identifier of new object if successful\n      None on error\n    \"\"\"\n    cylinder=None\n    height_point = rhutil.coerce3dpoint(height)\n    if( height_point!=None ):\n        #base must be a point\n        base = rhutil.coerce3dpoint(base)\n        if( base!=None ):\n            normal = height_point-base\n            plane = Rhino.Geometry.Plane(base, normal)\n            height = normal.Length\n            circle = Rhino.Geometry.Circle(plane, radius)\n            cylinder = Rhino.Geometry.Cylinder(circle, height)\n    else:\n        #base must be a plane\n        base = rhutil.coerceplane(base)\n        if( base!=None ):\n            circle = Rhino.Geometry.Circle(base, radius)\n            cylinder = Rhino.Geometry.Cylinder(circle, height)\n    if( cylinder==None ): return scriptcontext.errorhandler()\n    brep = cylinder.ToBrep(cap, cap)\n    id = scriptcontext.doc....",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef DoSomething():\n    x = 20.0\n    y = 30.0\n    thickness = 0.5\n    radius = 0.5\n    base = Rhino.Geometry.Point3d(x, y, thickness)\n    top = Rhino.Geometry.Point3d(x, y, thickness+.1)\n    scyl = rs.AddCylinder(base, top, radius)\n    rs.ObjectColor(scyl,(255,0,0))\n    \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef DoSomething():\n    x = 20.0\n    y = 30.0\n    thickness = 0.5\n    radius = 0.5\n    base = Rhino.Geometry.Point3d(x, y, thickness)\n    top = Rhino.Geometry.Point3d(x, y, thickness+.1)\n    scyl = rs.AddCylinder(base, top, radius)\n    \n    # add new material and get its index\n    material_index = rs.AddMaterialToObject(scyl)\n    \n    # assign material color\n    rs.MaterialColor(material_index, color=(255,0,0))\n    \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport utility as rhutil\nimport scriptcontext\nimport System.Guid\nimport re\nimport math\nimport time\nimport sys\n\nimport System.Windows.Forms.DialogResult\nimport System.IO.File\n\nimport object as rhobject\n\nfrom scriptcontext import doc\n\nimport Rhino.UI\nimport rhinoscriptsyntax\nimport System.Drawing.Color\nimport System.Enum\nimport System.Array\nimport System.Windows.Forms\nfrom view import __viewhelper\n\nimport os\n\ndef AddCylinder(base, height, radius, cap=True):\n    \"\"\"\n    Adds a cylinder-shaped polysurface to the document\n    Parameters:\n      base = The 3D base point of the cylinder or the base plane of the cylinder\n      height = if base is a point, then height is a 3D height point of the cylinder. The height\n        point defines the height and direction of the cylinder. If base is a plane, then height\n        is the numeric height value of the cylinder\n      radius = radius of the cylinder\n      cap[opt] = cap the cylinder\n    Returns:\n      identifier of new object if successful\n      None on error\n    \"\"\"\n    cylinder=None\n    height_point = rhutil.coerce3dpoint(height)\n    if( height_point!=None ):\n        #base must be a point\n        base = rhutil.coerce3dpoint(base)\n        if( base!=None ):\n            normal = height_point-base\n            plane = Rhino.Geometry.Plane(base, normal)\n            height = normal.Length\n            circle = Rhino.Geometry.Circle(plane, radius)\n            cylinder = Rhino.Geometry.Cylinder(circle, height)\n    else:\n        #base must be a plane\n        base = rhutil.coerceplane(base)\n        if( base!=None ):\n            circle = Rhino.Geometry.Circle(base, radius)\n            cylinder = Rhino.Geometry.Cylinder(circle, height)\n    if( cylinder==None ): return scriptcontext.errorhandler()\n    brep = cylinder.ToBrep(cap, cap)\n    id = scriptcontext.doc.Objects.AddBrep(brep)\n    if( id==System.Guid.Empty ):\n        return scriptcontext.errorhandler()\n    return id\n    \"\"\"\n    scriptcontext.doc.Views.Redraw()\n    \"\"\"\n\nx = 20.\ny = 30.\nthickness = .5\nradius = .5\nbase = Rhino.Geometry.Point3d(x, y, thickness)\ntop = Rhino.Geometry.Point3d(x, y, thickness+.1)\nscyl = AddCylinder(base, top, radius)\n\nrhinoscriptsyntax.ObjectColor(scyl,(25,50,255))",
+      "language": "python",
+      "author": "elaner",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 6728
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-know-what-the-default-linetype-name-is/31503",
+  "topic_id": 31503,
+  "title": "How to know what the default linetype name is?",
+  "question": "Hi,\n\n\nI just found that the linetypes listed via rhinoscriptsyntax.LinetypeNames(), omits the linetype ‘Continuous’.\n\nThis appears to be the default, hardcoded linetype.\n\n\n\n\nIs there a way to find the name of that default linetype? Is it always Continuous; is it always present in all files?\n\n\nThe issue I ran into is that when explicitly stating linetypes for layers and testing them against the existing linetypes in the document, the ‘continouos’ type is caught as non-existent.\n\n\nCan someone shed some light on what can be expected so I can write a valid workaround.\n\nIs there somewhere to know the name of the default linetype?\n\n\nThanks\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\n\nlayers=sc.doc.Layers\nindex=layers.Find(\"Default\",True)\nprint layers[index].LinetypeIndex\nlayers[index].LinetypeIndex=-1\nlayers[index].CommitChanges()\nprint layers[index].LinetypeIndex\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DoSomething():\n\n    # get the layer\n    layer_index = scriptcontext.doc.Layers.Find(\"Default\", True)\n    layer = scriptcontext.doc.Layers[layer_index]\n\n    # get layers linetype name and index\n    lt_index = layer.LinetypeIndex\n    lt_name = scriptcontext.doc.Linetypes[lt_index].Name\n    print \"Linetype '{}' with index: {}\".format(lt_name, lt_index)\n\n    # set linetype to continuous (default)\n    lt = Rhino.DocObjects.Linetype()\n    lt.Default()\n    layer.LinetypeIndex = lt.LinetypeIndex\n    layer.CommitChanges()\n    print \"New LinetypeIndex:\", layer.LinetypeIndex\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 792
+}

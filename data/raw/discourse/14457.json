@@ -1,0 +1,97 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-rhinoscriptsyntax-custom-filter-question/14457",
+  "topic_id": 14457,
+  "title": "Python rhinoscriptsyntax custom_filter question",
+  "question": "I am trying to limit the selection to either a closed planar curve or a planar surface.  I have tried all sorts of combinations of different ways to set up the custom filter including more detailed if statements and try/except clauses, but none work correctly, either I can select some things that don’t fit the filter criteria or I can’t select some things that do…  Haven’t found the right combination yet.  Anyone have any pointers here?\n\n\ndef cp_filt(rhino_object, geometry, component_index):\n    a=(rs.IsSurface(geometry) and rs.IsSurfacePlanar(geometry))\n    b=(rs.IsCurvePlanar(geometry) and rs.IsCurveClosed(geometry))\n    return a | b\n\ndef TestFilter():\n    msg=\"Select closed planar curve or planar surface\"\n    obj=rs.GetObject(msg,4+8,True,custom_filter=cp_filt)\n    print obj\n\n\n\nThx, --Mitch",
+  "code_blocks": [
+    {
+      "code": "def cp_filt(rhino_object, geometry, component_index):\n    a=(rs.IsSurface(rhino_object.Id) and rs.IsSurfacePlanar(rhino_object.Id))\n    b=(rs.IsCurvePlanar(rhino_object.Id) and rs.IsCurveClosed(rhino_object.Id))\n    return a | b",
+      "language": "python",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def cp_filt(rhino_object, geometry, component_index):\n    return rs.IsCurvePlanar(geometry) and rs.IsCurveClosed(geometry)\n\ndef TestFilter():\n    msg=\"Select planar object\"\n    obj=rs.GetObject(msg,4,True,custom_filter=cp_filt)\n    print obj\nTestFilter()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def cp_filt(rhino_object, geometry, component_index):\n    return rs.IsCurvePlanar(geometry) and rs.IsCurveClosed(geometry)\n\ndef TestFilter():\n    msg=\"Select planar object\"\n    obj=rs.GetObject(msg,4+8,True,custom_filter=cp_filt)\n    print obj\nTestFilter()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef cp_filt(rhino_object, geometry, component_index):\n    return rs.IsCurve(geometry) and rs.IsCurvePlanar(geometry) and rs.IsCurveClosed(geometry)\n\ndef TestFilter():\n    msg=\"Select planar object\"\n    obj=rs.GetObject(msg,4+8,True,custom_filter=cp_filt)\n    print obj\nTestFilter()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nid = None\nwhile not id:\n    id = rs.GetObject( '?' )\n    if not id:\n        break\n    if rs.IsSurface( id ) and rs.IsSurfacePlanar( id ):\n        pass\n    elif rs.IsCurve( id ) and rs.IsCurvePlanar( id ):\n        pass\n    else:\n        id = None\nprint id",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\ndef cp_filt(rhino_object, geometry, component_index):\n    if geometry.IsPlanar():\n        if isinstance(geometry, Rhino.Geometry.Curve):\n            if not geometry.IsClosed: return False\n        return True\n    return False\n\ndef TestFilter():\n    msg=\"Select planar object\"\n    obj=rs.GetObject(msg,4+8,True,custom_filter=cp_filt)\n    print obj\n    \nTestFilter()",
+      "language": "python",
+      "author": "Jess",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef cp_filt(rhino_object, geometry, component_index):\n    if rs.IsCurve(rhino_object.Id):\n        if rs.IsCurveClosed(rhino_object.Id):\n            if rs.IsCurvePlanar(rhino_object.Id):\n                return True\n    elif rs.IsSurface(rhino_object.Id):\n            if rs.IsSurfacePlanar(rhino_object.Id):\n                return True\n    return False\n\ndef TestFilter():\n    msg=\"Select planar object\"\n    obj=rs.GetObject(msg,4+8,True,custom_filter=cp_filt)\n    print obj\n    \nTestFilter()",
+      "language": "python",
+      "author": "Jess",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef cp_filt(rhino_object, geometry, component_index):\n    a=(rs.IsSurface(rhino_object.Id) and rs.IsSurfacePlanar(rhino_object.Id))\n    b=(rs.IsCurve(rhino_object.Id) and rs.IsCurvePlanar(rhino_object.Id) and rs.IsCurveClosed(rhino_object.Id))\n    return a | b\n\ndef TestFilter():\n    msg=\"Select closed planar curve or planar surface\"\n    obj=rs.GetObject(msg,4+8,True,custom_filter=cp_filt)\n    print obj\n    \nTestFilter()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n#polycurves, but no polylines\ndef pcrv_filt(rhino_object, geometry, component_index):\n    return rs.IsPolyCurve(geometry)\n\ndef TestFilter():\n    msg=\"Select polycurves to test\"\n    crvIDs=rs.GetObjects(msg,4,preselect=True,custom_filter=pcrv_filt)\n    if not crvIDs: return\nTestFilter()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n#polycurves, but no polylines\ndef pcrv_filt(rhino_object, geometry, component_index):\n    return geometry.IsPolyCurve()\n\ndef TestFilter():\n    msg=\"Select polycurves to test\"\n    crvIDs=rs.GetObjects(msg,4,preselect=True,custom_filter=pcrv_filt)\n    if not crvIDs: return\nTestFilter()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "def cp_filt(rhino_object, geometry, component_index):\n    a=(rs.IsSurface(geometry) and rs.IsSurfacePlanar(geometry))\n    b=(rs.IsCurvePlanar(geometry) and rs.IsCurveClosed(geometry))\n    return a | b\n\ndef TestFilter():\n    msg=\"Select closed planar curve or planar surface\"\n    obj=rs.GetObject(msg,4+8,True,custom_filter=cp_filt)\n    print obj",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 2713
+}

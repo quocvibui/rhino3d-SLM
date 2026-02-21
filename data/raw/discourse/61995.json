@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/the-only-safe-way-to-update-sliders-in-ghpython/61995",
+  "topic_id": 61995,
+  "title": "The only safe way to Update Sliders in GhPython",
+  "question": "Over the years, there have been lots of threads here and on the old Grasshopper forum that deal with setting slider values in Grasshopper. They all have some advantages and disadvantages, but they have something in common: they too often end up breaking the Grasshopper SDK rule \n“never edit values while the definition is running”\n.\n\n\nThis thread shows a way of fixing that. This is a Rhino-6-only possibility, because this feature is new in Rhino 6. By overriding the Component Context menu, we can set the values outside of the solution, in a very Grasshopper-classic way.\n\n\nLike \nthis definition\n by \nAnders Holden Deleuran\n on the old Grasshopper forum, this uses the logic of searching sliders by name. You can however adapt it to using slider InstanceGuids, so that they can be renamed.\n\n\n\n\nHere is the code:\n\n\n\"\"\"\nReset named sliders.\nRight-click on the component and choose \"Update Sliders!\" to update their values.\n    Inputs:\n        Sliders: (strings) A list with names of sliders\n        Values: (numbers) A list with values of sliders\n    Remarks: This component does not retuns any values.\n \"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass UpdateSliders(component):\n    \n    def RunScript(self, Sliders, Values):\n        if not Sliders or not Values:\n            Sliders = None\n            Values = None\n            return\n        self.Sliders = Sliders\n        self.Values = Values\n        if len(Sliders) != len(Values):\n            raise Exception(\"Different lenghts of sliders and values\")\n        self.Component = ghenv.Component\n        self.GhDef = None\n        if self.Component: self.GhDef = self.Component.OnPingDocument()\n        \n        \n    def AppendAdditionalComponentMenuItems(self, menu):\n        item = Grasshopper.Kernel.GH_Component.Menu_AppendGenericMenuItem(\n            menu, \"Update Sliders!\", self.OnClicked, self.Icon_24x24, None, True, F...",
+  "code_blocks": [
+    {
+      "code": "\"\"\"\nReset named sliders.\nRight-click on the component and choose \"Update Sliders!\" to update their values.\n    Inputs:\n        Sliders: (strings) A list with names of sliders\n        Values: (numbers) A list with values of sliders\n    Remarks: This component does not retuns any values.\n \"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass UpdateSliders(component):\n    \n    def RunScript(self, Sliders, Values):\n        if not Sliders or not Values:\n            Sliders = None\n            Values = None\n            return\n        self.Sliders = Sliders\n        self.Values = Values\n        if len(Sliders) != len(Values):\n            raise Exception(\"Different lenghts of sliders and values\")\n        self.Component = ghenv.Component\n        self.GhDef = None\n        if self.Component: self.GhDef = self.Component.OnPingDocument()\n        \n        \n    def AppendAdditionalComponentMenuItems(self, menu):\n        item = Grasshopper.Kernel.GH_Component.Menu_AppendGenericMenuItem(\n            menu, \"Update Sliders!\", self.OnClicked, self.Icon_24x24, None, True, False);\n        item.ToolTipText = \"Update the sliders now\";\n        \n        \n    def OnClicked(self, obj, args):\n        try:\n            self.UpdateValues(obj, args)\n        except Exception, ex:\n            System.Windows.Forms.MessageBox.Show(str(ex))\n            \n    def UpdateValues(self, obj, args):\n        if not self.GhDef: return\n        if not self.Sliders or not self.Values: return\n        \n        ghObjects = self.GhDef.Objects # Get to the GH objects\n        \n        # Iterate the GH objects\n        for obj in ghObjects:\n            # Set the named slider values\n            if type(obj) is Grasshopper.Kernel.Special.GH_NumberSlider and \\\n                obj.NickName in self.Sliders:\n                \n                # Set min/max\n                #obj.Slider.Minimum = 0\n                #obj.Slider.Maximum = 10\n                \n                # Set value\n                obj.Slider.Value = self.Values[self.Sliders.index(obj.NickName)]\n                \n                # Update slider\n                obj.ExpireSolution(True)",
+      "language": "python",
+      "author": "piac",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 25,
+  "views": 8379
+}

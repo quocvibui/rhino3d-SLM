@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-do-i-remove-edges-and-join-them/185462",
+  "topic_id": 185462,
+  "title": "How do I remove edges and join them?",
+  "question": "How do I remove edges and join them?\n\nI would appreciate it if you could let me know the problem.\n\nPlease correct it.\n\n\nimage\n837×845 11.8 KB\n\n\nimport rhinoscriptsyntax as rs\n\ndef create_fillet_rectangle():\n    # Define the points of the rectangle\n    pointA = rs.AddPoint(30, 0, 0)\n    pointB = rs.AddPoint(60, 73, 0)\n    pointC = rs.AddPoint(-60, 73, 0)\n    pointD = rs.AddPoint(-30, 0, 0)\n\n    # Add the polyline\n    pt = [pointA, pointB, pointC, pointD]\n    profile1 = rs.AddPolyline(pt)\n\n    # Mirror the polyline\n    profile2 = rs.MirrorObject(profile1, (0, 0, 0), (1, 0, 0), True)\n    \n    # Join the curves\n    joincrv1 = rs.JoinCurves([profile1, profile2])\n\n    if not joincrv1:\n        print(\"Failed to join curves.\")\n        return\n\n    # Set the fillet radius\n    fillet_radius = 20\n\n    # Explode the joined curve into segments\n    segments = rs.ExplodeCurves(joincrv1[0])\n\n    if not segments or len(segments) < 2:\n        print(\"Failed to explode joined curve.\")\n        return\n\n    # Apply fillets between each pair of segments\n    fillets = []\n    for i in range(len(segments)):\n        seg1 = segments[i]\n        seg2 = segments[(i + 1) % len(segments)]\n        fillet = rs.AddFilletCurve(seg1, seg2, fillet_radius)\n        if fillet:\n            fillets.append(fillet)\n    \n    if fillets:\n        # Delete the original segments\n        rs.DeleteObjects(segments)\n        rs.DeleteObject(joincrv1)\n        \n        # Join the filleted curves\n        fillet_ids = [seg1] + fillets\n        for i in range(len(fillets) - 1):\n            fillet_ids.append(fillets[i].Split(0.5)[1])\n        \n        joined_fillet = rs.JoinCurves(fillet_ids)\n        if joined_fillet:\n            print(\"Fillets applied and curves joined successfully.\")\n        else:\n            print(\"Failed to join filleted curves.\")\n    else:\n        print(\"Failed to create fillets.\")\n\nif __name__ == \"__main__\":\n    create_fillet_rectangle()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef create_fillet_rectangle():\n    # Define the points of the rectangle\n    pointA = rs.AddPoint(30, 0, 0)\n    pointB = rs.AddPoint(60, 73, 0)\n    pointC = rs.AddPoint(-60, 73, 0)\n    pointD = rs.AddPoint(-30, 0, 0)\n\n    # Add the polyline\n    pt = [pointA, pointB, pointC, pointD]\n    profile1 = rs.AddPolyline(pt)\n\n    # Mirror the polyline\n    profile2 = rs.MirrorObject(profile1, (0, 0, 0), (1, 0, 0), True)\n    \n    # Join the curves\n    joincrv1 = rs.JoinCurves([profile1, profile2])\n\n    if not joincrv1:\n        print(\"Failed to join curves.\")\n        return\n\n    # Set the fillet radius\n    fillet_radius = 20\n\n    # Explode the joined curve into segments\n    segments = rs.ExplodeCurves(joincrv1[0])\n\n    if not segments or len(segments) < 2:\n        print(\"Failed to explode joined curve.\")\n        return\n\n    # Apply fillets between each pair of segments\n    fillets = []\n    for i in range(len(segments)):\n        seg1 = segments[i]\n        seg2 = segments[(i + 1) % len(segments)]\n        fillet = rs.AddFilletCurve(seg1, seg2, fillet_radius)\n        if fillet:\n            fillets.append(fillet)\n    \n    if fillets:\n        # Delete the original segments\n        rs.DeleteObjects(segments)\n        rs.DeleteObject(joincrv1)\n        \n        # Join the filleted curves\n        fillet_ids = [seg1] + fillets\n        for i in range(len(fillets) - 1):\n            fillet_ids.append(fillets[i].Split(0.5)[1])\n        \n        joined_fillet = rs.JoinCurves(fillet_ids)\n        if joined_fillet:\n            print(\"Fillets applied and curves joined successfully.\")\n        else:\n            print(\"Failed to join filleted curves.\")\n    else:\n        print(\"Failed to create fillets.\")\n\nif __name__ == \"__main__\":\n    create_fillet_rectangle()",
+      "language": "python",
+      "author": "jesusson12",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 121
+}

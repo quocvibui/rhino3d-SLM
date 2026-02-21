@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-determine-the-direction-of-an-angle-between-two-vectors/93204",
+  "topic_id": 93204,
+  "title": "How to determine the 'direction' of an angle between two vectors?",
+  "question": "I was working on a script to orient spotlights to a certain focus point. This requires the fixture to be rotated in 2 planes. The rotation angle I calculate by creating vectors between the light fixture and the focus point. See attached rhino file and python script.\n\nRight now it works, but only trough iteration in ugly while loops. I want to know if there is a way I can determine the direction I need to rotate in.\n\nThis script is a continuation of a version posted \nhere\n\n\nspotlight_focus.3dm\n (496.8 KB)\n\n\nspotFocusAdvanced-v03.py\n (3.8 KB)\n\n\nedit: removed the while loops, now using singed angles to calculate the right rotations:\n\n\nspotFocusAdvanced-v04.py\n (4.1 KB)",
+  "code_blocks": [
+    {
+      "code": "i=0\nwhile True:    \n    #calculate horizontal rotation\n    #get the plane of the spot_h_circle and calculate from there\n    for item in items:\n        if rs.ObjectName(item) == \"spot_h_circle\":\n            h_circle = rs.coercecurve(item)\n            rc, h_circle = h_circle.TryGetCircle()\n        if rs.ObjectName(item) == \"spot_target\":\n            target = rs.coerce3dpoint(item)\n        if rs.ObjectName(item) == \"spot_source\":\n            source = rs.coerce3dpoint(item)    \n    plane = h_circle.Plane\n    h_cen = h_circle.Center\n    \n    h_vec = rs.VectorCreate(pt_focus, h_cen)\n    f_vec=rs.VectorCreate(target, source)\n    \n    angle = rs.VectorAngle(h_vec, f_vec)\n    \n    a=h_vec\n    b=f_vec\n    if(a.X*b.Y - a.Y*b.X < 0):\n        angle=-angle\n    print angle\n    if abs(angle)<0.1 or i>20:\n        print \"went through second while loop %d times\" %i\n        break\n    \n    for item in items:\n        if rs.ObjectName(item):\n            if rs.ObjectName(item)[:6]!=\"spot_v\" and rs.ObjectName(item)!=\"slider\":\n                rs.RotateObject(item, pivot, angle, plane.ZAxis)\n    i+=1",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nfrom math import atan2\nfrom Rhino.Geometry import Plane, Point3d, Transform, Vector3d\n\ndef signedVectorAngle(v1, v2):\n    \"\"\"\n    Calculates the signed vector angle between two\n    vectors v1 and v2.\n    \"\"\"\n    \n    # unitize both input vectors\n    v1.Unitize()\n    v2.Unitize()\n    \n    # create reference plane\n    vXAxis = Vector3d.CrossProduct(v1, v2)\n    plane = Plane(Point3d.Origin, v1, v2)\n    \n    # change base of vectors to reference plane\n    xChangeBase = Transform.ChangeBasis(Plane.WorldXY, plane)\n    v1.Transform(xChangeBase)\n    v2.Transform(xChangeBase)\n    \n    # signed angle calculation, see:\n    # https://stackoverflow.com/a/33920320\n    return Rhino.RhinoMath.ToDegrees(atan2(Vector3d.CrossProduct(v1, v2) * plane.ZAxis, v1 * v2))\n        \ndef calculateSignedAngleInteractive():\n    \n    result, v1 = Rhino.Input.RhinoGet.GetLine()\n    if result != Rhino.Commands.Result.Success:\n        return result\n        \n    result, v2 = Rhino.Input.RhinoGet.GetLine()\n    if result != Rhino.Commands.Result.Success:\n        return result\n\n    angle = signedVectorAngle(v1.Direction, v2.Direction)\n    \n    print angle\n    \nif __name__ == \"__main__\":\n    calculateSignedAngleInteractive()",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nfrom math import atan2\nfrom Rhino.Geometry import Plane, Point3d, Transform, Vector3d\n\ndef signedVectorAngle(v1, v2):\n    \"\"\"\n    Calculates the signed vector angle between two\n    vectors v1 and v2.\n    \"\"\"\n    \n    # unitize both input vectors\n    v1.Unitize()\n    v2.Unitize()\n    \n    # create reference plane\n    vXAxis = Vector3d.CrossProduct(v1, v2)\n    plane = Plane(Point3d.Origin, v1, v2)\n    \n    # change base of vectors to reference plane\n    xChangeBase = Transform.ChangeBasis(Plane.WorldXY, plane)\n    v1.Transform(xChangeBase)\n    v2.Transform(xChangeBase)\n    \n    # signed angle calculation, see:\n    # https://stackoverflow.com/a/33920320\n    return Rhino.RhinoMath.ToDegrees(atan2(Vector3d.CrossProduct(v1, v2) * plane.ZAxis, v1 * v2))\n        \ndef calculateSignedAngleInteractive():\n    \n    result, v1 = Rhino.Input.RhinoGet.GetLine()\n    if result != Rhino.Commands.Result.Success:\n        return result\n        \n    result, v2 = Rhino.Input.RhinoGet.GetLine()\n    if result != Rhino.Commands.Result.Success:\n        return result\n\n    angle = signedVectorAngle(v1.Direction, v2.Direction)\n    \n    print angle\n    \nif __name__ == \"__main__\":\n    calculateSignedAngleInteractive()",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nfrom math import atan2\nfrom Rhino.Geometry import Plane, Point3d, Transform, Vector3d\n\ndef signedVectorAngle(v1, v2):\n    \"\"\"\n    Calculates the signed vector angle between two\n    vectors v1 and v2.\n    \"\"\"\n    \n    # unitize both input vectors\n    v1.Unitize()\n    v2.Unitize()\n    \n    # create reference plane\n    vZAxis = Vector3d.CrossProduct(v1, v2)\n    plane = Plane(Point3d.Origin, vZAxis)\n        \n    # signed angle calculation, see:\n    # https://stackoverflow.com/a/33920320\n    return Rhino.RhinoMath.ToDegrees(atan2(Vector3d.CrossProduct(v1, v2) * plane.ZAxis, v1 * v2))\n        \ndef calculateSignedAngleInteractive():\n    \n    result, v1 = Rhino.Input.RhinoGet.GetLine()\n    if result != Rhino.Commands.Result.Success:\n        return result\n        \n    result, v2 = Rhino.Input.RhinoGet.GetLine()\n    if result != Rhino.Commands.Result.Success:\n        return result\n\n    angle = signedVectorAngle(v1.Direction, v2.Direction)\n    \n    print angle\n    \nif __name__ == \"__main__\":\n    calculateSignedAngleInteractive()",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 5696
+}

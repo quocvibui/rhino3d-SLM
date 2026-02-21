@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-its-own-help-command-for-pythonscript/137445",
+  "topic_id": 137445,
+  "title": "Create its own Help Command for PythonScript",
+  "question": "Edit the help webpage in Rhino plugin seems to be possible:\n\n\n\n\n\n\n\n\nCreate its own Help Command for Rhino Plugin\n \nRhino Developer\n\n\n\n\n\n    Hi \n@gaspard.bourgeois\n, \nProvide command specific help, just override the \nCommand.OnHelp\n virtual function. \nFor example: \npublic class TestCommand : Command\n{\n  public override string EnglishName => \"Test\";\n\n  protected override void OnHelp()\n  {\n    // TODO: Add your command help here\n    Eto.Forms.MessageBox.Show(\"Help me!\");\n  }\n\n  protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n  {\n    return Result.Success; \n  }\n}\n\n– Dale\n  \n\n\n\n\nI’m looking for a way to edit this function from within a python script\n\n\nThanks\n\nGaspard",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom Rhino.Runtime import PythonScript\n\nimport webbrowser\n\n\n__commandname__ = \"python_edit_help\"\n\n\nclass TestCommand(Rhino.Commands.Command):\n    def OnHelp(self):\n        webbrowser.open(\"http://rhino3d.com\")\n    \n    def RunCommand(self, doc, mode):\n        return Rhino.Commands.Result.Success\n\nscript = \"\"\"\nimport rhinoscriptsyntax as rs\nrs.GetString(\"Open Help toolbar or Press F1\")\n\"\"\"\n\n\nps = PythonScript.Create()\nps.ScriptContextCommand = TestCommand()\nps.ExecuteScript(script)",
+      "language": "python",
+      "author": "gaspard.bourgeois",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 510
+}

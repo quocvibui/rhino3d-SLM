@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-loops-on-corners/130442",
+  "topic_id": 130442,
+  "title": "Create loops on corners",
+  "question": "Hi\n\n\nI wonder if there is a way to create loops or arcs around cornered shapes. The corners here have been extended to create a balloon shape so that the curve should be harmonious, is there a way to place an arc between the end points of the extended curves? Similar to this exemple from silhuette studio called\n\n“smart loops”\n\n\nThanks\n\n\nedge loop\n591×492 6.4 KB\n \nedge loop 2\n733×678 9.81 KB\n\n\nextra cut lines silhouette studio kraft blade\n1321×756 164 KB\n\n\nsmart loops.gh\n (11.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper as gh\n\n\nif P is not None:\n    if O is not None and O > 0.0:   \n        prev_pt = rg.Point3d.Unset  # prev point to connect to\n        crv = rg.PolyCurve()\n\n        for i in range(P.Count-1):\n            curr_vtx = P[i]\n\n            vec1 = P[(i-1)%(P.Count-1)] - curr_vtx\n            vec1.Unitize()\n            vec2 = P[(i+1)%(P.Count-1)] - curr_vtx\n            vec2.Unitize()\n\n            cross = rg.Vector3d.CrossProduct(vec2, vec1)\n            if cross.Z > 0.0:  # convex vertex/corner\n                start_pt = curr_vtx - vec1 * O\n                end_pt = curr_vtx - vec2 * O\n\n                if prev_pt != rg.Point3d.Unset:\n                    ln = rg.Line(prev_pt, start_pt)\n                    crv.Append(ln)\n\n                arc = rg.Arc(start_pt, -vec1, end_pt)\n                crv.Append(arc)\n                prev_pt = end_pt\n\n            else:  # concave vertex/corner\n                if prev_pt == rg.Point3d.Unset:\n                    prev_pt = curr_vtx\n                    continue\n\n                ln = rg.Line(prev_pt, curr_vtx)\n                crv.Append(ln)\n                prev_pt = curr_vtx\n\n        crv.Append(rg.Line(crv.PointAtEnd, crv.PointAtStart))  # close the polycurve\n\n        # Output\n        C = crv\n    else:\n        # Output\n        C = P\nelse:\n    ghenv.Component.AddRuntimeMessage(\n        gh.Kernel.GH_RuntimeMessageLevel.Warning, \n        \"Parameter P failed to collect data\"\n    )",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 8,
+  "views": 443
+}

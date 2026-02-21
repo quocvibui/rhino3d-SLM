@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-using-rhino-commands-with-compiled-plugin/35414",
+  "topic_id": 35414,
+  "title": "Error Using Rhino Commands with compiled plugin",
+  "question": "Hi everybody, I’ve been having this issue for a while now and with a ton of time debugging I’ve finally induced the error in 3 lines:\n\n\n`import rhinoscriptsyntax as rs\ntry: rs.AddCurve(((1,2,3),(1,2,4)))\nexcept Exception as e: print(e)`\n\n\nthe code will execute perfectly in the python script editor command in Rhino, but for some reason when compiled, it will throw the following error:\n\n\n‘NoneType’ object has no attribute ‘Objects’\n\n\nI’ve tried printing type(rs) and it returns module so I have no idea why it is giving an error saying NoneType.  My speculation is that this error diagnosis is incorrect, I’m not sure this is a type of error that would be normally handled by python.\n\n\nAlso by the way, I’ve gotten other rs commands to work, but in the script I developed that has a lot of work into it, this sort of command is pretty crucial.\n\n\nAny suggestions? Seems like rhinoscriptsyntax is not imported correctly… but why",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nnew_curve_id = rs.AddCurve(((1,2,3),(1,2,4)))\nif not new_curve_id: raise Exception(\"Your error text\")",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# scriptcontext module\nimport RhinoPython.Host as __host\n\n'''The Active Rhino document (Rhino.RhinoDoc in RhinoCommon) while a script\nis executing. This variable is set by Rhino before the exection of every script.\n'''\ndoc = None\n\n\n'''Identifies how the script is currently executing\n1 = running as standard python script\n2 = running inside grasshopper component\n3... potential other locations where script could be running\n'''\nid = 1\n\n\n'''A dictionary of values that can be reused between execution of scripts\n'''\nsticky = dict()\n\ndef escape_test( throw_exception=True, reset=False ):\n    \"Tests to see if the user has pressed the escape key\"\n    rc = __host.EscapePressed(reset)\n    if rc and throw_exception:\n        raise Exception('escape key pressed')\n    return rc\n    \n\ndef errorhandler():\n    '''\n    The default error handler called by functions in the rhinoscript package.\n    If you want to have your own predefined function called instead of errorhandler,\n    replace the scriptcontext.errorhandler value\n    '''\n    return None",
+      "language": "python",
+      "author": "Steven_Elliott",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 13,
+  "views": 3352
+}

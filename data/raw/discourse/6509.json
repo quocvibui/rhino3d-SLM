@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-wireframe-command-in-python/6509",
+  "topic_id": 6509,
+  "title": "Brep wireframe command in python",
+  "question": "hey guys\n\nAm trying to do waffle using python via gh. And am followin the same method which i done in grasshopper. i lofted the curve using python and I want to divide the curve both in X and Y directions … so i created a bounding box around d curve and later I cud convert to curves(using brep wireframe as used in gh) which helps me in dividind d curves. But I cudn find the brep wireframe command in python which I found in gh… Help me in figuring out this guys…",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      Rhino.DocObjects.ObjRef objref;\n      Result rc = Rhino.Input.RhinoGet.GetOneObject(\"Select Brep\", false, Rhino.DocObjects.ObjectType.Brep, out objref);\n      if (rc != Result.Success)\n        return rc;\n\n      Rhino.Geometry.Brep brep = objref.Brep();\n      if (null == brep)\n        return Result.Failure;\n\n      foreach (Rhino.Geometry.BrepEdge edge in brep.Edges)\n      {\n        if (null != edge)\n        {\n          Rhino.Geometry.Curve curve = edge.DuplicateCurve();\n          if (null != curve)\n            doc.Objects.AddCurve(curve);\n        }\n      }\n\n      return Result.Success;\n    }",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1738
+}

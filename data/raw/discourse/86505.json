@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unexpected-result-from-brep-getboundingbox-plane-plane-of-text-geometry/86505",
+  "topic_id": 86505,
+  "title": "Unexpected result from Brep.GetBoundingBox(Plane plane) of text geometry",
+  "question": "Hello everyone,\n\n\nI have used Brep.GetBoundingBox(Plane plane) before. However, when I use it on a brep created from a text entity, it fails me:\n\n\nfrom Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\n\ndoc = RhinoDoc.ActiveDoc\ndoc.Objects.Clear()\n\ntext = \"T\"\nstyle = DimensionStyle()\nplane = Plane(Point3d(-2.0, 0.0, 1.0), Point3d(-1.0, 1.0, 1.0), Point3d(-2.0, 0.0, 2.0))\n\nentity = TextEntity.CreateWithRichText(text, plane, style, False, 10.0, 0.0)\n\nbrep = entity.CreatePolySurfaces(style, 0.5)[0]\nbbox = Box(brep.GetBoundingBox(plane))\n\ndoc.Objects.AddBrep(brep)\ndoc.Objects.AddBox(bbox)\n\ndoc.Views.Redraw()\n\n\n\nIn the code above I create some text aligned to a plane in space. When I try to get the plane-aligned bounding box of this text, things go wrong. What I get in fact, is the bounding box of the text as if it were created in Plane.WorldXY. Here is an example picture:\n\n\n\n\nI do not understand how I get this result. Am I missing something, or is it a bug?\n\n\nGreeting from Berlin,\n\nThomas",
+  "code_blocks": [
+    {
+      "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\n\ndoc = RhinoDoc.ActiveDoc\ndoc.Objects.Clear()\n\ntext = \"T\"\nstyle = DimensionStyle()\nplane = Plane(Point3d(-2.0, 0.0, 1.0), Point3d(-1.0, 1.0, 1.0), Point3d(-2.0, 0.0, 2.0))\n\nentity = TextEntity.CreateWithRichText(text, plane, style, False, 10.0, 0.0)\n\nbrep = entity.CreatePolySurfaces(style, 0.5)[0]\nbbox = Box(brep.GetBoundingBox(plane))\n\ndoc.Objects.AddBrep(brep)\ndoc.Objects.AddBox(bbox)\n\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "thomas.gust",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 593
+}

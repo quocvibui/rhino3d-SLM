@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/assign-materials-to-layers-with-identical-names/170607",
+  "topic_id": 170607,
+  "title": "Assign materials to layers with identical names",
+  "question": "Can anyone help me writing a simple scipt that assigns materials to layers with the same name?\n\n\nTo be clear, the material already exists.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef AssignRenderMaterialToLayers():\n    \n    layer_names = [\"cupboard\"]\n    material_name = \"Cherry\"\n    \n    data = scriptcontext.doc.RenderMaterials.GetEnumerator()\n    mats = filter(lambda rm: rm.Name == material_name, data)\n    if not mats:\n        print \"Material '{}' not found\".format(material_name) \n        return \n    \n    for layer in scriptcontext.doc.Layers:\n        if layer.Name in layer_names:\n            layer.RenderMaterial = mats[0]\n\nAssignRenderMaterialToLayers()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef AssignRenderMaterialToLayers():\n    \n    render_materials = list(scriptcontext.doc.RenderMaterials)\n    if not render_materials: print \"0 Materials found !\"; return\n    \n    data = dict()\n    for rm in render_materials: data[rm.Name] = rm \n    \n    for layer in scriptcontext.doc.Layers:\n        if layer.Name in data:\n            layer.RenderMaterial = data[layer.Name]\n\nAssignRenderMaterialToLayers()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 379
+}

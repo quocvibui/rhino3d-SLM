@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-addpolyline-not-culling-duplicate-points-as-per-help/5434",
+  "topic_id": 5434,
+  "title": "Rs.AddPolyline not culling duplicate points as per Help",
+  "question": "I notice that the Python rhinoscriptsyntax does not automatically cull duplicate points as the Help indicates (Help which was copied over from VB essentially), if consecutive duplicates are found, the method fails.  If non-consecutive duplicates are found, it does create a polyline (albeit potentially a problematic one)…\n\n\nI notice that the syntax for rs.AddPolyline does not call cull duplicates (Point3d.CullDuplicates Method) nor does rs.coerce3dpointlist; so as it is coded now, I guess behavior is expected…  However, CullDuplicates cullls ALL duplicates, not just consecutive ones, so this is a bit different than culling consecutive ones…\n\n\nJust a heads-up…  Either the Help needs to be changed or the method needs a bit of tweaking…\n\n\n–Mitch\n\n\nFails:\n\n\nimport rhinoscriptsyntax as rs\npointlist=[]\nfor i in range(10):\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\nrs.AddPolyline(pointlist)\n\n\n\nSucceeds, but not a good idea…\n\n\nimport rhinoscriptsyntax as rs\npointlist=[]\nfor i in range(10):\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist.append(rs.coerce3dpoint((i+1,i+1,i+1)))\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\nrs.AddPolyline(pointlist)\n\n\n\nBetter…\n\n\nimport rhinoscriptsyntax as rs\npointlist=[]\nfor i in range(10):\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist.append(rs.coerce3dpoint((i+1,i+1,i+1)))\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist=rs.CullDuplicatePoints(pointlist)\nrs.AddPolyline(pointlist)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\npointlist=[]\nfor i in range(10):\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\nrs.AddPolyline(pointlist)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\npointlist=[]\nfor i in range(10):\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist.append(rs.coerce3dpoint((i+1,i+1,i+1)))\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\nrs.AddPolyline(pointlist)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\npointlist=[]\nfor i in range(10):\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist.append(rs.coerce3dpoint((i+1,i+1,i+1)))\n    pointlist.append(rs.coerce3dpoint((i,i,i)))\n    pointlist=rs.CullDuplicatePoints(pointlist)\nrs.AddPolyline(pointlist)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1168
+}

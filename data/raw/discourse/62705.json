@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hatchpatterntable-findname-bug/62705",
+  "topic_id": 62705,
+  "title": "HatchPatternTable.FindName bug",
+  "question": "Hi \n@Alain\n,\n\n\ni am trying to find the solid hatch pattern in Rhino 6 using the new \nFindName\n method. If i open a blank new file using any template and run this:\n\n\nimport scriptcontext\n\nsolid_index = scriptcontext.doc.HatchPatterns.FindName(\"Solid\")\nprint solid_index\n\n\n\nit returns \nNone\n. The solid hatchpattern exists in the file, once i open the \n_Options\n dialog, click on the \nHatch\n page entry and close the \n_Options\n dialog, then run the script again, it returns:\n\n\n\n\nHatchPattern: Solid (0)\n\n\n\n\nI can repeat the same behavior using the now obsolete method:\n\n\nscriptcontext.doc.HatchPatterns.Find(\"Solid\", False)\n\n\n\nwhich returns first an index of -1 then 0. It does not give any deprication message in V6 and works in V5.\n\n_\n\nc.",
+  "code_blocks": [
+    {
+      "code": "solid_index = -1\n    solid_pattern = scriptcontext.doc.HatchPatterns.Item[solid_index]\n    if solid_pattern.Name != \"Solid\": \n        print \"SOLID NOT FOUND\"\n        return",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "hatches = Rhino.Geometry.Hatch.Create(curves, solid_index, 0.0, 1.0)\nprint hatches\nfor hatch in list(hatches):\n    print scriptcontext.doc.Objects.AddHatch(hatch)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    crv_id = rs.GetObject(\"Curve\", 4, True, True)\n    if not crv_id: return\n    crv = rs.coercecurve(crv_id, -1, True)\n    hatches = Rhino.Geometry.Hatch.Create(crv, -1, 0, 1, 0.001)\n    if hatches.Count != 0:\n        obj_id = scriptcontext.doc.Objects.AddHatch(hatches[0])\n        print obj_id\n        scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    circle = Rhino.Geometry.Circle(10.0)\n    curve = circle.ToNurbsCurve()\n    hatches = Rhino.Geometry.Hatch.Create(curve, -1, 0, 1, 0.001)\n    if hatches.Count != 0:\n        print hatches\n        obj_id = scriptcontext.doc.Objects.AddHatch(hatches[0])\n        print obj_id\n        scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\n\nsolid_index = scriptcontext.doc.HatchPatterns.FindName(\"Solid\")\nprint solid_index",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 689
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ibois-epfl/augmented-carpentry/blob/414eeb93984fad40a4e57daa60e1bb268cbd406c/py/components/acimbeamfinder/code.py",
+  "repo": "ibois-epfl/augmented-carpentry",
+  "repo_stars": 15,
+  "repo_description": "Main repository hosting the main AR software developed for Augmented Carpentry rersearch at Ibois, Epfl.",
+  "license": "GPL-3.0",
+  "filepath": "py/components/acimbeamfinder/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport sys\nimport os\nimport time\nimport io\n\nimport System\n\nimport Grasshopper\nimport Grasshopper as gh\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nimport Rhino\nimport Rhino.Geometry as rg\n\nimport typing\n\nimport ACPy\nimport ACPy.ac_util\n\n\nTOL_DOC = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\nACTIVE_DOC = Rhino.RhinoDoc.ActiveDoc\n\n\nclass ACPyBeamFinder(component):\n    def __init__(self):\n        super(ACPyBeamFinder, self).__init__()\n        self._var_output = []\n\n    def RunScript(self,\n        i_beam_name : str = \"\",\n    ):\n        ghenv.Component.Message = f\"ACPyApp v{ACPy.__version__}\"\n\n        # retrieve the beams\n        found_breps = ACPy.ac_util.find_beam_by_name(i_beam_name)\n        ghdoc = ACTIVE_DOC\n\n        # scale the beams for visualization\n        for brep in found_breps:\n            centroid = brep.GetBoundingBox(True).Center\n            scale = rg.Transform.Scale(centroid, 1.1)\n            brep.Transform(scale)\n\n        o_found = found_breps\n\n        return o_found\n\n############################################################################################\n## only for DEBUG: erase before componentize\n############################################################################################\nif __name__ == \"__main__\":\n    \n    comp = ACPyBeamFinder()\n    o_found = comp.RunScript(\n        i_beam_name\n    )\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

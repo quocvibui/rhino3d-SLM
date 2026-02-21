@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/excel-to-table-in-layout/96140",
+  "topic_id": 96140,
+  "title": "Excel to table in layout",
+  "question": "I have been searching around for a while and have not found anything that works for me. I have a GH that creates an item from an engineering provided spreadsheet. I also have a few layout sheets that provide 2d documentation from that 3d model. Each of those layouts contains a table with data in cells that correspond to specific ranges in the engineering spreadsheet. I would like to automate the layouts to include the .xlsx data in that table. If the spreadsheet changes a new file is created so the link is only one way.\n\n\nI have a matrix in Grasshopper that is exactly what I want into the layout. I just can’t figure how to get that data into the layout appropriately.\n\n\nThanks In Advance,\n\nRobb\n\n\ntable-01\n1333×750 56.9 KB",
+  "code_blocks": [
+    {
+      "code": "def CSVBom():\n\n    listA = _csv\n    #a = listA\n    plane=Rhino.Geometry.Plane.WorldXY\n    ListTotals = []\n    table = _pointFeed\n    rs.EnableRedraw(False)\n    ListLarge = []\n    ListLen = []\n    a=0\n\n\n\n    for row  in listA:\n                row = row.split(\";\")\n                rowA = []\n                for str in row:\n                    str = str.replace(\"\\n\",\"\")\n                    rowA.append(str)\n                rowB = []\n                for aa in rowA:\n                    rowB=aa.split(',')\n                if len(rowB)<= len(rowA):rowB=rowA\n                list=[]\n                A=len(rowB)\n                ListLen.append(A)\n                for txt in rowB:\n                    if txt :\n                       test = rs.AddText(txt, plane, height=_textSize, font='Arial', font_style=0, justification=None)\n                       bb = rs.BoundingBox(test, plane, in_world_coords=True)\n                       if bb :\n                           large =round(( bb[1].DistanceTo(bb[0])),1)\n                           if large < 0: largeur=large*(-1)\n                           list.append(large)\n                           rs.DeleteObject(test)\n                       else : \n                           large=0.0\n                           list.append(large)\n                    else : \n                           large=0.0\n                           list.append(large)\n                ListLarge.append(list)\n\n    N = max(ListLen)\n    d_max = {i: max(map(itemgetter(i), ListLarge)) for i in range(N)}\n    #Largest \n    ListMax = d_max.values()\n    #Layers\n    rs.AddLayer(\"Name\")\n    rs.AddLayer(\"Detail Lines\",parent=\"Name\")\n    rs.AddLayer(\"Texts\",parent=\"Name\")\n\n    \n    listB = _csv\n\n\n    Group=rs.AddGroup()\n    ListGroup = []\n    H = _textSize\n    font='Arial'\n    count=1\n\n\n    for row  in listB:\n        V=0\n        Y=0\n        row = row.split(\";\")\n        rowA = []\n        for str in row:\n            str = str.replace(\"\\n\",\"\")\n            rowA.append(str)\n        rowB = []\n        for aa in rowA:\n            rowB=aa.split(',')\n        if len(rowB)<= len(rowA):rowB=rowA\n        for value in rowB:\n            #text placement\n            placeA= ((-H*2) - (float(count)*(H*2)))\n            placeB= ((-H) - (float(count)*(H*2)))\n            #rectangle\n            LX = (ListMax[Y])+(H*.25+H)\n            recA=rs.AddRectangle(plane,LX,H*2)\n            VV=V+(LX/2)\n            recA=rs.MoveObject(recA,[V,placeA,0.0])\n            rs.ObjectLayer(recA,\"Detail Lines\")\n            ListGroup.append(recA)\n            #text\n            txt=value\n            if txt :\n                txtA=rs.AddText (txt,plane,H,font,0,2 + 131072)\n                txtA=rs.MoveObject(txtA,[VV,placeB,0.0])\n                rs.ObjectLayer(txtA,\"Texts\")\n                ListGroup.append(txtA)\n            #new text placement\n            Y=Y+1\n            V=V+LX\n            #New Line\n        count=count+1\n    ListGroup=rs.MoveObjects(ListGroup,table)\n#    rs.EnableRedraw(True)\n    rs.AddObjectsToGroup(ListGroup,Group)\n\nif x:\n    CSVBom()",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 23,
+  "views": 5846
+}

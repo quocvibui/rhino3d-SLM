@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-help/66773",
+  "topic_id": 66773,
+  "title": "Rhino python help!",
+  "question": "Hi, I was trying one code from rhino python primer, I wrote the exact definition, but it shows an error(\nMessage: range() integer end argument expected, got float\n)\n\n\nsrf peel.py\n (721 Bytes)\n\n\nPFA a screenshot, and code for reference,\n\nthanks",
+  "code_blocks": [
+    {
+      "code": "#calculate uStep and vStep as you did originally\nfor i in range(intCount):\n    for j in range(intCount):\n        pt=rs.EvaluateSurface(idSurface,[(uDomain[0]+(i*uStep),(vDomain[0]+(i*vStep)])\n        #etc.",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#calculate uStep and vStep as you did originally\nfor i in range(intCount):\n    for j in range(intCount):\n        pt=rs.EvaluateSurface(idSurface,[uDomain[0]+(i*uStep),vDomain[0]+(i*vStep)])\n        #etc.",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nidSurface=rs.GetObject(\"Surface to frame\",8,True,True)\nintCount=rs.GetInteger(\"Number of iterations per direction\",20,2)\n\nuDomain=rs.SurfaceDomain(idSurface,0)\nvDomain=rs.SurfaceDomain(idSurface,1)\nuStep=(uDomain[1]-uDomain[0])/intCount\nvStep=(vDomain[1]-vDomain[0])/intCount\nrs.EnableRedraw(False)\nfor i in range(intCount+1):\n    for j in range(intCount+1):\n        pt=rs.EvaluateSurface(idSurface,uDomain[0]+(i*uStep),vDomain[0]+(j*vStep))\n        if rs.Distance(pt,rs.BrepClosestPoint(idSurface,pt)[0])<0.1:\n            srfFrame=rs.SurfaceFrame(idSurface,[i*uStep,j*vStep])\n            rs.AddPlaneSurface(srfFrame,1.0,1.0)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1320
+}

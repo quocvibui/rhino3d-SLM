@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-single-line-text-object-in-python/47702",
+  "topic_id": 47702,
+  "title": "How to create single line text object in Python?",
+  "question": "Hi,\n\n\nI’m looking into making a python script where I click on a point and it automatically creates the curves of a number in a single line font. I do this now manually with the “text object” command with options “curves” and “allow single stroke fonts”. And think I have most of it figured out except for creating the text object thing. How do I create a Single stroke font text object in Python? There is “Addtext” and “Addtextdot” but both don’t give the wanted output.\n\n\nAny help would be appreciated.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n\ndef DoSomething():\n    \n    t3d = Rhino.Display.Text3d(\"Hello World\")\n    t3d.Height = 10\n    t3d.FontFace = \"RhSS\"\n    \n    conduit = Rhino.Display.CustomDisplay(True)\n    conduit.AddText(t3d, Color.Blue)\n    scriptcontext.doc.Views.Redraw()\n    \n    rs.GetString(\"Press Enter when done\")\n    conduit.Enabled = False\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n\nclass CustomConduit(Rhino.Display.DisplayConduit):\n    \n    def __init__(self):\n        self.Text = \"Hello World\"\n        self.Plane = Rhino.Geometry.Plane.WorldXY\n        self.FontFace = \"RhSS\"\n        \n    def DrawForeground(self, e):\n        e.Display.Draw3dText(self.Text, Color.Red, self.Plane, 10, self.FontFace)\n\ndef DoSomething():\n    conduit = CustomConduit()\n    conduit.Enabled = True\n    scriptcontext.doc.Views.Redraw()\n    rs.GetString(\"Press Enter when done\")\n    conduit.Enabled = False\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 3888
+}

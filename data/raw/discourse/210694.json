@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/i-asked-chatgpt-to-select-all-objects-intersected-by-other-objects/210694",
+  "topic_id": 210694,
+  "title": "I asked ChatGPT to select all objects intersected by other objects",
+  "question": "Script asks for geometry in Set A and Set B.\n\nThen selects the geometry in Set A intersected by the geometry in Set B.\n\n\nThis time I had to debug the script a few times.\n\nTested on 2000 geometries, for meshes, curves, surfaces, polysurfaces.\n\n\n\n\n\n\n# -*- coding: utf-8 -*-\nimport Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef to_brep_from_id(obj_id):\n    \"\"\"\n    Try to turn any supported object into a Brep.\n    - Brep / polysurface / surface / extrusion: via rs.coercebrep\n    - Mesh: via Brep.CreateFromMesh\n    Returns a Brep or None.\n    \"\"\"\n    if not obj_id:\n        return None\n\n    geo = rs.coercegeometry(obj_id)\n    if geo is None:\n        return None\n\n    # Mesh → Brep\n    if isinstance(geo, rg.Mesh):\n        brep = rg.Brep.CreateFromMesh(geo, True)\n        return brep\n\n    # Brep / Surface / Extrusion etc.\n    brep = rs.coercebrep(obj_id)\n    return brep\n\n\ndef objects_clash(id_a, id_b, tol):\n    \"\"\"\n    True geometric clash test between two objects.\n    Uses BrepBrep intersection only.\n    No bounding box filtering involved.\n    \"\"\"\n    brep_a = to_brep_from_id(id_a)\n    brep_b = to_brep_from_id(id_b)\n\n    # If we can't convert either to a Brep, skip\n    if brep_a is None or brep_b is None:\n        return False\n\n    # Real clash: BrepBrep intersection\n    rc, curves, points = rg.Intersect.Intersection.BrepBrep(brep_a, brep_b, tol)\n    if not rc:\n        return False\n\n    has_curves = curves is not None and len(curves) > 0\n    has_points = points is not None and len(points) > 0\n\n    return has_curves or has_points\n\n\ndef main():\n    tol = sc.doc.ModelAbsoluteTolerance\n\n    # First set: GeoA (can be preselected)\n    geo_a_ids = rs.GetObjects(\n        \"Select GeoA (objects that will be filtered by clash)\",\n        preselect=True,\n        select=False\n    )\n    if not geo_a_ids:\n        print(\"No GeoA objects selected.\")\n        return\n\n    # Second set: GeoB (clashing objects)\n    geo_b_ids = rs.GetObjects(\n        ...",
+  "code_blocks": [
+    {
+      "code": "# -*- coding: utf-8 -*-\nimport Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef to_brep_from_id(obj_id):\n    \"\"\"\n    Try to turn any supported object into a Brep.\n    - Brep / polysurface / surface / extrusion: via rs.coercebrep\n    - Mesh: via Brep.CreateFromMesh\n    Returns a Brep or None.\n    \"\"\"\n    if not obj_id:\n        return None\n\n    geo = rs.coercegeometry(obj_id)\n    if geo is None:\n        return None\n\n    # Mesh → Brep\n    if isinstance(geo, rg.Mesh):\n        brep = rg.Brep.CreateFromMesh(geo, True)\n        return brep\n\n    # Brep / Surface / Extrusion etc.\n    brep = rs.coercebrep(obj_id)\n    return brep\n\n\ndef objects_clash(id_a, id_b, tol):\n    \"\"\"\n    True geometric clash test between two objects.\n    Uses BrepBrep intersection only.\n    No bounding box filtering involved.\n    \"\"\"\n    brep_a = to_brep_from_id(id_a)\n    brep_b = to_brep_from_id(id_b)\n\n    # If we can't convert either to a Brep, skip\n    if brep_a is None or brep_b is None:\n        return False\n\n    # Real clash: BrepBrep intersection\n    rc, curves, points = rg.Intersect.Intersection.BrepBrep(brep_a, brep_b, tol)\n    if not rc:\n        return False\n\n    has_curves = curves is not None and len(curves) > 0\n    has_points = points is not None and len(points) > 0\n\n    return has_curves or has_points\n\n\ndef main():\n    tol = sc.doc.ModelAbsoluteTolerance\n\n    # First set: GeoA (can be preselected)\n    geo_a_ids = rs.GetObjects(\n        \"Select GeoA (objects that will be filtered by clash)\",\n        preselect=True,\n        select=False\n    )\n    if not geo_a_ids:\n        print(\"No GeoA objects selected.\")\n        return\n\n    # Second set: GeoB (clashing objects)\n    geo_b_ids = rs.GetObjects(\n        \"Select GeoB (objects that may clash with GeoA)\",\n        preselect=False,\n        select=False\n    )\n    if not geo_b_ids:\n        print(\"No GeoB objects selected.\")\n        return\n\n    clashing_ids = []\n    count_a = len(geo_a_ids)\n    count_b = len(geo_b_ids)\n\n    for i, id_a in enumerate(geo_a_ids):\n        # Optional: progress feedback for large sets:\n        # print(\"Testing {}/{} from GeoA...\".format(i+1, count_a))\n\n        for id_b in geo_b_ids:\n            if objects_clash(id_a, id_b, tol):\n                clashing_ids.append(id_a)\n                break  # already found a clash, no need to test more GeoB\n\n    rs.UnselectAllObjects()\n\n    if clashing_ids:\n        rs.SelectObjects(clashing_ids)\n        print(\"Found {} clashing object(s) in GeoA (out of {} GeoA, {} GeoB).\".format(\n            len(clashing_ids), count_a, count_b))\n        print(\"They are now selected.\")\n    else:\n        print(\"No clashes found between GeoA and GeoB.\")\n\n\nif __name__ == \"__main__\":\n    main()",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 89
+}

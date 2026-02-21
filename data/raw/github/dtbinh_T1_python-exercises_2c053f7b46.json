@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/dtbinh/T1_python-exercises/blob/f4710c3dc2ba8ddb3e3e9069ab8d65df674463ab/07_ur_online/shifted_frames_setup/compas/__debugging/objects_to_mesh_in_rhino/nurbs_objects_to_mesh.py",
+  "repo": "dtbinh/T1_python-exercises",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "07_ur_online/shifted_frames_setup/compas/__debugging/objects_to_mesh_in_rhino/nurbs_objects_to_mesh.py",
+  "instruction": "Nurbs objects to mesh",
+  "code": "\n\n\nfrom objects_to_mesh import nurbs_to_mesh\nimport rhinoscriptsyntax as rs  \n\n\nif __name__ == '__main__':\n    \n    poly_srf = rs.GetObjects(\"Select Objects\",8+16)\n    \n    if poly_srf:\n        srfs_explo = rs.ExplodePolysurfaces(poly_srf) \n    \n    if srfs_explo:\n        srfs = srfs_explo\n    else:\n        srfs = poly_srf\n       \n        \n    trg_len = rs.GetReal(\"Target Edges Length\",0.75)\n    rhino_meshes = []\n    for i,srf in enumerate(srfs):\n        print(\"Computing Surface {0} of {1}\".format(i+1,len(srfs)+1))\n        rs.EnableRedraw(False)\n        rs.HideObject(srf)\n        rhino_meshes.append(nurbs_to_mesh(srf,trg_len,vis=5))\n        if srfs_explo:\n            rs.DeleteObject(srf)\n\n    rs.ShowObjects(srfs)\n    rs.JoinMeshes(rhino_meshes, True)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

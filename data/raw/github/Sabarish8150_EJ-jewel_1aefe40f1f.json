@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Sabarish8150/EJ-jewel/blob/a0bd6b58ecf0aa22c1c348164a4a2418cb773c1e/testej.py",
+  "repo": "Sabarish8150/EJ-jewel",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "testej.py",
+  "instruction": "Testej",
+  "code": "import rhinoscriptsyntax as rs\nimport math\n\ndef get_grade(value, grade_type):\n    \"\"\"\n    Function to calculate the grade based on weight or pieces.\n    \"\"\"\n    grade_ranges = {\n        \"weight\": {\n            (0, 1.99): 0.2,\n            (2, 3.99): 0.4,\n            (4, 5.99): 0.6,\n        },\n        \"pieces\": {\n            (0, 10): 0.1,\n            (10, 20): 0.25,\n            (20, 30): 0.4,\n        }\n    }\n    \n    for range_key, grade in grade_ranges[grade_type].items():\n        if range_key[0] <= value <= range_key[1]:\n            return grade\n    return 0\n\ndef calculate_area_without_stones():\n    # Get selected objects (design and stones)\n    selected_objects = rs.GetObject(\"Select the jewelry design object\", rs.filter.surface | rs.filter.polysurface)\n    if not selected_objects:\n        return \"No object selected.\"\n\n    stones = rs.GetObject(\"Select the stones (or multiple stones)\", rs.filter.surface | rs.filter.polysurface)\n    if not stones:\n        return \"No stones selected.\"\n\n    # Calculate the total area of the jewelry design (without stones)\n    design_area = rs.SurfaceArea(selected_objects)[0] if rs.IsSurface(selected_objects) else rs.PolySurfaceArea(selected_objects)[0]\n    \n    # Initialize the total area of the stones\n    total_stone_area = 0\n\n    # Loop through selected stones and calculate their total area\n    if isinstance(stones, list):  # If multiple stones are selected\n        for stone in stones:\n            stone_area = rs.SurfaceArea(stone)[0] if rs.IsSurface(stone) else rs.PolySurfaceArea(stone)[0]\n            total_stone_area += stone_area\n    else:  # If only one stone is selected\n        total_stone_area = rs.SurfaceArea(stones)[0] if rs.IsSurface(stones) else rs.PolySurfaceArea(stones)[0]\n\n    # Calculate the remaining area (without stones)\n    remaining_area = design_area - total_stone_area\n    \n    # Display the output\n    report = f\"Design Area: {design_area:.2f} sq.mm\\n\"\n    report += f\"Total Stone Area: {total_stone_area:.2f} sq.mm\\n\"\n    report += f\"Remaining Area (without stones): {remaining_area:.2f} sq.mm\\n\"\n    \n    # Display final report in Rhino message box\n    rs.MessageBox(report)\n    return report\n\n# Run the function to calculate and display the area without stones\ncalculate_area_without_stones()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

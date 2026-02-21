@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/8462fc3487f8b7a58595ef73f6a5c09f92717f60/rhinocommon/snippets/py/surface-from-edge-curves.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/surface-from-edge-curves.py",
+  "instruction": "Surface from edge curves",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    go = GetObject()\n    go.SetCommandPrompt(\"Select 2, 3, or 4 open curves\")\n    go.GeometryFilter = ObjectType.Curve\n    go.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\n    go.GetMultiple(2, 4)\n    if go.CommandResult() != Result.Success:\n        return go.CommandResult()\n\n    curves = [o.Curve() for o in go.Objects()]\n\n    brep = Brep.CreateEdgeSurface(curves)\n\n    if brep != None:\n        doc.Objects.AddBrep(brep)\n        doc.Views.Redraw()\n\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

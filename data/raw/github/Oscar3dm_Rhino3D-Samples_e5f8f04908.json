@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Oscar3dm/Rhino3D-Samples/blob/eca3e49214cf484c5764ebaf3b4df9a31442785b/o3dm_rhino/data/serialization.py",
+  "repo": "Oscar3dm/Rhino3D-Samples",
+  "repo_stars": 8,
+  "repo_description": "A collection of Rhino 3D functions",
+  "license": "MIT",
+  "filepath": "o3dm_rhino/data/serialization.py",
+  "instruction": "Serialization",
+  "code": "import pickle\nimport copy\nimport Rhino.Geometry as rg\nimport Rhino.FileIO as rfi\nimport Rhino.Runtime as rr\n\ndef clean_data(data):\n\t\"\"\"Recursively replaces instances of Rhino.Geometry objects with their JSON representations.\"\"\"\n\tif isinstance(data, rg.GeometryBase):\n\t\tjson_data = data.ToJSON(rfi.SerializationOptions())\n\t\treturn json_data\n\telif isinstance(data, dict):\n\t\treturn {k: clean_data(v) for k, v in data.items()}\n\telif isinstance(data, list):\n\t\treturn [clean_data(v) for v in data]\n\telif isinstance(data, tuple):\n\t\treturn tuple(clean_data(v) for v in data)\n\telif hasattr(data, '__dict__'):\n\t\ttry:\n\t\t\tnew_obj = data.__class__()\n\t\texcept:\n\t\t\tnew_obj = copy.copy(data)\n\t\tfor attr in vars(data):\n\t\t\tsetattr(new_obj, attr, clean_data(getattr(data, attr)))\n\t\treturn new_obj\n\telse:\n\t\t# Attempt to handle any other iterable types\n\t\ttry:\n\t\t\t# Check if data is iterable (but not a string, bytes, or bytearray)\n\t\t\tif hasattr(data, '__iter__') and not isinstance(data, (str, bytes, bytearray)):\n\t\t\t\treturn [clean_data(v) for v in data]\n\t\t\telse:\n\t\t\t\t# Not an iterable we want to process, return as-is\n\t\t\t\treturn data\n\t\texcept TypeError:\n\t\t\t# Data is not iterable, return as-is\n\t\t\treturn data\n\ndef reconstruct_data(data):\n\t\"\"\"Recursively reconstructs Rhino.Geometry objects from their JSON representations.\"\"\"\n\tif isinstance(data, str):\n\t\ttry:\n\t\t\tgeometry = rr.CommonObject.FromJSON(data)\n\t\t\tif geometry is not None:\n\t\t\t\treturn geometry\n\t\t\telse:\n\t\t\t\treturn data  # Not a geometry JSON string\n\t\texcept:\n\t\t\treturn data  # Not a valid JSON string for geometry\n\telif isinstance(data, dict):\n\t\treturn {k: reconstruct_data(v) for k, v in data.items()}\n\telif isinstance(data, list):\n\t\treturn [reconstruct_data(v) for v in data]\n\telif isinstance(data, tuple):\n\t\treturn tuple(reconstruct_data(v) for v in data)\n\telif hasattr(data, '__dict__'):\n\t\tnew_obj = data.__class__()\n\t\tfor attr in vars(data):\n\t\t\tsetattr(new_obj, attr, reconstruct_data(getattr(data, attr)))\n\t\treturn new_obj\n\telse:\n\t\treturn data\n\ndef save_data(data, file_path):\n\t\"\"\"Saves the cleaned data structure to a text file after pickling.\"\"\"\n\tcleaned_data = clean_data(data)\n\twith open(file_path, 'wb') as file:\n\t\tpickle.dump(cleaned_data, file)\n\ndef load_data(file_path):\n\t\"\"\"Loads the pickled data from a text file and reconstructs the Rhino.Geometry objects.\"\"\"\n\twith open(file_path, 'rb') as file:\n\t\tdata = pickle.load(file)\n\treconstructed_data = reconstruct_data(data)\n\treturn reconstructed_data",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

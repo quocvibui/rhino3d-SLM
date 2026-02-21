@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/add-texture.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/add-texture.py",
+  "instruction": "Add texture",
+  "code": "import Rhino\nimport scriptcontext\nimport System.Guid\nimport System.Windows.Forms.DialogResult\nimport System.IO.File\n\ndef AddTexture():\n    # Select object to add texture\n    filter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter | Rhino.DocObjects.ObjectType.Mesh\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select object to add texture\", False, filter)\n    if rc!=Rhino.Commands.Result.Success: return rc\n\n    rhino_object = objref.Object()\n    if not rhino_object: return Rhino.Commands.Result.Failure\n\n    # Select texture\n    fd = Rhino.UI.OpenFileDialog()\n    fd.Filter = \"Image Files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg\"\n    if not fd.ShowDialog():\n        return Rhino.Commands.Result.Cancel\n\n    # Verify texture\n    bitmap_filename = fd.FileName\n    if not System.IO.File.Exists(bitmap_filename):\n        return Rhino.Commands.Result.Nothing\n\n    # Make sure the object has it's material source set to \"material_from_object\"\n    rhino_object.Attributes.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n\n    # Make sure the object has a material assigned\n    material_index = rhino_object.Attributes.MaterialIndex\n    if material_index<0:\n        # Create a new material based on Rhino's default material\n        material_index = scriptcontext.doc.Materials.Add()\n        # Assign the new material (index) to the object.\n        rhino_object.Attributes.MaterialIndex = material_index\n\n    if material_index>=0:\n        mat = scriptcontext.doc.Materials[material_index]\n        mat.SetBumpTexture(bitmap_filename)\n        mat.CommitChanges()\n\n        #Don't forget to update the object, if necessary\n        rhino_object.CommitChanges()\n\n        scriptcontext.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n\n    return Rhino.Commands.Result.Failure\n\nif __name__==\"__main__\":\n    AddTexture()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

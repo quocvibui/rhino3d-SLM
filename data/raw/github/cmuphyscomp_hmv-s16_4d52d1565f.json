@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/cmuphyscomp/hmv-s16/blob/7863c66ed645b463b72aef98a5c484a18cc9f396/Grasshopper/MocapDemo/DetectFlick.py",
+  "repo": "cmuphyscomp/hmv-s16",
+  "repo_stars": 5,
+  "repo_description": "Course resources for the Human-Machine Virtuosity course at Carnegie Mellon University, Spring 2016.",
+  "license": "BSD-3-Clause",
+  "filepath": "Grasshopper/MocapDemo/DetectFlick.py",
+  "instruction": "Detect flick",
+  "code": "﻿# DetectFlick.py - contents of the ghpython object in MocapDemo.gh\r\n#\r\n# inputs\r\n#   reset   - Boolean to deactivate and reset state\r\n#   points  - list of Point3D objects representing the path of the tip of an indicating stick\r\n#             Note: the 'points' input must be set to 'List Access'\r\n# threshold - the acceleration value above which to output an event\r\n\r\n# outputs\r\n#   out      - debugging text stream\r\n#   sample   - None, or an integer sample offset for the flick event; zero is 'now', negative values are relative to now.\r\n#   pos      - list of points in buffer\r\n#  accel     - list of estimated accelerations\r\n\r\n# use persistent state context\r\nimport scriptcontext\r\nsc_identifier = 'flick_detector'\r\n\r\n# use point filter with acceleration estimator\r\nreload(pointfilter)\r\nimport pointfilter\r\n\r\n# If the user reset input is set, then clear any existing state and do nothing.\r\nif reset:\r\n    print \"Resetting receiver state.\"\r\n    scriptcontext.sticky[sc_identifier] = None \r\n\r\nelse:\r\n    # fetch or create the persistent filter object\r\n    filter = scriptcontext.sticky.get(sc_identifier)\r\n    if filter is None:\r\n        filter = pointfilter.Point3dFilter(80)\r\n        scriptcontext.sticky[sc_identifier] = filter\r\n        \r\n    # add the new data\r\n    filter.add_points(points)\r\n    # print filter._position\r\n    # print \"Adding %d points to filter.\" % len(points)\r\n    # offset, mag, acc, pos = filter.find_accel_peak()\r\n    # print \"Peak at %d of %f\" % (offset, mag)\r\n    \r\n    sample = filter.detect_acceleration_event( threshold )\r\n    if sample is not None:\r\n        print \"Acceleration peak observed at %d\" % sample\r\n    \r\n    print \"Filter has seen %d points, buffer starts at %d, blanking ends at %d.\" % (filter.samples, filter.samples - filter._buf_len, filter.last_event + filter.blanking)\r\n    pos = filter._position\r\n    accel = filter._accel\r\n    \r\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problems-with-rail-revolved-brep/157810",
+  "topic_id": 157810,
+  "title": "Problems with rail revolved brep?",
+  "question": "Hi,\n\n\nI’m using \nRhino.Geometry.NurbsSurface.CreateRailRevolvedSurface\n in \nGHPython\n with a helical \nRhino.Geometry.NurbsCurve\n as \nrail\n and a \nRhino.Geometry.PolyCurve\n as \nprofile\n, all generated procedurally in code.\n\nI’ve quickly created a Grasshopper definition to be able to illustrate my issues more easily.\n\n\n\n\nScreenshot 2023-04-06 at 08.46.10\n647×836 213 KB\n\n\n\n\nI’ve encountered \ntwo distinct problems\n!\n\n\nFirst\n, I use \nRhino.Geometry.Brep.Trim\n with two planes to crop the ends of the brep and keep the region between the planes. This way I get two planar ends that can be capped to close the brep.\n\nHowever, when I set the two planes to an exact height, the \nRhino.Geometry.Brep.Trim\n fails. I guess the planes intersecting the brep at the pink points pose issues, which is common in Rhino?\n\n\n\n\nScreenshot 2023-04-06 at 08.56.35\n890×884 77.8 KB\n\n\n\n\nWhen I offset the planes ever so slightly in their normal direction, the trimming succeeds, but these tolerances get shaved off of the total length of the brep, which introduces inaccuracies in the process.\n\n\nThe \nsecond problem\n lies with finally getting a solid closed brep.\n\nAfter trimming the ends, I cap them with \nRhino.Geometry.Brep.CapPlanarEnds\n, which works fine.\n\n\n\n\nScreenshot 2023-04-06 at 09.04.02\n481×747 160 KB\n\n\n\n\nHowever, there remains a naked seam along the brep - where the initial profile starts and ends while being revolved -, which prevents it from being watertight.\n\n\n\n\nScreenshot 2023-04-06 at 09.07.21\n493×752 167 KB\n\n\n\n\nIs there recipe in RhinoCommon that can automatically detect the adjacent, naked edges and then join/fuse them along the seam?\n\n\nThe Grasshopper definition has the same issues. It contains the relevant GHPython code.\n\n\ndemo.gh\n (18.4 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\nfrom System.Collections.Generic import IEnumerable\n\n\nMTOL = sc.doc.ModelAbsoluteTolerance\nATOL = sc.doc.ModelAngleToleranceRadians\n\nbrep = B\ncA = rg.Intersect.Intersection.BrepPlane(brep, Pa, MTOL)[1][0]\ncB = rg.Intersect.Intersection.BrepPlane(brep, Pb, MTOL)[1][0]\n\nbrep = brep.Split.Overloads[IEnumerable[rg.Curve], float]([cA, cB], MTOL)[2]\n\n# brep.Edges.RemoveNakedMicroEdges(MTOL, True)\n# brep.Edges.MergeAllEdges(ATOL)\n\npieces = []\nfor f in brep.Faces:\n    pieces.Add(f.DuplicateFace(False))\nbrep = rg.Brep.JoinBreps(pieces, MTOL)[0]\n\npsA = rg.Brep.CreatePlanarBreps(cA)[0]\npsB = rg.Brep.CreatePlanarBreps(cB)[0]\n\nbrep.Join(psA, MTOL, False)\nbrep.Join(psB, MTOL, True)\nG = brep",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 11,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 14,
+  "views": 815
+}

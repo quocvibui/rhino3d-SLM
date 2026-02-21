@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trying-boolean-union-sdk-c/214866",
+  "topic_id": 214866,
+  "title": "Trying Boolean Union SDK C++",
+  "question": "Hi everyone,\n\n\nI’m encountering an issue with \nRhinoBooleanUnion\n. I pass a valid list of Breps (checked for nulls), but I often get an \nAccess Violation Exception (0xC0000005)\n inside \ntl.dll\n.\n\n\nThe inputs are generated via Offset and might be open Breps or have coincident faces. Here is the helper function I wrote:\n\n\nON_SimpleArray<ON_Brep\\*> GetBooleanUnion(const ON_Brep\\* brepA, const ON_Brep\\* brepB)\n{\n// 1. Get the active document and tolerance\nCRhinoDoc\\* doc = RhinoApp().ActiveDoc();\nif (!doc) return ON_SimpleArray<ON_Brep\\*>(); // Safety check\n\ndouble tolerance = doc->AbsoluteTolerance();\n\n// 2. Output array to store the result\nON_SimpleArray<ON_Brep*> outputBreps;\n\n// 3. Validation: Ensure inputs are not null\nif (!brepA || !brepB) \n{\n    RhinoApp().Print(L\"Error: Invalid input Breps (NULL pointer).\\n\");\n    return outputBreps;\n}\n\n// 4. Prepare the Input List\n// RhinoBooleanUnion requires a list (array) even if we only have 2 objects.\nON_SimpleArray<const ON_Brep*> inputBreps;\ninputBreps.Append(brepA);\ninputBreps.Append(brepB);\n\n// 5. Execute Boolean Union\n// bManifoldOnly = false (Set to false to avoid failures on open surfaces)\nbool result = RhinoBooleanUnion(\n    inputBreps, \n    tolerance, \n    false, // bManifoldOnly\n    outputBreps\n);\n\n// 6. Check for success\nif (result && outputBreps.Count() > 0)\n{\n    // Success: The 'outputBreps' array now contains the united geometry.\n    // Note: The caller is responsible for managing the memory of the new Breps \n    // (e.g., adding them to the doc or deleting them).\n    return outputBreps;\n}\n\n// Failure: Return empty array\nRhinoApp().Print(L\"Boolean Union failed.\\n\");\nreturn outputBreps;\n\n}\n\n\n\nDoes anyone know why this crashes instead of just returning false? Should I be using \nRhinoCreateSolid\n or \nJoin\n for open surfaces? Thanks!\n\n\nimage\n693×675 65.1 KB",
+  "code_blocks": [
+    {
+      "code": "ON_SimpleArray<ON_Brep\\*> GetBooleanUnion(const ON_Brep\\* brepA, const ON_Brep\\* brepB)\n{\n// 1. Get the active document and tolerance\nCRhinoDoc\\* doc = RhinoApp().ActiveDoc();\nif (!doc) return ON_SimpleArray<ON_Brep\\*>(); // Safety check\n\ndouble tolerance = doc->AbsoluteTolerance();\n\n// 2. Output array to store the result\nON_SimpleArray<ON_Brep*> outputBreps;\n\n// 3. Validation: Ensure inputs are not null\nif (!brepA || !brepB) \n{\n    RhinoApp().Print(L\"Error: Invalid input Breps (NULL pointer).\\n\");\n    return outputBreps;\n}\n\n// 4. Prepare the Input List\n// RhinoBooleanUnion requires a list (array) even if we only have 2 objects.\nON_SimpleArray<const ON_Brep*> inputBreps;\ninputBreps.Append(brepA);\ninputBreps.Append(brepB);\n\n// 5. Execute Boolean Union\n// bManifoldOnly = false (Set to false to avoid failures on open surfaces)\nbool result = RhinoBooleanUnion(\n    inputBreps, \n    tolerance, \n    false, // bManifoldOnly\n    outputBreps\n);\n\n// 6. Check for success\nif (result && outputBreps.Count() > 0)\n{\n    // Success: The 'outputBreps' array now contains the united geometry.\n    // Note: The caller is responsible for managing the memory of the new Breps \n    // (e.g., adding them to the doc or deleting them).\n    return outputBreps;\n}\n\n// Failure: Return empty array\nRhinoApp().Print(L\"Boolean Union failed.\\n\");\nreturn outputBreps;\n\n}",
+      "language": "csharp",
+      "author": "Mauricio3",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 39
+}

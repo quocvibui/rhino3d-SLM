@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-createfromsweep-gives-crooked-result/215239",
+  "topic_id": 215239,
+  "title": "Brep.CreateFromSweep Gives Crooked Result",
+  "question": "Surely I’m overlooking something simple here. Given all the very complicated stuff I do with RhinoCommon and Python, I’m not sure why this is whipping me so hard. Below is a code sample and the results I’m getting vs the results I want. The CreateFromSweep is giving crooked results. The Sweep.PerformSweep is not making anything (and empty array is returned).\n\n\n#! python 2\n\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport math\n\nradius1 = 0.5\nradius2 = 1.3\nradius3 = 1\n\n# set to True to test the SweepOneRail() method,\ndo_sweep = False\n\nsection = rg.Circle(0.5).ToNurbsCurve()\nsection.Rotate(math.radians(90), rg.Plane.WorldXY.YAxis, rg.Point3d.Origin)\nsection.Translate(rg.Vector3d(0, radius1 + radius2, 0))\nsc.doc.Objects.AddCurve(section)\n\nrail = rg.Ellipse(rg.Plane.WorldXY, radius3, radius2).ToNurbsCurve()\nsc.doc.Objects.AddCurve(rail)\n\nif do_sweep:\n    # PRODUCES NOTHING\n    sweeper = rg.SweepOneRail()\n    brep = sweeper.PerformSweep(rail, section)[0]\n    sc.doc.Objects.AddBrep(brep)\nelse:\n    # PRODUCES AN UNEXPECTED (CROOKED) RESULT\n    brep = rg.Brep.CreateFromSweep(rail, section, True, 0.001)[0]\n    sc.doc.Objects.AddBrep(brep)\n\n\n\n2026-01-29_16-32-41\n790×553 94 KB",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\n\ndef Test():\n    radius1 = 0.5\n    radius2 = 1.3\n    radius3 = 1.0\n\n    # compute rail\n    world_xy = Rhino.Geometry.Plane.WorldXY\n    ellipse = Rhino.Geometry.Ellipse(world_xy, radius3, radius2)\n    rail = ellipse.ToNurbsCurve()\n\n    # compute section\n    domain = rail.Domain\n    origin = rail.PointAt(domain.Min)\n    normal = rail.TangentAt(domain.Min)\n    plane = Rhino.Geometry.Plane(origin, normal)\n    circle = Rhino.Geometry.Circle(plane, radius1)\n    section = circle.ToNurbsCurve()\n\n    # sweep1\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    results = Rhino.Geometry.Brep.CreateFromSweep(rail, section, True, tolerance)\n    if results:\n        for rc in results:\n            sc.doc.Objects.AddBrep(rc)\n        sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    Test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino\nimport scriptcontext as sc\n\ndef Test():\n    radius1 = 0.5\n    radius2 = 1.3\n    radius3 = 1.0\n\n    # compute rail\n    world_xy = Rhino.Geometry.Plane.WorldXY\n    ellipse = Rhino.Geometry.Ellipse(world_xy, radius3, radius2)\n    rail = ellipse.ToNurbsCurve()\n\n    # move rail start\n    p = Rhino.Geometry.Point3d(0, radius2, 0)\n    success, t = rail.ClosestPoint(p)\n    rail.ChangeClosedCurveSeam(t)\n    sc.doc.Objects.AddCurve(rail)\n\n    # compute section\n\n    domain = rail.Domain\n    origin = Rhino.Geometry.Point3d(0, radius1 + radius2, 0)\n    normal = rail.TangentAt(domain.Min)\n    plane = Rhino.Geometry.Plane(origin, normal)\n    circle = Rhino.Geometry.Circle(plane, radius1)\n    section = circle.ToNurbsCurve()\n    sc.doc.Objects.AddCurve(section)\n\n    # sweep1\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    results = Rhino.Geometry.Brep.CreateFromSweep(rail, section, True, tolerance)\n    if results:\n        for rc in results:\n            sc.doc.Objects.AddBrep(rc)\n        sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    Test()",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\n\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport math\n\nradius1 = 0.5\nradius2 = 1.3\nradius3 = 1\n\n# set to True to test the SweepOneRail() method,\ndo_sweep = False\n\nsection = rg.Circle(0.5).ToNurbsCurve()\nsection.Rotate(math.radians(90), rg.Plane.WorldXY.YAxis, rg.Point3d.Origin)\nsection.Translate(rg.Vector3d(0, radius1 + radius2, 0))\nsc.doc.Objects.AddCurve(section)\n\nrail = rg.Ellipse(rg.Plane.WorldXY, radius3, radius2).ToNurbsCurve()\nsc.doc.Objects.AddCurve(rail)\n\nif do_sweep:\n    # PRODUCES NOTHING\n    sweeper = rg.SweepOneRail()\n    brep = sweeper.PerformSweep(rail, section)[0]\n    sc.doc.Objects.AddBrep(brep)\nelse:\n    # PRODUCES AN UNEXPECTED (CROOKED) RESULT\n    brep = rg.Brep.CreateFromSweep(rail, section, True, 0.001)[0]\n    sc.doc.Objects.AddBrep(brep)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 48
+}

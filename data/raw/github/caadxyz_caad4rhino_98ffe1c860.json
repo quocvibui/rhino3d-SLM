@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caadxyz/caad4rhino/blob/d3df5a030b2bd0ab58954fb341f04a4e814835d9/dev/wall_cmd.py",
+  "repo": "caadxyz/caad4rhino",
+  "repo_stars": 22,
+  "repo_description": " Caad4Rhino is a python package whose purpose is to provide computer aided architectural design tools in rhino 3d software",
+  "license": "LGPL-3.0",
+  "filepath": "dev/wall_cmd.py",
+  "instruction": "Copyright\ncreate on 2020.02.19\n@author mahaidong",
+  "code": "#coding=utf-8\n'''\nCopyright\ncreate on 2020.02.19\n@author mahaidong\n\ndescription:\n'''\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nfrom caad.geometry.DoubleLine import DoubleLine\nimport caad.utility as util\nimport caad.config as config\n\n__commandname__ = \"Wall\"\ndef RunCommand( is_interactive ):\n    go = Rhino.Input.Custom.GetOption()\n    go.AcceptNothing(True)\n    go.SetCommandPrompt( \"set options\" )\n    # set up the options\n    widthOption = Rhino.Input.Custom.OptionDouble( config.DOUBLELINEWIDTH, \n            config.DOUBLELINEWIDTHLIMIT[0],config.DOUBLELINEWIDTHLIMIT[1] )\n    wallOption = Rhino.Input.Custom.OptionToggle(True, \"Off\", \"On\")\n\n    # offset side options\n    sideValues = \"middle\", \"right\", \"left\"\n    sideIndex = config.DOUBLELINEOFFSETSIDETYPE\n    go.AddOptionList(\"Type\", sideValues, sideIndex)\n\n    go.AddOptionDouble(\"Width\", widthOption)\n    go.AddOptionToggle(\"Wall\", wallOption)\n\n    while True:\n        get_rc = go.Get()\n        if go.CommandResult()!=Rhino.Commands.Result.Success:\n            print go.CommandResult()\n            break \n        if get_rc==Rhino.Input.GetResult.Option:\n            sideIndex = go.Option().CurrentListOptionIndex\n            config.DOUBLELINEOFFSETSIDETYPE = sideIndex \n            continue\n        break\n    \n    if go.CommandResult() != Rhino.Commands.Result.Cancel:\n        config.DOUBLELINEWIDTH = widthOption.CurrentValue\n        isWall = wallOption.CurrentValue\n        if not rs.IsLayer(\"Wall\"): \n            util.initCaadLayer(\"Wall\")\n        if isWall :\n            DoubleLine.DrawDoubleLines( \"wall\", sideIndex )\n        else:\n            DoubleLine.DrawDoubleLines( rs.CurrentLayer(), sideIndex )\n\n\n    sc.doc.Views.Redraw()\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

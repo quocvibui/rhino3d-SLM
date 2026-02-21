@@ -1,0 +1,50 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mirror-transformation/27819",
+  "topic_id": 27819,
+  "title": "Mirror transformation",
+  "question": "Can anyone please help me out with the mirror transformation in Rhino python ?\n\nAs of now I have come across a command Rhino.Geometry.Transform.Mirror(point, normal) ,but I am clueless as to how I can actually use it in my code to mirror a curve.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n    \ndef MirrorCurve():\n    \"\"\"Mirror existing curve over y-axis\"\"\"\n    \n    id = rs.GetObject(\"Select curve to mirror\", 4, True, False)\n    if not id: return\n    \n    plane = Rhino.Geometry.Plane.WorldYZ\n    xform = Rhino.Geometry.Transform.Mirror(plane)\n    m_id = rs.TransformObject(id, xform, copy=False)\n\nif __name__==\"__main__\":\n    MirrorCurve()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef AddNurbsCurveAndMirror():\n    points = Rhino.Collections.Point3dList(5)\n    points.Add(0, 0, 0)\n    points.Add(0, 2, 0)\n    points.Add(2, 3, 0)\n    points.Add(4, 2, 0)\n    points.Add(4, 0, 0)\n    \n    nc = Rhino.Geometry.NurbsCurve.Create(False, 3, points)\n    if nc and nc.IsValid:\n        id = scriptcontext.doc.Objects.AddCurve(nc)\n        if id:\n            # mirror using the id\n            plane = Rhino.Geometry.Plane.WorldYZ\n            xform = Rhino.Geometry.Transform.Mirror(plane)\n            m_id = rs.TransformObject(id, xform, copy=True)\n            scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    AddNurbsCurveAndMirror()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef AddNurbsCurveAndMirror():\n    points = Rhino.Collections.Point3dList(5)\n    points.Add(0, 0, 0)\n    points.Add(0, 2, 0)\n    points.Add(2, 3, 0)\n    points.Add(4, 2, 0)\n    points.Add(4, 0, 0)\n    \n    nc1 = Rhino.Geometry.NurbsCurve.Create(False, 3, points)\n    nc2 = Rhino.Geometry.NurbsCurve.Duplicate(nc1)\n    \n    plane = Rhino.Geometry.Plane.WorldYZ\n    xform = Rhino.Geometry.Transform.Mirror(plane)\n    Rhino.Geometry.NurbsCurve.Transform(nc2, xform)\n    \n    if nc1 and nc1.IsValid and nc2 and nc2.IsValid:\n        scriptcontext.doc.Objects.AddCurve(nc1)\n        scriptcontext.doc.Objects.AddCurve(nc2)\n        scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    AddNurbsCurveAndMirror()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n    \ndef ExportIGES():\n    # select all objects to export\n    objs = rs.AllObjects(select=True, include_lights=False, include_grips=False)\n    if not objs: return\n    \n    # setup path and filename in quotes\n    file = chr(34) + \"D:\\Temp\\MyTestFileName.iges\" + chr(34)\n    \n    # set iges export type in quotes\n    iges_type = chr(34) + \"Default\" + chr(34)\n    \n    # create export command\n    cmd = \"_-Export \" + file + \" \" + iges_type + \" _Enter\"\n\n    # run the command\n    rc = rs.Command(cmd, False)\n    if not rc:\n        print \"Error exporting file {}\".format(path)\n    \nif __name__==\"__main__\":\n    ExportIGES()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 27,
+  "views": 5544
+}

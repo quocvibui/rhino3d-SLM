@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-bring-forward/58887",
+  "topic_id": 58887,
+  "title": "Python - bring forward",
+  "question": "Hi,\n\n\nCan anybody help me? I couldn’t find the visibility orders in Python. Shall I use Command  for that?\n\nI would like to change the order of some groups to bring them forward.",
+  "code_blocks": [
+    {
+      "code": "from System.Collections.Generic import *\nfrom System.Drawing import *\nfrom Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Display import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\n\nobjList = []\n\ndef DisplayOrder():\n    obj = rs.GetObject( \"Select an object\", 0, False, False, None, False)\n    objList.append(obj)\n    print objList\n    objList[0].Attributes.DisplayOrder = 10\n    objList[0].CommitChanges()\n    doc.Views.Redraw()\n    \nDisplayOrder()",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "from System.Collections.Generic import *\nfrom System.Drawing import *\nfrom Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Display import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\n\ndef DisplayOrder():\n    objects = rs.GetObjects(\"Select the objects that you want displayed on top\")\n    if objects:\n        for object in objects:\n            obj = rs.coercerhinoobject(object, True, True)\n            obj.Attributes.DisplayOrder = 1\n            obj.CommitChanges()\n            rs.Redraw()\n\nif __name__ == \"__main__\":\n    DisplayOrder()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef DoSomething():\n    \n    red_id = rs.GetObject(\"Select red object\")\n    if not red_id: return\n    \n    blue_id = rs.GetObject(\"Select blue object\")\n    if not blue_id: return\n    \n    red_obj = rs.coercerhinoobject(red_id, True, True)\n    blue_obj = rs.coercerhinoobject(blue_id, True, True)\n    \n    red_obj.Attributes.DisplayOrder = 1\n    red_obj.CommitChanges()\n    \n    blue_obj.Attributes.DisplayOrder = -1\n    blue_obj.CommitChanges()\n    \n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef BringObjDisplayToFront(objIDs,filter):\n    chgobjs=[rs.coercerhinoobject(objID) for objID in objIDs]\n    norm_objs=[rs.coercerhinoobject(objID) for objID in rs.ObjectsByType(filter)]\n    max_level=max([rhobj.Attributes.DisplayOrder for rhobj in norm_objs])\n    #print max_level\n    for chgobj in chgobjs:\n        chgobj.Attributes.DisplayOrder=max_level+1\n        chgobj.CommitChanges()\n    sc.doc.Views.Redraw()\n    \nfilter=1+4+512+65536\nobjIDs=rs.GetObjects(\"Select objects to bring to front\",filter)\nBringObjDisplayToFront(objIDs,filter)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DisplayOrder():\n    objects = rs.GetObjects(\"Select the objects that are on top\", 0, None, True, True)\n    if objects:\n        copied = rs.CopyObjects(objects)\n        if copied:\n            rs.DeleteObjects(objects)\n        rs.UnselectAllObjects()\n        rs.Redraw()\n\nif __name__ == \"__main__\":\n    DisplayOrder()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DisplayOrder():\n    objects = rs.GetObjects(\"Select the objects that are displayed on top\")\n    if objects:\n        copied = rs.CopyObject(objects)\n        if copied:\n            rs.DeleteObjects(objects)\n        rs.UnselectAllObjects()\n        rs.Redraw()\n\nif __name__ == \"__main__\":\n    DisplayOrder()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 30,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 30,
+  "views": 1808
+}

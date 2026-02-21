@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/activating-additional-out-parameters-rhinocommon-python/149516",
+  "topic_id": 149516,
+  "title": "Activating additional \"out\" parameters RhinoCommon/Python",
+  "question": "For example here:\n\n\n\n\n\n\n\n\ndeveloper.rhino3d.com\n\n\n\n\n\n\nMesh.ClosestPoint Method (Point3d, Point3d, Vector3d, Double)\n\n\nGets the point on the mesh that is closest to a given test point.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nimage\n1318×1003 80.5 KB\n\n\n\n\nThe overloads include a couple of ‘out’ parameters and IIRC, I have to feed it some input types to get the out parameters - using clr.Strongbox.  But I am not having much luck here, all I have is the test point and the mesh.  Can someone remind me the correct syntax to use here?  Thx.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport clr \n\ndef DoSomething():\n    \n    mesh_id = rs.GetObject(\"Select mesh\", 32, True, False)\n    if not mesh_id: return\n    \n    test_point = rs.GetPoint(\"Point\")\n    if not test_point: return \n    \n    m = rs.coercemesh(mesh_id, True)\n    p = clr.StrongBox[Rhino.Geometry.Point3d]()\n    n = clr.StrongBox[Rhino.Geometry.Vector3d]()\n    \n    face_index = Rhino.Geometry.Mesh.ClosestPoint(m, test_point, p, n, 0.0)\n    if not face_index: return\n    \n    line = Rhino.Geometry.Line(p.Value, n.Value, 10)\n    scriptcontext.doc.Objects.AddLine(line)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 377
+}

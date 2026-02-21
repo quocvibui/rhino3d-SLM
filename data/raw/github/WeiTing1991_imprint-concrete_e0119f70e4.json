@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/WeiTing1991/imprint-concrete/blob/f4f5112d78c336c568b06cd353ba065e6f802e0d/src/cSlicer/infill.py",
+  "repo": "WeiTing1991/imprint-concrete",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/cSlicer/infill.py",
+  "instruction": "supports/infill",
+  "code": "\"\"\"\nsupports/infill\n\"\"\"\n\nfrom __future__ import division\nimport Rhino.Geometry as rg\nimport math\n\n\nclass Infill():\n\n    \"\"\"This class generates infill path for concrete 3D printing\n    \"\"\"\n\n    def __init__(self, mesh):\n\n        self.mesh = mesh\n        self.mesh.Normals.ComputeNormals()\n        #self.layer_height = layer_height\n        #self.contours = contours\n        self.create_angles_list()\n        self.create_color_list()\n\n    def create_angles_list(self):\n\n        self.angles = []\n\n        for i in range(self.mesh.Faces.Count):\n\n            normal = self.mesh.FaceNormals[i]\n            center = self.mesh.Faces.GetFaceCenter(i)\n\n            newpoint = rg.Point3d(center.X, center.Y, center.Z + 10.0)\n\n            vector = center - newpoint\n\n            angle = rg.Vector3d.VectorAngle(\n                normal, vector, rg.Vector3d.CrossProduct(normal, vector))\n\n            self.angles.append(abs(math.degrees(angle)-90))\n\n    def create_color_list(self):\n\n        self.colors = []\n\n        for angle in self.angles:\n\n            if angle <= 30:\n                self.colors.append(\"green\")\n            elif angle <= 45:\n                self.colors.append(\"yellow\")\n            else:\n                self.colors.append(\"red\")\n\n    def create_contours_of_support_region(self, tolerance):\n\n        suport_contours = []\n\n        for k in range(len(self.contours)):\n            curves = []\n\n            for i in range(self.mesh.Faces.Count-1, 0, -1):\n                points = []\n                if self.mesh.Faces.GetFaceCenter(i).Z > self.layer_height*k and self.angles[i] > 25:\n\n                    points.append(self.mesh.Vertices[self.mesh.Faces[i].A])\n                    points.append(self.mesh.Vertices[self.mesh.Faces[i].B])\n                    points.append(self.mesh.Vertices[self.mesh.Faces[i].C])\n                    if self.mesh.Faces[i].IsQuad:\n                        points.append(self.mesh.Vertices[self.mesh.Faces[i].D])\n                    points.append(self.mesh.Vertices[self.mesh.Faces[i].A])\n\n                if len(points) > 3:\n                    temp = [rg.Point3d(p.X, p.Y, self.layer_height*k)\n                            for p in points]\n                    crv = rg.Curve.CreateInterpolatedCurve(temp, 1)\n                    curves.append(crv)\n\n            if len(rg.Curve.CreateBooleanUnion(curves)) > 0:\n\n                # get booleanUnion as a curve\n                crvContour = rg.Curve.CreateBooleanUnion(curves)[0]\n                # convert to polyline\n                polyContour = crvContour.TryGetPolyline()[1]\n                # delete extra points\n                polyContour.MergeColinearSegments(\n                    math.radians(tolerance), False)\n\n                suport_contours.append(polyContour)\n\n        return suport_contours\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

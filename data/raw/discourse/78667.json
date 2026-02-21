@@ -1,0 +1,22 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-group-of-rhino-to-grasshopper/78667",
+  "topic_id": 78667,
+  "title": "Get group of rhino to grasshopper",
+  "question": "I would like to ask if there is any possibility to select groups of objects from rhino canvas and reference them in grasshopper?\n\n\nIn human \n@andheum\n plugin you can reference groups, but is there a way to select group by mouse and reference them? Would it work if I select GUID and group them by some sort of group identifier?\n\n\nMaybe someone has similar example how to do this or a reference to Rhino SDK?",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(List<Guid> Guids, object y, ref object A)\n  {\n\nDataTree<Guid> dtGrouped = new DataTree<Guid>();\nDataTree<Guid> dtNotGrouped = new DataTree<Guid>();\n\n\nint i = 0;\nforeach(Guid g in Guids){\n  var attributes = Rhino.RhinoDoc.ActiveDoc.Objects.Find(g).Attributes;\n  int[] groupID = attributes.GetGroupList();\n  if(groupID != null){\n      dtGrouped.Add(g, new GH_Path(groupID[groupID.Length-1]));\n  }else {\n     dtNotGrouped.Add(g, new GH_Path(i));\n  }\n  i++;\n}\n\n\nA = dtNotGrouped;\nB = dtGrouped;\n}",
+      "language": "csharp",
+      "author": "Petras_Vestartas",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "grasshopper"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 1159
+}

@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/surface-orientation-of-breps/69976",
+  "topic_id": 69976,
+  "title": "Surface orientation of Breps",
+  "question": "Rhino 6, Windows10\n\nHello, I have a Brep which is sent to another Boolean Intersection operation. The Boolean operation is processed correctly.,\n\nWhen I mirrored the Brep (I am using Python and Rhino.Geometry instead of native GH components), the boolean operation failed. The boolean intersection operation result indicates that the Brep has a wrong orientation.\n\nSo I tried several ways.\n\n\n\n\nconnect the Brep to Deconstruct Brep component and Join Brep after that.\n\n\ncall Brep.CreateSolid()\n\n\ncall Brep.Flip()\n\n\n\n\nAll of these three worked. So, it seems like when I mirrored the Brep, it only flips the geometry but keeps the surface orientation as it is. (or maybe surface orientation is also flipped but it shouldn’t be flipped.)\n\n\nBut the problem is, I cannot find any documentation how face orientaions of Breps are managed. Is there a way to check if face orientations are setup correctly so that the Brep truly represents a solid geometry? Is there a way to get/set face orientations per faces? To build a solid Brep by my own, do I need to care about surface orientations ( I was just joining surfaces)? What’s the difference of Brep.Join and Brep.CreateSolid? The first one just join them while the second rebuild surface orientaions? Are surface orientations same as surface normals of each faces?\n\n\nPlease somebody shed a light.\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nbrep_id = rs.SelectedObjects()[0]\nbrep = rs.coercebrep(brep_id)\n\nprint brep.SolidOrientation\nxform = Rhino.Geometry.Transform.Mirror(rs.WorldXYPlane())\nbrep.Transform(xform)\nprint brep.SolidOrientation\nbrep.Flip()\nprint brep.SolidOrientation",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 2101
+}

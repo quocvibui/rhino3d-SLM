@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Eridaa/1.RhinoGH--Python-hops-examples/blob/db30011918629b550eb1e26aa638723944303b9a/RhinoGH--Mesh-analysis-with-networkx-main/01_mesh/app.py",
+  "repo": "Eridaa/1.RhinoGH--Python-hops-examples",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "RhinoGH--Mesh-analysis-with-networkx-main/01_mesh/app.py",
+  "instruction": null,
+  "code": "from flask import Flask\nimport ghhops_server as hs\nimport rhino3dm \n\napp = Flask(__name__)\nhops = hs.Hops(app)\n\n\n@hops.component(\n    \"/meshFromPoints\",\n    name = \"meshFromPoints\",\n    inputs=[\n        hs.HopsPoint(\"Points\", \"P\", \"Some Points\", hs.HopsParamAccess.LIST)\n\n\n    ],\n\n    outputs=[\n        hs.HopsMesh(\"Mesh\",\"M\",\"A simple rhino3dm mesh\"),\n\n    ]\n)\ndef meshFromPoints(pts):\n\n    m = rhino3dm.Mesh()\n\n    for p in pts:\n        m.Vertices.Add(p.X, p.Y, p.Z)\n\n    \n    m.Faces.AddFace(0,1,2,2)\n    m.Faces.AddFace(3,4,5,5) #triangular meshes repeat the last number!\n\n    print (m.Faces[0])\n    print (m.Faces.TriangleCount)\n\n\n    return m\n\n\n\n@hops.component(\n    \"/gridMesh\",\n    name = \"gridMesh\",\n    outputs=[\n        hs.HopsMesh(\"Mesh\",\"M\",\"A simple rhino3dm mesh\"),\n\n    ]\n)\ndef gridMesh():\n\n\n    U = 5\n    V = 5\n\n    #creating a simple mesh from a grid of points\n    grid = []\n    mesh = rhino3dm.Mesh()\n    \n    for i in range(U):\n        for j in range(V):\n            p = rhino3dm.Point3d(i,j,0)\n            grid.append(p)\n            mesh.Vertices.Add(p.X, p.Y, p.Z) \n            \n    for i in range(len(grid)-(V)):\n        if ( i % V != V -1 ):\n            mesh.Faces.AddFace(i,i+1, i+V+1,i+V)\n\n    print(mesh.Faces.Count)\n\n    for i in range(mesh.Faces.Count):\n        print(mesh.Faces[i])\n\n    return mesh\n\n\n\nif __name__== \"__main__\":\n    app.run(debug=True)\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

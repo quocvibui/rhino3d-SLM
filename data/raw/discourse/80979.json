@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/transformation-matrix-xyz-to-xzy/80979",
+  "topic_id": 80979,
+  "title": "Transformation matrix XYZ to XZY",
+  "question": "Hello.\n\n\nI’m trying to export transformation matrix to octane render but Octane’s coordinate space is XZY from what I understand. Maybe it’s the same with .obj files. Anyhow, my question is how to modify a transformation matrix from xyz to xzy. And also from millimeters to meters.\n\n\nAny help is appreciated!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\n# Create scale transformation\nus_from = Rhino.UnitSystem.Millimeters\nus_to = Rhino.UnitSystem.Meters\nscale = Rhino.RhinoMath.UnitScale(us_from, us_to)\nxf_scale = Rhino.Geometry.Transform.Identity\nxf_scale.M00 = scale\nxf_scale.M11 = scale\nxf_scale.M22 = scale\n\n# Create rotation transformation\norigin = Rhino.Geometry.Point3d.Origin\nxaxis = Rhino.Geometry.Vector3d.XAxis\nzaxis = Rhino.Geometry.Vector3d.ZAxis\nplane_xz = Rhino.Geometry.Plane(origin, xaxis, zaxis)\nplane_xy = Rhino.Geometry.Plane.WorldXY\nxf_rotate = Rhino.Geometry.Transform.PlaneToPlane(plane_xy, plane_xz)\n\n# Final transformation\nxform = xf_scale * xf_rotate\n\n#TODO: scale objects...\n\nprint xform",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Option Strict Off\nOption Explicit On\n\nImports System\nImports System.Collections\nImports System.Collections.Generic\n\nImports Rhino\nImports Rhino.Geometry\n\nImports Grasshopper\nImports Grasshopper.Kernel\nImports Grasshopper.Kernel.Data\nImports Grasshopper.Kernel.Types\n\nImports System.IO\nImports System.Linq\nImports System.Data\nImports System.Drawing\nImports System.Reflection\nImports System.Windows.Forms\nImports System.Xml\nImports System.Xml.Linq\nImports Microsoft.VisualBasic\nImports System.Runtime.InteropServices\n\nImports Rhino.DocObjects\nImports Rhino.Collections\nImports GH_IO\nImports GH_IO.Serialization\n\n''' <summary>\n''' This class will be instantiated on demand by the Script component.\n''' </summary>\nPublic Class Script_Instance\n  Inherits GH_ScriptInstance\n\n  #Region \"Utility functions\"\n  ''' <summary>Print a String to the [Out] Parameter of the Script component.</summary>\n  ''' <param name=\"text\">String to print.</param>\n  Private Sub Print(ByVal text As String)\n    'Implementation hidden in Script Edit mode...\n  End Sub\n  ''' <summary>Print a formatted String to the [Out] Parameter of the Script component.</summary>\n  ''' <param name=\"format\">String format.</param>\n  ''' <param name=\"args\">Formatting parameters.</param>\n  Private Sub Print(ByVal format As String, ByVal ParamArray args As Object())\n    'Implementation hidden in Script Edit mode...\n  End Sub\n  ''' <summary>Print useful information about an object instance to the [Out] Parameter of the Script component. </summary>\n  ''' <param name=\"obj\">Object instance to parse.</param>\n  Private Sub Reflect(ByVal obj As Object)\n    'Implementation hidden in Script Edit mode...\n  End Sub\n  ''' <summary>Print the signatures of all the overloads of a specific method to the [Out] Parameter of the Script component. </summary>\n  ''' <param name=\"obj\">Object instance to parse.</param>\n  Private Sub Reflect(ByVal obj As Object, ByVal method_name As String)\n    'Implementation hidden in Script Edit mode...\n  End Sub\n#End Region\n\n#Region \"Members\"\n  ''' <summary>Gets the current Rhino document.</summary>\n  Private Readonly RhinoDocument As RhinoDoc\n  ''' <summary>Gets the Grasshopper document that owns this script.</summary>\n  Private Readonly GrasshopperDocument as GH_Document\n  ''' <summary>Gets the Grasshopper script component that owns this script.</summary>\n  Private Readonly Component As IGH_Component\n  ''' <summary>\n  ''' Gets the current iteration count. The first call to RunScript() is associated with Iteration=0.\n  ''' Any subsequent call within the same solution will increment the Iteration count.\n  ''' </summary>\n  Private Readonly Iteration As Integer\n#End Region\n\n  ''' <summary>\n  ''' This procedure contains the user code. Input parameters are provided as ByVal arguments,\n  ''' Output parameter are ByRef arguments. You don't have to assign output parameters,\n  ''' they will have default values.\n  ''' </summary>\n  Private Sub RunScript(ByVal matrix As Transform, ByRef code As Object) \n    Dim segments() As String\n    ReDim segments(11)\n\n    Dim format As String = \"0.00##\"\n\n\n    segments(0) = matrix.M00.ToString(format)\n    segments(1) = matrix.M02.ToString(format)\n    segments(2) = -matrix.M01.ToString(format)\n    segments(3) = 0.001 * matrix.M03.ToString(format)\n    segments(4) = matrix.M20.ToString(format)\n    segments(5) = matrix.M22.ToString(format)\n    segments(6) = -matrix.M21.ToString(format)\n    segments(7) = 0.001 * matrix.M23.ToString(format)\n    segments(8) = -matrix.M10.ToString(format)\n    segments(9) = -matrix.M12.ToString(format)\n    segments(10) = matrix.M11.ToString(format)\n    segments(11) = 0.001 * -matrix.M13.ToString(format)\n\n\n    code = String.Join(\", \", segments)\n  End Sub \n\n  '<Custom additional code> \n\n  '</Custom additional code> \nEnd Class",
+      "language": "unknown",
+      "author": "rikard",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 10,
+  "views": 2966
+}

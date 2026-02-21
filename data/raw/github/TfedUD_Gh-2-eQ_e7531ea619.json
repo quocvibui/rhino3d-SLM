@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/TfedUD/Gh-2-eQ/blob/f8d0d681aca03b406fced8bb50abb70f2fd42b69/eQuestRhino/_Archives/eQRHGH/eq_space.py",
+  "repo": "TfedUD/Gh-2-eQ",
+  "repo_stars": 0,
+  "repo_description": "initial eQuest model generation project to be developed with further interoperability",
+  "license": "GPL-3.0",
+  "filepath": "eQuestRhino/_Archives/eQRHGH/eq_space.py",
+  "instruction": "Eq space",
+  "code": "\nimport rhinoscriptsyntax as rs\nfrom functools import reduce\nimport operator\nimport math\nimport ghpythonlib.components as ghc\nfrom math import atan2\nimport geomTools \nfrom geomTools import EQverts as ev\n\n\n\nclass Eq_space:\n    \"\"\"Space Properties for Eq_space.\n    \n    Args:\n        spc_srf: A srfc object hosting space properties.\n        spc_name: Name of the space\n        spc_vrts: vertices of the space\n        \n    Properties:\n        *spc_srf \n        *spc_name\n        *spc_vrts\n        *spcVrtStr\n    \"\"\"\n\n    def __init__(self, spc_srf, space_name):\n        self._spc_srf = spc_srf\n        self._space_name = space_name\n        self._spc_vrts = None\n        \n\n    @property\n    def spc_srf(self):\n        \"\"\"Get the surface hosting the properties\"\"\"\n        return self._spc_srf\n\n    @property\n    def spc_name(self):\n        \"\"\"Get the name of the space\"\"\"\n        return self._space_name\n\n\n    @property\n    def spc_vrts(self):\n        \"\"\"Return the verts of the space\"\"\"\n        return self._get_verts(self.spc_srf)\n        \n\n#So Rhino natively counts counter clockwise apparently!\n#So the key here is the class object in geomTools.py: that constructs \n#The 'eQuest vert Object' and the below utilizing the native Rh/Gh logic to construct \n#our 'space verts list'\n    \"\"\"\n    @staticmethod\n    def _get_verts(obj):\n        brp_edges = ghc.DeconstructBrep(obj).edges\n        brp_perim = ghc.JoinCurves(brp_edges, True)\n        brp_verts = ghc.ControlPoints(brp_perim).points\n        verts = (ev.from_Rh_points(vert) for vert in brp_verts)\n        return list(verts)\n    \"\"\"\n\n    @staticmethod\n    def _get_verts(obj):\n        brp_edges = ghc.DeconstructBrep(obj).edges\n        brp_perim = ghc.JoinCurves(brp_edges, True)\n        brp_verts = ghc.ControlPoints(brp_perim).points\n        brpC =  ghc.CullDuplicates(brp_verts, 0.0).points\n        verts = (ev.from_Rh_points(vert) for vert in brpC) #brp_verts\n        \n        return list(verts)\n\n\n\n\n\n\n\n\n\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

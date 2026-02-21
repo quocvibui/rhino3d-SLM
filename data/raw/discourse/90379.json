@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-counter-give-wrong-result/90379",
+  "topic_id": 90379,
+  "title": "Python counter give wrong result",
+  "question": "Hi,\n\n\ncan somone explain why the counter in python give me a wrong result?\n\nI try to find all identical curve endpoints and inserted ones , grasshopper with sets gives me the correct result but counter hm…?\n\n\n\n\nCanvas%20at%2007%3B46%3B27\n1524×655 72.3 KB\n\n\n \n\n\nCapture\n903×481 3.45 KB\n\n\n \nrig_weight_point.3dm\n (53.8 KB) \nunnamed.gh\n (9.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nfrom ghpythonlib import treehelpers\n\n\ndef split_line(line, params):\n    \"\"\"Splits a line at a series of specified parameters.\n    \n    Args:\n      line (Rhino.Geometry.Line): A line to trim.\n      params (list): A list of parameters, where each parameter \n        must be within the line domain from 0.0 to 1.0.\n    Returns:\n      The new line segments.\n    \"\"\"\n    if 0.0 not in params:\n        params.append(0.0)\n    if 1.0 not in params:\n        params.append(1.0)\n    params = sorted(list(set(params)))\n    line_segs = []\n    for i in xrange(len(params)-1):\n        curr_pt = line.PointAt(params[i])\n        next_pt = line.PointAt(params[i+1])\n        if curr_pt.DistanceTo(next_pt) > 0.01:\n            line_segs.append(rg.Line(curr_pt, next_pt))\n    return line_segs\n\n\n# Shatter the lines that intersect points other than their end points\nshattered_lines = []\nfor i in xrange(len(Lines)):\n    params = [] # parameters to split the line at\n    for j in xrange(len(Points)):\n        if Points[j].DistanceTo(Lines[i].From) < 0.01 or \\\n           Points[j].DistanceTo(Lines[i].To) < 0.01:\n            # Point equals one of the line end points\n            continue\n        else:\n            closest_t = Lines[i].ClosestParameter(Points[j])\n            closest_pt = Lines[i].PointAt(closest_t)\n            if Points[j].DistanceTo(closest_pt) < 0.01:\n                # Point intersects the line\n                params.append(closest_t)\n    if len(params) > 0:\n        # Shatter the line into segments\n        segments = split_line(Lines[i], params)\n        shattered_lines.extend(segments)\n    else:\n        shattered_lines.append(Lines[i])\n\n# Get the indices of lines connected to each point\nconnected = []\nfor i in xrange(len(Points)):\n    conns = []\n    for j in xrange(len(shattered_lines)):\n        if Points[i].DistanceTo(shattered_lines[j].From) < 0.01 or \\\n           Points[i].DistanceTo(shattered_lines[j].To) < 0.01:\n            # Point equals one of the line end points\n            conns.append(j)\n    connected.append(conns)\n\n# Get the lines connected to each point\nconn_lines = [[shattered_lines[i] for i in c] for c in connected]\n\n\n# Outputs\na = treehelpers.list_to_tree(conn_lines)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 830
+}

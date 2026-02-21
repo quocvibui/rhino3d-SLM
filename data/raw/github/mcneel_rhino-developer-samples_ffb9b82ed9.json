@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/get-and-set-the-active-view.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/get-and-set-the-active-view.py",
+  "instruction": "Get and set the active view",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    # view and view names\n    active_view_name = doc.Views.ActiveView.ActiveViewport.Name\n\n    non_active_views = [(view.ActiveViewport.Name, view) for view in doc.Views if view.ActiveViewport.Name != active_view_name]\n\n    # get name of view to set active\n    gs = GetString()\n    gs.SetCommandPrompt(\"Name of view to set active\")\n    gs.AcceptNothing(True)\n    gs.SetDefaultString(active_view_name)\n    for view_name, _ in non_active_views:\n        gs.AddOption(view_name)\n    result = gs.Get()\n    if gs.CommandResult() != Result.Success:\n        return gs.CommandResult()\n\n    selected_view_name = \"{0}\".format(gs.StringResult())\n    if gs.Option() != None:\n        selected_view_name = gs.Option().EnglishName\n\n    if selected_view_name != active_view_name:\n        if selected_view_name in [seq[0] for seq in non_active_views]:\n            doc.Views.ActiveView = [seq[1] for seq in non_active_views if seq[0] == selected_view_name][0]\n        else:\n            print \"\\\"{0}\\\" is not a view name\".format(selected_view_name)\n\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

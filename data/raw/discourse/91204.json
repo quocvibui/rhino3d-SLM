@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-move-curve-point-in-python/91204",
+  "topic_id": 91204,
+  "title": "How to move curve point in python",
+  "question": "Hi,  I’m trying to adjust curve point by python. But I can’t make it works. Please help me, thanks!\n\n\nimport rhinoscriptsyntax as rs\n\nimport scriptcontext as sc\n\nobj = rs.GetObject(“Select a curve”)\n\npoint=rs.CurvePoints(obj)\n\npp=sc.doc.Objects.AddPoint(point[1])\n\n\n#\n3d\n point\n\nrs.MoveObject(point[1],[0,0,0])\n\n\n#\nguid\n\nrs.MoveObject(pp,[0,0,0])",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rhg\nimport Rhino as rh\nimport scriptcontext as sc\n\nc = rs.GetCurveObject()[0]\nrobj = sc.doc.Objects.FindId(c)\ncrv = robj.Geometry\nnurbs = crv.ToNurbsCurve()\n\n# below line is an example; do what you need in your case\nnurbs.Points[1] = rhg.Point3d(5,5,0)\n\nsc.doc.Objects.AddCurve(nurbs, rh.DocObjects.ObjectAttributes())\nsc.doc.Objects.Remove(robj)",
+      "language": "python",
+      "author": "Will_Wang",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1174
+}

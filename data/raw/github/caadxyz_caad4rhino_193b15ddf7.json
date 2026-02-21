@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/caadxyz/caad4rhino/blob/d3df5a030b2bd0ab58954fb341f04a4e814835d9/dev/line2wall_cmd.py",
+  "repo": "caadxyz/caad4rhino",
+  "repo_stars": 22,
+  "repo_description": " Caad4Rhino is a python package whose purpose is to provide computer aided architectural design tools in rhino 3d software",
+  "license": "LGPL-3.0",
+  "filepath": "dev/line2wall_cmd.py",
+  "instruction": "Copyright\ncreate on 2020.02.11\n@author mahaidong\ndescription:",
+  "code": "#coding=utf-8\n'''\nCopyright\ncreate on 2020.02.11\n@author mahaidong\ndescription:\n'''\nimport Rhino\nimport Rhino.Geometry as geo\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nfrom  caad.geometry.DoubleLine import DoubleLine\nimport caad.config as config\nimport caad.utility as util\n\ndef line2wall(layer):\n\n    go = Rhino.Input.Custom.GetOption()\n    go.AcceptNothing(True)\n    go.SetCommandPrompt( \"set wall width\" )\n    # set up the options\n    widthOption = Rhino.Input.Custom.OptionDouble( config.DOUBLELINEWIDTH, \n            config.DOUBLELINEWIDTHLIMIT[0],config.DOUBLELINEWIDTHLIMIT[1] )\n    go.AddOptionDouble(\"Width\", widthOption)\n    while True:\n        get_rc = go.Get()\n        if go.CommandResult()!=Rhino.Commands.Result.Success:\n            print go.CommandResult()\n            break \n        if get_rc==Rhino.Input.GetResult.Option:\n            continue\n        break\n    \n    if go.CommandResult() != Rhino.Commands.Result.Cancel:\n        config.DOUBLELINEWIDTH = widthOption.CurrentValue\n\n        if not rs.IsLayer(\"Axis\"): \n            util.initCaadLayer(\"Axis\")\n        if not rs.IsLayer(layer): \n            util.initCaadLayer(layer)\n            \n        go = Rhino.Input.Custom.GetObject()\n        go.SetCommandPrompt( \"Select lines\" )\n        go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n        go.GetMultiple( 1, 0 )\n        if go.CommandResult() != Rhino.Commands.Result.Success: \n            return go.CommandResult()\n        \n        oldLayer = rs.CurrentLayer(layer); \n        for lineCurveId in go.Objects():\n            if rs.IsLine(lineCurveId):\n                # make axis\n                rs.ObjectLayer(lineCurveId, \"Axis\")\n\n                # make wall\n                point0 = rs.CurveStartPoint(lineCurveId) \n                point1 = rs.CurveEndPoint(lineCurveId) \n                doubleLine = DoubleLine.MakeDoubleLine(config.DOUBLELINEWIDTH, point0, point1);\n                doubleLine.draw()\n        rs.CurrentLayer(oldLayer); \n\n__commandname__ = \"Line2Wall\"\ndef RunCommand( is_interactive ):\n    if not rs.IsLayer(\"Wall\"): \n        util.initCaadLayer(\"Wall\")\n    line2wall(\"wall\")\n    sc.doc.Views.Redraw()\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

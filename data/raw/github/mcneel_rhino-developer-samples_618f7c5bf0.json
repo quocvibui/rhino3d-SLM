@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_booleandifference.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_booleandifference.py",
+  "instruction": "Ex booleandifference",
+  "code": "import Rhino\nimport scriptcontext\n\ndef BooleanDifference():\n    filter = Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, objrefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Select first set of polysurfaces\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc\n    if not objrefs: return Rhino.Commands.Result.Failure\n\n    in_breps0 = []\n    for objref in objrefs:\n        brep = objref.Brep()\n        if brep: in_breps0.append(brep)\n\n    scriptcontext.doc.Objects.UnselectAll()\n    rc, objrefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Select second set of polysurfaces\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc\n    if not objrefs: return Rhino.Commands.Result.Failure\n\n    in_breps1 = []\n    for objref in objrefs:\n        brep = objref.Brep()\n        if brep: in_breps1.append(brep)\n\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    breps = Rhino.Geometry.Brep.CreateBooleanDifference(in_breps0, in_breps1, tolerance)\n    if not breps: return Rhino.Commands.Result.Nothing\n    for brep in breps: scriptcontext.doc.Objects.AddBrep(brep)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    BooleanDifference()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

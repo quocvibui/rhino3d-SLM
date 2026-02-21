@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/969flash/UrbanFrame/blob/0f253b7a73233f7217608b7815c1a99f71e14f35/builder.py",
+  "repo": "969flash/UrbanFrame",
+  "repo_stars": 0,
+  "repo_description": "Generate Urban Frame",
+  "license": "unknown",
+  "filepath": "builder.py",
+  "instruction": "r: networkx",
+  "code": "# -*- coding:utf-8 -*-\n# r: networkx\ntry:\n    from typing import List, Tuple\nexcept ImportError:\n    pass\nimport Rhino.Geometry as geo\nimport units, utils, road_network_generator, block_generator, get_road_data\nimport importlib\n\n[\n    importlib.reload(module)\n    for module in [utils, units, road_network_generator, block_generator, get_road_data]\n]\n\n\nfrom road_network_generator import RoadNetworkGenerator\nfrom block_generator import BlockGenerator\n\n\nif __name__ == \"__main__\":\n    # inputs setting\n    generate = globals().get(\"GENERATE\", [])\n    print(\"Generate:\", generate)\n    if generate:\n        road_data = get_road_data.get_road_data_from_layer()\n\n        print(\"Road data: {} roads\".format(len(road_data)))\n        road_network = RoadNetworkGenerator().generate(road_data)\n        blocks = BlockGenerator().generate(road_network)\n\n        # output\n        edges = [e.curve for e in road_network.edges]\n        nodes = [n.point for n in road_network.nodes]\n        roads = [r.region for r in road_network.roads]\n        junctions = [j.region for j in road_network.junctions]\n        block_regions = [b.region for b in blocks]\n\n        print(\n            \"RoadNetwork: {} edges, {} nodes, {} roads, {} junctions, {} blocks\".format(\n                len(edges), len(nodes), len(roads), len(junctions), len(blocks)\n            )\n        )\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

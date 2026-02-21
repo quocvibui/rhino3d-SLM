@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/cmuphyscomp/hmv-s16/blob/7863c66ed645b463b72aef98a5c484a18cc9f396/Grasshopper/RhinoDocDemo/ReplaceGeometry.py",
+  "repo": "cmuphyscomp/hmv-s16",
+  "repo_stars": 5,
+  "repo_description": "Course resources for the Human-Machine Virtuosity course at Carnegie Mellon University, Spring 2016.",
+  "license": "BSD-3-Clause",
+  "filepath": "Grasshopper/RhinoDocDemo/ReplaceGeometry.py",
+  "instruction": "Replace geometry",
+  "code": "﻿# ReplaceGeometry.py - contents of the ReplaceGeometry ghpython script\r\n\r\n# inputs\r\n#   layer  - string naming the layer to address within the current Rhino document\r\n#  update  - Boolean indicating the action is enabled\r\n#   guid   - GUID string identifying a single object within the RhinoDoc to replace\r\n#   gobj   - geometry object to add, either a raw Geometry type or a ghdoc GUID\r\n\r\n# outputs\r\n#   out    - console debugging output\r\n#  newid   - GUID strings for the new geometry primitive\r\n# Note: the GUIDs are for objects located in the RhinoDoc database, *not* the\r\n# Grasshopper document database, so they are only useful for requesting updates\r\n# to the current Rhino document.\r\n\r\nimport Rhino\r\nimport System.Guid\r\nimport pythonlibpath; pythonlibpath.add_library_path()\r\nimport ghutil.ghrhinodoc as ghrhinodoc\r\n\r\nif update and guid is not None:\r\n    # Fetch the layer index, creating the layer if not present.\r\n    layer_name = str(layer)\r\n    layer_index = ghrhinodoc.fetch_or_create_layer_index(layer_name)\r\n    \r\n    # Look up the object to delete.\r\n    print \"GUID to modify is\", guid, type(guid)\r\n    \r\n    # convert from a string to a Guid object\r\n    guid = System.Guid(guid)\r\n    \r\n    existing = Rhino.RhinoDoc.ActiveDoc.Objects.Find(guid)\r\n    print \"Found RhinoDoc object\", existing\r\n    if existing is not None:\r\n        name = existing.Attributes.Name\r\n        print \"Existing object has name\", name\r\n        # Delete the geometry from the RhinoDoc with the given layer and name.\r\n        Rhino.RhinoDoc.ActiveDoc.Objects.Delete(guid, True)\r\n\r\n        # If needed, find the geometry corresponding with the given input, possibly looking it up by GUID.\r\n        item = ghrhinodoc.find_ghdoc_geometry(ghdoc, gobj)\r\n        print \"Input item is \", item, type(item)\r\n\r\n        # Add the geometry to the RhinoDoc with the given layer and name.\r\n        newid = str(ghrhinodoc.add_geometry(item, layer_index, name))",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": false
+}

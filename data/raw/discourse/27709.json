@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/findbyuserstring/27709",
+  "topic_id": 27709,
+  "title": "FindByUserString",
+  "question": "Hi,\n\n\nI have a problem. When I try to use the FindByUserString Command, it doesn’t find the Objects. I can set and get the UserString Data. Is it a bug or am I doing it wrong.\n\n\nHere is the code:\n\n\nimport System\n\nimport copy\n\nimport rhinoscriptsyntax as rs\n\nimport scriptcontext as sc\n\nimport Rhino.Geometry as rg\n\nimport Rhino.Input as ri\n\nimport Rhino.DocObjects as rd\n\nimport time\n\nimport math\n\nimport random\n\n\ndef Main():\n\nrc, brep_ref = ri.RhinoGet.GetOneObject(“Select obj to write”, False, Rhino.DocObjects.ObjectType.Brep)\n\nsc.doc.Objects.UnselectAll()\n\nif rc <> Rhino.Commands.Result.Success or brep_ref == None:\n\nreturn rc\n\nobj_brep = brep_ref.Object()\n\ngeo_brep = obj_brep.Geometry\n\nkey = \"01\"\n\nvalue = \"A\"\n\nrg.Brep.SetUserString(geo_brep,key,value)\n\ngetstring = rg.Brep.GetUserString(geo_brep,key)\n\narrObj = sc.doc.Objects.FindByUserString(key,value,False,False,True,Rhino.DocObjects.ObjectType.AnyObject)\n\nsc.doc.Views.Redraw()\n\n\nMain()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n    \ndef DoSomething():\n    key = \"Rhino\"\n    val = \"SR12\"\n    filter = Rhino.DocObjects.ObjectType.AnyObject\n    rc = sc.doc.Objects.FindByUserString(key, val, False, True, False, filter)\n    print \"Found {} objects\".format(rc.Count)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 1805
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/_old_axolotl-1.0/code/modifications/gradient.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "_old_axolotl-1.0/code/modifications/gradient.py",
+  "instruction": "Calculates a gradient direction vector for every cell.\n    Inputs:\n        vals: distance field values\n        nx: number of cells in x direction\n        ny: number of cells in y direction\n       ...",
+  "code": "\"\"\"\nCalculates a gradient direction vector for every cell.\n    Inputs:\n        vals: distance field values\n        nx: number of cells in x direction\n        ny: number of cells in y direction\n        nz: number of cells in z direction\n    Output:\n        a: a 3d vector in gradient direction for every cell\n\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT / ETH Zurich'\n__license__    = 'MIT License'\n__email__      = '<bernhard@arch.ethz.ch>'\n\nimport Rhino.Geometry as rg\n\na = []\n\nnyz = ny*nz\n\ndef get_index(x,y,z):\n    return x*nyz + y*nz + z\n\nfor x in range(nx):\n    for y in range(ny):\n        for z in range(nz):\n            if x==0 or x==nx-1 or y==0 or y==ny-1 or z==0 or z==nz-1:\n                a.append(rg.Vector3d(0,0,0))\n            else:\n                ux = vals[get_index(x-1,y,z)]\n                vx = vals[get_index(x+1,y,z)]\n                uy = vals[get_index(x,y-1,z)]\n                vy = vals[get_index(x,y+1,z)]\n                uz = vals[get_index(x,y,z-1)]\n                vz = vals[get_index(x,y,z+1)]\n                a.append(rg.Vector3d(vx-ux,vy-uy,vz-uz))\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

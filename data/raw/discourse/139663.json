@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/looking-for-a-way-to-run-a-command-after-a-block-is-updated/139663",
+  "topic_id": 139663,
+  "title": "Looking for a way to run a command after a block is updated",
+  "question": "Hello all,\n\n\nI would like to have Rhino automatically run a command after a block has been edited.\n\nSo far my best attempt at achieving this has been with the \nAlerter command\n, which I have tried to set up to watch the BlockEdit command, but so far have not been able to get it to actually alert.\n\n\nDoes anyone have an idea on possible ways to achieve this? It seems there may be ways to create a script to constantly watch for block updates, or to have a plugin do something similar. Since I have not been able to find anything related to this topic, I’m hoping someone can point me in the right direction before I get too tangled up in the weeds.\n\n\nThanks in advance for any input!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef MyEndCommandEvent(sender, e):\n    if e.CommandEnglishName == \"Line\":\n        print \"You ended the Line command: \", e.CommandResult\n\ndef DoSomething():\n    key = \"MyEndCommandEvent\"\n    if scriptcontext.sticky.has_key(key):\n        print \"Event removed\"\n        Rhino.Commands.Command.EndCommand -= scriptcontext.sticky[key]\n        scriptcontext.sticky.Remove(key)\n    else:\n        print \"Event added\"\n        scriptcontext.sticky[key] = eval(key)\n        Rhino.Commands.Command.EndCommand += eval(key)\n\nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 950
+}

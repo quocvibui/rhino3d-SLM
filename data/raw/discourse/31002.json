@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/point-related-operations-execution-speed/31002",
+  "topic_id": 31002,
+  "title": "Point related operations execution speed",
+  "question": "I’ve been doing some research into mimicking the logic found \nhere\n and [here] (\nhttp://research.microsoft.com/pubs/115797/paper.pdf\n) to create stippled distribution via grasshopper+python. I’ve been able to script the logic, but am finding that the execution time to be way too long. I’m not sure what kind of times the authors of the research were getting, but I am hoping to make mine faster.\n\n\nA lot of the operations in the script are related to solving for the distance between two points. Currently I am using rhinocommon’s Rhino.Geometry.Point3d.DistanceTo( ). Would it be faster to solve it mathematically? Previously, I’ve been told that you can add and subtract points like numbers. I’m just wondering if going through rhinocommon is adding anything to the time. I have found that ghpythonlib.component operations seem to take longer to execute relative to rhinocommon, which is why I avoid using them and why I am posing this question to bypass rhinocommon.\n\n\nOut of curiosity, has anyone else created a good stippling script?\n\n\nExample from research authors:\n\n\nhttp://graphics.uni-konstanz.de/publikationen/2009/capacityconstrainedpointdistributions/website/images/stippling_closeup.png",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nfrom Rhino.Geometry.Point3d import DistanceTo as Dist2Pt\n...\n# and later use\ndist = p1.Dist2Pt(p2)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport random\n\ndef search_callback(obj, args):\n    cloud, points, search_point, call_count = args.Tag\n    args.Tag[3] = call_count + 1\n    location = cloud[args.Id].Location\n    index_to_replace = -1\n    distance = location.DistanceTo(search_point)\n    # find furthest point from test point\n    for i, point in enumerate(points):\n        d = point.DistanceTo(search_point)\n        if d > distance:\n            distance = d\n            index_to_replace = i\n    if index_to_replace >= 0:\n        points[index_to_replace] = location\n        args.SearchSphere = rg.Sphere(search_point, distance)\n    \ndef main():\n    mesh_id = rs.GetObject(\"Select Mesh\", rs.filter.mesh)\n    if mesh_id is None: return\n    cloud = rg.PointCloud(rs.MeshVertices(mesh_id))\n    tree = rg.RTree.CreatePointCloudTree(cloud);\n    search_count = 5\n    \n    while True:\n        search_point = rs.GetPoint(\"Search Point\")\n        if search_point is None: break\n        points = []\n        radius = -1\n        #seed point list with 'search_count' items for starters\n        sample = random.sample(xrange(cloud.Count), search_count)\n        for i, sample_index in enumerate(sample):\n            points.append(cloud[sample_index].Location)\n            r = points[i].DistanceTo(search_point)\n            if r > radius: radius = r\n        tag = [cloud, points, search_point, 0]\n        tree.Search(rg.Sphere(search_point, radius), search_callback, tag)\n        rs.AddPoints(points)\n        print \"search called {0} times for mesh with {1} points\".format(tag[3], cloud.Count)\n\nmain()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 19,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 37,
+  "views": 6579
+}

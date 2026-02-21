@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-objects-containing-string-within-layer-name/148675",
+  "topic_id": 148675,
+  "title": "Select objects containing string within layer name",
+  "question": "Hi All,\n\n\nI am trying select objects not by a specific layer but with anything containing a string (w/python).\n\n\nFor instance: if the object has ‘barrier’ somewhere in attribution all barriers would be selected within the drawing.\n\n\nAny assistance is appreciated!\n\n\nPS I was intending on modifying the following script\n\n\nimport Rhino\n\nimport scriptcontext\n\nimport System.Guid, System.Drawing.Color\n\n\ndef SelLayer():\n\n# Prompt for a layer name\n\nlayername = scriptcontext.doc.Layers.CurrentLayer.Name\n\nrc, layername = Rhino.Input.RhinoGet.GetString(“Name of layer to select objects”, True, layername)\n\nif rc!=Rhino.Commands.Result.Success: return rc\n\n\n# Get all of the objects on the layer. If layername is bogus, you will\n# just get an empty list back\nrhobjs = scriptcontext.doc.Objects.FindByLayer(layername)\nif not rhobjs: Rhino.Commands.Result.Cancel\n\nfor obj in rhobjs: obj.Select(True)\nscriptcontext.doc.Views.Redraw()\nreturn Rhino.Commands.Result.Success\n\n\n\nif \nname\n==“\nmain\n”:\n\nSelLayer()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Guid, System.Drawing.Color\nimport rhinoscriptsyntax as rs\n\ndef select_objs_from_layer_search():\n    # Prompt for a search string\n    search_str = ''\n    rc, search_str = Rhino.Input.RhinoGet.GetString(\"Name of layer to select objects\", True, search_str)\n    if rc!=Rhino.Commands.Result.Success: return rc\n    \n    layers = [layer for layer in rs.LayerNames() if search_str in layer.lower()]\n        \n    # Get all of the objects on the layers. If search_str is bogus, you will\n    # just get an empty list back\n    rhobjs = [obj for layer in layers for obj in rs.ObjectsByLayer(layer)]\n    # to search by name: if search_str in rs.ObjectName(obj)\n    # to search by user text: any(search_str in rs.GetUserText(obj, key) for key in rs.GetUserText(obj))\n    if not rhobjs: Rhino.Commands.Result.Cancel\n\n    rs.SelectObjects(rhobjs)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    select_objs_from_layer_search()",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "# Get all of the objects on the layer. If layername is bogus, you will\n# just get an empty list back\nrhobjs = scriptcontext.doc.Objects.FindByLayer(layername)\nif not rhobjs: Rhino.Commands.Result.Cancel\n\nfor obj in rhobjs: obj.Select(True)\nscriptcontext.doc.Views.Redraw()\nreturn Rhino.Commands.Result.Success",
+      "language": "python",
+      "author": "happysad",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 596
+}

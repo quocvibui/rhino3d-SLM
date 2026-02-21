@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcericson/arch_441_repo_fall_22/blob/51976acc603fbc68cdef1edff124885fe3d917b0/13_week/recursion_example_inclass.py",
+  "repo": "mcericson/arch_441_repo_fall_22",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "13_week/recursion_example_inclass.py",
+  "instruction": "Recursion example inclass",
+  "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\n\ndef vector_at_angle(angle, magnitude):\n    start_angle = math.radians(angle)\n    vec_x = math.cos(start_angle)*magnitude\n    vec_y = math.sin(start_angle)*magnitude\n    new_vector = (vec_x, vec_y, 0)\n    return new_vector\n\n\ndef tree_growth(start_line, min_length, angle):\n    end_point = rs.DivideCurve(start_line, 2)[2]\n    distance = (rs.CurveLength(start_line))*.5\n    vector_right = vector_at_angle(angle, distance)\n    vector_left = vector_at_angle(angle + 90, distance)\n    point_right = rs.CopyObject(end_point, vector_right)\n    point_left = rs.CopyObject(end_point, vector_left)\n    right_line = rs.AddLine(end_point, point_right)\n    left_line = rs.AddLine(end_point, point_left)\n    length = rs.CurveLength(right_line)\n    if length > min_length:\n        sc.escape_test(True)\n        tree_growth(left_line, min_length, angle)\n        tree_growth(right_line, min_length, angle)\n    \n\ndef main():\n    start_line = rs.AddLine((0,0,0), (0,50,0))\n    tree_growth(start_line, 1, 45)\n\nmain()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

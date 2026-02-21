@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-duplicate-preselected-ctrl-shift-polysurface-edges-in-python/77737",
+  "topic_id": 77737,
+  "title": "How to duplicate preselected (ctrl+shift) polysurface edges in Python?",
+  "question": "I am trying to achieve something like “DupEdge” rhino command on preselected edges with script. Can anyone point me in the right direction?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ngo = Rhino.Input.Custom.GetObject()\ngo.SetCommandPrompt(\"Select edges to duplicate\")\ngo.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\ngo.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.EdgeCurve\ngo.GetMultiple(1, 0)\nif go.CommandResult() == Rhino.Commands.Result.Success:\n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        edge = objref.Edge()\n        if edge:\n            curve = edge.DuplicateCurve()\n            sc.doc.Objects.AddCurve(curve)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 514
+}

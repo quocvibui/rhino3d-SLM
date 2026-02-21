@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcericson/arch_441_repo_fall_22/blob/51976acc603fbc68cdef1edff124885fe3d917b0/06_week/image_analysis.py",
+  "repo": "mcericson/arch_441_repo_fall_22",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "06_week/image_analysis.py",
+  "instruction": "Image analysis",
+  "code": "import rhinoscriptsyntax as rs\n\nimport System.Drawing.Bitmap as Bitmap\n\nfile_path = r'C:\\Users\\ericsonm\\Dropbox\\Woodbury\\2023_Jan\\Arch_562\\web_mountains_small.jpg'\n\ndef image_to_line(file_path, resolution):\n    rs.EnableRedraw(False)\n    img = Bitmap.FromFile(file_path)\n\n    width = img.Width\n    height = img.Height\n\n    w_step = width/resolution\n    h_step = height/resolution\n    \n    \n    print (width, height)\n    lines = []\n    for i in rs.fxrange(0, width, w_step):\n        x = int(i)\n        for j in rs.fxrange(0, height, h_step):\n            y = int(j)\n            r, g, b, a = img.GetPixel(x,y)\n            location_1 = (x, y, 0)\n            location_2 = (r, g, b)\n            line = rs.AddLine(location_1, location_2)\n            color = rs.CreateColor(r, g, b, a)\n            rs.ObjectColor(line, color)\n            lines.append(line)\n    return lines\n\n\ndef image_to_circle(file_path, resolution):\n    rs.EnableRedraw(False)\n    img = Bitmap.FromFile(file_path)\n    #get image width from img object\n    width = img.Width\n    height = img.Height\n    #create a step based on resolution and convert to integer\n    #so it will work in the range function\n    w_step = int(width/resolution)\n    h_step = int(height/resolution)\n    \n    \n    print (width, height)\n    \n    #create a loop for a 2d grid that covers the dimensions of the image.\n    for i in range(0, width, w_step):\n        x = i\n        for j in range(0, height, h_step):\n            y = j\n            #get the r,g, b, a values from the img object\n            r, g, b, a = img.GetPixel(x,y)\n            location = (x, y, r/5)\n            circle = rs.AddCircle(location, 2)\n            color = rs.CreateColor(r, g, b, a)\n            rs.ObjectColor(circle, color)\n\n#call the function\nimage_to_circle(file_path, 100)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-with-not-initiated-linetypes/129401",
+  "topic_id": 129401,
+  "title": "Problem with not initiated linetypes",
+  "question": "Hi there,\n\n\nI have a problem with assigning one of the default linetypes to objects via either command or script - by default, apart from the \"Continuous: linetype, a few more, inclding “Dots” are available. The problem is, I cannot assign “Dots” linetype unless it is somehow initiated first.\n\n\nTo explain: in a new empty file If I draw a line, select it and try:\n\n\n-SetLinetype\nLinetype name <By Layer>: Dots\n\n\n\nI get this message:\n\n\nLinetype not found\n\n\nSame if I try to check via Script:\n\n\nRhino.Print Rhino.IsLinetype(\"Dots\")\n\nit returns \nFalse\n\n\nAs soon as I open Options dialog and at least look at linetypes in the file (“Dots” being there) or assign Dots linetype “by hand” to any geometry in the file, all of the above works fine, but until this is manually initiated, the command or scripts to assign this linetype do not work.\n\n\nI need to be able to assign non-Continuous linetype via script (for example “Dots”) regardless if the user initiated it in the file or opened the Linetypes dialog.\n\n\nIs there a way to “force” rhino to preload a particular linetype or all default linetypes in an empty file?\n\n\nthanks,\n\n\n–jarek",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\ndef SetLinetype():\n  filter = Rhino.DocObjects.ObjectType.Curve\n  rc, objrefs = Rhino.Input.RhinoGet.GetMultipleObjects('Select curves', False, filter)\n  if rc != Rhino.Commands.Result.Success: return rc\n  if not objrefs: return Rhino.Commands.Result.Failure\n  name = ''\n  rc, name = Rhino.Input.RhinoGet.GetString('Linetype name', False, name)\n  if rc != Rhino.Commands.Result.Success: return rc\n  index = scriptcontext.doc.Linetypes.Find(name)\n  if index == -1: return Rhino.Commands.Result.Failure\n  for objref in objrefs:\n    obj = objref.Object()\n    obj.Attributes.LinetypeSource = Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject\n    obj.Attributes.LinetypeIndex = index\n    obj.CommitChanges()\n  scriptcontext.doc.Views.Redraw()\n  return Rhino.Commands.Result.Success\nif __name__==\"__main__\":\n  SetLinetype()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\no=rs.SelectedObjects()\nfor objref in o:\n    rs.ObjectLinetypeSource(objref,1)\n    rs.ObjectLinetype(objref,\"Dots\")",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n\nCall ForcePreloadLineTypes()\n\nSub ForcePreloadLineTypes()\n\tIf Not Rhino.IsLinetype(\"Dots\") Then\n\t\tRhino.EnableRedraw False\n\t\tDim s : s = \"\"\n\t\ts = s & \"import rhinoscriptsyntax as rs\" & vbCrLf\n\t\ts = s & \"o = rs.AddCircle([0, 0, 0], 1)\" & vbCrLf\n\t\ts = s & \"rs.ObjectLinetypeSource(o, 1)\" & vbCrLf\n\t\ts = s & \"rs.ObjectLinetype(o, \"\"Dots\"\")\" & vbCrLf\n\t\ts = s & \"rs.DeleteObject(o)\" & vbCrLf\n\t\tCall Rhino.Command(\"_-RunPythonScript (\" & s & \")\", False)\n\t\tRhino.EnableRedraw True\n\tEnd If\nEnd Sub",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 405
+}

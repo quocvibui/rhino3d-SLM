@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-import-named-objects-from-an-external-rhino-file/124464",
+  "topic_id": 124464,
+  "title": "Python Import Named Objects from an External Rhino File",
+  "question": "Hi All,\n\n\nWondering if it is at all possible to import a given named object(s) from an external file (always the same file path) into a current file with python?\n\n\nI haven’t used much outside of rhinoscriptsyntax, though see sc. methods being used and imagine I would require to use these methods?\n\n\nAny help would be greatly appreciated\n\n\nEdit: Have used import before, albeit through the rs.command(import) - which doesn’t give me much flexibility",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport os\n\n\n#for testing get file next to this file named test_import.3dm\nimport_path = os.path.join(rs.DocumentPath(), 'test_import.3dm')\n\n#read the 3dm \nrhino_file = Rhino.FileIO.File3dm().Read(import_path)\n\n#get table of objects in the 3dm file\nrh_objects = rhino_file.Objects\n\n#find objects in de 3dm with the name you need eg 'TestName'\nname_to_find = 'TestName'\nnamed_objects = []\nfor rh_object in rh_objects:\n    if rh_object.Name == name_to_find:\n        named_objects.append(rh_object)\n\n#add the found objects to the document\nimported_ids = []\nfor name_object in named_objects:\n    #NOTE: passing the attributes here will not take care of possible file specific attributes\n    #such as layers, linetypes etc... these will have to be created separately and set to the newly created object\n    new_id = sc.doc.Objects.Add(name_object.Geometry , name_object.Attributes)\n    imported_ids.append(new_id)\n        \nrs.SelectObjects(imported_ids)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1756
+}

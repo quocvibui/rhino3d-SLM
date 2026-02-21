@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-inside-fatal-app-crashes-when-disposing-headless-documents/208673",
+  "topic_id": 208673,
+  "title": "Rhino Inside - Fatal app crashes when disposing headless documents",
+  "question": "Hey, I wonder if I could get some clarity on the threading requirements for using \nRhino.Inside\n to create and dispose headless documents.\n\n\nI’m seeing some weird behaviour where the disposal of the \nRhinoDoc\n is causing my application to crash without a managed (.NET) exception for me to handle…\n\n\nHere’s a minimal code sample that reproduces my issue. Regardless of the 3dm file you import, will crash on the line that disposes the open document, and the line “Success” will never print.\n\n\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Threading.Tasks;\nusing Rhino;\nusing Rhino.DocObjects;\nusing Rhino.Runtime.InProcess;\n\nnamespace RhinoInsideCrash\n{\n    class Program\n    {\n        static Program()\n        {\n            RhinoInside.Resolver.Initialize();\n            Console.WriteLine($\"Loading Rhino @ {RhinoInside.Resolver.RhinoSystemDirectory}\");\n        }\n\n        [System.STAThread]\n        static async Task Main(string[] args)\n        {\n            await RhinoProgram.Run();\n            Console.WriteLine(\"Success!\");\n        }\n\n        static class RhinoProgram\n        {\n            public static async Task Run()\n            {\n                //This is on the Main thread\n                using (new RhinoCore([], WindowStyle.NoWindow))\n                {\n\n                    RhinoDoc open = RhinoDoc.CreateHeadless(null);\n                    try\n                    {\n                        open.Import(@\"C:\\Users\\Jedd\\Documents\\RhinoInsideCrash\\Sample.3dm\");\n\n                        //Do something that actually interacts with the document...\n                        List<RhinoObject> rhinoObjects = open.Objects.GetObjectList(ObjectType.AnyObject)\n                            .ToList();\n\n                        // Do *something* async.\n                        // We have to use ConfigureAwait(false) here because Rhino will hog the main thread. Note, this does mean we'll be calling Dispose on a worker thread...\n \n                        await T...",
+  "code_blocks": [
+    {
+      "code": "Fatal error.\nSystem.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt.\nRepeat 2 times:\n--------------------------------\n   at UnsafeNativeMethods.CRhinoDoc_OpenHeadless(System.String, IntPtr)\n--------------------------------\n   at Rhino.RhinoDoc.OpenHeadless(System.String)\nProcess finished with exit code -1,073,741,819.",
+      "language": "csharp",
+      "author": "Jedd_Morgan",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Threading.Tasks;\nusing Rhino;\nusing Rhino.DocObjects;\nusing Rhino.Runtime.InProcess;\n\nnamespace RhinoInsideCrash\n{\n    public static class Program\n    {\n        static Program()\n        {\n            RhinoInside.Resolver.Initialize();\n            Console.WriteLine($\"Loading Rhino @ {RhinoInside.Resolver.RhinoSystemDirectory}\");\n        }\n\n        public static async Task Main(string[] args)\n        {\n            await RhinoProgram.Run();\n            Console.WriteLine(\"Success!\");\n        }\n\n        private static class RhinoProgram\n        {\n            public static async Task Run()\n            {\n                //This is on the Main thread\n                using (new RhinoCore([], WindowStyle.NoWindow))\n                {\n                    _ = Task.Run(async () =>\n                    {\n                        RhinoDoc? open = null;\n                        try\n                        {\n                            // New issue.\n                            // Rhino 8.25 RC, this line throws AccessViolationException:\n                            open = RhinoDoc.OpenHeadless(@\"C:\\Test Files\\.3dm\");\n    \n                            await Task.Delay(1);\n                        }\n                        finally\n                        {\n                            // Existing issue, not ideal, but can be worked around.\n                            // Rhino 8.? -> 8.24, this line causes an unmanaged process kill \n                            // https://mcneel.myjetbrains.com/youtrack/issue/RH-89095\n                            open?.Dispose();\n                        }\n                    });\n\n                    await Task.Delay(1).ConfigureAwait(false);\n                }\n            }\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "Jedd_Morgan",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Threading.Tasks;\nusing Rhino;\nusing Rhino.DocObjects;\nusing Rhino.Runtime.InProcess;\n\nnamespace RhinoInsideCrash\n{\n    class Program\n    {\n        static Program()\n        {\n            RhinoInside.Resolver.Initialize();\n            Console.WriteLine($\"Loading Rhino @ {RhinoInside.Resolver.RhinoSystemDirectory}\");\n        }\n\n        [System.STAThread]\n        static async Task Main(string[] args)\n        {\n            await RhinoProgram.Run();\n            Console.WriteLine(\"Success!\");\n        }\n\n        static class RhinoProgram\n        {\n            public static async Task Run()\n            {\n                //This is on the Main thread\n                using (new RhinoCore([], WindowStyle.NoWindow))\n                {\n\n                    RhinoDoc open = RhinoDoc.CreateHeadless(null);\n                    try\n                    {\n                        open.Import(@\"C:\\Users\\Jedd\\Documents\\RhinoInsideCrash\\Sample.3dm\");\n\n                        //Do something that actually interacts with the document...\n                        List<RhinoObject> rhinoObjects = open.Objects.GetObjectList(ObjectType.AnyObject)\n                            .ToList();\n\n                        // Do *something* async.\n                        // We have to use ConfigureAwait(false) here because Rhino will hog the main thread. Note, this does mean we'll be calling Dispose on a worker thread...\n \n                        await Task.Delay(100).ConfigureAwait(false);\n                    }\n                    finally\n                    {\n                        Console.WriteLine(\"Done some stuff, about to dispose\");\n                        open?.Dispose(); //This line causes a fatal crash...\n                    }\n                }\n            }\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "Jedd_Morgan",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 171
+}

@@ -1,0 +1,63 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-example-using-the-particle-class/78863",
+  "topic_id": 78863,
+  "title": "[Python] Example using the Particle Class",
+  "question": "Where can I find an example using the Particle Class?\n\n\nhttps://developer.rhino3d.com/5/api/RhinoCommon/html/T_Rhino_Geometry_Particle.htm",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"zooid\"\n__version__ = \"2019.02.17\"\n\nimport rhinoscriptsyntax as rs\n\nfrom Rhino.Geometry import Particle, ParticleSystem\nfrom System.Drawing import Color, Bitmap\nfrom Rhino.Display import DisplayConduit, DisplayBitmap, DrawEventArgs\nimport scriptcontext as sc\nimport Rhino\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nclass PSDisplay(DisplayConduit):\n    ps = ParticleSystem()\n    #file = \"\"\n    \n    def DrawForeground(DrawEventArgs):\n        bm = Bitmap(file)\n        dbm = DisplayBitmap(bm)\n        e.Display.DrawParticles(ps, dbm)\n        \npsDisplay = PSDisplay()\nif display:\n    psDisplay.Enabled = True\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n    \nelse:\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\n\np = Particle()\na = []\nfor pt in pts:\n    p.Location = pt\n    p.Size = 10\n    p.Color = Color.FromArgb(10,255,0,255)\n    psDisplay.ps.Add(p)\n    a.append(p)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"zooid\"\n__version__ = \"2019.02.17\"\n\nimport rhinoscriptsyntax as rs\n\nfrom Rhino.Geometry import Particle, ParticleSystem\nfrom System.Drawing import Color, Bitmap\nfrom Rhino.Display import DisplayConduit, DisplayBitmap, DrawEventArgs\nimport scriptcontext as sc\nimport Rhino\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nclass PSDisplay(DisplayConduit):\n    ps = ParticleSystem()\n    #file = \"\"\n    \n    def DrawForeground(self,e):#=DrawEventArgs\n        bm = Bitmap(file)\n        dbm = DisplayBitmap(bm)\n        e.Display.DrawParticles(ps, dbm)\n        \n        \npsDisplay = PSDisplay()\nif display:\n    psDisplay.Enabled = True\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n    #e.Display.DrawBoundingBox(self.ps. BoundingBox, System.Drawing. Color.Black)\nelse:\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\n\np = Particle()\na = []\nfor pt in pts:\n    p.Location = pt\n    p.Size = 10\n    p.Color = Color.FromArgb(10,255,0,255)\n    psDisplay.ps.Add(p)\n    \n    a.append(p)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfrom Rhino.Geometry import Particle, ParticleSystem\nfrom System.Drawing import Color, Bitmap\nfrom Rhino.Display import DisplayConduit, DisplayBitmap, DrawEventArgs\nimport scriptcontext as sc\nimport Rhino\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nclass PSDisplay(DisplayConduit):\n    ps = ParticleSystem()\n    #file = \"\"\n    \n    def DrawForeground(self,e):#=DrawEventArgs\n        bm = Bitmap(file)\n        dbm = DisplayBitmap(r\"Z:\\zooid\\IronPython\\zShowOff\\main.menu.icon.open.bmp\")\n        e.Display.DrawParticles(ps, dbm)\n        #e.Display.DrawBoundingBox(self.ps. BoundingBox, System.Drawing. Color.Black)\n        \npsDisplay = PSDisplay()\n\npsDisplay.Enabled = True\nRhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\n\np = Particle()\n\n\n\nfor pt in pts:\n    p.Location = pt\n    p.Size = 10\n    p.Color = Color.FromArgb(10,255,0,255)\n    psDisplay.ps.Add(p)\n    \n    #a.append(p)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfrom Rhino.Geometry import Particle, ParticleSystem, Point3d\nfrom System.Drawing import Color, Bitmap\nfrom Rhino.Display import DisplayConduit, DisplayBitmap, DrawEventArgs\nimport scriptcontext as sc\nimport Rhino\n\nclass PSDisplay(DisplayConduit):\n    ps = ParticleSystem()\n    file = r\"Z:\\zooid\\IronPython\\zShowOff\\main.menu.icon.open.bmp\"\n    \n    def DrawForeground(self,e):#=DrawEventArgs\n        bm = Bitmap(self.file)\n        dbm = DisplayBitmap(bm)\n        e.Display.DrawParticles(self.ps, dbm)\n        #e.Display.DrawBoundingBox(self.ps. BoundingBox, System.Drawing. Color.Black)\n        \npsDisplay = PSDisplay()\n\npts = [Point3d.Origin, Point3d(2,2,2), Point3d(1,1,1), Point3d(3,3,3)]\nfor pt in pts:\n    p = Particle()\n    p.Location = pt\n    p.Size = 10\n    psDisplay.ps.Add(p)\n    \npsDisplay.Enabled = True\nrs.Redraw()\nrs.GetString(\"wait ...\")\npsDisplay.Enabled = False\nrs.Redraw()",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfrom Rhino.Geometry import Particle, ParticleSystem, Point3d\nfrom System.Drawing import Color, Bitmap\nfrom Rhino.Display import DisplayConduit, DisplayBitmap, DrawEventArgs\nimport scriptcontext as sc\nimport Rhino\n\nclass PSDisplay(DisplayConduit):\n    ps = ParticleSystem()\n    file = r\"Z:\\zooid\\IronPython\\zShowOff\\main.menu.icon.open.bmp\"\n    \n    def DrawForeground(self,e):#=DrawEventArgs\n        bm = Bitmap(self.file)\n        dbm = DisplayBitmap(bm)\n        e.Display.DrawParticles(self.ps, dbm)\n        #e.Display.DrawBoundingBox(self.ps. BoundingBox, System.Drawing. Color.Black)\n\ndef create_particle(pt=None,idx=0):\n    if pt is None:\n        pt = Rhino.Geometry.Point3d.Origin\n    p = Particle()\n    #p.Color = Color.Yellow\n    #p.DisplayBitmapIndex\n    \n    #p.ParentSystem\n    p.Location = pt\n    p.Size = 20\n    psDisplay.ps.Add(p)\n    print p.Index\n    rs.Redraw()\n\npsDisplay = PSDisplay()\nprint psDisplay.ps\n\"\"\"\npts = [Point3d.Origin, Point3d(2,2,2), Point3d(1,1,1), Point3d(3,3,3)]#\nfor pt in pts:\n    create_particle(pt)\n\"\"\"\ncreate_particle(Point3d.Origin,0)\ncreate_particle(Point3d(1,1,1),1)\ncreate_particle(Point3d(2,2,2),2)\ncreate_particle(Point3d(3,3,3),3)\n\npsDisplay.Enabled = True\n\nrs.Redraw()\n\nrs.GetString(\"wait ...\")\npsDisplay.Enabled = False\nrs.Redraw()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfrom Rhino.Geometry import Particle, ParticleSystem, Point3d\nfrom System.Drawing import Color, Bitmap\nfrom Rhino.Display import DisplayConduit, DisplayBitmap, DrawEventArgs\nimport scriptcontext as sc\nimport Rhino\n\nclass PSDisplay(DisplayConduit):\n    ps = ParticleSystem()\n    file = r\"Z:\\zooid\\IronPython\\zShowOff\\main.menu.icon.open.bmp\"\n    \n    def DrawForeground(self,e):#=DrawEventArgs\n        bm = Bitmap(self.file)\n        dbm = DisplayBitmap(bm)\n        e.Display.DrawParticles(self.ps, dbm)\n        #e.Display.DrawBoundingBox(self.ps. BoundingBox, System.Drawing. Color.Black)\n\ndef create_particle(pt=None,idx=0):\n    if pt is None:\n        pt = Rhino.Geometry.Point3d.Origin\n        \n    p = Particle()\n    #p.Color = Color.Yellow\n    #p.DisplayBitmapIndex\n    \n    #p.ParentSystem\n    p.Location = pt\n    p.Size = 1\n    psDisplay.ps.Add(p)\n    #psDisplay.ps.Update()\n    #print p.Index\n    rs.Redraw()\n\npsDisplay = PSDisplay()\n\n\"\"\"\npts = [Point3d.Origin, Point3d(2,2,2), Point3d(1,1,1), Point3d(3,3,3)]#\nfor pt in pts:\n    create_particle(pt)\n\"\"\"\n#create_particle(Point3d.Origin,0)\n#create_particle(Point3d(1,1,1),1)\n#create_particle(Point3d(2,2,2),2)\n#create_particle(Point3d(3,3,3),3)\n\npsDisplay.Enabled = True\nfor i in range(100):\n    create_particle(Point3d(float(i),float(i),float(i)))\n    rs.Redraw()\n\n\n\n\nfor particle in psDisplay.ps:\n    \n    print particle.Index, particle.Location\n\nrs.GetString(\"wait ...\")\npsDisplay.Enabled = False\nrs.Redraw()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 19,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 24,
+  "views": 2874
+}

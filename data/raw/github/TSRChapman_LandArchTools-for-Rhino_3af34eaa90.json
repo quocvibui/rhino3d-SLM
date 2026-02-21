@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/TSRChapman/LandArchTools-for-Rhino/blob/43036cbbcab2bf756216f6a752f65e83aac3fccb/DelOffScreen.py",
+  "repo": "TSRChapman/LandArchTools-for-Rhino",
+  "repo_stars": 5,
+  "repo_description": "Custom Tools for Rhino made for Landscape Architects",
+  "license": "BSD-3-Clause",
+  "filepath": "DelOffScreen.py",
+  "instruction": "Copyright <2021> <Thomas Chapman>",
+  "code": "'''\n\nCopyright <2021> <Thomas Chapman>\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE\nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR\nCOPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR\nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n'''\n\n# Delete selected objects outside view cone\n\n\nimport rhinoscriptsyntax as rs\n\n\ndef DelOffScreen():\n    try:\n\n        obj = rs.GetObjects('Select objects to test', preselect=True)\n        bool = rs.GetBoolean(\n            'Delete or Hide', ('Option', 'Delete', 'Hide'), (False))\n\n        if obj:\n            rs.EnableRedraw(False)\n\n            for i in obj:\n\n                isVisible = rs.IsVisibleInView(i)\n                if isVisible == False:\n                    if bool[0] == True:\n                        rs.HideObject(i)\n                    if bool[0] == False:\n                        rs.DeleteObject(i)\n\n        rs.EnableRedraw(True)\n\n    except:\n        print(\"Failed to execute\")\n        rs.EnableRedraw(True)\n        return\n\n\nif __name__ == \"__main__\":\n    DelOffScreen()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

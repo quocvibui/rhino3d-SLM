@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gramaziokohler/integral_timber_joints/blob/d543a28ccfaeb8a56ff692a29d5510c3e649477f/src/integral_timber_joints/rhino/demo_trajectory.py",
+  "repo": "gramaziokohler/integral_timber_joints",
+  "repo_stars": 11,
+  "repo_description": "Robotic Assembled Timber Structures with Integral Timber Joints",
+  "license": "MIT",
+  "filepath": "src/integral_timber_joints/rhino/demo_trajectory.py",
+  "instruction": "Demo trajectory",
+  "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\nimport Rhino\nfrom compas_fab.robots.trajectory import JointTrajectory\n\nfrom integral_timber_joints.process import Movement, RoboticMovement\n\nfrom integral_timber_joints.rhino.load import get_process, get_process_artist\nfrom integral_timber_joints.rhino.visualize_trajectory import (hide_interactive_beams,\n    load_selected_external_movment_if_exist,\n    redraw_state_and_trajectory,\n    show_interactive_beams_delete_state_vis,\n)\n\n\nviewPort = rs.CurrentView()\nprocess = get_process()\nartist = get_process_artist()\nstarting_state_id = artist.selected_state_id\nmovements = process.movements\n\n# Hide interactive beams and beams in positions\nrs.EnableRedraw(False)\nhide_interactive_beams(process)\n\n# Show Environment Meshes\nartist.draw_all_env_mesh(True, redraw=False)\nrs.EnableRedraw(True)\n\n# Draw trajectory\nskipping_to_selected_movement = True\n\nwhile True:\n    # Goes to the begining (resets in second replay)\n    artist.selected_state_id = starting_state_id\n\n    for movement_index, movement in enumerate(movements):\n        if artist.selected_state_id > movement_index + 1:\n            continue\n\n        artist.selected_state_id = movement_index + 1\n        load_selected_external_movment_if_exist(process)\n        redraw_state_and_trajectory(artist, process)\n\n        # Skip non-robotic movements\n        if not isinstance(movement, RoboticMovement):\n            continue\n\n        trajectory = movement.trajectory  # type: JointTrajectory\n\n        if trajectory is None:\n            print(\"Movement %s has no Trajectory\" % (movement.movement_id))\n            continue\n\n        for point_index in range(len(trajectory.points)):\n            # * Get Configuration at Trajectory Point\n            config = trajectory.points[point_index]\n\n            # * Get scene with the new trajectory point config\n            scene = artist.get_current_selected_scene_state(robot_config_override=config)\n\n            print(\"Showing Movement %s - %s Trajectory Point %i of %i\" % (movement.movement_id, movement.tag, point_index + 1, len(trajectory.points)))\n            rs.RotateView(viewPort, 0, 0.5)\n            artist.draw_state(scene)\n\n            # rs.EnableRedraw(True)\n            Rhino.RhinoApp.Wait()\n            if scriptcontext.escape_test(False):\n                print(\"Thanks for spinning around with Victor\")\n                show_interactive_beams_delete_state_vis(process)\n                exit()\n\nprint(\"Thanks for spinning around with Victor\")\nshow_interactive_beams_delete_state_vis(process)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

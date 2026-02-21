@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-rhinoscript-addlineardimension-draws-line-to-wrong-direction/6402",
+  "topic_id": 6402,
+  "title": "Python/Rhinoscript AddLinearDimension draws line to wrong direction",
+  "question": "Hi,\n\nI found AddLinearDimension function draws line to wrong direction.\n\n\nThis code draws Horizontial Dimension, but the manual operation at the same points draws Vertical Dimension.\n\n\nI wonder why?\n\n\nAnd I cannot find constraint option for Horz/Vert direction in script that manual operation have.\n\n\nThanks.\n\n\n> # coding: utf-8\n> import rhinoscriptsyntax as rs\n\n> ydim0=[1.2,56.3,0]\n> ydim1=[-2.1,16.4,0]\n> ydim2=[46.0,36.0,0]\n\n> rs.AddLinearDimension(ydim0, ydim1, ydim2 )",
+  "code_blocks": [
+    {
+      "code": "Sub Main()\n\n  Dim plane, origin, xaxis, yaxis\n  Dim dim0, dim1, dim2\n\n  origin = Array(0, 0, 0)\n  xaxis = Array(0, 1, 0) // world yaxis\n  yaxis = Array(-1, 0, 0) // -world xaxis\n  plane = Rhino.PlaneFromFrame(origin, xaxis, yaxis)\n\n  dim0 = Array(1.2, 56.3, 0)\n  dim1 = Array(-2.1, 16.4, 0)\n  dim2 = Array(46.0, 36.0, 0)\n  Call Rhino.AddLinearDimension(plane, dim0, dim1, dim2)\n\t\nEnd Sub",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport utility as rhutil\nimport Rhino\n\ndef TestAddLinearDimension(base_plane, start_point, end_point, point_on_dimension_line):\n    plane = rhutil.coerceplane(base_plane, True)\n    start = rhutil.coerce3dpoint(start_point, True)\n    end = rhutil.coerce3dpoint(end_point, True)\n    onpoint = rhutil.coerce3dpoint(point_on_dimension_line, True)\n    success, s, t = plane.ClosestParameter(start)\n    start = Rhino.Geometry.Point2d(s,t)\n    success, s, t = plane.ClosestParameter(end)\n    end = Rhino.Geometry.Point2d(s,t)\n    success, s, t = plane.ClosestParameter(onpoint)\n    onpoint = Rhino.Geometry.Point2d(s,t)\n    ldim = Rhino.Geometry.LinearDimension(plane, start, end, onpoint)\n    if not ldim: return scriptcontext.errorhandler()\n    ldim.Aligned = True\n    rc = scriptcontext.doc.Objects.AddLinearDimension(ldim)\n    if rc==System.Guid.Empty: raise Exception(\"unable to add dimension to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc\n\norigin = [0, 0, 0]\nxaxis = [0, 1, 0]\nyaxis = [-1, 0, 0]\nplane = rs.PlaneFromFrame(origin, xaxis, yaxis)\n\ndim0=[1.2,56.3,0]\ndim1=[-2.1,16.4,0]\ndim2=[46.0,36.0,0]\n\nTestAddLinearDimension(plane, dim0, dim1, dim2 )",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "> # coding: utf-8\n> import rhinoscriptsyntax as rs\n\n> ydim0=[1.2,56.3,0]\n> ydim1=[-2.1,16.4,0]\n> ydim2=[46.0,36.0,0]\n\n> rs.AddLinearDimension(ydim0, ydim1, ydim2 )",
+      "language": "python",
+      "author": "Katsu",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 2181
+}

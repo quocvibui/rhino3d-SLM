@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-python-viewdisplaymode-copying-problem/70734",
+  "topic_id": 70734,
+  "title": "RhinoCommon/Python : ViewDisplayMode copying problem",
+  "question": "Hi All,\n\n\nI am trying to work with ViewDisplayMode copies but ran into a problem that I can’t figure out. Sample code below.The goal is to make a copy of given display mode with specific name, [do anything to it] and then delete at the end of the script. Repeat at each run of the script.\n\n\nThe problem is, the code below works only once for each new duplicate with the same name.\n\nEven though the copied mode gets successfully deleted at the end of the script (I can tell from the Options > View > Advanced menu), the next time I run the script no copy is made, and the returned guid is all 0000-0000-0000…\n\n\nWhat am I missing here? Should there be any use of Dispose method so the copy can be created each time the code runs ?\n\n\nimport Rhino.Display\nimport System\nimport rhinoscriptsyntax as rs\n\ng=rs.ViewDisplayModeId(\"Shaded\")\nnewguid = Rhino.Display.DisplayModeDescription.CopyDisplayMode(g,\"Shaded---COPY\")\nguid_s = System.Guid.ToString(newguid)\nRhino.Display.DisplayModeDescription.DeleteDiplayMode(newguid)\nprint guid_s\n\n\n\nthanks in advance for any hints\n\n\n–jarek",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System\n\njarek_id = Rhino.Display.DisplayModeDescription.AddDisplayMode(\"Jarek\")\njarek = Rhino.Display.DisplayModeDescription.GetDisplayMode(jarek_id)\nprint jarek.EnglishName, jarek.Id\n\nshaded_id = Rhino.Display.DisplayModeDescription.ShadedId\nshaded = Rhino.Display.DisplayModeDescription.GetDisplayMode(shaded_id)\nprint shaded.EnglishName, shaded.Id\n\nshaded_copy_id = Rhino.Display.DisplayModeDescription.CopyDisplayMode(shaded_id, \"Copy of Shaded\")\nshaded_copy = Rhino.Display.DisplayModeDescription.GetDisplayMode(shaded_copy_id)\nprint shaded_copy.EnglishName, shaded_copy.Id\n\nif Rhino.Display.DisplayModeDescription.DeleteDiplayMode(jarek_id):\n    print jarek_id, 'deleted'",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Display\nimport System\nimport rhinoscriptsyntax as rs\n\ng=rs.ViewDisplayModeId(\"Shaded\")\nnewguid = Rhino.Display.DisplayModeDescription.CopyDisplayMode(g,\"Shaded---COPY\")\nguid_s = System.Guid.ToString(newguid)\nRhino.Display.DisplayModeDescription.DeleteDiplayMode(newguid)\nprint guid_s",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 721
+}

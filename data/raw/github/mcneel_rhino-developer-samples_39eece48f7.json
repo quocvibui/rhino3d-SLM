@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/lock-layer.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/lock-layer.py",
+  "instruction": "Lock layer",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\ndef lock():\n    layerName = rs.GetString(\"Name of layer to lock\")\n\n    matchingLayers = [layer for layer in doc.Layers if layer.Name == layerName]\n\n    layerToLock = None\n    if len(matchingLayers) == 0:\n        print \"Layer \\\"{0}\\\" does not exist.\".format(layerName)\n    elif len(matchingLayers) == 1:\n        layerToLock = matchingLayers[0]\n    elif len(matchingLayers) > 1:\n        i = 0;\n        for layer in matchingLayers:\n            print \"({0}) {1}\".format(i+1, matchingLayers[i].FullPath.replace(\"::\", \"->\"))\n            i += 1\n\n        selectedLayer = rs.GetInteger(\"which layer?\", -1, 1, len(matchingLayers))\n        if selectedLayer == None:\n            return\n        layerToLock = matchingLayers[selectedLayer - 1]\n\n    if layerToLock.IsLocked:\n        print \"layer {0} is already locked.\".format(layerToLock.FullPath)\n    else:\n        layerToLock.IsLocked = True\n        layerToLock.CommitChanges()\n\nif __name__ == \"__main__\":\n    lock()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

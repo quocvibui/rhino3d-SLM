@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gaussian-curvature-python-x-plankton-x-gh/79820",
+  "topic_id": 79820,
+  "title": "Gaussian curvature /python x plankton x gh",
+  "question": "Hello,\n\n\nAm trying to compute total Gaussian curvature for all vertices in a mesh… but coming across this error as u see…\n\n\n\n\nimage\n1423×840 56.7 KB\n\n\n\n\nthe output in the yellow should be 4*pi …\n\nCan someone tell me where I am going wrong please?",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper as gh\nimport math\nimport clr\nimport os\n\n# Paths to the Plankton libraries (might need to be changed for your setup!!!)\nplankton_dll_path = os.path.join(gh.Folders.DefaultAssemblyFolder, \"Plankton.dll\")\nplankton_gha_path = os.path.join(gh.Folders.DefaultAssemblyFolder, \"Plankton.gha\")\n\n\nclr.AddReferenceToFileAndPath(plankton_dll_path) # halfedge mesh data structure\nclr.AddReferenceToFileAndPath(plankton_gha_path) # GH components and helper methods\n\nimport Plankton\nimport PlanktonGh\n\nclr.ImportExtensions(PlanktonGh.RhinoSupport) # extension methods (e.g. rg.Mesh.ToPlantonMesh())\n\n\n# Convert the input mesh to a Plankton.PlanktonMesh() object\nplt_mesh = x.ToPlanktonMesh()\n\n# Gaussian curvatures per vertex\ngaussian_curvatures = []\n\nfor k in range(plt_mesh.Vertices.Count):\n    # Get the current vertex as a point\n    curr_vtx = plt_mesh.Vertices[k].ToPoint3d() \n    # Get the indices of the vertex neighbours\n    nb_indices = plt_mesh.Vertices.GetVertexNeighbours(k)\n    # Get the vertex neighbours as points\n    neighbours = [plt_mesh.Vertices[i] for i in nb_indices]\n    valence = plt_mesh.Vertices.GetValence(k)\n    t = 2 * math.pi \n    # Contruct the vectors from the current vector to its neighbours\n    vecs = [v.ToPoint3d() - curr_vtx for v in neighbours]\n    for i in range(len(vecs)):\n        # Calculate the angle in radians for each vector pair\n        angle = rg.Vector3d.VectorAngle(vecs[i], vecs[(i + 1) % valence])\n        # Subtract the rangle in radians of each vector pair from t\n        t -= angle\n    # Save t as the Gaussian curvature of the current vertex\n    gaussian_curvatures.append(t)\n\n# Output\na = gaussian_curvatures",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 13,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 16,
+  "views": 2028
+}

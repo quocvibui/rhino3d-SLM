@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/move-to-certain-coordinate-one-one-or-two-axes-without-changing-the-other-coordinates/93788",
+  "topic_id": 93788,
+  "title": "Move to certain coordinate one one or two axes, without changing the other coordinates",
+  "question": "Hello,\n\nIs there a way to move an object using world coordinates, but leaving some axis coordinates the same?\n\nExample: Moving an object from (12.56, 5.22, 2.14) to (12.56, 5.22, 8).\n\nI guess typing something similar to (-,-,8).\n\n\nBeing the first time that I have to write a question, I want to thank you guys for being such an awesome community, and spending so much of your time helping other people. You have saved me many times over the years.",
+  "code_blocks": [
+    {
+      "code": "! _-RunPythonScript (\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\ndef test():\n    wxy = Rhino.Geometry.Plane.WorldXY\n    \n    ids = rs.GetObjects(\"Select objects to move\", preselect=True)\n    if not ids: return\n    \n    pt = rs.GetPoint(\"Point to move from\")\n    if not pt: return\n    xForm = Rhino.Geometry.Transform.PlaneToPlane(wxy, rs.ViewCPlane())\n    ptCPlane = rs.PointTransform(pt, xForm)\n    \n    rs.ClipboardText (ptCPlane.ToString())\n    print \"From point copied to the clipboard, paste when you need it.\"\n    rs.SelectObjects(ids)\n    rs.Command(\"Move \" + ptCPlane.ToString() +\" \" )\n    \ntest()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "...\n    rs.ClipboardText (ptCPlane.ToString())\n    print \"From point copied to the clipboard, paste when you need it.\"\n    rs.SelectObjects(ids)\n    rs.Command(\"Move \" + ptCPlane.ToString() +\" \" )\n    \ntest()\n)  <---",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 13,
+  "views": 3472
+}

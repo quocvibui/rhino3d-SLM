@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_conduitarrowheads.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_conduitarrowheads.py",
+  "instruction": "Ex conduitarrowheads",
+  "code": "import Rhino\nimport System.Drawing\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\nclass DrawArrowHeadsConduit(Rhino.Display.DisplayConduit):\n  def __init__(self, line, screenSize, worldSize):\n    self.line = line\n    self.screenSize = screenSize\n    self.worldSize = worldSize\n\n  def DrawForeground(self, e):\n    e.Display.DrawArrow(self.line, System.Drawing.Color.Black, self.screenSize, self.worldSize)\n\ndef RunCommand():\n  # get arrow head size\n  go = Rhino.Input.Custom.GetOption()\n  go.SetCommandPrompt(\"ArrowHead length in screen size (pixles) or world size (percentage of arrow lenght)?\")\n  go.AddOption(\"screen\")\n  go.AddOption(\"world\")\n  go.Get()\n  if (go.CommandResult() != Rhino.Commands.Result.Success):\n    return go.CommandResult()\n\n  screenSize = 0\n  worldSize = 0.0\n  if (go.Option().EnglishName == \"screen\"):\n    gi = Rhino.Input.Custom.GetInteger()\n    gi.SetLowerLimit(0,True)\n    gi.SetCommandPrompt(\"Length of arrow head in pixels\")\n    gi.Get()\n    if (gi.CommandResult() != Rhino.Commands.Result.Success):\n      return gi.CommandResult()\n    screenSize = gi.Number()\n  else:\n    gi = Rhino.Input.Custom.GetInteger()\n    gi.SetLowerLimit(0, True)\n    gi.SetUpperLimit(100, False)\n    gi.SetCommandPrompt(\"Lenght of arrow head in percentage of total arrow lenght\")\n    gi.Get()\n    if (gi.CommandResult() != Rhino.Commands.Result.Success):\n      return gi.CommandResult()\n    worldSize = gi.Number()/100.0\n\n\n  # get arrow start and end points\n  gp = Rhino.Input.Custom.GetPoint()\n  gp.SetCommandPrompt(\"Start of line\")\n  gp.Get()\n  if (gp.CommandResult() != Rhino.Commands.Result.Success):\n    return gp.CommandResult()\n  ptStart = gp.Point()\n\n  gp.SetCommandPrompt(\"End of line\")\n  gp.SetBasePoint(ptStart, False)\n  gp.DrawLineFromPoint(ptStart, True)\n  gp.Get()\n  if (gp.CommandResult() != Rhino.Commands.Result.Success):\n    return gp.CommandResult()\n  ptEnd = gp.Point()\n\n\n  v = ptEnd - ptStart\n  if (v.IsTiny(Rhino.RhinoMath.ZeroTolerance)):\n    return Rhino.Commands.Result.Nothing\n\n  line = Rhino.Geometry.Line(ptStart, ptEnd)\n\n  conduit = DrawArrowHeadsConduit(line, screenSize, worldSize)\n  conduit.Enabled = True\n  scriptcontext.doc.Views.Redraw()\n  rs.GetString(\"Pausing for user input\")\n  conduit.Enabled = False\n  scriptcontext.doc.Views.Redraw()\n\n  return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n  RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

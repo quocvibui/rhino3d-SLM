@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/escape-characters-in-doc-strings/73984",
+  "topic_id": 73984,
+  "title": "Escape characters in doc.Strings",
+  "question": "Hi,\n\n\nI ran into an issue where I could not purge some usertext entries with python rhinoscript\n\nspecifically these type of entries:\n\n\n\n\nIn userdata.py the method GetDocumentUserText pointed to the cause, apparently there was a need to filter escape characters for reasons unknown to me:\n\nI\n\n\n    #todo: leaky abstraction: \"\\\\\" logic should be inside doc.Strings implementation\n    keys = [scriptcontext.doc.Strings.GetKey(i) for i in range(scriptcontext.doc.Strings.Count) if not \"\\\\\" in scriptcontext.doc.Strings.GetKey(i)]\n\n\n\nI’d like to purge the document form all userdata and want do it like so:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nkeys = [sc.doc.Strings.GetKey(i) for i in range(sc.doc.Strings.Count)]\nfor key in keys:\n    rs.SetDocumentUserText(str(key),'')\n\n\n\nIt clears all entries including those with the escape-characters.\n\nHowever given the comment in the python method, \nI’d like to know if and what danger there lies in not filtering out keys with escape characters.\n\n\nThanks\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nkeys = [sc.doc.Strings.GetKey(i) for i in range(sc.doc.Strings.Count)]\nfor key in keys:\n    rs.SetDocumentUserText(str(key),'')",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 498
+}

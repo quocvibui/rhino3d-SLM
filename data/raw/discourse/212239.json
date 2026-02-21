@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/broken-scaling-transform/212239",
+  "topic_id": 212239,
+  "title": "Broken Scaling Transform",
+  "question": "I am using RhinoCommon to scale objects and I came across this strange behavior. I’ve extracted the important code into a command:\n\n\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\nusing Rhino.Input.Custom;\n\nnamespace LayupRH.Commands\n{\n\tpublic class MyScaleConstant : Command\n\t{\n\t\tpublic MyScaleConstant()\n\t\t{\n\t\t\tInstance = this;\n\t\t}\n\n\t\tpublic static MyScaleConstant Instance { get; private set; }\n\n\t\tpublic override string EnglishName => \"MyScaleConstant\";\n\n\t\tprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n\t\t{\n            using GetObject gb = new();\n\t\t\tBrep brep;\n            gb.SetCommandPrompt(\"Select a brep to scale\");\n            gb.GeometryFilter = Rhino.DocObjects.ObjectType.Brep;\n            if (gb.Get() == Rhino.Input.GetResult.Cancel)\n            {\n                return Result.Cancel;\n            }\n\n            brep = gb.Object(0).Brep();\n            Transform transform = Transform.Scale(\n                new Plane(Point3d.Origin, Vector3d.ZAxis),\n                0.99,\n                0.99,\n                0.9\n            );\n            brep.Transform(transform);\n            brep.Repair(0.001);\n\n            doc.Objects.Add(brep);\n            \n            return Result.Success;\n\t\t}\n\t}\n}\n\n\n\nWhen I call it on the big shape,\n\n\nimage\n593×676 70.5 KB\n\nI get the small shape\n\n\nimage\n538×676 65.6 KB\n\nwhich has doesn’t match on the inside edges.\n\n\nIs this a bug with the transformation? If so, is there a way to detect this kind of behavior? For my purposes I need to use RhinoCommon to scale a variety of shapes.\n\n\nFile with the shapes:\n\n\nbrokenScaling.3dm\n (167.7 KB)\n\nProcess for replication: Use the custom command on the bigger shape and it creates the smaller shape.\n\n\nThank you,\n\n- Russell",
+  "code_blocks": [
+    {
+      "code": "using Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\nusing Rhino.Input.Custom;\n\nnamespace LayupRH.Commands\n{\n\tpublic class MyScaleConstant : Command\n\t{\n\t\tpublic MyScaleConstant()\n\t\t{\n\t\t\tInstance = this;\n\t\t}\n\n\t\tpublic static MyScaleConstant Instance { get; private set; }\n\n\t\tpublic override string EnglishName => \"MyScaleConstant\";\n\n\t\tprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n\t\t{\n            using GetObject gb = new();\n\t\t\tBrep brep;\n            gb.SetCommandPrompt(\"Select a brep to scale\");\n            gb.GeometryFilter = Rhino.DocObjects.ObjectType.Brep;\n            if (gb.Get() == Rhino.Input.GetResult.Cancel)\n            {\n                return Result.Cancel;\n            }\n\n            brep = gb.Object(0).Brep();\n            Transform transform = Transform.Scale(\n                new Plane(Point3d.Origin, Vector3d.ZAxis),\n                0.99,\n                0.99,\n                0.9\n            );\n            brep.Transform(transform);\n            brep.Repair(0.001);\n\n            doc.Objects.Add(brep);\n            \n            return Result.Success;\n\t\t}\n\t}\n}",
+      "language": "csharp",
+      "author": "Russell_Emerine",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 99
+}

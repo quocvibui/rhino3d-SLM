@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mirror-button/9003",
+  "topic_id": 9003,
+  "title": "Mirror button",
+  "question": "Hello\n\nI am trying to make a button that mirrors a object in X or Y axis.I have a script that mirrors x and y axis.would it be possible to have a button that asks if I want to mirrors x or y axis after clicking the button.below is the script\n\n\nCall MirrorXY()\nSub MirrorXY()\n    Dim hState,objs,xMirObjs,yMirObjs\n    hState = Rhino.EnableHistoryRecording(True)\n    objs = Rhino.GetObjects(\"Select objects to quad mirror\",,, True, True)\n    Call Rhino.EnableRedraw(False)\n    If Not IsArray(objs) Then Exit Sub\n    Call Rhino.Command(\"_Mirror X _Enter\", False)\n    xMirObjs = Rhino.LastCreatedObjects()\n    If IsArray(xMirObjs) Then\n        Call Rhino.SelectObjects(xMirObjs)\n        Call Rhino.Command(\"_Mirror Y _Enter\", False)\n    End If\n    Call Rhino.UnselectAllObjects()\n    Call Rhino.SelectObjects(objs)\n    If Not hState Then\n        Call Rhino.EnableHistoryRecording(False)\n    End If\n    Call Rhino.EnableRedraw(True)\nEnd Sub\n)",
+  "code_blocks": [
+    {
+      "code": "Option Explicit\n'set up a global variable to remember axis setting within session\nPrivate prevMA\nIf IsEmpty(prevMA) Then prevMA = False 'default to X\n\nCall HistoryMirrorXorY()\nSub HistoryMirrorXorY()\n    Dim hState,objs,mirObjs,bool,axis\n    hState = Rhino.EnableHistoryRecording(True)\n    \n    objs = Rhino.GetObjects(\"Select objects to mirror\",,, True, True)\n    If Not IsArray(objs) Then Exit Sub\n    \n    bool = Rhino.GetBoolean(\"Mirror axis?\", Array(\"Mirror\", \"X\", \"Y\"), Array(prevMA))\n    If IsNull(bool) Then Exit Sub\n    If bool(0) Then    axis = \"Y\" Else axis = \"X\"\n    \n    Call Rhino.EnableRedraw(False)    \n    Call Rhino.Command(\"Mirror \" & axis & \" Enter\", False)\n    Call Rhino.EnableHistoryRecording(hState)\n    'record axis choice for next use\n    prevMA = bool(0)\n    Call Rhino.EnableRedraw(True)\nEnd Sub",
+      "language": "unknown",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "################################################################################\n# SampleMirrorWithHistory.py\n# Copyright (c) 2018 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport rhinoscriptsyntax\nimport scriptcontext\n\n# Ensures the Mirror command is run with history recording enabled\ndef SampleMirrorWithHistory():\n    \n    # select object to mirror\n    object_ids = rhinoscriptsyntax.GetObjects(\"Select object to mirror\", 0, True, True, True)\n    if not object_ids:\n        return\n        \n    # restore default axis if it has been saved\n    default = False\n    if scriptcontext.sticky.has_key(\"axis\"):",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "Call MirrorXY()\nSub MirrorXY()\n    Dim hState,objs,xMirObjs,yMirObjs\n    hState = Rhino.EnableHistoryRecording(True)\n    objs = Rhino.GetObjects(\"Select objects to quad mirror\",,, True, True)\n    Call Rhino.EnableRedraw(False)\n    If Not IsArray(objs) Then Exit Sub\n    Call Rhino.Command(\"_Mirror X _Enter\", False)\n    xMirObjs = Rhino.LastCreatedObjects()\n    If IsArray(xMirObjs) Then\n        Call Rhino.SelectObjects(xMirObjs)\n        Call Rhino.Command(\"_Mirror Y _Enter\", False)\n    End If\n    Call Rhino.UnselectAllObjects()\n    Call Rhino.SelectObjects(objs)\n    If Not hState Then\n        Call Rhino.EnableHistoryRecording(False)\n    End If\n    Call Rhino.EnableRedraw(True)\nEnd Sub\n)",
+      "language": "unknown",
+      "author": "junkim",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1138
+}

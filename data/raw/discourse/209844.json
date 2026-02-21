@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/custom-render-meshes-broken-in-r8-sr23/209844",
+  "topic_id": 209844,
+  "title": "Custom Render Meshes broken in R8 SR23",
+  "question": "@D-W\n and I are working with Custom Render Meshes. All worked well until R8 SR23 broke it.\n\n\nNow, only the Raytraced display mode calls the RenderMeshes override. All other display modes ignore it.\n\n\n@dale\n, \n@stevebaer\n, \n@CallumSykes\n, we’ve scanned through the changelog but nothing obvious stands out:\n\n\n\n\n\n\n\n\n\n\nRhino 8 Service Release Available\n \nRhino\n\n\n\n\n\n\n\n    Rhino 8 Service Release 23 for Windows and Mac (8.23.25252) is now available \nRhino will automatically update, unless updates are disabled. \n\nDownload the latest service release now…\n \nBugs Fixed: \n\nBlockEdit: Editing a linked file leaves a \"ceflog.txt\" file on disk (\nRH-62888\n)\nCurve: Changing active layer while drawing does not update preview color (\nRH-88368\n)\nDisplay: Selected subobject has clipped selected edge highlight (\nRH-79197\n)\nDotNET: Load \nMSAL.NET\n >4.52 for SSO broker support (\nRH-88608\n)\nGro…\n  \n\n\n\n\nThe minimal example below should replace any object with a sphere. Only raytraced works as expected:\n\nRendered:\n\n\nimage\n829×694 22.3 KB\n\n\nRaytraced:\n\n\nimage\n1010×714 45.3 KB\n\n\nusing Rhino;\nusing Rhino.Display;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing Rhino.PlugIns;\nusing Rhino.Render;\nusing Rhino.Render.CustomRenderMeshes;\nusing System;\nusing System.Collections.Generic;\n\nnamespace CRM_Demo\n{\n    public class SphereRenderMeshProvider : RenderMeshProvider\n    {\n        public static SphereRenderMeshProvider Instance { get; private set; }\n\n        public Guid TargetObjectId { get; set; } = Guid.Empty;\n        private RenderMeshes _cachedRenderMeshes = null;\n        private uint _currentCRC = 0;\n\n        public SphereRenderMeshProvider()\n        {\n            Instance = this;\n        }\n\n        public override Guid ProviderId => new Guid(\"71731923-0978-45DD-9BA5-31C4EAAEDD8D\");\n\n        public override string Name => \"Sphere Replacer\";\n\n        public override bool HasCustomRenderMeshes(\n            MeshType mt,\n            ViewportInfo vp,\n            RhinoDoc doc,\n            Guid obj...",
+  "code_blocks": [
+    {
+      "code": "protected override void PostDrawObjects(DrawEventArgs e)\n        {\n            Rhino.RhinoApp.WriteLine(\"PostDraw\");\n            base.PostDrawObjects(e);\n        }",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "using Rhino;\nusing Rhino.Display;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing Rhino.PlugIns;\nusing Rhino.Render;\nusing Rhino.Render.CustomRenderMeshes;\nusing System;\nusing System.Collections.Generic;\n\nnamespace CRM_Demo\n{\n    public class SphereRenderMeshProvider : RenderMeshProvider\n    {\n        public static SphereRenderMeshProvider Instance { get; private set; }\n\n        public Guid TargetObjectId { get; set; } = Guid.Empty;\n        private RenderMeshes _cachedRenderMeshes = null;\n        private uint _currentCRC = 0;\n\n        public SphereRenderMeshProvider()\n        {\n            Instance = this;\n        }\n\n        public override Guid ProviderId => new Guid(\"71731923-0978-45DD-9BA5-31C4EAAEDD8D\");\n\n        public override string Name => \"Sphere Replacer\";\n\n        public override bool HasCustomRenderMeshes(\n            MeshType mt,\n            ViewportInfo vp,\n            RhinoDoc doc,\n            Guid objectId,\n            ref Flags flags,\n            PlugIn plugin,\n            DisplayPipelineAttributes attrs)\n        {\n            return objectId == TargetObjectId;\n        }\n\n        public bool UpdateRenderMeshes(RhinoObject rhinoObject, RhinoDoc doc)\n        {\n            #region dummy geometry & material\n            // Create a dummy sphere\n            BoundingBox bbox = rhinoObject.Geometry.GetBoundingBox(true);\n            if (!bbox.IsValid)\n                return false;\n\n            var sphere = new Sphere(bbox.Center, bbox.Diagonal.Length / 2.0);\n            Mesh sphereMesh = Mesh.CreateFromSphere(sphere, 32, 32);\n            if (sphereMesh == null)\n                return false;\n            \n            sphereMesh.Normals.ComputeNormals();\n\n            var displayMaterial = new Material();\n            #endregion\n\n            var customRenderMesh = new Rhino.Render.CustomRenderMeshes.Instance();\n            customRenderMesh.Material = RenderMaterial.CreateBasicMaterial(displayMaterial, doc);\n            customRenderMesh.Mesh = sphereMesh;\n\n            uint hash = 0;\n            if (_cachedRenderMeshes != null)\n                hash = _cachedRenderMeshes.Hash + 10;\n\n            _cachedRenderMeshes = new RenderMeshes(doc, rhinoObject.Id, ProviderId, hash, (uint)Flags.IsDocumentObject);\n            _cachedRenderMeshes.AddInstance(customRenderMesh);\n\n            _currentCRC = rhinoObject.Geometry.DataCRC(0);\n\n            return true;\n        }\n\n        public override RenderMeshes RenderMeshes(\n            MeshType mt,\n            ViewportInfo vp,\n            RhinoDoc doc,\n            Guid objectId,\n            List<InstanceObject> ancestry,\n            ref Flags flags,\n            RenderMeshes previousPrimitives,\n            PlugIn plugin,\n            DisplayPipelineAttributes attrs)\n        {\n            if (!HasCustomRenderMeshes(mt, vp, doc, objectId, ref flags, plugin, attrs))\n                return null;\n\n            var rhinoObject = doc?.Objects.FindId(objectId);\n            if (rhinoObject.Geometry.DataCRC(0) != _currentCRC)\n                UpdateRenderMeshes(rhinoObject, doc);\n\n            return _cachedRenderMeshes;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "using Rhino;\nusing Rhino.Commands;\nusing Rhino.Display;\nusing Rhino.Input.Custom;\n\nnamespace CRM_Demo\n{\n    public class ReplaceWithSphereCommand : Command\n    {\n        public override string EnglishName => \"ReplaceObjectWithSphereMesh\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            if (SphereRenderMeshProvider.Instance == null)\n            {\n                RhinoApp.WriteLine(\"Sphere Render Mesh Provider failed to load.\");\n                return Result.Failure;\n            }\n\n            var go = new GetObject();\n            go.SetCommandPrompt(\"Select object to replace with a sphere render mesh\");\n            go.Get();\n\n            if (go.CommandResult() != Result.Success)\n            {\n                return go.CommandResult();\n            }\n\n            var objRef = go.Object(0);\n            var rhinoObject = objRef.Object();\n            var objectId = objRef.ObjectId;\n\n            if (rhinoObject != null)\n            {\n                var attributes = rhinoObject.Attributes.Duplicate();\n                attributes.SetDisplayModeOverride(DisplayModeDescription.GetDisplayMode(DisplayModeDescription.RenderedId));\n                doc.Objects.ModifyAttributes(rhinoObject.Id, attributes, true);\n            }\n\n            if (!SphereRenderMeshProvider.Instance.UpdateRenderMeshes(rhinoObject, doc))\n                return Result.Failure;\n\n            SphereRenderMeshProvider.Instance.TargetObjectId = objectId;\n\n            doc.Views.Redraw();\n\n            return Result.Success;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "layers",
+    "materials",
+    "mesh",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 127
+}

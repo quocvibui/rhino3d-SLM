@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/triremesh-scripteditor-python-example/199133",
+  "topic_id": 199133,
+  "title": "TriRemesh ScriptEditor Python Example",
+  "question": "@DanielPiker\n\n\nIs it possible to run TriMesh in Rhino Python ScriptEditor (not Grasshopper) as a single function?\n\nIf yes, is there any example for mesh with a fix boundary features?",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport Rhino.NodeInCode.Components as ncc \n\nimport Rhino\n\ndef get_meshes():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select Mesh\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh  # Filter to curves\n    go.EnablePreSelect(True, True)\n    go.SubObjectSelect = False\n    go.DeselectAllBeforePostSelect = False\n    res = go.GetMultiple(1, 0)\n    \n    if go.CommandResult() == Rhino.Commands.Result.Success:\n        selected_meshes = [go.Object(i).Mesh() for i in range(go.ObjectCount) if go.Object(i).Mesh()]\n        return selected_meshes\n\nmeshes = get_meshes()\n\nif len(meshes)>0:\n    mesh = meshes[0]\n    T,D,C = ncc.NodeInCodeFunctions.Kangaroo2Component_TriRemesh(mesh, None, None, None, 1, 25)\n    print(D)\n    Rhino.RhinoDoc.ActiveDoc.Objects.AddMesh(T[0])\n    # Rhino.RhinoDoc.ActiveDoc.Objects.AddMesh(D[0])",
+      "language": "python",
+      "author": "Petras_Vestartas",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nfrom Rhino.NodeInCode import Components as ncc \n\nimport Rhino\n\ndef get_meshes():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select Mesh\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh  # Filter to curves\n    go.EnablePreSelect(True, True)\n    go.SubObjectSelect = False\n    go.DeselectAllBeforePostSelect = False\n    res = go.GetMultiple(1, 0)\n    \n    if go.CommandResult() == Rhino.Commands.Result.Success:\n        selected_meshes = [go.Object(i).Mesh() for i in range(go.ObjectCount) if go.Object(i).Mesh()]\n        return selected_meshes\n\nmeshes = get_meshes()\n\nif meshes:\n    mesh = meshes[0]\n    T,D,C = ncc.NodeInCodeFunctions.Kangaroo2Component_TriRemesh(mesh, None, None, None, 1, 25)\n    print(D)\n    Rhino.RhinoDoc.ActiveDoc.Objects.AddMesh(T[0])\n    # Rhino.RhinoDoc.ActiveDoc.Objects.AddMesh(D[0])",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nfrom Rhino.NodeInCode import Components as ncc \n\nimport Rhino\n\ndef get_meshes():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select Mesh\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh  # Filter to curves\n    go.EnablePreSelect(True, True)\n    go.SubObjectSelect = False\n    go.DeselectAllBeforePostSelect = False\n    res = go.GetMultiple(1, 0)\n    \n    if go.CommandResult() == Rhino.Commands.Result.Success:\n        selected_meshes = [go.Object(i).Mesh() for i in range(go.ObjectCount) if go.Object(i).Mesh()]\n        return selected_meshes\n\nmeshes = get_meshes()\n\nif meshes:\n    mesh = meshes[0]\n    T,D,C = ncc.NodeInCodeFunctions.Kangaroo2Component_TriRemesh(mesh, None, None, None, 1, 25)\n    print(D)\n    Rhino.RhinoDoc.ActiveDoc.Objects.AddMesh(T[0])\n    # Rhino.RhinoDoc.ActiveDoc.Objects.AddMesh(D[0])",
+      "language": "python",
+      "author": "Petras_Vestartas",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\n# from Rhino.NodeInCode import Components as ncc\nimport ghpythonlib.components as ghcomp\n\nimport Rhino\n\ndef get_meshes():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select Mesh\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh  # Filter to curves\n    go.EnablePreSelect(True, True)\n    go.SubObjectSelect = False\n    go.DeselectAllBeforePostSelect = False\n    res = go.GetMultiple(1, 0)\n    \n    if go.CommandResult() == Rhino.Commands.Result.Success:\n        selected_meshes = [go.Object(i).Mesh() for i in range(go.ObjectCount) if go.Object(i).Mesh()]\n        return selected_meshes\n\nmeshes = get_meshes()\n\nif meshes:\n    mesh = meshes[0]\n    # T,D,C = ncc.NodeInCodeFunctions.TriRemesh(mesh, None, None, None, 1, 25)\n    T,D,C = ghcomp.TriRemesh(mesh, None, None, None, 1, 25)\n    print(D)\n    Rhino.RhinoDoc.ActiveDoc.Objects.AddMesh(T)",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.NodeInCode import Components\nComponents.NodeInCodeFunctions.Kangaroo2Component_TriRemesh (mesh, None, None, None, 1, 25)\nComponents.NodeInCodeFunctions.TriRemesh(mesh, None, None, None, 1, 25)\n\nimport ghpythonlib.components as ghcomp\nghcomp.Kangaroo2Component.TriRemesh(mesh, None, None, None, 1, 25)\nghcomp.TriRemesh(mesh, None, None, None, 1, 25)",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 23,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 24,
+  "views": 358
+}

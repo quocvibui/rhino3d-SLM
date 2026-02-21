@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/continuous-mousecallback-in-gh/109512",
+  "topic_id": 109512,
+  "title": "Continuous MouseCallback in GH",
+  "question": "Hi there,\n\nI’m trying to implement a continuous MouseCallback in Grasshopper. The goal is to have a GH component that continuously registers mouse clicks in Rhino viewports. (In detail: I want to retrieve a 3d point on mouse down and up, as if to drag smth from one place to another, to use it later similar to the \nGrab\n component in \nKangaroo2\n ).\n\n\nI have a working Python Script version:\n\n\nimport System\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef get_view_pt():\n    screenPos = System.Windows.Forms.Cursor.Position \n    doc = Rhino.RhinoDoc.ActiveDoc \n    view = doc.Views.ActiveView \n    point = view.ActiveViewport.ScreenToClient(screenPos)  \n    line = view.ActiveViewport.ClientToWorld(point) \n    cplane = view.ActiveViewport.ConstructionPlane() \n    \n    _, t = Rhino.Geometry.Intersect.Intersection.LinePlane(line, cplane)\n    P = line.PointAt(t)\n    return P\n\nclass MyMouseCallback(Rhino.UI.MouseCallback):\n    def __init__(self):\n        self.pt_mouse_down = None\n        self.pt_mouse_up = None\n        \n    def OnMouseDown(self, args):\n        p = get_view_pt()\n        print \"mouse down point : \",p\n        self.pt_mouse_down = p\n        self.pt_mouse_up = None\n\n    def OnMouseUp(self, args):\n        p = get_view_pt()\n        print \"mouse up point : \",p\n        self.pt_mouse_up = p\n        self.add_drag_line\n        self.pt_mouse_down = None\n        self.pt_mouse_up = None\n        \n    @property\n    def add_drag_line(self):\n        if self.pt_mouse_down and self.pt_mouse_up:\n            return rs.AddLine(self.pt_mouse_down, self.pt_mouse_up)\n        else:\n            pass\n            \ncb = MyMouseCallback()\ncb.Enabled = True\nwhile True:\n    Rhino.RhinoApp.Wait()\n    if scriptcontext.escape_test(False):\n        print \"ESC pressed \"\n        break     \ncb.Enabled = False\n\n\n\nadapted from \nthis post\n and \nthis post\n.\n\nHow can I make it run in a Grasshopper component?\n\n\nMany thanks in advance for a hint",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport threading\nimport time     \n\nclass MCB_Singleton:\n    \n    instance = None\n    \n    class MyMouseCallback(Rhino.UI.MouseCallback):\n        def __init__(self):\n            super(MCB_Singleton.MyMouseCallback, self).__init__()\n            self.on_mcbs = []\n            \n        def register_on_mouse_down_callback(self, cb):\n            self.on_mcbs.append(cb)\n            \n        def OnMouseDown(self, args):\n            for cb in self.on_mcbs:\n                cb()\n                \n    def __init__(self):\n        if MCB_Singleton.instance is None:\n            MCB_Singleton.instance = MCB_Singleton.MyMouseCallback()\n            \n    def __getattr__(self, name):\n        return getattr(self.instance, name)\n\nj = 0\n\ndef test():\n    global j\n    j += 1\n\nclass MyComponent(component):\n    \n    def __init__(self):\n        self.do_mcb = True\n        self.thread = threading.Thread(target=self.start_mcb)\n        self.thread.start()\n\n    def start_mcb(self):\n        import time\n        import Rhino\n        sc.sticky[\"mcb\"] = MCB_Singleton()\n        sc.sticky[\"mcb\"].Enabled = True\n        sc.sticky[\"mcb\"].register_on_mouse_down_callback(test)\n        while self.do_mcb:\n            Rhino.RhinoApp.Wait()\n        sc.sticky[\"mcb\"].Enabled = False\n\n    def stop_mcb(self):\n        self.do_mcb = False\n        self.thread.join(timeout=1)\n      \n    def RunScript(self, update):\n\n        print j, self.thread.is_alive(), sc.sticky[\"mcb\"].Enabled, sc.sticky[\"mcb\"].on_mcbs\n        \n        time.sleep(0.1)\n        if update:\n            ghenv.Component.ExpireSolution(True)\n\n        return j\n\n    def __del__(self):\n        print \"del\"\n        self.stop_mcb()",
+      "language": "python",
+      "author": "sirkrisp",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nfrom scriptcontext import sticky\nscriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n\nclass CtrlDoubleClick(Rhino.UI.MouseCallback):\n    \"\"\"Our custom MouseCallback class\"\"\"\n\n    def xy_target(self, e):\n        \"\"\"Get target point in WordlXY plane based on cursor location.\"\"\"\n        line = e.View.ActiveViewport.ClientToWorld(e.ViewportPoint)\n        param = rg.Intersect.Intersection.LinePlane(line, rg.Plane.WorldXY)[1]\n        pt = line.PointAt(param)\n        return pt\n\n    def OnMouseDoubleClick(self, e):\n        \"\"\"Override for DoubleClick event, which adds point if CTRL is pressed.\"\"\"\n        if e.CtrlKeyDown:\n            pt = self.xy_target(e)\n            rs.AddPoint(pt)\n\n# We use sticky dict to keep track of the created callbacks\n# and make sure that we always have only one active.\n# Ideally we should also dispose of the old ones.\n\ndef create_callback(clss, update=False):\n    # init on first load\n    if clss.__name__ not in sticky:\n        sticky[clss.__name__] = clss()\n    \n    # if update disable last instance and create a new one\n    if update:\n        sticky[clss.__name__].Enabled = False\n        sticky[clss.__name__] = clss()\n\ndef enable_callback(clss, enabled=True):\n    # an user input driven enable/disable\n    try:\n        sticky[clss.__name__].Enabled = enabled\n    except:\n        pass\n\ncreate_callback(CtrlDoubleClick, update)\nenable_callback(CtrlDoubleClick, enabled)",
+      "language": "python",
+      "author": "ondrej-vesely",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef get_view_pt():\n    screenPos = System.Windows.Forms.Cursor.Position \n    doc = Rhino.RhinoDoc.ActiveDoc \n    view = doc.Views.ActiveView \n    point = view.ActiveViewport.ScreenToClient(screenPos)  \n    line = view.ActiveViewport.ClientToWorld(point) \n    cplane = view.ActiveViewport.ConstructionPlane() \n    \n    _, t = Rhino.Geometry.Intersect.Intersection.LinePlane(line, cplane)\n    P = line.PointAt(t)\n    return P\n\nclass MyMouseCallback(Rhino.UI.MouseCallback):\n    def __init__(self):\n        self.pt_mouse_down = None\n        self.pt_mouse_up = None\n        \n    def OnMouseDown(self, args):\n        p = get_view_pt()\n        print \"mouse down point : \",p\n        self.pt_mouse_down = p\n        self.pt_mouse_up = None\n\n    def OnMouseUp(self, args):\n        p = get_view_pt()\n        print \"mouse up point : \",p\n        self.pt_mouse_up = p\n        self.add_drag_line\n        self.pt_mouse_down = None\n        self.pt_mouse_up = None\n        \n    @property\n    def add_drag_line(self):\n        if self.pt_mouse_down and self.pt_mouse_up:\n            return rs.AddLine(self.pt_mouse_down, self.pt_mouse_up)\n        else:\n            pass\n            \ncb = MyMouseCallback()\ncb.Enabled = True\nwhile True:\n    Rhino.RhinoApp.Wait()\n    if scriptcontext.escape_test(False):\n        print \"ESC pressed \"\n        break     \ncb.Enabled = False",
+      "language": "python",
+      "author": "funkchaser",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 1455
+}

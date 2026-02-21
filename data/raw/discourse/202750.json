@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-identify-which-modelspace-viewport-is-which-with-python/202750",
+  "topic_id": 202750,
+  "title": "How to identify which Modelspace viewport is which with Python?",
+  "question": "Hi scripting gurus,\n\n\nI want to write a python script that allows me to always reset the modelspace viewport in the south-east quadrant, which by default is where the Right View located. Please see screenshot below.\n\n\nI can get the script to identify the Right View and reset it, however, the script only works if the Right View is visible on the screen. If I were to rename the Right viewport to a different name, the script no longer works. Is there a way to identify the viewport based on where it sits instead of its name?\n\n\nI know the Rhino command _4View reset the screen back to the default 4 viewports, Top, Perspective, Front and Right views. I can’t access the codes for ‘4View’ to see how it’s identifying and referencing each viewport. Does the Right Viewport have a fixed GUID?\n\n\nAny advice would be greatly appreciated. Thanks in advance.\n\n\nimage\n800×351 85.7 KB",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\nimport System.Drawing\n\ndef __GetModelViews():\n    model_views = []\n    rhino_views = sc.doc.Views.GetViewList(True, False)\n    for view in rhino_views:\n        if not view.Floating:\n            model_views.append(view)\n    return model_views\n\ndef Test():\n    model_views = __GetModelViews()\n    if len(model_views) != 4:\n        return\n\n    right_view = None\n    right = -1\n    bottom = -1\n    for view in model_views:\n        rect = view.ScreenRectangle\n        if right < rect.Right or bottom < rect.Bottom:\n            right_view = view\n            right = rect.Right\n            bottom = rect.Bottom\n\n    print(right_view.ActiveViewport.Name)\n\nif __name__ == \"__main__\":\n    Test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 168
+}

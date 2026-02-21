@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/extend-curve.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/extend-curve.py",
+  "instruction": "Extend curve",
+  "code": "from Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n\n    rc, boundary_obj_refs = RhinoGet.GetMultipleObjects(\"Select boundary objects\", False, ObjectType.AnyObject)\n    if rc != Result.Success:\n        return rc\n    if boundary_obj_refs == None or boundary_obj_refs.Length == 0:\n        return Result.Nothing\n\n    gc = GetObject()\n    gc.SetCommandPrompt(\"Select curve to extend\")\n    gc.GeometryFilter = ObjectType.Curve\n    gc.GeometryAttributeFilter = GeometryAttributeFilter.OpenCurve\n    gc.Get()\n    if gc.CommandResult() != Result.Success:\n        return gc.CommandResult()\n    curve_obj_ref = gc.Object(0)\n\n    curve = curve_obj_ref.Curve()\n    if curve == None: return Result.Failure\n    b, t = curve.ClosestPoint(curve_obj_ref.SelectionPoint())\n    if not b: return Result.Failure\n    curve_end = CurveEnd.Start if t <= curve.Domain.Mid else CurveEnd.End\n\n    geometry = [obj.Geometry() for obj in boundary_obj_refs]\n    extended_curve = curve.Extend(curve_end, CurveExtensionStyle.Line, geometry)\n    if extended_curve != None and extended_curve.IsValid:\n        if not doc.Objects.Replace(curve_obj_ref.ObjectId, extended_curve):\n            return Result.Failure\n        doc.Views.Redraw()\n        return Result.Success\n    else:\n        RhinoApp.WriteLine(\"No boundary object was intersected so curve not extended\")\n        return Result.Nothing\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-3-class-inheritance-puzzle-rhino-input-custom-getpoint/182095",
+  "topic_id": 182095,
+  "title": "Python 3 class inheritance puzzle. Rhino.Input.Custom.GetPoint()",
+  "question": "Hello,\n\n\nI am working with Rhino.Input.Custom.GetPoint().  The following code works fine for python 2, but in python 3, the inherited class example fails.\n\n\nI am working on the GetPointDynamicDraw example to make a custom picker. This (with some debugging) works for p2 but not p3. (\nhttps://developer.rhino3d.com/api/rhinocommon/examples/getpointdynamicdraw\n)\n\n\nIs this Rhino, or something I have missed about p3 classes?\n\n\nAny thoughts appreciated, Paul\n\n\n\n\nimport Rhino\n\nimport Rhino.Input.Custom as ric\n\nimport scriptcontext as sc\n\n\ndef RunCommand():\n\n\ngp1 = ric.GetPoint()\n\ngp1.SetCommandPrompt(“Add point 1”)\n\ngp1.Get()\n\nsc.doc.Objects.AddPoint(gp1.Point())\n\nsc.doc.Views.Redraw()\n\n\ngp2 = InheritedGetPoint()\n\ngp2.SetCommandPrompt(“Add point 2”)\n\ngp2.Get()\n\nsc.doc.Objects.AddPoint(gp2.Point())\n\nsc.doc.Views.Redraw()\n\n\nclass InheritedGetPoint (ric.GetPoint):\n\n\ndef __init__(self):\n    pass\n\n\n\nif \nname\n == “\nmain\n”:\n\nRunCommand()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Input.Custom as ric\nimport scriptcontext as sc\n\ndef RunCommand():\n\n    gp1 = ric.GetPoint()\n    gp1.SetCommandPrompt('Add point 1')\n    gp1.Get()\n    sc.doc.Objects.AddPoint(gp1.Point())\n    sc.doc.Views.Redraw()\n\n    gp2 = InheritedGetPoint()\n    gp2.SetCommandPrompt('Add point 2')\n    gp2.Get()\n    sc.doc.Objects.AddPoint(gp2.Point())\n    sc.doc.Views.Redraw()\n\nclass InheritedGetPoint (ric.GetPoint):\n\n    def __init__(self):\n        pass\n\nif __name__ == '__main__':\n    RunCommand()",
+      "language": "python",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "class InheritedGetPoint (ric.GetPoint):\n\n    def __init__(self):\n        ric.GetPoint.__init__(self)",
+      "language": "python",
+      "author": "menno",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# API docs example updated for p3  https://developer.rhino3d.com/api/rhinocommon/examples/getpointdynamicdraw\n\n#! python3\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport Rhino.Commands as rc\nimport Rhino.Input.Custom as ric\nimport scriptcontext as sc\nimport System.Drawing\n\n\ndef RunCommand():\n  gp = ric.GetPoint()\n  gp.SetCommandPrompt('Center point')\n  gp.Get()\n  if gp.CommandResult() != rc.Result.Success:\n    return gp.CommandResult()\n  center_point = gp.Point()\n  if center_point == rg.Point3d.Unset:\n    return rc.Result.Failure\n  gcp = GetCircleRadiusPoint(center_point)\n  gcp.SetCommandPrompt('Radius')\n  gcp.ConstrainToConstructionPlane(False)\n  gcp.SetBasePoint(center_point, True)\n  gcp.DrawLineFromPoint(center_point, True)\n  gcp.Get()\n  if gcp.CommandResult() != rc.Result.Success:\n     return gcp.CommandResult()\n  radius = center_point.DistanceTo(gcp.Point())\n  cplane = sc.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n  sc.doc.Objects.AddCircle(rg.Circle(cplane, center_point, radius))\n  sc.doc.Views.Redraw()\n  return rc.Result.Success\n\n\nclass GetCircleRadiusPoint (ric.GetPoint):\n\n  def __init__(self, centerPoint):\n    ric.GetPoint.__init__(self)\n    self.line_color = System.Drawing.Color.FromArgb(255,0,0)\n    self.m_center_point = centerPoint\n  \n  def OnDynamicDraw(self, e):\n    cplane = e.RhinoDoc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    radius = self.m_center_point.DistanceTo(e.CurrentPoint)\n    circle = rg.Circle(cplane, self.m_center_point, radius)\n    e.Display.DrawCircle(circle, self.line_color)\n\nif __name__ == '__main__':\n    RunCommand()",
+      "language": "python",
+      "author": "Greenbox",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 252
+}

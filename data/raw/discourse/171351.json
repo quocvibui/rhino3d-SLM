@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-set-the-bump-amount-of-a-physicallybasedmaterial-in-rhinocommon/171351",
+  "topic_id": 171351,
+  "title": "How to set the bump amount of a PhysicallyBasedMaterial in RhinoCommon?",
+  "question": "In our RhinoCommon based plugin for Rhino 8 I would like to set the bump amount for a PBR material. I can successfully set a bump texture but I’m not able to set the bump amount.\n\n\nI created a Material:\n\n\nvar mat = new Rhino.DocObjects.Material();\n\n\nThen I created the PBR material:\n\n\nmat.ToPhysicallyBased();\nRhino.DocObjects.PhysicallyBasedMaterial pbrMat = mat.PhysicallyBased;\n\n\n\nAnd finally I created a RenderMaterial:\n\n\nvar renderMat = Rhino.Render.RenderMaterial.FromMaterial(mat, doc);\n\n\nHow can I change the bump amount of the PBR material? I tried to set it in all three materials. The \nPhysicallyBasedMaterial\n seems to have no bump amount property and I also tried things like \nrenderMat.SetChildSlotAmount(\"Bump\", 50.0, RenderContent.ChangeContexts.Program);\n without success.\n\n\nThanks in advance!\n\n\nBest regards\n\nTim",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    renderMat = list(scriptcontext.doc.RenderMaterials)[0]\n    \n    print \"Before:\", renderMat.GetParameter(\"pbr-bump-amount\").ToDouble(None)\n    \n    context = Rhino.Render.RenderContent.ChangeContexts.Program\n    renderMat.SetParameter(\"pbr-bump-amount\", 42, context) \n    \n    print \"After:\", renderMat.GetParameter(\"pbr-bump-amount\").ToDouble(None)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 412
+}

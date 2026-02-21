@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/maximum-minimum-point-of-surface/133179",
+  "topic_id": 133179,
+  "title": "Maximum (minimum) point of surface",
+  "question": "Hi everyone\n\nFor\n\n1- find surface \nClosestPoint\n to other Surface\n\n\nOr for:\n\n2-find Maximum (minimum) point of surface\n\n\nIs there a command or api in Grasshopper or C #?\n\n\nFor the maximum and minimum of a  Surface, I intersect with its BoundingBox, but their common Intersection is not a Point  and is null.!!\n\n\ninnt\n1547×575 100 KB\n\n\n\n\nmax of surface.gh\n (196.2 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper as gh\nimport scriptcontext as sc\n\n\ndef divide_surface(srf, udiv, vdiv, nested=False):\n    \"\"\"Divides a surface into a grid of uv-points.\n    \n    Args:\n      srf (Rhino.Geometry.Surface): Surface to divide\n      udiv (int): Number of divisions in surface u-direction\n      vdiv (int): Number of divisions in surface v-direction\n      nested (bool): Optionally True to return a nested list [column][row], \n        by default False to return a flat list.\n    \n    Returns:\n      The division points.\"\"\"\n    \n    num_rows = udiv + 1\n    num_cols = udiv + 1\n    \n    udom = rg.Interval(0, udiv)\n    vdom = rg.Interval(0, vdiv)\n    S.SetDomain(0, udom)\n    S.SetDomain(1, vdom)\n    \n    div_pts = []\n    for i in xrange(num_rows):\n        for j in xrange(num_cols):\n            div_pts.append(rg.Surface.PointAt(srf, i, j))\n    \n    if nested:\n        return [div_pts[i:i+num_rows] for i in xrange(0, len(div_pts), num_rows)]\n    return div_pts\n    \n\n\ndef find_extremes_z(srf, udiv=10, vdiv=10, step=10, max_div=250, __pts=[], __vals=[]):\n    \"\"\"Recursively finds the approximated extremes - highest and lowest point in z - on a surface.\n    \n    Args:\n      srf (Rhino.Geometry.Surface): Surface to evaluate the z-extremes for\n      udiv (int): Optional number of start divisions in surface u-direction, by default 15\n      vdiv (int): Optional number of start divisions in surface v-direction, by default 15\n      step (int): Optional step value that increments udiv and vdiv each recursion level, by default 15\n      max_div (int): Optional maximum number of divisions to in uv-direction of the surface\n     \n    Returns:\n      The approximated lowest [0] and hightest point [1] on the surface.\"\"\"\n    \n    if udiv >= max_div or vdiv >= max_div:\n        return __pts\n    \n    sample_pts = divide_surface(srf, udiv, vdiv)\n    sample_pts.sort(key=lambda pt: pt.Z)\n    extremes = [sample_pts[0], sample_pts[-1]]\n    # print \"U:\", udiv, \"V:\", vdiv, \"-> Extremes:\", [pt.Z for pt in __pts]\n\n    if len(__pts) == 0:\n        __vals = [[] for _ in xrange(len(extremes))]\n        return find_extremes_z(srf, udiv+step, vdiv+step, step, max_div, extremes, __vals)\n    \n    for i in xrange(len(extremes)):\n        difference = abs(extremes[i].Z) - abs(__pts[i].Z)\n        if difference > 0.0:\n            __pts[i] = extremes[i]\n        __vals[i].append(difference)\n    \n    \n    if len(__vals[0]) == 10:\n        dsum = sum([sum(lt) for lt in __vals])\n        if dsum < sc.doc.ModelAbsoluteTolerance:\n            return __pts\n    \n    return find_extremes_z(srf, udiv+step, vdiv+step, step, max_div, __pts, __vals)\n  \n            \n        \n\nif __name__ == \"__main__\":\n    if S:\n        if not D:\n            D = 250\n        E = find_extremes_z(S, max_div=D)\n    else:\n        ghenv.Component.AddRuntimeMessage(\n            gh.Kernel.GH_RuntimeMessageLevel.Warning,\n            \"Input parameter S failed to collect data\"\n        )",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1277
+}

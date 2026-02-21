@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/4x-variation-in-execution-time-of-rs-evaluatesurface/50564",
+  "topic_id": 50564,
+  "title": "4X Variation in Execution time of rs.EvaluateSurface",
+  "question": "I see 13 sec to an agonizing 55 sec execution time for the script below when \nmax_v\n in \ndef problem\n is set to 700.  The first time it often runs in 13 sec but the next time it takes 55 sec.  How can this be!!!  What do I need to do in order to consistently get the faster time?  I did some tests:\n\nmax_v   time\n\n100 2.6 sec\n\n200 3.6 sec to 7.6 sec\n\n400 8 sec to 21 sec\n\n700 13 sec to 55 sec\n\nThe display is disabled for all these tests.  Is there some kind of garbage collection going on for the larger sizes of the 2D \nmatrix\n variable? 100k entries seems mostly reproducible but 200k to 700k can increase by 400% in execution time.\n\n\nPlease try this simple script yourself and let me know your results.  Set \nmax_v\n to a value and try multiple executions.  Are the times consistent?  Is a graph of time vs \nmax_v\n reasonably linear?\n\n\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Point3d\nfrom time import time\nP3d = Point3d\ndef problem(srf):\n\ttime1 = time()\n\tmax_u = 1070.; max_v = 700.\n\ta = []\n\tfor i in range(int(max_u)):\n\t\tb = []\n\t\tfor j in range(int(max_v)): b.append(rs.EvaluateSurface(srf, i, j))\n\t\ta.append(b)\n\tprint 'Time to fill matrix = ', time() - time1\n\treturn()\ndef makeBase():\n\tpts = [P3d(0,0,942),P3d(0,88,953),   P3d(0,175,964),   P3d(0,263,973),   P3d(0,350,983),   P3d(0,438,991),   P3d(0,525,986),   P3d(0,613,991),   P3d(0,700,1000),\n\t\tP3d(220,0,951), P3d(220,88,969), P3d(220,175,976), P3d(220,263,988), P3d(220,350,995), P3d(220,438,1000),P3d(220,525,1000),P3d(220,613,1002),P3d(220,700,999),\n\t\tP3d(267,0,959), P3d(267,88,969), P3d(267,175,977), P3d(267,263,982), P3d(267,350,994), P3d(267,438,998), P3d(267,525,1000),P3d(267,613,1002),P3d(267,700,987),\n\t\tP3d(535,0,934), P3d(535,88,945), P3d(535,175,955), P3d(535,263,963), P3d(535,350,971), P3d(535,438,962), P3d(535,525,967), P3d(535,613,975), P3d(535,700,961),\n\t\tP3d(802,0,890), P3d(802,88,906), P3d(802,175,916), P3d(802,263,922), P3d(802,350,912), P3d(802,438,913), P3d(802,525,912), P3d(802,613,929), P3d...",
+  "code_blocks": [
+    {
+      "code": "def EvaluateSurface(surface_id, u, v):\n    \"Evaluates a surface at a U,V parameter\"\n    surface = rhutil.coercesurface(surface_id, True)\n    rc = surface.PointAt(u,v)\n    if rc.IsValid: return rc\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def problem(surface_id):\n    time1 = time()\n    surface = rs.coercesurface(surface_id, True)\n    if surface:\n        max_u = 1070.; max_v = 700.\n        a = []\n        for i in range(int(max_u)):\n            b = []\n            for j in range(int(max_v)): \n                b.append(surface.PointAt(i, j))\n            a.append(b)\n        print 'Time to fill matrix = ', time() - time1\n        return",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Point3d\nfrom time import time\nP3d = Point3d\ndef problem(srf):\n\ttime1 = time()\n\tmax_u = 1070.; max_v = 700.\n\ta = []\n\tfor i in range(int(max_u)):\n\t\tb = []\n\t\tfor j in range(int(max_v)): b.append(rs.EvaluateSurface(srf, i, j))\n\t\ta.append(b)\n\tprint 'Time to fill matrix = ', time() - time1\n\treturn()\ndef makeBase():\n\tpts = [P3d(0,0,942),P3d(0,88,953),   P3d(0,175,964),   P3d(0,263,973),   P3d(0,350,983),   P3d(0,438,991),   P3d(0,525,986),   P3d(0,613,991),   P3d(0,700,1000),\n\t\tP3d(220,0,951), P3d(220,88,969), P3d(220,175,976), P3d(220,263,988), P3d(220,350,995), P3d(220,438,1000),P3d(220,525,1000),P3d(220,613,1002),P3d(220,700,999),\n\t\tP3d(267,0,959), P3d(267,88,969), P3d(267,175,977), P3d(267,263,982), P3d(267,350,994), P3d(267,438,998), P3d(267,525,1000),P3d(267,613,1002),P3d(267,700,987),\n\t\tP3d(535,0,934), P3d(535,88,945), P3d(535,175,955), P3d(535,263,963), P3d(535,350,971), P3d(535,438,962), P3d(535,525,967), P3d(535,613,975), P3d(535,700,961),\n\t\tP3d(802,0,890), P3d(802,88,906), P3d(802,175,916), P3d(802,263,922), P3d(802,350,912), P3d(802,438,913), P3d(802,525,912), P3d(802,613,929), P3d(802,700,902),\n\t\tP3d(1070,0,857),P3d(1070,88,876),P3d(1070,175,874),P3d(1070,263,865),P3d(1070,350,835),P3d(1070,438,873),P3d(1070,525,835),P3d(1070,613,853),P3d(1070,700,855)]\n\tsrf = rs.AddSrfPtGrid([6,9], pts, [3,3], [False, False])\n\treturn(srf)\n# Clear document\nrs.EnableRedraw(False)\nrs.DeleteObjects(rs.AllObjects())\nsrf = makeBase()\nproblem(srf)\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 59,
+  "posts_count": 12,
+  "views": 1237
+}

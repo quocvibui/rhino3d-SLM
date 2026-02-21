@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/get-multiple-with-options.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/get-multiple-with-options.py",
+  "instruction": "Get multiple with options",
+  "code": "import Rhino\nimport scriptcontext\n\ndef GetMultipleWithOptions():\n    geometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter | Rhino.DocObjects.ObjectType.Mesh\n    integer1 = 300\n    integer2 = 300\n\n    optionInteger1 = Rhino.Input.Custom.OptionInteger(integer1, 200, 900)\n    optionInteger2 = Rhino.Input.Custom.OptionInteger(integer2, 200, 900)\n\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select surfaces, polysurfaces, or meshes\")\n    go.GeometryFilter = geometryFilter\n    go.AddOptionInteger(\"Option1\", optionInteger1)\n    go.AddOptionInteger(\"Option2\", optionInteger2)\n    go.GroupSelect = True\n    go.SubObjectSelect = False\n    go.EnableClearObjectsOnEntry(False)\n    go.EnableUnselectObjectsOnExit(False)\n    go.DeselectAllBeforePostSelect = False\n\n    bHavePreselectedObjects = False\n\n    while True:\n        res = go.GetMultiple(1, 0)\n\n        if res == Rhino.Input.GetResult.Option:\n            go.EnablePreSelect(False, True)\n            continue\n\n        elif res != Rhino.Input.GetResult.Object:\n            return Rhino.Commands.Result.Cancel\n\n        if go.ObjectsWerePreselected:\n            bHavePreselectedObjects = True\n            go.EnablePreSelect(False, True)\n            continue\n\n        break\n\n    if bHavePreselectedObjects:\n        # Normally, pre-selected objects will remain selected, when a\n        # command finishes, and post-selected objects will be unselected.\n        # This this way of picking, it is possible to have a combination\n        # of pre-selected and post-selected. So, to make sure everything\n        # \"looks the same\", lets unselect everything before finishing\n        # the command.\n        for i in range(0, go.ObjectCount):\n            rhinoObject = go.Object(i).Object()\n            if not rhinoObject is None:\n                rhinoObject.Select(False)\n        scriptcontext.doc.Views.Redraw()\n\n    objectCount = go.ObjectCount\n    integer1 = optionInteger1.CurrentValue\n    integer2 = optionInteger2.CurrentValue\n\n    Rhino.RhinoApp.WriteLine(\"Select object count = {0}\", objectCount)\n    Rhino.RhinoApp.WriteLine(\"Value of integer1 = {0}\", integer1)\n    Rhino.RhinoApp.WriteLine(\"Value of integer2 = {0}\", integer2)\n\n    return Rhino.Commands.Result.Success\n\nif __name__ == \"__main__\":\n    GetMultipleWithOptions()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

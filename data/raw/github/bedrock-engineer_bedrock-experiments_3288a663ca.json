@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/bedrock-engineer/bedrock-experiments/blob/f92c6c00200c26ef13e7f9733d743ee4fec4cb08/nl_amsterdam/grasshopper/geojson_to_rhino_geom.py",
+  "repo": "bedrock-engineer/bedrock-experiments",
+  "repo_stars": 0,
+  "repo_description": "Repo with experimental notebooks and apps",
+  "license": "Apache-2.0",
+  "filepath": "nl_amsterdam/grasshopper/geojson_to_rhino_geom.py",
+  "instruction": "Geojson to rhino geom",
+  "code": "import json\n\nimport ghpythonlib.treehelpers as th\nimport Rhino.Geometry as rg\n\n\ndef geojson_to_rhino_geometry(geom):\n    \"\"\"Convert a single GeoJSON geometry to Rhino geometry.\"\"\"\n    geom_type = geom[\"type\"]\n    coords = geom[\"coordinates\"]\n\n    if geom_type == \"Point\":\n        return rg.Point3d(coords[0], coords[1], coords[2] if len(coords) > 2 else 0)\n\n    elif geom_type == \"LineString\":\n        points = [rg.Point3d(c[0], c[1], c[2] if len(c) > 2 else 0) for c in coords]\n        return rg.PolylineCurve(points)\n\n    elif geom_type == \"Polygon\":\n        print(coords)\n        # Exterior ring\n        exterior = [\n            rg.Point3d(c[0], c[1], c[2] if len(c) > 2 else 0) for c in coords[0]\n        ]\n        exterior_curve = rg.PolylineCurve(exterior)\n\n        # Create planar surface\n        breps = rg.Brep.CreatePlanarBreps([exterior_curve], 0.01)\n        if not breps:\n            return None\n        brep = breps[0]\n\n        # Handle holes (interior rings)\n        if len(coords) > 1:\n            for hole in coords[1:]:\n                hole_pts = [\n                    rg.Point3d(c[0], c[1], c[2] if len(c) > 2 else 0) for c in hole\n                ]\n                hole_curve = rg.PolylineCurve(hole_pts)\n                hole_brep = rg.Brep.CreatePlanarBreps([hole_curve], 0.01)\n                if hole_brep:\n                    diff = rg.Brep.CreateBooleanDifference([brep], hole_brep, 0.01)\n                    if diff:\n                        brep = diff[0]\n\n        return brep\n\n    else:\n        return None\n\n\nwith open(json_path, \"r\") as f:\n    geojson = json.load(f)\n\nfeatures = geojson[\"features\"]\n\ngeometries = []\nproperty_keys = []\nproperty_values = []\nfor feat in features:\n    geom = feat[\"geometry\"]\n    geometries.append([geojson_to_rhino_geometry(geom)])\n\n    properties = feat[\"properties\"]\n    property_keys.append(list(properties.keys()))\n    property_values.append(list(properties.values()))\n\ngeometries = th.list_to_tree(geometries)\nproperty_keys = th.list_to_tree(property_keys)\nproperty_values = th.list_to_tree(property_values)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

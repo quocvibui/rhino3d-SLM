@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/customize-selection-in-python-or-rhinoscript/17871",
+  "topic_id": 17871,
+  "title": "Customize selection in Python (or Rhinoscript)",
+  "question": "Hello,\n\n\nI am trying to find a way to select objects like using rs.GetObjects(). But some objects have already to be selected. Is there a simple way to do so or do have I to use Selection Event or something more complicated?\n\nBecause I would add this to an old module written in rhinoscript it would also nice to do it there - but I think thats not possible?  Thanks a lot in advance.\n\n\nPhilip",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef AddToSelection(pre_sel):\n    #returns preselected plus post selected objects\n    #if neither, returns None\n    if pre_sel:\n        msg=\"Select any additional objects and press Enter\"\n    else:\n        msg=\"Select some objects\"\n    post_sel=rs.GetObjects(msg,preselect=False,select=True)\n    if pre_sel:\n        rs.SelectObjects(pre_sel)\n        if post_sel is None: return pre_sel\n    if post_sel: return pre_sel + post_sel\n\n\ndef TestAddToSelection():\n    sel=AddToSelection(rs.SelectedObjects())\n    if not sel:\n        print \"Nothing selected.\"\n    else:\n        print \"{} objects selected\".format(len(sel))\nTestAddToSelection()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef select():    \n    selected =rs.SelectedObjects()\n    while True:\n        curves = rs.GetObjects(\"Please select curves\",4)\n        if curves:\n            for curve in curves:\n                if curve in selected:\n                    rs.ObjectColorSource(curve,1)\n                    rs.ObjectColor(curve, (0,0,0))\n                    selected[selected.index(curve)] = None\n                    \n                else:\n                    selected.append(curve)\n                    rs.ObjectColor(curve, (0,255,255))\n        else:\n            selected  = [item for item in selected if item != None]\n            if selected:\n                print selected\n                [rs.ObjectColorSource(sel, 0) for sel in selected]\n                rs.SelectObjects(selected)\n            break\n\nselect()",
+      "language": "python",
+      "author": "powerpp",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def RunCommand():\n  go = GetObject()\n  go.SetCommandPrompt(\"Select objects\")\n  go.EnablePreSelect(True, True)\n  go.EnablePostSelect(True)\n  go.GetMultiple(0, 0)\n  if go.CommandResult() != Result.Success:\n    return go.CommandResult()\n\n  selected_objects = []\n  for obj in go.Objects():\n    selected_objects.Add(obj)\n\n  if go.ObjectsWerePreselected:\n    go.EnablePreSelect(False, True)\n    go.DeselectAllBeforePostSelect = False\n    go.EnableUnselectObjectsOnExit(False)\n    go.GetMultiple(0, 0)\n    if go.CommandResult() == Result.Success:\n      for obj in go.Objects():\n        selected_objects.Add(obj)\n       obj.Object().Select(True)\n  return Result.Success if selected_objects.Count > 0 else Result.Nothing",
+      "language": "python",
+      "author": "powerpp",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 3968
+}

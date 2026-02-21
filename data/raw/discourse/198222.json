@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-an-empty-box-with-box-plane-boundingbox-empty/198222",
+  "topic_id": 198222,
+  "title": "Creating an empty box with Box(plane, BoundingBox.Empty)",
+  "question": "Hi!\n\n\nI found a weird behavior in rhinocommon api. It might be a bug or just me being fooled by expecting something different.\n\n\nI want to create an \noriented\n empty box to union with points and grow.\n\n\nfrom Rhino.Geometry import Box, BoundingBox, Plane\n\n\nbox = Box(Plane.WorldXY, BoundingBox.Empty)\nprint box.X.Length, box.IsValid\n\nbox.Union(Plane.WorldXY.Origin)\nprint box.X.Length, box.IsValid\n\n\n\nResult is:\n\n\n-2.0 False\n2.0 True\n\n\n\nThe box should just contain one point, so it should degenerate to just that point and have zero length in all intervals. Or Not?\n\n\nAny feedback?\n\nThanks.\n\nGianluca",
+  "code_blocks": [
+    {
+      "code": "from Rhino.Geometry import Box, BoundingBox, Plane, Interval\n\nbox = Box(Plane.WorldXY, Interval(0,0),Interval(0,0),Interval(0,0))\nprint (box.X.Length, box.IsValid)\n\nbox.Union(Plane.WorldXY.Origin)\nprint (box.X.Length, box.IsValid)",
+      "language": "python",
+      "author": "CallumSykes",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "from Rhino.Geometry import Box, BoundingBox, Plane, Point3d\n\nbox = Box(Plane.WorldXY, BoundingBox.Empty)\nprint (box.X, box.IsValid)\n\nbox.Union(Point3d.Unset)\nprint (box.X, box.IsValid)",
+      "language": "python",
+      "author": "CallumSykes",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Geometry import Box, BoundingBox, Plane\n\n\nbox = Box(Plane.WorldXY, BoundingBox.Empty)\nprint box.X.Length, box.IsValid\n\nbox.Union(Plane.WorldXY.Origin)\nprint box.X.Length, box.IsValid",
+      "language": "python",
+      "author": "iltabe",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 143
+}

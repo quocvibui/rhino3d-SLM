@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-control-the-style-of-addsweep1/115837",
+  "topic_id": 115837,
+  "title": "How to control the style of AddSweep1?",
+  "question": "Is there a way to control whether the results of AddSweep1 outputs freeform or roadlike? It seems to me that freeform is the only output I’m seeing.\n\n\nThanks,\n\n\nDan",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef main():\n    \n    gCrv_Rail = rs.GetObject(\"Select rail curve\", filter=rs.filter.curve)\n    if not gCrv_Rail: return\n    \n    gCrvs_Shapes = rs.GetObjects(\"Select shape curves\", filter=rs.filter.curve)\n    if not gCrvs_Shapes: return\n    \n    rgCrv_Rail = rs.coercecurve(gCrv_Rail)\n    rgCrvs_Shapes = [rs.coercecurve(g) for g in gCrvs_Shapes]\n    \n    rgBreps = rg.Brep.CreateFromSweep(\n            rail=rgCrv_Rail,\n            shapes=rgCrvs_Shapes,\n            startPoint=rg.Point3d.Unset,\n            endPoint=rg.Point3d.Unset,\n            frameType=rg.SweepFrame.Roadlike,\n            roadlikeNormal=rg.Vector3d.ZAxis,\n            closed=False,\n            blendType=rg.SweepBlend.Local,\n            miterType=rg.SweepMiter.Trimmed,\n            tolerance=sc.doc.ModelAbsoluteTolerance,\n            rebuildType=rg.SweepRebuild.None,\n            rebuildPointCount=0,\n            refitTolerance=0.0)\n    \n    if not rgBreps:\n        print \"Sweep failed.\"\n        return\n    \n    for rgB in rgBreps:\n        sc.doc.Objects.AddBrep(rgB)\n    \n    sc.doc.Views.Redraw()\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef main():\n    \n    gCrv_Rail = rs.GetObject(\"Select rail curve\", filter=rs.filter.curve)\n    if not gCrv_Rail: return\n    \n    gCrvs_Shapes = rs.GetObjects(\"Select shape curves\", filter=rs.filter.curve)\n    if not gCrvs_Shapes: return\n    \n    rgCrv_Rail = rs.coercecurve(gCrv_Rail)\n    rgCrvs_Shapes = [rs.coercecurve(g) for g in gCrvs_Shapes]\n    \n    rgBreps = rg.Brep.CreateFromSweep(\n            rail=rgCrv_Rail,\n            shapes=rgCrvs_Shapes,\n            startPoint=rg.Point3d.Unset,\n            endPoint=rg.Point3d.Unset,\n            frameType=rg.SweepFrame.Roadlike,\n            roadlikeNormal=rg.Vector3d.ZAxis,\n            closed=False,\n            blendType=rg.SweepBlend.Local,\n            miterType=rg.SweepMiter.Trimmed,\n            tolerance=sc.doc.ModelAbsoluteTolerance,\n            rebuildType=rg.SweepRebuild.None,\n            rebuildPointCount=0,\n            refitTolerance=0.0)\n    \n    if not rgBreps:\n        print \"Sweep failed.\"\n        return\n    \n    for rgB in rgBreps:\n        sc.doc.Objects.AddBrep(rgB)\n    \n    sc.doc.Views.Redraw()\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 609
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TheoArchi/EsquisSons/blob/00d1b02f7ce3e190b5c4c3429d3e84756c29bfdb/Components_Uncompiled_for%20ghpython/Listener_Point.py",
+  "repo": "TheoArchi/EsquisSons",
+  "repo_stars": 3,
+  "repo_description": "Esquissons is a grasshopper plugin which help you to design with sound ;)",
+  "license": "NOASSERTION",
+  "filepath": "Components_Uncompiled_for ghpython/Listener_Point.py",
+  "instruction": "EsquisSons Listener is used to declare the listening point.\nDefine its position, orientation and size :)\n-\nAAU / Theo Marchal / BETA VERSION / AVRIL2020",
+  "code": "\"\"\"EsquisSons Listener is used to declare the listening point.\nDefine its position, orientation and size :)\n-\nAAU / Theo Marchal / BETA VERSION / AVRIL2020\"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, Listener_Location, Direction, Height):\n        \n        __author__ = \"theomarchal\"\n        self.Params.Input[0].Description = \"Location of the listener foots (as a point - Default is set to 0,0,0)\"\n        self.Params.Input[1].Description = \"Direction of the listener (in degrees from 0 to 360)\"\n        self.Params.Input[2].Description = \"How tall is the listener (default = 1.80)\"\n        self.Params.Output[0].Description = \"Listener Geometry, size and direction\"\n        self.Params.Output[1].Description = \"Listener Object (plug it into EsquisSons)\"\n        self.Name = \"Listener Point\"\n        self.NickName = \"Listener\"\n        self.Message = \"EsquisSons V3\"\n        self.Category = \"EsquisSons\"\n        self.SubCategory = \"1/ Scene\"\n                \n                \n        import rhinoscriptsyntax as rs\n                \n        LL = Listener_Location\n        LD = Direction\n        LH = Height\n                \n        if LL is None:\n            LL = rs.AddPoint(0,0,0)\n        if LD is None:\n            LD = 0\n        if LH is None:\n            LH = 1.8\n                \n        LV = rs.VectorRotate([0,(LH),0],LD,[0,0,1])\n        matrix = rs.XformTranslation((0,0,LH))\n        LHp = rs.PointTransform(LL,matrix)\n        LV2 = rs.VectorScale((rs.VectorRotate(LV,90,[0,0,1])),0.5)\n        LV3 = rs.VectorScale((rs.VectorRotate(LV,-90,[0,0,1])),0.5)\n        T1 = rs.PointTransform(LL,(rs.XformTranslation(LV)))\n        Tl = rs.PointTransform(LL,(rs.XformTranslation(LV2)))\n        Tr = rs.PointTransform(LL,(rs.XformTranslation(LV3)))\n        ps=[T1,Tl,Tr]\n        Geo = [rs.AddSphere(LHp,(LH/10)),rs.AddLine(LL,LHp),rs.AddSrfPt(ps)]\n        Tl = rs.PointTransform(Tl,matrix)\n        Tr = rs.PointTransform(Tr,matrix)\n        LP = [LHp,Tl,Tr,LH]\n        Listener = [LP]\n        return (Geo, Listener)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

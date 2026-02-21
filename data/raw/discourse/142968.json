@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multiple-get-objects/142968",
+  "topic_id": 142968,
+  "title": "Multiple Get Objects",
+  "question": "Hi,\n\n\nI have run into an odd issue with my script. I want to get a second edge loop from a subd, but the Rhino document doesn’t prompt me for another selection. I’m guessing that the results of the first ‘get’ are sticking around being reused when i try assigning to another variable (selected_edge_id2)\n\n\nAny thoughts? Do I need to do something like an unset?\n\n\n\n# \nimport Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport System\n\ndef GetSubDEdge():\n    \n    #select a subd edge, return edge ids of selection\n    go = Rhino.Input.Custom.GetObject()\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.MeshEdge\n    go.SetCommandPrompt('Select subd edge for fairing')\n    go.GetMultiple(1,0) # could be optional depending on inputs, add cmd line op?\n    \n    objrefs = go.Objects()\n    subdref = go.Objects() [0].SubD()\n    \n    edge_ids = [ objref.GeometryComponentIndex.Index for objref in objrefs ]\n    \n    return edge_ids, subdref\n\ndef SubDPointsInfo( subd ):\n    # input a subd, return all info of subds points\n    verts = subd.Vertices.First\n    \n    control_net_pts, srf_pts = [ verts.ControlNetPoint ], [ verts.SurfacePoint() ]\n    subd_vert_objects = [verts] # temp variable\n    subd_vert_ids = [verts.Id]\n    \n    for vert in range( subd.Vertices.Count  - 1 ):\n        current = subd_vert_objects[-1].Next\n        subd_vert_objects.append( current )\n        subd_vert_ids.append( current.Id) \n        control_net_pts.append( current.ControlNetPoint )\n        srf_pts.append(current.SurfacePoint( ) )\n        value = [ current.ControlNetPoint, current.SurfacePoint( ) ]\n    \n    point_loc_tuple =  zip( control_net_pts, srf_pts )\n    point_loc = list(map(list, point_loc_tuple))\n    \n    points_info_dict = dict (zip( subd_vert_ids, point_loc) )\n    \n    return points_info_dict\n\ndef GetSelectedSubDEdgePoints( edges, selected_edge_ids ):\n    \n    selected_edge_points = [ ]\n    for edge in edges:\n        if edge.Id in selected_edge_ids:\n   ...",
+  "code_blocks": [
+    {
+      "code": "# \nimport Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport System\n\ndef GetSubDEdge():\n    \n    #select a subd edge, return edge ids of selection\n    go = Rhino.Input.Custom.GetObject()\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.MeshEdge\n    go.SetCommandPrompt('Select subd edge for fairing')\n    go.GetMultiple(1,0) # could be optional depending on inputs, add cmd line op?\n    \n    objrefs = go.Objects()\n    subdref = go.Objects() [0].SubD()\n    \n    edge_ids = [ objref.GeometryComponentIndex.Index for objref in objrefs ]\n    \n    return edge_ids, subdref\n\ndef SubDPointsInfo( subd ):\n    # input a subd, return all info of subds points\n    verts = subd.Vertices.First\n    \n    control_net_pts, srf_pts = [ verts.ControlNetPoint ], [ verts.SurfacePoint() ]\n    subd_vert_objects = [verts] # temp variable\n    subd_vert_ids = [verts.Id]\n    \n    for vert in range( subd.Vertices.Count  - 1 ):\n        current = subd_vert_objects[-1].Next\n        subd_vert_objects.append( current )\n        subd_vert_ids.append( current.Id) \n        control_net_pts.append( current.ControlNetPoint )\n        srf_pts.append(current.SurfacePoint( ) )\n        value = [ current.ControlNetPoint, current.SurfacePoint( ) ]\n    \n    point_loc_tuple =  zip( control_net_pts, srf_pts )\n    point_loc = list(map(list, point_loc_tuple))\n    \n    points_info_dict = dict (zip( subd_vert_ids, point_loc) )\n    \n    return points_info_dict\n\ndef GetSelectedSubDEdgePoints( edges, selected_edge_ids ):\n    \n    selected_edge_points = [ ]\n    for edge in edges:\n        if edge.Id in selected_edge_ids:\n            \n            selected_edge_points.append(edge.VertexFrom.Id)\n            selected_edge_points.append(edge.VertexTo.Id)\n    \n    selected_vertex_ids_set = set ( selected_edge_points )\n    srf_pt = [ ]\n    for id in selected_vertex_ids_set:\n        selected_vertex = verts.Find( id )\n        srf_pt.append( selected_vertex.SurfacePoint() )\n    \n    selected_vertex_ids = [ vert for vert in selected_vertex_ids_set ]\n    \n    return selected_vertex_ids, srf_pt\n\n#get operation one, no problem\nselected_edge_id, subdref = GetSubDEdge() #returns selected edge ids\npoints_info = SubDPointsInfo( subdref )\n\n#get operation two, rhino document doesn't prompt for another selection?\nselected_edge_id2, subdref = GetSubDEdge()",
+      "language": "python",
+      "author": "Jonathan_Hutchinson1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 587
+}

@@ -1,0 +1,22 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bypass-plugin-loading-for-rhino-testing/196781",
+  "topic_id": 196781,
+  "title": "Bypass plugin loading for Rhino.Testing",
+  "question": "I have managed to modify the Rhino.Testing library and set it up to run integration tests for my custom .gha plugin. In the original code for Rhino.Testing, in the \nGH1Loader\n class, the \nLoadGHA\n method is used to load any specified .gha files into Grasshopper. This method calls a private (?) method called \nLoadGHA\n on the \nComponentServer\n.\n\n\nThe issue I am facing can be described like this:\n\nFor the plugin’s development, I have added a static path to my .gha file in \nGrasshopperDeveloperSettings\n. This makes it so that when Rhino.Testing loads Grasshopper, the .gha file will automatically get loaded. But the integration tests must not rely on a static path for the .gha file, therefore I want to be able to supply the path to the latest .gha file to the \nLoadGHA\n method.\n\n\nIf I attempt to load the plugin again, Grasshopper will notice that the same plugin was already loaded and will show messages. Is there any workaround for this situation?\n\n\nMy current modified version of the \nLoadGHA\n method looks like this:\n\n\npublic static void LoadGHA(IEnumerable<string> ghaFiles) {\n\n    System.Reflection.MethodInfo loader =\n        GH1.Instances.ComponentServer\n                     .GetType()\n                     .GetMethod(\"LoadGHA\", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);\n\n    foreach (string gha in ghaFiles) {\n        // Verify that the gha file is not already loaded.\n        var matchingLibrary = GH1.Instances.ComponentServer.Libraries.FirstOrDefault(l => string.Equals(Path.GetFileName(l.Location), Path.GetFileName(gha)));\n        if (matchingLibrary != null) {\n            Logging.logMessage($\"Skip loading Grasshopper plugin from file:{gha}. Same-name file is already loaded possibly in GrasshopperDeveloperSettings at version {matchingLibrary.Version}.\");\n            continue;\n        }\n\n        Logging.logMessage($\"Loading Grasshopper plugin from file:{gha}\");\n        loader.Invoke(\n                GH1.Instances.ComponentServer,...",
+  "code_blocks": [
+    {
+      "code": "public static void LoadGHA(IEnumerable<string> ghaFiles) {\n\n    System.Reflection.MethodInfo loader =\n        GH1.Instances.ComponentServer\n                     .GetType()\n                     .GetMethod(\"LoadGHA\", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);\n\n    foreach (string gha in ghaFiles) {\n        // Verify that the gha file is not already loaded.\n        var matchingLibrary = GH1.Instances.ComponentServer.Libraries.FirstOrDefault(l => string.Equals(Path.GetFileName(l.Location), Path.GetFileName(gha)));\n        if (matchingLibrary != null) {\n            Logging.logMessage($\"Skip loading Grasshopper plugin from file:{gha}. Same-name file is already loaded possibly in GrasshopperDeveloperSettings at version {matchingLibrary.Version}.\");\n            continue;\n        }\n\n        Logging.logMessage($\"Loading Grasshopper plugin from file:{gha}\");\n        loader.Invoke(\n                GH1.Instances.ComponentServer,\n                new object[] { new GH1.Kernel.GH_ExternalFile(gha), false }\n            );\n    }\n}",
+      "language": "csharp",
+      "author": "Christos_Tsaridis",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "grasshopper"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 72
+}

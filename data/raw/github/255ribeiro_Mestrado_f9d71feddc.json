@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/255ribeiro/Mestrado/blob/07e9939e80a3217834a7cd6707bda1bf5fb46389/Latex/Disseracao%20-%20MCTI/funicular01.py",
+  "repo": "255ribeiro/Mestrado",
+  "repo_stars": 0,
+  "repo_description": "Arquivos da Dissertação de Mestrado",
+  "license": "unknown",
+  "filepath": "Latex/Disseracao - MCTI/funicular01.py",
+  "instruction": "Funicular01",
+  "code": "﻿from __future__ import division\n\nfrom Rhino.Geometry import Point3d, Line\nimport ghpythonlib.components as gh\nimport rhinoscriptsyntax as rs\n\n#Cirando Listas vazias para os outputs\nfunicular=[]\nPF=[]\nraios=[]\nresultante=[]\nteste=[]\n\n\n\n# Desenhando o poligono de forças\npAux = rs.coerce3dpoint(pto_inicial)\nprint \"ponto inicial: \", pAux\n\npolo = rs.coerce3dpoint(polo)\nprint \"polo: \", polo\nraios.append(Line(polo,pAux))\n\nfor v in vetores:\n    vAux1 = rs.coerceline(v)\n    vAux2 = pAux - v.PointAt(0)\n    vAux3 = gh.Move(vAux1,vAux2)[0]\n    pAux = vAux3.PointAt(1)\n    PF.append(vAux3)\n    r=Line(polo,pAux)\n    raios.append(r)\n\nr=Line(rs.coerce3dpoint(pto_inicial),pAux)\n\n#testando PF ppara equilíbrio de translação\ntestePF=gh.Length(r)\nif testePF == 0:\n    print \"Equilíbrio de Translação\"\nelse:\n    print \"Módulo da resultante: \", testePF\n    resultante.append(r)\n\n#Desenhando o funicular\n\nj = len(raios)\n\nfor i in range(j):\n    r = rs.coerceline(raios[i])\n    if i == 0:\n        pAux = (rs.coerceline(vetores[0]).PointAt(.5))\n        vAux1 = Line(r.PointAt(0),pAux)\n        corda = gh.Move(r,vAux1)[0]\n        corda = rs.coerceline(corda)\n        funicular.append(corda)\n        \n    elif i < j-1:\n        vAux1 = Line(r.PointAt(1),pAux)\n        crdAux = gh.Move(r,vAux1)[0]\n        crdAux = rs.coerceline(crdAux)\n        pAux2 = pAux\n        pAux = gh.LineXLine(crdAux,vetores[i])[-1]\n        corda = Line(pAux2,pAux)\n        funicular.append(corda)\n        if not gh.CurveXCurve(crdAux,vetores[i])[-1]:\n            print \"teste\"\n            \n            \n    else:\n        vAux1 = Line(r.PointAt(1),pAux)\n        corda = gh.Move(r,vAux1)[0]\n        corda = rs.coerceline(corda)\n        funicular.append(corda)\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

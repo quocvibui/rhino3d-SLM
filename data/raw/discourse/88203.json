@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/predefined-filename-and-location-with-rhinopdf/88203",
+  "topic_id": 88203,
+  "title": "Predefined filename and location with RhinoPDF",
+  "question": "Hi\n\n\nIt try to script in python a  PDF output from the current view to a predefined map and file name but I doesn’t get to the result I like.\n\n\nimport rhinoscriptsyntax as rs\n\n\ndef PrintCurrentView():\n\ndoc=rs.DocumentName()\n\n\nprinter='RhinoPDF'\ndir=\"C:\\\\pdf_output\\\\\"\nName='test.pdf'\n\ncmd='-_Print Setup Margins TopMargin=5 BottomMargin=5 LeftMargin=5 RightMargin=5 _Enter '\n \ncmd+='Destination '\ncmd+='OutputColor PrintColor '\ncmd+='Pagesize 297.0 210.0 '\ncmd+='OutputType=Raster _Enter '\ncmd+='View ViewportArea=Viewport _Enter '\ncmd+='Visibility Footer '+doc+' _Enter '\n#cmd+=\"_Enter _GO \"+dir+Name+' '\ncmd+='_Enter Preview '\nrs.Command(cmd)\nreturn\n\n\n\nif \nname\n==“\nmain\n”:\n\nPrintCurrentView()\n\n\nI like to use the Commented row to predefine the file location and name but it doesn’t work.\n\n\nOr is the another way to print the current view as and PDF to a predefined map and name?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System.Drawing\n#import rhinoscriptsyntax as rs\n\ndef createSinglePDF(view):\n    pdf = Rhino.FileIO.FilePdf.Create()\n    dpi = 300\n    size = System.Drawing.Size(11*dpi,8.5*dpi)\n    \n    settings = Rhino.Display.ViewCaptureSettings(view, size, dpi)\n    pdf.AddPage(settings)\n    filename = 'c:/pdf_output/'+'ViewCaprture'+'.pdf'\n    pdf.Write(filename)\n\nViews=sc.doc.Views\nv=sc.doc.Views.ActiveView\ncreateSinglePDF(v)",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System.Drawing\n\ndef createSinglePDF(view):\n    \n    pdf = Rhino.FileIO.FilePdf.Create()\n    dpi = 300\n    size = System.Drawing.Size(11*dpi,8.5*dpi)\n    settings = Rhino.Display.ViewCaptureSettings(view, size, dpi)\n    settings.OutputColor = Rhino.Display.ViewCaptureSettings.ColorMode.DisplayColor\n    capture = Rhino.Display.ViewCapture.CaptureToBitmap(settings)\n    pdf.AddPage(settings)\n    pdf.DrawBitmap(0, capture, 0, 0, 11*dpi, 8.5*dpi, 0)\n\n    filename = 'c:/pdf_output/'+'ViewCapture'+'.pdf'\n    pdf.Write(filename)\n\nif __name__==\"__main__\":\n    Views=sc.doc.Views\n    v=sc.doc.Views.ActiveView\n    createSinglePDF(v)",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "printer='RhinoPDF'\ndir=\"C:\\\\pdf_output\\\\\"\nName='test.pdf'\n\ncmd='-_Print Setup Margins TopMargin=5 BottomMargin=5 LeftMargin=5 RightMargin=5 _Enter '\n \ncmd+='Destination '\ncmd+='OutputColor PrintColor '\ncmd+='Pagesize 297.0 210.0 '\ncmd+='OutputType=Raster _Enter '\ncmd+='View ViewportArea=Viewport _Enter '\ncmd+='Visibility Footer '+doc+' _Enter '\n#cmd+=\"_Enter _GO \"+dir+Name+' '\ncmd+='_Enter Preview '\nrs.Command(cmd)\nreturn",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 872
+}

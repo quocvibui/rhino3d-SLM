@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Eridaa/1.RhinoGH--Python-hops-examples/blob/db30011918629b550eb1e26aa638723944303b9a/AS01/2.%20networks/geometry.py",
+  "repo": "Eridaa/1.RhinoGH--Python-hops-examples",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "AS01/2. networks/geometry.py",
+  "instruction": "Geometry",
+  "code": "import rhino3dm as rg\nimport networkx as nx\nimport random\n\ndef createGridGraph(x, y):\n\n    M = nx.grid_2d_graph(x,y)\n    return M\n\ndef addRandomWeights(G):\n\n    NG = nx.Graph()\n    for u,v,data in G.edges(data=True):\n        #w = data['weight'] if 'weight' in data else 1.0\n        w = random.randint(1,10)\n        if NG.has_edge(u,v):\n            NG[u][v]['weight'] += w\n        else:\n            NG.add_edge(u, v, weight=w)\n    \n    return NG\n\ndef getNodes(G, layout = 0):\n\n    if layout == 0 : lay =  nx.kamada_kawai_layout(G)\n    elif layout == 1 : lay =  nx.circular_layout(G)\n    elif layout == 2 : lay =  nx.shell_layout(G)\n    elif layout == 3 : lay =  nx.spiral_layout(G)\n    else: lay = nx.planar_layout(G)\n\n    nodes = []\n    for d in lay.values():\n        pt = rg.Point3d( d[0], d[1] , 0)\n        nodes.append(pt)\n\n    return nodes\n\n\ndef getEdges(G, layout = 0):\n\n    if layout == 0 : lay =  nx.kamada_kawai_layout(G)\n    elif layout == 1 : lay =  nx.circular_layout(G)\n    elif layout == 2 : lay =  nx.shell_layout(G)\n    elif layout == 3 : lay =  nx.spiral_layout(G)\n    else: lay = nx.planar_layout(G)\n\n    edges = []\n    for e in G.edges:\n        p1 = rg.Point3d( lay[e[0]][0], lay[e[0]][1], 0 )\n        p2 = rg.Point3d( lay[e[1]][0], lay[e[1]][1], 0 )\n        line = rg.LineCurve(p1, p2)\n        edges.append(line)\n\n    return edges\n\n\n\"\"\"\nG = createGridGraph(3,3)\nGW = addRandomWeigrhs(G)\n\nnodes = getNodes(G)\nedges = getEdges(G)\n\"\"\"\n\n\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

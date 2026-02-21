@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_meshvolume.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_meshvolume.py",
+  "instruction": "Ex meshvolume",
+  "code": "from Rhino.Input.Custom import *\nfrom Rhino.DocObjects import ObjectType\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import Result\n\ndef RunCommand():\n  gm = GetObject()\n  gm.SetCommandPrompt(\"Select solid meshes for volume calculation\")\n  gm.GeometryFilter = ObjectType.Mesh\n  gm.GeometryAttributeFilter = GeometryAttributeFilter.ClosedMesh\n  gm.SubObjectSelect = False\n  gm.GroupSelect = True\n  gm.GetMultiple(1, 0)\n  if gm.CommandResult() != Result.Success:\n    return gm.CommandResult()\n\n  volume = 0.0\n  volume_error = 0.0\n  for obj_ref in gm.Objects():\n    if obj_ref.Mesh() != None:\n      mass_properties = VolumeMassProperties.Compute(obj_ref.Mesh())\n      if mass_properties != None:\n        volume += mass_properties.Volume\n        volume_error += mass_properties.VolumeError\n\n  print \"Total volume = {0:f} (+/- {1:f})\".format(volume, volume_error)\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-faces-removezeroareafaces-removes-all-faces/95869",
+  "topic_id": 95869,
+  "title": "Mesh.Faces.RemoveZeroAreaFaces() removes all faces",
+  "question": "When i call the function RemoveZeroAreaFaces() on a mesh, all faces are deleted.\n\n\nHere is an example:\n\n\nimport clr\nimport Rhino\nimport scriptcontext\nimport System.Guid\nfrom Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport System.Guid\n\ndef RunCommand():\n  \n  boundingBox = BoundingBox(0, 0, 0, 10, 10, 10)\n  brep = boundingBox.ToBrep();\n  qualityRenderMesh = MeshingParameters.QualityRenderMesh\n  meshes = Mesh.CreateFromBrep(brep, qualityRenderMesh)\n  \n  brep_mesh = Mesh();\n  for mesh in meshes:\n    brep_mesh.Append(mesh)\n \n  brep_mesh.Faces.ConvertQuadsToTriangles()\n\n  print \"brep_mesh has {0} faces.\".format(str(brep_mesh.Faces.Count))\n\n  doc.Objects.AddMesh(brep_mesh);\n  doc.Views.Redraw();\n\n  fixedPartially = clr.Reference[System.Int32]()\n  fixedWholly = brep_mesh.Faces.RemoveZeroAreaFaces(fixedPartially)\n\n  print \"After RemoveZeroAreaFaces faceCount={0}, fidexPartially={1}, fixedWholly={2}\".format(str(brep_mesh.Faces.Count), str(fixedPartially), str(fixedWholly))\n\n  return Result.Success\n\n\nif __name__ == \"__main__\":\n  RunCommand()\n\n\n\n\nThe ouput looks like this:\n\n\nbrep_mesh has 12 faces.\n\nAfter RemoveZeroAreaFaces faceCount=0, fidexPartially=0, fixedWholly=0\n\n\nDoes anyone have any idea what’s going wrong?",
+  "code_blocks": [
+    {
+      "code": "import clr\nimport Rhino\nimport scriptcontext\nimport System.Guid\nfrom Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport System.Guid\n\ndef RunCommand():\n  \n  boundingBox = BoundingBox(0, 0, 0, 10, 10, 10)\n  brep = boundingBox.ToBrep();\n  qualityRenderMesh = MeshingParameters.QualityRenderMesh\n  meshes = Mesh.CreateFromBrep(brep, qualityRenderMesh)\n  \n  brep_mesh = Mesh();\n  for mesh in meshes:\n    brep_mesh.Append(mesh)\n \n  brep_mesh.Faces.ConvertQuadsToTriangles()\n\n  print \"brep_mesh has {0} faces.\".format(str(brep_mesh.Faces.Count))\n\n  doc.Objects.AddMesh(brep_mesh);\n  doc.Views.Redraw();\n\n  fixedPartially = clr.Reference[System.Int32]()\n  fixedWholly = brep_mesh.Faces.RemoveZeroAreaFaces(fixedPartially)\n\n  print \"After RemoveZeroAreaFaces faceCount={0}, fidexPartially={1}, fixedWholly={2}\".format(str(brep_mesh.Faces.Count), str(fixedPartially), str(fixedWholly))\n\n  return Result.Success\n\n\nif __name__ == \"__main__\":\n  RunCommand()",
+      "language": "python",
+      "author": "thomas.k",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 581
+}

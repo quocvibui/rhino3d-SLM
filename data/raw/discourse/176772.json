@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/block-decomposition-using-rhinoinside/176772",
+  "topic_id": 176772,
+  "title": "Block decomposition using rhinoinside",
+  "question": "I am working with some models exported from SolidWorks. As a consequence, when importing those models into the Rhino, I have a situation when every detail is placed in a separate block and if in SolidWorks there were assemblies and subassemblies – those details in Rhino will be in some nested blocks. But I need to work with separate details ( here – separate closed polysurfaces).\n\nI have made a script for interactive Rhino like this:\n\n\nimport Rhino\ndef decompose(objs):\n    surfs =list()\n    for obj in objs:\n        if obj.ObjectType == Rhino.DocObjects.ObjectType.InstanceReference:\n            decompose(obj.GetSubObjects())\n        elif obj.ObjectType == Rhino.DocObjects.ObjectType.Brep:\n            surfs.append(obj.Geometry)\n    if surfs:\n        [Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(brep) for brep in Rhino.Geometry.Brep.JoinBreps(surfs,0.1)]\n\n\ndoc = Rhino.RhinoDoc.ActiveDoc\nobjs = doc.Objects\n\ndecompose(objs)\nfor obj in objs:\n    if obj.ObjectType == Rhino.DocObjects.ObjectType.InstanceReference:\n        Rhino.RhinoDoc.ActiveDoc.Objects.Delete(obj)\ndoc.Views.ActiveView.Redraw()\n\n\n\nBut this script will not work when I run it in Pycharm using rhinoinside library (the idea here is to use Rhino in a headless mode.\n\nI would be very grateful if you could recommend me how to rewrite this code so that it will work in Pycharm. As far as I see – the main problem is that in Rhino we usually work with RhinoObjects and when working in a headless mode using rhinoinside – we get some File3dmObjects. And those two classes have different methods and attributes.",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport System\nimport Rhino",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\ndef decompose(objs):\n    surfs =list()\n    for obj in objs:\n        if obj.ObjectType == Rhino.DocObjects.ObjectType.InstanceReference:\n            decompose(obj.GetSubObjects())\n        elif obj.ObjectType == Rhino.DocObjects.ObjectType.Brep:\n            surfs.append(obj.Geometry)\n    if surfs:\n        [Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(brep) for brep in Rhino.Geometry.Brep.JoinBreps(surfs,0.1)]\n\n\ndoc = Rhino.RhinoDoc.ActiveDoc\nobjs = doc.Objects\n\ndecompose(objs)\nfor obj in objs:\n    if obj.ObjectType == Rhino.DocObjects.ObjectType.InstanceReference:\n        Rhino.RhinoDoc.ActiveDoc.Objects.Delete(obj)\ndoc.Views.ActiveView.Redraw()",
+      "language": "python",
+      "author": "Andrii_Levchenko1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 267
+}

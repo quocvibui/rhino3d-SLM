@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/auto-name-numbering-of-objects/1518",
+  "topic_id": 1518,
+  "title": "Auto-name&numbering of objects",
+  "question": "Hi,\n\n\nPer email I was requested for a script to auto-name object with numbering:\n\n\n\n\nI would like now to know if it is possible to have a script how create the name of following a number order, as example kn01, kn02, kn03, kn04….\n\nThe problem is, all the lines in my project should have a name with an associated number\n\nI would like to select a couple of lines and the script give the names.\n\n\nDoes anyone have such script laying around?\n\nI’m on a tight schedule and cannot help right now.\n\n\nCheers\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''\n' AutoNameObjects.rvb -- August 2013\n' If this code works, it was written by Dale Fugier.\n' If not, I don't know who wrote it.\n' Works with Rhino 4 and 5.\n'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''\nOption Explicit\n\nSub AutoNameObjects\n  \n  Dim arrObjects, strPrefix, nDigits, strName, i\n  \n  arrObjects = Rhino.GetObjects(\"Select objects to automatically name\", 0, True, True)\n  If IsNull(arrObjects) Then Exit Sub\n    \n  strPrefix = Rhino.GetString(\"Object name prefix\")\n  If IsNull(strPrefix) Then Exit Sub\n    \n  nDigits = Len(CStr(UBound(arrObjects) + 1))",
+      "language": "unknown",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\" August 2013\nShamelessly stolen from Dale's AutoNameObjects.rvb\n\"\"\"\nimport rhinoscriptsyntax as rs\n\ndef AutoNameObjects():\n    msg = \"Select objects to automatically name\"\n    objects = rs.GetObjects(msg, rs.filter.allobjects, True, True)\n    if not objects: return\n    \n    prefix = rs.GetString(\"Object name prefix\")\n    if not prefix: return\n    \n    width = len(str(len(objects)+1))\n    for i, obj in enumerate(objects):\n        name = prefix + str(i+1).rjust(width, '0')\n        rs.ObjectName(obj, name)\n\n\nAutoNameObjects()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 3217
+}

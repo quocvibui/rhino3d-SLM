@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/use-rhinocommon-python-to-select-all-objects-in-rhino-file/97179",
+  "topic_id": 97179,
+  "title": "Use RhinoCommon(python) to select all objects in Rhino file",
+  "question": "I’m sure this is incredibly simple but I haven’t been able to get it to work…\n\n\nI have a Rhino file with several objects (points, breps, lines, etc.). I’d like to be able to access these objects in a python component using RhinoCommon, so that I can use them as if they had been referenced in Grasshopper (i.e. I can Transform them, visualize them, or call any of the usual methods associated with their relevant class).\n\n\nI’ve tried things like Rhino.DocObjects.BrepObject.Geometry, but that just returns a IronPython.Runtime.Types.ReflectedProperty, not the geometry. I’ve also tried Rhino.DocObjects.ObjRef() and entered the guid as the argument, but I can’t seem to format the string as a guid… Any help would be greatly appreciated.\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\nfor rObj in Rhino.RhinoDoc.ActiveDoc.Objects:\n    if rObj.IsNormal:\n        Rhino.RhinoDoc.ActiveDoc.Objects.Select(rObj.Id,True)",
+      "language": "python",
+      "author": "Darryl_Menezes",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\n\nfor rObj in Rhino.RhinoDoc.ActiveDoc.Objects:\n    if rObj.IsNormal:\n        if(rObj.ObjectType == Rhino.DocObjects.ObjectType.Brep):\n            brep= rObj.Geometry\n            ##do something for breps\n        elif(rObj.ObjectType == Rhino.DocObjects.ObjectType.Curve):\n            curve = rObj.Geometry\n            ##Do somthing for curves",
+      "language": "python",
+      "author": "Darryl_Menezes",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nfor rObj in Rhino.RhinoDoc.ActiveDoc.Objects:\n    id = rObj.Id",
+      "language": "python",
+      "author": "Darryl_Menezes",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System\n\nguid_string = 'b64fa0bd-28f0-4894-baa7-ae1937d3e124'\nguid = System.Guid.Parse(guid_string)\n\nfor rObj in Rhino.RhinoDoc.ActiveDoc.Objects:\n    if rObj.Id == guid:\n        my_brep = rObj.Geometry\n\na = my_brep",
+      "language": "python",
+      "author": "jason.danforth",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "ObjRef obj_ref;\n            var rc = RhinoGet.GetOneObject(\"Select object\", false, ObjectType.AnyObject, out obj_ref);\n            if (rc != Result.Success)\n                return rc;\n            if (obj_ref == null)\n                return Result.Nothing;\n\n            var guid = obj_ref.ObjectId;      \n\n            RhinoObject rObj = RhinoDoc.ActiveDoc.Objects;\n\n            if (rObj.Id == guid)\n            { GeometryBase my_brep = rObj.Geometry;\n\n                var a = my_brep;\n             }",
+      "language": "csharp",
+      "author": "raghav.pathak",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 4607
+}

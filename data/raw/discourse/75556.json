@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/which-approach-is-most-appropriate-writing-python-code/75556",
+  "topic_id": 75556,
+  "title": "Which approach is most appropriate - writing python code",
+  "question": "I’ve been writing a few python scripts now again but I’ve never questioned which package is most appropriate to use until I came across two different approaches to generate curves from text with a big difference in calculation time.\n\n\nThe first example with Rhino is very fast to compute - 45ms:\n\n\nimport Rhino as rc\n\npreText = rc.RhinoDoc.ActiveDoc.Objects.AddText(text, location, text_height, font, True, False)\n\npostText = rc.RhinoDoc.ActiveDoc.Objects.Find(preText)\n\ntextCrvs = postText.Geometry.Explode()\n\nrc.RhinoDoc.ActiveDoc.Objects.Delete(postText, True)\n\ncrvs = textCrvs\n\n\n\nHowever, the second example with rhinoscriptsyntax takes forever at 2.6s:\n\n\nimport rhinoscriptsyntax as rs\n\ngeoList = []\n\npreText = rs.AddText(text, plane, height, font)\ntextGeo = rs.ExplodeText(preText, True)\n\nfor i in textGeo: geoList.append(rs.coercegeometry(i))\n\nfor i in textGeo: rs.DeleteObject(i)\n\n\n\nCan someone clarify what’s going on? How does one decide to use Rhino vs Rhinoscriptsyntax?\n\n\ntext2curve.gh\n (6.9 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npreText = rs.AddText(text, plane, height, font)\ntextGeo = rs.ExplodeText(preText, True)\n\nrs.DeleteObjects(textGeo )",
+      "language": "python",
+      "author": "axa",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\n\npreText = rc.RhinoDoc.ActiveDoc.Objects.AddText(text, location, text_height, font, True, False)\n\npostText = rc.RhinoDoc.ActiveDoc.Objects.Find(preText)\n\ntextCrvs = postText.Geometry.Explode()\n\nrc.RhinoDoc.ActiveDoc.Objects.Delete(postText, True)\n\ncrvs = textCrvs",
+      "language": "python",
+      "author": "charles2",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ngeoList = []\n\npreText = rs.AddText(text, plane, height, font)\ntextGeo = rs.ExplodeText(preText, True)\n\nfor i in textGeo: geoList.append(rs.coercegeometry(i))\n\nfor i in textGeo: rs.DeleteObject(i)",
+      "language": "python",
+      "author": "charles2",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 6,
+  "views": 1051
+}

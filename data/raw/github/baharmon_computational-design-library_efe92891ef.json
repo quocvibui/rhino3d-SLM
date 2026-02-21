@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/baharmon/computational-design-library/blob/3b49802218466afb9dcdb0452cb0afe566b51382/07-point-clouds/gaussian-planting.py",
+  "repo": "baharmon/computational-design-library",
+  "repo_stars": 8,
+  "repo_description": "A collection of Python scripts and Grasshopper definitions for the book Computational Design for Landscape Architects",
+  "license": "MIT",
+  "filepath": "07-point-clouds/gaussian-planting.py",
+  "instruction": "Gaussian Planting",
+  "code": "\"\"\"Gaussian Planting\"\"\"\r\n#! python 3\r\n\r\n# requirements: numpy\r\nimport Rhino.Collections as rc\r\nimport Rhino.Geometry as rg\r\nimport numpy as np\r\nimport math\r\n\r\nif Run:\r\n\r\n    # create empty sets\r\n    points = rc.Point3dList()\r\n    coordinates = np.empty(shape=[0, 3])\r\n    Clouds = []\r\n\r\n    # generate gaussian distribution of points\r\n    for point in Points:\r\n\r\n        # instantiate random number generator\r\n        rng = np.random.default_rng()\r\n\r\n        # generate random x, y, and z values\r\n        n = int(Count)\r\n        sigma = float(Deviation) # standard deviation\r\n        x = rng.normal(point[0], sigma, n)\r\n        y = rng.normal(point[1], sigma, n)\r\n        z = np.zeros(n)\r\n\r\n        # interweave coordinates\r\n        xyz = np.column_stack((x, y, z))\r\n\r\n        # add points to list\r\n        xyz = xyz.tolist()\r\n        for coordinate in xyz:\r\n            point = rg.Point3d(\r\n                coordinate[0],\r\n                coordinate[1],\r\n                coordinate[2]\r\n                )\r\n            points.AddRange([point])\r\n\r\n    # transform point clouds\r\n    Points = points\r\n    for point in Points:\r\n\r\n        # set variables\r\n        vector = rg.Vector3d(0, 0, 1)\r\n        angle = math.pi / rng.uniform(0.0, 360.0)\r\n        scaling = rng.uniform(0.5, 1.0)\r\n\r\n        # transform\r\n        transform = Cloud.DuplicateShallow()\r\n        transform.Rotate(angle, vector, point)\r\n        transform.Scale(scaling)\r\n        transform.Translate(point)\r\n        Clouds.append(transform)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

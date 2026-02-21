@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/createfromloft-returns-error-message-in-python/211211",
+  "topic_id": 211211,
+  "title": ".CreateFromLoft() returns error message in Python",
+  "question": "The objective is to create a loft surface in Rhino. I want to achieve this by using Rhino.Compute in Python. The loft is supposed to be based on two circles created using Rhino3DM. I am seeking clarification on the correct parameter types for the .CreateFromLoft() method as I think that the problem lies in the definition of the argument types.\n\n\nThis is the code I was attempting to use:\n\n\nimport rhino3dm as r3d\nimport compute_rhino3d.Util\nimport compute_rhino3d.Brep\nimport compute_rhino3d.NurbsCurve\n\ncompute_rhino3d.Util.authToken = \"token\"\n\nmodel = r3d.File3dm()\n\ncurves = []\n\ncircle = r3d.Circle(r3d.Point3d(0,0,0),1).ToNurbsCurve()\ncircle2 = r3d.Circle(r3d.Point3d(0,0,10),10).ToNurbsCurve()\n\ncurves.append(circle)\ncurves.append(circle2)\n\nmodel.Objects.AddCurve(circle)\nmodel.Objects.AddCurve(circle2)\n\nloft_breps = compute_rhino3d.Brep.CreateFromLoft(curves, r3d.Point3d.Unset, r3d.Point3d.Unset, 0, False)\n\nmodel.Objects.AddBrep(loft_breps)\n\noutput_filename = r\"path\"\nmodel.Write(output_filename, 8)\n\n\n\nWhen executing the code, an error message is received that indicates incorrect arguments have been provided. Therefore, I would like to know how I should call this method to ensure that the code works. Are there any code snippets I could use as an example?\n\nAny help is appreciated!",
+  "code_blocks": [
+    {
+      "code": "from System.Collections.Generic import List\nfrom Rhino.Geometry import Curve;\n\ncurves = List[Curve]()",
+      "language": "python",
+      "author": "CallumSykes",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhino3dm as r3d\nimport compute_rhino3d.Util\nimport compute_rhino3d.Brep\nimport compute_rhino3d.NurbsCurve\n\ncompute_rhino3d.Util.authToken = \"token\"\n\nmodel = r3d.File3dm()\n\ncurves = []\n\ncircle = r3d.Circle(r3d.Point3d(0,0,0),1).ToNurbsCurve()\ncircle2 = r3d.Circle(r3d.Point3d(0,0,10),10).ToNurbsCurve()\n\ncurves.append(circle)\ncurves.append(circle2)\n\nmodel.Objects.AddCurve(circle)\nmodel.Objects.AddCurve(circle2)\n\nloft_breps = compute_rhino3d.Brep.CreateFromLoft(curves, r3d.Point3d.Unset, r3d.Point3d.Unset, 0, False)\n\nmodel.Objects.AddBrep(loft_breps)\n\noutput_filename = r\"path\"\nmodel.Write(output_filename, 8)",
+      "language": "python",
+      "author": "Clemens_Rausch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 131
+}

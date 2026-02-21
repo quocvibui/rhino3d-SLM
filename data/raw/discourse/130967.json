@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/viewport-dimension-in-world-view/130967",
+  "topic_id": 130967,
+  "title": "Viewport dimension in world view",
+  "question": "Hello,\n\n\nIs there a way to get the width and height dimensions of the current viewport in python? I.e. measuring the extent of the view of the visible area in model units (in this case mm):\n\n\nimage\n1467×681 85.6 KB\n\n\nSo when I zoom out, I can re-run the script and get the updated values:\n\n\nimage\n1483×673 60.1 KB\n\n\nThank you in advance,\n\n\nShahe",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef get_viewport_size():\n    \n    # Get the active view\n    view = sc.doc.Views.ActiveView\n    if not view:\n        return\n    \n    # Probably only makes senses in parallel projected views\n    if not view.ActiveViewport.IsParallelProjection:\n        return\n    \n    # Get the view size in screen coordinates (e.g. pixels)\n    rect = view.ClientRectangle\n    \n    # Get viewport screen coordinate to world coordinate transformation\n    screen_cs = Rhino.DocObjects.CoordinateSystem.Screen\n    world_cs = Rhino.DocObjects.CoordinateSystem.World\n    screen_to_world = view.ActiveViewport.GetTransform(screen_cs, world_cs)\n    \n    # Make some points like this:\n    # p3----------------p2\n    # |                  |     \n    # |                  |\n    # |                  |\n    # |                  |\n    # p0-----------------p1\n    \n    p0 = Rhino.Geometry.Point3d(rect.Left, rect.Bottom, 0.0)\n    p0.Transform(screen_to_world)\n    \n    p1 = Rhino.Geometry.Point3d(rect.Right, rect.Bottom, 0.0)\n    p1.Transform(screen_to_world)\n    \n    p2 = Rhino.Geometry.Point3d(rect.Right, rect.Top, 0.0)\n    p2.Transform(screen_to_world)\n    \n    p3 = Rhino.Geometry.Point3d(rect.Left, rect.Top, 0.0)\n    p3.Transform(screen_to_world)\n    \n    us = sc.doc.ModelUnitSystem\n    str = Rhino.UI.Localization.UnitSystemName(us, False, True, True)\n    \n    # Print sizes\n    print(\"Viewport width: {0} pixels\".format(rect.Size.Width))\n    print(\"Viewport height: {0} pixels\".format(rect.Size.Height))\n    print(\"Viewport width: {0} {1}\".format(p0.DistanceTo(p1), str))\n    print(\"Viewport height: {0} {1}\".format(p0.DistanceTo(p3), str))\n\nif __name__ == \"__main__\":\n    get_viewport_size()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 833
+}

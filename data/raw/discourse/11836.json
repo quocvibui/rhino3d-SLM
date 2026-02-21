@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scaleobject-and-transformobject-behaviour/11836",
+  "topic_id": 11836,
+  "title": "ScaleObject and TransformObject behaviour",
+  "question": "Hello,\n\n\nI am encountering problems with scaling an object at different factors in x, y, z. Here is what I am trying to do:\n\n\n\n# FuselageOMLSurf is the result of a complex, parametric script. I am trying to scale it by 5 in the y direction and 10 in the z direction here (though in my actual script Scaling is the argument of the function) \n\nScaling = [1, 5, 10] \n\nFuselageOMLSurf = rs.ScaleObject(FuselageOMLSurf, (0,0,0), Scaling)\n\n\n\n\nWhen I first run it, this produces the expected result: FuselageOMLSurf stretches by a factor of 5 in the y direction and 10 in the z direction. However, after a few runs it starts mixing up the axes and will stretch it in the z direction by a factor of 5 and y by a factor of 10, etc.\n\n\nMy suspicion is that this has something to do with the line “Scaling is based on the active construction plane.” is the ScaleObject header, but I don’t know how to ensure that it all happens in world coordinates.\n\n\nI don’t use construction planes - at least, not knowingly! I have also tried:\n\n\n\nScaling = [1, 5, 10] \n\nxform = rs.XformScale(Scaling)\n\nFuselageOMLSurf = rs.TransformObjects(FuselageOMLSurf, xform)\n   \n\n\n\nThis seems to have the same (inconsistent) result.\n\n\nIn either case, if I open a new document, the first time I run the script the result is as expected. But if I delete the resulting objects and re-run the script, it starts getting hit and miss.\n\n\nAny help would be much appreciated.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\n\ndef ScaleObjectsEx(object_ids, plane, scale, copy=False):\n    \"\"\"Scales one or more objects. Can be used to perform a uniform or non-\n    uniform scale transformation. Scaling is based on supplied plane argument.\n    Parameters:\n      object_ids: Identifiers of objects to scale\n      plane: the plane for the transformation\n      scale: three numbers that identify the X, Y, and Z axis scale factors to apply\n      copy[opt] = copy the objects\n    Returns:\n      List of identifiers of the scaled objects if successful\n      None on error\n    \"\"\"\n    scale = rs.coerce3dpoint(scale, True)\n    if scale:\n        xform = Rhino.Geometry.Transform.Scale(plane, scale.X, scale.Y, scale.Z)\n        rc = []\n        for object_id in object_ids:\n            object_id = rs.coerceguid(object_id, True)\n            id = sc.doc.Objects.Transform(object_id, xform, not copy)\n            if id!=System.Guid.Empty: rc.append(id)\n        if rc: sc.doc.Views.Redraw()\n    return rc\n    \ndef TestScaleObjectsEx():    \n    objs=rs.GetObjects(\"Select objects to scale\")\n    plane=rs.WorldXYPlane()\n    sf=[1,5,10]\n    ScaleObjectsEx(objs,plane,sf,False)\nTestScaleObjectsEx()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nobjs=rs.GetObjects(\"Select objects to scale\")\nScaling = [1, 5, 10]\nxform = rs.XformScale(Scaling)\ntObjs = rs.TransformObjects(objs,xform,False)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# FuselageOMLSurf is the result of a complex, parametric script. I am trying to scale it by 5 in the y direction and 10 in the z direction here (though in my actual script Scaling is the argument of the function) \n\nScaling = [1, 5, 10] \n\nFuselageOMLSurf = rs.ScaleObject(FuselageOMLSurf, (0,0,0), Scaling)",
+      "language": "python",
+      "author": "andras_sobester",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Scaling = [1, 5, 10] \n\nxform = rs.XformScale(Scaling)\n\nFuselageOMLSurf = rs.TransformObjects(FuselageOMLSurf, xform)",
+      "language": "python",
+      "author": "andras_sobester",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 3641
+}

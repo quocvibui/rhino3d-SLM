@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-python-join-curve-segments/71891",
+  "topic_id": 71891,
+  "title": "Gh Python - Join Curve Segments",
+  "question": "Hello,\n\n\nI am trying to create a Component\n\nwich snaps the ends of an open curve in the middle of the endpoints to close it.\n\nSince the curve is an assambly of various bended segments wich has some sharp edges I explode it first.\n\nThen I rebuild the start- and endsegments.\n\nNow I want to rejoin everything, but get an error.\n\n\nimport rhinoscriptsyntax as rs\n\n##############################################\n##############################################\n\n# Ensure variable is defined\ntry:\n    tol\nexcept NameError:\n    tol = None\n\n# Test whether variable is defined to be None\nif tol is None:\n    tol = 0\n##############################################\n##############################################\n\n#get endpoints and the middle between them - Point\n\n\nif rs.IsCurve(opCrv): # and not rs.IsCurveClosed(opCrv) and rs.IsCurveClosable( opCrv, tol ):\n    cePt = rs.CurveEndPoint(opCrv)\n    csPt = rs.CurveStartPoint(opCrv)\nelse:\n    print \"not an open curve in respect to the given tolerance\"\n\n\ndist = rs.Distance(cePt, csPt)\nnePt = cePt - csPt\nnePt = rs.VectorUnitize(nePt)\nnePt *= dist/2\n\n\nmidVec = rs.VectorCreate(cePt, csPt)\nmidVec = rs.VectorDivide(midVec,2)\nmatrix = rs.XformTranslation(midVec)\n\nnePt = rs.PointTransform(csPt, matrix)\n\n##############################################\n\n#get points of start and end segment for rebuild\nsegCrvList = rs.ExplodeCurves(opCrv) #gives a list\n\nsSeg = segCrvList[0]\neSeg = segCrvList[len(segCrvList)-1]\n\nsSegPt = rs.CurveEditPoints(sSeg)\nssSegPt = sSegPt[0]\n \neSegPt = rs.CurveEditPoints(eSeg)\neeSegPt = eSegPt[len(eSegPt)-1]\n\n#replace points and rebuild of segments\n\nsSegPt[0] = eSegPt[len(eSegPt)-1] = nePt\n\nsSeg = rs.AddInterpCurve(sSegPt)\neSeg = rs.AddInterpCurve(eSegPt)\n\n#replace segments and join all into closed curve\nsegCrvList[0] = sSeg\nsegCrvList[len(segCrvList)-1] = eSeg\n\n\nclCrv = rs.JoinCurves( segCrvList, delete_input=True, tolerance=tol)\n\n\n\nError:\n\n\n0. Runtime error (NullReferenceException): Object reference not set to an instance of an ob...",
+  "code_blocks": [
+    {
+      "code": "if rc and delete_input:\n    for id in object_ids:\n        id = rhutil.coerceguid(id, True)\n        scriptcontext.doc.Objects.Delete(id, False)",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "scriptcontext.doc = Rhino.Rhinodoc.Activedoc\n# do stuff\nscriptcontext.doc = ghdoc",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n##############################################\n##############################################\n\n# Ensure variable is defined\ntry:\n    tol\nexcept NameError:\n    tol = None\n\n# Test whether variable is defined to be None\nif tol is None:\n    tol = 0\n##############################################\n##############################################\n\n#get endpoints and the middle between them - Point\n\n\nif rs.IsCurve(opCrv): # and not rs.IsCurveClosed(opCrv) and rs.IsCurveClosable( opCrv, tol ):\n    cePt = rs.CurveEndPoint(opCrv)\n    csPt = rs.CurveStartPoint(opCrv)\nelse:\n    print \"not an open curve in respect to the given tolerance\"\n\n\ndist = rs.Distance(cePt, csPt)\nnePt = cePt - csPt\nnePt = rs.VectorUnitize(nePt)\nnePt *= dist/2\n\n\nmidVec = rs.VectorCreate(cePt, csPt)\nmidVec = rs.VectorDivide(midVec,2)\nmatrix = rs.XformTranslation(midVec)\n\nnePt = rs.PointTransform(csPt, matrix)\n\n##############################################\n\n#get points of start and end segment for rebuild\nsegCrvList = rs.ExplodeCurves(opCrv) #gives a list\n\nsSeg = segCrvList[0]\neSeg = segCrvList[len(segCrvList)-1]\n\nsSegPt = rs.CurveEditPoints(sSeg)\nssSegPt = sSegPt[0]\n \neSegPt = rs.CurveEditPoints(eSeg)\neeSegPt = eSegPt[len(eSegPt)-1]\n\n#replace points and rebuild of segments\n\nsSegPt[0] = eSegPt[len(eSegPt)-1] = nePt\n\nsSeg = rs.AddInterpCurve(sSegPt)\neSeg = rs.AddInterpCurve(eSegPt)\n\n#replace segments and join all into closed curve\nsegCrvList[0] = sSeg\nsegCrvList[len(segCrvList)-1] = eSeg\n\n\nclCrv = rs.JoinCurves( segCrvList, delete_input=True, tolerance=tol)",
+      "language": "python",
+      "author": "luisseyfer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 2717
+}

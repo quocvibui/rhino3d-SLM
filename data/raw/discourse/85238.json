@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscript-getobjects-doesnt-keep-objects-selected/85238",
+  "topic_id": 85238,
+  "title": "Rhinoscript GetObjects() doesn't keep objects selected",
+  "question": "I’m writing a command that selects two sets of breps. The sets are supposed to be mutually exclusive (can’t pick a brep in set 1 to be part of set 2). I can’t seem to make this happen by using the available options in rs.GetObjects. What gives? Is there a way to do this without RhinoCommon?\n\n\nimport rhinoscriptsyntax as rs\n\nset1 = rs.GetObjects(\"Select some breps for set 1\",filter=16,select=True,preselect=False)\n#set 1 should be selected now...\nset2 = rs.GetObjects(\"Select some more breps. Shouldn't be able to pick any of the set 1 breps.\",filter=16,select=True,preselect=False)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef GetTwoSetsOfObjs():\n    all_selectable=[obj for obj in rs.AllObjects() if rs.IsObjectSelectable(obj)]\n    if not all_selectable: return\n    msg1=\"Select some breps for set 1\"\n    set1=rs.GetObjects(msg1,filter=16,preselect=False,select=True)\n    if not set1: return\n    #set 1 should be selected now...\n    still_selectable=[obj for obj in all_selectable if not obj in set1]\n    msg2=\"Select some more breps\"\n    set2=rs.GetObjects(msg2,filter=16,select=True,objects=still_selectable)\n    print \"{} selected objects in set 1\".format(len(set1))\n    print \"{} selected objects in set 2\".format(len(set2))\nGetTwoSetsOfObjs()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef GetTwoSetsOfObjs2():\n    type_filt=16\n    msg1=\"Select some breps for set 1\"\n    set1=rs.GetObjects(msg1,filter=type_filt,preselect=False)\n    if not set1: return\n    #lock set1\n    rs.LockObjects(set1)\n    msg2=\"Select some more breps\"\n    set2=rs.GetObjects(msg2,filter=type_filt,select=True)\n    #unlock set 1 immediately afterwards\n    rs.UnlockObjects(set1)\n    if not set2: return\n    print \"{} selected objects in set 1\".format(len(set1))\n    print \"{} selected objects in set 2\".format(len(set2))\nGetTwoSetsOfObjs2()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nset1 = rs.GetObjects(\"Select some breps for set 1\",filter=16,select=True,preselect=False)\n#set 1 should be selected now...\nset2 = rs.GetObjects(\"Select some more breps. Shouldn't be able to pick any of the set 1 breps.\",filter=16,select=True,preselect=False)",
+      "language": "python",
+      "author": "S_L",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 422
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/function-to-insert-a-file-works-in-rhino-7-but-fails-in-rhino-8/208392",
+  "topic_id": 208392,
+  "title": "Function to Insert a file works in Rhino 7 but fails in Rhino 8",
+  "question": "Hi All,\n\n\nThis Function for inserting a file works in Rhino 7 but quit working in Rhino 8.  Something to do with rs.Command formatting?  Can someone shed some light as to what the problem is or suggest another avenue for inserting a file as an object.\n\n\nThanks\n\n\nEric Bunn\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nfrom scriptcontext import doc\nimport scriptcontext\n\n\ndef InsertFile(SubD,insFile):\n    def GetVersion():\n        import os\n        user = os.environ[\"USERPROFILE\"]\n        path = user + \"/SEE RhinoScript/\"\n        return path\n        \n    ver = GetVersion()\n        \n    # insert options\n    file =chr(34) + r\"\" + ver + SubD + insFile + \"\" + chr(34)\n    point = Rhino.Geometry.Point3d(0, 0, 0)\n    scale = 1.0\n    rotation = 0.0\n    \n    # command\n    #cmd = \"_-Insert _File=Yes _LinkMode=_Embed {0} \".format(file)\n    cmd = \"_-Insert _File=Yes _LinkMode=_Embed {0} \".format(file)\n    cmd += \"Objects _Enter {0} {1} {2}\".format(point, scale, rotation)\n    print(cmd)\n    rc = rs.Command(cmd, False)\n    print(rc)\n    \n    rs.ZoomSelected()\n    rs.UnselectAllObjects()\n    \n    \nMBTemp = \"Mold Box (Side Handles).3dm\"  \nSubD = \"iMold Files/\"   \nInsertFile(SubD,MBTemp) \n\n\n\n\n\n\nThis is the string that is created for the Command Function:\n\n\n_-Insert _File=Yes _LinkMode=_Embed \"C:\\Users\\ebunn/SEE RhinoScript/iMold Files/Mold Box (Side Handles).3dm\" Objects _Enter 0,0,0 1.0 0.0",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom scriptcontext import doc\nimport scriptcontext\n\n\ndef InsertFile(SubD,insFile):\n    def GetVersion():\n        import os\n        user = os.environ[\"USERPROFILE\"]\n        path = user + \"/SEE RhinoScript/\"\n        return path\n        \n    ver = GetVersion()\n        \n    # insert options\n    file =chr(34) + r\"\" + ver + SubD + insFile + \"\" + chr(34)\n    point = Rhino.Geometry.Point3d(0, 0, 0)\n    scale = 1.0\n    rotation = 0.0\n    \n    # command\n    #cmd = \"_-Insert _File=Yes _LinkMode=_Embed {0} \".format(file)\n    cmd = \"_-Insert _File=Yes _LinkMode=_Embed {0} \".format(file)\n    cmd += \"Objects _Enter {0} {1} {2}\".format(point, scale, rotation)\n    print(cmd)\n    rc = rs.Command(cmd, False)\n    print(rc)\n    \n    rs.ZoomSelected()\n    rs.UnselectAllObjects()\n    \n    \nMBTemp = \"Mold Box (Side Handles).3dm\"  \nSubD = \"iMold Files/\"   \nInsertFile(SubD,MBTemp)",
+      "language": "python",
+      "author": "ebunn3",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 65
+}

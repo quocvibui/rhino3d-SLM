@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-a-new-layer-and-renaming-automatically-using-python-script/137276",
+  "topic_id": 137276,
+  "title": "Creating a new layer and renaming automatically using Python script",
+  "question": "Hi,\n\n\nI was wondering if anybody can show me how to add a new layer and label it automatically. For example, create a new layer and name it layer01. Then run the script again and it will create a new layer and label it layer02 and so on.\n\n\nBelow is some script I found that creates a new layer but I have to name it myself. I have approx 160 layers to create and name so was hoping to do this automatically.\n\n\nCan anyone help please?\n\n\nThanks\n\nDave\n\n\n\n\nimport Rhino\nimport scriptcontext \nimport System.Guid, System.Drawing.Color\n\ndef AddLayer():\n    # Cook up an unused layer name\n    unused_name = scriptcontext.doc.Layers.GetUnusedLayerName(False)\n\n    # Prompt the user to enter a layer name\n    gs = Rhino.Input.Custom.GetString()\n    gs.SetCommandPrompt(\"Name of layer to add\")\n    gs.SetDefaultString(unused_name)\n    gs.AcceptNothing(True)\n    gs.Get()\n    if gs.CommandResult()!=Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    # Was a layer named entered?\n    layer_name = gs.StringResult().Trim()\n    if not layer_name:\n        print \"Layer name cannot be blank.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Is the layer name valid?\n    if not Rhino.DocObjects.Layer.IsValidName(layer_name):\n        print layer_name, \"is not a valid layer name.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Does a layer with the same name already exist?\n    layer_index = scriptcontext.doc.Layers.Find(layer_name, True)\n    if layer_index>=0:\n        print \"A layer with the name\", layer_name, \"already exists.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Add a new layer to the document\n    layer_index = scriptcontext.doc.Layers.Add(layer_name, System.Drawing.Color.Black)\n    if layer_index<0:\n        print \"Unable to add\", layer_name, \"layer.\"\n        return Rhino.Commands.Result.Failure\n\n    return Rhino.Commands.Result.Success\n\n\nif __name__==\"__main__\":\n    AddLayer()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_add_layers():\n    color = Rhino.ApplicationSettings.AppearanceSettings.DefaultLayerColor\n    for i in range(0, 160):\n        name = sc.doc.Layers.GetUnusedLayerName()\n        sc.doc.Layers.Add(name, color)\n    \nif __name__ == '__main__':    \n    test_add_layers()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\ndef _get_unused_name(prefix):\n    number = 1\n    while True:\n        number_str = str(number)\n        name = \"{0} {1}\".format(prefix, number_str.zfill(2))\n        layer = sc.doc.Layers.FindName(name)\n        if layer:\n            number += 1\n        else:\n            return name\n\ndef test():\n    color = System.Drawing.Color.Red\n    for i in range(0, 160):\n        name = _get_unused_name(\"Extract\")\n        sc.doc.Layers.Add(name, color)\n\nif __name__ == '__main__':\n    test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\ndef _get_unused_name(prefix):\n    number = 1\n    while True:\n        number_str = str(number)\n        name = \"{0} {1}\".format(prefix, number_str.zfill(2))\n        layer = sc.doc.Layers.FindName(name)\n        if layer:\n            number += 1\n        else:\n            return name\n\ndef test():\n    color = System.Drawing.Color.Red\n    name = _get_unused_name(\"Layer\")\n    index = sc.doc.Layers.Add(name, color)\n    if index >= 0:\n        sc.doc.Layers.SetCurrentLayerIndex(index, False)\n\nif __name__ == '__main__':\n    test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext \nimport System.Guid, System.Drawing.Color\n\ndef AddLayer():\n    # Cook up an unused layer name\n    unused_name = scriptcontext.doc.Layers.GetUnusedLayerName(False)\n\n    # Prompt the user to enter a layer name\n    gs = Rhino.Input.Custom.GetString()\n    gs.SetCommandPrompt(\"Name of layer to add\")\n    gs.SetDefaultString(unused_name)\n    gs.AcceptNothing(True)\n    gs.Get()\n    if gs.CommandResult()!=Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    # Was a layer named entered?\n    layer_name = gs.StringResult().Trim()\n    if not layer_name:\n        print \"Layer name cannot be blank.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Is the layer name valid?\n    if not Rhino.DocObjects.Layer.IsValidName(layer_name):\n        print layer_name, \"is not a valid layer name.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Does a layer with the same name already exist?\n    layer_index = scriptcontext.doc.Layers.Find(layer_name, True)\n    if layer_index>=0:\n        print \"A layer with the name\", layer_name, \"already exists.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Add a new layer to the document\n    layer_index = scriptcontext.doc.Layers.Add(layer_name, System.Drawing.Color.Black)\n    if layer_index<0:\n        print \"Unable to add\", layer_name, \"layer.\"\n        return Rhino.Commands.Result.Failure\n\n    return Rhino.Commands.Result.Success\n\n\nif __name__==\"__main__\":\n    AddLayer()",
+      "language": "python",
+      "author": "David_Gibbins",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1453
+}

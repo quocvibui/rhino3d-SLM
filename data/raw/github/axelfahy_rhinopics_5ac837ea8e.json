@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/axelfahy/rhinopics/blob/25e76ce0f8ac7113ffc0ee9953086dd59acf1c6e/rhinopics/rhinobuilder.py",
+  "repo": "axelfahy/rhinopics",
+  "repo_stars": 0,
+  "repo_description": "Rhinopics, let the fat unicorn rename your pics!",
+  "license": "MIT",
+  "filepath": "rhinopics/rhinobuilder.py",
+  "instruction": "rhinobuilder class.",
+  "code": "# -*- coding: utf-8 -*-\n\"\"\"rhinobuilder class.\"\"\"\n\nimport logging\nfrom typing import ClassVar\n\nfrom .rhinopic import Rhinopic\nfrom .rhinovid import Rhinovid\n\n\nclass RhinoBuilder:\n    \"\"\"Factory class to create `Rhinopic` or `Rhinovid` objects.\"\"\"\n\n    VIDEO_EXTS: ClassVar[set] = {\".avi\", \".AVI\", \".mov\", \".MOV\"}\n    IMG_EXTS: ClassVar[set] = {\".jpg\", \".JPG\", \".jpeg\", \".JPEG\", \".png\", \".PNG\"}\n\n    def __init__(self, nb_digits: int, keyword: str, backup: bool, lowercase: bool):\n        self.logger = logging.getLogger(__name__)\n        self.nb_digits = nb_digits\n        self.keyword = keyword\n        self.backup = backup\n        self.lowercase = lowercase\n\n    def factory(self, path):\n        \"\"\"\n        Factory method to create the object.\n\n        Depending on the type of file, the appropriate object is created.\n        \"\"\"\n        if path.suffix in self.IMG_EXTS:\n            return Rhinopic(\n                path, self.nb_digits, self.keyword, self.backup, self.lowercase\n            )\n        if path.suffix in self.VIDEO_EXTS:\n            return Rhinovid(\n                path, self.nb_digits, self.keyword, self.backup, self.lowercase\n            )\n        self.logger.info(f\"Extension {path.suffix} not supported\")\n        return None\n",
+  "language": "python",
+  "imports": [],
+  "has_docstring": true
+}

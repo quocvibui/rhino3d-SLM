@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/addnetworksrf-type-problem/111927",
+  "topic_id": 111927,
+  "title": "AddNetworkSrf type problem",
+  "question": "I wanted to write a script that will create a surface from the edges of a surface. If there are only 2 edge curves then I need a loft, if between 2 and 4 edge surface command and if more than 4 a network surface command should run. Here is the code:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rh\n\n\nprint crvs\nprint type(crvs[1])\n#print len(crvs)\n\n#crvs = [rs.coercecurve(crv) for crv in crvs]\n#print type(crvs[1])\n\nif len(crvs) <= 2:\n    dir_check = rs.CurveDirectionsMatch(crvs[0], crvs[1])\n    if dir_check == False:\n        crvs[1] = rs.ReverseCurve(crvs[1])\n#        crvs[1] = rh.Geometry.Curve.Reverse(crvs[1])\n        \n    srf = rs.AddLoftSrf(crvs)\nelif 2 < len(crvs) <= 4:\n    srf = rs.AddEdgeSrf(crvs)\nelse:\n    srf = rs.AddNetworkSrf(crvs, cont, edge_tol, int_tol, angle_tol)\n\n\n\nWhen I run this code I get this error on rs.ReverseCurve function:\n\n\nRuntime error (TypeErrorException): Parameter must be a Guid or string representing a Guid\n\nTraceback:\n  line 890, in coerceguid, \"C:\\Users\\Erdem\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py\"\n  line 995, in coercecurve, \"C:\\Users\\Erdem\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py\"\n  line 490, in AddLoftSrf, \"C:\\Users\\Erdem\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\surface.py\"\n  line 28, in script\n\n\n\nI’m pretty sure that the types of the items of crvs list are Guid. So I don’t understand why it asks for a Guid type object when I already pass Guid type objects? \n\n\nBy the way, rs.AddEdgeSrf function works with this same input but rs.AddLoftSrf and rs.AddNetworkSrf don’t work. What’s the logic?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nif not cont:\n    cont = 0\nif not edge_tol:\n    edge_tol = 0\nif not int_tol:\n    int_tol = 0\nif not angle_tol:\n    angle_tol = 0\n\n\nif len(crvs) <= 4:\n    srf = rs.AddEdgeSrf(crvs)\nelse:\n    srf = rs.AddNetworkSrf(crvs, cont, edge_tol, int_tol, angle_tol)",
+      "language": "python",
+      "author": "Erdem",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\n\n\nprint crvs\nprint type(crvs[1])\n#print len(crvs)\n\n#crvs = [rs.coercecurve(crv) for crv in crvs]\n#print type(crvs[1])\n\nif len(crvs) <= 2:\n    dir_check = rs.CurveDirectionsMatch(crvs[0], crvs[1])\n    if dir_check == False:\n        crvs[1] = rs.ReverseCurve(crvs[1])\n#        crvs[1] = rh.Geometry.Curve.Reverse(crvs[1])\n        \n    srf = rs.AddLoftSrf(crvs)\nelif 2 < len(crvs) <= 4:\n    srf = rs.AddEdgeSrf(crvs)\nelse:\n    srf = rs.AddNetworkSrf(crvs, cont, edge_tol, int_tol, angle_tol)",
+      "language": "python",
+      "author": "Erdem",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Runtime error (TypeErrorException): Parameter must be a Guid or string representing a Guid\n\nTraceback:\n  line 890, in coerceguid, \"C:\\Users\\Erdem\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py\"\n  line 995, in coercecurve, \"C:\\Users\\Erdem\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py\"\n  line 490, in AddLoftSrf, \"C:\\Users\\Erdem\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\surface.py\"\n  line 28, in script",
+      "language": "unknown",
+      "author": "Erdem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 5,
+  "views": 591
+}

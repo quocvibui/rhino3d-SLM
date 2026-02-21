@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/i-want-to-roll-the-camera/145919",
+  "topic_id": 145919,
+  "title": "I want to roll the camera",
+  "question": "I wrote a plugin to let we walk around inside my model using an XBox gamepad.\n\n\nI used the gamepad to input camera translation and rotations. I move a vertical stick (Curve) around and collide it with collision surfaces (Breps). I use the point of intersection to centre the stick vertically.\n\n\nOnce the stick is moved and collided, I then position the camera at stick.PointAtStart.\n\n\nMy collision surfaces are large compared to the stick and are mostly flat or are gentle ramps.\n\n\nThis image shows the golden breps and a green stick (near the top). There is a point on the stick that represents the walker’s feet position. The parts of the stick below that point let me walk down ramps.\n\n\n\n\nimage\n1372×492 70.7 KB\n\n\n\n\nAnyway, this works well and I am happy walking around my model.\n\n\nUnfortunately: I got ambitious.\n\n\nI want to walk around a cylindrical surface and have my camera stick stay aligned to the surface normal.\n\n\nI’ve been playing around with Brep ClosestPoint which gives me a point of intersection and a normal.\n\n\nI can move and orient my stick, I can place my camera at stick.PointAtStart.\n\n\nBut I \nthink\n that I want to set my camera’s up direction to be the surface normal.\n\n\nIn my mind this would roll the camera.\n\n\nIn reality: the setcameraup call appears to do nothing.\n\n\nIn this 3dm file you can see a large, hollow, “cylinder” that has some flat parts coming off it in the +Y direction.\n\n\nstick.3dm\n (1.2 MB)\n\n\nIf I stand on the stop of the cylinder and look in +ve Y, looking into the screen: and then use the gamepad to move right - I expect to move around the outside of the cylinder in a clockwise direction.\n\n\nNow, if my setcameraup worked, then I would expect to see the cylinder rotating in the opposite direction beneath me. A full circle would take me back to the beginning.\n\n\nBut instead, the camera up direction seems locked to be +ve Z so i start sliding down the righthand side of the cylinder until it is above me then I can continue up the left hand side to retu...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nview=rs.CurrentView()\nvector = rs.VectorCreate(rs.ViewCamera(view),rs.ViewTarget(view))\n\nfor i in range(36):\n    upVector = rs.ViewCameraUp(view)\n    upVector = rs.VectorRotate(upVector,10,vector)\n    rs.ViewCameraUp(view,upVector)\n    rs.Redraw()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nview=rs.CurrentView()\nvector = rs.VectorCreate(rs.ViewCamera(view),rs.ViewTarget(view))\n\nfor i in range(36):\n    upVector = rs.ViewCameraUp(view)\n    upVector = rs.VectorRotate(upVector,10,vector)\n    rs.ViewCameraUp(view,upVector)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 893
+}

@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-modify-a-block-definition-in-python/193780",
+  "topic_id": 193780,
+  "title": "How to modify a block definition in python?",
+  "question": "I want to get an object from a file and add it to the block definitions (I figured out how to do this). Then, I would like to add other obects to the block definition. This is what I’ve got so far (for an example). When I run it, I get an error saying that Breps do not have a Geometry attribute.\n\n\n#! python3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\nimport Rhino\nfrom Rhino import RhinoDoc as rdoc\n\nblock_name = rdoc.ActiveDoc.InstanceDefinitions.GetUnusedInstanceDefinitionName(\"torus\")\npath = \"C:\\\\Users\\\\Owner\\\\Desktop\\\\torus.3dm\"\n\ntorus_file = Rhino.FileIO.File3dm().Read(path)\ntorus = torus_file.Objects.FindByLayer('Default')[0]\nindex = rdoc.ActiveDoc.InstanceDefinitions.Add(block_name, \"\", rg.Plane.WorldXY.Origin, torus.Geometry, torus.Attributes)\n\nsphere = rg.Sphere(rg.Plane.WorldXY.Origin, 1.2).ToBrep()\nrdoc.ActiveDoc.InstanceDefinitions.ModifyGeometry(index, sphere.Geometry, sphere.Attributes)\n\n# I would like this to have the torus and the sphere combined\nsc.doc.Objects.Add(torus.Geometry, torus.Attributes)\n\n\n\n\n\n\n\n\ninsert_block_test.py\n (801 Bytes)\n\n\ntorus.3dm\n (55.0 KB)",
+  "code_blocks": [
+    {
+      "code": "################################################################################\n# SampleModifyInstanceDef.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext as sc\n\n# Demonstates how to modify an instance definition's objects\ndef SampleModifyInstanceDef():\n    \n    # Get the name of the instance definition to modify\n    idef_name = ''\n    rc, idef_name = Rhino.Input.RhinoGet.GetString(\"Name of block to modify\", False, idef_name)\n    if rc != Rhino.Commands.Result.Success: \n        return\n    \n    # Find the instance definition\n    idef = sc.doc.InstanceDefinitions.Find(idef_name)\n    if idef is None:",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\nimport Rhino\nfrom Rhino import RhinoDoc as rdoc\n\nblock_name = rdoc.ActiveDoc.InstanceDefinitions.GetUnusedInstanceDefinitionName(\"torus\")\npath = \"C:\\\\Users\\\\Owner\\\\Desktop\\\\torus.3dm\"\n\ntorus_file = Rhino.FileIO.File3dm().Read(path)\ntorus = torus_file.Objects.FindByLayer('Default')[0]\nindex = rdoc.ActiveDoc.InstanceDefinitions.Add(block_name, \"\", rg.Plane.WorldXY.Origin, torus.Geometry, torus.Attributes)\n\nsphere = rg.Sphere(rg.Plane.WorldXY.Origin, 1.2).ToBrep()\n\ngeometry = []\nattributes = []\ngeometry.append(torus.Geometry)\ngeometry.append(sphere)\nattributes.append(torus.Attributes)\nattributes.append(sc.doc.CreateDefaultAttributes())\n\n\nrdoc.ActiveDoc.InstanceDefinitions.ModifyGeometry(index, geometry, attributes)\nrdoc.ActiveDoc.InstanceDefinitions.Find(block_name)\nidef = rdoc.ActiveDoc.InstanceDefinitions.Find(block_name)\n\nobs = idef.GetObjects()\nfor ob in obs:\n    sc.doc.Objects.Add(ob.Geometry, ob.Attributes)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\nimport Rhino\nfrom Rhino import RhinoDoc as rdoc\n\nblock_name = rdoc.ActiveDoc.InstanceDefinitions.GetUnusedInstanceDefinitionName(\"torus\")\npath = \"C:\\\\Users\\\\Owner\\\\Desktop\\\\torus.3dm\"\n\ntorus_file = Rhino.FileIO.File3dm().Read(path)\ntorus = torus_file.Objects.FindByLayer('Default')[0]\nindex = rdoc.ActiveDoc.InstanceDefinitions.Add(block_name, \"\", rg.Plane.WorldXY.Origin, torus.Geometry, torus.Attributes)\n\nsphere = rg.Sphere(rg.Plane.WorldXY.Origin, 1.2).ToBrep()\nrdoc.ActiveDoc.InstanceDefinitions.ModifyGeometry(index, sphere.Geometry, sphere.Attributes)\n\n# I would like this to have the torus and the sphere combined\nsc.doc.Objects.Add(torus.Geometry, torus.Attributes)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 138
+}

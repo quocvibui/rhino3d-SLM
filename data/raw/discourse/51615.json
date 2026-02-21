@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/why-gh-display-strangely-if-the-solid-brep-is-created-in-ghpython-with-rhinocommon/51615",
+  "topic_id": 51615,
+  "title": "Why GH display strangely if the solid brep is created in GHPython with Rhinocommon?",
+  "question": "Hello All!\n\n\nThe below one is solid brep, after using “rg.CreateSolid” or “rg.MergeBreps” or “rg.JoinBreps” in GHPython\n\nIn in the middle is surface in GH, after explode the brep.\n\nThe top one is the solid brep after bake into Rhino.\n\n\nWhy the below one’s side face divide into 3 part? Is there any way to let it display flat?\n\n\n\n\n捕获.JPG\n554×980 20.1 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ncrv1 = rs.coercecurve(x)\ncrv2 = crv1.Duplicate()\ncrv2.Translate(0.0, 0.0, 10.0)\nbrep = rg.Brep.CreateFromLoft([crv1, crv2], rg.Point3d.Unset, rg.Point3d.Unset, rg.LoftType.Normal, False)[0]\nif brep:\n    brep.Faces.SplitKinkyFaces()\n    brep = brep.CapPlanarHoles(sc.doc.ModelAbsoluteTolerance)\n    if brep:\n        if brep.SolidOrientation == rg.BrepSolidOrientation.Inward:\n            brep.Flip()\na = brep",
+      "language": "python",
+      "author": "dale",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 1281
+}

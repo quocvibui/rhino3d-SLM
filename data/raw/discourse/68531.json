@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/modify-clipping-plane-position-in-python/68531",
+  "topic_id": 68531,
+  "title": "Modify Clipping plane position in python",
+  "question": "Is there a possibility in the python editor to modify the clipping plane position just by changing the .Plane.Origin.X value? (See picture below)\n\n\n\n\nimage.png\n1404×792 35 KB",
+  "code_blocks": [
+    {
+      "code": "def SetClippingPlaneOrigin():\n    \n    cp_id = rs.GetObject(\"Clipping plane\", rs.filter.clippingplane, True, True)\n    if not cp_id: return\n    \n    origin = rs.GetPoint(\"New clipping plane origin\")\n    if not origin: return\n    \n    cp_obj = rs.coercerhinoobject(cp_id, True, True)\n    rc,x,y = cp_obj.ClippingPlaneGeometry.GetSurfaceSize()\n    vp_ids = cp_obj.ClippingPlaneGeometry.ViewportIds()\n    cplane = cp_obj.ClippingPlaneGeometry.Plane\n    \n    cplane.Origin = origin\n    cplane.Translate(cplane.XAxis * x * -0.5)\n    cplane.Translate(cplane.YAxis * y * -0.5)\n    attr = cp_obj.Attributes\n    \n    scriptcontext.doc.Objects.AddClippingPlane(cplane, x, y, vp_ids, attr)\n    scriptcontext.doc.Objects.Delete(cp_id, True)\n    scriptcontext.doc.Views.Redraw()\n    \nSetClippingPlaneOrigin()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\ndef MoveObjects(object_ids, translation):\n    translation = rs.coerce3dvector(translation, True)\n    xf = Rhino.Geometry.Transform.Translation(translation)\n    rc = TransformObjects(object_ids, xf)\n    return rc\n\ndef ClippingPlane():\n    plane=rs.PlaneFromNormal([0,0,0],[0,0,1])\n    cp_id=rs.AddClippingPlane(plane,1000,1000,[\"Top\",\"Front\",\"Right\"])\n    rs.ObjectLayer(cp_id,\"ClippingPlane\")\n    rs.ObjectName(cp_id,\"Test 1\")\n    rs.SetUserText(cp_id,\"ClippingSide\",\"Left\")\n    CPG=rs.coercegeometry(cp_id)\n    X=2000\n    SetClippingPlaneOrigin(cp_id,X)\n    return\n\ndef SetClippingPlaneOrigin(cp_id,x):\n    \n    if not cp_id: return\n    origin=rs.coerce3dpoint((x,0,0))\n    if not origin: return\n    \n    cp_obj = rs.coercerhinoobject(cp_id, True, True)\n    rc,x,y = cp_obj.ClippingPlaneGeometry.GetSurfaceSize()\n    cv_ID=scriptcontext.doc.Views.ActiveView.ActiveViewportID\n    vp_ids = cp_obj.ClippingPlaneGeometry.ViewportIds()\n    vplist=[]\n    for vp in vp_ids:\n        if vp<>cv_ID:\n            vplist.append(vp)\n    cplane = cp_obj.ClippingPlaneGeometry.Plane\n    cplane.Origin = origin\n    cplane.Translate(cplane.XAxis * x * -0.5)\n    cplane.Translate(cplane.YAxis * y * -0.5)\n    attr = cp_obj.Attributes\n    \n    scriptcontext.doc.Objects.AddClippingPlane(cplane, x, y, vplist, attr)\n    #scriptcontext.doc.Objects.AddClippingPlane(cplane, x, y, vp_ids, attr)\n    #scriptcontext.doc.Objects.Delete(cp_id, True)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    ClippingPlane()\n    viewname=scriptcontext.doc.Views.ActiveView.ActiveViewportID\n    print rs.coerceguid(viewname)",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def ClippingPanel():\n    dialog = ClippingDialog();\n    #dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)\n    Rhino.UI.EtoExtensions.ShowSemiModal(dialog, Rhino.RhinoDoc.ActiveDoc, Rhino.UI.RhinoEtoApp.MainWindow)\n    return",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def ClippingPlaneOnOff(name,state=True):\n    layername='ClippingPlane'\n    objs=rs.ObjectsByName(name)\n    rs.LayerVisible(layername,True)\n    if objs:\n        if state:\n            #string='_enableclippingplane _selid '+str(objs[0])+' _enter'\n            #rs.Command(string)\n            print \"\"\n        else:\n            print \"\"\n            #rs.Command(\"_disableclippingplane _selid \"+str(objs[0])+ \" _enter\")\n    rs.LayerVisible(layername,False)\n    return",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def ClippingPanel():\n    dialog = ClippingDialog();\n    #dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)\n    Rhino.UI.EtoExtensions.ShowSemiModal(dialog, Rhino.RhinoDoc.ActiveDoc, Rhino.UI.RhinoEtoApp.MainWindow)\n    return",
+      "language": "python",
+      "author": "Nico_de_Meester",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1520
+}

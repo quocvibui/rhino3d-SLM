@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/iterating-through-groups-of-objects/150845",
+  "topic_id": 150845,
+  "title": "Iterating through groups of objects",
+  "question": "I wrote a script that is working on a single selected group of curves. It’s for exporting nested sheets to dxf for CNC use. It copies the group, moves it to the origin, rotates, exports and then deletes the copy.\n\n\nWhat I’m after is the ability to select multiple groups and have them each processed into individual files. I think I might be on the right track, however, all I’ve actually managed to achieve so far is that the groups all export into a single file with all the file names concatenated. Sooo…  Maybe I’m not as close as I think!\n\n\nIt may be worth mentioning that the groups often contain other sub-groups but all of them have a rectangular outline on the “CNC” layer that I’m using to get the top level group name.\n\n\nHere’s the original single use script for reference:\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport System.Guid, System.Drawing.Color\n\nobjectIDs = rs.GetObjects(\"Select objects for export as .DXF\", 4 + 512, True, True, True)\n\nobjNames=[]\n\ndef RotateSelected(deg):\n    geo = copy\n    if copy:\n        plane=rs.ViewCPlane()\n        bb=rs.BoundingBox(geo,plane)\n        if bb:\n            rs.EnableRedraw(False)\n            rs.RotateObjects(geo,(bb[0]),deg,copy=False)\n\nfor singleID in objectIDs:\n    objName = rs.ObjectName(singleID)\n    objNames.append(objName)\n\nname = {x for x in objNames if x != None}\nsheetnum = \" \".join(name)\npath = rs.DocumentPath()\nexportcmd = '_-Export \"' + path + \"CNC\\\\\" + sheetnum + '.dxf\" _Enter'\n\nif objectIDs:\n    bbox = rs.BoundingBox(objectIDs)\n    dir = rs.VectorCreate([0,0,0], bbox[0])\n    copy = rs.CopyObjects(objectIDs, dir)\n    rs.UnselectAllObjects()\n    rs.SelectObjects(copy)\n    RotateSelected(270)\n    rs.Command(exportcmd)\n    rs.DeleteObjects(copy)\n\n\n\nHere’s the latest attempt at a multi-group version:\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport System.Guid, System.Drawing.Color\n\nobjs = rs.GetObjects(\"Select objects for export as .DXF\", 4 + 512, Tru...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_group_curves():\n    # Select some grouped curves\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select grouped curves to export\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.GroupSelect = True\n    go.SubObjectSelect = False\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success: return\n    \n    # Create an an empty dictionary\n    dict = {}\n    \n    # Iterate the selection\n    for objref in go.Objects():\n        obj = objref.Object()\n        if obj:\n            obj_groups = obj.Attributes.GetGroupList()\n            if obj_groups:\n                # Get the top group\n                group_index = obj_groups[0]\n                # Is the group in the dictionary?\n                if dict.has_key(group_index):\n                    # Append the curve id to the list\n                    dict[group_index].append(obj.Id)\n                else:\n                    # Add a key and initial list\n                    dict[group_index] = [obj.Id]\n    \n    for group_index in dict.keys():\n        print(sc.doc.Groups.GroupName(group_index))\n        for id in dict[group_index]:\n            print(id)\n\nif __name__ == \"__main__\":\n    test_group_curves()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport System.Guid, System.Drawing.Color\n\nobjectIDs = rs.GetObjects(\"Select objects for export as .DXF\", 4 + 512, True, True, True)\n\nobjNames=[]\n\ndef RotateSelected(deg):\n    geo = copy\n    if copy:\n        plane=rs.ViewCPlane()\n        bb=rs.BoundingBox(geo,plane)\n        if bb:\n            rs.EnableRedraw(False)\n            rs.RotateObjects(geo,(bb[0]),deg,copy=False)\n\nfor singleID in objectIDs:\n    objName = rs.ObjectName(singleID)\n    objNames.append(objName)\n\nname = {x for x in objNames if x != None}\nsheetnum = \" \".join(name)\npath = rs.DocumentPath()\nexportcmd = '_-Export \"' + path + \"CNC\\\\\" + sheetnum + '.dxf\" _Enter'\n\nif objectIDs:\n    bbox = rs.BoundingBox(objectIDs)\n    dir = rs.VectorCreate([0,0,0], bbox[0])\n    copy = rs.CopyObjects(objectIDs, dir)\n    rs.UnselectAllObjects()\n    rs.SelectObjects(copy)\n    RotateSelected(270)\n    rs.Command(exportcmd)\n    rs.DeleteObjects(copy)",
+      "language": "python",
+      "author": "ainsley",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport System.Guid, System.Drawing.Color\n\nobjs = rs.GetObjects(\"Select objects for export as .DXF\", 4 + 512, True, True, True)\n\nnames = []\nsheets = []\ngnames = []\ngrps = []\n\n#populate lists\nfor i in objs:\n    if rs.ObjectLayer(i) == \"CNC\":\n        sheets.append(i)\nfor i in sheets:\n    gnames.append(rs.ObjectTopGroup(i))\nfor i in gnames:\n    grps.append(rs.ObjectsByGroup(i))\nfor i in sheets:\n    names.append(rs.ObjectName(i))\n\ndef exportdxf(objs):\n#create save name    \n    name = {x for x in names if x != None}\n    sheetnum = \" \".join(name)\n    path = rs.DocumentPath()\n    exportcmd = '_-Export \"' + path + \"CNC\\\\\" + sheetnum + '.dxf\" _Enter'\n#operations\n    if objs:\n        bbox = rs.BoundingBox(objs)\n        dir = rs.VectorCreate([0,0,0], bbox[0])\n        copy = rs.CopyObjects(objs, dir)\n        rs.UnselectAllObjects()\n        rs.SelectObjects(copy)\n    if copy:\n        plane=rs.ViewCPlane()\n        bb=rs.BoundingBox(copy,plane)\n        if bb:\n            rs.EnableRedraw(False)\n            rs.RotateObjects(copy,(bb[0]),270,copy=False)\n        rs.Command(exportcmd)\n        rs.DeleteObjects(copy)\n#try to get it to loop\nfor i in grps:\n    exportdxf(i)",
+      "language": "python",
+      "author": "ainsley",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 334
+}

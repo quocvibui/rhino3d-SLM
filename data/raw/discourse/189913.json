@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/headless-document-mesh-to-gh-mesh/189913",
+  "topic_id": 189913,
+  "title": "Headless document Mesh to GH_Mesh",
+  "question": "Task:\n\nConvert the mesh or pointcloud geometry from an external .stl or .ply file into Grasshopper geometry without importing it into the current active document.\n\n\nIs this even possible?\n\n\nApproach:\n\n\n\n\nCreate a headless document to import the external file into using the Import() method.\n\n\nSelect the object with the MostRecentObject() method. Get the Geometry of the object.\n\n\nConvert the geometry into Grasshopper geometry with GH_Mesh().\n\n\nDispose of the headless document.\n\n\n\n\nIs this a valid method? Are there more efficient ways?\n\n\nProblem:\n\nI get the following exceptions and a null output on a. Replacing the tempDoc with the current active document works and produces no exceptions but is not desired as it imports the geometry into the document.\n\n\nScreenshot 2024-08-22 at 09.23.49\n1223×686 114 KB\n\n\n\n\nCode:\n\n\nScreenshot 2024-08-22 at 09.26.28\n914×1237 156 KB\n\n\nimport Rhino\nfrom Rhino.Geometry import Mesh, PointCloud\nimport Grasshopper.Kernel.Types as ghtypes\n\nfilePath = '/path/to/file.stl'\n        \n        importArguments = {\n            '_Weld' : '_Yes',\n            '_WeldAngle' : 22.5,\n            '_SplitDisjointMeshes': '_Yes',\n            '_ModelUnits' : '_Millimeters'\n        }\n        importOptions = Rhino.Collections.ArchivableDictionary()\n        for parameter, value in importArguments.items():\n            importOptions.Set(parameter, value)\n        \n        tempDoc = Rhino.RhinoDoc.CreateHeadless(None)\n        test = tempDoc.Import(filePath, importOptions)\n        print(test)\n        \n        obj = tempDoc.Objects.MostRecentObject()\n        print(obj)\n        \n        geometry = obj.Geometry\n        print(geometry)\n        \n        if isinstance(geometry, Rhino.Geometry.Mesh):\n            a = ghtypes.GH_Mesh(obj.Geometry)\n            print(a)\n        \n        tempDoc.Dispose()\n\n\n\nAny help or feedback is appreciated!\n\n\nAaron\n\n\nSystem:\n\nMacOS 14.4.1\n\nRhino Version 8  (8.10.24228.13002, 2024-08-15)\n\nusing the Python 3.9.1 component",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nfrom Rhino.Geometry import Mesh, PointCloud\nimport Grasshopper.Kernel.Types as ghtypes\n\nfilePath = '/path/to/file.stl'\n        \n        importArguments = {\n            '_Weld' : '_Yes',\n            '_WeldAngle' : 22.5,\n            '_SplitDisjointMeshes': '_Yes',\n            '_ModelUnits' : '_Millimeters'\n        }\n        importOptions = Rhino.Collections.ArchivableDictionary()\n        for parameter, value in importArguments.items():\n            importOptions.Set(parameter, value)\n        \n        tempDoc = Rhino.RhinoDoc.CreateHeadless(None)\n        test = tempDoc.Import(filePath, importOptions)\n        print(test)\n        \n        obj = tempDoc.Objects.MostRecentObject()\n        print(obj)\n        \n        geometry = obj.Geometry\n        print(geometry)\n        \n        if isinstance(geometry, Rhino.Geometry.Mesh):\n            a = ghtypes.GH_Mesh(obj.Geometry)\n            print(a)\n        \n        tempDoc.Dispose()",
+      "language": "python",
+      "author": "Aaron_Leonard_Merten",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 70
+}

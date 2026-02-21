@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-there-a-way-w-o-grasshopper-to-select-all-items-on-a-layer-that-intersect-with-items-on-another-layer/35918",
+  "topic_id": 35918,
+  "title": "Is there a way (w/o Grasshopper) to select all items on a layer that intersect with items on another layer?",
+  "question": "Here’s the situation: I have a bunch of little polysurface items that are populated around a big mesh. I want to only keep the polysurfaces that are intersecting the mesh, and delete all the other ones that are inside and outside the mesh. Currently, I’m just deleting them manually, but it’s a big task. Is there any existing command that could in one way or another accomplish what I’m trying to do more quickly than manual labor? I could imagine various ways to script this in Grasshopper, but alas, that isn’t available for Mac yet (will it ever?)\n\n\nThanks Forum! Thanks Rhino, you’re my best friend.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport System.Collections.Generic.IEnumerable as IEnumerable\nimport System.Guid as Guid\nimport Rhino.Input as ri\nimport Rhino.DocObjects as rdo\nresult, mainMesh = ri.RhinoGet.GetOneObject(\"Select a mesh\",False,rdo.ObjectType.Mesh)\nresult, polysrfs = ri.RhinoGet.GetMultipleObjects(\"Select Polysurfaces to filter\",False,rdo.ObjectType.Brep)\ntoSelect = []\nfor ps in polysrfs:\n    psMeshes = rg.Mesh.CreateFromBrep(ps.Brep(),rg.MeshingParameters.Default)\n    meshUnion = rg.Mesh()\n    for mesh in psMeshes:\n        meshUnion.Append(mesh)\n    intersect = rg.Intersect.Intersection.MeshMeshFast(meshUnion,mainMesh.Mesh())\n    if intersect and len(list(intersect)) > 0:\n        toSelect.append(ps.ObjectId)\nRhino.RhinoDoc.ActiveDoc.Objects.Select.Overloads[IEnumerable[Guid]](toSelect)",
+      "language": "python",
+      "author": "andheum",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 5,
+  "posts_count": 5,
+  "views": 2848
+}

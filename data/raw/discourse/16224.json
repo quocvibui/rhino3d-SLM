@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curve-projecttobrep-problem/16224",
+  "topic_id": 16224,
+  "title": "Curve.ProjectToBrep problem",
+  "question": "Hi,\n\n\nI want project a Curve over a Brep.\n\n\n \n\n\nIn the image, I’ve the Curve (pink line) and the brep. This Brep is selected and I can see that the vertical line is not in the brep’s middle.\n\n\nI use this instruction for project the line\n\n\nCurve\n curvas = Curve.ProjectToBrep(_linea, Face, Plane.WorldZX.Normal, 1);\n\n\nAnd the result is this\n\n\n\n\nThe projection result is the green line, but I need the projection over all brep, not only in the section\n\n\nWhat can I do?\n\n\nI’m working with c# and rhinoCommon",
+  "code_blocks": [
+    {
+      "code": "ObjRef cRef;\nResult res = RhinoGet.GetOneObject(\"Select curve to project\", false, ObjectType.Curve, out cRef);\nif (res != Result.Success)\n    return res;\n\nObjRef bRef;\nres = RhinoGet.GetOneObject(\"Select BREP to project to\", false, ObjectType.Brep, out bRef);\nif (res != Result.Success)\n    return res;\n\nBrep b = bRef.Brep();\nCurve c = cRef.Curve();\n\nCurve[] result = Curve.ProjectToBrep(c, b, Vector3d.YAxis, doc.ModelAbsoluteTolerance);\nif (null != result)\n    foreach (Curve crv in result)\n    {\n        if (null != crv)\n            doc.Objects.AddCurve(crv);\n    }\n\ndoc.Views.Redraw();",
+      "language": "csharp",
+      "author": "menno",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "Imports System\nImports System.Collections.Generic\nImports Rhino\nImports Rhino.Commands\nImports Rhino.Geometry\nImports Rhino.Input\nImports Rhino.Input.Custom\n\nNamespace TestProjectToBrep\n\n    <System.Runtime.InteropServices.Guid(\"c01eae32-2d3c-4384-88db-4ca680cd90e3\")> _\n    Public Class TestProjectToBrepCommand\n        Inherits Command\n\n        Shared _instance As TestProjectToBrepCommand \n\n        Public Sub New()\n            ' Rhino only creates one instance of each command class defined in a\n            ' plug-in, so it is safe to store a refence in a static field.\n            _instance = Me\n        End Sub\n\n        '''<summary>The only instance of this command.</summary>\n        Public Shared ReadOnly Property Instance() As TestProjectToBrepCommand\n            Get\n                Return _instance\n            End Get\n        End Property\n\n        '''<returns>The command name as it appears on the Rhino command line.</returns>\n        Public Overrides ReadOnly Property EnglishName() As String\n            Get\n                Return \"TestProjectToBrepCommand\"\n            End Get\n        End Property\n\n        Protected Overrides Function RunCommand(ByVal doc As RhinoDoc, ByVal mode As RunMode) As Result\n\n            doc.Objects.UnselectAll()\n\n            Dim Brep As Rhino.DocObjects.ObjRef = Nothing\n            Dim rc2 = Rhino.Input.RhinoGet.GetOneObject(\"Brep\", False, Rhino.DocObjects.ObjectType.Brep, Brep)\n            If rc2 <> Rhino.Commands.Result.Success Then\n                Return rc2\n            End If\n\n            doc.Objects.UnselectAll()\n\n            Dim Curve As Rhino.DocObjects.ObjRef = Nothing\n            Dim rc = Rhino.Input.RhinoGet.GetOneObject(\"Curve\", False, Rhino.DocObjects.ObjectType.Curve, Curve)\n            If rc <> Rhino.Commands.Result.Success Then\n                Return rc\n            End If\n\n            Dim DefBrep As Geometry.Brep = Brep.Brep\n            Dim DefCurve As Geometry.Curve = Curve.Curve\n\n            Dim ProjCrv As Geometry.Curve() = Geometry.Curve.ProjectToBrep(DefCurve, DefBrep, New Geometry.Vector3d(0, 0, 1), doc.ModelAbsoluteTolerance)\n\n            For Each crv In ProjCrv\n                doc.Objects.AddCurve(crv)\n            Next\n\n            doc.Views.Redraw()\n\n            Return Result.Success\n        End Function\n    End Class\nEnd Namespace",
+      "language": "csharp",
+      "author": "jordy1989",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1406
+}

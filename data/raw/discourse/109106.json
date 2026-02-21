@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/comparing-files/109106",
+  "topic_id": 109106,
+  "title": "Comparing files",
+  "question": "Is there a (relatively) simple way to compare two .3dm files and identify geometry which is duplicated between the files and/or geometry which is unique to each file?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\ndef tag_objects():\n    \n    file = rs.DocumentName()\n\n    if not file:return\n\n    tagString = file.split(\".\")[0]\n    \n    ids = rs.AllObjects()\n    \n    if not ids: return\n    \n    for id in ids:\n        rs.SetUserText(id, 'FileTag', tagString)\n        \ntag_objects()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef sel_tag_objects():\n    \n    file = rs.DocumentName()\n\n    if not file:return\n\n    tagString = file.split(\".\")[0]\n    \n    ids = rs.NormalObjects()\n    \n    if not ids: return\n    rs.UnselectAllObjects()\n    rs.EnableRedraw(False)\n    for id in ids:\n        \n        if rs.SetUserText(id, 'FileTag', tagString):\n            rs.SelectObject(id)\n    rs.EnableRedraw(True)\n        \nsel_tag_objects()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef clear_tag_objects():\n    \n\n    ids = rs.AllObjects()\n    \n    if not ids: return\n\n    for id in ids:\n        rs.SetUserText(id, 'FileTag', \"\")\n\nclear_tag_objects()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 11,
+  "views": 2331
+}

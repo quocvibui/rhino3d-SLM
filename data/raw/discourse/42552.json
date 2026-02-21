@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/text-field-editing-as-macro/42552",
+  "topic_id": 42552,
+  "title": "Text Field editing as macro",
+  "question": "I want to write a macro to let a objects name be extracted as a text. To do this I have tried to write a command string who uses “object name” in text field option (Fx) but i have no success. Is this possible?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\ngo = Rhino.Input.Custom.GetObject()\ngo.SetCommandPrompt('Select text')\ngo.GeometryFilter = Rhino.DocObjects.ObjectType.Annotation\ngo.Get()\nif go.CommandResult() == Rhino.Commands.Result.Success:\n    text = go.Object(0).TextEntity()\n    if text:\n        print text.TextFormula",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\nfrom Rhino.Geometry import *\n\ntext_entity = TextEntity()\ntext_entity.Plane = Plane.WorldXY\ntext_entity.TextFormula = \"%<ObjectName(\\\"dfe70ddc-3e57-4ca7-acc0-79bb29ecd629\\\")>%\"\ntext_entity.Justification = TextJustification.MiddleCenter\n\ndoc.Objects.AddText(text_entity)\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 828
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/StrucEng-Library-kfmresearch/strucenglib-snippets/blob/2e4b498eaa5b2928c1766e9ed99bf6493e5fe056/strucenglib/prepost_functions/plot_nr_elem.py",
+  "repo": "StrucEng-Library-kfmresearch/strucenglib-snippets",
+  "repo_stars": 1,
+  "repo_description": "StrucEng Library (snippets) for Rhinoceros",
+  "license": "unknown",
+  "filepath": "strucenglib/prepost_functions/plot_nr_elem.py",
+  "instruction": "Author(s): Marius  Weber (ETHZ, HSLU T&A)",
+  "code": "# Author(s): Marius  Weber (ETHZ, HSLU T&A)\r\n\r\nimport rhinoscriptsyntax as rs\r\nfrom compas_fea.structure import Structure\r\nfrom compas_fea.cad import rhino\r\nimport Rhino\r\nimport scriptcontext\r\nimport System.Guid, System.Drawing.Color\r\n\r\n\r\n\r\ndef plot_nr_elem(mdl):\r\n\r\n    # Basics\r\n    layer_new = \"Element_numbers\"\r\n    rs.CurrentLayer(layer=\"Default\")\r\n\r\n    def AddLayer():\r\n        layer_index = scriptcontext.doc.Layers.Add(layer_new, System.Drawing.Color.Black)\r\n        return Rhino.Commands.Result.Success\r\n\r\n    # check if layer already exist and Add a new layer to the document\r\n    if rs.IsLayer(layer_new):\r\n        rs.PurgeLayer(layer_new) \r\n        AddLayer()\r\n        rs.CurrentLayer(layer_new)\r\n    else:    \r\n        AddLayer()\r\n        rs.CurrentLayer(layer_new)\r\n\r\n\r\n    # show Element numbers\r\n    for element_num, element in mdl.elements.items():\r\n        xyz=mdl.element_centroid(element=element_num)  # return the centroid of element\r\n        elemen_num_backend=element_num+1\r\n        rs.AddTextDot(str(elemen_num_backend), xyz)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

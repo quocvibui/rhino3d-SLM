@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-python-component-render-material-vray/103886",
+  "topic_id": 103886,
+  "title": "Grasshopper Python Component Render Material Vray",
+  "question": "Hi All,\n\n\nin a Grasshopper Python Component I would like to get a list of all materials in the document \nto read their RGB values\n (of the diffuse channel). My materials are Vray materials. There are no Rhino materials present in the file. I cannot use Rhino materials for this.\n\n\nRhino Version 6 SR26\n\nVray Version 3.60.03\n\n\nI tried so far:\n\n\n\n\n\n\nscriptcontext.doc.Materials\n -> not supported in GH\n\n\n\n\nRhino.RhinoDoc.ActiveDoc.Materials\n -> Holds the same number of materials as listed in the Vray Asset Editor UI. So I assume those are the Vray materials. But all \nRhino.RhinoDoc.ActiveDoc.Materials[i].DiffuseColor\n values are unrelated to the actual values set up in the Vray materials.\n\n\n\n\nRhino.RhinoDoc.ActiveDoc.RenderMaterials\n -> is empty\n\n\nI applied the Vray materials in Rhino to Brep objects. Loaded those objects into GH as Geometry and use them inside the GH Python Component to do \nrhinoscriptsyntax.ObjectMaterialIndex(guid)\n -> always gives me -1. This works in normal Rhino Python Scripts, but not in the GH Python component.\n\n\n\n\nEDIT\n\nFurther tests I did\n\n\n\n\nUsing the \nVray Material from Project\n component to get to the material and plugging it into the GH Python Script component. Inside the script this gives me \n-1\n, same when you plug it into a panel. Those Vray components hardly implement anything.\n\n\n\n\nI know \n@clement\n did some work in this direction with Python Script. Did you ever get it to work in GH Python?\n\n\nAny ideas are greatly appreciated. Thanks for your help.\n\nSilvan",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\nvray = rs.GetPlugInObject(\"V-Ray for Rhino\")\n\nmaterials = vray.Scene().Materials()\n\nfor m in materials:\n    material = m.Name()+\"/Base/V-Ray BRDF\"\n    brdf=vray.Scene().Plugin(material)\n    brdf.Param(\"diffuse_color\").Value = System.Array[System.Single]([0, 1, 1])\nvray.Scene().Refresh()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\nvray = rs.GetPlugInObject(\"V-Ray for Rhino\")\n\nmaterials = vray.Scene().Materials()\n\nfor m in materials:\n    \n    \n    material = m.Name()+\"/Bump/VRay Mtl\"\n    brdf=vray.Scene().Plugin(material)\n    brdf.Param(\"diffuse_color\").Value = System.Array[System.Single]([0, 1, 1])\nvray.Scene().Refresh()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 17,
+  "views": 1669
+}

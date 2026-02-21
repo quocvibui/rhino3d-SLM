@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/disable-gumball-with-python-in-gh/206791",
+  "topic_id": 206791,
+  "title": "Disable gumball with Python in GH",
+  "question": "Working on a project that makes use of the model environment through the recent Rhino components in Grasshopper. I have some randomly generated panels that i can cycle through. With some python code+trigger i check if a panel is selected, which is stored as a boolean value/key in the Object.\n\n\nNow i want to try and disable the gumball whenever a panel is selected, because at that point i want to show some annotation/information. The gumball comes in use again later under different conditions, so i need to enable it again when the boolean is false.\n\n\nI have this code through chatgpt, but so far no luck. Does anyone see the problem?\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n# Input: isSelected (bool) -- True to turn Gumball ON, False to turn OFF\n\ndef toggle_gumball(is_selected):\n    # Get the current document's GumballDisplayConduit\n    gumball = Rhino.UI.Gumball.GumballDisplayConduit()\n    \n    # Enable or disable the Gumball based on selection state\n    gumball.Enabled = is_selected\n    \n    # Redraw the views to update the display\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\ntoggle_gumball(isSelected)\n\n\n\n\n\n\n\nPanels_Redux.gh\n (14.6 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\n# Before trying to access something in Rhino\n# Set Script Context To Rhino Doc\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\n# Do something in code here that needs to interact with/modify Rhino\n\n# After accessing Rhino and working back with Grasshopper again\n# Set Script Context To Grasshopper Doc\nsc.doc = ghdoc\n\n#End the script here or continue doing other Grasshopper related code/access",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# After accessing Rhino and working back with Grasshopper again\n# Set Script Context To Grasshopper Doc\nsc.doc = ghdoc",
+      "language": "unknown",
+      "author": "Calcman",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n# Input: isSelected (bool) -- True to turn Gumball ON, False to turn OFF\n\ndef toggle_gumball(is_selected):\n    # Get the current document's GumballDisplayConduit\n    gumball = Rhino.UI.Gumball.GumballDisplayConduit()\n    \n    # Enable or disable the Gumball based on selection state\n    gumball.Enabled = is_selected\n    \n    # Redraw the views to update the display\n    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()\n\ntoggle_gumball(isSelected)",
+      "language": "python",
+      "author": "Calcman",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 120
+}

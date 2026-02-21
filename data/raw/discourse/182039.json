@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getboundingbox-plane-oriented-but-world-coordinates/182039",
+  "topic_id": 182039,
+  "title": "GetBoundingBox() plane-oriented but world coordinates",
+  "question": "Two overloads here:\n\n\nimage\n801×817 42.1 KB\n\n\nimage\n735×663 27.1 KB\n\n\nIf I just use \nobj.GetBoundingBox(plane)\n, it uses the second overload, and I get the box output \nin plane coordinates\n.  I would like the first, the plane-oriented bounding box, but in world coordinates…  How to?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nfrom Rhino.Geometry import Plane, Box\n\nimport clr\noBox = clr.Reference[Box]()\n\nb = SomeBrep()\np = SomePlane()\n\nbb = b.GetBoundingBox(p, oBox)\nbox = oBox.Value\ndoc.Objects.AddBox(box)\nrs.Redraw()",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino, clr\n\ndef TestPlaneOrientedBB():\n    obj_id=rs.GetObject(\"Pick rectangle\",4,preselect=True)\n    if obj_id:\n        crv=rs.coercecurve(obj_id)\n        rc,plane=crv.TryGetPlane()\n        if rc:\n            wxy=Rhino.Geometry.Plane.WorldXY\n            plane.Origin=crv.PointAtStart\n            oBox = clr.Reference[Rhino.Geometry.Box]()\n            bb=crv.GetBoundingBox(plane,oBox)\n            rs.AddPoint(bb.Center)\nTestPlaneOrientedBB()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef TestPlaneOrientedBB():\n    obj_id=rs.GetObject(\"Pick rectangle\",4,preselect=True)\n    if obj_id:\n        crv=rs.coercecurve(obj_id)\n        rc,plane=crv.TryGetPlane()\n        if rc:\n            wxy=Rhino.Geometry.Plane.WorldXY\n            plane.Origin=crv.PointAtStart\n            out_xform=Rhino.Geometry.Transform.ChangeBasis(wxy,plane)\n            bb=crv.GetBoundingBox(out_xform)\n            #rs.AddPoint(bb.Center)\n            in_xform=Rhino.Geometry.Transform.ChangeBasis(plane,wxy)\n            new_pt=rs.PointTransform(bb.Center,in_xform)\n            rs.AddPoint(new_pt)\nTestPlaneOrientedBB()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "def GetPlaneAlignedBBCtr(obj,plane):\n    wxy=Rhino.Geometry.Plane.WorldXY\n    out_xform=Rhino.Geometry.Transform.ChangeBasis(wxy,plane)\n    bb=obj.GetBoundingBox(out_xform)\n    if bb:\n        in_xform=Rhino.Geometry.Transform.ChangeBasis(plane,wxy)\n        return in_xform*bb.Center",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 308
+}

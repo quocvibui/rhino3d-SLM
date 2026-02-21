@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/input-dynamically/157984",
+  "topic_id": 157984,
+  "title": "Input Dynamically",
+  "question": "from Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nfrom System.Drawing import *\nimport rhinoscriptsyntax as rs\n\n \ndef RunCommand():\n    gp = GetPoint()\n    gp.SetCommandPrompt(\"Center point\")\n    gp.Get()\n    if gp.CommandResult() != Result.Success:\n        return gp.CommandResult()\n    center_point = gp.Point()\n    if center_point == Point3d.Unset:\n        return Result.Failure\n \n    radius = rs.RealBox(\"msg\", 0, \"tit\") #\n    gcp = GetCircleRadiusPoint(center_point, radius) #\n    #gcp = GetCircleRadiusPoint(center_point)\n    gcp.SetCommandPrompt(\"Radius\")\n    gcp.ConstrainToConstructionPlane(False)\n    gcp.SetBasePoint(center_point, True)\n    gcp.DrawLineFromPoint(center_point, True)\n    gcp.Get()\n    if gcp.CommandResult() != Result.Success:\n        return gcp.CommandResult()\n \n    #radius = center_point.DistanceTo(gcp.Point())\n    cplane = doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    doc.Objects.AddCircle(Circle(cplane, center_point, radius))\n    doc.Views.Redraw()\n    return Result.Success\n \nclass GetCircleRadiusPoint(GetPoint):\n    #def __init__(self, centerPoint):\n    def __init__(self, centerPoint, radius):\n        self.m_center_point = centerPoint\n        self.m_radius = radius #\n \n    def OnDynamicDraw(self, e):\n        cplane = e.RhinoDoc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        radius = rs.RealBox(\"msg\", 0, \"tit\") #\n        #radius = self.m_center_point.DistanceTo(e.CurrentPoint)\n        circle = Circle(cplane, self.m_center_point, radius)\n        e.Display.DrawCircle(circle, Color.Red)\n \nif __name__ == \"__main__\":\n    RunCommand()\n\n\n\nthe above code, I modified it from below link:\n\n\n\n\n\n\n\n\nwww.rhino3d.com\n\n\n\n\n\n\nDynamically Draw Geometry when Picking Points\n\n\nDemonstrates how to dynamically draw geometry during point picking.\n\n\n\n\n\n\n\n\n\n\n\n\nthe intent is to be able to vary the size of the circle, not by clicking with the mouse to obtain t...",
+  "code_blocks": [
+    {
+      "code": "from Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nfrom System.Drawing import *\nimport rhinoscriptsyntax as rs\n\n \ndef RunCommand():\n    gp = GetPoint()\n    gp.SetCommandPrompt(\"Center point\")\n    gp.Get()\n    if gp.CommandResult() != Result.Success:\n        return gp.CommandResult()\n    center_point = gp.Point()\n    if center_point == Point3d.Unset:\n        return Result.Failure\n \n    radius = rs.RealBox(\"msg\", 0, \"tit\") #\n    gcp = GetCircleRadiusPoint(center_point, radius) #\n    #gcp = GetCircleRadiusPoint(center_point)\n    gcp.SetCommandPrompt(\"Radius\")\n    gcp.ConstrainToConstructionPlane(False)\n    gcp.SetBasePoint(center_point, True)\n    gcp.DrawLineFromPoint(center_point, True)\n    gcp.Get()\n    if gcp.CommandResult() != Result.Success:\n        return gcp.CommandResult()\n \n    #radius = center_point.DistanceTo(gcp.Point())\n    cplane = doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    doc.Objects.AddCircle(Circle(cplane, center_point, radius))\n    doc.Views.Redraw()\n    return Result.Success\n \nclass GetCircleRadiusPoint(GetPoint):\n    #def __init__(self, centerPoint):\n    def __init__(self, centerPoint, radius):\n        self.m_center_point = centerPoint\n        self.m_radius = radius #\n \n    def OnDynamicDraw(self, e):\n        cplane = e.RhinoDoc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        radius = rs.RealBox(\"msg\", 0, \"tit\") #\n        #radius = self.m_center_point.DistanceTo(e.CurrentPoint)\n        circle = Circle(cplane, self.m_center_point, radius)\n        e.Display.DrawCircle(circle, Color.Red)\n \nif __name__ == \"__main__\":\n    RunCommand()",
+      "language": "python",
+      "author": "0904",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 640
+}

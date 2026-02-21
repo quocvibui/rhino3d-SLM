@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/copying-surface-from-block-in-python/183352",
+  "topic_id": 183352,
+  "title": "Copying surface from block in python",
+  "question": "Is there a way to copy a surface from a BlockInstance without exploding the block?\n\n\nI’m generating a bunch of different blocks to design a facade, but for simulations I just need to copy/choose a single specific surface from each of these (same Rhino Name and Layer in all BlockInstances) in a Python script without exploding the block, as it would increase file size.\n\n\nI can do it in Grasshopper, but I’m learning Python and haven’t been able to find a starting point or path yet, so any suggestions would be a great help\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef ExtractSrf():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select surface to extract\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.SubSurface\n    go.EnablePreSelect(True, True)\n    go.Get()\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n    \n    objref = go.Object(0)\n    face = objref.Face()\n    if face:\n        brep = face.DuplicateFace(True)\n        if brep:\n            sc.doc.Objects.AddBrep(brep)\n            \n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    ExtractSrf()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "id = scriptcontext.doc.Objects.Add(obj, rh_obj.Attributes)\n            new_obj = scriptcontext.doc.Objects.Find(id)\n            rs.ObjectLayer(new_obj,\"PV-Surfaces\")\n            if new_obj:\n                new_obj.Select(True)  \n    scriptcontext.doc.Views.Redraw()\n    return new_obj",
+      "language": "python",
+      "author": "anders",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "def makeDetail(keys, objs):\n    if not objs: return\n    for obj in objs: # I get an error here 'TypeError: iteration over non-sequence of type BrepObject'\n        for key in keys:\n            cur_keys = rs.GetUserText (obj)\n            if key not in cur_keys:\n                rs.SetUserText (obj, key, \"0\", False)\n            else:\n                val = rs.GetUserText (obj, key)\n                if len(val)<1 or val==\" \":\n                    rs.SetUserText (obj, key, \"0\", False)",
+      "language": "python",
+      "author": "anders",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 390
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-7-material-assignments-to-layers-not-saving/130800",
+  "topic_id": 130800,
+  "title": "Rhino 7 - material assignments to layers not saving",
+  "question": "I’m using Version 7 SR10 (7.10.21256.17001, 2021-09-13) and trying to apply different materials to all the layers for exporting information easily to Twinmotion and/or Unreal Engine. On saving a file, and re-opening it, the material for the first layer in the list is applied to all the layers.\n\n\nI start a file, no materials applied to the layers.\n\n\n1\n1106×881 177 KB\n\n\nUsing a Python script (see end), I create make and apply new materials to each layer, material named by the layer.\n\n\n2\n1121×853 206 KB\n\n\nNew materials in material palette:\n\n\n3\n557×457 73 KB\n\n\nI save the file, re-open it, and the material from the first layer in the list is applied to every layer.\n\n\nNOT GOOD.\n\n\n4\n1118×894 185 KB\n\n\nAll material definitions are gone.\n\n\n5\n564×471 24.3 KB\n\n\nPython material application code:\n\n\n> \"\"\"USE FOR COORDINATION WITH TWINMOTION DATASMITH SYNCHRONIZATION\"\"\"\n> \n> import scriptcontext as sc\n> import rhinoscriptsyntax as rs\n> import Rhino as rh\n> import Rhino.DocObjects\n> import scriptcontext\n> \n> def AddMaterialToLayer(layer):\n>     \"\"\"Add material to a layer and returns the new material's index. If the\n>     layer already has a material, then the layer's current material index is\n>     returned\n>     Parameters:\n>       layer = name of an existing layer.\n>     Returns:\n>       Material index of the layer if successful\n>       None if not successful or on error\n>     \"\"\"\n> \n>     print layer\n> \n>     layName = rs.LayerName(layer)\n>     print layName\n> \n>     layer=rs.LayerId(layName)\n>     print layer\n>     \n>     #if rs.LayerMaterialIndex(layer)>-1: \n>     #    return rs.LayerMaterialIndex(layer)\n>     \n>     material_index = scriptcontext.doc.Materials.Add()\n>     rs.MaterialName(material_index,layName)\n>     rs.LayerMaterialIndex(layer, material_index)\n>    \n> lays = rs.LayerIds()\n> \n> for lay in lays:\n>     AddMaterialToLayer(lay)",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino as rh\nimport Rhino.DocObjects\nimport scriptcontext\nimport random\ndef AddMaterialToLayer(layer, color):\n    \"\"\"Add material to a layer and returns the new material's index. If the\n    layer already has a material, then the layer's current material index is\n    returned\n    Parameters:\n    layer = name of an existing layer.\n    Returns:\n    Material index of the layer if successful\n    None if not successful or on error\n    \"\"\"\n\n    \n    print layer\n    \n    layName = rs.LayerName(layer)\n    print layName\n    \n    layer=rs.LayerId(layName)\n    print layer\n    \n    #if rs.LayerMaterialIndex(layer)-1: \n    #    return rs.LayerMaterialIndex(layer)\n    \n    material_index = scriptcontext.doc.Materials.Add()\n    rs.MaterialName(material_index,layName)\n    rs.MaterialColor(material_index, color)\n    \n    rs.LayerMaterialIndex(layer, material_index)\n\ndef AddMatsTolayers():\n    lays = rs.LayerIds()\n    colors = []\n    for lay in lays:\n        while True:\n            r = random.randint(0,255)\n            g = random.randint(0,255)\n            b = random.randint(0,255)\n            color = [r,g,b]\n            if color not in colors:\n                break\n        colors.append(color)\n        print color\n        AddMaterialToLayer(lay, color)\n        \nAddMatsTolayers()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "> \"\"\"USE FOR COORDINATION WITH TWINMOTION DATASMITH SYNCHRONIZATION\"\"\"\n> \n> import scriptcontext as sc\n> import rhinoscriptsyntax as rs\n> import Rhino as rh\n> import Rhino.DocObjects\n> import scriptcontext\n> \n> def AddMaterialToLayer(layer):\n>     \"\"\"Add material to a layer and returns the new material's index. If the\n>     layer already has a material, then the layer's current material index is\n>     returned\n>     Parameters:\n>       layer = name of an existing layer.\n>     Returns:\n>       Material index of the layer if successful\n>       None if not successful or on error\n>     \"\"\"\n> \n>     print layer\n> \n>     layName = rs.LayerName(layer)\n>     print layName\n> \n>     layer=rs.LayerId(layName)\n>     print layer\n>     \n>     #if rs.LayerMaterialIndex(layer)>-1: \n>     #    return rs.LayerMaterialIndex(layer)\n>     \n>     material_index = scriptcontext.doc.Materials.Add()\n>     rs.MaterialName(material_index,layName)\n>     rs.LayerMaterialIndex(layer, material_index)\n>    \n> lays = rs.LayerIds()\n> \n> for lay in lays:\n>     AddMaterialToLayer(lay)",
+      "language": "python",
+      "author": "Mdmowry",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 7,
+  "views": 868
+}

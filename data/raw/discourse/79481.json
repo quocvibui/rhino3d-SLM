@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/evaluate-point-doesnt-label-with-cplane-coordinates/79481",
+  "topic_id": 79481,
+  "title": "Evaluate point doesn't label with cplane coordinates",
+  "question": "@pascal\n\nI’m ashamed to say I’ve not used this command and its label function in any serious endeavor in all my years of Rhinoing. Now I need it and notice it doesn’t label with the cplane coordinates, but rather with world coordinates only. I need it to evaluate and label with the current cplane coordinates.\n\n\nIs there some hidden setting I’m missing?\n\n\nv5, last update.\n\n\nThank you for any tips.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nworld = rs.GetPoint(\"Point to evaluate\")\norient = rg.Transform.ChangeBasis(rg.Plane.WorldXY, rs.ViewCPlane())\ncplane = rg.Point3d(world)\ncplane.Transform(orient)\ncplane = rg.Point3d(round(cplane.X,2),round(cplane.Y,2),round(cplane.Z,2))\nrs.AddTextDot(cplane, world)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nworld = rs.GetPoint(\"Point to evaluate\")\norient = rg.Transform.ChangeBasis(rg.Plane.WorldXY, rs.ViewCPlane())\ncplane = rg.Point3d(world)\ncplane.Transform(orient)\ncplane = rg.Point3d(round(cplane.X,2),round(cplane.Y,2),round(cplane.Z,2))\nrs.AddLeader([cplane,cplane+rg.Point3d(1,1,1)], None, cplane)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 13,
+  "views": 1699
+}

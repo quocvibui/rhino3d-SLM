@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/run-rhino-command-from-python-script/175764",
+  "topic_id": 175764,
+  "title": "Run Rhino command from python script",
+  "question": "Hi there!\n\n\nI can run command on picked object from my python script:\n\n\nimport rhinoscriptsyntax as rs\n\n\n#rs\n.Command(“WaterlineElevation=9.2  Symmetric=Yes  Longitude=X”)\n\n\nresult = rs.Command(\"_Hydrostatics \")\n\n\nI have no idea how to catch results from this command:\n\n\nVolume Displacement = …\n\nCenter of Buoyancy = …\n\nWetted Surface Area = …\n\nWaterline Length = …\n\nMaximum Waterline Beam = …\n\nWater Plane Area = …\n\nCenter of Floatation = …\n\n\nCan anyone give me a hint to return results into my python script.\n\n\nI also like to run this comamnd for the same object several times with different elevation.\n\nWithout selecting the same object again.\n\n\nThanks and regards, vzav",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    message = \"Select surfaces or polysurfaces for hydrostatics\"\n    obj_ids = rs.GetObjects(message, 8+16, True, True, True)\n    if not obj_ids: return\n    \n    cmd = \"_-Hydrostatics \"\n    cmd += \"_WaterlineElevation {} \"\n    cmd += \"_Symmetric=_Yes \"\n    cmd += \"_Longitude=X _Enter \"\n    cmd += \"_Clipboard \"\n    \n    levels = [-0.25, 0.0, 0.25]\n    for level in levels:\n        rc = rs.Command(cmd.format(level), False)\n        if rc:\n            text = rs.ClipboardText()\n            print \"Results for level: {}\\n{}\".format(level, text)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 363
+}

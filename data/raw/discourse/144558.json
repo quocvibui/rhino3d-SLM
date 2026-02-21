@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-offset-polysurface-created-in-grasshopper/144558",
+  "topic_id": 144558,
+  "title": "GHPython offset polysurface created in Grasshopper",
+  "question": "Hi,\n\n\nI am trying to offset a brep / polysurface in gh using Python. I am referencing a bunch of curves into gh to manipulate, joining & extruding them up, and trying to create a brep from that by offsetting the extruded polysrf but when I use Offset Surface in gh (both the native & Pufferfish one), the polysurface created is not a single solid brep. However, when I manually offset that extruded polysrf in Rhino, the brep created is a single closed brep.\n\n\nMy current issue with the Rhino Common command is that CreateOffsetBrep requires a brep input, and when I input the brep component in gh, I am getting an error that says it is a GUID & not a brep. Is there a way to convert this info? Or perhaps a more elegant way to resolve this problem? The command I am running is:\n\n\n\n\na = Rhino.Geometry.Brep.CreateOffsetBrep(brep, dist, solid, ext, shr)\n\n\n\n\nI have also included the Rhino & gh file to hopefully explain what I’m trying to achieve, and the attempts in gh I have tried - Pufferfish (not creating a single closed brep), scriptsyntax (which is a srf input only, so doesn’t inherently work I think?), and Rhino Common (which is giving a GUID error).\n\n\nThank you in advance for any feedback / suggestions / solutions!\n\n\n220628_eg_offset-problem.gh\n (13.4 KB)\n\n\n220628_eg_offset-problem.3dm\n (793.2 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ncbrep = rs.coercebrep(brep)\ntol = sc.doc.ModelAbsoluteTolerance\n\nb = Rhino.Geometry.Brep.CreateOffsetBrep(cbrep, dist, solid, ext, tol)\n\na = b[0]",
+      "language": "python",
+      "author": "Lukxf",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1023
+}

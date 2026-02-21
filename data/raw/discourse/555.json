@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscript-dupedge-equivalent/555",
+  "topic_id": 555,
+  "title": "Rhinoscript: DupEdge equivalent",
+  "question": "I probably looked right at it and missed it, but is there a version of  Rhino.DuplicateEdgeCurves which finds one or more single edges of a surface.\n\n\nI know you guys want to keep categories to a minimum, do you think there is merit in further splitting Scripting into RhinoScript and RhinoPython?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n \ndef selectCurves():    \n    rc, objref = Rhino.Input.RhinoGet.GetMultipleObjects(\"Base curves\", False, Rhino.DocObjects.ObjectType.Curve)\n    #objref  sono i riferimenti alle curve o edge selezionati\n    if rc!=Rhino.Commands.Result.Success: return     \n    curves=[]\n    for curve in objref:\n        curva = curve.Curve() \n        if not curva: return \n        cc=scriptcontext.doc.Objects.AddCurve(curva) # crea una curva copia dell'elemento selezionato e ritorna id\n        curves.append(cc) # crea lista id curve       \n    scriptcontext.doc.Views.Redraw()\n    return curves\n    \nif( __name__ == \"__main__\" ): \n    curves=selectCurves()",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2458
+}

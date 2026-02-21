@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/display-conduit-in-python-3/177263",
+  "topic_id": 177263,
+  "title": "Display Conduit in Python 3",
+  "question": "Hi all!\n\n\nIn the past, I’ve used the \nRhino.Display.DisplayConduit\n class in C# to draw objects in the Rhino viewport without adding them to the doc. Now I am trying to do something similar inside of a Python 3 component in Rhino 8. Basically, I would like to render objects to the Rhino Viewport inside of a Python loop without having to output them from the component. Is this possible? Is there something in \nrhinoscriptsyntax\n that gives you access to the display pipeline?\n\n\n@eirannejad\n, I’m sure you’ve got some tricks up your sleeve \n\n\nThanks!\n\nSP",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as RG\nimport Grasshopper\nimport System.Drawing as SD\n\nimport rhinoscriptsyntax as rs\n\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        self.center = RG.Point3d(5, 5, 5)\n        self.scale = y\n        return Rhino.Geometry.Sphere(self.center, x)\n\n    # Preview overrides\n    @property\n    def ClippingBox(self):\n        return RG.BoundingBox(RG.Point3d(0, 0, 0), RG.Point3d(5, 5, 5))\n\n    def DrawViewportWires(self, args):\n        args.Display.Draw2dLine(SD.Point(0, 0), SD.Point(100, 100), SD.Color.Red, 5)\n\n    def DrawViewportMeshes(self, args):\n        args.Display.DrawDirectionArrow(\n            self.center, RG.Vector3f(self.scale, 0.5, 0), SD.Color.Blue\n        )\n        args.Display.DrawDirectionArrow(\n            self.center, RG.Vector3f(0.5, self.scale, 0), SD.Color.Red\n        )\n        args.Display.DrawDirectionArrow(\n            self.center, RG.Vector3f(0, 1, self.scale), SD.Color.Green\n        )\n\n        args.Display.Draw2dText(\n            \"Example Text\", SD.Color.Yellow, RG.Point2d(30, 30), False, 16, \"Consolas\"\n        )",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport System.Drawing as SD\nimport Rhino\nimport Rhino.Geometry as G\nimport Grasshopper\nimport Grasshopper.Kernel as GHK\nimport threading\nimport time\n\n\ndef main_solve():\n    for r in range(10, 20):\n        # wait represents compute work\n        Rhino.RhinoApp.WriteLine(\"computing mesh\")\n        time.sleep(1)\n\n        sphere = G.Sphere(G.Point3d.Origin, r)\n        MyComponent.CURRENT_MESH = G.Mesh.CreateFromSphere(sphere, 10, 10)\n        Rhino.RhinoApp.WriteLine(\"computed mesh\")\n\n    Rhino.RhinoApp.WriteLine(\"computed completed\")\n\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    SOVLE_STARTED = False\n    CURRENT_MESH = None\n\n    def RunScript(self):\n        # outputing a point to get gh to call draw methods\n        if MyComponent.SOVLE_STARTED:\n            return (\"Training in Progress\", G.Point3d.Origin)\n        \n        MyComponent.SOVLE_STARTED = True\n        threading.Thread(target=main_solve).start()\n        return (\"Training in Progress\", G.Point3d.Origin)\n        \n    @property\n    def ClippingBox(self):\n        return G.BoundingBox(-25, -25, -25, 25, 25, 25)\n\n    def DrawViewportMeshes(self, args: GHK.GH_PreviewMeshArgs):\n        d = args.Display\n        if MyComponent.CURRENT_MESH:\n            d.DrawMeshWires(MyComponent.CURRENT_MESH, SD.Color.Red, 2)",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 10,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 10,
+  "views": 862
+}

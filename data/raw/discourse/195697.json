@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/looking-for-a-python-script-to-optimise-surface-positioning-in-rhino/195697",
+  "topic_id": 195697,
+  "title": "Looking for a Python script to optimise surface positioning in Rhino",
+  "question": "Hi everyone,\n\n\nI’m working on a project in Rhino where I need to optimize the orientation of multiple planar surface on my C-plane. The idea is to find the best orientation for each surface so that the bounding rectangle has the small possible area, maybe i have to keep a maximum length and width limits.\n\n\nI’m a bit stuck on how to write the loop logic for this. Should I test every possible angle, degree by degree, or is there a smarter way to do it? If someone has a script or a code example that could help me get started, that would be amazing.\n\n\nThis is for a woodworking project to reduce wastes when cutting woode panels.\n\n\nThanks a lot for your help!\n\n\nBest,",
+  "code_blocks": [
+    {
+      "code": "# Calcul initial de la boîte englobante\n        bbox_start = rs.BoundingBox(obj)\n        if not bbox_start:\n            print(\"Impossible de calculer la BoundingBox pour l'objet .\")\n            continue\n\n        rotate_point = bbox_start[0]\n        current_min_width = rs.Distance(bbox_start[3], bbox_start[0])\n        optimal_angle = 0  # Angle initial\n\n        # Recherche de l'angle optimal\n        for angle in range(0, 180):  # Rotation de 0° à 179°\n            rotated_obj = rs.RotateObject(obj, rotate_point, angle, copy=True)\n            if not rotated_obj:\n                print(\"Erreur lors de la rotation de l'objet.\")\n                continue\n\n            bbox = rs.BoundingBox(rotated_obj)\n            if bbox:\n                # Calcul des dimensions\n                current_length = rs.Distance(bbox[1], bbox[0])\n                current_width = rs.Distance(bbox[3], bbox[0])\n\n                print(\"Rotation \",angle,\"° : longueur = \",current_length,\" largeur = \",current_width)\n\n                # Mise à jour de l'angle optimal\n                if current_width < current_min_width:\n                    current_min_width = current_width\n                    optimal_angle = angle\n                    print(\"Nouvelle largeur minimale : \",current_min_width,\" à l'angle \",optimal_angle'\"°\")\n\n            # Suppression de l'objet temporaire\n            rs.DeleteObject(rotated_obj)\n\n        # Appliquer la rotation optimale\n        rs.RotateObject(obj, rotate_point, optimal_angle)\n        print(\"Forme optimisée à l'angle,\" optimal_angle,\"° avec une largeur minimale de ,\"current_min_width)\nexcept:\n    print ('erreur lors du script')\nfinally:\n    rs.EnableRedraw(enable=True)",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 115,
+  "posts_count": 3,
+  "views": 113
+}

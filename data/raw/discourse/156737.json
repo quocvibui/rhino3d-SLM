@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/keyerror-0-while-using-hops-with-python/156737",
+  "topic_id": 156737,
+  "title": "KeyError: '0' while using hops with python",
+  "question": "Hello everyone! I’m new to Hops and Cpython and i was wondering if anyone can help me solve this issue. I’ve written a code to get the contour of an image using openCV but when i try to link to the hops component the file path to the image it doesn’t work. I’ll send the error under the code.\n\n\nimport sys\nimport os\nimport rhinoinside as rh\nimport cv2\n# load ghhops-server-py source from this directory\nsys.path.append(os.path.dirname(os.path.dirname(__file__)))\nimport ghhops_server as hs\nimport rhino3dm as dm\n\nrh.load()\n# System and Rhino can only be loaded after rhinoinside is initialized\n\n\nhops = hs.Hops(app=rh)\n\n\n@hops.component(\n    \"/list\",\n    name=\"get_object_contour\",\n    description=\"Get the contour of a object in a image\",\n    inputs=[\n        hs.HopsString(\"File_path\",\"Path\",\"Connect the path to the image that you want to get the contour\"),\n    ],\n    outputs=[\n        #hs.HopsNumber(\"x_coordinate\",\"x_coords\",\"X coordinates of contour\"),\n        #hs.HopsNumber(\"y_coordinate\",\"y_coords\",\"Y coordinates of contour\"),\n        hs.HopsPoint(\"Contour_Points\",\"Points\",\"The contour points of the object\"),\n    ],\n    )\n\ndef get_object_contour(file_path):\n    # Load the image in grayscale\n    img = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)\n\n    # Apply adaptive thresholding to create a binary image\n    thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)\n\n    # Find the external contours in the binary image\n    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)\n\n    # Get the x and y coordinates of the object contour\n    x_coords = []\n    y_coords = []\n    \n    for contour in contours:\n        for point in contour:\n            x_coords.append(point[0][0])\n            y_coords.append(point[0][1])\n    for i in range(len(x_coords)):\n        points_3D = dm.Point3dList.Add(0,x_coords[i],y_coords[i])\n    \n                         \n    return points_3D\n\nif __name__ == \"__main__\":\n    hop...",
+  "code_blocks": [
+    {
+      "code": "import sys\nimport os\nimport rhinoinside as rh\nimport cv2\n# load ghhops-server-py source from this directory\nsys.path.append(os.path.dirname(os.path.dirname(__file__)))\nimport ghhops_server as hs\nimport rhino3dm as dm\n\nrh.load()\n# System and Rhino can only be loaded after rhinoinside is initialized\n\n\nhops = hs.Hops(app=rh)\n\n\n@hops.component(\n    \"/list\",\n    name=\"get_object_contour\",\n    description=\"Get the contour of a object in a image\",\n    inputs=[\n        hs.HopsString(\"File_path\",\"Path\",\"Connect the path to the image that you want to get the contour\"),\n    ],\n    outputs=[\n        #hs.HopsNumber(\"x_coordinate\",\"x_coords\",\"X coordinates of contour\"),\n        #hs.HopsNumber(\"y_coordinate\",\"y_coords\",\"Y coordinates of contour\"),\n        hs.HopsPoint(\"Contour_Points\",\"Points\",\"The contour points of the object\"),\n    ],\n    )\n\ndef get_object_contour(file_path):\n    # Load the image in grayscale\n    img = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)\n\n    # Apply adaptive thresholding to create a binary image\n    thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)\n\n    # Find the external contours in the binary image\n    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)\n\n    # Get the x and y coordinates of the object contour\n    x_coords = []\n    y_coords = []\n    \n    for contour in contours:\n        for point in contour:\n            x_coords.append(point[0][0])\n            y_coords.append(point[0][1])\n    for i in range(len(x_coords)):\n        points_3D = dm.Point3dList.Add(0,x_coords[i],y_coords[i])\n    \n                         \n    return points_3D\n\nif __name__ == \"__main__\":\n    hops.start(debug=True)",
+      "language": "python",
+      "author": "Paolo_Colombo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 152,
+  "posts_count": 7,
+  "views": 788
+}

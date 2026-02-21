@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hiding-all-panels-and-toolbars/212880",
+  "topic_id": 212880,
+  "title": "Hiding all panels and toolbars",
+  "question": "Hi,\n\nI’m looking fora way to hide all toolbars and sidebars and panels for a super minimal Rhino experience.\n\nI have looked here: \nHide specific toolbar tab\n\nAnd here \nHow to hide tool bar in C# - #3 by kaicihuang\n\n\nBut it doesn’t seem to do what I want. Do you have any advice to how I can hide everything except the viewports?",
+  "code_blocks": [
+    {
+      "code": "\"\"\"\nSet up Rhino and Grasshopper for a fullscreen demo (e.g. show Remote Control \nPanel, turn off viewport titles/lock viewport, set unit, hide Grasshopper).\n    Inputs:\n        Setup: Run the component {item,bool}\n        Geometry: Geometry to zoom select to {item,geometry}\n    Outputs:\n    Remarks:\n        Author: Anders Holden Deleuran (BIG CPH)\n        Rhino: 8.24.25251.22001\n        Version: 250926\n\"\"\"\n\nghenv.Component.Name = \"SetupRhinoGrasshopper\"\nghenv.Component.NickName = \"SRG\"\n\nimport Rhino as rc\nimport Grasshopper as gh\nfrom System.Drawing import Color\n\n# Get Rhino appearence setting, active viewport and Grasshopper plugin\nast = rc.ApplicationSettings.AppearanceSettings\natv = rc.RhinoDoc.ActiveDoc.Views.ActiveView\nghp = rc.RhinoApp.GetPlugInObject(\"Grasshopper\")\n\n# Set up Rhino/Grasshopper for live demo\nif Setup:\n    \n    # Go fullscreen\n    if not rc.RhinoApp.InFullScreen():\n        rc.RhinoApp.RunScript(\"FullScreen\",False)\n        \n    # Set top view\n    rc.RhinoApp.RunScript(\"SetView World Top\",False)\n    \n    # Show Grasshopper remote control panel\n    if not gh.Instances.IsRemotePanelVisible:\n        gh.Instances.ShowRemotePanel()\n        \n    # Turn off viewport titles/tabs and set background color\n    ast.ShowViewportTitles = False\n    ast.ViewportTabsVisibleAtStart = False\n    ast.ViewportBackgroundColor = Color.White\n    \n    # Set active viewport properties\n    atv.Maximized = True\n    atv.ActiveViewport.ZoomBoundingBox(Geometry.GetBoundingBox(True))\n    atv.ActiveViewport.ConstructionGridVisible = False\n    atv.ActiveViewport.ConstructionAxesVisible = False\n    atv.ActiveViewport.WorldAxesVisible = False\n    atv.ActiveViewport.LockedProjection = True\n    \n    # Set unit to mm and tolerance\n    rc.RhinoDoc.ActiveDoc.ModelUnitSystem = rc.UnitSystem.Millimeters\n    rc.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance = 0.001\n    \n    # Hide Grasshopper window\n    ghp.HideEditor()\n    \n# Turn things off again\nelse:\n    \n    # Return from fullscreen\n    if rc.RhinoApp.InFullScreen():\n        rc.RhinoApp.RunScript(\"FullScreen\",False)\n        \n    \"\"\"\n    # Hide Grasshopper remote control panel\n    if gh.Instances.IsRemotePanelVisible:\n        gh.Instances.HideRemotePanel()\"\"\"\n        \n    # Turn on viewport titles\n    ast.ShowViewportTitles = True\n    \n    # Set active viewport properties\n    atv.ActiveViewport.LockedProjection = False\n    #atv.ActiveViewport.ConstructionGridVisible = True\n    #atv.ActiveViewport.ConstructionAxesVisible = True\n    #atv.ActiveViewport.WorldAxesVisible = True",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ndef HideAllToolbars():\n    rs.EnableRedraw(False)\n    for toolbar_file in Rhino.RhinoApp.ToolbarFiles:\n        print(toolbar_file.Name)\n        print(toolbar_file.GroupCount)\n        print(toolbar_file.ToolbarCount)\n        for i in range(toolbar_file.ToolbarCount):\n            toolbar = toolbar_file.GetToolbar(i)\n            print(toolbar.Name)\n            #HOW TO HIDE!\nHideAllToolbars()\n\nfor panel in Rhino.UI.Panels.GetOpenPanelIds():\n    try:\n        Rhino.UI.Panels.ClosePanel(panel)\n    except:\n        pass\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "Timo_Harboe_Nielsen",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nnames = rs.ToolbarCollectionNames()\nif names:\n    for name in names:\n        rs.CloseToolbarCollection(name,True)",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 124
+}

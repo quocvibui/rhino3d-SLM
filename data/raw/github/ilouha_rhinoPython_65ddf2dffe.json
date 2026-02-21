@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/ilouha/rhinoPython/blob/4194fbd3f384073a9a648e1a52490737a4509e1d/dimensionLines.py",
+  "repo": "ilouha/rhinoPython",
+  "repo_stars": 1,
+  "repo_description": "general scripting repository for quick hacks in Rhino using Python",
+  "license": "unknown",
+  "filepath": "dimensionLines.py",
+  "instruction": "Dimension lines",
+  "code": "import rhinoscriptsyntax as rs \nimport Rhino\n\n#definitions\n\ndef createAlignedDimension(line):\n\n    startPoint = rs.CurveStartPoint(line)\n    endPoint = rs.CurveEndPoint(line)\n    #offset_direction = #calculate the normal of the line\n\n    offset_curve = rs.OffsetCurve(line,\n        [0,1,0],\n        5,\n        normal=None,\n        style=1)\n\n    midPoint = rs.CurveMidPoint(offset_curve)\n\n    #returns the function \n    dim = rs.AddAlignedDimension(startPoint,endPoint,midPoint)\n\n    #sets the dimensions on a certain layer\n\n    if rs.LayerId(('Dims')):\n        \n        rs.ObjectLayer(dim,'Dims')\n    \n    else:\n\n        rs.AddLayer(name='Dims', color=None, visible=True, locked=False, parent=None)\n        rs.ObjectLayer(dim,'Dims')\n\n    return dim\n    #deletes the objects that were used for creating the lines. \n\n    rs.DeleteObjects(\n\n        startPoint,\n        endPoint,\n        offset_curve,\n        midPoint,\n\n    )\n\ndef dimensionGrids():\n    pass\n\ndef dimensionPlotPlan():\n    pass\n\n#execution code\n\nif __name__ == \"__main__\":\n\n    selectedCurve = rs.GetCurveObject(\"Select Line\")[0] \n    lines = rs.ExplodeCurves(selectedCurve)\n\n    for line in lines: \n        createAlignedDimension(line)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

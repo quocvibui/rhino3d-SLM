@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/nurbscurve-different-behaviour-between-rhino-net-and-rhinocommon/75376",
+  "topic_id": 75376,
+  "title": "nurbsCurve: different behaviour between Rhino.NET and RhinoCommon",
+  "question": "Hello Forum,\n\n\nI’m porting my old code from \nRhino.NET\n to RhinoCommon and I found an issue on nurbsCurve. My Rhino version is 5 SR8 by now.\n\n\nGiven the points:\n\n\np0(0,0,0)\n\np1(1,1,0)\n\np2(2,0,0)\n\np(1.5, 0.3, 0)\n\n\nI need to draw the nurbs starting at p0 with tangent p0 -> p1, ending at p2 with tangent p2 -> p1 and passing through p.\n\n\nI did my homework and I came up with this solution: a rational nurbs curve with degree and order = 3, 4 knots and 3 control points\n\n\nThe knots vector must be:\n\n\n[0,0,1,1]\n\n\nthe control points must be:\n\n\n[0,0,0]\n\n[0.612372435695795,0.612372435695795,0]\n\n[2,0,0]\n\n\nand the weights vector must be:\n\n\n[1, 0.612372435695795, 1]\n\n\nMy RhinoCommon implementation is:\n\n\nNurbsCurve nc0 = new NurbsCurve(3, true, 3, 3);\nnc0.Knots[0] = 0;\nnc0.Knots[1] = 0;\nnc0.Knots[2] = 1;\nnc0.Knots[3] = 1;\nbool p0OK = nc0.Points.SetPoint(0, 0, 0, 0, 1);\nbool p1OK = nc0.Points.SetPoint(1, 0.612372435695795, 0.612372435695795, 0, 0.612372435695795);\nbool p2OK = nc0.Points.SetPoint(2, 2, 0, 0, 1);\n\n\n\nand my \nRhino.NET\n implementation is:\n\n\nOnNurbsCurve nc1 = new OnNurbsCurve(3, true, 3, 3);\nnc1.SetKnot(0, 0);\nnc1.SetKnot(1, 0);\nnc1.SetKnot(2, 1);\nnc1.SetKnot(3, 1);\nOn4dPoint p04d2 = new On4dPoint(0, 0, 0, 1);\nOn4dPoint p14d2 = new On4dPoint(0.612372435695795, 0.612372435695795, 0, 0.612372435695795);\nOn4dPoint p24d2 = new On4dPoint(2, 0, 0, 1);\nbool p0OK2 = nc1.SetCV(0, p04d2);\nbool p1OK2 = nc1.SetCV(1, p14d2);\nbool p2OK2 = nc1.SetCV(2, p24d2);\nbool w0OK2 = nc1.SetWeight(0, 1.0);\nbool w2OK2 = nc1.SetWeight(2, 1.0);\n\n\n\nThe problem is that they don’t match. In the picture you can see the construction triangle, the \nRhino.NET\n based green nurbs and the RhinoCommon based red nurbs.\n\n\n\n\nimage.png\n892×554 2.45 KB\n\n\n\n\nThe green curve properly passes through p and has the correct tangents, while the red one not only doesn’t pass through p but also has wrong right tangent.\n\n\nBizarre is also the fact that if I look at the properties of both curves from Rhino I get “elliptic arc”....",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  NurbsCurve nc0 = new NurbsCurve(3, true, 3, 3);\n  nc0.Knots[0] = 0;\n  nc0.Knots[1] = 0;\n  nc0.Knots[2] = 1;\n  nc0.Knots[3] = 1;\n  nc0.Points.SetPoint(0, CreateHomogeneousPoint(0, 0, 0, 1));\n  nc0.Points.SetPoint(1, CreateHomogeneousPoint(0.612372435695795, 0.612372435695795, 0, 0.612372435695795));\n  nc0.Points.SetPoint(2, CreateHomogeneousPoint(2, 0, 0, 1));\n  doc.Objects.AddCurve(nc0);\n  doc.Views.Redraw();\n\n  return Result.Success;\n}\n\nprivate Point4d CreateHomogeneousPoint(double x, double y, double z, double w)\n{\n  if (w == 0.0) w = 1.0;\n  var pt = new Point4d\n  {\n    X = x / w,\n    Y = y / w,\n    Z = z / w,\n    W = w\n  };\n  return pt;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "nurbs",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 573
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-getrectangle-is-broken/151040",
+  "topic_id": 151040,
+  "title": "Rhinoscriptsyntax.GetRectangle() is broken",
+  "question": "Here is the Help for rs.GetRectangle():\n\n\n\n\nimage\n1308×687 74.6 KB\n\n\n\n\nSo, supplying \nmode=0\n as the first argument (or leaving it out) \nshould\n enable “All modes”.  However, there are no command line options offered (as the Rhino command Rectangle does), instead it behaves exactly like \nmode=1\n, only two corner points can be chosen.\n\n\nIn checking with VB Rhinoscript, if I run\n\n\ntest = Rhino.GetRectangle(0)\n\n\n\nit does indeed give me the following command line options:\n\n\n\n\nIn looking further into the RhinoCommon code that \nrs.GetRectangle()\n calls, it appears that the RhinoCommon method \nRhino.Input.RhinoGet.GetRectangle\n is actually what is broken.\n\n\nIf you run this:\n\n\nimport Rhino\nbase_point = Rhino.Geometry.Point3d.Unset\nprompts = [\"\", \"\", \"\"]\nrc, corners = Rhino.Input.RhinoGet.GetRectangle(0, base_point, prompts)\n\n\n\nYou get the same thing happening as with rs.GetRectangle(0), that is to say no command line options and it goes directly into two point mode.\n\n\nTested in V7 and WIP",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nbase_point = Rhino.Geometry.Point3d.Unset\nprompts = [\"\", \"\", \"\"]\nrc, corners = Rhino.Input.RhinoGet.GetRectangle(0, base_point, prompts)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 332
+}

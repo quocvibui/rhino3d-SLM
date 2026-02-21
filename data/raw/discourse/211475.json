@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/should-displayconduit-derived-classes-implement-idisposable/211475",
+  "topic_id": 211475,
+  "title": "Should DisplayConduit-derived classes implement IDisposable?",
+  "question": "Background\n\n\nI’m working with a custom \nDisplayConduit\n class for visualizing curves in Rhino commands. The typical pattern is:\n\n\npublic class CurveDisplayer : DisplayConduit\n{\n    public List<Curve> Curves { get; set; } = [];\n    public bool IsShowDirection { get; set; }\n    // ... other properties\n}\n\npublic class CyCurveReverse : Command\n{\n    private CurveDisplayer _displayer = new CurveDisplayer();\n    \n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n        // Get curves\n        var result = RhinoGet.GetMultipleObjects(...);\n        \n        _displayer.Curves = curves;\n        _displayer.IsShowDirection = true;\n        _displayer.Enabled = true;  // Enable display\n        doc.Views.Redraw();\n        \n        // User interaction\n        result = RhinoGet.GetString(...);\n        \n        // Process curves (could throw exceptions)\n        foreach (var objRef in objRefs)\n        {\n            // ... operations that might fail\n        }\n        \n        _displayer.Enabled = false;  // Disable display\n        doc.Views.Redraw();\n        \n        return Result.Success;\n    }\n}\n\n\n\n\nThe Problem\n\n\nIf an exception occurs\n between \nEnabled = true\n and \nEnabled = false\n, the displayer remains active, causing:\n\n\n\n\n\n\nVisual artifacts in the viewport\n\n\n\n\n\n\nMemory leaks (curves remain referenced)\n\n\n\n\n\n\nUnexpected behavior in subsequent operations\n\n\n\n\n\n\nQuestion\n\n\nShould custom \nDisplayConduit\n classes implement \nIDisposable\n to ensure proper cleanup?\n\n\nOption A: Implement IDisposable\n\n\npublic class CurveDisplayer : DisplayConduit, IDisposable\n{\n    public void Dispose()\n    {\n        Enabled = false;\n        Curves?.Clear();\n        // Should we call RhinoDoc.ActiveDoc.Views.Redraw() here?\n    }\n}\n\n// Usage with using statement\nusing (var displayer = new CurveDisplayer())\n{\n    displayer.Enabled = true;\n    // ... operations\n} // Automatically disabled even if exception occurs\n\n\n\n\nPros:\n\n\n\n\n\n\nStandard .NET pattern for resource management\n\n\n\n\n\n\nCompile...",
+  "code_blocks": [
+    {
+      "code": "public class CurveDisplayer : DisplayConduit\n{\n    public List<Curve> Curves { get; set; } = [];\n    public bool IsShowDirection { get; set; }\n    // ... other properties\n}\n\npublic class CyCurveReverse : Command\n{\n    private CurveDisplayer _displayer = new CurveDisplayer();\n    \n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n        // Get curves\n        var result = RhinoGet.GetMultipleObjects(...);\n        \n        _displayer.Curves = curves;\n        _displayer.IsShowDirection = true;\n        _displayer.Enabled = true;  // Enable display\n        doc.Views.Redraw();\n        \n        // User interaction\n        result = RhinoGet.GetString(...);\n        \n        // Process curves (could throw exceptions)\n        foreach (var objRef in objRefs)\n        {\n            // ... operations that might fail\n        }\n        \n        _displayer.Enabled = false;  // Disable display\n        doc.Views.Redraw();\n        \n        return Result.Success;\n    }\n}",
+      "language": "csharp",
+      "author": "yangf85",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "public class CurveDisplayer : DisplayConduit, IDisposable\n{\n    public void Dispose()\n    {\n        Enabled = false;\n        Curves?.Clear();\n        // Should we call RhinoDoc.ActiveDoc.Views.Redraw() here?\n    }\n}\n\n// Usage with using statement\nusing (var displayer = new CurveDisplayer())\n{\n    displayer.Enabled = true;\n    // ... operations\n} // Automatically disabled even if exception occurs",
+      "language": "csharp",
+      "author": "yangf85",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "layers",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 122
+}

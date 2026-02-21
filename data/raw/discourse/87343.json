@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/batch-convert-2000-rhino-files-to-3ds-and-obj-files-respectively/87343",
+  "topic_id": 87343,
+  "title": "Batch convert 2000 rhino files to 3ds and obj files respectively",
+  "question": "Hi~I am puzzled by the problem to convert around 2000 rhino files to obj and 3ds files respectively\n\nI try to use AHK window automatic script to simulate the human click operation,e.g click ‘import’, assign path, click ok, and then wait for a few seconds to totally import, and then click ‘export’, well this is a little fool and clumsy, especially low efficient\n\n\nIs there any more efficient way to convert a huge amount of files?like 500 rhino files or even 2000 rhino files?The target format is 3ds and obj,I know to convert them in the same open file can be a disaster for CPU,this way i tried is inconvenient and anti-human-and-computer,if one step crash,all crash,and so do i\n\n\nThe core thought should be converting each of them one by one in queue aumatically by script  .\n\n\nBelow is a simple example i want to show:\n\n\nrhino_convert_3ds\n287×347 2.86 KB\n \nrhino_convert\n327×609 4.67 KB\n\n\ni think there  must be  some script to help me,BTW,i master python,so if you have any direction or good suggestion ,please tell me ,thanks !!!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport os\n\n\"\"\"Converts all 3ds files in a  folder to .3ds. Original 3dm files are preserved.\nModify the .obj export settings as needed.  Can be adapted to other export formats.\nScript by Mitch Heynick 10.08.19! \nuse this in Rhino command line to find export settings: \n-SaveAs \"C:\\Users\\aurelius\\Desktop\\furniture selected\\Vitra_ID_Mesh\\transform\\transform.obj\" \"\"\"\n\n\ndef 3DSSettings():\n    e_str= \"_Unweld=_No \"\n    e_str+= \"_WeldAngle=22.5 \"\n    e_str+= \"_OpenImportMeshesAsSubdSurfaces=No \"\n    e_str+= \"_ImportLights=_No \"\n    e_str+= \"_ImportCameras=_No \"\n    e_str+= \"_PromptToScaleOnImport=_No \"\n    e_str+= \"_Enter _Enter\"\n    return e_str\n\ndef Get3DSSettings():\n    e_str= \"_SaveViews=No \"\n    e_str+= \"_SaveLights=No \"\n    #e_str+= \"_Enter _DetailedOptions \"\n    e_str+= \"_PolygonDensity=50 \" \n    #---detailed options---\n    e_str+= \"_JaggedSeams=_No \"\n    e_str+= \"_PackTextures=_No \"\n    e_str+= \"_Refine=_Yes \"\n    e_str+= \"_SimplePlane=_No \"\n    e_str+= \"_AdvancedOptions \"\n    e_str+= \"_Angle=0.0 \"\n    e_str+= \"_AspectRatio=6.0 \"\n    e_str+= \"_Distance=0.0 \"\n    e_str+= \"_Grid=0 \"\n    e_str+= \"_MaxEdgeLength=0 \"\n    e_str+= \"_MinEdgeLength=0.0001 \"\n    e_str+= \"_Enter _Enter\"\n    return e_str\n\ndef BatchConvertTo3DS():\n    #Get folders\n    folder = rs.BrowseForFolder(message=\"Select folder to process\")\n    if not folder: return\n    \n    import_sett=3DSImportSettings()\n    export_sett=Get3DSExportSettings()\n    \n    found = False ; counter=0 ; ext=\"3ds\"\n    rs.EnableRedraw(False)\n    \n    #Find 3ds files in the folder\n    for filename in os.listdir(folder):\n        if filename.endswith(\".3ds\"):\n            found = True ; counter+=1\n            fullpath=os.path.join(folder,filename).lower()\n            #allow the current file to close without the save dialog\n            rs.DocumentModified(False)\n            rs.EnableRedraw(False)\n            #Open file to convert\n            comm_str=\"_-Import \"+chr(34)+fullpath+chr(34)+import_sett+\" _Enter\"\n            rs.Command (comm_str, False)\n            e_file_name = \"{}.{}\".format(fullpath[:-4],ext)\t\n            #save the file using the file name/path and settings\n            rs.Command('-_SaveAs \"{}\" {}'.format(e_file_name,export_sett),False)\n    if not found:\n        msg=\"No 3ds files found in selected folder!\"\n    else:\n        msg=\"{} files converted to .3ds format\".format(counter)\n    \n    #open a blank document to finish\n    rs.DocumentModified(False)\n    rs.Command(\"_-New _None\",False)\n    rs.Command(\"SetRedrawOn\",False)\n    rs.MessageBox(msg)\n        \nBatchConvertTo3DS()",
+      "language": "python",
+      "author": "user333",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 1881
+}

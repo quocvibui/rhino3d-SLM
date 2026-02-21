@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/designalyze/python-tutorials-for-rhino/blob/91176fb804f95de96b7ceb5a6898de1c429aad15/Lessons/lesson16.py",
+  "repo": "designalyze/python-tutorials-for-rhino",
+  "repo_stars": 15,
+  "repo_description": "Python Scripting Tutorials for Rhino",
+  "license": "MIT",
+  "filepath": "Lessons/lesson16.py",
+  "instruction": "Python Workshop Lesson:16 http://www.designalyze.com/int2pythonscripting16_ImportPtsFromCSV",
+  "code": "#Python Workshop Lesson:16\n#http://www.designalyze.com/int2pythonscripting16_ImportPtsFromCSV\n\n#Import Points from CSV\n \nimport rhinoscriptsyntax as rs\n \n#Select a file to open\nfilename = rs.OpenFileName(\"Open CSV file\",\"*.csv|\", None, None, None)\n \n#open the file for reading\nfile = open(filename, 'r')\n \nlines = file.readlines()\n \nfile.close()\n \n#delete the first line because it's a header\ndel lines[0]\n#print to check the data\nprint(lines)\n \nptNumber = 0\n \nfor line in lines:\n    #remove the \\n\n    line = line.strip()\n    #split the line by the comma\n    ptInfo = line.split(',')\n    x = float(ptInfo[0])\n    y = float(ptInfo[1])\n    z = float(ptInfo[2])\n    r = int(ptInfo[3])\n    g = int(ptInfo[4])\n    b = int(ptInfo[5])\n    pt = rs.AddPoint(x,y,z)\n    color = (r,g,b)\n    rs.ObjectColor(pt, color)\n    name = \"pt_\" + str(ptNumber)\n    rs.ObjectName(pt,name)\n    ptNumber += 1\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

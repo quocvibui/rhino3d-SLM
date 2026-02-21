@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/simulation-of-european-extremely-large-telescope-elt/137219",
+  "topic_id": 137219,
+  "title": "Simulation of European Extremely Large Telescope (\"ELT\")",
+  "question": "ELT telescope is really huge and exceptional. I tried to model the mirror and then simulate the rays. I don’t think I have the last coefficient for the optics has some of the last coefficients are not the same on the ESO website, but as I need all parameters (see image at the end) I can’t use them. The ray converge to a 10 mm radius, I don’t know if it is correct or if there is a slight error somewhere.\n\n\nThree mirror are aspheric so there are defined by coefficients that link the Z to the radius\n\n\nZ=\\frac{r²/R}{1+\\sqrt{1-(K+1)r²/R²}}+A r^4+B r^6 \n\nSo I calculate Z for various radius, make an interpolation curve then I revolve this curve.\n\nI just made a little C# to calculate the perfect ray reflection.\n\n\nrhino_elt1\n1128×719 284 KB\n\n\nrhino_elt2\n1002×735 275 KB\n\n\n[1] E-ELT Optomechanics: Overview\n\nM. Cayrel European Southern Observatory (ESO), Karl-Schwarzschild-Strasse. 2, Garching, Germany\n\n\nimage\n1610×621 203 KB",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(List<Surface> surfaces, List<Line> linesRay, double maxDist, ref object A)\n  {\n    double distanceMax = 100000;\n    double tolerance = 0.001;\n    double distanceNoIntersection = maxDist;\n\n    List<Polyline> lst_polylines = new  List<Polyline>();\n\n    foreach (Line lineRay in linesRay)\n    {\n      List<Point3d> lst_points = new  List<Point3d>();\n      lst_points.Add(lineRay.From);\n\n      Line actualRay = lineRay;\n      foreach (Surface surface in surfaces)\n      {\n        Line lineReflection = RaySurfaceReflexion(surface, actualRay, distanceMax, tolerance);\n\n        if (lineReflection != Line.Unset)\n        {\n          lst_points.Add(lineReflection.From);\n          actualRay = lineReflection;\n        }\n        else\n        {\n          lst_points.Add(actualRay.From + actualRay.Direction * distanceNoIntersection);\n          break;\n        }\n      }\n\n      lst_points.Add(actualRay.From + actualRay.Direction * distanceNoIntersection);\n      lst_polylines.Add(new Polyline(lst_points));\n    }\n\n    A = lst_polylines;\n\n\n\n  }\n\n  // <Custom additional code> \n\n\n  public Line RaySurfaceReflexion(Surface surface, Line ray, double distanceMax, double tolerance)\n  {\n\n    Line lineRay = new Line(ray.From, ray.Direction, distanceMax);\n    Line lineOut = Line.Unset;\n\n    Curve curve = lineRay.ToNurbsCurve();\n    CurveIntersections cis = Rhino.Geometry.Intersect.Intersection.CurveSurface(curve, surface, tolerance, tolerance);\n    if (cis.Count > 0)\n    {\n      double minParameter = double.MaxValue;\n      foreach (IntersectionEvent ci in cis)\n      {\n        if (ci.ParameterA < minParameter)\n        {\n          minParameter = ci.ParameterA;\n        }\n      }\n      if (minParameter >= 0)\n      {\n        Point3d pointIntersection = curve.PointAt(minParameter);\n        double u, v;\n        surface.ClosestPoint(pointIntersection, out u, out v);\n\n        Plane frame = Plane.WorldXY;\n        surface.FrameAt(u, v, out frame);\n        Vector3d reflexion = Reflexion(ray.Direction, frame.Normal);\n        lineOut = new Line(pointIntersection, reflexion, 1);\n      }\n    }\n    return lineOut;\n  }\n\n\n  Vector3d Reflexion(Vector3d ray, Vector3d normal)\n  {\n\n    normal.Unitize();\n\n\n    return ray - 2.0 * (ray * normal) * normal;\n\n  }",
+      "language": "csharp",
+      "author": "laurent_delrieu",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport random\nimport math\n\nseed_string = \"ourrandommagicformula\" + str(seed)\nrandom.seed(seed_string)\n\nray_polylines = []\n\ndirection = rg.Vector3d(-1, -1, -1)\ndirection.Rotate(math.radians(angle_x), rg.Vector3d.XAxis)\ndirection.Rotate(math.radians(angle_y), rg.Vector3d.XAxis)\n\nfor i in range(nr_of_rays):\n    ran_x = random.uniform(-jitter, jitter)\n    ran_y = random.uniform(-jitter, jitter)\n    ran_z = random.uniform(-jitter, jitter)\n    ran_vec = rg.Vector3d(ran_x, ran_y, ran_z)\n    ray_direction = direction + ran_vec\n    ref_pts =rs.ShootRay(surfaces, source, ray_direction, reflections)\n    if ref_pts != None:\n        ray_polyline = rs.AddPolyline(ref_pts)\n        ray_polylines.append(ray_polyline)",
+      "language": "python",
+      "author": "crz_06",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 13,
+  "views": 2118
+}

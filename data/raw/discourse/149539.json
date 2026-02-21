@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/nodeincode-contour-doesnt-work-on-meshes/149539",
+  "topic_id": 149539,
+  "title": "NodeInCode ... \"Contour\" Doesn't Work On Meshes",
+  "question": "So, I tried to invoke the \nContour\n component via NodeInCode (since the GH Contour component seems zillion times faster than the RhinoCommon function \nMesh.CreateContourCurves(mesh, plane, tol);\n)\n\n\nBut the NodeInCode version fails with a Mesh as the \nShape\n input, while it works fine with the “Canvas” version of the component:\n\n\n\n\nThe code I’m running:\n\n\n    var contour = Rhino.NodeInCode.Components.FindComponent(\"Contour\");\n    if (contour == null) return;      \n    string[] warn_msgs;\n    \n    object[] result = contour.Evaluate(\n      new object[] {\n        mesh,         // S - shape\n        plane.Origin, // P - point\n        plane.Normal, // N - Direction\n        10.0          // D - Distance between lines\n      }, false, out warn_msgs);\n      \n    if (warn_msgs != null) foreach (var s in warn_msgs) Print(s);\n          \n    CT = result[0]; // contour curve\n\n\n\nThe above terminates with result[0] == null and the following warning messages:\n\n\n\n\nimage\n1115×149 15.4 KB\n\n\n\n\nIs there anything else I could try? (I tried instantiating the \n\"Contourex\"\n component as well, but no go).\n\n\n// Rolf",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\nplane = rg.Plane.WorldXY\n\nC = rg.Intersect.Intersection.MeshPlane(M, plane)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 8,
+  "views": 420
+}

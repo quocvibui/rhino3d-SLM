@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/arpastrana/compas_cem/blob/15c9c69fb49971302b5e91be13ab9ad23b7e6f98/src/compas_cem/ghpython/components/CompasCem_ConstrainedFormFinding/code.py",
+  "repo": "arpastrana/compas_cem",
+  "repo_stars": 39,
+  "repo_description": "Inverse design of 3D truss networks with automatic differentiation",
+  "license": "MIT",
+  "filepath": "src/compas_cem/ghpython/components/CompasCem_ConstrainedFormFinding/code.py",
+  "instruction": "Generate a form diagram in static equilibrium such that it meets user-defined constraints.",
+  "code": "\"\"\"\nGenerate a form diagram in static equilibrium such that it meets user-defined constraints.\n\"\"\"\nfrom ghpythonlib.componentbase import executingcomponent as component\nfrom scriptcontext import sticky\n\nfrom compas.rpc import Proxy\n\n\nclass ConstrainedFormFindingComponent(component):\n    def RunScript(self, solve, topology, constraints, parameters, algorithm, iters_max, eps, kappa, tmax, eta):\n        algorithm = algorithm or \"SLSQP\"\n        iters_max = iters_max or 100\n        eps = eps or 1e-6\n        kappa = kappa or 1e-8\n        tmax = tmax or 100\n        eta = eta or 1e-6\n\n        if not (solve and topology and constraints and parameters):\n            return\n\n        topology = topology.copy()\n\n        # clean constraints and parameters from None\n        constraints = [c for c in constraints if c is not None]\n        parameters = [p for p in parameters if p is not None]\n\n        # fetch optimization proxy from scriptcontext\n        opt = sticky.get(\"proxy_cem\")\n        proxy_temp_exists = opt is not None\n\n        # create temporary proxy server if unavailable from scriptcontext\n        if not proxy_temp_exists:\n            opt = Proxy(\"compas_cem.optimization\")\n\n        # solve constrained form-finding problem\n        solution = opt.solve_proxy(topology=topology,\n                                   constraints=constraints,\n                                   parameters=parameters,\n                                   algorithm=algorithm,\n                                   iters=iters_max,\n                                   eps=eps,\n                                   kappa=kappa,\n                                   tmax=tmax,\n                                   eta=eta)\n\n        # shut down temporary proxy\n        if not proxy_temp_exists:\n            opt.stop_server()\n\n        # unpack solution\n        topology, form, objective, grad_norm, iters, time, status = solution\n\n        return topology, form, objective, grad_norm, iters, time, status\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

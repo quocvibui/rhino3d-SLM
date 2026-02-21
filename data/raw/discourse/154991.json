@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cplane-with-python/154991",
+  "topic_id": 154991,
+  "title": "Cplane with python",
+  "question": "hello,\n\n\ni searched but I don’t understand how we can move the Cplane,\n\nwhen I scripted :\n\n\ncplane=rs.PlaneFromPoints(pt1, pt2, pt3)\nrs.ViewCPlane(view=None, plane=cplane)\npt5=rs.AddPoint(0,0,0)\n\n\n\npt5 is on the 0 of rhino world coordinates i would it place my pt5 on pt1, how can I do?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#these points are arbitrary for the example\npt1=rs.coerce3dpoint([10,10,10])\npt2=rs.coerce3dpoint([20,20,20])\npt3=rs.coerce3dpoint([0,20,10])\nc_plane=rs.PlaneFromPoints(pt1, pt2, pt3)\n\nleng=3000\nwid=1200\nht=400\n\nc1=c_plane.Origin\nc2=c1+leng*c_plane.XAxis\nc3=c2+wid*c_plane.YAxis\nc4=c1+wid*c_plane.YAxis\nc5=c1+ht*c_plane.ZAxis\nc6=c2+ht*c_plane.ZAxis\nc7=c3+ht*c_plane.ZAxis\nc8=c4+ht*c_plane.ZAxis\nrs.AddBox([c1,c2,c3,c4,c5,c6,c7,c8])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n#these points are arbitrary for the example\npt1=Rhino.Geometry.Point3d(10,10,10)\npt2=Rhino.Geometry.Point3d(20,20,20)\npt3=Rhino.Geometry.Point3d(0,20,10)\nplane=Rhino.Geometry.Plane(pt1, pt2, pt3)\n\n#another way of making the box without 8 corner points...\nbox_len=Rhino.Geometry.Interval(0,3000)\nbox_wid=Rhino.Geometry.Interval(0,1200)\nbox_ht=Rhino.Geometry.Interval(0,400)\nbox=Rhino.Geometry.Box(plane,box_len,box_wid,box_ht)\nsc.doc.Objects.AddBox(box)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nleng=3000\nwid=1200\nht=400\n\n#make the box on world XY\nwxy_plane=rs.WorldXYPlane()\nc1=wxy_plane.Origin\nc2=c1+leng*wxy_plane.XAxis\nc3=c2+wid*wxy_plane.YAxis\nc4=c1+wid*wxy_plane.YAxis\nc5=c1+ht*wxy_plane.ZAxis\nc6=c2+ht*wxy_plane.ZAxis\nc7=c3+ht*wxy_plane.ZAxis\nc8=c4+ht*wxy_plane.ZAxis\nw_box=rs.AddBox([c1,c2,c3,c4,c5,c6,c7,c8])\n\n#these points are arbitrary for the example\npt1=rs.coerce3dpoint([10,10,10])\npt2=rs.coerce3dpoint([20,20,20])\npt3=rs.coerce3dpoint([0,20,10])\nc_plane=rs.PlaneFromPoints(pt1, pt2, pt3)\n\n#create the transformation and transform the box (no copy)\nxform=rs.XformRotation1(wxy_plane,c_plane)\nc_box=rs.TransformObject(w_box,xform,False)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "cplane=rs.PlaneFromPoints(pt1, pt2, pt3)\nrs.ViewCPlane(view=None, plane=cplane)\npt5=rs.AddPoint(0,0,0)",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 712
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas/blob/HEAD/src/compas_rhino/scene/vectorobject.py",
+  "repo": "compas-dev/compas",
+  "repo_stars": 352,
+  "repo_description": "Main library of the COMPAS framework and CAD integrations for Rhino/GH and Blender.",
+  "license": "MIT",
+  "filepath": "src/compas_rhino/scene/vectorobject.py",
+  "instruction": "Vectorobject",
+  "code": "from __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport scriptcontext as sc  # type: ignore\n\nfrom compas.geometry import Point\nfrom compas.scene import GeometryObject\nfrom compas_rhino.conversions import point_to_rhino\nfrom compas_rhino.conversions import transformation_to_rhino\n\nfrom .sceneobject import RhinoSceneObject\n\n\nclass RhinoVectorObject(RhinoSceneObject, GeometryObject):\n    \"\"\"Scene object for drawing vectors.\"\"\"\n\n    def draw(self):\n        \"\"\"Draw the vector.\n\n        Returns\n        -------\n        list[System.Guid]\n            List of GUIDs of the objects created in Rhino.\n\n        \"\"\"\n        attr = self.compile_attributes(arrow=\"end\")\n        start = Point(0, 0, 0)\n        end = start + self.geometry\n        start_geometry = point_to_rhino(start)\n        end_geometry = point_to_rhino(end)\n        transformation = transformation_to_rhino(self.worldtransformation)\n        start_geometry.Transform(transformation)\n        end_geometry.Transform(transformation)\n\n        self._guids = [sc.doc.Objects.AddLine(start_geometry, end_geometry, attr)]\n        return self.guids\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/aaronnelson/RhinoPython/blob/9f25cf249ab53ef9fd45d1a8df6cdac1da20c2c8/PointGrid/2D%20Point%20Grid%20Circles.py",
+  "repo": "aaronnelson/RhinoPython",
+  "repo_stars": 2,
+  "repo_description": "Python Scripts for Rhino",
+  "license": "GPL-3.0",
+  "filepath": "PointGrid/2D Point Grid Circles.py",
+  "instruction": "2D Point Grid with Circles generated with an Attractor Point This script will create a 2D grid of points and circle centered on each point. Circle radius is driven by the distance from the attractor to the point defining the center of the circle.",
+  "code": "#2D Point Grid with Circles generated with an Attractor Point\r\n#This script will create a 2D grid of points and circle centered on each point.\r\n#Circle radius is driven by the distance from the attractor to the point defining the center of the circle.\r\n\r\nimport rhinoscriptsyntax as rs\r\n\r\n#spacing variable sets distance between points\r\nspacing = 3\r\n\r\n#Dictionary to hold points\r\npts = {}\r\n\r\n#Prompt user to set X and Y extents, default of 20\r\niMax = rs.GetInteger(\"Please enter max number of points in x\", 20)\r\njMax = rs.GetInteger(\"Please enter max number of points in y\", 20)\r\n\r\n#select an attractor pt.  This will drive the size of the circles\r\nattPt = rs.GetObject(\"Select attractor point\", 1)\r\n\r\n#nested For loops for X and Y Domains\r\nfor i in range(iMax):\r\n    for j in range(jMax):\r\n        \r\n        #define x,y,(z)\r\n        x = i * spacing\r\n        y = j * spacing\r\n\t\t#z will always be 0 for a 2D Grid\r\n        z = 0\r\n        \r\n\t\t#Store the points in the dictionary using the iterators as the reference keys\r\n        pts[(i, j)] = [x, y, z]\r\n\r\n\r\n#Loop through all of the sorted points in the Dictionary\r\nfor key, pt in sorted(pts.iteritems()):\r\n\t\r\n\t#print out the key and value for debugging\r\n    #print key, value\r\n    \r\n\t#calculate the straight line distace between the attractor point and the current point in the loop\r\n    dist = rs.Distance(pt, attPt)\r\n\t\r\n\t#print out the distance for debugging\r\n    #print dist\r\n    \r\n\t#Create a radius value based on the scaled distance\r\n    radius = dist/20\r\n    \r\n\t#If our circle gets too large or small, constrain it to a value between half the spacing and 0.4 units\r\n    if radius > spacing/2:\r\n        radius = spacing/2\r\n    elif radius < 0.4:\r\n        radius = 0.4\r\n    \r\n\t#Add the circle to the Rhino document using the calculated radius\r\n    rs.AddCircle(pt, radius)\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

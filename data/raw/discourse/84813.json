@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/organized-block-organize-blocks/84813",
+  "topic_id": 84813,
+  "title": "Organized Block / Organize Blocks",
+  "question": "After following \nthis discussion\n, I’ve made a script that you can use to create a block definition layer structure when creating a block.\n\nAnd another to organize blocks onto  layers with their block name\n\n\n@pascal\n \n@Helvetosaur\n what do you think?\n\n\norganizedBlock.py (1.6 KB)\n\n\n\n\n\nsee the code\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef organizedBlock():\n    \"\"\"\n    create a block from selection and add it to a layer with the block's name\n    nested under layer Block_Definitions\n    tested in Rhino 6.14\n    www.studiogijs.nl\n    \"\"\"\n    \n    #get objects to create block from\n    objs = rs.GetObjects(\"select objects to creat block from\")\n    if not objs: return\n    \n    base_point = rs.GetPoint(\"block base point\")\n    if not base_point: return\n    \n    def checkName():    \n        block_name = rs.GetString(\"enter block name\")\n        if block_name =='' or block_name==None:\n            print \"block name can't be empty\"\n            return checkName()\n        #check if layer Block_Definitions exist, else create it\n        if not rs.IsLayer(\"Block_Definitions\"): rs.AddLayer(\"Block_Definitions\")\n        \n        #check if layer with block name exists, else create it\n        if not rs.IsLayer(\"Block_Definitions::\"+block_name):\n            block_layer = rs.AddLayer(block_name, parent = \"Block_Definitions\")\n            \n        else:\n            print \"block definition with this name already exists\"\n            return checkName()\n        return block_layer, block_name\n        \n            \n    block_layer, block_name = checkName()\n    \n    #create the block\n    block = rs.AddBlock(objs, base_point, block_name, True)\n    if not block:\n        return\n    temp_layer = rs.CurrentLayer()\n    rs.CurrentLayer(block_layer)\n    rs.InsertBlock(block, base_point)\n    #restore to previous layer\n    rs.CurrentLayer(temp_layer)\n\nif __name__ == '__main__':\n    organizedBlock()\n\n\n\n\n\norganizeBlocks.py (1.0 KB)\n\n\n\n\n\nsee the code\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef or...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef organizedBlock():\n    \"\"\"\n    create a block from selection and add it to a layer with the block's name\n    nested under layer Block_Definitions\n    tested in Rhino 6.14\n    www.studiogijs.nl\n    \"\"\"\n    \n    #get objects to create block from\n    objs = rs.GetObjects(\"select objects to creat block from\")\n    if not objs: return\n    \n    base_point = rs.GetPoint(\"block base point\")\n    if not base_point: return\n    \n    def checkName():    \n        block_name = rs.GetString(\"enter block name\")\n        if block_name =='' or block_name==None:\n            print \"block name can't be empty\"\n            return checkName()\n        #check if layer Block_Definitions exist, else create it\n        if not rs.IsLayer(\"Block_Definitions\"): rs.AddLayer(\"Block_Definitions\")\n        \n        #check if layer with block name exists, else create it\n        if not rs.IsLayer(\"Block_Definitions::\"+block_name):\n            block_layer = rs.AddLayer(block_name, parent = \"Block_Definitions\")\n            \n        else:\n            print \"block definition with this name already exists\"\n            return checkName()\n        return block_layer, block_name\n        \n            \n    block_layer, block_name = checkName()\n    \n    #create the block\n    block = rs.AddBlock(objs, base_point, block_name, True)\n    if not block:\n        return\n    temp_layer = rs.CurrentLayer()\n    rs.CurrentLayer(block_layer)\n    rs.InsertBlock(block, base_point)\n    #restore to previous layer\n    rs.CurrentLayer(temp_layer)\n\nif __name__ == '__main__':\n    organizedBlock()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef organizeBlocks():\n    \"\"\"\n    organize blocks onto layers with their blockname nested under layer Block_Definitions\n    tested in Rhino 6.14\n    www.studiogijs.nl\n    \"\"\"\n    blocks = Rhino.RhinoDoc.ActiveDoc.Objects.FindByObjectType(Rhino.DocObjects.ObjectType.InstanceReference)\n    if not blocks:\n        print 'no blocks found in this document'\n        return\n    for block in blocks:\n        block_name = block.InstanceDefinition.Name\n        #check if layer Block_Definitions exist, else create it\n        if not rs.IsLayer(\"Block_Definitions\"): rs.AddLayer(\"Block_Definitions\")\n        \n        #check if layer with block name exists, else create it\n        layer_name = \"Block_Definitions::\"+block_name\n        if not rs.IsLayer(layer_name):\n            block_layer = rs.AddLayer(block_name, parent = \"Block_Definitions\")\n        else:\n            block_layer = layer_name\n        rs.ObjectLayer(block.Id, block_layer)\n        \nif __name__ == '__main__':\n    organizeBlocks()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 7,
+  "views": 1444
+}

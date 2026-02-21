@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-python-moving-breps-with-rhinocommon-returns-booleans-not-geometries/91790",
+  "topic_id": 91790,
+  "title": "GH.Python Moving Breps with RhinoCommon returns Booleans, not geometries",
+  "question": "Hi Forum,\n\n\nTrying to develop my first GH Python Script and hitting a bit of a learning curve.\n\nWatched all the Lynda training a couple of times but struggling to make my own thing work.\n\n\nThe first step of my script is to move inputted Breps.\n\nFor the next steps in my script, I need this to be a loop and use RhinoCommon (not RhinoScriptSyntax)\n\nThis is what I wrote this far:\n\n\n# Move up Test\n# geo is a bunch of spheres inputted in the component\n\nmovedGeo = []\n\nfor i in geo:\n\n    vec = rg.Transform.Translation(0,0,100)\n    x = i.Transform(vec)\n    movedGeo.append(x)\n\na = movedGeo\n\n\n\nFor some reason, this outputs a list of Booleans, all true, instead of the moved up Breps and I dont understand why.\n\n\nCould someone explain this and tell me how to get my moved up Breps instead ?\n\n\n(Ultimately my script would jiggle a bunch of breps to overcome failing boolean unions but thats as story for another time)\n\n\nCheers,\n\n\n01 Moving Outputs Booleans.3dm\n (1.5 MB) \n01 Moving Outputs Booleans.gh\n (4.8 KB) \n\n\n01%20Moving%20Outputs%20Booleans\n1320×757 71.6 KB",
+  "code_blocks": [
+    {
+      "code": "**import** Rhino.Geometry **as** rg\n**from** math **import** radians\n\ndistances = []\nframes = []\n\n#Distances\n\n**for** panel **in** panels:\n\npoint = panel. **PointAt** (0.5,0.5)\ndist = point. **DistanceTo** (attractor)\ndistances. **append** (dist)\ndistances. **sort** ()\ndmin = distances[0]\ndmax = distances[-1]\nrange = dmax - dmin\n\n#Transform\n\n**for** panel **in** panels:\n\npanelC = panel. **Duplicate** ()\ncentreF = panelC. **FrameAt** (0.5,0.5)[1]\ndist = centreF.Origin. **DistanceTo** (attractor)\nscaledist **=** (dist - dmin)/range ***** (max-min) + min\n\n#Scale\n\ntrans = rg.Transform. **Scale** (centreF.Origin, scaledist)\npanelC. **Transform** (trans)\n\n#Move\n\nmoveDir = centreF.ZAxis\nmoveVect = rg.Vector3d. **Multiply** (scaledist * 3, moveDir)\nmoveTrans = rg.Transform. **Translation** (moveVect)\npanelC. **Transform** (moveTrans)\n\n#Rotation\n\nrotateTrans = rg.Transform. **Rotation** ( **radians** (viewAngle), centreF.Origin)\npanelC. **Transform** (rotateTrans)\nframes. **append** (panelC)",
+      "language": "unknown",
+      "author": "dav.rhr",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 6,
+  "views": 1965
+}

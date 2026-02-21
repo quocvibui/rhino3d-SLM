@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-expected-objref-got-curveobject/134900",
+  "topic_id": 134900,
+  "title": "ERROR expected ObjRef, got CurveObject",
+  "question": "import Rhino\nimport scriptcontext\nimport System\nimport Rhino.UI\nimport Eto.Drawing as drawing\nimport Eto.Forms as forms\nimport rhinoscriptsyntax as  rs\nlayer_names = rs.LayerNames()\nlayer_objects = list(layer for layer in scriptcontext.doc.Layers if not layer.IsDeleted)\nfor name in layer_names:\n    layer_obj = None\n    for layer_obj in layer_objects:\n        if layer_obj.FullPath == \"MCS\":\n            autoMCS = scriptcontext.doc.Objects.FindByLayer(layer_obj)\n            rs.ConvertCurveToPolyline (autoMCS[0], 0.1, 0.1, True, 1, 5)\n\n\n\nTEST.3dm\n (49.9 KB).",
+  "code_blocks": [
+    {
+      "code": "import Rhino.DocObjects\n\n # ...\n\nfor crv in autoMCS:\n    obref = Rhino.DocObjects.ObjRef(autoMCS)\n    # now you can convert your objref into polyline",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\nimport Rhino.UI\nimport Eto.Drawing as drawing\nimport Eto.Forms as forms\nimport rhinoscriptsyntax as  rs\nlayer_names = rs.LayerNames()\nlayer_objects = list(layer for layer in scriptcontext.doc.Layers if not layer.IsDeleted)\nfor name in layer_names:\n    layer_obj = None\n    for layer_obj in layer_objects:\n        if layer_obj.FullPath == \"MCS\":\n            autoMCS = scriptcontext.doc.Objects.FindByLayer(layer_obj)\n            rs.ConvertCurveToPolyline (autoMCS[0], 0.1, 0.1, True, 1, 5)",
+      "language": "python",
+      "author": "cua54kttt",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 360
+}

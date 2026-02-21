@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/dalefugier/design-nxt-atlanta-2019/blob/fc437cdfc71633443eb2484730d866e17f365136/python/sample6.py",
+  "repo": "dalefugier/design-nxt-atlanta-2019",
+  "repo_stars": 1,
+  "repo_description": "Reference material for the Rhino.Compute + Rhino3dm workshop with Dale Fugier and Travis Serio",
+  "license": "MIT",
+  "filepath": "python/sample6.py",
+  "instruction": "Design NXT 2019 Workshop\nSample 6: Offset and trim",
+  "code": "\"\"\"\nDesign NXT 2019 Workshop\nSample 6: Offset and trim\n\"\"\"\n\nimport rhino3dm\nimport compute_rhino3d.Util\nimport compute_rhino3d.Intersection\n\ncompute_rhino3d.Util.authToken = 'ADD_TOKEN_HERE'\n\npoints = []\npoints.append(rhino3dm.Point3d(0.417, 0.262, -10))\npoints.append(rhino3dm.Point3d(11.718, 1.645, 0))\npoints.append(rhino3dm.Point3d(0.656, 4.029, 0))\npoints.append(rhino3dm.Point3d(11.814, 8.178, 10))\ncurve1 = rhino3dm.Curve.CreateControlPointCurve(points, 3)\n\nsphere = rhino3dm.Sphere(rhino3dm.Point3d(5, 5, 0), 5)\nbrep = sphere.ToBrep()\n\n# create a 3dm file with results\nmodel = rhino3dm.File3dm()\nmodel.Objects.AddCurve(curve1)\nmodel.Objects.AddSphere(sphere)\n\nintersection_results = compute_rhino3d.Intersection.CurveBrep(curve1, brep, 0.01)\nintersection_points = intersection_results[2]\nfor intersection in intersection_points:\n    x = intersection[\"X\"]\n    y = intersection[\"Y\"]\n    z = intersection[\"Z\"]\n    model.Objects.AddPoint(x, y, z)\n\nmodel.Write('design_nxt_sample6.3dm')\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

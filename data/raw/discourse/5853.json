@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multiple-matches-error-for-sc-doc-objects-addpoints/5853",
+  "topic_id": 5853,
+  "title": "Multiple matches error for sc.doc.Objects.AddPoints()",
+  "question": "I am getting this:\n\n\nimport Rhino\nimport scriptcontext as sc\n#create point list\nptList=[Rhino.Geometry.Point3d(i,j,k) for i in range(3) for j in range(3) for k in range(3)]\n#try to add the list to document\nsc.doc.Objects.AddPoints(ptList)\n\nMessage: Multiple targets could match: AddPoints(IEnumerable[Point3f]), AddPoints(IEnumerable[Point3d])\n\n\n\nSomehow the AddPoints method should know it’s a list of point3d’s, no?  Certainly I can use\n\n\nfor pt in ptList : sc.doc.Objects.AddPoint(pt)\n\n\n\nbut what is sc.doc.Objects.AddPoints() for then?  Somehow the overloading of this function is not working…?\n\n\n\n\nObjTable.PNG\n969×126 6.76 KB\n\n\n \n\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom System.Collections.Generic import IEnumerable\nfrom Rhino.Geometry import Point3d\nimport scriptcontext\n\npts = rs.GetPoints()\nscriptcontext.doc.Objects.AddPoints.Overloads[IEnumerable[Point3d]](pts)\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n#create point list\nptList=[Rhino.Geometry.Point3d(i,j,k) for i in range(3) for j in range(3) for k in range(3)]\n#try to add the list to document\nsc.doc.Objects.AddPoints(ptList)\n\nMessage: Multiple targets could match: AddPoints(IEnumerable[Point3f]), AddPoints(IEnumerable[Point3d])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 2399
+}

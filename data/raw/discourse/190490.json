@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-rhino-reports-false-deviation-values/190490",
+  "topic_id": 190490,
+  "title": "Bug: Rhino reports false deviation values",
+  "question": "I noticed that Rhino reports false minor deviation values that are nearly 10 times smaller than the actual huge deviation. These are highly misleading and give the user a false confidence about the quality and precision of the expected output surfaces.",
+  "code_blocks": [
+    {
+      "code": "################################################################################\n# SampleRebuildSrfDeviation.py\n# Copyright (c) 2018 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport System\nimport rhinoscriptsyntax as rs\n\n# Description:\n#   Returns max deviation of a rebuilt surface\n# Parameters:\n#   original - A Brep face whose underlying surface was rebuilt\n#   rebuild - The rebuilt surface\ndef SampleRebuildSrfDeviation(original, rebuilt):\n    o_domain = []\n    r_domain = []\n    for i in range(2):\n        o_domain.append(original.Domain(i))\n        r_domain.append(rebuilt.Domain(i))",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "# coding=utf-8\nfrom __future__ import division\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\ndef test_deviation(puv_samples , srf):\n    \n    r_domain = []\n    for i in range(2):\n        r_domain.append(srf.Domain(i))\n    \n    d_vecs = []\n    for po, un, vn in puv_samples:\n        uu = r_domain[0].ParameterAt(un)\n        vv = r_domain[1].ParameterAt(vn)\n        rc, ru, rv = srf.LocalClosestPoint(po, uu, vv)\n        if rc:\n            pr = srf.PointAt(ru, rv)\n            d_vecs.append(Rhino.Geometry.Vector3d(pr-po))\n    \n    d_vecs.sort(key=lambda  v : v.Length, reverse = True)\n    \n    return d_vecs[0].Length\n\n\ndef helper_srfsrf_deviation(srf1, srf2):\n    \n    def srf_samples(srf):\n        f_domain = []\n        for i in range(2):\n            f_domain.append(srf.Domain(i))\n        \n        knot = []\n        for i in range(2):\n            k = srf.GetSpanVector(i)\n            knot.append(k)\n        \n        puv = []\n        doc_pts = []\n        samples = 2\n        for j0 in range(knot[0].Count - 1):\n            u_interval = Rhino.Geometry.Interval(knot[0][j0], knot[0][j0 + 1])\n            for j1 in range(knot[1].Count - 1):\n                v_interval = Rhino.Geometry.Interval(knot[1][j1], knot[1][j1 + 1])\n                for i0 in range(samples + 1):\n                    for i1 in range(samples + 1):\n                        if i0 == 0 and j0 > 0: continue\n                        if i1 == 0 and j1 > 0: continue\n                        u = u_interval.ParameterAt(i0 / samples)\n                        v = v_interval.ParameterAt(i1 / samples)\n                        po = srf.PointAt(u, v)\n                        doc_pts.append(rs.AddPoint(po))\n                        nu = f_domain[0].NormalizedParameterAt(u)\n                        nv = f_domain[1].NormalizedParameterAt(v)\n                        puv.append([po,nu,nv])\n        return puv, doc_pts\n    \n    \n    puv1, doc_pts1 = srf_samples(srf1)\n    puv2, doc_pts2 = srf_samples(srf2)\n    \n    dev1 = test_deviation(puv1 , srf2)\n    dev2 = test_deviation(puv2 , srf1)\n    \n    print 'deviation AB : {}'.format(dev1)\n    print 'deviation BA : {}'.format(dev2)\n    return doc_pts1, doc_pts2\n\n\n\n\nif __name__ == '__main__':\n\n\n    id1 = rs.GetObject('surface A', 8)\n    id2 = rs.GetObject('surface B', 8)\n    \n    srf1 = rs.coercesurface(id1)\n    srf2 = rs.coercesurface(id2)\n    \n    \n    pts1, pts2 = helper_srfsrf_deviation(srf1, srf2)\n    rs.ObjectColor(pts1, rs.ObjectColor(id1))\n    rs.ObjectColor(pts2, rs.ObjectColor(id2))\n    \n    rs.AddObjectToGroup(pts1, rs.AddGroup)\n    rs.AddObjectToGroup(pts2, rs.AddGroup)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 9,
+  "views": 225
+}

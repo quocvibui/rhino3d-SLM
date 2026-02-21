@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/close-an-excel-session-with-python/613",
+  "topic_id": 613,
+  "title": "Close an Excel session with Python",
+  "question": "Hi to Everyone, i create a Python Script who allow me to bring some data by an .xlsx file.\n\nI import the clr, i can read the data. I have trouble when i must close the session with the file.\n\nIf I try to open the file evrithing is fine. If I open my task manager the EXCEL.exe process is already open.\n\nHow i can close it. Because everytime i run the script it open a new process!\n\nHere my code:\n\n\nimport clr\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nclr.AddReference(\"Microsoft.Office.Interop.Excel\")\nfrom Microsoft.Office.Interop import Excel\n\nif( scriptcontext.sticky.has_key(\"ExcelApp\") ):\n        xl = scriptcontext.sticky[\"ExcelApp\"]\n        return xl\nxl = Excel.ApplicationClass()\nscriptcontext.sticky[\"ExcelApp\"] = xl\nwb = xl.Workbooks.Open(r'path\\to\\myfile.xlsx',False,True)\nsh=wb.Worksheets(1)\nvalue=sh.Range[\"B4\"].Text\nclose=wb.Close(True)\nclose=xl.Quit\n\n\n\nThanks!\n\nDaniele",
+  "code_blocks": [
+    {
+      "code": "import clr\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nclr.AddReference(\"Microsoft.Office.Interop.Excel\")\nfrom Microsoft.Office.Interop import Excel\nimport System.Array\n\ndef GetExcelApplication():\n    if( scriptcontext.sticky.has_key(\"ExcelApp\") ):\n        return scriptcontext.sticky[\"ExcelApp\"]\n    # start Excel and save the instance in our sticky dictionary\n    # so we can reuse it\n    xl = Excel.ApplicationClass()\n    scriptcontext.sticky[\"ExcelApp\"] = xl\n    return xl\n\nif( __name__ == \"__main__\" ):\n    xl = GetExcelApplication()\n    wb = xl.ActiveWorkbook\n    if wb==None:\n        wb = xl.Workbooks.Add()\n    sheet = wb.ActiveSheet\n    pointcloud = rs.GetObject(\"Select point cloud\", rs.filter.pointcloud)\n    points = rs.PointCloudPoints(pointcloud)\n    if points:\n        xl.Visible = False\n        a = System.Array.CreateInstance(object, 3)\n        for i, point in enumerate(points):\n            cell = \"A\" + str(i+1) + \":C\" + str(i+1)\n            a[0] = point[0]\n            a[1] = point[1]\n            a[2] = point[2]\n            sheet.Range[cell].Value = a\n        xl.Visible = True",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import clr\nclr.AddReference(\"Microsoft.Office.Interop.Excel\")\nfrom Microsoft.Office.Interop import Excel\nimport rhinoscriptsyntax as rs\nif __name__ == '__main__':\n    FileLocation = \"path\\to\\my\\xls\\file.xls\" \n    ExcelApp = ApplicationClass() \n    workbook= None \n    workbook = ExcelApp.Workbooks.Open(FileLocation) \n    workbook.Save() \n    workbook.Close(SaveChanges=0)\n    del (workbook)\n    ExcelApp.Quit()\n    del (ExcelApp)\n    pass",
+      "language": "python",
+      "author": "DanieleMauro",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport clr\nimport System.GC\n\nclr.AddReference(\"Microsoft.Office.Interop.Excel\")\nfrom Microsoft.Office.Interop import Excel\n\ndef XLS_cleanup():\n    \n    System.GC.Collect()\n    System.GC.WaitForPendingFinalizers()\n    return\n    \ndef Excel_Open():\n\n    myfile = rs.OpenFileName(\"Select Excel File:\",\"Excel file|*.xls;*.xlsx|\")\n\n    if not myfile:\n        return\n  \n    xl = Excel.ApplicationClass()\n    WB=xl.Workbooks.Open (myfile)\n\n    print WB.Name\n\n    WB.Close()\n    xl.Quit()\n\nExcel_Open()\nXLS_cleanup()",
+      "language": "python",
+      "author": "AleksandarSM",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import clr\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nclr.AddReference(\"Microsoft.Office.Interop.Excel\")\nfrom Microsoft.Office.Interop import Excel\n\nif( scriptcontext.sticky.has_key(\"ExcelApp\") ):\n        xl = scriptcontext.sticky[\"ExcelApp\"]\n        return xl\nxl = Excel.ApplicationClass()\nscriptcontext.sticky[\"ExcelApp\"] = xl\nwb = xl.Workbooks.Open(r'path\\to\\myfile.xlsx',False,True)\nsh=wb.Worksheets(1)\nvalue=sh.Range[\"B4\"].Text\nclose=wb.Close(True)\nclose=xl.Quit",
+      "language": "python",
+      "author": "DanieleMauro",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 26107
+}

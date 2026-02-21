@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/questions-about-using-the-getpoint-constrain-mesh-bool/54651",
+  "topic_id": 54651,
+  "title": "Questions about using the GetPoint.Constrain(mesh,bool)",
+  "question": "Why is the response rate slow when I get points on the mesh compared to brep using \nGetPoint.Constrain ()\n?\n\nAre there any ways to improve speed?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    mesh_id = rs.GetObject(\"Mesh\", 32, True, False)\n    if not mesh_id: return\n    \n    mesh = rs.coercemesh(mesh_id, True)\n    \n    gp = Rhino.Input.Custom.GetPoint()\n    gp.Constrain(mesh, False)\n    \n    while True:\n        gp.Get()\n        if gp.CommandResult() != Rhino.Commands.Result.Success: \n            break\n        else:\n            scriptcontext.doc.Objects.AddPoint(gp.Point())\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    mesh_id = rs.GetObject(\"Mesh\", 32, True, False)\n    if not mesh_id: return\n    \n    while True:\n        rc, pt = Rhino.Input.RhinoGet.GetPointOnMesh(mesh_id, \"Pick point\", False)\n        if rc != Rhino.Commands.Result.Success: break\n        scriptcontext.doc.Objects.AddPoint(pt)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 658
+}

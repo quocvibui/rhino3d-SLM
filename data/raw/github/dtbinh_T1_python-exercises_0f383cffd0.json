@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/dtbinh/T1_python-exercises/blob/f4710c3dc2ba8ddb3e3e9069ab8d65df674463ab/07_ur_online/shifted_frames_setup/compas/src/compas_rhino/conduits/labels.py",
+  "repo": "dtbinh/T1_python-exercises",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "07_ur_online/shifted_frames_setup/compas/src/compas_rhino/conduits/labels.py",
+  "instruction": "Labels",
+  "code": "from __future__ import print_function\n\nfrom compas_rhino.conduits import Conduit\n\ntry:\n    from Rhino.Geometry import Point3d\n    from System.Drawing.Color import FromArgb\n\nexcept ImportError:\n    import platform\n    if platform.python_implementation() == 'IronPython':\n        raise\n\n\n__author__     = 'Tom Van Mele'\n__copyright__  = 'Copyright 2014, BLOCK Research Group - ETH Zurich'\n__license__    = 'MIT License'\n__email__      = 'vanmelet@ethz.ch'\n\n\n__all__ = ['LabelsConduit', ]\n\n\nclass LabelsConduit(Conduit):\n    \"\"\"A Rhino display conduit for labels.\n\n    Parameters:\n        labels (list): A list of label tuples. Each tuple contains a position and text for the label.\n        color (tuple): Optional.\n            RGB color spec for the dots.\n            Default is ``None``.\n\n    Example:\n\n        .. code-block:: python\n\n            from random import randint\n            import time\n\n            labels = [([1.0 * randint(0, 100), 1.0 * randint(0, 100), 0.0], str(i)) for i in range(100)]\n\n            try:\n                conduit = LabelsConduit(labels)\n                conduit.Enabled = True\n\n                for i in range(100):\n                    labels = [([1.0 * randint(0, 100), 1.0 * randint(0, 100), 0.0], str(i)) for i in range(100)]\n                    conduit.labels = labels\n\n                    conduit.redraw()\n\n                    time.sleep(0.1)\n\n            except Exception as e:\n                print e\n\n            finally:\n                conduit.Enabled = False\n                del conduit\n\n    \"\"\"\n    def __init__(self, labels, color=None, **kwargs):\n        super(LabelsConduit, self).__init__(**kwargs)\n        self.labels = labels\n        color = color or (255, 255, 255)\n        self.color = FromArgb(*color)\n\n    def DrawForeground(self, e):\n        for pos, text in self.labels:\n            e.Display.DrawDot(Point3d(*pos), text)\n\n\n# ==============================================================================\n# Debugging\n# ==============================================================================\n\nif __name__ == \"__main__\":\n\n    from random import randint\n    import time\n\n    labels = [([1.0 * randint(0, 100), 1.0 * randint(0, 100), 0.0], str(i)) for i in range(100)]\n\n    try:\n        conduit = LabelsConduit(labels)\n        conduit.Enabled = True\n\n        for i in range(100):\n            labels = [([1.0 * randint(0, 100), 1.0 * randint(0, 100), 0.0], str(i)) for i in range(100)]\n            conduit.labels = labels\n\n            conduit.redraw()\n\n            time.sleep(0.1)\n\n    except Exception as e:\n        print(e)\n\n    finally:\n        conduit.Enabled = False\n        del conduit\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-boundingbox-not-accepting-python-sets/89500",
+  "topic_id": 89500,
+  "title": "rhinoscriptsyntax.BoundingBox not accepting python sets",
+  "question": "Hi,\n\n\n@stevebaer\n I suppose:\n\n\nI just found that a python \nset\n object is not accepted as itterable in rhinoscriptsyntax.BoundingBox\n\n\ngeometry.py starting at line 343:\n\n\n    bbox = Rhino.Geometry.BoundingBox.Empty\n    if type(objects) is list or type(objects) is tuple:\n        for object in objects:\n            objectbbox = __objectbbox(object, xform)\n            bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    else:\n        objectbbox = __objectbbox(objects, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n\n\n\n.\n\n.\n\n\nas utility.py coerceguidlist does successfully coerces a list from a set this could better read:\n\n\nutility.py coerceguidlist does not handle sets , I think it would be a valuable addition to also accept sets and use it at BoundingBox like below\n\n\n    bbox = Rhino.Geometry.BoundingBox.Empty\n    objectlist = rhutil.coerceguidlist(objects)\n    if not objectlist: return scriptcontext.errorhandler()\n    for object in objectlist:\n        objectbbox = __objectbbox(object, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n\n\n\nP.S. \n@stevebaer\n I now see the use of \nobject\n as variable all over the modules yet that is a buildin python type…\n\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "bbox = Rhino.Geometry.BoundingBox.Empty\n    if type(objects) is list or type(objects) is tuple:\n        for object in objects:\n            objectbbox = __objectbbox(object, xform)\n            bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    else:\n        objectbbox = __objectbbox(objects, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "bbox = Rhino.Geometry.BoundingBox.Empty\n    objectlist = rhutil.coerceguidlist(objects)\n    if not objectlist: return scriptcontext.errorhandler()\n    for object in objectlist:\n        objectbbox = __objectbbox(object, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 440
+}

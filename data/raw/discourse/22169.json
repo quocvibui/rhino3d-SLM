@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-it-possible-to-trim-a-pictureframe-with-python-without-losing-the-picture/22169",
+  "topic_id": 22169,
+  "title": "Is it possible to trim a pictureframe with Python without losing the picture?",
+  "question": "Ok so I have to import some pictureframes in Rhino page layout and then trim some parts of them using python.\n\n\nbut every command I use trim the surface and discard the texture, those are the one I tried :\n\n\nrs.TrimSurface()\n\nRhino.Geometry.Surface.Trim()\n\nRhino.Geometry.BrepFace.Split()\n\nrs.SplitBrep()\n\n\nI know it’s possible with rs.command(Trim) but in case someone has already resolved this problem please enlighten me.",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef TrimSurfaceEx(surface_id, direction, interval, delete_input=True):\n    surface = rs.coercesurface(surface_id, True)\n    obj = rs.coercerhinoobject(surface_id, True, True)\n    u = surface.Domain(0)\n    v = surface.Domain(1)\n    if direction==0:\n        u[0] = interval[0]\n        u[1] = interval[1]\n    else:\n        v[0] = interval[0]\n        v[1] = interval[1]\n    new_surface = surface.Trim(u,v)\n    if new_surface:\n        if delete_input:\n            scriptcontext.doc.Objects.Replace(obj.Id, new_surface)\n            rc = surface_id\n        else:\n            attr = obj.Attributes\n            rc = scriptcontext.doc.Objects.AddSurface(new_surface)\n        scriptcontext.doc.Views.Redraw()\n        return rc\n\n# Test...\nsurface = rs.GetObject(\"Select surface to split\", rs.filter.surface)\nif surface:\n    domain_u = rs.SurfaceDomain(surface, 0)\n    domain_u = (domain_u[1] - domain_u[0]) * 0.25, domain_u[1]\n    TrimSurfaceEx(surface, 0, domain_u, True )",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1785
+}

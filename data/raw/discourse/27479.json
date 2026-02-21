@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/xml-to-rhino/27479",
+  "topic_id": 27479,
+  "title": "XML to Rhino",
+  "question": "Hi\n\n\nI have geometric objects created and saved in an xml file from one piece of measurement software and I would like to use Python to parse the xml file so the geometric objects can be created in Rhino.\n\nMy first problem is that I am not a Python user, I have only used Rhinoscript since Rhino 1.0 so I need some guidance as to how I should proceed with this issue.\n\nSecondly there seems to be a multitude of Python applications and approaches so again any advice will be gratefully received.\n\n\nI have attached a typical xml file.\n\n\nThanks very much\n\n\nRoger\nSteach.xml\n (76.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino as rc\nimport clr\n\nclr.AddReference(\"System.Xml\")\nfrom System.Xml import *\n\ndef extract_xml_points():\n    xml_file = rs.OpenFileName(\"Please select xml-file to import points (steach.xml)\")\n    xml_doc = XmlDocument()\n    xml_doc.Load(xml_file)\n    point_nodes = xml_doc.SelectNodes(\"//RealPoint\")\n    for point_node in point_nodes:            \n        x_node = point_node.SelectSingleNode(\"./x\")        \n        if x_node:\n            x = x_node.InnerText\n            y_node = point_node.SelectSingleNode(\"./y\")\n            if y_node:\n                y = y_node.InnerText\n                z_node = point_node.SelectSingleNode(\"./z\")\n                if z_node:\n                    z = z_node.InnerText\n                    #print \"Adding point\"                    \n                    rs.AddPoint( map(float,(x,y,z)))\n            \nextract_xml_points()",
+      "language": "python",
+      "author": "powerpp",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 8048
+}

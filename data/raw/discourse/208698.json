@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/display-conduit-override-object-color-in-a-specific-viewport/208698",
+  "topic_id": 208698,
+  "title": "Display Conduit - Override object color in a specific viewport",
+  "question": "Hi everyone,\n\n\nI’m working on a plugin where I need to \noverride the display color\n of some Rhino objects only in a given viewport, while keeping everything else (shading, silhouettes, technical display, AO, etc.) consistent with the current display mode. The truth is that it is quite hard for me to fully understand the display pipeline….\n\n\nAt the moment, I’m trying to use a \nDisplayConduit\n and overriding \nPreDrawObject\n. In that handler, I check if the current object is one of my “override” objects (tracked by GUID + target viewport ID). If yes, I modify some properties of \nDisplayPipelineAttributes\n. Here the pseudocode i’m using:\n\n\n\nprotected override void PreDrawObject(DrawObjectEventArgs e)\n{\n    var dp = e.Display.DisplayPipelineAttributes;\n\n    if (MyManager.IsScopedObject(e.RhinoObject.Id, e.Viewport.Id))\n    {\n        dp.UseCustomObjectColor = true;\n        dp.ObjectColor = Color.Red;   // works for curves & selection\n        dp.FrontDiffuse = Color.Red;  // works for shaded surfaces\n\n       // For edges (Brep/mesh borders)\n        dp.SurfaceEdgeColor = Color.Red;\n        dp.SurfaceEdgeColorUsage = DisplayPipelineAttributes.SurfaceEdgeColorUse.SingleColorForAll;\n\n       // Crv\n        dp.UseSingleCurveColor = true;\n        dp.CurveColor = col;\n    }\n\n}\n\n\n\nProblem is: This works quite well in wireframe, shaded, ghosted, arctic and xray mode; it does not work 100% in technical, pen, artistic and monochrome (brep edges are still black, curves are ok; brep edges gets color once the object is selected). In all displaymode once i select the object the selection is equal to the override color and not classic rhino yellow. This is not a big deal but would be great to have a proper selection feedback.\n\n\nAlso it seems like the curves takes their color from dp.ObjectColor and not really from dp.CurveColor; dp.ObjectColor seems also the responsible for the selection color glitch..\n\n\nSo my questions are:\n\n\n\n\n\n\nIs there a \nrecommended way\n in RhinoCommon 8.21.25188.1700...",
+  "code_blocks": [
+    {
+      "code": "protected override void PreDrawObject(DrawObjectEventArgs e)\n{\n    var dp = e.Display.DisplayPipelineAttributes;\n\n    if (MyManager.IsScopedObject(e.RhinoObject.Id, e.Viewport.Id))\n    {\n        dp.UseCustomObjectColor = true;\n        dp.ObjectColor = Color.Red;   // works for curves & selection\n        dp.FrontDiffuse = Color.Red;  // works for shaded surfaces\n\n       // For edges (Brep/mesh borders)\n        dp.SurfaceEdgeColor = Color.Red;\n        dp.SurfaceEdgeColorUsage = DisplayPipelineAttributes.SurfaceEdgeColorUse.SingleColorForAll;\n\n       // Crv\n        dp.UseSingleCurveColor = true;\n        dp.CurveColor = col;\n    }\n\n}",
+      "language": "csharp",
+      "author": "mariodisibio",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 135
+}

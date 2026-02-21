@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/chansiky/RhinoScript/blob/d63f1354c9b3ff2b6a0f8dc687605b1eaaef87cb/Python/connectClosestPoints.py",
+  "repo": "chansiky/RhinoScript",
+  "repo_stars": 1,
+  "repo_description": "A collection of small scripts for Rhinoceros 3D",
+  "license": "MIT",
+  "filepath": "Python/connectClosestPoints.py",
+  "instruction": "Connect closest points",
+  "code": "import rhinoscriptsyntax as rs\r\n\r\ndef getAllEndPoints(crvs):\r\n    arrPoints = []\r\n    i = 0\r\n    for crv in crvs:\r\n        arrPoints.append(rs.CurveEndPoint(crv))\r\n        arrPoints.append(rs.CurveStartPoint(crv))\r\n    return arrPoints      \r\n\r\ndef MaxDist(point,points):\r\n    maxDist = 0;\r\n    for point_i in points:\r\n        distPointToI = rs.Distance(point,point_i)\r\n        if distPointToI > maxDist:\r\n            maxDist = distPointToI\r\n    return maxDist\r\n\r\ndef pointPairExists():\r\n    #code to be written.  for now, seldup and delete.\r\n    return False\r\n\r\ndef findClosestEndPoint(point, points):\r\n    closestPtIndex = 0\r\n    dist = MaxDist(point,points)\r\n    i = 0\r\n    for point_i in points:\r\n        distPointToI = rs.Distance(point,point_i)\r\n        if distPointToI < dist and distPointToI != 0:\r\n            dist = distPointToI\r\n            closestPtIndex = i\r\n        i += 1\r\n    return points[closestPtIndex]\r\n\r\ndef connectClosestPoint(point, points):\r\n    closestPt = findClosestEndPoint(point, points)\r\n    if not pointPairExists():\r\n        rs.AddLine(point,closestPt)\r\n\r\ndef connectEndpoints(crvs):\r\n    points = getAllEndPoints(crvs)\r\n    for crv in crvs:\r\n        point = rs.CurveEndPoint(crv)\r\n        connectClosestPoint(point,points)\r\n        point = rs.CurveStartPoint(crv)\r\n        connectClosestPoint(point,points)\r\n\r\ndef main():\r\n    crvs = rs.GetObjects(\"Select curves to connect:\",4,True)\r\n    connectEndpoints(crvs)\r\n    print(\"Script is incomplete.  Please selDup and delete extra curves\")\r\n\r\nmain();",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

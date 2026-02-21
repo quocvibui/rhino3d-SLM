@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/layout-detail-view-set-to-named-view/213412",
+  "topic_id": 213412,
+  "title": "Layout Detail View, Set to Named View",
+  "question": "@dale\n I am trying to copy a layout and set the first detail on the copied layout to a named view. I am not able to set the detail to the named view. Please see an example below. (The example must be run, while the layout to copy is visible.). Thanks for your help.\n\n\n#! python3\nimport Rhino\nimport scriptcontext as sc\n\n\ndef main():\n    source_layout = sc.doc.Views.ActiveView\n    duplicate_layout = source_layout.Duplicate(True)\n    duplicate_layout.PageName = \"Layout002\"\n\n    detail_view = duplicate_layout.GetDetailViews()[0]\n    named_view_index = sc.doc.NamedViews.FindByName(\"NamedView002\")\n\n    # This is not working as intended, does nothing\n    sc.doc.NamedViews.Restore(named_view_index, detail_view.Viewport)\n    sc.doc.Views.Redraw()\n\n\nmain()\n\n\n\nUntitled.3dm\n (93.5 KB)\n\n\nUntitled.py\n (436 Bytes)",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\n\ndef TestCopyLayout():\n    layout = sc.doc.Views.ActiveView\n    if not isinstance(layout, Rhino.Display.RhinoPageView):\n        print(\"A layout view must be the active view\")\n        return\n\n    duplicate_layout = layout.Duplicate(True)\n    duplicate_layout.PageName = \"Layout002\"\n    sc.doc.Views.ActiveView = duplicate_layout\n\n    detail_views = duplicate_layout.GetDetailViews()\n    detail_views[0].IsActive = True\n    Rhino.RhinoApp.RunScript(\"_NoEcho _-NamedView _Restore NamedView002 _Enter\", False)\n    detail_views[0].IsActive = False\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    TestCopyLayout()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport Rhino\nimport scriptcontext as sc\n\n\ndef main():\n    source_layout = sc.doc.Views.ActiveView\n    duplicate_layout = source_layout.Duplicate(True)\n    duplicate_layout.PageName = \"Layout002\"\n\n    detail_view = duplicate_layout.GetDetailViews()[0]\n    named_view_index = sc.doc.NamedViews.FindByName(\"NamedView002\")\n\n    # This is not working as intended, does nothing\n    sc.doc.NamedViews.Restore(named_view_index, detail_view.Viewport)\n    sc.doc.Views.Redraw()\n\n\nmain()",
+      "language": "python",
+      "author": "silvano",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 76
+}

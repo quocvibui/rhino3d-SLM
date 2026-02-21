@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/ibois-epfl/Cockroach-documentation/blob/774cd92661bb372a2f4d514c3386bc9eea4e16b8/assets/fjoint/brep_from_treePC.py",
+  "repo": "ibois-epfl/Cockroach-documentation",
+  "repo_stars": 5,
+  "repo_description": "This is a GitHub page for documenting Cockroach code.",
+  "license": "MIT",
+  "filepath": "assets/fjoint/brep_from_treePC.py",
+  "instruction": "Author: Joseph Tannous, PhD student IBOIS EPFL\nThis small piece of code was made in the context of a workshop given at IBOIS (directed by dr. Agathe Mignon and Prof. Yves Weinand).",
+  "code": "\"\"\"Author: Joseph Tannous, PhD student IBOIS EPFL\nThis small piece of code was made in the context of a workshop given at IBOIS (directed by dr. Agathe Mignon and Prof. Yves Weinand).\n\"\"\"\nimport Rhino\nimport rhinoscriptsyntax as sc\nimport scriptcontext as scr\nimport Rhino.Geometry as rg\nfrom System.Collections.Generic import List\n\n\ncrvs = []\nbboxes = []\ncenters = []\ncircles = []\npoints = []\n\n\ndef skeleton():\n    #Gets two inputs: \n    #The ratio, a parameter that checks if all the cross-sections that are given are somewhat similar.\n        #if one cross-section is much larger than the next one, the cross-section is skipped. (see line 40-43)\n    #The cross sections, as closed curves.\n    \n    input_ratio = sc.GetReal(\"Admitted ratio for contour Bounding rectangle\", 1.6)\n    input_crvs = sc.GetObjects(\"Pick set of curves\" , sc.filter.curve , True , True)\n    if not input_crvs: return\n    \n    for crv in input_crvs:\n        crvs.append(sc.coercegeometry(crv))\n    #Now we create bounding boxes of the cross sections, and check the ratio\n    for crv in crvs:\n        bboxes.append(crv.GetBoundingBox(rg.Plane.WorldXY))\n\n    for bbox in bboxes:\n        lines = bbox.GetEdges()\n        line = lines[:2]\n        ratio = line[0].Length / line[1].Length\n        \n        #Now, for the valid cross-sections, we simplify them to fitted circles.\n        \n        if ratio > 1/input_ratio and ratio < input_ratio:\n            centers.append(bbox.Center)\n            circles.append(rg.Circle(bbox.Center, (line[0].Length + line[1].Length)/4).ToNurbsCurve())\n    for c in centers:\n        points.append(c.Z)\n    \n    comb=zip(points,circles)\n    comb.sort() #sorts by first element, i.e. points\n    points_sorted,circles_sorted=zip(*comb)\n    \n    #At last we loft and output the circles\n    \n    loft_result = rg.Brep.CreateFromLoft(circles_sorted,rg.Point3d.Unset,rg.Point3d.Unset,rg.LoftType.Tight,False)\n    capped = loft_result[-1].CapPlanarHoles(0.0001)\n    scr.doc.Objects.AddBrep(capped)\n    \n    sc.EnableRedraw(enable=False)\n\n\nif __name__ == \"__main__\":\n    skeleton()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

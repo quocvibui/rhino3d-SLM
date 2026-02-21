@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/closestpoint-in-cpython-rhinoinside/90056",
+  "topic_id": 90056,
+  "title": "ClosestPoint in cpython, rhinoinside",
+  "question": "I am not able to use the method ClosestPoint for a crv\n\n\ncrv.ClosestPoint(crv.PointAtEnd,0.0)\n\n\nReturns typeerror:\n\n\n\"\n\n\nTypeError                                 Traceback (most recent call last)\n\n in \n\n----> 1 line.ClosestPoint(line.PointAtEnd,0.0)\n\n\nTypeError: No method matches given arguments for ClosestPoint\n\n\n\"\n\n\nThis may be related to the “out double t” definition?\n\n\nfrom RhinoCommon API description:\n\npublic bool ClosestPoint(\n\nPoint3d testPoint,\n\nout double t\n\n)\n\n\n\n\nimage.png\n1155×551 22.2 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nrhinoinside.load()\nimport Rhino\nimport System  # pip install pythonnet\n\npt0 = Rhino.Geometry.Point3d(0.0, 0.0, 0.0)\npt1 = Rhino.Geometry.Point3d(5.0, 5.0, 0.0)\nline_curve = Rhino.Geometry.LineCurve(pt0, pt1)\n\n# When calling .NET methods have return a value as an 'out' parameter,\n# you need to pass as many arguments as the method requires.\n# Since the concept of out arguments (or passed by reference)\n# does not apply to Python, the trick is to pass some dummy arguments\n# of the expected type.\ndummy_out = System.Double(0.0)\nrc, real_out = line_curve.ClosestPoint(pt1, dummy_out, 0.0)\nif rc:\n    print(real_out)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 544
+}

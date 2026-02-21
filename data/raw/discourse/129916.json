@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unrollsrf-bug/129916",
+  "topic_id": 129916,
+  "title": "UnrollSrf bug",
+  "question": "Hi guys,\n\n\nI have a surface which acts weird when I unroll it using RhinoCommon. It’s easy to recreate using Python though. Run the following script on the surface in the file below:\n\n\nimport rhinoscriptsyntax as rs\n\nobj = rs.GetObject()\n\nrs.UnrollSurface(obj)\n\n\n\nThe left is the result I’m getting, notice the odd bump that shows up. This doesn’t happen when using the regular Rhino UnrollSrf command, but I cannot use that. Is this a bug or is there a way to prevent this from happening?\n\n\n\n\nimage\n1251×491 8.99 KB\n\n\n\n\n210908 UnrollSrf bug.3dm\n (181.6 KB)",
+  "code_blocks": [
+    {
+      "code": "def UnrollSurface(surface_id, explode=False, following_geometry=None, absolute_tolerance=None, relative_tolerance=None):\n    \"\"\"Flattens a developable surface or polysurface\n    Parameters:\n      surface_id (guid): the surface's identifier\n      explode (bool, optional): If True, the resulting surfaces ar not joined\n      following_geometry ({guid, ...]): List of curves, dots, and points which\n        should be unrolled with the surface\n    Returns:\n      list(guid, ...): of unrolled surface ids\n      tuple((guid, ...),(guid, ...)): if following_geometry is not None, a tuple\n        [1] is the list of unrolled surface ids\n        [2] is the list of unrolled following geometry\n    Example:\n      import rhinoscriptsyntax as rs\n      surface = rs.GetObject(\"Select surface or polysurface to unroll\", rs.filter.surface + rs.filter.polysurface)\n      if surface: rs.UnrollSurface(surface)\n    See Also:\n      \n    \"\"\"\n    brep = rhutil.coercebrep(surface_id, True)\n    unroll = Rhino.Geometry.Unroller(brep)\n    unroll.ExplodeOutput = explode\n    if relative_tolerance is None: relative_tolerance = scriptcontext.doc.ModelRelativeTolerance\n    if absolute_tolerance is None: absolute_tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    unroll.AbsoluteTolerance = absolute_tolerance\n    unroll.RelativeTolerance = relative_tolerance\n    if following_geometry:\n        for id in following_geometry:\n            geom = rhutil.coercegeometry(id)\n            unroll.AddFollowingGeometry(geom)\n    breps, curves, points, dots = unroll.PerformUnroll()\n    if not breps: return None\n    rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in breps]\n    new_following = []\n    for curve in curves:\n        id = scriptcontext.doc.Objects.AddCurve(curve)\n        new_following.append(id)\n    for point in points:\n        id = scriptcontext.doc.Objects.AddPoint(point)\n        new_following.append(id)\n    for dot in dots:\n        id = scriptcontext.doc.Objects.AddTextDot(dot)\n        new_following.append(id)\n    scriptcontext.doc.Views.Redraw()\n    if following_geometry: return rc, new_following\n    return rc",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobj = rs.GetObject()\n\nrs.UnrollSurface(obj)",
+      "language": "python",
+      "author": "siemen",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 678
+}

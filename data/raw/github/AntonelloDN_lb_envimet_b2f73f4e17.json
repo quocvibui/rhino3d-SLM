@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/AntonelloDN/lb_envimet/blob/f49c125fcf2cc2dd9deaab3ae220523a805a0247/Newlb_envimet/lb_envimet/Geometry/tree.py",
+  "repo": "AntonelloDN/lb_envimet",
+  "repo_stars": 4,
+  "repo_description": "﻿lb_envimet: a series of components to connect Ladybug and Gismo to Envimet for urban microclimatic analysis",
+  "license": "GPL-3.0",
+  "filepath": "Newlb_envimet/lb_envimet/Geometry/tree.py",
+  "instruction": null,
+  "code": "import Rhino as rc\nimport collections\nimport scriptcontext as sc\n\n\nclass Plant3d(object):\n\n    def __init__(self, geometry, material):\n        self.geometry = geometry\n\n        idAndDescription = material.split(',')\n        self.materialId = idAndDescription[0]\n        self.materialDescrition = idAndDescription[1]\n\n\n    def threeDimensionalPlants(self, grid):\n        nestedMatrix = []\n        unit = 1\n\n        curves = [c for c in self.geometry.DuplicateEdgeCurves()]\n        closedCrv = [crv for crv in rc.Geometry.Curve.JoinCurves(curves)][0]\n\n        for j in range(grid.numY + unit):\n            for i in range(grid.numX + unit):\n                point = rc.Geometry.Point3d((i * grid.dimX) + grid.minX, (j * grid.dimY) + grid.minY, grid.zHeight[0])\n                if rc.Geometry.Curve.Contains(closedCrv, point, rc.Geometry.Plane.WorldXY, sc.doc.ModelAbsoluteTolerance) == rc.Geometry.PointContainment.Inside:\n                    nestedMatrix.append([str(i + unit), str(j + unit),'0', self.materialId, self.materialDescrition, '0'])\n\n        return nestedMatrix\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/move-command-rhino-python/149296",
+  "topic_id": 149296,
+  "title": "Move command - Rhino Python",
+  "question": "Hi All,\n\n\nIs there a way to prompt for the average of the objects with the move command? I’m trying to automate via python and want to achieve this for selected objects:\n\n\nRhino.RhinoApp.RunScript(“_selall \" “_move” “average of objects” “2000,2000,20” \" Enter”, False)\n\n\nNote the “average of objects” is a mouse command. Is there a means to select a point in the objects / middle of objects or equivalent?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#get all \"normal\" selectable objects (not ones that are locked or hidden)\nobjs=rs.NormalObjects()\nif objs:\n    bb=rs.BoundingBox(objs)\n    #returns the 8 corner points of the bounding box in a list\n    #you can get the center by averaging the diagonal corner points\n    bb_center=(bb[0]+bb[6])/2\n    #create a point (you can also use rs.GetPoint() to ask user for a point)\n    #coerce3dpoint() can make a point object from a list of 3 numbers\n    target=rs.coerce3dpoint([2000,2000,20])\n    #move the objects from the center to a new point\n    #MoveObjects() wants a translation *vector*, which is typically endpt-startpt\n    rs.MoveObjects(objs,target-bb_center)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 819
+}

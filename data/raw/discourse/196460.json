@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/refresh-components-in-gh-canvas/196460",
+  "topic_id": 196460,
+  "title": "Refresh Components in Gh-Canvas",
+  "question": "Hello everyone,\n\n\nI’ve been iterating quickly and building new components for a larger plugin. During this process, I often change parameter names or even the names of the components themselves.\n\n\nNow that the plugin has become more mature, I’d like to refresh the instances in my Grasshopper canvas to reflect the updated plugin names and parameters. Currently, I delete the old components, add the updated ones back to the canvas, and reconnect all the wires manually.\n\n\nThis process feels unnecessarily repetitive. Is there an automated way to achieve this?\n\n\n(I know about “OLD” but for the first stable version I would like to brute force it)\n\n\nThanks and Best Felix",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper\n\nfor object in Grasshopper.Instances.ActiveCanvas.Document.Objects:\n    proxy = Grasshopper.Instances.ComponentServer.EmitObjectProxy(object.ComponentGuid)\n    object.Name = proxy.Desc.Name",
+      "language": "python",
+      "author": "ondrej",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "for object in Grasshopper.Instances.ActiveCanvas.Document.Objects:\n    proxy = Grasshopper.Instances.ComponentServer.EmitObjectProxy(object.ComponentGuid)\n    # Initialize new instance of the component\n    new_object = proxy.Type() \n    # Only GH_Component objects have Params\n    if isinstance(new_object, Grasshopper.Kernel.GH_Component):\n        # iterate trough Params - their number and order has to match obviously\n        for old, new in zip(object.Params, new_object.Params):\n            old.Name = new.Name",
+      "language": "python",
+      "author": "ondrej",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "protected override void RegisterInputParams(GH_InputParamManager pManager)\n        {\n            pManager.AddBooleanParameter(\"Run\", \"R\", \"Execute the reset on currently selected components\", GH_ParamAccess.item, false);\n            pManager.AddBooleanParameter(\"Clear Connections\", \"C\", \"If true, remove all sources and recipients as well\", GH_ParamAccess.item, false);\n        }\n\n        protected override void RegisterOutputParams(GH_OutputParamManager pManager)\n        {\n            pManager.AddTextParameter(\"Reset Items\", \"RI\", \"GUIDs of the reset components\", GH_ParamAccess.list);\n        }\n\n        protected override void SolveInstance(IGH_DataAccess DA)\n        {\n            bool run = false;\n            bool clearConnections = false;\n            if (!DA.GetData(0, ref run)) return;\n            if (!DA.GetData(1, ref clearConnections)) return;\n            if (!run) return;\n\n            var doc = OnPingDocument();\n            if (doc == null)\n            {\n                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, \"Could not access Grasshopper document.\");\n                return;\n            }\n\n            var selectedObjects = doc.SelectedObjects();\n            if (selectedObjects == null || selectedObjects.Count == 0)\n            {\n                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, \"No components are currently selected.\");\n                return;\n            }\n\n            var resetGuids = new List<string>();\n\n            foreach (var selectedObject in selectedObjects)\n            {\n                if (selectedObject is GH_Component targetComponent)\n                {\n                    if (targetComponent is GH_Cluster ||\n                        targetComponent.GetType().Name == \"CSharpComponent\" ||\n                        targetComponent.GetType().Name == \"ZuiPythonComponent\" ||\n                        targetComponent.GetType().Name == \"Python3Component\" ||\n                        targetComponent.ComponentGuid == this.ComponentGuid) \n                        continue;\n\n                    var freshComponent = Activator.CreateInstance(targetComponent.GetType()) as GH_Component;\n                    if (freshComponent == null)\n                    {\n                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $\"Failed to create a fresh instance of {targetComponent.Name}.\");\n                        continue;\n                    }\n\n                    targetComponent.Name = freshComponent.Name;\n                    targetComponent.NickName = freshComponent.NickName;\n                    targetComponent.Description = freshComponent.Description;\n                    targetComponent.IconDisplayMode = freshComponent.IconDisplayMode;\n\n                    for (int i = 0; i < Math.Min(targetComponent.Params.Input.Count, freshComponent.Params.Input.Count); i++)\n                    {\n                        ResetParameter(targetComponent.Params.Input[i], freshComponent.Params.Input[i], clearConnections);\n                    }\n\n                    for (int i = 0; i < Math.Min(targetComponent.Params.Output.Count, freshComponent.Params.Output.Count); i++)\n                    {\n                        ResetParameter(targetComponent.Params.Output[i], freshComponent.Params.Output[i], clearConnections);\n                    }\n\n                    resetGuids.Add(targetComponent.InstanceGuid.ToString());\n                }\n            }\n\n            DA.SetDataList(0, resetGuids);\n        }\n\n        private void ResetParameter(IGH_Param existingParam, IGH_Param templateParam, bool clearConnections)\n        {\n            existingParam.Name = templateParam.Name;\n            existingParam.NickName = templateParam.NickName;\n            existingParam.Description = templateParam.Description;\n            existingParam.Access = templateParam.Access;\n            \n            if (clearConnections)\n            {\n                var sources = new List<IGH_Param>(existingParam.Sources);\n                foreach (var s in sources)\n                {\n                    existingParam.RemoveSource(s);\n                }\n\n                var recipients = new List<IGH_Param>(existingParam.Recipients);\n                foreach (var r in recipients)\n                {\n                    r.RemoveSource(existingParam);\n                }\n            }\n        }",
+      "language": "csharp",
+      "author": "felix.brunold",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 169
+}

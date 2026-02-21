@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinopython/SampleUnroller.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinopython/SampleUnroller.py",
+  "instruction": "SampleUnroller.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleUnroller.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext as sc\nimport System.Collections.Generic.IEnumerable as IEnumerable\n\n# Demonstrates how to use Rhino.Geometry.Unroller\ndef SampleUnroller():\n    \n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select object to unroll\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n    go.Get()\n    if go.CommandResult() != Rhino.Commands.Result.Success: return\n    \n    brep = go.Object(0).Brep()\n    if not brep: return\n    \n    gd = Rhino.Input.Custom.GetObject()\n    gd.SetCommandPrompt(\"Select text dots that follow\")\n    gd.GeometryFilter = Rhino.DocObjects.ObjectType.TextDot\n    gd.EnablePreSelect(False, True)\n    gd.DeselectAllBeforePostSelect = False\n    gd.GetMultiple(1, 0)\n    if gd.CommandResult() != Rhino.Commands.Result.Success: return\n    \n    dots = []\n    for obj_ref in gd.Objects():\n        dots.append(obj_ref.TextDot())\n    \n    unroller = Rhino.Geometry.Unroller(brep)\n    unroller.AbsoluteTolerance = sc.doc.ModelAbsoluteTolerance\n    \n    # IronPython doesn't really have overloads of functions, just one single\n    # function with all the functionality. Normally IronPython would do this\n    # automatically but the generic types complicate things. To disambiguate\n    # which overload to use, get the function using the Overloads dictionary\n    # passing the types in the signature as the key.\n    unroller.AddFollowingGeometry.Overloads[IEnumerable[Rhino.Geometry.TextDot]](dots)\n    \n    out_breps, out_curves, out_points, out_dots = unroller.PerformUnroll()\n    if out_breps:\n        attribs = go.Object(0).Object().Attributes\n        attribs.RemoveFromAllGroups();\n        for b in out_breps:\n          sc.doc.Objects.Add(b, attribs);\n    \n    if out_dots:\n        for i in range(len(out_dots)):\n            d = out_dots[i]\n            attribs = sc.doc.CreateDefaultAttributes();\n            index = unroller.FollowingGeometryIndex(d);\n            if index >= 0:\n                attribs = gd.Object(i).Object().Attributes\n                attribs.RemoveFromAllGroups()\n            sc.doc.Objects.Add(d, attribs)\n    \n    sc.doc.Views.Redraw()\n\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    SampleUnroller()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-shrinkwrap-in-python/202728",
+  "topic_id": 202728,
+  "title": "Using Shrinkwrap in Python",
+  "question": "How would it be possible to use Shrinkwrap in Python?\n\n\nThis is the code that I am using now:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport random\n\n# Step 1: Select the mesh\nmesh_id = rs.GetObject(\"Select STL mesh\", rs.filter.mesh)\n\nif not mesh_id:\n    raise Exception(\"No mesh selected\")\n\nmesh_obj = rs.coercegeometry(mesh_id)\n\nif not isinstance(mesh_obj, Rhino.Geometry.Mesh):\n    raise Exception(\"Selected object is not a mesh\")\n\nparams = Rhino.Geometry.ShrinkWrapParameters()\n\nparams.FillHolesInInputObjects = True  # Example, enable hole filling\nparams.InflateVerticesAndPoints = False  # Example, do not inflate vertices/points\nparams.Offset = 0.1  # Example, offset the mesh by 0.1 units\nparams.PolygonOptimization = 50  # Example, 50% optimization for polygons\nparams.SmoothingIterations = 5  # Example, apply 5 smoothing iterations\nparams.TargetEdgeLength = 0.2  # Example, target edge length is 0.2 units\n\n# Step 3: Shrink wrap the mesh using the parameters\n# Step 3: Get mesh vertices\nvertices = mesh_obj.Vertices\n\nall_points = [Rhino.Geometry.Point3d(v.X, v.Y, v.Z) for v in vertices]\n\n# Step 4: Reduce points (take 10%)\nsample_ratio = 0.1\nsampled_points = random.sample(all_points, int(len(all_points) * sample_ratio))\n\n# Optional: Visualize the points\nfor pt in sampled_points:\n    rs.AddPoint(pt)\n\nshrink_wrap_mesh = Rhino.Geometry.Mesh.ShrinkWrap(mesh_obj, params)\n\n\n\n\nI keep getting the following error:\n\nTraceback (most recent call last):\n\nFile “file:///C:/Users/Martijn/.rhinocode/stage/cclfz0qb.4mc”, line 40, in \n\nTypeError: Invoked a non-static method with an invalid instance\n\n\nWhat would be a possible solution?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport random\n\n# Step 1: Select the mesh\nmesh_id = rs.GetObject(\"Select STL mesh\", rs.filter.mesh)\n\nif not mesh_id:\n    raise Exception(\"No mesh selected\")\n\nmesh_obj = rs.coercegeometry(mesh_id)\n\nif not isinstance(mesh_obj, Rhino.Geometry.Mesh):\n    raise Exception(\"Selected object is not a mesh\")\n\n# Create shrink wrap parameters\nparams = Rhino.Geometry.ShrinkWrapParameters()\n\nparams.FillHolesInInputObjects = True  # Example: Enable hole filling\nparams.InflateVerticesAndPoints = False  # Example: Do not inflate vertices/points\nparams.Offset = 0.1  # Example: Offset the mesh by 0.1 units\nparams.PolygonOptimization = 50  # Example: 50% optimization for polygons\nparams.SmoothingIterations = 5  # Example: Apply 5 smoothing iterations\nparams.TargetEdgeLength = 0.2  # Example: Target edge length is 0.2 units\n\n# Step 2: Shrink wrap the mesh using the parameters (mesh_obj needs to be wrapped)\nshrink_wrap_mesh = mesh_obj.ShrinkWrap(params)",
+      "language": "python",
+      "author": "Martijn_Fouchier",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport random\n\n# Step 1: Select the mesh\nmesh_id = rs.GetObject(\"Select STL mesh\", rs.filter.mesh)\n\nif not mesh_id:\n    raise Exception(\"No mesh selected\")\n\nmesh_obj = rs.coercegeometry(mesh_id)\n\nif not isinstance(mesh_obj, Rhino.Geometry.Mesh):\n    raise Exception(\"Selected object is not a mesh\")\n\nparams = Rhino.Geometry.ShrinkWrapParameters()\n\nparams.FillHolesInInputObjects = True  # Example, enable hole filling\nparams.InflateVerticesAndPoints = False  # Example, do not inflate vertices/points\nparams.Offset = 0.1  # Example, offset the mesh by 0.1 units\nparams.PolygonOptimization = 50  # Example, 50% optimization for polygons\nparams.SmoothingIterations = 5  # Example, apply 5 smoothing iterations\nparams.TargetEdgeLength = 0.2  # Example, target edge length is 0.2 units\n\n# Step 3: Shrink wrap the mesh using the parameters\n# Step 3: Get mesh vertices\nvertices = mesh_obj.Vertices\n\nall_points = [Rhino.Geometry.Point3d(v.X, v.Y, v.Z) for v in vertices]\n\n# Step 4: Reduce points (take 10%)\nsample_ratio = 0.1\nsampled_points = random.sample(all_points, int(len(all_points) * sample_ratio))\n\n# Optional: Visualize the points\nfor pt in sampled_points:\n    rs.AddPoint(pt)\n\nshrink_wrap_mesh = Rhino.Geometry.Mesh.ShrinkWrap(mesh_obj, params)",
+      "language": "python",
+      "author": "Martijn_Fouchier",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 237
+}

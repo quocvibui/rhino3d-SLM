@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/about-keyboard-event-handle-in-rhinocommon/23800",
+  "topic_id": 23800,
+  "title": "About Keyboard event handle in RhinoCommon",
+  "question": "Hi:\n\nWhen I run this script, if I want to rotate the viewport, I must put the cursor on the “Press J or K”  window, or it just iuput string to rhino.\n\nI need wherever my  cursor is in rhino, I will rotate the viewport by key “J” or “K”, think you.\n\n\n  import Rhino\n  import System.Drawing\n  import System.Windows.Forms\n  import scriptcontext\n  class Form1(System.Windows.Forms.Form):\n\n      def __init__(self):\n\n          self.InitializeComponent()\n\n      def InitializeComponent(self):\n          self._button = System.Windows.Forms.Button()\n          self.SuspendLayout()\n          self._button.Location = System.Drawing.Point(150, 67)\n          self._button.Size = System.Drawing.Size(75, 23)\n          self._button.TabIndex = 0\n          self._button.Text = \"Done\"\n          self._button.Click += self.ButtonClick\n          self.ClientSize = System.Drawing.Size(250, 102)\n          self.Controls.Add(self._button)\n          self.KeyPreview = True\n          self.Text = \"Press J or K\"\n          self.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow\n          self.KeyDown += self.OnKeyDownEvent\n          self.Closing += self.OnClosingEvent\n          self.ResumeLayout(False)\n\n      def ButtonClick(self, sender, e):\n          self.Close()\n\n     def OnKeyDownEvent(self, sender, e):\n         left = e.KeyCode == System.Windows.Forms.Keys.J\n         right = e.KeyCode == System.Windows.Forms.Keys.K\n         if left or right:\n             amount = 0.1\n             if right: amount = -0.1\n                viewport = scriptcontext.doc.Views.ActiveView.MainViewport\n                z = viewport.ConstructionPlane().ZAxis\n               viewport.Rotate(amount, z, Rhino.Geometry.Point3d.Origin)\n             scriptcontext.doc.Views.Redraw()\n          finish = e.KeyCode == System.Windows.Forms.Keys.Escape\n          finish = finish or e.KeyCode == System.Windows.Forms.Keys.Enter\n          if finish:\n              self.Close()\n          e.Handled = True\n      def OnClosingEvent(...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n  import System.Drawing\n  import System.Windows.Forms\n  import scriptcontext\n  class Form1(System.Windows.Forms.Form):\n\n      def __init__(self):\n\n          self.InitializeComponent()\n\n      def InitializeComponent(self):\n          self._button = System.Windows.Forms.Button()\n          self.SuspendLayout()\n          self._button.Location = System.Drawing.Point(150, 67)\n          self._button.Size = System.Drawing.Size(75, 23)\n          self._button.TabIndex = 0\n          self._button.Text = \"Done\"\n          self._button.Click += self.ButtonClick\n          self.ClientSize = System.Drawing.Size(250, 102)\n          self.Controls.Add(self._button)\n          self.KeyPreview = True\n          self.Text = \"Press J or K\"\n          self.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow\n          self.KeyDown += self.OnKeyDownEvent\n          self.Closing += self.OnClosingEvent\n          self.ResumeLayout(False)\n\n      def ButtonClick(self, sender, e):\n          self.Close()\n\n     def OnKeyDownEvent(self, sender, e):\n         left = e.KeyCode == System.Windows.Forms.Keys.J\n         right = e.KeyCode == System.Windows.Forms.Keys.K\n         if left or right:\n             amount = 0.1\n             if right: amount = -0.1\n                viewport = scriptcontext.doc.Views.ActiveView.MainViewport\n                z = viewport.ConstructionPlane().ZAxis\n               viewport.Rotate(amount, z, Rhino.Geometry.Point3d.Origin)\n             scriptcontext.doc.Views.Redraw()\n          finish = e.KeyCode == System.Windows.Forms.Keys.Escape\n          finish = finish or e.KeyCode == System.Windows.Forms.Keys.Enter\n          if finish:\n              self.Close()\n          e.Handled = True\n      def OnClosingEvent(self, sender, e):\n          Rhino.Input.Custom.GetBaseClass.PostCustomMessage(\"exit\")\n\n  f = Form1()\n  f.Show(Rhino.RhinoApp.MainWindow())\n  gs = Rhino.Input.Custom.GetPoint()\n  gs.AcceptCustomMessage(True)\n  gs.Get()\n  if not f.IsDisposed:\n      f.Close()",
+      "language": "python",
+      "author": "pythonuser",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 2008
+}

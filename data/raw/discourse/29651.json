@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-set-dashdot-type-for-line-arc-circle-and-so-on/29651",
+  "topic_id": 29651,
+  "title": "How to set Dashdot type for line,arc,circle and so on?",
+  "question": "How to implement it like below ?\n\n\n\n\nLineType.png\n1376×724 169 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n    \ndef DoSomething():\n    \n    plane = Rhino.Geometry.Plane.WorldXY\n    circle = Rhino.Geometry.Circle(plane, 10.0)\n    \n    index = scriptcontext.doc.Linetypes.Find(\"DashDot\", True)\n    if index < 0: return None\n    \n    source = Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject\n    \n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.LinetypeSource = source\n    attr.LinetypeIndex = index\n    \n    scriptcontext.doc.Objects.AddCircle(circle, attr)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino.Geometry.Point3d center = new Rhino.Geometry.Point3d( 0, 0, 0 );\n        const double radius = 10.0;\n        Rhino.Geometry.Circle c = new Rhino.Geometry.Circle( center, radius );\n        //\n        var attrib = new ObjectAttributes();\n        attrib.LinetypeIndex = RhinoDoc.ActiveDoc.Linetypes.Find(\"DashDot\", true);\n        attrib.LinetypeSource = ObjectLinetypeSource.LinetypeFromObject;\n\n        if (Rhino.RhinoDoc.ActiveDoc.Objects.AddCircle(c, attrib) != Guid.Empty)\n        {\n             ...\n        }",
+      "language": "csharp",
+      "author": "kaicihuang",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 1035
+}

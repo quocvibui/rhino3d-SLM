@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/bengolder/python-geometry/blob/4b1b44f6234fbc77a846997224fe732000aeae53/geometry/rhino.py",
+  "repo": "bengolder/python-geometry",
+  "repo_stars": 52,
+  "repo_description": "A 2D and 3D geometry library in python",
+  "license": "NOASSERTION",
+  "filepath": "geometry/rhino.py",
+  "instruction": "This module handles object conversions to and from Rhino",
+  "code": "\"\"\"This module handles object conversions to and from Rhino\"\"\"\n\nimport Rhino.Geometry as rg\n\nfrom vector import Vector3d, Point3d, PointSet\nfrom plane import Plane3d\nfrom line import Line3d\n\ndef importFromRhino(objs):\n    \"\"\"This function detects the type of an incoming Rhino\n    object and converts it into the appropriate type\n\n    the only argument can be either a single object or a\n    list or tuple of objects\n    \"\"\"\n    if type(objs) in (list, tuple):\n        return [convertFromRhino(obj) for obj in objs]\n    else:\n        return convertFromRhino(objs)\n\ndef convertFromRhino(obj):\n    return importAndConvert[type(obj)](obj)\n\ndef exportToRhino(objs):\n    \"\"\"This function detects the type of outgoing objects and\n    converts them to the appropriate type of Rhinoo object\n    \"\"\"\n    if type(objs) in (list, tuple):\n        return [convertToRhino(obj) for obj in objs]\n    else:\n        return convertToRhino(objs)\n\ndef convertToRhino(obj):\n    return convertAndExport[type(obj)](obj)\n\n\nimportAndConvert = {\n        rg.Vector3d: lambda g: Vector3d(g.X, g.Y, g.Z),\n        rg.Point3d: lambda g: Point3d(g.X, g.Y, g.Z),\n        rg.Point: lambda g: importFromRhino(g.Location),\n        rg.Plane: lambda g: Plane3d(\n            importFromRhino(g.Origin),\n            importFromRhino(g.Normal)),\n        rg.Line: lambda g: Line3d(\n            importFromRhino(g.Direction),\n            importFromRhino(g.From)),\n        }\n\nconvertAndExport = {\n        Vector3d: lambda g: rg.Vector3d(*g.asList()),\n        Point3d: lambda g: rg.Point3d(*g.asList()),\n        Plane3d: lambda g: rg.Plane(\n            convertToRhino(g.point),\n            convertToRhino(g.normal)),\n        Line3d: lambda g: rg.Line(\n            convertToRhino(g.point),\n            convertToRhino(g.vector)),\n        }\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

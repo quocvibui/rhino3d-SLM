@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-in-rs-explodemeshes/47925",
+  "topic_id": 47925,
+  "title": "Bug in rs.ExplodeMeshes",
+  "question": "I have noticed a small bug in rs.ExplodeMeshes:\n\nThe help file states the input parameters are:\n\n\n\n\nmesh_ids\n\nRequired.  String, Guid, or list of Guids.  The identifier(s) of the mesh object(s) to explode.\n\n\ndelete\n\nOptional.  Boolean.  Delete input objects after exploding.  The default is not to delete objects (False).\n\n\n\n\nHowever when passing delete=True, the input meshes are not deleted.\n\n\nInspecting the code for rs.ExplodeMeshes shows that the delete parameter is unused. Can this be added in?",
+  "code_blocks": [
+    {
+      "code": "def ExplodeMeshes(mesh_ids, delete=False):\n    \"\"\"Explodes a mesh object, or mesh objects int submeshes. A submesh is a\n    collection of mesh faces that are contained within a closed loop of\n    unwelded mesh edges. Unwelded mesh edges are where the mesh faces that\n    share the edge have unique mesh vertices (not mesh topology vertices)\n    at both ends of the edge\n    Parameters:\n      mesh_ids = list of mesh identifiers\n      delete[opt] = delete the input meshes\n    Returns:\n      List of identifiers\n    \"\"\"\n    id = rhutil.coerceguid(mesh_ids)\n    if id: mesh_ids = [mesh_ids]\n    rc = []\n    for mesh_id in mesh_ids:\n        mesh = rhutil.coercemesh(mesh_id, True)\n        if mesh:\n            submeshes = mesh.ExplodeAtUnweldedEdges()\n            if submeshes:\n                for submesh in submeshes:\n                    id = scriptcontext.doc.Objects.AddMesh(submesh)\n                    if id!=System.Guid.Empty: rc.append(id)\n    if rc: scriptcontext.doc.Views.Redraw()\n    if delete:\n        for id in mesh_ids:\n            scriptcontext.doc.Objects.Delete(id, True)\n    return rc",
+      "language": "python",
+      "author": "wattzie",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "geometry",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1087
+}

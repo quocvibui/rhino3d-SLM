@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/purgelayer-doesnt-delete-layers-with-objects-in-them/112446",
+  "topic_id": 112446,
+  "title": "PurgeLayer doesn't delete layers with objects in them",
+  "question": "As discovered in this thread: \nHow to delete a layer from GH?\n it appears that the PurgeLayer function is just a copy of the DeleteLayer function and does not in fact let you delete a parent layer with all its sublayers and objects in sublayers as described. It simply does nothing if any of the sublayers contain geometry.\n\n\nIn the documentation you can see someone obviously just copied the info for the DeleteLayer command without updating it properly, so probably the same has happened with the function itself.\n\n\nHere is the contradictory part:\n\n\npurge_bug\n982×600 66.2 KB\n\n\n\n\n\n\n\n\ndeveloper.rhino3d.com\n\n\n\n\n\n\n\n\nrhinoscriptsyntax",
+  "code_blocks": [
+    {
+      "code": "def DeleteLayer(layer):\n    layer = __getlayer(layer, True)\n    return scriptcontext.doc.Layers.Delete( layer.LayerIndex, True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def PurgeLayer(layer):\n    layer = __getlayer(layer, True)\n    rc = scriptcontext.doc.Layers.Purge( layer.LayerIndex, True)\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 631
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/toggle-on-off-all-visible-layers-except-for-selected-layer-how/7321",
+  "topic_id": 7321,
+  "title": "Toggle on/off all visible layers except for selected layer....how?",
+  "question": "Hi,\n\nV4\n\nI am working over a raster plan image and at times wish to just view the plan as my workings are getting in the way !\n\nI wish to temporarily in a quick toggle on/off sort of way, turn off visibilty for the other layers \nTHAT ARE CURRENTLY ON\n, I dont want to find when I turn them back on that all layers turn on. I just want to toggle on/off all visible layers except for a selected layer, that selected layer being my plan image.\n\n\nHow is that done ?\n\n\nI presume I would have to click on the raster image layer to let Rhino know what I wanted to remain on !\n\nIf the procedure is different then I shall go with that, but selecting the layer I still want on seems sensible and easy !\n\n\nSteve",
+  "code_blocks": [
+    {
+      "code": "# https://discourse.mcneel.com/t/python-script-to-select-sublayer-objects/173422/4\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelectObjectsOnSelectedLayers():\n    \n    rc, indices = scriptcontext.doc.Layers.GetSelected()\n    if not rc: return\n    \n    rh_objs = []\n    \n    for index in indices:\n        layer = scriptcontext.doc.Layers[index]\n        layer_objs = scriptcontext.doc.Objects.FindByLayer(layer)\n        if layer_objs: \n            rh_objs.extend(layer_objs)\n        \n    rs.SelectObjects(rh_objs)\n\nSelectObjectsOnSelectedLayers()",
+      "language": "python",
+      "author": "Cumberland",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 12,
+  "views": 16573
+}

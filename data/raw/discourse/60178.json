@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/find-curve-parameters-at-local-min-and-max-and-at-inflection-points/60178",
+  "topic_id": 60178,
+  "title": "Find curve parameters at local min and max, and at inflection points",
+  "question": "I have a user defined curve. For fabrication purposes, I need to divide the curve at the inflection points (where the 2nd derivative = 0). There is need to specify a thickness at the local min and max points (where the 1st derivative = 0). I would like to do this all in Grasshopper with a clean flow of data, for purpose of later manipulations and fabrication. Currently, I am marking the points in Rhino, then referencing those points in GH.\n\n\nCurve and points are internalized into the attached file.\n\n\ninternalized curve - to find inflection points and local min-max.gh\n (3.6 KB)\n\n\nSee image: this is a structural moment diagram, that it represents the thickness and how I hope to vary the thickness.\n\n\n\n\ncurve-help.JPG\n721×322 14.9 KB\n\n\n\n\nFor your curiosity, this is what we are planning to install.\n\n\n\n\n_5a-02.jpg\n720×576 119 KB",
+  "code_blocks": [
+    {
+      "code": "from Rhino.Geometry import NurbsCurve, Point3d\n\ndef get_hodograph(crv):\n    nc = crv.ToNurbsCurve()  # type: NurbsCurve\n    deg = nc.Degree\n    pts = []\n    for i in range(nc.Points.Count - 1):\n        k = deg * 1.0 / (nc.Knots[i + deg] - nc.Knots[i])\n        pt = Point3d(k * (nc.Points[i + 1].Location - nc.Points[i].Location))\n        pts.append(pt)\n\n    hodo_crv = NurbsCurve.CreateControlPointCurve(pts, deg - 1)\n\n    for i in range(nc.Knots.Count - 2):\n        hodo_crv.Knots[i] = nc.Knots[i + 1]\n\n    return hodo_crv",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 20,
+  "views": 5094
+}

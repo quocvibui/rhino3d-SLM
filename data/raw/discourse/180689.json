@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-pointgroups-rhinocommon-equivalent/180689",
+  "topic_id": 180689,
+  "title": "Grasshopper PointGroups RhinoCommon equivalent",
+  "question": "Hi,\n\n\nIs there any RhinoCommon function similar to the ‘PointGroups’ component in grasshopper, or it needs to be written from scratch?\n\n\n\n\nThanks in advance for your help!",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing Rhino.Geometry;\n\nFunc<List<Point3d>, double, List<List<Point3d>>> point_groups = (pts, minDist) => {\n    var pointGroups = new List<List<Point3d>>();\n    List<Point3d> lonePoints = pts;\n\n    bool repeatLoop = true;\n    while (lonePoints.Count > 0) {\n        var inRangeGroup = new List<Point3d>{lonePoints.First()};\n        lonePoints = lonePoints.Skip(1).ToList();\n        while (lonePoints.Count > 0 && repeatLoop) {\n            repeatLoop = false;\n            var tooFarGroup = new List<Point3d>();\n            foreach(var lp in lonePoints) {\n                if (inRangeGroup.Any(p => p.DistanceTo(lp) <= minDist)) {\n                    inRangeGroup.Add(lp);\n                    repeatLoop = true;\n                }\n                else\n                    tooFarGroup.Add(lp);\n            }\n            lonePoints = tooFarGroup;\n        }\n        pointGroups.Add(inRangeGroup);\n        repeatLoop = true;\n    }\n    return pointGroups;\n};\n\nG = point_groups(P.ToList(), D);",
+      "language": "csharp",
+      "author": "Alain",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 249
+}

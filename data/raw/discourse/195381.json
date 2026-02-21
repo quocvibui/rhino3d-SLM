@@ -1,0 +1,50 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-cant-scale-breps-non-uniformly/195381",
+  "topic_id": 195381,
+  "title": "[python] Can't scale breps non-uniformly?",
+  "question": "I was unable to scale a brep. And I can’t tell if it is a bug or by design. It was very unexpected, though. The code below did NOT work.\n\n\n#! python 2\nimport Rhino.Geometry as rg\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npln = rg.Plane.WorldXY\nob = rg.Sphere(pln, 10).ToBrep()\n\nxform = rg.Transform.Scale(pln, 1, 2, 1)\nob.Transform(xform)\n\nsc.doc.Objects.AddBrep(ob)\n\n\n\n\nI was pulling my hair out. But fortunately I somehow found the answer here.\n\n\n\n\n\n\n\n\nPython scale a sphere non-uniformly\n \nGrasshopper\n\n\n\n\n\n    It seems one must cast the Sphere to a NurbsSurface in order for the non-uniform scaling to work as expected (doesn’t work with casting to Brep either): \n \n[2019-02-07%2011_29_31-Grasshopper%20-%2020190207%20problrem%20uniform%20scale%20a%20sphere%2000_]\n\n\n190207_ScaleSphereNonUniform_00.gh\n (5.8 KB) \nI feel like this method should probably return False when called on a type it doesn’t work with (i.e. it doesn’t non-uniformly scale it), but I may be missing something here \n\n\n\n\n\n\nSo based on that, I was able to scale the sphere by converting it to a NurbsSurface and then converting it to a brep after the scaling operation. But, like I said, it was very unexpected that I couldn’t do a NU scale on a brep directly. And no errors thrown, either…it just refused to scale. In fact, iirc, at some point in time, I recorded the result of \nob.Transform(xform)\n and got \nTrue\n back!\n\n\n(working code below)\n\n\n#! python 2\nimport Rhino.Geometry as rg\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npln = rg.Plane.WorldXY\nob = rg.Sphere(pln, 10).ToNurbsSurface()\n\nxform = rg.Transform.Scale(pln, 1, 2, 1)\nob.Transform(xform)\n\nob = ob.ToBrep()\n\nsc.doc.Objects.AddBrep(ob)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nwxy=Rhino.Geometry.Plane.WorldXY\nsph=Rhino.Geometry.Sphere(wxy,10.0)\nsph_brep=sph.ToBrep()\nsc.doc.Objects.AddBrep(sph_brep)\nxform=Rhino.Geometry.Transform.Scale(wxy,2.0,1.0,1.0)\nsph_brep.Transform(xform)\nsc.doc.Objects.AddBrep(sph_brep)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino.Geometry as rg\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npln = rg.Plane.WorldXY\nob = rg.Sphere(pln, 10).ToBrep()\nr = ob.MakeDeformable()\n\nif r:\n    xform = rg.Transform.Scale(pln, 1, 2, 1)\n    ob.Transform(xform)\n\n    sc.doc.Objects.AddBrep(ob)\nelse:\n    Rhino.RhinoApp.WriteLine(\"Nope! LOL!\")",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino.Geometry as rg\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npln = rg.Plane.WorldXY\nob = rg.Sphere(pln, 10).ToBrep()\n\nxform = rg.Transform.Scale(pln, 1, 2, 1)\nob.Transform(xform)\n\nsc.doc.Objects.AddBrep(ob)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino.Geometry as rg\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npln = rg.Plane.WorldXY\nob = rg.Sphere(pln, 10).ToNurbsSurface()\n\nxform = rg.Transform.Scale(pln, 1, 2, 1)\nob.Transform(xform)\n\nob = ob.ToBrep()\n\nsc.doc.Objects.AddBrep(ob)",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 171
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-addcircle-supports-guids-as-an-agrument-too/4647",
+  "topic_id": 4647,
+  "title": "Rs.AddCircle() supports guids as an agrument too?",
+  "question": "Been looking at the RhinoCommon code below the rhinoscriptsyntax.AddCircle() function, and it seems it supports guids as input too:\n\n\ndef AddCircle(plane_or_center, radius):\n    \"\"\"Adds a circle curve to the document\n    Parameters:\n      plane_or_center = plane on which the circle will lie. If a point is\n        passed, this will be the center of the circle on the active\n        construction plane\n      radius = the radius of the circle\n    Returns:\n      id of the new curve object\n    \"\"\"\n    rc = None\n    plane = rhutil.coerceplane(plane_or_center, False)\n    if plane:\n        circle = Rhino.Geometry.Circle(plane, radius)\n        rc = scriptcontext.doc.Objects.AddCircle(circle)\n    else:\n        center = rhutil.coerce3dpoint(plane_or_center, True)\n        view = scriptcontext.doc.Views.ActiveView\n        plane = view.ActiveViewport.ConstructionPlane()\n        plane.Origin = center\n        circle = Rhino.Geometry.Circle(plane, radius)\n        rc = scriptcontext.doc.Objects.AddCircle(circle)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add circle to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc\n\n\n\nThat’s the purpose of utility.coerce3dpoint(), right? Converting guid into Point3d object.\n\nIf that is so, than \nAddCircle’s function help file\n, needs an addition:\n\n\n–\n\n*Parameters:\n\nplane_or_center\n\n\nRequired. Plane, Point3d, list of 3 numbers \nor center point’s identifier\n.  The plane on which the circle will lie. The origin of the plane will be the center point of the circle. If a list of three numbers or a Point3d is supplied, the active view plane is used*\n\n\n?",
+  "code_blocks": [
+    {
+      "code": "def AddCircle(plane_or_center, radius):\n    \"\"\"Adds a circle curve to the document\n    Parameters:\n      plane_or_center = plane on which the circle will lie. If a point is\n        passed, this will be the center of the circle on the active\n        construction plane\n      radius = the radius of the circle\n    Returns:\n      id of the new curve object\n    \"\"\"\n    rc = None\n    plane = rhutil.coerceplane(plane_or_center, False)\n    if plane:\n        circle = Rhino.Geometry.Circle(plane, radius)\n        rc = scriptcontext.doc.Objects.AddCircle(circle)\n    else:\n        center = rhutil.coerce3dpoint(plane_or_center, True)\n        view = scriptcontext.doc.Views.ActiveView\n        plane = view.ActiveViewport.ConstructionPlane()\n        plane.Origin = center\n        circle = Rhino.Geometry.Circle(plane, radius)\n        rc = scriptcontext.doc.Objects.AddCircle(circle)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add circle to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1170
+}

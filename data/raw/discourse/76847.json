@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/fastest-way-to-combine-meshes/76847",
+  "topic_id": 76847,
+  "title": "Fastest way to combine meshes",
+  "question": "I have not been able to decipher how to use mesh.Vertices.GetEnumerator in the following code to speed up copying the vertices of one mesh into another mesh.  I use this code to combine several meshes.\n\n\nimport  rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Mesh, Point3f\nfrom scriptcontext import doc \nP3f = Point3f\n\n# Part 1 Works using .Add to add vertices to new_mesh which is used to combine several meshes.\n\n# Define very simple mesh.\nmeshGeo = Mesh()\nmeshGeo.Vertices.Add(P3f(0.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(1.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(1.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(0,1,2)\nmeshGeo.Vertices.Add(P3f(1.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(2.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(1.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(3,4,5)\nvertices = meshGeo.Vertices\nvcount = vertices.Count\nfaces = meshGeo.Faces\n# At start, set offset to 0.  For each following mesh to be combined, set offset to sum of vcount of prior combined meshes.\noffset = 0\n# Define new mesh for combining several meshes (with only 1 combined in this example).\nnew_meshGeo = Mesh()\nnew_vertices = new_meshGeo.Vertices\nnew_faces = new_meshGeo.Faces\nfor i in xrange(vcount): new_vertices.Add(vertices[i])\nf_indices = faces.ToIntArray(True)\nfor i in xrange(faces.Count):\n\tii = 3*i\n\ti1,i2,i3 = f_indices[ii+offset], f_indices[ii+1+offset], f_indices[ii+2+offset]\n\tnew_faces.AddFace(i1,i2,i3)\nprint new_meshGeo.IsValid\ndoc.Objects.AddMesh(new_meshGeo)\n[rs.ViewDisplayMode(view, 'Wireframe') for view in rs.ViewNames()]\n\n\n# Part 2 Fails using .AddVertices with ienumberator obtained from mesh to be added to new_mesh\n\n# Define very simple mesh.\nmeshGeo = Mesh()\nmeshGeo.Vertices.Add(P3f(3.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(4.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(4.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(0,1,2)\nmeshGeo.Vertices.Add(P3f(4.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(5.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(4.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(3,4,5)\nvertices = meshGeo.Vertices\nvcount = vertices.Count\nfaces ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino as R\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\nmesh_guid = rs.GetObject('select mesh to be joined')\nmesh_geo = rs.coercegeometry(mesh_guid)\n\nnew_mesh_guid = rs.GetObject('select mesh to join to')\nnew_mesh_geo = rs.coercegeometry(new_mesh_guid)\n\nnew_mesh_geo.Append(mesh_geo)\n\nsc.doc.Objects.AddMesh(new_mesh_geo)",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "mesh_guids = rs.GetObjects('select meshes to combine')\n\nnew_mesh = R.Geometry.Mesh()\n\nfor mesh_guid in mesh_guids:\n    geo = rs.coercegeometry(mesh_guid)\n    new_mesh.Append(geo)\n    \nsc.doc.Objects.AddMesh(new_mesh)",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\nfrom Rhino.Geometry import Mesh\ndef getGeo(id):\n   obj = doc.Objects.Find(id)\n   return obj.Geometry\n\nnew_meshGeo = Mesh()\nmeshGeos = [getGeo(mesh) for mesh in meshes]\nnew_meshGeo.Append(meshGeos)",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc \nimport Rhino.DocObjects\nfrom Rhino.Geometry import Mesh\nfrom System import Array\nfrom System.Drawing import Color\nfrom time import time\n\ndef getGeo(id):\n\tobj = doc.Objects.Find(id)\n\treturn obj.Geometry\n\n# Combine multiple meshes into one, preserving vertex colors if they are present.\ndef combine_meshes(meshes):\n\ttimea = time()\n\tprint 'Multiple meshes found and will be combined into one mesh for use in the display of maps.'\n\t# Get the geometry of the meshes.\n\tmeshGeos = [getGeo(mesh) for mesh in meshes]\n\t# Check if meshes have vertex colors. The vertex colors will be copied to the combined mesh.\n\ttimeb = time()\n\thas_colors = True\n\t# Make dictionary for translating vertex to color.\n\tp2c = {}\n\t# Check to see if all meshes have a color for each vertex and save them if they exist.\n\tfor meshGeo in meshGeos:\n\t\tcount = meshGeo.VertexColors.Count; vcount = meshGeo.Vertices.Count\n\t\tif count != vcount: has_colors = False; break\n\t\t# Save colors using vertex as pointer to color.\n\t\tvertices = meshGeo.Vertices\n\t\tfor i in xrange(vcount): p2c[vertices[i]] = meshGeo.VertexColors[i]\n\tprint '    Time to check for vertex colors and save them if present = {0:.4f} sec'.format(time() - timeb)\n\t# Combine mesh geometries.\n\ttimeb = time()\n\tnew_meshGeo = Mesh()\n\tnew_meshGeo.Append(meshGeos)\n\tvertices = new_meshGeo.Vertices\n\tvcount = vertices.Count\n\tprint '    Made 1 mesh with {0:,} vertices and {1:,} faces in {2:.4f} sec'.format(vcount, new_meshGeo.Faces.Count, time() - timeb)\n\ttimeb = time()\n\t# Save vertex count before identical vertices are removed.\n\tvb = vcount\n\t# Combine identical vertices.\n\trc = vertices.CombineIdentical(True, True)\n\tif rc: print '    Found and removed {0:,} identical vertices leaving {1:,} vertices and {2:,} faces in {3:.4f} sec'.format(vb - vertices.Count, vertices.Count, new_meshGeo.Faces.Count, time() - timeb)\n\telse: print '    Mesh has no identical vertices found in {0:.4f} sec'.format(time() - timeb)\n\t# Compact mesh.\n\ttimeb = time()\n\tmem_before = 1e-6*new_meshGeo.MemoryEstimate(); new_meshGeo.Compact(); mem_after = 1e-6*new_meshGeo.MemoryEstimate()\n\tvalid = new_meshGeo.IsValid\n\t# Update vertex count.\n\tvcount = vertices.Count\n\tprint '    Time to compact mesh = {0:.4f} sec which saved {1:.2f} MB and resulted in mesh with {2:,} vertices and {3:,} faces and is valid = {4}'.format(time() - timeb, mem_before - mem_after, vcount, new_meshGeo.Faces.Count, valid)\n\t# If the meshes had colored vertices, apply their vertex colors to the combined mesh.\n\tif valid:\n\t\tif has_colors:\n\t\t\ttimeb = time()\n\t\t\tcolors = Array.CreateInstance(Color, vcount)\n\t\t\tfor i in xrange(vcount): colors[i] = p2c[vertices[i]]\n\t\t\tnew_meshGeo.VertexColors.Clear(); new_meshGeo.VertexColors.SetColors(colors)\n\t\t\tprint '    Time to apply vertex colors = {0:.4f} sec'.format(time() - timeb)\n\t\t# Add visible mesh to document.\n\t\tmesh = doc.Objects.AddMesh(new_meshGeo)\n\t\tprint 'Total time to combine meshes = {0:.4f} sec'.format(time() - timea)\n\t\treturn mesh\n\telse:\n\t\tprint 'ERROR: Combined mesh is not valid'; return None",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import  rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Mesh, Point3f\nfrom scriptcontext import doc \nP3f = Point3f\n\n# Part 1 Works using .Add to add vertices to new_mesh which is used to combine several meshes.\n\n# Define very simple mesh.\nmeshGeo = Mesh()\nmeshGeo.Vertices.Add(P3f(0.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(1.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(1.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(0,1,2)\nmeshGeo.Vertices.Add(P3f(1.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(2.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(1.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(3,4,5)\nvertices = meshGeo.Vertices\nvcount = vertices.Count\nfaces = meshGeo.Faces\n# At start, set offset to 0.  For each following mesh to be combined, set offset to sum of vcount of prior combined meshes.\noffset = 0\n# Define new mesh for combining several meshes (with only 1 combined in this example).\nnew_meshGeo = Mesh()\nnew_vertices = new_meshGeo.Vertices\nnew_faces = new_meshGeo.Faces\nfor i in xrange(vcount): new_vertices.Add(vertices[i])\nf_indices = faces.ToIntArray(True)\nfor i in xrange(faces.Count):\n\tii = 3*i\n\ti1,i2,i3 = f_indices[ii+offset], f_indices[ii+1+offset], f_indices[ii+2+offset]\n\tnew_faces.AddFace(i1,i2,i3)\nprint new_meshGeo.IsValid\ndoc.Objects.AddMesh(new_meshGeo)\n[rs.ViewDisplayMode(view, 'Wireframe') for view in rs.ViewNames()]\n\n\n# Part 2 Fails using .AddVertices with ienumberator obtained from mesh to be added to new_mesh\n\n# Define very simple mesh.\nmeshGeo = Mesh()\nmeshGeo.Vertices.Add(P3f(3.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(4.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(4.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(0,1,2)\nmeshGeo.Vertices.Add(P3f(4.0,1.0,0.0))\nmeshGeo.Vertices.Add(P3f(5.0,0.0,0.0))\nmeshGeo.Vertices.Add(P3f(4.0,-1.0,0.0))\nmeshGeo.Faces.AddFace(3,4,5)\nvertices = meshGeo.Vertices\nvcount = vertices.Count\nfaces = meshGeo.Faces\nnew_meshGeo = Mesh()\nnew_vertices = new_meshGeo.Vertices\nnew_faces = new_meshGeo.Faces\n# Get Ienumerator for vertices.\nienumerator = vertices.GetEnumerator()\nprint ienumerator\nnew_vertices.AddVertices(ienumerator) # This line fails with message: expected IEnumerable[Point3f], got <GetEnumerator>d__72\nf_indices = faces.ToIntArray(True)\nfor i in xrange(faces.Count):\n\tii = 3*i\n\ti1,i2,i3 = f_indices[ii+offset], f_indices[ii+1+offset], f_indices[ii+2+offset]\n\tnew_faces.AddFace(i1,i2,i3)\nprint new_meshGeo.IsValid\ndoc.Objects.AddMesh(new_meshGeo)\n[rs.ViewDisplayMode(view, 'Wireframe') for view in rs.ViewNames()]",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 1072
+}

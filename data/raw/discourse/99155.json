@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/inputs-and-outputs-of-component/99155",
+  "topic_id": 99155,
+  "title": "Inputs and outputs of component",
+  "question": "Hello\n\nHow we find the count of inputs and outputs of component\n\n\n\n\nimage\n1239×320 30.3 KB",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper as gh\nobjects = ghenv.Component.OnPingDocument().Objects\nname = []\ninput = []\noutput = []\n\nfor obj in objects:\n    name.append(obj.Name)\n    if gh.Kernel.IGH_Component in list(type(obj).__bases__):\n        input.append(obj.Params.Input.Count)\n        output.append(obj.Params.Output.Count)\n    else:\n        input.append('-')\n        output.append('-')",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Grasshopper as gh\nimport GhPython\nimport rhinoscriptsyntax as rs\n\nghObjects = ghenv.Component.OnPingDocument().Objects\n\npoints = []\nbndsPt = []\nbndsH = []\nbndsW = []\nnames = []\n\nname = []\ninput = []\noutput = []\n\nfor obj in ghObjects:\n    pivotX = obj.Attributes.Pivot.X\n    pivotY = obj.Attributes.Pivot.Y\n    pvt = rs.CreatePoint(pivotX,-pivotY)\n    points.append(pvt)\n    \n    bndX = obj.Attributes.Bounds.X\n    bndY = obj.Attributes.Bounds.Y\n    bndPt = rs.CreatePoint(bndX,-bndY)\n    bndsPt.append(bndPt)\n    \n    bndW = obj.Attributes.Bounds.Width\n    bndH = obj.Attributes.Bounds.Height\n    bndsW.append(bndW)\n    bndsH.append(-bndH)\n    \n    name = obj.NickName\n    names.append(name)\n    \n    if gh.Kernel.IGH_Component in list(type(obj).__bases__):\n        input.append(obj.Params.Input.Count)\n        output.append(obj.Params.Output.Count)\n    elif gh.Kernel.IGH_Param in list(type(obj).__bases__):\n        input.append(0)\n        output.append(1)\n    else:\n        input.append(0)\n        output.append(0)\n    \nPivots = points\nCorners = bndsPt\nX = bndsW\nY = bndsH\nnames = names",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper as gh\nobjects = ghenv.Component.OnPingDocument().Objects;\nnames = []\ngrips = []\nbounds = []\nplane = rg.Plane.WorldXY\nfor obj in objects:\n    names.append(obj.Name)\n    bound = obj.Attributes.Bounds\n    plane.Origin = rg.Point3d(bound.X, -bound.Y, 0)\n    bounds.append(rg.Rectangle3d(plane, rg.Interval(0, bound.Width), rg.Interval(0, -bound.Height)))\n    if gh.Kernel.IGH_Component in list(type(obj).__bases__):\n        for input in obj.Params.Input:\n            grip = input.Attributes.Pivot\n            grips.append(rg.Circle(rg.Point3d(bound.X, -grip.Y, 0),2.0))\n        for output in obj.Params.Output:\n            grip = output.Attributes.Pivot\n            grips.append(rg.Circle(rg.Point3d(bound.X+bound.Width, -grip.Y, 0),2.0))\n    else:\n        if obj.Attributes.HasInputGrip:\n            grip = obj.Attributes.InputGrip\n            grips.append(rg.Circle(rg.Point3d(grip.X, -grip.Y, 0),2.0))\n        if obj.Attributes.HasOutputGrip:\n            grip = obj.Attributes.OutputGrip\n            grips.append(rg.Circle(rg.Point3d(grip.X, -grip.Y, 0),2.0))",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 27,
+  "views": 3089
+}

@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-replicate-select-object-layer-command/149316",
+  "topic_id": 149316,
+  "title": "How to replicate \"Select Object Layer\" command?",
+  "question": "I am trying to highlight the layer of the currently selected object in the layers dialog. Is there an API method for that?\n\n\nI’m also curious if there’s any API to interact with Rhino’s menus (e.g. “Properties”, “Layers”, “Named Views”, etc.) in general.\n\n\nimage\n611×598 64 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelectObjectLayer():\n    \n    obj_id = rs.GetObject(\"Select Object\", False, False)\n    if not obj_id: return\n    \n    rh_obj = rs.coercerhinoobject(obj_id, True, True)\n    layer_index = rh_obj.Attributes.LayerIndex\n    \n    scriptcontext.doc.Layers.Select([layer_index], True)\n    \nSelectObjectLayer()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef SelectObjectParentLayer():\n    \n    obj_id = rs.GetObject(\"Select Object\", False, False)\n    if not obj_id: return\n    \n    rh_obj = rs.coercerhinoobject(obj_id, True, True)\n\n    layer = scriptcontext.doc.Layers[rh_obj.Attributes.LayerIndex]\n    \n    parent_layer_id = layer.ParentLayerId\n    if parent_layer_id != System.Guid.Empty:\n        parent_layer = scriptcontext.doc.Layers.FindId(parent_layer_id)\n        scriptcontext.doc.Layers.Select([parent_layer.LayerIndex], True)\n    else:\n        print \"{} has no parent layer\".format(layer.FullPath)\n    \nSelectObjectParentLayer()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport re\n\ndef DoSomething():\n    \n    expression = re.compile(\"key.plan\")\n    indices = set()\n    \n    for layer in scriptcontext.doc.Layers:\n        if expression.findall(layer.Name):\n            indices.add(layer.LayerIndex)\n    \n    if indices:\n        scriptcontext.doc.Layers.Select(indices, True)\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelectObjectLayers():\n    \n    obj_ids = rs.GetObjects(\"Select Objects\", 0, False, True, True)\n    if not obj_ids: return\n    \n    rh_objs = [rs.coercerhinoobject(obj_id, True, True) for obj_id in obj_ids]\n    indices = [rh_obj.Attributes.LayerIndex for rh_obj in rh_objs]\n    \n    scriptcontext.doc.Layers.Select(indices, True)\n    \nSelectObjectLayers()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 18,
+  "views": 1241
+}

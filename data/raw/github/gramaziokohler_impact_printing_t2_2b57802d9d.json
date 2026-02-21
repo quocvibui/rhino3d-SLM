@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/gramaziokohler/impact_printing_t2/blob/bb6fd1dcfd0612314cfe67c12fc3543531e7b0aa/src/ur_fabrication.py",
+  "repo": "gramaziokohler/impact_printing_t2",
+  "repo_stars": 4,
+  "repo_description": null,
+  "license": "NOASSERTION",
+  "filepath": "src/ur_fabrication.py",
+  "instruction": "Ur fabrication",
+  "code": "from utils import *\nfrom ur_comm import *\nfrom ur_script import *\nfrom math import radians\nimport Rhino.Geometry as rg\n\nROBOT_IP = '192.168.10.20'\n\nclass UR(object):\n\n    def __init__(self, way_planes, toggles, wait_times, ip = ROBOT_IP):\n        \"\"\"\n        Class for communicating with robot\n        Args:\n            way_planes  : Flattened list of planes in rhino space\n            toggles     : Flattended list of toggles for extruder\n            wait_times  : Flattened list of wait times for each point\n        \"\"\"\n        self.way_planes = way_planes\n        self.toggles = toggles\n        self.wait_times = wait_times\n        self.robot_base = None\n        self.robot_frames = []\n        self.script = \"\"\n\n    def tcp(self,x,y,z,rx,ry,rz):\n        \"\"\"\n        This function set the TCP for robot\n        x,y,z       : TCP dimension, float\n        rx,ry,rz    : TCP rotation, float\n        \"\"\"\n        self.script += set_tcp_by_angles(float(x),float(y),float(z),radians(rx),radians(ry),radians(rz))\n\n    def set_base_plane(self, origin, x_axis, y_axis):\n        \"\"\"\n        This function creates a base plane from measured points for workobject\n        origin  : point on base plane\n        x_axis  : vector for x axis\n        y_axis  : vector for y axis\n        \"\"\"\n        self.robot_base = rg.Plane(origin, x_axis - origin, y_axis - origin)\n    \n    def rhino_planes_to_robot_planes(self):\n        rhino_planes = self.way_planes\n        for pl in rhino_planes:\n            pl = rg.Plane(rg.Point3d(pl.Origin[0],pl.Origin[1],pl.Origin[2]),rg.Vector3d(0,-1,0),rg.Vector3d(1,0,0))\n            robot_plane = rhino_to_robotbase(pl,self.robot_base)\n            self.robot_frames.append(robot_plane)\n\n    def lift_planes_z(self, lift_height):\n        for plane in self.robot_frames:\n            plane.Translate(rg.Vector3d(0,0,lift_height))\n\n    def prepare_script(self, lift_height):\n        self.rhino_planes_to_robot_planes()\n        self.lift_planes_z(lift_height)\n        for i,(pl, toggle, wait) in enumerate(zip(self.robot_frames, self.toggles, self.wait_times)):\n            self.script += move_l(pl,MAX_ACCEL, MAX_VELOCITY)\n            self.script += sleep(0.5)\n            if toggle:\n                self.script += set_digital_out(0,True)\n                self.script += sleep(wait)\n                self.script += set_digital_out(0,False)\n            if i%5 == 0:\n                self.script += textmsg('Pt : %d' %i)\n    \n    \n    def trigger(self):\n        self.script = concatenate_script(self.script)\n        send_script(self.script, ROBOT_IP)\n\n        \n\n\n            \n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/labryga/rhino/blob/041fe843df221b8ab5c6feec92d4adbd6de4be9a/01%20Basics/7%20nurbs1.py",
+  "repo": "labryga/rhino",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "01 Basics/7 nurbs1.py",
+  "instruction": "7 nurbs1",
+  "code": "def blendcorners():\n    polyline_id = rs.GetObject(\"Polyline to blend\", 4, True, True)\n    if not polyline_id: return\n    vertices = rs.PolylineVertices(polyline_id)\n    if not vertices: return\n    radius = rs.GetReal(\"Blend radius\", 1.0, 0.0)\n    if radius is None: return\n\n    between = lambda a,b: (a+b)/2.0\n    newverts = []\n    for i in range(len(vertices)-1):\n        a = vertices[i]\n        b = vertices[i+1]\n        segmentlength = rs.Distance(a, b)\n        vec_segment = rs.PointSubtract(b, a)\n        vec_segment = rs.VectorUnitize(vec_segment)\n\n        if radius<(0.5*segmentlength):\n            vec_segment = rs.VectorScale(vec_segment, radius)\n        else:\n            vec_segment = rs.VectorScale(vec_segment, 0.5*segment_length)\n\n        w1 = rs.VectorAdd(a, vec_segment)\n        w2 = rs.VectorSubtract(b, vec_segment)\n        newverts.append(a)\n        newverts.append(between(a,w1))\n        newverts.append(w1)\n        newverts.append(between(w1,w2))\n        newverts.append(w2)\n        newverts.append(between(w2,b))\n    newverts.append(vertices[len(vertices)-1])\n\n    rs.AddCurve(newverts, 5)\n\n    rs.DeleteObject(polyline_id)\n",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

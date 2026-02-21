@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Doerge/rhino-developer-samples/blob/beb34e5f5daf7f8da651d732aadf165bdf32a74d/rhinocommon/snippets/from_rhinocommon/py/ex_curvesurfaceintersect.py",
+  "repo": "Doerge/rhino-developer-samples",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_curvesurfaceintersect.py",
+  "instruction": "Ex curvesurfaceintersect",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import *\nimport Rhino\nimport System.Collections.Generic as scg\nimport System as s\n\ndef RunCommand():\n  srfid = rs.GetObject(\"select surface\", rs.filter.surface | rs.filter.polysurface)\n  if not srfid: return\n \n  crvid = rs.GetObject(\"select curve\", rs.filter.curve)\n  if not crvid: return\n\n  result = rs.CurveBrepIntersect(crvid, srfid)\n  if result == None:\n    print \"no intersection\"\n    return\n  \n  curves, points = result\n  for curve in curves:\n    doc.Objects.AddCurve(rs.coercecurve(curve))\n  for point in points:\n    rs.AddPoint(point)\n\n  doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n  RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

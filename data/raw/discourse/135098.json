@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/svg-export-woes/135098",
+  "topic_id": 135098,
+  "title": "SVG export woes",
+  "question": "Issues:\n\n\n\n\nResulting SVG has geometry cut off on the sides.\n\n\nIt breaks Model space display where to restore it I have to switch my view to any Paper space tab and back to Model space. Or restart Rhino.\n\n\n\n\nInput:\n\n\n\n\nimage\n1328×853 7.22 KB\n\n\n\n\nSVG:\n\n\n\n\nimage\n1191×981 16.2 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nobjs = rs.GetObjects(\"Pick something\")\nrs.SelectObjects(objs)\nsc.doc.Views.ActiveView.ActiveViewport.ZoomExtentsSelected()\nsc.doc.ExportSelected(rs.WorkingFolder() + \"/test.svg\")\n\n\n\nSVG test.3dm\n (130.0 KB)\n\n\nRhino 7 SR14 2021-12-14 (Rhino 7, 7.14.21348.13001, Git hash:master @ 5ab502b613f84488d00228948505c6f28ebfe598)\n\nLicense type: Commercial, build 2021-12-14\n\nLicense details: LAN Zoo Network Node\n\n\nWindows 10.0.19042 SR0.0 or greater (Physical RAM: 64Gb)\n\n\nComputer platform: LAPTOP  - Plugged in [100% battery remaining]\n\n\nNon-hybrid graphics configuration.\n\nPrimary display and OpenGL: NVIDIA Quadro RTX 3000 (NVidia) Memory: 6GB, Driver date: 4-5-2021 (M-D-Y). OpenGL Ver: 4.6.0 NVIDIA 462.30\n\n> Integrated accelerated graphics device with 4 adapter port(s)\n\n- Windows Main Display is laptop’s integrated screen or built-in port\n\n\nSecondary graphics devices.\n\nDisplayLink USB Device (DisplayLink) Memory: 0MB, Driver date: 4-16-2020 (M-D-Y).\n\n> External USB display device with 3 adapter port(s)\n\n- Secondary monitor attached to adapter port \n#\n0\n\nDisplayLink USB Device (DisplayLink) Memory: 0MB, Driver date: 4-16-2020 (M-D-Y).\n\n> External USB display device with 0 adapter port(s)\n\n- There are no monitors attached to this device. Laptop lid is probably closed\n\nDisplayLink USB Device (DisplayLink) Memory: 0MB, Driver date: 4-16-2020 (M-D-Y).\n\n> External USB display device with 0 adapter port(s)\n\n- There are no monitors attached to this device. Laptop lid is probably closed\n\nDisplayLink USB Device (DisplayLink) Memory: 0MB, Driver date: 4-16-2020 (M-D-Y).\n\n> External USB display device with 0 adapter port(s)\n\n- There are no monitors attac...",
+  "code_blocks": [
+    {
+      "code": "svg_fix = Rhino.DocObjects.ObjRef(sc.doc.Objects.AddPoint(Rhino.Geometry.Point3d(0, 0, 0))).Object()\n    svg_fix.Select(True)\n    sc.doc.ExportSelected(rel_path + \"fix.svg\")\n    os.remove(rel_path + \"fix.svg\")\n    sc.doc.Objects.Delete(svg_fix, True)",
+      "language": "unknown",
+      "author": "Asterisk",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nobjs = rs.GetObjects(\"Pick something\")\nrs.SelectObjects(objs)\nsc.doc.Views.ActiveView.ActiveViewport.ZoomExtentsSelected()\nsc.doc.ExportSelected(rs.WorkingFolder() + \"/test.svg\")",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 1101
+}

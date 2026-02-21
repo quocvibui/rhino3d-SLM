@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/fast-way-to-split-filleted-surface-into-faces/204238",
+  "topic_id": 204238,
+  "title": "Fast Way to Split Filleted Surface into Faces?",
+  "question": "Hello, I’m back with a performance-related question.\n\n\nI’m currently working on optimizing a workflow that goes from a filleted curve to a filleted solid Brep.\n\n\nMy initial approach was to create a single surface and then offset it using \nBrep.CreateFromOffsetFace\n. This was the fastest method for generating the solid. However, I ran into an issue: I need all individual faces, including the filleted ones. When I use \nBrep.Faces.SplitFacesAtTangents()\n, I do get the desired face separation, but this operation takes just as long as offsetting the entire Brep.\n\n\nSo my question is:\n\n\nIs there a more performant way to split a filleted surface into individual faces?\n\n\nFilletedSurfaceToOffsetBrep.gh\n (18.6 KB)\n\n\nBase Surface:\n\n\nimage\n1242×701 80.8 KB\n\n\nResult:\n\n\nimage\n1254×697 89.7 KB\n\n\nimage\n1119×744 98 KB\n\n\nThanks already in advance!",
+  "code_blocks": [
+    {
+      "code": "public static Brep CreateExtrudedProfileFromCurve(Curve curve, double thickness, Plane referencePlane, double length)\n    {\n        var toll = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n        var secondFilledCurves = curve.Offset(referencePlane, thickness, toll,\n            CurveOffsetCornerStyle.None)[0];\n\n        if (secondFilledCurves == null || !secondFilledCurves.IsValid)\n            throw new InvalidOperationException(\"Failed to create second filled curves.\");\n\n        var fistStartPoint = curve.PointAtStart;\n        var seconStartPoint = secondFilledCurves.PointAtStart;\n\n        var startLine = new Line(fistStartPoint, seconStartPoint).ToNurbsCurve();\n\n        var fistEndPoint = curve.PointAtEnd;\n        var secondEndPoint = secondFilledCurves.PointAtEnd;\n\n        var endLine = new Line(fistEndPoint, secondEndPoint).ToNurbsCurve();\n\n        var allCurves = new List<Curve> { curve, secondFilledCurves, startLine, endLine };\n        var joinedCurves = Curve.JoinCurves(allCurves,toll)[0];\n        \n        if (joinedCurves == null || joinedCurves.IsClosed == false)\n            throw new InvalidOperationException(\"Failed to join filleted curves.\");\n        \n        var extrusion = Extrusion.Create(joinedCurves, length, true).ToBrep();\n\n        return extrusion ?? throw new InvalidOperationException(\"Failed to create extrusion from joined curves.\");\n    }",
+      "language": "csharp",
+      "author": "felix.brunold",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "nurbs"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 5,
+  "views": 90
+}

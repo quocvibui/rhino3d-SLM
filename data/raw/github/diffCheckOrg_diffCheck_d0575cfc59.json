@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_tester/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_tester/code.py",
+  "instruction": null,
+  "code": "#! python3\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\n\nimport diffCheck\nimport diffCheck.df_cvt_bindings\nimport diffCheck.df_util\nfrom diffCheck import diffcheck_bindings\n\nclass DFTester(component):\n    def RunScript(self):\n        # version\n        ghenv.Component.Message = f\"diffCheck v: {diffCheck.__version__}\"  # noqa: F821\n\n        # bindings\n        is_binding_imported = diffcheck_bindings.dfb_test.test()\n        if not is_binding_imported:\n            ghenv.Component.AddRuntimeMessage(RML.Warning, \"Bindings not imported.\")  # noqa: F821\n        else:\n            ghenv.Component.AddRuntimeMessage(RML.Remark, \"Bindings imported.\")  # noqa: F821\n        print(f\"diffCheck test: {diffCheck.df_cvt_bindings.test_bindings()}\")\n\n        # workspace unit\n        scalef = diffCheck.df_util.get_doc_2_meters_unitf()\n        if scalef != 1.0:\n            ghenv.Component.AddRuntimeMessage(RML.Warning, \"Workspace unit is not in meters.\")  # noqa: F821\n        else:\n            ghenv.Component.AddRuntimeMessage(RML.Remark, \"Workspace unit is in meters.\")  # noqa: F821\n\n        return is_binding_imported\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-input-components-from-within-ghpython-component/154667",
+  "topic_id": 154667,
+  "title": "Create input components from within ghpython component",
+  "question": "Hello!\n\n\nI would like my custom ghpython component to create its own input components (e.g. a toggle switch) but am struggling with hooking into the correct events in the component’s life-cycle. Ideally, the component would create the input component when it is being added to the document (and delete it when it’s being removed).\n\n\nWhen creating a C# component which inherits from \nGH_Component\n overriding \nAddedToDocument\n seems to be the way to go, but I was unable to find the equivalent method of \nExecutingComponent\n available in python.\n\n\nBelow is an example component, and I’m looking for the right place in which to call \nadd_toggle_input\n.\n\n\nfrom ghpythonlib.componentbase import executingcomponent\n\nclass MyComponent(executingcomponent):\n\n    def add_toggle_input(self):\n        toggle = Grasshopper.Kernel.Special.GH_BooleanToggle()\n        toggle.CreateAttributes()\n        toggle.Attributes.Pivot = System.Drawing.PointF(\n            self.Attributes.InputGrip.X - toggle.Attributes.Bounds.Width - 20,\n            self.Attributes.InputGrip.Y - toggle.Attributes.Bounds.Height / 2\n            )\n\n        Grasshopper.Instances.ActiveCanvas.Document.AddObject(toggle, False)\n        self.Params.Input[0].AddSource(toggle)\n\n\n\nThanks!\n\nChen",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent\n\nclass MyComponent(executingcomponent):\n\n    def add_toggle_input(self):\n        toggle = Grasshopper.Kernel.Special.GH_BooleanToggle()\n        toggle.CreateAttributes()\n        toggle.Attributes.Pivot = System.Drawing.PointF(\n            self.Attributes.InputGrip.X - toggle.Attributes.Bounds.Width - 20,\n            self.Attributes.InputGrip.Y - toggle.Attributes.Bounds.Height / 2\n            )\n\n        Grasshopper.Instances.ActiveCanvas.Document.AddObject(toggle, False)\n        self.Params.Input[0].AddSource(toggle)",
+      "language": "python",
+      "author": "Chen_Kasirer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 592
+}

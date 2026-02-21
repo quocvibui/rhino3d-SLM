@@ -1,0 +1,78 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-combine-data-of-branches/77428",
+  "topic_id": 77428,
+  "title": "Python combine data of branches",
+  "question": "I try to python branches to another kind of list, what am I doing wrong?\n\nThanks in advance for your response.\n\n\n20190106 problem python combine branch 00.gh\n (5.9 KB)\n\n\n\n\n20190106%20problem%20python%20combine%20branch%2000\n1387×720 118 KB",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib import treehelpers as th\n\nnewlist = []\nnewlist.append(th.tree_to_list(x, 0))\nprint newlist[0]\na = newlist[0]",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import ghpythonlib.treehelpers as th\n\n#print oneandtwo[0][0] # which will be 4\n\nnewList = th.tree_to_list(oneandtwo)\nprint newList[0][0]\nprint newList[1][0]",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ninters = []\nfor reg in regions:\n    # Don't call your varibale 'int'!!!\n    # It's reserved for an internal method to convert floats to integers!\n    rint = rs.CurveBooleanIntersection(r, reg) \n    if len(rint) > 0: # check for empty intersection lists\n        inters.append(rint[0]) # unpack the intersection curve ids before appending\n        #inters.extend(rint) # OR use extend instead of append",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n\ndef list_to_tree(input, none_and_holes=True, source=[0]):\n    \"\"\"Transforms nestings of lists or tuples to a Grasshopper DataTree\"\"\"\n    # written by Giulio Piacentino, giulio@mcneel.com\n    from Grasshopper import DataTree as Tree\n    from Grasshopper.Kernel.Data import GH_Path as Path\n    from System import Array\n    def proc(input,tree,track):\n        path = Path(Array[int](track))\n        if len(input) == 0 and none_and_holes: tree.EnsurePath(path); return\n        for i,item in enumerate(input):\n            if hasattr(item, '__iter__'): #if list or tuple\n                track.append(i); proc(item,tree,track); track.pop()\n            else:\n                if none_and_holes: tree.Insert(item,path,i)\n                elif item is not None: tree.Add(item,path)\n    if input is not None: t=Tree[object]();proc(input,t,source[:]);return t\n\n\ncrvs_inters = [] # nested list of intersection curves per curve\n\nfor i in range(len(Regions)):\n    crv_inters = [] # list of intersection curves for the curve Regions[i]\n    for j in range(i+1, len(Regions)): # prevent double checking and duplicate intersections\n        crvs_bint = rg.Curve.CreateBooleanIntersection(Regions[i], Regions[j])\n        if len(crvs_bint) > 0: # if successful intersection\n            crv_inters.extend(crvs_bint)\n    if len(crv_inters) > 0: # curve Regions[i] has intersections with other curves\n        crvs_inters.append(crv_inters)\n\n# Outputs\nIntersections = list_to_tree(crvs_inters)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nr=regcrv\ndiffer=[]\nfor c in differsregcrvs:\n    new=rs.CurveBooleanDifference(r,c)\n    r=new\ndiffer = (r)",
+      "language": "python",
+      "author": "ForestOwl",
+      "post_number": 28,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nr=regcrv\ndiffer=[]\nfor c in differsregcrvs:\n    new=rs.CurveBooleanDifference(r,c)\n    r=new\ndiffer = (r)",
+      "language": "python",
+      "author": "ForestOwl",
+      "post_number": 34,
+      "is_solution": false
+    },
+    {
+      "code": "import inspect\nimport rhinoscriptsyntax as rs\n\nprint inspect.getsource(rs.CurveBooleanDifference)",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 35,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Calculates the difference between two closed, planar curves and\n    adds the results to the document. Note, curves must be coplanar.\n    Parameters:\n      curve_id_0 = identifier of the first curve object.\n      curve_id_1 = identifier of the second curve object.\n    Returns:\n      The identifiers of the new objects if successful, None on error.\n    \"\"\"\n    curve0 = rhutil.coercecurve(curve_id_0, -1, True)\n    curve1 = rhutil.coercecurve(curve_id_1, -1, True)\n    out_curves = Rhino.Geometry.Curve.CreateBooleanDifference(curve0, curve1)\n    curves = []\n    if out_curves:\n        for curve in out_curves:\n            if curve and curve.IsValid:\n                rc = scriptcontext.doc.Objects.AddCurve(curve)\n                curve.Dispose()\n                if rc==System.Guid.Empty: raise Exception(\"unable to add curve to document\")\n                curves.append(rc)\n    scriptcontext.doc.Views.Redraw()\n    return curves",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 35,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 38,
+  "views": 4868
+}

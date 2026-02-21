@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-end-points-of-line/97100",
+  "topic_id": 97100,
+  "title": "Get end points of line",
+  "question": "I know I can use GetObjects to get all the curves in a selection but want to drill down further.  I would like to determine if the curve is a line and get its end point coordinates.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\ndef is_rectangle(crv):\n    \n    rc, plane = crv.TryGetPlane()\n    if not rc:\n        return (False, \"nonplanar\")\n    \n    if not crv.IsClosed:\n        return (False, \"not closed\")\n    \n    try:\n        pline = crv.ToPolyline()\n    except:\n        return (False, \"not a polyline\")\n    \n    if pline.Count != 5:\n        return (False, \"not quadrilateral\")\n    \n    segments = pline.GetSegments()\n    angles = []\n    \n    for i in xrange(pline.SegmentCount):\n        v0 = segments[i].UnitTangent\n        \n        if i < pline.SegmentCount - 1:\n            v1 = segments[i+1].UnitTangent\n        else:\n            v1 = segments[0].UnitTangent\n\n        delta = rg.Vector3d.VectorAngle(v0, v1, plane)\n        reflex = (2 * math.pi) - abs(delta)\n        \n        angles.append(min([delta, reflex]))\n        \n    if len(list(set(angles))) > 1:\n        return (False, \"not equiangular\")\n    \n    return (True, \"rectangular\")\n\n\nresults = []\nmessages = []\n\nfor i in xrange(len(C)):\n    test, msg = is_rectangle(C[i])\n    print \"Curve {0} is {1}.\".format(i, msg)\n    results.append(test)\n    messages.append(msg)\n    \n# Outputs\nR = results",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\n\ndef curveToRectangle(curve):\n    \n    \"\"\" Cast curve to rectangle if possible \"\"\"\n    \n    # Cast curve to polyline and proceed if possibly\n    test,crvPl = curve.TryGetPolyline()\n    if test:\n        \n        # Cast curve polyline to rectangle and check it is valid\n        rect = rc.Geometry.Rectangle3d.CreateFromPolyline(crvPl)\n        if rect.IsValid:\n            \n            # Cast rectangle to polyline and check vertex count\n            rectPl = rect.ToPolyline()\n            if crvPl.Count == rectPl.Count:\n                \n                # Compute polylines vertex pair distances and set flag\n                distanceOkay = True\n                for crvPt,rectPt in zip(crvPl,rectPl):\n                    d = crvPt.DistanceTo(rectPt)\n                    if d > rc.RhinoMath.SqrtEpsilon:\n                        distanceOkay = False\n                        break\n                        \n                # Return rectangle\n                if distanceOkay:\n                    return rect\n\nRectangle = curveToRectangle(Curve)",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nACTIVE_DOC = Rhino.RhinoDoc.ActiveDoc # get the active Rhino document\n\ncurves = ACTIVE_DOC.Objects.FindByObjectType(Rhino.DocObjects.ObjectType.Curve)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "polyline = rs.ConvertCurveToPolyline(obj)\nif polyline:\nrs.SelectObject(polyline)\npoints = rs.PolylineVertices(polyline)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"\nSelects \"rectangle\" closed polylines (including squares).\nTest for \"rectangularity\":\n- planar, closed\n- opposite sides equal length within model tolerance\n- both diagonals equal length within model tolerance\n\"\"\"\n\nimport rhinoscriptsyntax as rs\n\ndef RectangleTestRS(crvID,tol):\n    if rs.IsCurvePlanar(crvID,tol) and rs.IsCurveClosed(crvID):\n        #covers polylines and degree 1 curves\n        if rs.CurveDegree(crvID)==1:\n            verts=rs.CurvePoints(crvID)\n            if len(verts)==5:\n                s1=verts[0].DistanceTo(verts[1])\n                s2=verts[1].DistanceTo(verts[2])\n                s3=verts[2].DistanceTo(verts[3])\n                s4=verts[3].DistanceTo(verts[0])\n                d1=verts[0].DistanceTo(verts[2])\n                d2=verts[1].DistanceTo(verts[3])\n                #check opposite side lengths to see if equal within tolerance\n                #plus the two diagonals also need to be the same length\n                if abs(s1-s3)<tol and abs(s2-s4)<tol and abs(d1-d2)<tol:\n                    #all conditions met if you get here\n                    return True\n    return False\n\nentity=\"rectangle\"\nerr_msg=\"No {} objects added to selection\".format(entity+\"s\") \nobjs=rs.ObjectsByType(4,state=1)\nif objs:\n    tol=rs.UnitAbsoluteTolerance()\n    select=[obj for obj in objs if RectangleTestRS(obj,tol)]\n    if select:\n        rs.EnableRedraw(False)\n        rs.SelectObjects(select)\n        if len(select)>1: s=\"s\"\n        else: s=\"\"\n        print \"{} {}{} added to selection\".format(len(select),entity,s)\n    else: print err_msg\nelse: print err_msg",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 20,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 31,
+  "views": 7107
+}

@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-sorted-by-x-and-after-by-y/134968",
+  "topic_id": 134968,
+  "title": "Python Sorted by X and after by Y",
+  "question": "Hello,\n\nI don’t understand the sort method in python, and i need today to sort geometry with the X value and the Y value.. for example i select circles, and i need that python sort them like this:\n\n\nimage\n802×668 12.5 KB\n\ni wrote this:\n\n\nsorted_circles=sorted([(rs.BoundingBox(circle)[0][0],circle) for circle in circles])\n\n\nbut it’s only on X value…\n\n\nI don’t find how i have to think about it… \n\n\nthank you!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ntolerance = scriptcontext.doc.ModelAbsoluteTolerance\n\ndef circle_filter(rhino_object, geometry, component_index):\n    rc, circle = geometry.TryGetCircle(tolerance)\n    return rc\n\ndef DoSomething():\n    \n    msg = \"Select circles to sort\"\n    obj_ids = rs.GetObjects(msg, 4, True, False, False, None, 2, 0, circle_filter)\n    if not obj_ids: return\n    \n    rh_objs = [rs.coercerhinoobject(obj_id, True, True) for obj_id in obj_ids]\n    rh_objs.sort(key=lambda c: (c.Geometry.Arc.Center.Y, c.Geometry.Arc.Center.X))\n    \n    for i, rh_obj in enumerate(rh_objs):\n        rs.AddTextDot(i, rh_obj.Geometry.Arc.Center)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    msg = \"Select cures to sort\"\n    obj_ids = rs.GetObjects(msg, 4, True, False, False, None, 2)\n    if not obj_ids: return\n    \n    rh_objs = [rs.coercerhinoobject(obj_id, True, True) for obj_id in obj_ids]\n    \n    def SortFunction(rh_obj):\n        bbox = rh_obj.Geometry.GetBoundingBox(True)\n        return (-bbox.Center.Y, bbox.Center.X)\n    \n    rh_objs.sort(key=SortFunction)\n    \n    for i, rh_obj in enumerate(rh_objs):\n        bbox = rh_obj.Geometry.GetBoundingBox(True)\n        rs.AddTextDot(i, bbox.Center)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\n\ndef DoSomething():\n    \n    msg = \"Select cures to sort\"\n    obj_ids = rs.GetObjects(msg, 4096, True, False, False, None, 2)\n    if not obj_ids: return\n    \n    rh_objs = [rs.coercerhinoobject(obj_id, True, True) for obj_id in obj_ids]\n    \n    def SortFunction(rh_obj):\n        bbox = rh_obj.Geometry.GetBoundingBox(True)\n        return (-bbox.Center.Y, bbox.Center.X)\n    \n    rh_objs.sort(key=SortFunction)\n    \n    for i, rh_obj in enumerate(rh_objs):\n        bbox = rh_obj.Geometry.GetBoundingBox(True)\n        rs.AddTextDot(i, bbox.Center)\n        \n        rs.SelectObject(rh_objs) #Yeah, sorta like that#\nDoSomething()",
+      "language": "python",
+      "author": "leex",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "for i, rh_obj in enumerate(rh_objs):\n        bbox = rh_obj.Geometry.GetBoundingBox(True)\n        rs.AddTextDot(i, bbox.Center)\n        rs.SelectObject(rh_obj)\n        rs.Sleep(500)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1536
+}

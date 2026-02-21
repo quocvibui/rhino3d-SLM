@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/AntonelloDN/ShrimpGIS/blob/cb74a8e1be14c854c7d0e88d4557f77f4c507a18/src/ShrimpGIS%20Field.py",
+  "repo": "AntonelloDN/ShrimpGIS",
+  "repo_stars": 18,
+  "repo_description": "A basic plugin for Grasshopper to read and write shapefile and geojson (GPL)",
+  "license": "GPL-3.0",
+  "filepath": "src/ShrimpGIS Field.py",
+  "instruction": "Construct a ShrimpGIS Field.\n-\nTry to export data from other plugin, such as Ladybug and Gismo!\n    Args:\n        _type_: Type of key to write. Default value is 'C' (character).\n        -\n        0 =...",
+  "code": "# ShrimpGIS: A basic plugin to read and write shapefile (GPL).\n# This file is part of ShrimpGIS.\n#\n# Copyright (c) 2020, Antonello Di Nunzio <antonellodinunzio@gmail.com>.\n# You should have received a copy of the GNU General Public License\n# along with ShrimpGIS; If not, see <http://www.gnu.org/licenses/>.\n# \n# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>\n\n\"\"\"\nConstruct a ShrimpGIS Field.\n-\nTry to export data from other plugin, such as Ladybug and Gismo!\n    Args:\n        _type_: Type of key to write. Default value is 'C' (character).\n        -\n        0 = Characters, text.\n        1 = Numbers, with or without decimals.\n        2 = Floats (same as \"N\").\n        3 = Logical, for boolean values. Required input 0 or 1.\n        4 = Dates. Required input format YYYYMMDD.\n        5 = Memo, has no meaning within a GIS and is part of the xbase spec instead.\n        key_: Name of column. Default value is 'MyField'.\n        length_: Length of key. Default is 40.\n        decimal_: Number of decimal places found in number key.\n        _values: Records (rows) to export to shapefile.\n    \n    Returns:\n        read_me: Message for users.\n        field: Column with rows to write within shp file.\n\"\"\"\n\nghenv.Component.Name = \"ShrimpGIS Field\"\nghenv.Component.NickName = \"shrimp_field\"\nghenv.Component.Category = \"ShrimpGIS\"\nghenv.Component.SubCategory = \"0 || Settings\"\ntry: ghenv.Component.AdditionalHelpFromDocStrings = \"1\"\nexcept: pass\n\nimport scriptcontext as sc\nimport os\nimport sys\n##################ShrimpGIS#####################\ntry:\n    user_path = os.getenv(\"APPDATA\")\n    sys.path.append(user_path)\n    from shrimp_gis import __version__\n    from shrimp_gis import Field\n    ghenv.Component.Message = __version__\nexcept ImportError as e:\n    raise ImportError(\"\\nFailed to import ShrimpGIS: {0}\\n\\nCheck your 'shrimp_gis' folder in {1}\".format(e, os.getenv(\"APPDATA\")))\n################################################\n\ndef main():\n    \n    if _values:\n        \n        field = Field(_values)\n        \n        if name_: field.name = name_\n        if _type_: field.type = Field.get_type(_type_)\n        if length_: field.length = length_\n        if decimal_: field.decimal = decimal_\n        \n        return field\n    else:\n        return\n\nfield = main()\nif not field: print(\"Please, connect values.\")\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

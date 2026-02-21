@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-get-selected-on-selection-change-event-handler/166393",
+  "topic_id": 166393,
+  "title": "Python - Get Selected On Selection Change Event Handler",
+  "question": "Hello,\n\n\nI’m trying to get the currently selected rhino object from the Rhino document in real-time.\n\n\nIf I use this script with a trigger attached to the component it works fine of course:\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nsel_objs = []\n\ndef get_selected_objs():\n    for obj in Rhino.RhinoDoc.ActiveDoc.Objects.GetSelectedObjects(False,False):\n        geo = rs.coercegeometry(obj)\n        sel_objs.append(geo)\n    return sel_objs\n\nget_selected_objs()\n\na = sel_objs\n\n\n\nHowever, I’m trying to use event handlers so that anytime a selection change occurs, i get the most current selected object in real time. I don’t want to use the trigger as that is computationally wasteful.\n\n\nI just can’t seem to get it to work without return an empty output result.\n\n\nAny help is greatly appreciated!\n\n\nThank you!\n\n\nFull Code:\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass SelectionChangeEventHandler():\n    # Initialize sel_objs as an empty list\n    sel_objs = []\n\n    def __init__(self):\n        Rhino.RhinoDoc.SelectObjects += self.get_selected_objs\n        self.Enabled = True\n    \n    def Disable(self):\n        Rhino.RhinoDoc.SelectObjects -= self.get_selected_objs\n        self.Enabled = False\n    \n    def IsEnabled(self):\n        return self.Enabled\n    \n    def get_selected_objs(self, sender, e):\n        self.sel_objs = []  # Clear the previous selected objects\n        for obj in Rhino.RhinoDoc.ActiveDoc.Objects.GetSelectedObjects(True, False):\n            geo = rs.coercegeometry(obj)\n            self.sel_objs.append(geo)\n        \n        # Assuming objs is a variable representing the output\n        objs = self.sel_objs  # Update objs with selected objects\n        return objs\n\nif __name__ == '__main__':\n    # Create an instance of the event handler to start listening for events\n    handler = SelectionChangeEventHandler()",
+  "code_blocks": [
+    {
+      "code": "// Grasshopper Script Instance\n//#! csharp\nusing System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Drawing;\n\nusing Rhino;\nusing Rhino.Geometry;\n\nusing Rhino.DocObjects;\nusing System.Linq;\n\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    \n  private void RunScript(out object A)\n  {\n    if(!_init)\n    {\n      Rhino.RhinoDoc.SelectObjects -= RhinoDocOnSelectObjects;\n      Rhino.RhinoDoc.SelectObjects += RhinoDocOnSelectObjects;\n      Rhino.RhinoDoc.DeselectObjects -= RhinoDocOnSelectObjects;\n      Rhino.RhinoDoc.DeselectObjects += RhinoDocOnSelectObjects;\n      Rhino.RhinoDoc.DeselectAllObjects -= RhinoDocOnDeselectAllObjects;\n      Rhino.RhinoDoc.DeselectAllObjects += RhinoDocOnDeselectAllObjects;\n      \n      _init = true;\n    }\n    A = guids;\n\n  }\n  private bool _init = false;\n  List<Guid> guids = new List<Guid>();\n  private void RhinoDocOnSelectObjects(object sender, RhinoObjectSelectionEventArgs e)\n  {\n    foreach(var rhObj in RhinoDoc.ActiveDoc.Objects.GetSelectedObjects(true, false))\n      \n      if (!guids.Contains(rhObj.Id))\n      guids.Add(rhObj.Id);\n\n    Component.ExpireSolution(true);\n  }\n  private void RhinoDocOnDeselectAllObjects(object sender, RhinoDeselectAllObjectsEventArgs e)\n  {\n    guids.Clear();\n    Component.ExpireSolution(true);\n  }\n}",
+      "language": "csharp",
+      "author": "michaelvollrath",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\nsel_objs = []\n\ndef get_selected_objs():\n    for obj in Rhino.RhinoDoc.ActiveDoc.Objects.GetSelectedObjects(False,False):\n        geo = rs.coercegeometry(obj)\n        sel_objs.append(geo)\n    return sel_objs\n\nget_selected_objs()\n\na = sel_objs",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\nclass SelectionChangeEventHandler():\n    # Initialize sel_objs as an empty list\n    sel_objs = []\n\n    def __init__(self):\n        Rhino.RhinoDoc.SelectObjects += self.get_selected_objs\n        self.Enabled = True\n    \n    def Disable(self):\n        Rhino.RhinoDoc.SelectObjects -= self.get_selected_objs\n        self.Enabled = False\n    \n    def IsEnabled(self):\n        return self.Enabled\n    \n    def get_selected_objs(self, sender, e):\n        self.sel_objs = []  # Clear the previous selected objects\n        for obj in Rhino.RhinoDoc.ActiveDoc.Objects.GetSelectedObjects(True, False):\n            geo = rs.coercegeometry(obj)\n            self.sel_objs.append(geo)\n        \n        # Assuming objs is a variable representing the output\n        objs = self.sel_objs  # Update objs with selected objects\n        return objs\n\nif __name__ == '__main__':\n    # Create an instance of the event handler to start listening for events\n    handler = SelectionChangeEventHandler()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 25,
+  "views": 1765
+}

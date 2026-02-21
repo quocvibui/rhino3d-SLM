@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/isbrepbox-test.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/isbrepbox-test.py",
+  "instruction": "Isbrepbox test",
+  "code": "import Rhino\n\ndef IsBrepBox(brep):\n    zero_tolerance = 1.0e-6 #or whatever\n    rc = brep.IsSolid\n    if rc: rc = brep.Faces.Count == 6\n\n    N = []\n    for i in range(6):\n        if not rc: break\n        rc, plane = brep.Faces[i].TryGetPlane(zero_tolerance)\n        if rc:\n            v = plane.ZAxis\n            v.Unitize()\n            N.append(v)\n\n    for i in range(6):\n        count = 0\n        for j in range(6):\n            if not rc: break\n            dot = abs(N[i] * N[j])\n            if dot<=zero_tolerance: continue\n            if abs(dot-1.0)<=zero_tolerance:\n                count += 1\n            else:\n                rc = False\n\n    if rc:\n        if 2!=count: rc = False\n    return rc\n\n\nif __name__==\"__main__\":\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select Brep\", True, Rhino.DocObjects.ObjectType.Brep)\n    if rc==Rhino.Commands.Result.Success:\n        brep = objref.Brep()\n        if brep:\n            if IsBrepBox(brep): print \"Yes it is a box\"\n            else: print \"No it is not a box\"\n",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": false
+}

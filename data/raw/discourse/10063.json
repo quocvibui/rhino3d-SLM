@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/projectpointstomeshes/10063",
+  "topic_id": 10063,
+  "title": "ProjectPointsToMeshes",
+  "question": "Hi,\n\n\nI’m currently using ProjectPointsToMeshes with a List of Points. I project the points to the mesh, to see which ones are within the x,y bounds of the mesh - but I actually want to keep the Z value of the original points. Currently in order to achieve this I am iterating through the outpoints and for each point in outpoints I am iterating through the inpoints to find the corresponding inpoint (by x,y) and then storing this inpoint to a filtered list.\n\n\nThis is verrry slooow. Is there a different command that I could use to achieve the same effect? In other words - I want something that behaves more like  cookie cutter.\n\n\nI note that an older version of ProjectPointstoBreps had an out parameter of Indices - which would have been ideal - but this no longer seems to be available.\n\n\nThanks,\n\n\nHannah",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\n# pts = list of points to check for projection\ndir = Rhino.Geometry.Vector3d(0,0,-1)\n\nhitPts = []\nfor pt in pts:\n    ray = Rhino.Geometry.Ray3d(pt, dir)\n    lineLength = Rhino.Geometry.Intersect.Intersection.MeshRay(m,ray)\n    if lineLength >= 0:    # less than 0 -> no intersection\n        hitPts.append(pt)    # or hitPts.append(pt.Z)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 1160
+}

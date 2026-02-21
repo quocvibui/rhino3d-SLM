@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-geometry-point3d-and-rhino-geometey-point-questions/5975",
+  "topic_id": 5975,
+  "title": "Rhino.Geometry.Point3d and Rhino.Geometey.Point questions",
+  "question": "I am working on a project in which I am storing string data in the geometry objects.  Everything is working for curves.  I also would like to store things in points.  However, Point3d does not have a SetUserString method, which is what I am using on the curves.  After looking around I find that Rhino.Geometey.Point seems to be what I want, as the .Location is the point3d, and it also has the geometry base that holds the user data.  However, when I try to add the .Point to the document:\n\n\nscriptcontext.doc.Objects.AddPoint(Rhino.Geometry.Point)\n\n\nI get an error:\n\n\nMessage: expected Point3f, got Point\n\n\nIf I use the .Location of the .Point:\n\n\nscriptcontext.doc.Objects.AddPoint(Rhino.Geometry.Point.Location)\n\n\nI get a point added to the doc, but alas, no userData.  I know the userData is in the .Point\n\n\nSo my question is, how can I add a Rhino.Geometry.Point to the document with the userData?\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "location = Rhino.Geometry.Point3d(1,2,3)\npoint = Rhino.Geometry.Point(location)\n# add user data to the point geometry\nscriptcontext.doc.Objects.Add(point)",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n#get set of coords\npointLocation = rs.GetPoint('select point location', in_plane=True)\n#make the 'Point' object\nrgPoint = Rhino.Geometry.Point(location=pointLocation)\n#set user string\nrgPoint.SetUserString(key='key', value='value')\n#check user string is stored in 'Point'\nprint 'checking value is stored:'\nprint rgPoint.GetUserString(key='key')\n#add the point to the object with the 'add' function\nsc.doc.Objects.Add(rgPoint)\n#select the just added 'Point'\npointObject = rs.GetObject('select point for user data print')\n#get to the geometry\nrgPointObject = rs.coercegeometry(pointObject)\n#should be 1 user string\nprint 'User string count:'\nprint rgPointObject.UserStringCount\nprint 'User string value:'\nprint rgPointObject.GetUserString(key='key')",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 2855
+}

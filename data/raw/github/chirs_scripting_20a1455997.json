@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/chirs/scripting/blob/034149e72701259a18ec5a34208a294dba6a9b7b/src/py/tangent_circles_between_curves.py",
+  "repo": "chirs/scripting",
+  "repo_stars": 1,
+  "repo_description": "an exploration into the borders of computing and architecture ->  computational geometry, scripting culture and parametrics",
+  "license": "unknown",
+  "filepath": "src/py/tangent_circles_between_curves.py",
+  "instruction": "Based on a script found via Google search for TryFitCircleTTT: http://www.grasshopper3d.com/forum/topics/cycle-operations-in-gh",
+  "code": "# Based on a script found via Google search for TryFitCircleTTT:\n# http://www.grasshopper3d.com/forum/topics/cycle-operations-in-gh\n\nimport Rhino\nimport scriptcontext\n\n\ndef closest_point(curve, length):\n\t\"\"\"Get the closest point on a curve at a given length\"\"\"\n\treturn curve.ClosestPoint(curve.PointAtLength(length), 0.0)[1]\n\n\ndef create_param(curve, point, radius, last):\n\t\"\"\"Create a param given input\"\"\"\n\t\n\tdomain = Rhino.Geometry.Interval(curve.Domain[0], curve.ClosestPoint(point, 0.0)[1])\n\tdist = curve.GetLength(domain) + radius\n\t\n\tif dist >= curve.GetLength():\n\t\treturn None\n\t\t\n\tparam = closest_point(curve, dist)\n\t\n\tif param >= last:\n\t\treturn param\n\telse:\n\t\treturn None\n\t\n\nCIRCLES = []\ncircle = None\n\n\nwhile True:\n\t\n  if circle is None:\n    curve_X = Rhino.Geometry.Line( CURVE_A.PointAtStart, CURVE_B.PointAtStart).ToNurbsCurve()\n    param_A, param_B, param_X = [closest_point(crv, curve_X.GetLength() * 0.5) for crv in [CURVE_A, CURVE_B, curve_X]]\t \n  else: \n    curve_X = circle.ToNurbsCurve()  \n    pt_X = curve_X.PointAtLength(curve_X.GetLength() * 0.5)\n    param_A = create_param(CURVE_A, pt_X, circle.Radius, param_A)\n    param_B = create_param(CURVE_B, pt_X, circle.Radius, param_B)\t\n    param_X = curve_X.ClosestPoint(pt_X, 0.0)[1]\n\t\n  if param_A is None or param_B is None:\n\tbreak\n        \n  circle = Rhino.Geometry.Circle.TryFitCircleTTT(curve_X, CURVE_A, CURVE_B, param_X, param_A, param_B)\n  \n  if circle == Rhino.Geometry.Circle.Unset:\n    break\n    \n  #if circle.Radius > scriptcontext.doc.ModelAbsoluteTolerance: \n  CIRCLES.append(circle)\n\t\n\n\n\n\n    \n\n    \n  \n \n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

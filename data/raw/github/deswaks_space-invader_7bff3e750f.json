@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/deswaks/space-invader/blob/94e00bff3b5371cfa6999f381461af9af6e0b0ba/ghpython%20component%20source%20code/floor_plan.py",
+  "repo": "deswaks/space-invader",
+  "repo_stars": 0,
+  "repo_description": "Tools for locating and reconstructing analytical building spaces with Rhino Grasshopper",
+  "license": "MIT",
+  "filepath": "ghpython component source code/floor_plan.py",
+  "instruction": "Floor plan",
+  "code": "import System\nimport clr\nclr.AddReference(\"Grasshopper\")\nimport rhinoscriptsyntax as rs\nfrom Grasshopper import DataTree\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as ghc\nimport ghpythonlib.treehelpers as ght\n\na = []\n# Checks whether the input geometry is brep, mesh or curve\n# If it is a brep or mesh, the input height is used to create the contour, in \n# the given height\n# Curves are then projected onto world xy-plane\nfor i in range (len(geometry)):\n    if (geometry[i].ToString().split(\".\")[-1]).Contains(\"Brep\"):\n        a.append(geometry[i].CreateContourCurves(geometry[i],rs.MovePlane(rs.WorldXYPlane(),[0,0,height])))\n    elif (geometry[i].ToString().split(\".\")[-1]).Contains(\"Mesh\"):\n        a.append(geometry[i].CreateContourCurves(geometry[i],rs.MovePlane(rs.WorldXYPlane(),[0,0,height])))\n    elif (geometry[i].ToString().split(\".\")[-1]).Contains(\"Curve\"):\n        a.append(geometry[i].ProjectToPlane(geometry[i],rs.WorldXYPlane()))\n\na = ght.list_to_tree(a)\na.Flatten()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

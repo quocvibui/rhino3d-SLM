@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/injecting-into-layers-panel-why-does-the-layout-bounds-break-on-re-open/215023",
+  "topic_id": 215023,
+  "title": "Injecting into Layers Panel: Why does the layout bounds break on re-open?",
+  "question": "Hey folks,\n\n\nI’m working on a small plugin where I’m trying to inject a custom button into the \nLayers Panel\n toolbar (right next to the “New Layer” / “Delete” icons).\n\n\nI’m traversing the Eto control tree, finding the specific \nPixelLayout\n that holds those buttons, and just adding mine to the end.\n\n\nThe weird part:\n\nIt works perfectly the first time I load Rhino or show the panel. The layout reports valid bounds, and my button sits exactly where it should.\n\n\nimage\n1062×578 145 KB\n\n\nBut…\n if I close the Layers panel and open it again (switching between tabs has no problem), things break.\n\nEven though the panel is visible on screen, the parent \nPixelLayout\n suddenly reports a Size of \n{-1, -1}\n or \n0,0\n.\n\n\nimage\n1061×585 142 KB\n\n\nBecause the container thinks it has no size, my button gets added but ends up stuck at \n0,0\n (overlapping the other icons) or just totally invisible, even though it’s technically in the \nChildren\n list.\n\n\nI’m triggering this on \nPanels.Show\n and even waiting for \nRhinoApp.Idle\n, but it seems like on re-creation, the internal layout state is just… empty?\n\n\nThis is happening on both Mac and Windows.\n\n\nIs there anything I’m missing here \n@curtisw\n? Is there a trick to force the layout to “wake up” and measure itself correctly after a re-open?\n\n\nThanks in advance!",
+  "code_blocks": [
+    {
+      "code": "Panels.Show += OnPanelShow;\n\nprivate void OnPanelShow(object sender, ShowPanelEventArgs e)\n{\n    if (e.PanelId == PanelIds.Layers)\n    {\n        LayerPanelInjector.Reset();  // Allow re-injection\n        RhinoApp.Idle += OnLayersPanelShown;\n    }\n}\n\nprivate void OnLayersPanelShown(object sender, System.EventArgs e)\n{\n    RhinoApp.Idle -= OnLayersPanelShown;\n    LayerPanelInjector.AttemptInjection();\n}",
+      "language": "csharp",
+      "author": "p.cortes.nieves",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "private void OnPanelShow(object sender, ShowPanelEventArgs e)\n\n{\n\n    if (e.PanelId == PanelIds.Layers && e.Show)\n\n        RhinoApp.Idle += InjectOnIdle; // Delayed\n\n}",
+      "language": "csharp",
+      "author": "p.cortes.nieves",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 114
+}

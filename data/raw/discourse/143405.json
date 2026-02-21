@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/capture-view-with-rectangle/143405",
+  "topic_id": 143405,
+  "title": "Capture View with Rectangle",
+  "question": "Thanks to \n@liukov.dobriev\n and his script from \nthis threat\n.\n\nAlthough I’m fully newbie to scripting, lately I was trying to modify it a bit it can capture selected view (Top/Front/Right).\n\n\nHowever, since the script use rectangle’s X,Y to define its size. It no longer works when the view plane is not on XY plane…\n\n\nAny idea and help will be appreciated!\n\n\nSet specific print area_xyz.gh\n (94.3 KB)\n\n\nCanvas at 19;16;30\n1916×835 335 KB\n\n\nimage\n902×776 33.5 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System.Drawing\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino.Display as rd\nimport System\n\npt0 = frame[0]\npt1 = frame[1]\npt2 = frame[2]\npt3 = frame[3]\n\nwidth = rg.Point3d.DistanceTo(pt0, pt1)\nheight = rg.Point3d.DistanceTo(pt1, pt2)\n\nsize = 'w=' + str(int(width*fector)) + ', ' + 'h=' + str(int(height*fector))\n\ndef Capture():\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n    selectview = RhinoDocument.Views.Find(view, False)\n    size = System.Drawing.Size(int(width*fector),int(height*fector)) \n\n    settings = rd.ViewCaptureSettings(selectview, size, 300) #view, size, dpi\n    settings.SetWindowRect(pt0, pt2)\n    settings.RasterMode = True\n    settings.DrawGrid = False\n    settings.DrawAxis = False\n    settings.DrawWallpaper = False\n\n    bitmap = rd.ViewCapture.CaptureToBitmap(settings)\n    bitmap.Save(path+filename+\".png\")\n\nif save:\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n    selectview = RhinoDocument.Views.Find(view, False)\n    rs.ViewDisplayMode(view, mode)\n    rs.Redraw()\n    \n    Capture()\n    \n    print(path+filename+\".png\")",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 8,
+  "views": 1327
+}

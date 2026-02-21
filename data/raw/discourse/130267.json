@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/howto-get-object-centers/130267",
+  "topic_id": 130267,
+  "title": "Howto get object centers?",
+  "question": "I’m trying to get started with Rhino Python and I’m stuck with basics . For a start I’m trying to create a script that would print centers of selected items.\n\nThis does not work:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nobjects = rs.GetObjects(\"Select objects \",preselect=True)\n\nfor object in objects:\n    center = item.Geometry.GetBoundingBox(True).Center\n    print(center)\n\n\n\nWhat’s the correct way to do it?\n\nI’m trying with this simple thing as it would allow me to loop thorugh things and do repetitive tasks per item using the item center.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef Main():\n    objectsId = rs.GetObjects(\"Select objects \",preselect=True) #This returns the object Id\n\n    for obj in objectsId:\n        objGeo = sc.doc.Objects.Find(obj).Geometry #This returns the rhino geometry\n        center = objGeo.GetBoundingBox(True).Center #Call the method on the geometry\n        print(center) #Result\n\nif __name__ == \"__main__\":\n    Main()",
+      "language": "python",
+      "author": "Dromaius",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nobjects = rs.GetObjects(\"Select objects \",preselect=True)\n\nfor object in objects:\n    center = item.Geometry.GetBoundingBox(True).Center\n    print(center)",
+      "language": "python",
+      "author": "przemek",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 362
+}

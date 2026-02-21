@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/connecting-curves-to-random-points-loop/93238",
+  "topic_id": 93238,
+  "title": "Connecting Curves to Random Points Loop",
+  "question": "Hey, so I’m very much a beginner when it comes to python scripting, and I’m trying to create a loop for a grid of points where I can created curves that will be randomly generated between these points. I got the grid to work, but I’m currently testing with just lines and I can’t seem to get the lines to connect to these points randomly, here’s the current script:\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nimport random\n\n\nxvalues = range(40)\n\nyvalues = range(5,30,1)\n\npoints = \n\nfor i in xvalues:\n\nfor j in yvalues:\n\npoint = rs.AddPoint(i,j,0)\n\npoints.append(point)\n\n\nnewPointsx = \n\nfor i in range(20):\n\nnewPointx = random.choice(points)\n\nnewPointsx.append(newPointx)\n\nnewPointsy = \n\nfor j in range(20):\n\nnewPointy = random.choice(points)\n\nnewPointsy.append(newPointy)\n\n\nrs.AddLine(newPointsx,newPointsy)\n\n\n\n\nI could be writing this completely wrong, so any help and guidance would be appreciated.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\nxvalues = range(40)\nyvalues = range(5,30,1)\npoints = []\nfor i in xvalues:\n    for j in yvalues:\n        point = rs.coerce3dpoint([i,j,0])\n        points.append(point)\n        \n#if you want to add the point objects to the document,uncomment the following\n#rs.AddPoints(points)\n\nnewPointsx = []\nfor i in range(20):\n    newPointx = random.choice(points)\n    newPointsx.append(newPointx)\nnewPointsy = []\nfor j in range(20):\n    newPointy = random.choice(points)\n    newPointsy.append(newPointy)\n#loop through the two lists and add lines\nfor i in range(len(newPointsx)):\n    rs.AddLine(newPointsx[i],newPointsy[i])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import random\n\nxvalues = range(1,400,5)\nyvalues = range(1,200,5)\npoints = []\nfor i in xvalues:\n    for j in yvalues:\n        point = rs.coerce3dpoint([i,j,0])\n        points.append(point)\n        \nnewPointsx = []\nfor i in range(1200):\n    newPointx = random.choice(points)\n    newPointsx.append(newPointx)\nnewPointsy = []\nfor j in range(1200):\n    newPointy = random.choice(points)\n    newPointsy.append(newPointy)\nfor i in range(len(newPointsx)):\n    line = rs.AddLine(newPointsx[i],newPointsy[i])\nnewCircles = []\nfor i in range(600):\n    newCircle = random.choice(points)\n    newCircles.append(newCircle)\nfor i in range(len(newCircles)):\n    radius = random.randint(1,9)\n    circle = rs.AddCircle(newPointsx[i],radius)",
+      "language": "python",
+      "author": "bseckler",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1301
+}

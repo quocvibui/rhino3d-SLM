@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mahaidong/p4r-vscode/blob/f75b8596c881faf1d5c2d0b7159ab2ec228acc4c/lib/scriptcontext.py",
+  "repo": "mahaidong/p4r-vscode",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "lib/scriptcontext.py",
+  "instruction": "scriptcontext module",
+  "code": "# scriptcontext module\nimport RhinoPython.Host as __host\n\n'''The Active Rhino document (Rhino.RhinoDoc in RhinoCommon) while a script\nis executing. This variable is set by Rhino before the exection of every script.\n'''\ndoc = None\n\n\n'''Identifies how the script is currently executing\n1 = running as standard python script\n2 = running inside grasshopper component\n3... potential other locations where script could be running\n'''\nid = 1\n\n\n'''A dictionary of values that can be reused between execution of scripts\n'''\nsticky = dict()\n\ndef escape_test( throw_exception=True, reset=False ):\n    \"Tests to see if the user has pressed the escape key\"\n    rc = __host.EscapePressed(reset)\n    if rc and throw_exception:\n        raise Exception('escape key pressed')\n    return rc\n    \n\ndef errorhandler():\n    '''\n    The default error handler called by functions in the rhinoscript package.\n    If you want to have your own predefined function called instead of errorhandler,\n    replace the scriptcontext.errorhandler value\n    '''\n    return None\n\n\n__executing_command = None\ndef localize(s):\n    import Rhino\n    if __executing_command is None:\n        return Rhino.UI.LocalizeStringPair(s,s)\n    assembly = __executing_command.PlugIn.Assembly\n    l = Rhino.UI.Localization.LocalizeString(s, assembly, -1)\n    return Rhino.UI.LocalizeStringPair(s,l)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "RhinoCommon",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

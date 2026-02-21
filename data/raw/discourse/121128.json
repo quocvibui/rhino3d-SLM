@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-do-i-simplify-rebuild-this-nurbs-edge-into-plain-3-segment-polyline/121128",
+  "topic_id": 121128,
+  "title": "How do I simplify/rebuild this NURBS edge into plain 3 segment polyline?",
+  "question": "Is dup’ing the edges, simplifying curves and making a new brep the only way?\n\n\n\n\nimage\n999×465 2.72 KB",
+  "code_blocks": [
+    {
+      "code": "def test_split_kinky_edges():\n    filter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select surface or polysurface\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return\n        \n    brep = objref.Brep()\n    if not brep:\n        return\n        \n    tol = Rhino.RhinoMath.DefaultAngleTolerance\n    \n    bcopy = brep.DuplicateBrep()\n    for i in range(0, bcopy.Edges.Count):\n        bcopy.Edges.SplitKinkyEdge(i, tol)\n    bcopy.Compact()\n    \n    sc.doc.Objects.Replace(objref, bcopy)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\n\ndef test_merge_all_edges():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select Brep\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Brep\n    go.Get()\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n        \n    objref = go.Object(0)\n    brep = objref.Brep()\n    if brep:\n        print(\"Original edge count: {0}\".format(brep.Edges.Count))\n        brep_copy = brep.DuplicateBrep()\n        ang_tol = System.Math.PI / 180.0\n        merge_count = brep_copy.Edges.MergeAllEdges(ang_tol)\n        if merge_count > 0:\n            print(\"Merged edge count: {0}\".format(brep_copy.Edges.Count))\n            sc.doc.Objects.Replace(objref, brep_copy)\n            \n    sc.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    test_merge_all_edges()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\ndef BrepSplitEdgeAtTangents(brep, edge_index):\n    if brep is None:\n        return None\n    if edge_index < 0 or edge_index >= brep.Edges.Count: \n        return None\n        \n    curve = brep.Edges[edge_index];\n    t0 = curve.Domain.Min;\n    t1 = curve.Domain.Max;\n    continuity = Rhino.Geometry.Continuity.G2_continuous\n    \n    params = []\n    while t0 < t1:\n        rc, t = curve.GetNextDiscontinuity(continuity, t0, t1)\n        if rc:\n            if t < t1 or (curve.IsClosed and t <= t1):\n                parameters.append(t)\n            t0 = t\n            continue\n        else:\n            break\n          \n    if len(params) > 0:\n        params.sort()\n        params = list(set(params)) \n        rc = brep.DuplicateBrep()\n        rc.Edges.SplitEdgeAtParameters(edge_index, params)\n        rc.Compact()\n        return rc\n    return None",
+      "language": "python",
+      "author": "dale",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 748
+}

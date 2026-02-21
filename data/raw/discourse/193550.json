@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/updating-position-of-grasshopper-component-using-pivot-in-ghpython/193550",
+  "topic_id": 193550,
+  "title": "Updating position of Grasshopper component using Pivot in ghpython",
+  "question": "Hi I’m trying to write a ghpython function that adds a value list to the python component when the component is dropped onto the canvas. I was able to figure out adding the valuelist part of the coding.The issue I’m having is when I make a user object of this python component and drop it onto canvas, the newly created value list is not taking the correct pivot location set. When I delete the valuelist component, that is when newly added valuelist is in the correct location. Does anyone know what might be causing this behavior? below is the code and my file. Any help is appreciated!\n\n\nimage\n570×227 5.2 KB\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\nimport Grasshopper \nimport Rhino.Geometry as rg\nimport Grasshopper.Kernel.Special as ghks\nfrom System.Drawing import PointF\n\n\nclass MyComponent(component):\n    \n    def RunScript(self, x, y):\n        def create_value_list(input_name, value_list_name, offset):\n            params = ghenv.Component.Params.Input\n            for i in range(len(params)):\n                param_name = params[i].NickName\n                if param_name == input_name:\n                    if params[i].SourceCount == 0:\n                        ghenv.Component.ExpireSolution(True)\n                        params = ghenv.Component.Params.Input\n                        valuelist = ghks.GH_ValueList()\n                        valuelist.CreateAttributes()\n                        valuelist.NickName = value_list_name\n                        X_cord = params[i].Attributes.InputGrip.X - offset\n                        Y_cord = params[i].Attributes.InputGrip.Y - 11\n                        coord = PointF(X_cord, Y_cord)\n                        valuelist.Attributes.Pivot = coord\n                        Grasshopper.Instances.ActiveCanvas.Document.AddObject(valuelist, False)\n                        ghenv.Component.Params.I...",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\nimport Grasshopper \nimport Rhino.Geometry as rg\nimport Grasshopper.Kernel.Special as ghks\nfrom System.Drawing import PointF\n\n\nclass MyComponent(component):\n    \n    def RunScript(self, x, y):\n        def create_value_list(input_name, value_list_name, offset):\n            params = ghenv.Component.Params.Input\n            for i in range(len(params)):\n                param_name = params[i].NickName\n                if param_name == input_name:\n                    if params[i].SourceCount == 0:\n                        ghenv.Component.ExpireSolution(True)\n                        params = ghenv.Component.Params.Input\n                        valuelist = ghks.GH_ValueList()\n                        valuelist.CreateAttributes()\n                        valuelist.NickName = value_list_name\n                        X_cord = params[i].Attributes.InputGrip.X - offset\n                        Y_cord = params[i].Attributes.InputGrip.Y - 11\n                        coord = PointF(X_cord, Y_cord)\n                        valuelist.Attributes.Pivot = coord\n                        Grasshopper.Instances.ActiveCanvas.Document.AddObject(valuelist, False)\n                        ghenv.Component.Params.Input[i].AddSource(valuelist)\n                        ghenv.Component.ExpireSolution(True)\n        \n        create_value_list(\"x\", \"TEST\",100)",
+      "language": "python",
+      "author": "User_aaa",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 1,
+  "views": 75
+}

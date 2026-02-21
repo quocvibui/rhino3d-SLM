@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-blendsrf/24635",
+  "topic_id": 24635,
+  "title": "Scripting BlendSrf",
+  "question": "I need to blend two surfaces but I don’t think there is a Rhinocommon function for this so I am going to script BlendSrf. The first issue I have is that I don’t know how to script the selection of an edge. How can I do this?\n\n\nThanks,\n\nSam",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n\n    id = rs.coerceguid(\"310aab71-ebf8-4280-aeca-c3ab1ded98fd\")\n    if not rs.IsObject(id): return\n\n    pt = rs.GetPoint(\"Click new naked edge vertex location (on edge)\")\n    if not pt: return\n\n    brep = rs.coercebrep(id, True)\n    brep.EnsurePrivateCopy()\n\n    rc, param = brep.Curves3D.Item[0].ClosestPoint(pt)\n    if not rc: return\n\n    brep.Curves2D.Item[0].ChangeClosedCurveSeam(param)\n    brep.Curves3D.Item[0].ChangeClosedCurveSeam(param)\n    brep.Vertices[0].Location = brep.Curves3D.Item[0].PointAtStart\n    brep.Compact()\n    scriptcontext.doc.Objects.Replace(id, brep)\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 17,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 25,
+  "views": 6498
+}

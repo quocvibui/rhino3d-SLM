@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/normal-vector-problem-in-python-help-please/172899",
+  "topic_id": 172899,
+  "title": "Normal vector problem in Python, Help Please",
+  "question": "I am trying to write a Python script to iteratively calculate the normal vector at a specific point on a polysurface selected by the user.\n\n\nI have written the code as follows, but it’s producing an error.\n\n\nrs.SurfaceNormal used\n\n\nimport rhinoscriptsyntax as rs\ndef calculate_normal_at_points(polysurface_id):\n    while True:\n        # Prompt the user to select a point on the polysurface. Exit the loop if canceled.\n        point = rs.GetPointOnSurface(polysurface_id, \"Select a point to calculate the normal (Press Esc to cancel)\")\n        if not point:\n            break\n        # Calculate the normal vector at the selected point on the polysurface.\n        normal = rs.SurfaceNormal(polysurface_id, point[2])\n        if normal:\n            print(\"Normal vector at the selected point:\", normal)\n        else:\n            print(\"Unable to calculate the normal vector.\")\n#- Prompt the user to select a polysurface.\npolysurface_id = rs.GetObject(\"Select a polysurface\", rs.filter.polysurface)\nif polysurface_id:\n    calculate_normal_at_points(polysurface_id)\n\n\n\nerror Message\n\n\nMessage: unable to convert 16c2377c-91b6-4c7b-9661-86b5ebaa6002 into Surface geometry\n\nTraceback:\n  line 1026, in coercesurface, \"C:\\Users\\jiny0\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py\"\n  line 2912, in SurfaceNormal, \"C:\\Users\\jiny0\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\surface.py\"\n  line 11, in calculate_normal_at_points, \"C:\\Users\\jiny0\\AppData\\Local\\Temp\\TempScript.py\"\n  line 20, in <module>, \"C:\\Users\\jiny0\\AppData\\Local\\Temp\\TempScript.py\"\n\n\n\nSo, I changed the code from PolySurface to blep as follows.\n\nBut there’s another problem. Please help\n\n\nBrep\n\n\nimport rhinoscriptsyntax as rs\n\ndef calculate_polysurface_normal(polysurface_id, point):\n    brep = rs.coercebrep(polysurface_id)\n    if brep:\n        cp_result = brep.ClosestPoint...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef calculate_polysurface_normal(polysurface_id, point):\n    brep = rs.coercebrep(polysurface_id)\n    if brep:\n        cp_result = brep.ClosestPoint(point,maximumDistance=0)\n    if cp_result[0]:\n        normal = cp_result[5]\n        if cp_result[2].ComponentIndexType == rg.ComponentIndexType.BrepFace:\n            print(str.format(\"BrepFace (u,v) = {0}, {1}\", cp_result[3], cp_result[4]))\n        elif cp_result[2].ComponentIndexType == rg.ComponentIndexType.BrepEdge:\n            print(str.format(\"BrepEdge (t) = {0}\", cp_result[3]))\n        return normal\n    else:\n        return None\n\npolysurface_id = rs.GetObject(\"select polysurface\", rs.filter.polysurface)\nif polysurface_id:\n    point = rs.GetPointOnSurface(polysurface_id, \"point for noraml\")\nif point:\n    normal = calculate_polysurface_normal(polysurface_id, point)\nif normal:\n    print(\"normalvector:\", normal)\nelse:\n    print(\"can't\")",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef calculate_normal_at_points(polysurface_id):\n    while True:\n        # Prompt the user to select a point on the polysurface. Exit the loop if canceled.\n        point = rs.GetPointOnSurface(polysurface_id, \"Select a point to calculate the normal (Press Esc to cancel)\")\n        if not point:\n            break\n        # Calculate the normal vector at the selected point on the polysurface.\n        normal = rs.SurfaceNormal(polysurface_id, point[2])\n        if normal:\n            print(\"Normal vector at the selected point:\", normal)\n        else:\n            print(\"Unable to calculate the normal vector.\")\n#- Prompt the user to select a polysurface.\npolysurface_id = rs.GetObject(\"Select a polysurface\", rs.filter.polysurface)\nif polysurface_id:\n    calculate_normal_at_points(polysurface_id)",
+      "language": "python",
+      "author": "LeoKim",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Message: unable to convert 16c2377c-91b6-4c7b-9661-86b5ebaa6002 into Surface geometry\n\nTraceback:\n  line 1026, in coercesurface, \"C:\\Users\\jiny0\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py\"\n  line 2912, in SurfaceNormal, \"C:\\Users\\jiny0\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\surface.py\"\n  line 11, in calculate_normal_at_points, \"C:\\Users\\jiny0\\AppData\\Local\\Temp\\TempScript.py\"\n  line 20, in <module>, \"C:\\Users\\jiny0\\AppData\\Local\\Temp\\TempScript.py\"",
+      "language": "unknown",
+      "author": "LeoKim",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef calculate_polysurface_normal(polysurface_id, point):\n    brep = rs.coercebrep(polysurface_id)\n    if brep:\n        cp_result = brep.ClosestPoint(point)\n        if cp_result[0]:\n            face_index = cp_result[1].FaceIndex\n            u, v = cp_result[2], cp_result[3]\n            face = brep.Faces[face_index]\n            normal = face.NormalAt(u, v)\n            return normal\n    return None\n\npolysurface_id = rs.GetObject(\"select polysurface\", rs.filter.polysurface)\nif polysurface_id:\n    point = rs.GetPointOnSurface(polysurface_id, \"point for noraml\")\n    if point:\n        normal = calculate_polysurface_normal(polysurface_id, point)\n        if normal:\n            print(\"normalvector:\", normal)\n        else:\n            print(\"can't\")\nprint(normal)",
+      "language": "python",
+      "author": "LeoKim",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 356
+}

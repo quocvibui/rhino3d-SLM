@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/code-examples-using-quaternion-for-rotation/53100",
+  "topic_id": 53100,
+  "title": "Code examples using quaternion for rotation?",
+  "question": "I have to look into quaternions. But can anyone provide with a code example of how to use them?\n\n\nFor example rotating an object around a vector, and transforming an object from one plane to another.  I know there are plugins that can handle quaternions (Falcon and Pufferfish has it) but I need to be able to code it myself (RhinoCommon \nquaternions\n).\n\n\nI tried a bit but the results doesn’t make sense to me… What I did was creating a vector from two box corners (see fig below) and created a transform with zero radians rotation. That resulted in a box rotated 180 degrees (the green box below). And the \nquat.MatrixForm()\n (output to \nT\n) results in a weird flattened surface (red).\n\n\nI obviously don’t have a clue. \n\n\nbild\n1103×280 18.7 KB\n\n\nFig 1. The code generating the above:\n\n\nprivate void RunScript(double w, Vector3d v, ref object Q, ref object trx)\n{\n    var vec = cp1 - cp0;\n    vec.Unitize();\n    var quat = new  Rhino.Geometry.Quaternion(rad, vec.X, vec.Y, vec.Z);\n\n    var out_rad = 0.0;\n    var out_vec = Vector3d.Unset;\n    quat.GetRotation(out out_rad, out out_vec);\n\n    var xform = Rhino.Geometry.Transform.Rotation(out_rad, out_vec, cp0);\n    geo.Transform(xform);\n\n    Geo = geo;   \n    T = quat.MatrixForm();  \n}\n\n\n\nbild\n1095×346 40.1 KB\n\n\nAlthough totally useless, here’s the script:\n\n\nQuaternion_test.gh\n (6.4 KB)\n\n\n< Embarrassed >\n\n\n// Rolf",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(double w, Vector3d v, ref object Q, ref object trx)\n{\n    var vec = cp1 - cp0;\n    vec.Unitize();\n    var quat = new  Rhino.Geometry.Quaternion(rad, vec.X, vec.Y, vec.Z);\n\n    var out_rad = 0.0;\n    var out_vec = Vector3d.Unset;\n    quat.GetRotation(out out_rad, out out_vec);\n\n    var xform = Rhino.Geometry.Transform.Rotation(out_rad, out_vec, cp0);\n    geo.Transform(xform);\n\n    Geo = geo;   \n    T = quat.MatrixForm();  \n}",
+      "language": "csharp",
+      "author": "RIL",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 20,
+  "views": 9030
+}

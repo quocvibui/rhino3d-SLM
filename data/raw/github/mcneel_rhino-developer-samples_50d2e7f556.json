@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/circle-center.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/circle-center.py",
+  "instruction": "Circle center",
+  "code": "import Rhino\nimport scriptcontext\n\ndef CircleCenter():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.ClosedCurve\n    go.GetMultiple(1, 0)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n\n    objrefs = go.Objects()\n    if not objrefs: return Rhino.Commands.Result.Nothing\n\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    for i, objref in enumerate(objrefs):\n        # get the curve geometry\n        curve = objref.Curve()\n        if not curve: continue\n        rc, circle = curve.TryGetCircle( tolerance )\n        if rc:\n            print \"Circle\", i+1, \": center = \", circle.Center\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    CircleCenter()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

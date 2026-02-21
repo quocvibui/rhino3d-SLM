@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/can-i-invoke-python-script-when-develop-gh-component-with-c-and-vsstudio/129425",
+  "topic_id": 129425,
+  "title": "Can I invoke Python script when develop GH component with C# and VSStudio?",
+  "question": "I used to use \nghpythonlib.components\n to invoke some Grasshopper functions when they are not offered by \nrhinoscriptssyntax\n, which is efficient. Recently I am trying to develop scripts using C# with VSstudio considering its user-friendly features and constructability（means that I don’t have to write all of the code in a single python file).\n\n\nWhile, when I tried to invoke functions of GH components from \nRhino.NodeInCode.Components.FindComponent\n in Rhinocommon, I could sincerely feel its stalling. Then I tried to write a test program that shows the speed gap between the performance using the similar function in Python and C#. I’d realized the speed of C# should be faster than Python theoretically, I can not understand what’s happening.\n\n\nNow I suppose I call the Python code directly in C#, and build them together in a battery, so as to solve the efficiency problem. But I haven’t found a relevant method. I hope you can dispel my problem.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib as gp\n\nResult = gp.components.CircleTanTanTan(A, B, C, Pt)",
+      "language": "python",
+      "author": "eastnoob",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "private void RunScript(Circle A, Circle B, Circle C, Point3d Pt, ref object D)\n  {\n    var engine = Python.CreateEngine();\n    dynamic scope = engine.CreateScope();\n    //now the python script as one big string literal\n    var script =\n      @\"\n#Always have to shit tab this to the far left whenever I open the C# editor to get appropriate python indenting\n#A lot of building the appropriate scope now follows, probably could have done more efficiently\nimport clr\nimport sys\n\n#typical sys.path list taken from ghpython component (I removed one or two paths)\npaths = ['C:\\\\Program Files\\\\Rhino 7\\\\Plug-ins\\\\IronPython\\\\Lib', 'C:\\\\Users\\\\d.beer\\\\AppData\\\\Roaming\\\\McNeel\\\\Rhinoceros\\\\7.0\\\\Plug-ins\\\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\\\settings\\\\lib', 'C:\\\\Users\\\\d.beer\\\\AppData\\\\Roaming\\\\McNeel\\\\Rhinoceros\\\\7.0\\\\scripts']\nsys.path.extend(paths)\n\n#seemed to need the below assemblies\nsys.path.append('C:\\\\Program Files\\\\Rhino 7\\\\System')\nsys.path.append('C:\\\\Program Files\\\\Rhino 7\\\\Plug-ins\\\\Grasshopper\\\\Components')\nsys.path.append('C:\\\\Program Files\\\\Rhino 7\\\\Plug-ins\\\\IronPython')\nclr.AddReferenceToFile('RhinoCommon.dll')\nclr.AddReferenceToFile('RhinoPythonHost.dll')\nclr.AddReferenceToFile('GhPython.gha')\n\n#and now the script\nimport ghpythonlib as gp\nResult = gp.components.CircleTanTanTan(A, B, C, Pt)\n      \";\n\n    //Add variables to the scope\n    scope.SetVariable(\"A\", A);\n    scope.SetVariable(\"B\", B);\n    scope.SetVariable(\"C\", C);\n    scope.SetVariable(\"Pt\", Pt);\n\n    //run script\n    engine.Execute(script, scope);\n\n    //retrieve result\n    D = scope.GetVariable(\"Result\");\n\n  }",
+      "language": "csharp",
+      "author": "dom.beer43",
+      "post_number": 5,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1031
+}

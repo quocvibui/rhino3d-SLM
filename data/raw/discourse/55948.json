@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-sublayers-with-python/55948",
+  "topic_id": 55948,
+  "title": "Creating sublayers with python",
+  "question": "Hi guys. I have a simple python script that creates a few layers with different colors which I think I based on a script I found from Helvetosaur here on the forum (I think). Now I’m wondering how I can create one Main layer and have the 3 layers be created as a sublayer. I’ve been trying this trick with Mainlayer::Sublayer but somehow I couldn’t get it to work. Anybody that could help me out here?\n\n\nimport scriptcontext as sc\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nlayer = Rhino.DocObjects.Layer()\n\ndef AddLayers():\n    layernames = [\"Layer1\", \"Layer2\", \"Layer3\"]\n    Colors = [(255,0,0), (0,255,0), (0,255,255)]\n    Count = 0\n    for x in layernames:\n        layer.Name = x\n        sc.doc.Layers.Add(layer)\n        rs.LayerColor(x, Colors[Count])\n        Count += 1\nAddLayers()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    main_layer = rs.AddLayer(\"Main\")\n    names = [\"Layer1\", \"Layer2\", \"Layer3\"]\n    colors = [(255,0,0), (0,255,0), (0,255,255)]\n    \n    for i in xrange(len(names)):\n        rs.AddLayer(names[i], colors[i], True, False, main_layer)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef TestAddSubLayers():\n    parent_layer=\"MainLayer\"\n    if not rs.IsLayer(parent_layer): rs.AddLayer(parent_layer)\n    sublayernames = [\"Layer1\", \"Layer2\", \"Layer3\"]\n    Colors = [(255,0,0), (0,255,0), (0,255,255)]\n    for i in range(len(sublayernames)):\n        # Color is also directly specifiable\n        rs.AddLayer(sublayernames[i],color=Colors[i],parent=parent_layer)\nTestAddSubLayers()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    main_layer = rs.AddLayer(\"Main\")\n    names = [\"Layer1\", \"Layer2\", \"Layer3\"]\n    colors = [(255,0,0), (0,255,0), (0,255,255)]\n    \n    for i in xrange(len(names)):\n        full_path = \"{}::{}\".format(main_layer, names[i])\n        rs.AddLayer(full_path, colors[i], True, False)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nlayer = Rhino.DocObjects.Layer()\n\ndef AddLayers():\n    layernames = [\"Layer1\", \"Layer2\", \"Layer3\"]\n    Colors = [(255,0,0), (0,255,0), (0,255,255)]\n    Count = 0\n    for x in layernames:\n        layer.Name = x\n        sc.doc.Layers.Add(layer)\n        rs.LayerColor(x, Colors[Count])\n        Count += 1\nAddLayers()",
+      "language": "python",
+      "author": "siemen",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 25,
+  "views": 3520
+}

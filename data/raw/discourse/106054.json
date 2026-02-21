@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/eto-webview-event-listeners/106054",
+  "topic_id": 106054,
+  "title": "Eto.WebView Event Listeners",
+  "question": "Hi,\n\n\nIs there a way to use event listeners within a WebView? For instance if I have a button in my html, can pressing that button trigger a script in python/grasshopper and output values etc. Still trying to wrap my head around the Eto documentation. I notice some event methods but not sure if any of them are what I need.\n\n\nJordan.",
+  "code_blocks": [
+    {
+      "code": "import clr\nclr.AddReference(\"Eto\")\nclr.AddReference(\"Rhino.UI\")\nfrom Eto.Forms import WebView, Form, DynamicLayout\nfrom Eto.Drawing import Size, Padding\nimport Rhino\n\nclass GreenScenarioPanel(Form):\n    def __init__(self):\n        self.Title = \"Green Scenario WebView\"\n        self.ClientSize = Size(800, 600)\n\n        # HTML content with the slider input\n        html = \"\"\"\n        <head>\n            <meta http-equiv='X-UA-Compatible' content='IE=edge' />\n            <title>Rhino UI</title>\n        </head>\n        <body>\n            <p>Runoff limit\n                <input type='range' min='0' max='100' value='50' class='slider' id='runoffLimit'>\n            </p>\n            <script>\n                document.getElementById('runoffLimit').addEventListener('input', function() {\n                    let value = document.getElementById('runoffLimit').value;\n                    window.location = 'greenscenario:runofflimit?' + value;\n                });\n            </script>\n        </body>\n        \"\"\"\n\n        # Create the WebView control\n        self.webview = WebView()\n        self.webview.Size = Size(800, 600)\n        self.webview.LoadHtml(html)\n\n        # Subscribe to the DocumentLoading event to intercept navigation\n        self.webview.DocumentLoading += self.on_document_loading\n\n        # Create a DynamicLayout for the UI\n        layout = DynamicLayout(DefaultSpacing=Size(5, 5), Padding=Padding(0))\n        layout.AddSeparateRow(self.webview)\n        layout.Add(None)\n        \n        # Set the layout as the content of the form\n        self.Content = layout\n\n    def on_document_loading(self, sender, e):\n        # Intercept custom scheme (e.g., \"greenscenario\")\n        if e.Uri.Scheme == \"greenscenario\":\n            e.Cancel = True  # Prevent actual navigation\n            value = e.Uri.Query.strip('?')  # Get the value from the query string\n            self.communicate_with_webview(value)\n\n    def communicate_with_webview(self, value):\n        # Log the slider value to the Rhino command line or output panel\n        Rhino.RhinoApp.WriteLine(\"Slider Value: {0}\".format(value))\n\n# Show the form\nform = GreenScenarioPanel()\nform.Show()",
+      "language": "python",
+      "author": "lolrazh",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 14,
+  "views": 1234
+}

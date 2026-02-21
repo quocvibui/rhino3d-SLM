@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-convexhull/73224",
+  "topic_id": 73224,
+  "title": "RhinoCommon ConvexHull -?",
+  "question": "I know this has been asked in the past and it appears that currently there is still no native RhinoCommon method for this.  So I guess the only possibility is importing the GH node?\n\n\nAre there any plans to port that or QuickHull to RhinoCommon soon?",
+  "code_blocks": [
+    {
+      "code": "import clr\nimport sys\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nfrom System import Array\n\n# Note, this path may vary\nsys.path.append('%APPDATA%/McNeel/Rhinoceros?6.0?Plug-ins/Rhino Polyhedra (666ae572-a6c5-44b5-b668-6b503d56c199)/6.0.6844.19198')\nclr.AddReference('PolyhedraCommon.dll')\nimport PolyhedraCommon\n\npoints = rs.GetPointCoordinates(\"Select points\")\n\narr = Array[Rhino.Geometry.Point3d](points)\npolylines = PolyhedraCommon.Geometry.WatermanPolyhedron.CalculateConvexHull(arr)\nmesh = PolyhedraCommon.PolyhedraUtils.MeshFromClosedPolylines(polylines, sc.doc.ModelAbsoluteTolerance)\nsc.doc.Objects.AddMesh(mesh)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 21,
+  "views": 1715
+}

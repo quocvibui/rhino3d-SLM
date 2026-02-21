@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ksobon/MantisShrimp/blob/9b3d1ef747a04f75f3542c38550c4e29b9d08c8f/Dynamo/src/getRhinoObjectValueByKey.py",
+  "repo": "ksobon/MantisShrimp",
+  "repo_stars": 39,
+  "repo_description": "A interop project for bridging the gap between Rhino/Grasshopper and Revit/Dynamo",
+  "license": "unknown",
+  "filepath": "Dynamo/src/getRhinoObjectValueByKey.py",
+  "instruction": "Copyright(c) 2015, Konrad Sobon @arch_laboratory, http://archi-lab.net",
+  "code": "# Copyright(c) 2015, Konrad Sobon\n# @arch_laboratory, http://archi-lab.net\n\nimport clr\nimport sys\n\npyt_path = r'C:\\Program Files (x86)\\IronPython 2.7\\Lib'\nsys.path.append(pyt_path)\n\nimport os\nappDataPath = os.getenv('APPDATA')\nmsPath = appDataPath + r'\\Dynamo\\0.9\\packages\\Mantis Shrimp\\extra'\nif msPath not in sys.path:\n\tsys.path.append(msPath)\nrhDllPath = appDataPath + r'\\Dynamo\\0.9\\packages\\Mantis Shrimp\\bin\\Rhino3dmIO.dll'\nclr.AddReferenceToFileAndPath(rhDllPath)\n\nimport Rhino as rc\n\npyt_path = r'C:\\Program Files (x86)\\IronPython 2.7\\Lib'\nsys.path.append(pyt_path)\n\n#The inputs to this node will be stored as a list in the IN variable.\ndataEnteringNode = IN\n\nif isinstance(IN[0], list):\n\trhObjects = IN[0]\nelse:\n\trhObjects = [IN[0]]\n\nkey = IN[1]\n\ndef GetValue(obj, key):\n\ttry:\n\t\tif obj.Attributes.HasUserData:\n\t\t\tus = obj.Attributes.GetUserStrings()\n\t\t\treturn us.Item[key]\n\texcept:\n\t\tpass\n\ndef ProcessListArg(_func, _list, _arg):\n    return map( lambda x: ProcessListArg(_func, x, _arg) if type(x)==list else _func(x, _arg), _list )\n\n#extract user keys\ntry:\n\terrorReport = None\n\trhValues = ProcessListArg(GetValue, rhObjects, key)\nexcept:\n\t# if error accurs anywhere in the process catch it\n\timport traceback\n\terrorReport = traceback.format_exc()\n\n#Assign your output to the OUT variable\nif errorReport == None:\n\tOUT = rhValues\nelse:\n\tOUT = errorReport\n",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": true
+}

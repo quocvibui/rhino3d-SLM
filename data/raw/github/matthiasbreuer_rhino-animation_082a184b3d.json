@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/matthiasbreuer/rhino-animation/blob/a043fa706c62b8f3e2c6374d852c20f7d83615af/animation/loop.py",
+  "repo": "matthiasbreuer/rhino-animation",
+  "repo_stars": 3,
+  "repo_description": "Python script to do camera animations in Rhino 5",
+  "license": "unknown",
+  "filepath": "animation/loop.py",
+  "instruction": null,
+  "code": "import time\n\nimport rhinoscript as rs\nimport scriptcontext as sc\n\nimport Rhino as r\n\n\nclass Loop(object):\n    def __init__(self, fps=25):\n        self.callbacks = []\n        self.delta = 1.0 / fps\n        self.running = False\n\n    def update(self):\n        td = time.time() - self.time\n        if td > self.delta:\n            self.time = time.time()\n            [callback(td) for callback in self.callbacks]\n            self.redraw()\n\n    def add_callback(self, callback):\n        self.callbacks.append(callback)\n\n    def remove_callback(self, callback):\n        try:\n            self.callbacks.remove(callback)\n        except ValueError:\n            return False\n\n        return True\n\n    def start(self):\n        self.running = True\n        self.time = time.time()\n        while True:\n            if not self.running:\n                return\n\n            self.update()\n\n    def stop(self):\n        self.running = False\n        self.redraw()\n\n    def redraw(self):\n        rs.document.EnableRedraw()\n        sc.doc.Views.Redraw()\n        r.RhinoApp.Wait()\n        rs.document.EnableRedraw(False)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-testing-fails-for-rhino-8-25/212401",
+  "topic_id": 212401,
+  "title": "Rhino.Testing fails for Rhino 8.25",
+  "question": "Hi,\n\n\nWe were testing Rhino 8.25 and came across an issue with the \nRhino.Testing\n library. Somewhere between Rhino 8.19 and Rhino 8.25 the RhinoSetupFixture started to fail.\n\n\nIf you build the attached project you’ll see that it works just fine if you update the nuget packages to 8.19 and have that version installed locally. However, if you switch it to 8.25 it will fail all the tests and you’ll get an error message like the one below.\n\n\nimage\n1705×520 58 KB\n\n\nThe root cause seems to be the RhinoSetupFixture. If you comment out the code below it works just fine in 8.25 as well.\n\n\n    [SetUpFixture]\n    public class RhinoFixture : RhinoSetupFixture\n    {\n\n\n        public override void OneTimeSetup()\n        {\n            base.OneTimeSetup();\n        }\n\n        public override void OneTimeTearDown()\n        {\n            base.OneTimeTearDown();\n        }\n\n    }\n\n\n\nThis is a bit of a problem for us since we use the fixtures to load the GH plugins we want to test. So currently all our Rhino tests are failing for 8.25. It also happens in the Github Action we use for running the tests remotely.\n\n\nI’m still investigating and trying to find a workaround. Figured I post it here in case anyone knows how to deal with it.\n\n\nRhinoTestProject1.zip\n (1.5 MB)",
+  "code_blocks": [
+    {
+      "code": "<Project Sdk=\"Microsoft.NET.Sdk\">\n\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n\n    <IsPackable>false</IsPackable>\n    <IsTestProject>true</IsTestProject>\n  </PropertyGroup>\n\n  <ItemGroup>\n\t  <PackageReference Include=\"coverlet.collector\" Version=\"6.0.2\" />\n\t  <PackageReference Include=\"Microsoft.NET.Test.Sdk\" Version=\"17.12.0\" />\n\t  <PackageReference Include=\"NUnit\" Version=\"4.4.0\" />\n\t  <PackageReference Include=\"NUnit.Analyzers\" Version=\"4.11.2\" />\n\t  <PackageReference Include=\"NUnit3TestAdapter\" Version=\"4.6.0\" />\n\t  <PackageReference Include=\"Rhino.Testing\" Version=\"8.0.28-beta\" />\n\t  <PackageReference Include=\"RhinoCommon\" Version=\"8.25.25314.11001\" >\n\t\t  <PrivateAssets>all</PrivateAssets>\n\t\t  <ExcludeAssets>runtime</ExcludeAssets>\n\t  </PackageReference>\n\t  <PackageReference Include=\"Grasshopper\" Version=\"8.25.25314.11001\" >\n\t\t  <PrivateAssets>all</PrivateAssets>\n\t\t  <ExcludeAssets>runtime</ExcludeAssets>\n\t  </PackageReference>\n  </ItemGroup>\n\n  <ItemGroup>\n    <Using Include=\"NUnit.Framework\" />\n  </ItemGroup>\n\n  <ItemGroup>\n    <None Update=\"Rhino.Testing.Configs.xml\">\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\n    </None>\n  </ItemGroup>\n\n</Project>",
+      "language": "csharp",
+      "author": "SK-Structurecraft",
+      "post_number": 6,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 107
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/eastnoob/TianParameterModelForOpt/blob/b463c06915742c215bc8077d7de086e369f03299/python_scripts/NorthAndSouthZones.py",
+  "repo": "eastnoob/TianParameterModelForOpt",
+  "repo_stars": 0,
+  "repo_description": "对于硕士论文参数化模型的C#重置，目标为提升可控性",
+  "license": "unknown",
+  "filepath": "python_scripts/NorthAndSouthZones.py",
+  "instruction": "North and south zones",
+  "code": "﻿import Rhino.Geometry as rg\n\ndef generate_rectangles(base, offset=10.0):\n    # 找到多边形的纵向分割线\n    bbox = base.GetBoundingBox(True)\n    center = bbox.Center\n    start = rg.Point3d(bbox.Min.X, center.Y, 0)\n    end = rg.Point3d(bbox.Max.X, center.Y, 0)\n\n    # 将分割线延长到可包裹多边形的纵向长度\n    diagonal = bbox.Diagonal\n    length = diagonal.Length\n#    extension_factor = length\n    extension_factor = (length / 2.0)\n    start_extended = rg.Point3d.Add(start, rg.Vector3d(start - center) * extension_factor)\n    end_extended = rg.Point3d.Add(end, rg.Vector3d(end - center) * extension_factor)\n    \n#    return start_extended\n    \n    # 复制分割线并向左右两侧都复制一份\n    up_start = rg.Point3d(start_extended.X, start_extended.Y - diagonal.Y/2.0 - offset, 0)\n    up_end = rg.Point3d(end_extended.X, end_extended.Y - diagonal.Y/2.0 - offset, 0)\n    \n    down_start = rg.Point3d(start_extended.X, start_extended.Y + diagonal.Y/2.0 + offset, 0)\n    down_end = rg.Point3d(end_extended.X, end_extended.Y + diagonal.Y/2.0 + offset, 0)\n\n#    return [up_start, up_end, down_start, down_end]\n\n    # 将分割线的起点终点与复制结果的起点终点对应连线，组合成为两个矩形\n    up_up_cup = rg.LineCurve(start_extended, up_start)\n    up_down_cup = rg.LineCurve(end_extended, up_end)\n    up_start_cup = rg.LineCurve(start_extended, end_extended)\n    up_end_cup = rg.LineCurve(up_start, up_end)\n    \n    down_up_cup = rg.LineCurve(start_extended, down_start)\n    down_down_cup = rg.LineCurve(end_extended, down_end)\n    down_start_cup = rg.LineCurve(start_extended, end_extended)\n    down_end_cup = rg.LineCurve(down_start, down_end)\n    \n    # 连线为两个Zones\n    \n    up_zone = rg.Curve.JoinCurves([up_up_cup, up_down_cup, up_start_cup, up_end_cup])[0]\n    down_zone = rg.Curve.JoinCurves([down_up_cup, down_down_cup, down_start_cup, down_end_cup])[0]\n    \n    # 传回结果\n    return [up_zone, down_zone]\n\na = generate_rectangles(base)",
+  "language": "python",
+  "imports": [
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_nurbs/blob/a64f3a024d660d4df40a6d5838fbc14c1421d873/src/compas_nurbs/ghpython/surface_artist.py",
+  "repo": "compas-dev/compas_nurbs",
+  "repo_stars": 12,
+  "repo_description": "NURBS for COMPAS",
+  "license": "MIT",
+  "filepath": "src/compas_nurbs/ghpython/surface_artist.py",
+  "instruction": "Surface artist",
+  "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\nfrom compas.utilities import flatten\nfrom compas_rhino.artists import BaseArtist\n\n\nclass SurfaceArtist(BaseArtist):\n    \"\"\"\n    \"\"\"\n\n    def __init__(self, surface):\n        self.surface = surface\n\n    def draw(self):\n        point_count = self.surface.count\n        points = [rg.Point3d(*p) for pl in self.surface.control_points for p in pl]\n        weights = list(flatten(self.surface.weights))\n        knots_u = self.surface.knot_vector[0][1:-1]\n        knots_v = self.surface.knot_vector[1][1:-1]\n        degree = self.surface.degree\n        ns = rg.NurbsSurface.Create(3, weights is not None, degree[0] + 1, degree[1] + 1, point_count[0], point_count[1])\n        index = 0\n        for i in range(point_count[0]):\n            for j in range(point_count[1]):\n                if weights:\n                    cp = rg.ControlPoint(points[index], weights[index])\n                    ns.Points.SetControlPoint(i, j, cp)\n                else:\n                    cp = rg.ControlPoint(points[index])\n                    ns.Points.SetControlPoint(i, j, cp)\n                index += 1\n        for i in range(ns.KnotsU.Count):\n            ns.KnotsU[i] = knots_u[i]\n        for i in range(ns.KnotsV.Count):\n            ns.KnotsV[i] = knots_v[i]\n        assert(ns.IsValid)\n        return ns\n\n    def draw_points(self):\n        return rs.AddPoints(self.surface.control_points)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

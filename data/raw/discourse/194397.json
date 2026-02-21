@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/adding-a-text-entity-via-rhino-geometry-textentity-create/194397",
+  "topic_id": 194397,
+  "title": "Adding a text entity via Rhino.Geometry.TextEntity.Create()",
+  "question": "The method wants the following:\n\n\nimage\n579×547 28.6 KB\n\n\nBut I’m not sure what to reference for \nDimensionStyle\n\n\nI tried \nRhino.DocObjects.Tables.DimStyleTable.Current\n but that didn’t work\n\n\nCreating a DimStyle from scratch requires a million things…\n\n\nWhat am I missing here?\n\n\nI actually need to do this in GH and get text out…",
+  "code_blocks": [
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino.Geometry;\nusing Rhino.DocObjects;\nusing Rhino;\n\n\n\nRhinoDoc doc = RhinoDoc.ActiveDoc;\nDimensionStyle docStyle = Rhino.RhinoDoc.ActiveDoc.DimStyles.Current;\n\nTextEntity txt = TextEntity.Create(\"hello world\", Plane.WorldXY,docStyle, false, 100,0);\n\nGuid idTxt = doc.Objects.AddText(txt);\n\nRhinoApp.WriteLine(\" new txt with id {0}\",idTxt);\n\nDimensionStyle style = new DimensionStyle();\nstyle.Name = \"demo\";\nstyle.Id = new Guid();\nstyle.CopyFrom(docStyle);\nPlane pl = Plane.WorldXY;\npl.Origin = new Point3d(0,30,0);\nTextEntity txt2 = TextEntity.Create(\"hello world 2\", pl,style, false, 100,0);\nCurve[] crvs = txt2.CreateCurves(style,false,1.0,1.0);\n\nforeach (Curve crvi in crvs) doc.Objects.AddCurve(crvi);\n\ndoc.Views.Redraw();",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 180
+}

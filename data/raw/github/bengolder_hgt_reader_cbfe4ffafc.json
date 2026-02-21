@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/bengolder/hgt_reader/blob/704041edba1660a25c09ca2588c9a5deb14720fc/rhino.py",
+  "repo": "bengolder/hgt_reader",
+  "repo_stars": 1,
+  "repo_description": "read NASA SRTM .hgt files",
+  "license": "unknown",
+  "filepath": "rhino.py",
+  "instruction": "This module provides a simple script for converting hgt coordinates into\nRhino points. Keep in mind that the 'points' in an hgt file are based on\nlongitude and latitude, in the EPSG 4362 geographic...",
+  "code": "'''This module provides a simple script for converting hgt coordinates into\nRhino points. Keep in mind that the 'points' in an hgt file are based on\nlongitude and latitude, in the EPSG 4362 geographic projection. This means that\nat some places on the earth, the longitude (or 'y') coordinates are about 90\nmeters apart, while they are closer together in areas closer to the poles. The\nheight values are measured in meters about sea level, and therefore if these\ncoordinates are not reprojected, they greatly exaggerate the height of any\narea, by a factor up to about 90.\n'''\n\nimport Rhino\nimport scriptcontext\n\ndef to_point(xyz_tuple):\n    return Rhino.Geometry.Point3d(*xyz_tuple)\n\ndef grid_to_points(hgt_read_results):\n    for row in hgt_read_results:\n        for coord in row:\n            yield to_point(coord)\n\ndef grid_to_doc(hgt_read_results):\n    for row in hgt_read_results:\n        for coord in row:\n            scriptcontext.doc.Objects.AddPoint(*coord)\n    print 'complete'\n\ndef grid_to_point_cloud(hgt_read_results):\n    pt_cloud = Rhino.Geometry.PointCloud()\n    for row in hgt_read_results:\n        for coord in row:\n            pt_cloud.Add(to_point(coord))\n    return pt_cloud\n\ndef bake_point_cloud(hgt_read_results):\n    pc = grid_to_point_cloud(hgt_read_results)\n    scriptcontext.doc.Objects.AddPointCloud(pc)\n    print 'complete'\n\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

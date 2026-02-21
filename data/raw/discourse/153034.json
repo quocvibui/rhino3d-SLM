@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-count-each-implicit-grasshopper-cycle-to-select-tree-branch/153034",
+  "topic_id": 153034,
+  "title": "Python count each implicit Grasshopper cycle to select tree branch",
+  "question": "I got a python that I’m using the implicit grasshopper cycle to output a Tree.\n\n\nIn the Python I’m using a Tree input as Tree Access and another Tree input but as List Access in order to create this implicit grasshopper cycles.\n\n\nProblem I have is when I use ghpythonlib.treehelpers - tree_to_list() it will always select branch 0 and not the corresponding brach of the list input.\n\n\n\n\nScreenshot 2023-01-09 at 10.32.53\n602×740 81 KB\n\n\n\n\nI need iterate from the First tree structure with its corresponding brach from the Second Tree Struture:\n\n\n{0} uses {0:0} and {0,1}\n\n{1} uses {1:0} and {1,1}\n\n{2} uses {2:0} and {2,1}\n\n\nHowever using this code:\n\n\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\n\nValuesList=th.tree_to_list(Values)\n\nfor i in Names:\n    print i\n    print ValuesList\n\n\n\nI get this result:\n\n\n\n\nScreenshot 2023-01-10 at 10.08.20\n843×408 31.9 KB\n\n\n\n\nI found that I can use List instead of tree and loop through the count range using:\n\n\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\n\nfor n in range(0,N):\n    print n\n    NamesList=th.tree_to_list(Names, lambda x:x[n])\n    ValuesList=th.tree_to_list(Values, lambda x:x[n])\n\n    for i in NamesList:\n        print i\n        print ValuesList\n\n\n\nit works, but it returns a list and not a tree\n\n\n\n\nScreenshot 2023-01-10 at 10.08.35\n977×475 34.3 KB\n\n\n\n\nis there a way to find or the tree path for the inputs or count the implicit Grasshopper cycle to pass as an integer on  \nValuesList=th.tree_to_list(Values, lambda x:x[n])\n\n\nthank you\n\n\nPyTree_Test.gh\n (12.6 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\n\nValuesList=th.tree_to_list(Values)\n\nfor i in Names:\n    print i\n    print ValuesList",
+      "language": "python",
+      "author": "quicova",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\n\nfor n in range(0,N):\n    print n\n    NamesList=th.tree_to_list(Names, lambda x:x[n])\n    ValuesList=th.tree_to_list(Values, lambda x:x[n])\n\n    for i in NamesList:\n        print i\n        print ValuesList",
+      "language": "python",
+      "author": "quicova",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 1,
+  "views": 749
+}

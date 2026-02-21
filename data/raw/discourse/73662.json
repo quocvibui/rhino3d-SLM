@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/close-curve-issue/73662",
+  "topic_id": 73662,
+  "title": "Close Curve issue?",
+  "question": "Is there something screwy with rs.CloseCurve? and rs.IsCurveClosable?\n\nI am not getting any luck trying to close crvs using python. Even the example code under those commands is not doing anything.\n\nWhen I just run CloseCrv command in rhino the curve actually closes.\n\nI tried it on all kinds of different types of curves.\n\nI’ve even long-form wrote something that checks start and end point and checks for the gap between vs the overall lengths of the curve and tries to close it then. No dice. \n\nTolerance also is not doing anything, even if you make it a super tiny number.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs \n\n#ids = rs.ObjectsByGroup()\nids = rs.GetObjects('Select objects', filter = 0, group=True, preselect = True) # 512 annotation | 4 Crv\n# Check if we got anything selected\nif not ids: \n    print 'Nothing was selected. Exiting Command'\n\n\n# Clean up duplicate data in the list, make it set them back to the list\nremoveDup = list(set(ids))\nfor crv in removeDup:\n    if not rs.IsCurveClosed(crv) and rs.IsCurveClosable(crv):\n        print 'I should close this'\n        rs.CloseCurve(crv)\n        for s in range(3):\n            print 'I am trying to simplify this'\n            rs.SimplifyCurve(crv)",
+      "language": "python",
+      "author": "mikhail",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\norigCrv = rs.GetObject(\"Select curve\", preselect=True)\nprint (origCrv)\nclosedCrv = rs.CloseCurve(origCrv, 3) #Won't work beyond 1-1/4\" gap in open crv\nrs.SelectObject(closedCrv)\nprint (closedCrv)\nrs.ObjectLayer(closedCrv, \"closedCrvs\")\nrs.DeleteObject(origCrv)",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1868
+}

@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-gives-internal-server-error-if-requests-back-to-back/214385",
+  "topic_id": 214385,
+  "title": "Grasshopper gives internal server error if requests back to back",
+  "question": "Hi ,\n\n\nI have made one custom endpoint which calls the grasshopper definition and provides it a json input. I have hosted it on ec2 instance. when the first 2 or 3 requests come it works correctly and gives the results. when more requests come it starts to give \ninternal server error 500\n.\n\n\nTo be more precise there is no parallel request processing is going on. all the requests stays in queue and they get process sequentially. I am attaching the below code that I have implemented for the custom endpoint. Initially I thought may cache issue is there due to which it starts breaking after certain requests hence I clear it with \ngH_ComponentServer.Clear();\n but it does not work\n\n\n   private string ExecuteDefinitionSingleParameter(string definitionPath)\n   {\n       List<GrasshopperDataTree> inputParams = null;\n       List<GrasshopperDataTree> results = null;\n       GH_ComponentServer gH_ComponentServer = new GH_ComponentServer();\n\n       try\n       {\n\n           if (string.IsNullOrWhiteSpace(definitionPath))\n               throw new ArgumentNullException(nameof(definitionPath),\n                   \"Grasshopper definition path is missing or invalid.\");\n\n           inputParams = BuildInputParamsSingleParameter();\n           results = GrasshopperCompute.EvaluateDefinition(definitionPath, inputParams).ToList();\n\n           if (results == null || results.Count == 0)\n               throw new InvalidOperationException(\"No results returned from Grasshopper definition.\");\n\n           Log($\"Definition executed successfully: {definitionPath}\");\n\n           return \"Definition executed successfully\";\n       }\n       catch (Exception ex)\n       {\n           Log($\"Error in ExecuteDefinition: {ex}\");\n           return $\"Error running analyzer: {ex.Message}\";\n       }\n       finally\n       {\n           // CRITICAL: break references\n           results = null;\n           inputParams = null;\n           gH_ComponentServer.Clear();\n           Rhino.RhinoDoc.ActiveDoc?.Objects.Clear();\n       ...",
+  "code_blocks": [
+    {
+      "code": "private string ExecuteDefinitionSingleParameter(string definitionPath)\n   {\n       List<GrasshopperDataTree> inputParams = null;\n       List<GrasshopperDataTree> results = null;\n       GH_ComponentServer gH_ComponentServer = new GH_ComponentServer();\n\n       try\n       {\n\n           if (string.IsNullOrWhiteSpace(definitionPath))\n               throw new ArgumentNullException(nameof(definitionPath),\n                   \"Grasshopper definition path is missing or invalid.\");\n\n           inputParams = BuildInputParamsSingleParameter();\n           results = GrasshopperCompute.EvaluateDefinition(definitionPath, inputParams).ToList();\n\n           if (results == null || results.Count == 0)\n               throw new InvalidOperationException(\"No results returned from Grasshopper definition.\");\n\n           Log($\"Definition executed successfully: {definitionPath}\");\n\n           return \"Definition executed successfully\";\n       }\n       catch (Exception ex)\n       {\n           Log($\"Error in ExecuteDefinition: {ex}\");\n           return $\"Error running analyzer: {ex.Message}\";\n       }\n       finally\n       {\n           // CRITICAL: break references\n           results = null;\n           inputParams = null;\n           gH_ComponentServer.Clear();\n           Rhino.RhinoDoc.ActiveDoc?.Objects.Clear();\n           GC.Collect();\n           GC.WaitForPendingFinalizers();\n           GC.Collect();\n       }",
+      "language": "csharp",
+      "author": "shivu",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 3,
+  "views": 40
+}

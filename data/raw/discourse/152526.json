@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/changing-layer-event/152526",
+  "topic_id": 152526,
+  "title": "Changing layer event?",
+  "question": "Hello\n\nWhat is the event used when an object changes its layer?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef MyLayerChangeEvent(sender, e):\n    if e.OldAttributes.LayerIndex != e.NewAttributes.LayerIndex: \n        layer = scriptcontext.doc.Layers[e.NewAttributes.LayerIndex]\n        print \"{} changed layer to: {}\".format(e.RhinoObject, layer.FullPath) \n    \ndef MyToggleEvent():\n    my_event_name = \"MyLayerChangeEvent\"\n    \n    if scriptcontext.sticky.has_key(my_event_name):\n        print \"removing event\"\n        func = scriptcontext.sticky[my_event_name]\n        scriptcontext.doc.ModifyObjectAttributes -= func\n        scriptcontext.sticky.Remove(my_event_name)\n    else:\n        print \"adding event\"\n        func = eval(my_event_name)\n        scriptcontext.sticky[my_event_name] = func\n        scriptcontext.doc.ModifyObjectAttributes += func\n\nMyToggleEvent()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 351
+}

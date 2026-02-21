@@ -1,0 +1,65 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-file-size-of-elements-in-mb/64816",
+  "topic_id": 64816,
+  "title": "Rhino file - size of elements in MB",
+  "question": "Hello,\n\nIs there any way to know, within a Rhino file, which elements, curves, lines, surfaces, solids etc… occupy a large number of megabytes? The purpose is to optimize the file size, omitting anything which could be deleted, if too big and not strictly necessary in the layers organization.\n\nThanks\n\nL.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef SelLarge():\n    \n    count = 1\n    if sc.sticky.has_key(\"MEMORYUSECOUNT\"):\n        count = sc.sticky[\"MEMORYUSECOUNT\"]",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef SelHighPolygonCount():\n            \n    ids = rs.ObjectsByType(8+16+32)\n    \n    if not ids:\n        print \"No meshes or objects with render meshes found.\"",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef SelHighPolygonCount():\n            \n    ids = rs.ObjectsByType(8+16+32)\n    \n    if not ids:\n        print \"No meshes or objects with render meshes found.\"",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n \ndef MeshCountFromBlock(id, blnTris):\n\n    bObjs = rs.BlockObjects(rs.BlockInstanceName(id))\n    \n    for bId in bObjs:",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n \ndef MeshCountFromBlock(id, blnTris):\n\n    bObjs = rs.BlockObjects(rs.BlockInstanceName(id))\n    \n    for bId in bObjs:",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 32,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef SelHighPolygonCount():\n            \n    ids = rs.ObjectsByType(8+16+32)\n    \n    if not ids:\n        print \"No meshes or objects with render meshes found.\"\n        return\n\n    selCount = 0\n    while True:\n        memInfo = False\n        if sc.sticky.has_key(\"MEM_SIZE_INFO\"):\n            memInfo = sc.sticky[\"MEM_SIZE_INFO\"]\n        polyCount = 5000\n        if sc.sticky.has_key(\"POLYCOUNT\"):\n            polyCount = sc.sticky[\"POLYCOUNT\"] \n        labels = True\n        if sc.sticky.has_key(\"MEMHOGLABELS\"):\n            labels = sc.sticky[\"MEMHOGLABELS\"]\n        blnTris = True\n        if sc.sticky.has_key(\"TRIANGULATE_QUADS\"):\n            blnTris = sc.sticky[\"TRIANGULATE_QUADS\"]\n            \n            \n        gi = Rhino.Input.Custom.GetInteger()\n        gi.SetDefaultNumber(polyCount)\n        gi.SetCommandPrompt(\"Find objects with mesh faces greater than\")\n        gi.AcceptNothing(True)\n        #gi.SetCommandPrompt(\"Set the number of objects to label\")\n        \n        opMeshInfo = Rhino.Input.Custom.OptionToggle(memInfo, \"No\", \"Yes\")\n        opLabels = Rhino.Input.Custom.OptionToggle(labels, \"No\", \"Yes\")\n        opTris = Rhino.Input.Custom.OptionToggle(blnTris, \"No\", \"Yes\")\n        \n        gi.AddOptionToggle(\"AddLabels\", opLabels)\n        gi.AddOptionToggle(\"MemoryInfo\", opMeshInfo)\n        gi.AddOptionToggle(\"Triangles\", opTris)\n        \n        rc = gi.Get()\n        \n        if gi.CommandResult()!=Rhino.Commands.Result.Success:\n              return None\n        if rc==Rhino.Input.GetResult.Number:\n            polyCount = gi.Number()\n            sc.sticky[\"POLYCOUNT\"] = polyCount\n            break\n            \n        elif rc==Rhino.Input.GetResult.Nothing:\n            break\n            \n        elif rc==Rhino.Input.GetResult.Option:\n            memInfo = opMeshInfo.CurrentValue\n            sc.sticky[\"MEM_SIZE_INFO\"]= memInfo\n            labels = opLabels.CurrentValue\n            sc.sticky[\"MEMHOGLABELS\"] = labels\n            blnTris = opTris.CurrentValue\n            sc.sticky[\"TRIANGULATE_QUADS\"]= blnTris\n            continue\n        \n    #polyCount = rs.GetInteger(\"There are \"+ str(len(temp)) +\" objects. How many would you like to label?\",oldMark,1)\n    if not polyCount: return\n    selIds = []\n    strPolys = \" polygons. \"\n    if blnTris: strPolys = \" triangles. \"\n    rs.EnableRedraw(False)\n    for id in ids:\n        if rs.IsObjectSelectable(id) :\n            strInfo = None\n            obj = sc.doc.Objects.Find(id)\n            x = Rhino.DocObjects.RhinoObject.GetRenderMeshes([obj], True, False)\n            meshes =  obj.GetMeshes(Rhino.Geometry.MeshType.Render)\n            pass\n\n            mCount = 0\n            for n in range(len(meshes)):\n                if blnTris:\n                    meshes[n].Faces.ConvertQuadsToTriangles()\n                mCount +=  meshes[n].Faces.Count\n\n            if mCount >= polyCount:\n                selCount += 1\n                strInfo = str(mCount) + strPolys + \"\\n\" \n\n                bb = rs.BoundingBox(id)\n                pt = bb[0] + ((bb[6]-bb[0])/2)\n                selIds.append(id)\n                if memInfo:\n                    mem = obj.Geometry.MemoryEstimate()/100\n                    strInfo = strInfo + str(mem) + \" k memory usage estimate.\"\n                print strInfo\n                if labels:\n                    dot = rs.AddTextDot(strInfo,pt)\n                    rs.ObjectLayer(dot, rs.ObjectLayer(id))\n                    rs.AddObjectsToGroup([id, dot], rs.AddGroup())\n                    selIds.append(dot)\n\n    rs.SelectObjects (selIds)\n    strOb = \" objects \"\n    if selCount == 1: strOb = \" object \"\n    print str(selCount)+ strOb +\"found with at least \" + str(polyCount) + \" polygons.\"\n    rs.EnableRedraw(True)\n    \nif __name__ == \"__main__\":\n    SelHighPolygonCount()",
+      "language": "python",
+      "author": "pawel",
+      "post_number": 35,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 35,
+  "views": 4155
+}

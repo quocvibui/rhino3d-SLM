@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python3-object-created-using-rhino3dm-how-to-convert-it-to-rhinocommon-object/101759",
+  "topic_id": 101759,
+  "title": "Python3 object created using rhino3dm: how to convert it to RhinoCommon Object?",
+  "question": "I have created a Mesh object using \nRhino3dm\n. When created, it gives a message as below:\n\n{0}\n\n0. <rhino3dm._rhino3dm.Mesh object at 0x00000153122CB8B0>\n\n\nWhat is this code? How can I convert this object to a Rhino.Geometry Object (using RhinoCommon.dll)?\n\n\nps. doing all this in Python3",
+  "code_blocks": [
+    {
+      "code": "# sample: create model, add mesh and write to .3dm file\nmodel = rhino3dm.File3dm()\nmodel.AddMesh(mesh)\nmodel.Write('example.3dm')",
+      "language": "unknown",
+      "author": "will",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "extern alias R3dmIo;\nextern alias RCommon;\nusing R3 = R3dmIo::Rhino.Geometry;\nusing RC = RCommon::Rhino.Geometry;\n\n/// <summary>\n/// Converts a RhinoCommon Matrix to Rhino3dmIO Matrix\n/// </summary>\n/// <param name=\"rcommonMatrix\">The RhinoCommon matrix</param>\n/// <returns>The converted Rhino3dmIO matrix</returns>\npublic static R3.Matrix ConvertMatrixFromRCommonToR3dm(RC.Matrix rcommonMatrix)\n{\n    R3.Matrix r3dmMatrix = new R3.Matrix(rcommonMatrix.RowCount, rcommonMatrix.ColumnCount);\n    for (int i = 0; i < rcommonMatrix.RowCount; i++)\n    {\n        for (int j = 0; j < rcommonMatrix.ColumnCount; j++)\n        {\n            r3dmMatrix[i, j] = rcommonMatrix[i, j];\n        }\n    }\n    return r3dmMatrix;\n}",
+      "language": "csharp",
+      "author": "emilpoulsen",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 102,
+  "posts_count": 12,
+  "views": 1924
+}

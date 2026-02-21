@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/EricM81/RhinoShare/blob/3fac09acbaa08446ac4847a103981b8c4bbb975e/Scripts/CopyWithHistory.py",
+  "repo": "EricM81/RhinoShare",
+  "repo_stars": 4,
+  "repo_description": "Personal scripts for Rhino3d",
+  "license": "MIT",
+  "filepath": "Scripts/CopyWithHistory.py",
+  "instruction": "Copy with history",
+  "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport eLib as e\n\n\n\n\ndef renameLayers():\n    layersToRename = []\n    prompt = \"Should pasted objects be on a different layer?\"\n    while True:\n        answer = rs.GetString(prompt, \"No\", [\"Yes\"])\n        if answer == \"Yes\":\n            layerID = rs.GetLayer(\"Select layer to rename:\")\n            if not layerID:\n                break\n            oldName = rs.LayerName(layerID)\n            print(oldName)              \n            \n            \n            newName = rs.GetString(\"New Layer name for pasted objects\", e.removeLayerParents(oldName) + \"-Copy\")\n            newName = str.replace(oldName, e.removeLayerParents(oldName), newName)\n            print(newName)              \n            \n            if not newName:\n                break\n            layersToRename.append(e.LayerName(layerID, oldName, newName))\n            prompt = \"Would you like to change any other layers?\"\n        else:\n            break\n    \n    return layersToRename\n\n\ndef CopyWithHistory():\n\n    objs = rs.GetObjects(\"Select objects to copy with history\", preselect=True)\n    if objs: \n        layersToRename =  renameLayers()\n\n        if 0 < len(layersToRename):\n            for layer in layersToRename:\n               e.renameLayer(layer.oldName, layer.newName)\n\n\n        rs.Command(\"_CopyToClipboard\", False)\n        rs.HideObjects(objs)\n        \n        if 0 < len(layersToRename):\n            for layer in layersToRename:\n               e.renameLayer(layer.newName, layer.oldName)\n                \n        rs.Command(\"_Paste\", False)\n        pastedCount = len(rs.SelectedObjects())\n        rs.UnselectAllObjects()\n        rs.Command(\"_SelObjectsWithHistory\", False)\n        parentCount = len(rs.SelectedObjects())\n        rs.InvertSelectedObjects()\n        strResponse = \"Copied {0:d} with history. {1:d} root parents without history are selected and can be moved to a new location.\".format(pastedCount, parentCount)\n\n        print(strResponse)\n        \n\n\nif (__name__ == \"__main__\"):\n    CopyWithHistory()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

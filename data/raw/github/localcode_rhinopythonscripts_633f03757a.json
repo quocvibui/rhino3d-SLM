@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/localcode/rhinopythonscripts/blob/34c5314a276e9d4d79a62da6bed96a8112552c2f/Smart.py",
+  "repo": "localcode/rhinopythonscripts",
+  "repo_stars": 62,
+  "repo_description": "A place to dump and share python scripts for use in McNeel's Rhino and Grasshopper",
+  "license": "unknown",
+  "filepath": "Smart.py",
+  "instruction": "A module for wrapping geometry with UserString and Attribute Dictionaries",
+  "code": "'''A module for wrapping geometry with UserString and Attribute Dictionaries'''\n\nimport Rhino\n\nclass SmartFeature(object):\n    def __init__(self, rhinoObjectOrTuple):\n        self._parseConstructor(rhinoObjectOrTuple)\n\n    def _parseConstructor(self, rhinoObjectOrTuple):\n        # determine if it is a tuple\n        kind = type(rhinoObjectOrTuple)\n        if kind == tuple or kind == list:\n            # build from geom, user string pair\n            pair = rhinoObjectOrTuple\n            self.geom = self._filterGeometry(pair[0]) # geometry\n            self.attributes = pair[1] # properties (as dictionary)\n        else: # assume RhinoObject\n            rhObj = rhinoObjectOrTuple\n            self.geom = self._filterGeom(rhObj.Geometry)\n            self.attributes = {}\n            numAtts = rhObj.Attributes.UserStringCount\n            rawAtts = rhObj.Attributes.GetUserStrings()\n            keys = rawAtts.AllKeys\n            for key in keys:\n                self.attributes[key] = rhObj.Attributes.GetUserString(key)\n\n    def _filterGeom(self, geometry):\n        if type(geometry) == Rhino.Geometry.Point:\n            return geometry.Location\n        else:\n            return geometry\n\n    def objAttributes(self, objectAttributes):\n        for key in self.attributes:\n            objectAttributes.SetUserString(key, self.attributes[key])\n        return objectAttributes\n\n\ndef RhinoObjectsToSmartFeatures(RhinoObjectList):\n    return [SmartFeature(obj) for obj in RhinoObjectList]\n\ndef replaceGeometries(smartFeatures, geometries):\n    out = []\n    for i in range(len(smartFeatures)):\n        feature = smartFeatures[i]\n        geometry = geometries[i]\n        feature.geom = geometry\n        out.append(feature)\n    return out\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

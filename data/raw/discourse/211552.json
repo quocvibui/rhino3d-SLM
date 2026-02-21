@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-instanceobject-usesdefinition-returns-false-positives/211552",
+  "topic_id": 211552,
+  "title": "Bug: InstanceObject.UsesDefinition returns false positives",
+  "question": "For any integer argument for \ndefinitionIndex\n of\n\n\nhttps://developer.rhino3d.com/api/rhinocommon/rhino.docobjects.instanceobject/usesdefinition\n\nthe return value is \nTrue\n.\n\n\nThis method is used in rhinoscriptsyntax’s \nAddBlock\n. Currently, any blocks containing instances are prevented from being redefined.\n\n\nOne workaround is to ignore the return value and instead only use the value of \nnestingLevel\n.\n\n\n\n\n\nPython 2 script\n\n\nfrom __future__ import print_function\n\nimport Rhino\n\ndef main():\n    \n    res, objref = Rhino.Input.RhinoGet.GetOneObject(\n        prompt=\"Select block instance\",\n        acceptNothing=False,\n        filter=Rhino.DocObjects.ObjectType.InstanceReference)\n    \n    rdInst = objref.Object()\n    sEval=\"rdInst\"; print(sEval, '=', eval(sEval))\n    rdDef = rdInst.InstanceDefinition\n    sEval=\"rdDef\"; print(sEval, '=', eval(sEval))\n    sEval=\"rdDef.Index\"; print(sEval, '=', eval(sEval))\n    \n    for definitionIndex in range(-1,3):\n        print('-'*10)\n        sEval = \"definitionIndex\"; print(sEval,'=',eval(sEval))\n        sEval = \"rdInst.UsesDefinition(definitionIndex)\"; print(sEval,'=',eval(sEval))\n    \n    print('-'*10)\n    \n    for definitionIndex in range(-1,3):\n        print('-'*10)\n        sEval = \"definitionIndex\"; print(sEval,'=',eval(sEval))\n        sEval = \"rdDef.UsesDefinition(definitionIndex)\"; print(sEval,'=',eval(sEval))\n\nif __name__ == '__main__': main()\n\n\n\n\n\nInstanceObject_UsesDefinition_Study.3dm\n (64.3 KB)\n\n\n\n\n\nScript output\n\n\nrdInst = InstanceObject: (unnamed) (0)\nrdDef = InstanceDefinition: testBlock (0)\nrdDef.Index = 0\n----------\ndefinitionIndex = -1\nrdInst.UsesDefinition(definitionIndex) = (True, 0)\n----------\ndefinitionIndex = 0\nrdInst.UsesDefinition(definitionIndex) = (True, 1)\n----------\ndefinitionIndex = 1\nrdInst.UsesDefinition(definitionIndex) = (True, 0)\n----------\ndefinitionIndex = 2\nrdInst.UsesDefinition(definitionIndex) = (True, 0)\n----------\n----------\ndefinitionIndex = -1\nrdDef.UsesDefinition(definitionIndex) = 0\n------...",
+  "code_blocks": [
+    {
+      "code": "from __future__ import print_function\n\nimport Rhino\n\ndef main():\n    \n    res, objref = Rhino.Input.RhinoGet.GetOneObject(\n        prompt=\"Select block instance\",\n        acceptNothing=False,\n        filter=Rhino.DocObjects.ObjectType.InstanceReference)\n    \n    rdInst = objref.Object()\n    sEval=\"rdInst\"; print(sEval, '=', eval(sEval))\n    rdDef = rdInst.InstanceDefinition\n    sEval=\"rdDef\"; print(sEval, '=', eval(sEval))\n    sEval=\"rdDef.Index\"; print(sEval, '=', eval(sEval))\n    \n    for definitionIndex in range(-1,3):\n        print('-'*10)\n        sEval = \"definitionIndex\"; print(sEval,'=',eval(sEval))\n        sEval = \"rdInst.UsesDefinition(definitionIndex)\"; print(sEval,'=',eval(sEval))\n    \n    print('-'*10)\n    \n    for definitionIndex in range(-1,3):\n        print('-'*10)\n        sEval = \"definitionIndex\"; print(sEval,'=',eval(sEval))\n        sEval = \"rdDef.UsesDefinition(definitionIndex)\"; print(sEval,'=',eval(sEval))\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 66
+}

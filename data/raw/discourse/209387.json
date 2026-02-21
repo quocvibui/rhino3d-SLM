@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bitmap-texture-filename-modification/209387",
+  "topic_id": 209387,
+  "title": "Bitmap texture filename modification",
+  "question": "Hello everyone,\n\n\nI’m trying something like this code to modify the path to the image used for a texture:\n\n\nstring referenceImageDir = \"path/to/reference/dir\"\n\nforeach(var material in doc.Materials) {\n  var texturePath = material.GetBitmapTexture().FileReference.FullPath\n                    ?? material.GetBitmapTexture().FileName;\n  var textureDir = Path.GetDirectoryName(texturePath);\n  if (textureDir == referenceImageDir) continue;\n  var textureFileName = Path.GetFileName(texturePath);\n  var newTexturePath = Path.Combine(referenceImageDir, textureFileName);\n  if (File.Exists(newTexturePath)) {\n    var texture = material.GetBitmapTexture();\n    texture.FileName = newTexturePath;\n    texture.FileReference = FileReference.CreateFromFullPath(newTexturePath);\n    material.SetBitmapTexture(texture);\n    material.CommitChanges();\n  }\n}\n\n\n\nWhen I check my objects the path is updated:\n\n\nforeach(var rhinoObject in objs) {\n  var matIndex = rhinoObject.Attributes.MaterialIndex;\n  var material = doc.Materials.FindIndex(matIndex);\n  if (material == null) continue;\n  var texturePath = material.GetBitmapTexture().FileReference.FullPath\n                    ?? material.GetBitmapTexture().FileName;\n}\n\n\n\nBut then when I check the materials in the app, it is not updated and naturally, when I save and reload the file, all the filenames are reset.\n\n\nWhat am I missing?",
+  "code_blocks": [
+    {
+      "code": "private void RhinoDoc_EndOpenDocument(object? sender, DocumentOpenEventArgs e) {\n    string referenceImageDir = \"Reference/Images/Dir\";\n    foreach(var material in e.Document.RenderMaterials) {\n        HandleRenderContent(material, referenceImageDir);\n    }\n}",
+      "language": "csharp",
+      "author": "Ali_NEMATOLLAHI",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 87
+}

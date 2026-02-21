@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/changing-the-code-of-a-ghpython-script-component-with-a-rhinocommonplugin/163836",
+  "topic_id": 163836,
+  "title": "Changing the code of a GHPython Script Component with a RhinoCommonPlugin",
+  "question": "I’m creating a RhinoCommon Plugin that let’s me create \nGHPython Script\n Components in GH by executing a command in Rhino.\n\nI have installed \nGrasshopper\n and \nRhinoCommon\n with NuGet in my project and I’m able to successfully create \nGHPython Script\n Components like this:\n\n\nvar pythonComponentGuid = new Guid(\"410755b1-224a-4c1e-a407-bf32fb45ea7e\");\nvar pythonComponent = Instances.ComponentServer.EmitObject(pythonComponentGuid) as IGH_Component;\nghDoc.AddObject(pythonComponent, false);\nghDoc.NewSolution(false);\n\n\n\nI want to set the python code of that component within my plugin but I cannot figure out how to do it.\n\n\nI tried casting it to \nGhPython.Component.ZuiPythonComponent\n but I don’t know how to import GhPython into my project.",
+  "code_blocks": [
+    {
+      "code": "// Get the current active Grasshopper document.\nGH_Document ghDoc = Grasshopper.Instances.ActiveCanvas.Document;\n\n// Check if a document is open.\nif (ghDoc == null)\n{\n    Console.WriteLine(\"No open document found\");\n    return Result.Failure;\n}\n\n// Get all the components in the document.\nIList<IGH_DocumentObject> components = ghDoc.Objects;\n\n// Print the name of each component.\nforeach (var component in components)\n{\n    Console.WriteLine(\"Component name: \" + component.Name);\n    Console.WriteLine(\"Component type: \" + component.GetType().ToString());\n    Console.WriteLine(\"Component GUID: \" + component.ComponentGuid);\n}",
+      "language": "csharp",
+      "author": "Robin_Wiethuechter",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "var pythonComponentGuid = new Guid(\"410755b1-224a-4c1e-a407-bf32fb45ea7e\");\nvar pythonComponent = Instances.ComponentServer.EmitObject(pythonComponentGuid) as IGH_Component;\nghDoc.AddObject(pythonComponent, false);\nghDoc.NewSolution(false);",
+      "language": "csharp",
+      "author": "Robin_Wiethuechter",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 386
+}

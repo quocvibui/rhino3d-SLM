@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ironpython-trim-breps-with-nurbs-surface-rhino-geometry/132954",
+  "topic_id": 132954,
+  "title": "IronPython | Trim Breps with NURBS Surface //Rhino.Geometry",
+  "question": "Hey Guys,\n\nI’m very new to coding altough I have some experience with GH already.\n\nFor an uni project I generated a wavy (non-planar) NURBS surface which I want to cut multiple breps with. I thought about extruding it to become a solid brep and then to do an boolean difference: I was trying to somehow RhinoGeometry.Extrusion it but this is only working with (planar) curves. I also converted it into a Brep but don’t know how to conitnue further and I was thinking if I could maybe instead of creating a NURBS surface directly create a solid out of the points/polycurves I got but I don’t know how.\n\n\nDo you guys have any suggestions? Maybe there is an possibility to cut/trim Breps with the NURBS surface directly?\n\n\nIf you need the script to follow here it is:\n\n\n#   import libries\nimport Rhino.Geometry as rg\nimport math\n\n# definitions\ns = 2.0\na = 1.5\nd = 4\nw = 0.3\ndis = 0.3\nplank_count = int(math.floor(x/(w+dis))-1)\n\n#   create lists\npts, nested_pts, my_polylines, planks_uncut, planks = [], [], [], [], []\n\n# create 3D Points\nfor i in range (x):\n    sub_pts = []\n    for j in range (y):\n        k = (math.sin(i*i*i*i-i*i*i+i*i-i+a) + math.cos(j*j*j*j-j*j*j+j*j-j+a)) * s + 10\n        pt = rg.Point3d(i,j,k)\n        pts.append(pt)\n        \n        # store into sublist\n        sub_pts.append(pt)\n    nested_pts.append(sub_pts)\n\n# create polycurves\nfor i in nested_pts:\n    my_polyline = rg.Polyline(i)\n    my_polycurves = my_polyline.ToPolylineCurve()\n    my_polylines.append(my_polycurves)\n\n# create NurbsSurface out of 3D Points\nsrf = rg.NurbsSurface.CreateFromPoints(pts, x, y, d, d)\n\n# create planks\nfor i in range(0,plank_count):\n    Point0 = rg.Point3d(0,i*(w+dis),0)\n    Point1 = rg.Point3d(x,(i+1)*w+(i*dis),25)\n    plank_bbox = rg.BoundingBox(Point0, Point1)\n    plank_brep = rg.Brep.CreateFromBox(plank_bbox)\n    planks_uncut.append(plank_brep)\n\n# cut planks with surface/polylines <--  <--  <--  <--  <--  <-- HOW?\n# ¯\\_(ツ)_/¯\n\n\"\"\"\n# cut planks with surface\nfor r in planks_uncut:\n...",
+  "code_blocks": [
+    {
+      "code": "#   import libries\nimport Rhino.Geometry as rg\nimport math\n\n# definitions\ns = 2.0\na = 1.5\nd = 4\nw = 0.3\ndis = 0.3\nplank_count = int(math.floor(x/(w+dis))-1)\n\n#   create lists\npts, nested_pts, my_polylines, planks_uncut, planks = [], [], [], [], []\n\n# create 3D Points\nfor i in range (x):\n    sub_pts = []\n    for j in range (y):\n        k = (math.sin(i*i*i*i-i*i*i+i*i-i+a) + math.cos(j*j*j*j-j*j*j+j*j-j+a)) * s + 10\n        pt = rg.Point3d(i,j,k)\n        pts.append(pt)\n        \n        # store into sublist\n        sub_pts.append(pt)\n    nested_pts.append(sub_pts)\n\n# create polycurves\nfor i in nested_pts:\n    my_polyline = rg.Polyline(i)\n    my_polycurves = my_polyline.ToPolylineCurve()\n    my_polylines.append(my_polycurves)\n\n# create NurbsSurface out of 3D Points\nsrf = rg.NurbsSurface.CreateFromPoints(pts, x, y, d, d)\n\n# create planks\nfor i in range(0,plank_count):\n    Point0 = rg.Point3d(0,i*(w+dis),0)\n    Point1 = rg.Point3d(x,(i+1)*w+(i*dis),25)\n    plank_bbox = rg.BoundingBox(Point0, Point1)\n    plank_brep = rg.Brep.CreateFromBox(plank_bbox)\n    planks_uncut.append(plank_brep)\n\n# cut planks with surface/polylines <--  <--  <--  <--  <--  <-- HOW?\n# ¯\\_(ツ)_/¯\n\n\"\"\"\n# cut planks with surface\nfor r in planks_uncut:\n    cutted_planks = rg.Brep.Trim(r, srf, 1)\n    cutted_planks = rg.Brep.CreateBooleanIntersection(r, Brep2, 1)\n    planks.append(cutted_planks)\n    \"\"\"",
+      "language": "python",
+      "author": "Error.ByNight",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 1,
+  "views": 584
+}

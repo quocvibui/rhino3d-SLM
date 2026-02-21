@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/potential-memory-leak-in-rhino-7-for-mesh-split-method/123854",
+  "topic_id": 123854,
+  "title": "Potential memory leak in Rhino 7 for Mesh.Split method",
+  "question": "Hello,\n\n\nI have an issue with python code I wrote and cannot figure out what to do to fix it. I am trying to split a large number of intersecting meshes between each other. All the meshes are initially made conformal and contain triangular faces only, so the Split command should work fine. The problem I found is that when I use Mesh.Split method (rhinocommon), Rhino 7 consumes large amount of memory and does not release it at all. Every time I run the script on about 70 meshes containing in total ~160K faces, Rhino 7 consumes ~1Gb of memory. This does not happen in Rhino 6, but Mesh.Split method does not produce adequate results either (I believe there were changes done to mesh intersection/split algorithms for Rhino 7). Below is a part of my python script.\n\n\ndef SplitMeshes():\n    go = Rhino.Input.Custom.GetObject()\n    \n    iniMeshes = list()\n    newMeshes = list()\n    for objRef in go.Objects():\n        rObj = objRef.Object()\n        if rObj.IsNormal and rObj.ObjectType == Rhino.DocObjects.ObjectType.Mesh:\n            iniMeshes.append(rObj.DuplicateGeometry())\n    \n    for i,ma in enumerate(iniMeshes):\n        print 'Working on mesh: ', i+1\n        splitMeshes = ma.Split(iniMeshes)\n        if len(splitMeshes) > 1:\n            newMeshes.append(splitMeshes)\n            rs.DeleteObject(go.Object(i).ObjectId)\n    \n    for ma in iniMeshes:\n        ma.Dispose()\n    del iniMeshes[:]\n\n\n\nOr maybe I don’t clear/dispose some containers or objects properly?",
+  "code_blocks": [
+    {
+      "code": "def SplitMeshes():\n    go = Rhino.Input.Custom.GetObject()\n    \n    iniMeshes = list()\n    newMeshes = list()\n    for objRef in go.Objects():\n        rObj = objRef.Object()\n        if rObj.IsNormal and rObj.ObjectType == Rhino.DocObjects.ObjectType.Mesh:\n            iniMeshes.append(rObj.DuplicateGeometry())\n    \n    for i,ma in enumerate(iniMeshes):\n        print 'Working on mesh: ', i+1\n        splitMeshes = ma.Split(iniMeshes)\n        if len(splitMeshes) > 1:\n            newMeshes.append(splitMeshes)\n            rs.DeleteObject(go.Object(i).ObjectId)\n    \n    for ma in iniMeshes:\n        ma.Dispose()\n    del iniMeshes[:]",
+      "language": "python",
+      "author": "pyati",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 630
+}

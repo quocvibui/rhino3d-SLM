@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sweep1-is-completely-baffling/23041",
+  "topic_id": 23041,
+  "title": "Sweep1 is completely baffling",
+  "question": "Hi All,\n\n\nI have been banging my head against this simple bit of code for the better part of today and I only seem to find more issues.\n\n\nWhat I’m trying to do is to take a closed curve. Generate a shape with two arcs and a line and sweep it along that curve. My code for this is shown here:\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport math\nimport scriptcontext\n\ndef _makeArcFromAngle(plane, cPoint, radius, startAngle, endAngle):\n    center = plane.PointAt(cPoint[0], cPoint[1])\n    circ = Rhino.Geometry.Circle(plane, center, radius)\n    angleInt = Rhino.Geometry.Interval(startAngle, endAngle)\n    arc = Rhino.Geometry.Arc(circ, angleInt)\n    return arc\ndef getMidpointFromCrv(crv):\n    dom = crv.Domain\n    return dom.Mid\n\ndef buildSharpBoss1(crv, radius):\n\n    curve = rs.coercecurve(crv)\n    if not curve:\n        return 0\n    subcurves = curve.DuplicateSegments()\n    if len(subcurves)>1:\n        focCurve = subcurves[0]\n    else:\n        focCurve = curve\n    focCrvMidpoint = getMidpointFromCrv(focCurve)\n    zVector = Rhino.Geometry.Vector3d(0,0,1)\n    xDir = Rhino.Geometry.Vector3d.CrossProduct(focCurve.TangentAt(focCrvMidpoint),zVector)\n    plane = Rhino.Geometry.Plane(focCurve.PointAt(focCrvMidpoint), xDir,zVector)\n    lArc = _makeArcFromAngle(plane, (-radius, radius), radius, 3*math.pi/2, 2*math.pi)\n    rArc = _makeArcFromAngle(plane, (radius, radius), radius, math.pi, 3*math.pi/2)\n    profile = Rhino.Geometry.PolyCurve()\n    profile.Append(lArc)\n    profile.Append(rArc)\n    baseLine = Rhino.Geometry.Line(profile.PointAtEnd,profile.PointAtStart)\n    profile.Append(baseLine)\n    sweepBrep = Rhino.Geometry.Brep.CreateFromSweep(curve,profile,True,scriptcontext.doc.ModelAbsoluteTolerance)\n    output = []\n    for i in sweepBrep:\n        output.append(scriptcontext.doc.Objects.AddBrep(i))\n    scriptcontext.doc.Views.Redraw()\n    return output\n\nif __name__ == \"__main__\":\n    for i in rs.SelectedObjects():\n        if rs.IsCurve:\n            buildSharpBoss1(i,1)\n\n\n\nUsi...",
+  "code_blocks": [
+    {
+      "code": "def buildSharpBoss2(crv, radius):\n    curve = rs.coercecurve(crv)\n    if not curve:\n        return 0\n    subcurves = curve.DuplicateSegments()\n    if len(subcurves)>1:\n        focCurve = subcurves[0]\n    else: \n        focCurve = curve\n    focCrvMidpoint = getMidpointFromCrv(focCurve)\n    zVector = Rhino.Geometry.Vector3d(0,0,1)\n    xDir = Rhino.Geometry.Vector3d.CrossProduct(focCurve.TangentAt(focCrvMidpoint),zVector)\n    plane = Rhino.Geometry.Plane(focCurve.PointAt(focCrvMidpoint), xDir,zVector)\n    lArc = _makeArcFromAngle(plane, (-radius, radius), radius, 3*math.pi/2, 2*math.pi)\n    rArc = _makeArcFromAngle(plane, (radius, radius), radius, math.pi, 3*math.pi/2)\n    profile = Rhino.Geometry.PolyCurve()\n    profile.Append(lArc)\n    profile.Append(rArc)\n    baseLine = Rhino.Geometry.Line(profile.PointAtEnd,profile.PointAtStart)\n    profile.Append(baseLine)\n\n    sweep = Rhino.Geometry.SweepOneRail()\n    sweep.AngleToleranceRadians = scriptcontext.doc.ModelAngleToleranceRadians\n    sweep.ClosedSweep = True\n    sweep.MiterType=1\n    sweep.SweepTolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    sweep.SetToRoadlikeTop()\n    sweep.SetRoadlikeUpDirection(Rhino.Geometry.Vector3d(0,0,1))\n    sweepBreps = sweep.PerformSweep(curve, profile)\n    output =[]\n    for i in sweepBreps:\n        output.append(scriptcontext.doc.Objects.AddBrep(i))\n    scriptcontext.doc.Views.Redraw()\n    return output",
+      "language": "python",
+      "author": "Alex_Steinberg",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport math\nimport scriptcontext\n\ndef _makeArcFromAngle(plane, cPoint, radius, startAngle, endAngle):\n    center = plane.PointAt(cPoint[0], cPoint[1])\n    circ = Rhino.Geometry.Circle(plane, center, radius)\n    angleInt = Rhino.Geometry.Interval(startAngle, endAngle)\n    arc = Rhino.Geometry.Arc(circ, angleInt)\n    return arc\ndef getMidpointFromCrv(crv):\n    dom = crv.Domain\n    return dom.Mid\n\ndef buildSharpBoss1(crv, radius):\n\n    curve = rs.coercecurve(crv)\n    if not curve:\n        return 0\n    subcurves = curve.DuplicateSegments()\n    if len(subcurves)>1:\n        focCurve = subcurves[0]\n    else:\n        focCurve = curve\n    focCrvMidpoint = getMidpointFromCrv(focCurve)\n    zVector = Rhino.Geometry.Vector3d(0,0,1)\n    xDir = Rhino.Geometry.Vector3d.CrossProduct(focCurve.TangentAt(focCrvMidpoint),zVector)\n    plane = Rhino.Geometry.Plane(focCurve.PointAt(focCrvMidpoint), xDir,zVector)\n    lArc = _makeArcFromAngle(plane, (-radius, radius), radius, 3*math.pi/2, 2*math.pi)\n    rArc = _makeArcFromAngle(plane, (radius, radius), radius, math.pi, 3*math.pi/2)\n    profile = Rhino.Geometry.PolyCurve()\n    profile.Append(lArc)\n    profile.Append(rArc)\n    baseLine = Rhino.Geometry.Line(profile.PointAtEnd,profile.PointAtStart)\n    profile.Append(baseLine)\n    sweepBrep = Rhino.Geometry.Brep.CreateFromSweep(curve,profile,True,scriptcontext.doc.ModelAbsoluteTolerance)\n    output = []\n    for i in sweepBrep:\n        output.append(scriptcontext.doc.Objects.AddBrep(i))\n    scriptcontext.doc.Views.Redraw()\n    return output\n\nif __name__ == \"__main__\":\n    for i in rs.SelectedObjects():\n        if rs.IsCurve:\n            buildSharpBoss1(i,1)",
+      "language": "python",
+      "author": "Alex_Steinberg",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1779
+}

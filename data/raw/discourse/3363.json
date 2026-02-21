@@ -1,0 +1,54 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-command-accepts-arguments-of-which-type/3363",
+  "topic_id": 3363,
+  "title": "Rs.Command accepts arguments of which type?",
+  "question": "I have just discovered the rs.Command() method.\n\nI was wondering what kind type of arguments could be passed to it?\n\nPoint3d seems to work?\n\n\nimport rhinoscriptsyntax as rs\n\na = rs.GetPoint(\"take pt1\")\nb = rs.GetPoint(\"take pt2\")\nrs.Command(\"-Line \" + str(a) + \" \" + str(b)+ \" \")\n\nprint type(a)\nprint type(b)\n\n\n\nBut when I try passing a Guid:\n\n\nimport rhinoscriptsyntax as rs\n\nc1 = rs.GetObject(\"take curve1\")\nc2 = rs.GetObject(\"take curve2\")\nrs.Command(\"-Fillet \"+str(c1)+\" \"+str(c2)+\" \")\n\nprint type(c1)\nprint type(c2)\n\n\n\nI get a message: “Unknown command: 1ded1e11-3890-4d89-9b71-998f1d28febb”. For both c1 and c2.\n\n\nWhy is that? rs.Command does not work with Guids?\n\n\nThank you.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nc1 = rs.GetObject(\"pick up the first curve\",4)\nc2 = rs.GetObject(\"pick up the second curve\",4)\nrs.Command(\"-ArcBlend \" + \"SelID \" + str(c1) + \" SelID \" + str(c2) + \" \")",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math as m\n\nc1 = rs.GetCurveObject(\"pick up the first curve\",4)\nc1_g = c1[0]   # curve1 Guid\nc1_t = c1[4]   # curve1 parameter of the selected point\nc1_dom = rs.CurveDomain(c1_g)\nc1_dom = m.fabs(c1_dom[0])+m.fabs(c1_dom[1])\nif (c1_dom - m.fabs(c1_t)) < (c1_dom/2):\n    rs.ReverseCurve(c1_g)\n\nc2 = rs.GetCurveObject(\"pick up the second curve\",4)\nc2_g = c2[0]   # curve2 Guid\nc2_t = c2[4]   # curve2 parameter of the selected point\nc2_dom = rs.CurveDomain(c2_g)\nc2_dom = m.fabs(c2_dom[0])+m.fabs(c2_dom[1])\nif (c2_dom - m.fabs(c2_t)) < (c2_dom/2):\n    rs.ReverseCurve(c2_g)\n\n\nrs.Command(\"-ArcBlend \" + \"SelID \" + str(c1_g) + \" SelID \" + str(c2_g) + \" \")",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef CheckFlipCrv(crv,param):\n    dom = rs.CurveDomain(crv)\n    if abs(dom[1]-param) < abs(param-dom[0]):\n        rs.ReverseCurve(crv)\n\nc1 = rs.GetCurveObject(\"pick the first curve near end to blend\",4)\nCheckFlipCrv(c1[0],c1[4])\n\nc2 = rs.GetCurveObject(\"pick the second curve near end to blend\",4)\nCheckFlipCrv(c2[0],c2[4])\n\nrs.Command(\"-ArcBlend \" + \"SelID \" + str(c1[0]) + \" SelID \" + str(c2[0]) + \" _Enter\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na = rs.GetPoint(\"take pt1\")\nb = rs.GetPoint(\"take pt2\")\nrs.Command(\"-Line \" + str(a) + \" \" + str(b)+ \" \")\n\nprint type(a)\nprint type(b)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nc1 = rs.GetObject(\"take curve1\")\nc2 = rs.GetObject(\"take curve2\")\nrs.Command(\"-Fillet \"+str(c1)+\" \"+str(c2)+\" \")\n\nprint type(c1)\nprint type(c2)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 7071
+}

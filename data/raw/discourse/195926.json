@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/identifiers-for-parameters-data/195926",
+  "topic_id": 195926,
+  "title": "Identifiers for parameters/data",
+  "question": "Is there any way in Grasshopper to uniquely identify parameters or their data? With geometry referenced from Rhino, there is a unique Guid, but what about with Grasshopper made objects?\n\n\nFor example, I have a custom component that accepts one or more curve parameters. Let’s assume that I connect 3 curves created by various ways with vanilla Grasshopper components. If one of the curves changes, I would like to be able to tell which of the 3 curves changed.",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nunique_string = str(ghenv.Component.Attributes.InstanceGuid)\nKEY = unique_string + \"_KEY_PREV\"\n\nnew_times = [param.ProcessorTime.ToString() for param in ghenv.Component.Params.Input]\nif sc.sticky.has_key(KEY):\n    U = [old != new for old, new in zip(sc.sticky[KEY], new_times)]\nelse:\n    U = [True for new in new_times]\nsc.sticky[KEY] = new_times",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 54
+}

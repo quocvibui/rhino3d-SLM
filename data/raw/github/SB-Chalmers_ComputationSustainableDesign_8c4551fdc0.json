@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/SB-Chalmers/ComputationSustainableDesign/blob/7f61d112e0d60667bbef3e6fc4fc7236bcf6bbba/Grasshopper%20Scripts/DTCC_CITYJSON_parser/CITYJSON_Parser.py",
+  "repo": "SB-Chalmers/ComputationSustainableDesign",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "NOASSERTION",
+  "filepath": "Grasshopper Scripts/DTCC_CITYJSON_parser/CITYJSON_Parser.py",
+  "instruction": "Cityjson parser",
+  "code": "import Rhino\nimport Rhino.Geometry as rg\nimport json\nimport ghpythonlib.treehelpers as th\ndef should_cull(value, criterion):\n    \"\"\"\n    Determine if a value should be culled based on the criterion.\n    criterion: string in format '>100' or '<100'\n    \"\"\"\n    if not criterion:\n        return False\n    operation = criterion[0]\n    threshold = float(criterion[1:])\n    if operation == '>':\n        return value > threshold\n    elif operation == '<':\n        return value < threshold\n    return False\nif _run:\n    with open(CityModel, 'r') as file:\n        data = json.load(file)\n\n    # Extract bounds\n    xmin = data['bounds']['xmin']\n    ymin = data['bounds']['ymin']\n\n    footprints = []\n    heights = []\n    buildings = []\n    culled_buildings = []\n    # Loop through buildings in the data\n    for building in data['buildings']:\n        points = []\n\n        z = building['groundHeight']\n        \n        height = building['height']\n\n        # Extract footprint points and subtract xmin and ymin from x and y respectively\n        for vertex in building['footprint']['shell']['vertices']:\n            x = vertex['x'] - xmin\n            y = vertex['y'] - ymin\n            points.append(rg.Point3d(x, y, z))\n\n\n        # Create the building in Rhino\n        polyline = rg.PolylineCurve(points)\n\n        # Ensure the polyline is closed\n        if not polyline.IsClosed:\n            polyline.MakeClosed(0.01)  # 0.01 is a small tolerance value\n        footprints.append(polyline)\n        vector = rg.Vector3d(0, 0, height)\n        extrusion = rg.Extrusion.Create(polyline, height, True)\n\n        if extrusion:\n            brep = extrusion.ToBrep()\n            area = rg.AreaMassProperties.Compute(brep).Area\n            volume = rg.VolumeMassProperties.Compute(brep).Volume\n            # Append the building and its details to their respective lists\n            footprints.append(polyline)\n            heights.append(height)\n        if (should_cull(area, cull_area) or \n            should_cull(volume, cull_volume) or \n            should_cull(height, cull_height)):\n            culled_buildings.append(brep)\n        else:\n            buildings.append(brep)\n    origin = rg.Point3d(xmin, ymin, 0)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

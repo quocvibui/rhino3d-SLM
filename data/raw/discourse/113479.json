@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/stamp-with-python/113479",
+  "topic_id": 113479,
+  "title": "Stamp with python",
+  "question": "hello…\n\non layouts, sometimes i need to add a symbol, i would like to make a python scipt, that it make the polyline and i’ve just to click to put it where i want.\n\nthere is two versions of this symbol, and i can rotate it every 90°, i know how i can change this, but i don’t know how i can have the dynamic preview at the end of my mouse’s cross…\n\n\nis it clear?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\n\ndef make_symbol():\n    points = []\n    points.append(Rhino.Geometry.Point3d(0.0, 5.0, 0.0))\n    points.append(Rhino.Geometry.Point3d(-5.0, 0.0, 0.0))\n    points.append(Rhino.Geometry.Point3d(-2.0, 0.0, 0.0))\n    points.append(Rhino.Geometry.Point3d(-2.0, -5.0, 0.0))\n    points.append(Rhino.Geometry.Point3d(2.0, -5.0, 0.0))\n    points.append(Rhino.Geometry.Point3d(2.0, 0.0, 0.0))\n    points.append(Rhino.Geometry.Point3d(5.0, 0.0, 0.0))\n    points.append(Rhino.Geometry.Point3d(0.0, 5.0, 0.0))\n    pline = Rhino.Geometry.Polyline(points)\n    return pline.ToPolylineCurve()\n\nclass get_symbol_point(Rhino.Input.Custom.GetPoint):\n    \n    def __init__(self):\n        self.m_curve = make_symbol()\n        self.m_xform = Rhino.Geometry.Transform.Identity\n    \n    def CalculateTransform(self, point):\n        xform = Rhino.Geometry.Transform.Identity\n        dir = point - Rhino.Geometry.Point3d.Origin\n        if (not dir.IsTiny()):\n            xform = Rhino.Geometry.Transform.Translation(dir)\n        return xform\n    \n    def OnMouseMove(self, e):\n        self.m_xform = self.CalculateTransform(e.Point)\n        GetPoint.OnMouseMove(self, e)\n    \n    def OnDynamicDraw(self, e):\n        curve = self.m_curve.DuplicateCurve()\n        curve.Transform(self.m_xform)\n        e.Display.DrawCurve(curve, System.Drawing.Color.Cyan)\n        GetPoint.OnDynamicDraw(self, e)    \n    \ndef test_place_symbol():\n    \n    gp = get_symbol_point()\n    gp.SetCommandPrompt(\"Symbol location\")\n    gp.Get()\n    if gp.CommandResult() <> Rhino.Commands.Result.Success:\n        return\n        \n    xform = gp.CalculateTransform(gp.Point())\n    curve = make_symbol()\n    curve.Transform(xform)\n    sc.doc.Objects.AddCurve(curve)\n    sc.doc.Views.Redraw()\n\nif( __name__ == \"__main__\" ):\n    test_place_symbol()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "rot = Rhino.Input.Custom.OptionInteger(rot, 0, 3)\n    sens = Rhino.Input.Custom.OptionToggle(sens, \"devant\", \"derrière\")\n    gp.AddOptionInteger(\"Rotation\",rot)\n    gp.AddOptionToggle(\"Sens_Coupe\",sens)",
+      "language": "unknown",
+      "author": "onlyforpeace",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "gp = get_symbol_point()\n    gp.SetCommandPrompt(\"Symbol location\")\n    rot = Rhino.Input.Custom.OptionInteger(rotcurrentvalue, 0, 3)\n    sens = Rhino.Input.Custom.OptionToggle(senscurrentvalue, \"devant\", \"derrière\")\n    gp.AddOptionInteger(\"Rotation\",rot)\n    gp.AddOptionToggle(\"Sens_Coupe\",sens)\n    \n    while True:\n        gp.Get()\n        if gp.CommandResult() == Rhino.Commands.Result.Cancel:\n            return\n        res=gp.Result()\n        if res==Rhino.Input.GetResult.Option:\n            gp.MaJSymbol(rot,sens)\n        else:\n            xform = gp.CalculateTransform(gp.Point())\n            curve = make_symbol(rot,sens)\n            curve.Transform(xform)\n            sc.doc.Objects.AddCurve(curve)\n            sc.doc.Views.Redraw()",
+      "language": "unknown",
+      "author": "onlyforpeace",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "# coding: utf-8\nimport Rhino\nfrom math import radians\nimport scriptcontext as sc\nimport System\n\ndef make_symbol(rot,sens):\n    try:\n        rotation=rot.CurrentValue\n    except:\n        rotation=rot\n    try:\n        sensp=sens.CurrentValue\n    except:\n        sensp=sens\n    points = []\n    if sensp:\n        points.append(Rhino.Geometry.Point3d(0.0, 5.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(-5.0, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(-2.0, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(-2.0, -5.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(2.0, -5.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(2.0, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(5.0, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(0.0, 5.0, 0.0))\n    else:\n        points.append(Rhino.Geometry.Point3d(0.0, 1.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(-2.5, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(-1.0, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(-1.0, -5.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(1.0, -5.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(1.0, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(2.5, 0.0, 0.0))\n        points.append(Rhino.Geometry.Point3d(0.0, 1.0, 0.0))\n\n\n    if rotation == 0:\n        pline = Rhino.Geometry.Polyline(points)\n        return pline.ToPolylineCurve()\n    elif rotation == 1:\n        pline = Rhino.Geometry.Polyline(points)\n        #Rform=Rhino.Geometry.Transform.Rotation(Rhino.Geometry.Vector3d(1,0,0),Rhino.Geometry.Vector3d(0,1,0),Rhino.Geometry.Point3d(0,0,0))\n        Rform=Rhino.Geometry.Transform.Rotation(radians(90),Rhino.Geometry.Point3d(0,0,0))\n        pline.Transform(Rform)\n        return pline.ToPolylineCurve()\n    elif rotation == 2:\n        pline = Rhino.Geometry.Polyline(points)\n        #Rform=Rhino.Geometry.Transform.Rotation(Rhino.Geometry.Vector3d(1,0,0),Rhino.Geometry.Vector3d(-1,0,0),Rhino.Geometry.Point3d(0,0,0))\n        Rform=Rhino.Geometry.Transform.Rotation(radians(180),Rhino.Geometry.Point3d(0,0,0))\n        pline.Transform(Rform)\n        return pline.ToPolylineCurve()\n    elif rotation == 3:\n        pline = Rhino.Geometry.Polyline(points)\n        #Rform=Rhino.Geometry.Transform.Rotation(Rhino.Geometry.Vector3d(1,0,0),Rhino.Geometry.Vector3d(0,-1,0),Rhino.Geometry.Point3d(0,0,0))\n        Rform=Rhino.Geometry.Transform.Rotation(radians(270),Rhino.Geometry.Point3d(0,0,0))\n        pline.Transform(Rform)\n        return pline.ToPolylineCurve()\n\nclass get_symbol_point(Rhino.Input.Custom.GetPoint):\n    \n    def __init__(self):\n        self.rotation=0\n        self.sens=True\n        self.m_curve = make_symbol(self.rotation,self.sens)\n        self.m_xform = Rhino.Geometry.Transform.Identity\n    \n    def CalculateTransform(self, point):\n        xform = Rhino.Geometry.Transform.Identity\n        dir = point - Rhino.Geometry.Point3d.Origin\n        if (not dir.IsTiny()):\n            xform = Rhino.Geometry.Transform.Translation(dir)\n        return xform\n    \n    def OnMouseMove(self, e):\n        self.m_xform = self.CalculateTransform(e.Point)\n        GetPoint.OnMouseMove(self, e)\n\n\n    def MaJSymbol(self,rot,sens):\n        self.m_curve = make_symbol(self.rotation,self.sens)\n\n    def OnDynamicDraw(self, e):\n        curve = self.m_curve.DuplicateCurve()\n        curve.Transform(self.m_xform)\n        e.Display.DrawCurve(curve, System.Drawing.Color.Red)\n        GetPoint.OnDynamicDraw(self, e)    \n    \ndef test_place_symbol():\n    \n    if sc.sticky.has_key('rotation'):\n            rotcurrentvalue=sc.sticky['rotation']\n    else:\n        rotcurrentvalue=0\n    if sc.sticky.has_key('sens'):\n            senscurrentvalue=sc.sticky['sens']\n    else:\n        senscurrentvalue=True\n        \n    gp = get_symbol_point()\n    gp.SetCommandPrompt(\"Symbol location\")\n    rot = Rhino.Input.Custom.OptionInteger(rotcurrentvalue, 0, 3)\n    sens = Rhino.Input.Custom.OptionToggle(senscurrentvalue, \"devant\", \"derrière\")\n    gp.AddOptionInteger(\"Rotation\",rot)\n    gp.AddOptionToggle(\"Sens_Coupe\",sens)\n    \n    while True:\n        gp.Get()\n        if gp.CommandResult() == Rhino.Commands.Result.Cancel:\n            return\n        res=gp.Result()\n        if res==Rhino.Input.GetResult.Option:\n            gp.MaJSymbol(rot,sens)\n        else:\n            xform = gp.CalculateTransform(gp.Point())\n            curve = make_symbol(rot,sens)\n            curve.Transform(xform)\n            sc.doc.Objects.AddCurve(curve)\n            sc.doc.Views.Redraw()\n\nif( __name__ == \"__main__\" ):\n    test_place_symbol()",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "def __init__(self):\n        self.rotation=0\n        self.sens=True\n        self.m_curve = make_symbol(self.rotation,self.sens)\n        self.m_xform = Rhino.Geometry.Transform.Identity",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "def OnDynamicDraw(self, e):\n        for line in self.m_lines:\n            dline = line.DuplicateCurve()\n            dline.Transform(self.m_xform)\n            e.Display.DrawCurve(dline, System.Drawing.Color.Red)\n            GetPoint.OnDynamicDraw(self, e)",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 20,
+  "views": 1027
+}

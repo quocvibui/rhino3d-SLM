@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/add-background-bitmap.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/add-background-bitmap.py",
+  "instruction": "Add background bitmap",
+  "code": "import Rhino\nimport scriptcontext\nimport System.Windows.Forms.DialogResult\nimport System.Drawing.Image\n\ndef AddBackgroundBitmap():\n    # Allow the user to select a bitmap file\n    fd = Rhino.UI.OpenFileDialog()\n    fd.Filter = \"Image Files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg\"\n    if not fd.ShowDialog():\n        return Rhino.Commands.Result.Cancel\n\n    # Verify the file that was selected\n    image = None\n    try:\n        image = System.Drawing.Image.FromFile(fd.FileName)\n    except:\n        return Rhino.Commands.Result.Failure\n\n    # Allow the user to pick the bitmap origin\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Bitmap Origin\")\n    gp.ConstrainToConstructionPlane(True)\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n\n    # Get the view that the point was picked in.\n    # This will be the view that the bitmap appears in.\n    view = gp.View()\n    if view is None:\n        view = scriptcontext.doc.Views.ActiveView\n        if view is None: return Rhino.Commands.Result.Failure\n\n    # Allow the user to specify the bitmap with in model units\n    gn = Rhino.Input.Custom.GetNumber()\n    gn.SetCommandPrompt(\"Bitmap width\")\n    gn.SetLowerLimit(1.0, False)\n    gn.Get()\n    if gn.CommandResult()!=Rhino.Commands.Result.Success:\n        return gn.CommandResult()\n\n    # Cook up some scale factors\n    w = gn.Number()\n    h = w * (image.Width / image.Height)\n\n    plane = view.ActiveViewport.ConstructionPlane()\n    plane.Origin = gp.Point()\n    view.ActiveViewport.SetTraceImage(fd.FileName, plane, w, h, False, False)\n    view.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    AddBackgroundBitmap()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

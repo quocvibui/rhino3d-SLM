@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/assign-existing-custom-material-to-layer-s-within-a-script/157224",
+  "topic_id": 157224,
+  "title": "Assign Existing Custom Material to Layer(s) within a script",
+  "question": "I’m trying to assign existing (non-default) materials (by name or index) after the AddLayer portion of my script.\n\n\nSeems like it should be very simple, but I’ve tried my darndest to figure this out, including all the script-bits that seem like they should do it, including AddMaterialToLayer; and LayerMaterialIndex (which states: \nReturns or changes the material index of a layer\n, but I can’t figure out how to enact the “change” ability.) I also looked into LayerId, etc.\n\n\nSearched this forum, Developer site, sample scripts, and GitHub, which had a \nbreakdown of the Material scripts\n, yet no mention of how to actually assign an existing material.\n\n\nHere’s my script so far, which creates a set of subLayers beneath a Layer, and assigns properties to them. (Ultimately I’m planning on having options for selected/different/additional subLayers.)\n\n\n# Creates a specified template layer tree for a new element\n# v04 by Alan Farkas 230327\n\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n#from System.Drawing import Color\n\nnew_element = rs.GetString(\"New Element?\")\nnew_element = new_element[0].upper()+new_element[1:]\n\nrs.AddLayer(new_element)\nrs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nrs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\nrs.AddLayer(\"light\"+new_element, Color.Aqua, parent=new_element)\nrs.AddLayer(\"glass\"+new_element, Color.FromArgb(100, 105, 105, 105), parent=new_element)\nrs.AddLayer(\"sol\"+new_element, Color.Green, parent=new_element)\nrs.AddLayer(\"ref\"+new_element, Color.Black, parent=new_element)\nrs.AddLayer(\"SM_\"+new_element, Color.White, parent=new_element)\n\nlayers = rs.LayerNames(new_element)\nif layers:\n    for layer in layers:\n        black = rs.CreateColor((0,0,0))\n        if rs.LayerPrintColor(layer)!=black:\n            rs.LayerPrintColor(layer, black)\n\n#Set LayerPrintWidths\n#This works in v3A\n\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\nr...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef AssignRenderMaterialToLayer(layer_path, render_material_name):\n    \n    # find the layer by it's full path\n    index = scriptcontext.doc.Layers.FindByFullPath(layer_path, -1)\n    if index < 0: \n        print \"Layer '{}' not found\".format(layer_path)\n        return False\n    \n    # find any rendermaterials by render_material_name\n    data = scriptcontext.doc.RenderMaterials.GetEnumerator()\n    mats = filter(lambda rm: rm.Name == render_material_name, data)\n    if not mats:\n        print \"Material '{}' not found\".format(render_material_name) \n        return False\n    \n    # assign first found rendermaterial to layer\n    layer = scriptcontext.doc.Layers[index]\n    layer.RenderMaterial = mats[0]\n    return True",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "# Creates a specified template layer tree for a new element\n# v04 by Alan Farkas 230327\n\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n#from System.Drawing import Color\n\nnew_element = rs.GetString(\"New Element?\")\nnew_element = new_element[0].upper()+new_element[1:]\n\nrs.AddLayer(new_element)\nrs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nrs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\nrs.AddLayer(\"light\"+new_element, Color.Aqua, parent=new_element)\nrs.AddLayer(\"glass\"+new_element, Color.FromArgb(100, 105, 105, 105), parent=new_element)\nrs.AddLayer(\"sol\"+new_element, Color.Green, parent=new_element)\nrs.AddLayer(\"ref\"+new_element, Color.Black, parent=new_element)\nrs.AddLayer(\"SM_\"+new_element, Color.White, parent=new_element)\n\nlayers = rs.LayerNames(new_element)\nif layers:\n    for layer in layers:\n        black = rs.CreateColor((0,0,0))\n        if rs.LayerPrintColor(layer)!=black:\n            rs.LayerPrintColor(layer, black)\n\n#Set LayerPrintWidths\n#This works in v3A\n\nbbox_layer_name = rs.AddLayer(\"bbox\"+new_element, Color.FromArgb(20, 0, 0, 0), parent=new_element)\nrs.LayerPrintWidth(bbox_layer_name, -1)\n\ncrv_layer_name = rs.AddLayer(\"crv\"+new_element, Color.Red, parent=new_element)\nrs.LayerPrintWidth(crv_layer_name, -1)\n\n#Assign Existing Custom Materials to the appropriate above subLayers",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 354
+}

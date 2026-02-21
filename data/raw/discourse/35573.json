@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issues-with-rs-textexplode-on-mac/35573",
+  "topic_id": 35573,
+  "title": "Issues with rs.TextExplode on Mac",
+  "question": "Hey,\n\nI’m trying to understand how to script components in python for Mac usage.\n\n\nRight now I’m trying to make a simple text preview and bake component using the GHpython component. It is meant to preview the text as outline curves since grasshopper has no text object available, and then bake the same text as a rhino text object so that it can be edited further as text in for example illustrator etc. What I’ve writtin so far works fine on my PC, but I’m having issues running the component in the Mac version of Grasshopper.\n\n\nAs far as I understand, I’m supposed to be able to use the RhinoScriptSyntax functions (found here: \nhttp://developer.rhino3d.com/api/RhinoScriptSyntax/win/#application\n) when coding in Python, but the rs.ExplodeText doesn’t seem to work on Mac. It returns the text as a text object one more time and no outline curves, even though “delete” is set to “True”. the rs.AddText only works within the If statement on Mac, and doesn’t continuously output text as it does on my PC.\n\n\nHere is the GHpython code and attached is an example file:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino as r<a class=\"attachment\" href=\"https://global.discourse-cdn.com/mcneel/uploads/default/original/3X/0/6/06ea5eb4d68d9d4e288ae8303286483aa4e0f0c8.gh\">BakeAsText.gh</a> (7.9 KB)\n\n\nsc.doc = r.RhinoDoc.ActiveDoc\n\ngeoList = []\n\npreText = rs.AddText(text, plane, height, font, font_style=fontStyle, justification=None) #justification = höger/center/vänsterställd text (int type)\ntextGeo = rs.ExplodeText(preText, True)\n\nfor i in textGeo:\n    geoList.append(rs.coercegeometry(i))\n\n\nfor i in textGeo:\n    rs.DeleteObject(i)\n\nif BAKE == True:\n    bakeText = rs.AddText(text, plane, height, font, font_style=0, justification=None)\n\n\n\nWould be very grateful for any pointers on what I’m doing wrong? Is it that I cant use the RhinoscriptSyntax functions if I want to run it on Mac? Where can I find a list of Mac compatible functions to call from the GHpython component?...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino as r<a class=\"attachment\" href=\"https://global.discourse-cdn.com/mcneel/uploads/default/original/3X/0/6/06ea5eb4d68d9d4e288ae8303286483aa4e0f0c8.gh\">BakeAsText.gh</a> (7.9 KB)\n\n\nsc.doc = r.RhinoDoc.ActiveDoc\n\ngeoList = []\n\npreText = rs.AddText(text, plane, height, font, font_style=fontStyle, justification=None) #justification = höger/center/vänsterställd text (int type)\ntextGeo = rs.ExplodeText(preText, True)\n\nfor i in textGeo:\n    geoList.append(rs.coercegeometry(i))\n\n\nfor i in textGeo:\n    rs.DeleteObject(i)\n\nif BAKE == True:\n    bakeText = rs.AddText(text, plane, height, font, font_style=0, justification=None)",
+      "language": "python",
+      "author": "Mertzi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 879
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/adjusting-the-camera-lens-length-in-python/16982",
+  "topic_id": 16982,
+  "title": "Adjusting the camera lens length in python",
+  "question": "Hi there\n\n\nI am trying to figure out how to use an item in the scriptcontext library. I have my camera location and target set using\n\n\nvp = sc.doc.Views.ActiveView.ActiveViewport\n\nvp.SetCameraLocation(loc, False)\n\nvp.SetCameraDirection(tar - loc, True)\n\n\nwhat variables do I need to pass in in order to use\n\n\nsc.doc.Views.ActiveView.ActiveViewport.Camera35mmLensLength() ?\n\n\npython has been throwing multiple errors with whatever I try. Also, is there an online reference library for scriptcontext? I can’t seem to locate it.\n\n\nCheers",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nvp = sc.doc.Views.ActiveView.ActiveViewport\nvp.Camera35mmLensLength = 43\nrs.Redraw()",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\niClass=sc.doc.Objects\ndirec=dir(iClass)\n\ndef ExportClassDirectory(direc):\n    filter = \"Text File (*.txt)|*.txt|All Files (*.*)|*.*||\"\n    filename = rs.SaveFileName(\"Save directory as\", filter)\n    if not filename: return\n    namext=filename.split(\"\\\\\")\n    name=namext[-1].split(\".\")\n    \n    file=open(filename,\"w\")\n    file.write(name[0]+\"\\n\\n\")\n    for item in direc:\n        file.write(item+\"\\n\")\n    file.close()\n\nExportClassDirectory(direc)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1462
+}

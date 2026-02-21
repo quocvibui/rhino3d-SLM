@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/replacing-points-with-block-need-a-mac-solution/201179",
+  "topic_id": 201179,
+  "title": "Replacing Points with Block - Need a Mac Solution",
+  "question": "I’d like to be able to replace selected points with a block. I found this older Windows script and wonder if there is a way to convert it to work in the Mac version or if there is another script to do the same thing.\n\n\n\n\n\n\n\n\nwww.rhino3d.com\n\n\n\n\n\n\nReplacing Points with Blocks\n\n\nThis guide demonstrates how to replace point objects with block objects using RhinoScript.\n\n\n\n\n\n\n\n\n\n\n\n\n' Replaces points with blocks\nSub ReplacePointsWithBlocks\n \n  ' Select points to replace with a block\n  Dim arrObjects\n  arrObjects = Rhino.GetObjects(\"Select points to replace with a block\", 1, True, True)\n  If Not IsArray(arrObjects) Then Exit Sub\n \n  ' Get the names of all block definitions in the document    \n  Dim arrBlocks\n  arrBlocks = Rhino.BlockNames(True)\n  If Not IsArray(arrBlocks) Then\n    Rhino.Print \"No block definitions found in the document.\"\n    Exit Sub\n  End If\n \n  ' Select a block name from a list\n  Dim strBlock\n  strBlock = Rhino.ListBox(arrBlocks, \"Select block\", \"Replace Points\")\n  If IsNull(strBlock) Then Exit Sub\n \n  ' Turn off redrawing (faster)\n  Rhino.EnableRedraw True      \n \n  ' Process each selected point object\n  Dim strObject, arrPoint\n  For Each strObject In arrObjects\n    ' Get the point object's coordinates\n    arrPoint = Rhino.PointCoordinates(strObject)\n    ' Insert the block at that location\n    Rhino.InsertBlock strBlock, arrPoint\n  Next\n \n  ' Delete all of the point objects\n  Rhino.DeleteObjects arrObjects   \n \n  ' Turn redrawing back on     \n  Rhino.EnableRedraw True      \n \nEnd Sub",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport rhinoscriptsyntax as rs\n\ndef ReplacePointsWithBlocks():\n    arrObjects = rs.GetObjects(\"Select points to replace with a block\", 1, True, True)\n    if not arrObjects:\n        return\n\n    arrBlocks = rs.BlockNames(True)\n    if not arrBlocks:\n        print(\"No block definitions found in the document.\")\n        return\n\n    strBlock = rs.ListBox(arrBlocks, \"Select block\", \"Replace Points\")\n    if not strBlock:\n        return\n\n    for strObject in arrObjects:\n        arrPoint = rs.PointCoordinates(strObject)\n        rs.InsertBlock(strBlock, arrPoint)\n\n    rs.DeleteObjects(arrObjects)\n    rs.Redraw()\n\nif __name__ == \"__main__\":\n    ReplacePointsWithBlocks()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "' Replaces points with blocks\nSub ReplacePointsWithBlocks\n \n  ' Select points to replace with a block\n  Dim arrObjects\n  arrObjects = Rhino.GetObjects(\"Select points to replace with a block\", 1, True, True)\n  If Not IsArray(arrObjects) Then Exit Sub\n \n  ' Get the names of all block definitions in the document    \n  Dim arrBlocks\n  arrBlocks = Rhino.BlockNames(True)\n  If Not IsArray(arrBlocks) Then\n    Rhino.Print \"No block definitions found in the document.\"\n    Exit Sub\n  End If\n \n  ' Select a block name from a list\n  Dim strBlock\n  strBlock = Rhino.ListBox(arrBlocks, \"Select block\", \"Replace Points\")\n  If IsNull(strBlock) Then Exit Sub\n \n  ' Turn off redrawing (faster)\n  Rhino.EnableRedraw True      \n \n  ' Process each selected point object\n  Dim strObject, arrPoint\n  For Each strObject In arrObjects\n    ' Get the point object's coordinates\n    arrPoint = Rhino.PointCoordinates(strObject)\n    ' Insert the block at that location\n    Rhino.InsertBlock strBlock, arrPoint\n  Next\n \n  ' Delete all of the point objects\n  Rhino.DeleteObjects arrObjects   \n \n  ' Turn redrawing back on     \n  Rhino.EnableRedraw True      \n \nEnd Sub",
+      "language": "python",
+      "author": "JEFF_DEAN",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 106
+}

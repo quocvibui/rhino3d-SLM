@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/runtime-error-argumenttypeexception-expected-ienumerable-curve-got-list/100349",
+  "topic_id": 100349,
+  "title": "Runtime error (ArgumentTypeException): expected IEnumerable[Curve], got list",
+  "question": "Hello\n\nI just want to make loft by two sets of rectangle.\n\nBut as title say, expected IEnumerable[Curve], got list even through I have declared like this. How to fix?\n\n\n200418_loft.gh\n (7.1 KB)\n\n\n\n\nimage\n1166×857 96.4 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nrec_a = rs.AddRectangle([0,0,0], 10,10)\nrec_b = rs.AddRectangle([0,0,10],10,10)\na = rs.AddLoftSrf([rec_a, rec_b])",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from System.Collections.Generic import *\nimport Rhino.Geometry as rg\nrec_a = rg.Rectangle3d(rg.Plane.WorldXY, 10,10)\nrec_b = rg.Rectangle3d(rg.Plane(rg.Point3d(0,0,10), rg.Vector3d.ZAxis), 10, 10)\ncurves = List[rg.Curve]([rec_a.ToNurbsCurve(), rec_b.ToNurbsCurve()])\na = rg.Brep.CreateFromLoft(curves, rg.Point3d.Unset, rg.Point3d.Unset, rg.LoftType.Normal, False)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from System.Collections.Generic import *\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nrec_a = rs.AddRectangle([0,0,0], 10,10)\nrec_b = rs.AddRectangle([0,0,10],10,10)\ncurves = List[rg.Curve]([rs.coercecurve(rec_a), rs.coercecurve(rec_b)])\na = rg.Brep.CreateFromLoft(curves, rg.Point3d.Unset, rg.Point3d.Unset, rg.LoftType.Normal, False)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 8,
+  "views": 2424
+}

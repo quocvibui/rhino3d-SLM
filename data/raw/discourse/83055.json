@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-getusertext-strips-user-text-of-vbnewlines/83055",
+  "topic_id": 83055,
+  "title": "Rhino.GetUserText strips user text of vbNewLines",
+  "question": "image.png\n1382×666 6.67 KB\n\n\n\n\n\n\nimage.png\n1415×892 21.7 KB",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nOX = rs.ViewCPlane()\nrs.ViewCPlane(None, rs.WorldXYPlane())\nrs.ClearCommandHistory()\n\nwhile True:\n    Pick = rs.GetObjectEx(\"Pick object to call out\", 4124, False, True)\n    if (Pick):\n        if rs.ObjectType(Pick[0]) == 4096:\n            for BlockItem in rs.BlockObjects(sc.doc.Objects.Find(Pick[0]).InstanceDefinition.Name):\n                if rs.GetUserText(BlockItem,\"ObjDescr\"): LdrTxt = rs.GetUserText(BlockItem,\"ObjDescr\")\n    else:\n        break\n    rs.AddText(LdrTxt,Pick[3],0.1)\n    print LdrTxt\n\nprint \"Leader plop done\\n\"\nrs.ViewCPlane(None,OX)",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "Dim Pick, ldrText, Snaps\n\t\n\tSnaps = Rhino.OsnapMode\n\tRhino.OsnapMode 177\n\t\n\tDo\n\t\tRhino.EnableRedraw True\n\t\tDo\n\t\t\tPick = Rhino.GetPoint(\"Pick detail element to describe\",,,, True)\n\t\t\tIf IsNull(Pick) Or IsEmpty(Pick) Then Rhino.OsnapMode Snaps: Exit Sub\n\t\tLoop While IsNull(Pick(1))\n\t\t\n\t\tRhino.EnableRedraw False\n\t\tldrText = Rhino.GetUserText(Pick(1), \"ObjDescr\")\n\t\tIf IsNull(ldrText) Then ldrText = \"\"\n\t\tldrText = Rhino.EditBox(ldrText,, \"DETAIL ELEMENT DESCRIPTION:\")\n\t\tIf Not IsNull(ldrText) Then Rhino.SetUserText Pick(1), \"ObjDescr\", ldrText\n\tLoop",
+      "language": "unknown",
+      "author": "Asterisk",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nobj=rs.GetObject()\nresult=rs.GetUserText(obj,\"My_Key\")\nprint result",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "id = Rhino.GetObject\nstr = Rhino.GetUserText(id, \"key\")\nFor i = 0 To len(str) - 1\n\tc = Mid(str, i + 1, 1)\n\ta = Asc(c)\n\tIf a = 10 Then     ' line feed\n\t\tc = \"LF\"\n\tElseIf a = 11 Then ' vertical tab\n\t\tc = \"VT\"\n\tElseIf a = 13 Then ' carriage return\n\t\tc = \"CR\"\n\tEnd If\n\tRhino.Print c & \" \" & CStr(a)\nNext",
+      "language": "python",
+      "author": "dale",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nid = rs.GetObject()\nstr = rs.GetUserText(id, \"key\")\nfor c in str:\n    a = ord(c)\n    if a == 10:   # line feed\n        c = \"LF\"\n    elif a == 11: # vertical tab\n        c = \"VT\"\n    elif a == 13: # carriage return\n        c = \"CR\"\n    print c, a",
+      "language": "python",
+      "author": "dale",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef NormalizeLineEndings(lines):\n    lines = lines.replace('\\r\\n', '\\n').replace('\\r', '\\n')\n    lines = lines.replace('\\n', '\\r\\n')\n    return lines\n\nid = rs.GetObject()\nstr = rs.GetUserText(id, \"key\")\ntxt = NormalizeLineEndings(str)\nrs.AddText(txt, [0,0,0], 1)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 28,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 29,
+  "views": 2657
+}

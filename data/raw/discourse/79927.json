@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brepsplit-multiple-surfaces-polysurfaces-by-a-single-or-mutiple-surfaces/79927",
+  "topic_id": 79927,
+  "title": "BrepSplit multiple surfaces/polysurfaces by a single or mutiple surfaces?",
+  "question": "I cannot wrap my head around this could someone give me a simple example using this RhinoCommon?\n\n\nWhat do I do after selecting the surfaces/polysurfaces?\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport time\n\n\n\n\ntol=sc.doc.ModelAbsoluteTolerance\n\nobjs_ids = rs.GetObjects(\"Select Objects: \",rs.filter.surface,rs.filter.polysurface)\nobjs = [rs.coercebrep(ID) for ID in objs_ids]\ncutter_id = rs.GetObject(\"Select split plane: \", rs.filter.surface)\ncutter = rs.coerceboundingbox(cutter_id)\n\n\n\n\nts = time.time()\nfor obj in objs:\n    \n    obj.Split(cutter,tol)\n    \n    \nte = time.time()\n\nprint \"Elapsed time is {:.2f}\".format(te-ts)\n\n\n\nI want just like Rhino command to just split the object and all properties to be the same as the original, just split",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport time\n\ntol=sc.doc.ModelAbsoluteTolerance\n\nobjs_ids = rs.GetObjects(\"Select Objects: \",rs.filter.surface+rs.filter.polysurface)\nobjs = [rs.coercebrep(ID) for ID in objs_ids]\ncutter_id = rs.GetObject(\"Select split plane: \", rs.filter.surface)\n#cutter = rs.coerceboundingbox(cutter_id) #this is wrong\ncutter = rs.coercebrep(cutter_id)\n\nts = time.time()\nsplit_part_IDs=[]\nfor i,obj in enumerate(objs):\n    breps=obj.Split(cutter,tol)\n    #breps are \"virtual\" geometry, you need to add them to the document (scriptcontext)\n    if breps:\n        for brep in breps: split_part_IDs.append(sc.doc.Objects.AddBrep(brep))\n        #if something happened, delete the original object in the file\n        rs.DeleteObject(objs_ids[i])\nte = time.time()\n\nprint \"Elapsed time is {:.2f}\".format(te-ts)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino, time\n\nobjs=rs.GetObjects(\"Select polysurface objects to split\",16,preselect=True)\ncutter=rs.GetObject(\"Select cutting surface\",8)\n\nst=time.time()\nrs.EnableRedraw(False)\nfor obj in objs: rs.SplitBrep(obj,cutter)\nrs.EnableRedraw()\nprint \"Elapsed time = {:.2f}\".format(time.time()-st)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, time\n\nobjs=rs.GetObjects(\"Select polysurface objects to split\",16,preselect=True)\ncutter=rs.GetObject(\"Select cutting surface\",8)\n\nst=time.time()\ntol=sc.doc.ModelAbsoluteTolerance\nbreps=[rs.coercebrep(obj) for obj in objs]\ncut_plane=rs.coercebrep(cutter)\nsplits=[]\nto_delete=[]\nfor i,brep in enumerate(breps):\n    result=brep.Split(cut_plane,tol)\n    if result:\n        splits.extend(result)\n        to_delete.append(objs[i])\nif splits:\n    for s_brep in splits: sc.doc.Objects.AddBrep(s_brep)\nif to_delete:\n    for objID in to_delete: sc.doc.Objects.Delete(objID,True)\nsc.doc.Views.Redraw()\nRhino.RhinoApp.Wait()\nprint \"Elapsed time = {:.2f}\".format(time.time()-st)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, time\n\nobjs=rs.GetObjects(\"Select polysurface objects to split\",16,preselect=True)\ncutter=rs.GetObject(\"Select cutting surface\",8)\n\nst=time.time()\ntol=sc.doc.ModelAbsoluteTolerance\nbreps=[rs.coercebrep(obj) for obj in objs]\ncut_plane=rs.coercebrep(cutter)\nsplits=[]\nto_delete=[]\nfor i,brep in enumerate(breps):\n    insec=Rhino.Geometry.Intersect.Intersection.BrepBrep(brep,cut_plane,tol)\n    if insec:\n        if len(insec[1])>0:\n            #intersection found\n            result=brep.Split(cut_plane,tol)\n            if result:\n                splits.extend(result)\n                to_delete.append(objs[i])\nif splits:\n    for s_brep in splits: sc.doc.Objects.AddBrep(s_brep)\nif to_delete:\n    for objID in to_delete: sc.doc.Objects.Delete(objID,True)\nsc.doc.Views.Redraw()\nRhino.RhinoApp.Wait()\nprint \"Elapsed time = {:.2f}\".format(time.time()-st)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport time\n\n\n\n\ntol=sc.doc.ModelAbsoluteTolerance\n\nobjs_ids = rs.GetObjects(\"Select Objects: \",rs.filter.surface,rs.filter.polysurface)\nobjs = [rs.coercebrep(ID) for ID in objs_ids]\ncutter_id = rs.GetObject(\"Select split plane: \", rs.filter.surface)\ncutter = rs.coerceboundingbox(cutter_id)\n\n\n\n\nts = time.time()\nfor obj in objs:\n    \n    obj.Split(cutter,tol)\n    \n    \nte = time.time()\n\nprint \"Elapsed time is {:.2f}\".format(te-ts)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 1015
+}

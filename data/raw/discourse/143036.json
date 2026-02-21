@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/faces-property-subdedge-object/143036",
+  "topic_id": 143036,
+  "title": "Faces property, SubDEdge Object?",
+  "question": "A subdvertex type has a handy property, below. Is there an equivalent to get, for example, all faces that an edge object is part of?\n\n\n\n\nEdges\n All edges that this vertex is part of\n\n\n\n\nFrom a face, you can get VertexAt or EdgeAt, but not necessarily just a list of the relevant edge / vertex Ids.",
+  "code_blocks": [
+    {
+      "code": "# Convert Loop to Ring Selection\nimport Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\ndef GetSubDEdge():\n    \n    #select a subd edge, return edge ids of selection\n    go = Rhino.Input.Custom.GetObject()\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.MeshEdge\n    go.SetCommandPrompt('Select edge  ')\n    go.GetMultiple(1,0) # could be optional depending on inputs, add cmd line op?\n    \n    \n    objrefs = go.Objects()\n    subdref = go.Objects() [0].SubD()\n    \n    edge_ids = [ objref.GeometryComponentIndex.Index for objref in objrefs ]\n    \n    return edge_ids, subdref, objrefs\n\n\n#global vars\nselected_edge_id, subdref, subdobjref = GetSubDEdge() #returns selected edge ids\nring_edges = []\nguid = subdobjref [0].ObjectId # guid of top level object, NEEDS ERROR CHECKING\n\n#returns the faces related to edge selection \nedge_obj = [subdref.Edges.Find( selected ) for selected  in selected_edge_id ]\nfaceids = []\nfor edge in edge_obj:\n    count = edge.FaceCount\n    for i in range(count):\n        faceref =  edge.FaceAt(i)\n        faceids.append(faceref.Id) if faceref not in faceids else next # \n\nfacedict = dict ( zip ( faceids, [ faceids.count(face) for face in faceids ])) #collect counter\nshared_faces_ids = [ i for i in facedict if facedict.get(i) > 1 ] # Return SubDFace Id / Component Index\nshared_faces_objs = [ subdref.Faces.Find(faceid) for faceid in shared_faces_ids ] # Return SubDFace Type\n\nfor faceobj in shared_faces_objs:\n    for i in range(faceobj.EdgeCount):\n        if faceobj.EdgeAt(i).Id not in selected_edge_id:\n            ring_edge_index =  faceobj.EdgeAt(i).Id\n            ring_edges.append(ring_edge_index) if ring_edge_index not in ring_edges else next\n            \n\nring_edge_objs = [ subdref.Edges.Find( edge ).Id for edge in ring_edges ] # return the ring edges, SubDEdge Type\ncomponent_indices = [ rg.ComponentIndex (rg.ComponentIndexType.SubdEdge, obj) for obj in ring_edge_objs ] # create ComponentIndex Types\n#component index and ring edge index are same number - is this duplication ?\n\nobjrefs = [Rhino.DocObjects.ObjRef(guid, index) for index in component_indices] # create ObjRef type, does it just accept an integer for index? \nrhino_objects = [ ref.Object() for ref in objrefs ] # create RhinoObject Type\n\nsc.doc.Objects.UnselectAll() #Remove current selection\n\n# Do the ring selecting\nfor enum, obj in enumerate ( rhino_objects ):\n    obj.SelectSubObject( component_indices [ enum ], True, True, True ) # best overload ?\n    print \"Selected Edge Index\", obj\n\n### from the vertices of selected edges, find vert ids that only appear once\n## i.e. they will be an end point\n# if closed, index of every vert will appear exactly twice\n\nprint \"selected edge indices:\", selected_edge_id\nprint \"associated face indices:\", faceids\nprint \"shared face indices:\", shared_faces_ids\nprint \"Edge ring indices are:\", list ( set( ring_edges ) )",
+      "language": "python",
+      "author": "Jonathan_Hutchinson1",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 667
+}

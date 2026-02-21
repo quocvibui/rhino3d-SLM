@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-derivativeat/81591",
+  "topic_id": 81591,
+  "title": "Python derivativeat",
+  "question": "What is the second needed argument ‘‘Int32?’’\n\n\n\n\nproblem derivativeat 00.PNG\n819×269 8.88 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport random\n\nrandom.seed(2)\n\ndef fit(value, source_domain, target_domain):\n    \"\"\"Fits a number between a target domain that is relative to a number in the source domain.\n    \n    Args:\n        value: number to be fitted\n        source_domain: tuple containing the domain start and end\n        target_domain: tuple containing the domain start and end\n    \n    Returns:\n        The refitted value, or None, if the initial value is outside the source domain.\n    \"\"\"\n    if (value < source_domain[0]) or (value > source_domain[1]):\n        return\n    else:\n        source_range = source_domain[1] - source_domain[0]\n        if source_range == 0:\n            fitted_value = target_domain[0]\n        else:\n            target_range = target_domain[1] - target_domain[0]\n            fitted_value = (((value - source_domain[0]) * target_range) / source_range) + target_domain[0]\n        return fitted_value\n\n\ncurr_plane = Planes[0]\ncurr_crv = Curves[0]\nmin_dist, max_dist = DistInterval\n\n# Get the curve length\ncrv_len = curr_crv.GetLength()\n# Get the curve domain\ncrv_dom = curr_crv.Domain\n\ncurr_dist = 0.0 # current desired distance\ncrv_parameters = [] # curve parameters\ndiv_pts = [] # curve division points\n\nwhile curr_dist < crv_len:\n    # Remap the desired distance to the curve domain\n    crv_param = fit(curr_dist, (0.0, crv_len), crv_dom)\n    # Check if curve parameter hasn't been visited yet\n    if crv_param not in crv_parameters:\n        # Get the curve point for the curve parameter\n        pt = curr_crv.PointAt(crv_param)\n        # Add the curve point to the division points list\n        div_pts.append(pt)\n        # Add the curve parameter to the curve parameters list as history entry\n        crv_parameters.append(crv_param)\n    # Randomly increment the current desired distance\n    curr_dist += random.randint(min_dist, max_dist)\n\n\n# --- OUTPUTS\na = div_pts",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 49,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 59,
+  "views": 3220
+}

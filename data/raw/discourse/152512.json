@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/split-curve/152512",
+  "topic_id": 152512,
+  "title": "Split Curve",
+  "question": "Hi all,\n\n\nI can split a curve\n\nin Py with rhinoscriptsyntax\n\nin VBS and also in Gh with C#\n\nbut i can’t do it using rhinocommon:\n\n\nimport Rhino\nimport scriptcontext\nimport Rhino.Geometry\n\ncrv=Rhino.Input.RhinoGet.GetOneObject(\"\", False, Rhino.DocObjects.ObjectType.Curve)[1]\n\ncrv=crv.Curve().Split(0.5)\n\nscriptcontext.doc.Views.Redraw()\n\n\n\nthe syntax does not return an error,\n\nbut neither does it give the split curve. . .\n\n\n\n\n\n\n\n\ndeveloper.rhino3d.com\n\n\n\n\n\n\nCurve.Split Method (Double)\n\n\nSplits (divides) the curve at the specified parameter. The parameter must be in the interior of the curve's domain.\n\n\n\n\n\n\n\n\n\n\n\n\ni searched the method in API\n\nI searched posts in the forum\n\nbut I haven’t found any solution\n\n\nwhere is my mistake?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport Rhino.Geometry\n\ncrv=Rhino.Input.RhinoGet.GetOneObject(\"\", False, Rhino.DocObjects.ObjectType.Curve)[1]\n\ncrvs=crv.Curve().Split(0.5)\nprint crvs\n#Add Rhino Geometry to the rhino view.\n[scriptcontext.doc.Objects.AddCurve(cv) for cv in crvs]\n\nscriptcontext.doc.Objects.Delete(crv.ObjectId,True)\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ngid = rs.GetObject( \"?\" )\ncu = Rhino.DocObjects.ObjRef( gid ).Curve()\nu0, u1 = rs.CurveDomain( gid )\nts = [ u0 + ( u1 - u0 ) / 10 * n for n in range( 1, 10 ) ]\ncus = list( cu.Split( ts ) )\nfor cu in cus:\n   scriptcontext.doc.Objects.AddCurve( cu )",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 8,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\nres, obref = Rhino.Input.RhinoGet.GetOneObject( \"\", False, Rhino.DocObjects.ObjectType.Curve )\ncu = obref.Curve()\nintv = cu.Domain\nu0, u1 = intv.Min, intv.Max\nts = [ u0 + ( u1 - u0 ) / 10 * n for n in range( 1, 10 ) ]\ncus = list( cu.Split( ts ) )\nfor cu in cus:\n   scriptcontext.doc.Objects.AddCurve( cu )\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport Rhino.Geometry\n\ncrv=Rhino.Input.RhinoGet.GetOneObject(\"\", False, Rhino.DocObjects.ObjectType.Curve)[1]\n\ncrv=crv.Curve().Split(0.5)\n\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "0904",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 13,
+  "views": 1297
+}

@@ -1,0 +1,57 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-sub-object-selection-in-python/7081",
+  "topic_id": 7081,
+  "title": "Scripting sub-object selection in Python",
+  "question": "Is it possible to invoke sub-object selection through a Python script? For example, if I have a polysurface and I want to select one face. Or would I have to extract the face and deal with it that way? That’s what I am assuming I will need to do but I thought it’s worth asking.\n\n\nThanks,\n\n\nDan",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SubObjectSelect():\n    obj_ref = rs.GetObject(message=\"Bla\", filter=8, preselect=False, subobjects=True)\n    if obj_ref:\n        print \"Surface:\", obj_ref.Surface()\n        print \"Selection Point:\", obj_ref.SelectionPoint()\n\nif __name__==\"__main__\":\n    SubObjectSelect()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef TestOffsetSubSrf():    \n    msg=\"Select a surface or Brep face to offset\"\n    srf_filter=Rhino.DocObjects.ObjectType.Surface \n    rc,objref=Rhino.Input.RhinoGet.GetOneObject(msg,False,srf_filter)\n    if rc!=Rhino.Commands.Result.Success: return\n    \n    offset=rs.GetReal(\"Offset value\")\n    if offset==None: return\n    \n    face=objref.Face()\n    subSrf=face.ToNurbsSurface()\n    \n    oSrf=subSrf.Offset(offset,sc.doc.ModelAbsoluteTolerance)\n    sc.doc.Objects.AddSurface(oSrf)\n    sc.doc.Views.Redraw()\n\nTestOffsetSubSrf()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\ndef GetOnlyBrepFace():\n    msg=\"Select a surface or Brep face to offset\"\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(msg)\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    go.GeometryAttributeFilter=Rhino.Input.Custom.GeometryAttributeFilter.SubSurface\n    go.SubObjectSelect = True\n    go.AcceptNothing(False)\n    \n    if go.Get()!=Rhino.Input.GetResult.Object: return\n    objref = go.Object(0)\n    #etc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef SubSelectCylinder():\n    obj_ref = rs.GetObject(message=\"Sel\", filter=8, preselect=False, subobjects=True)\n    if obj_ref:\n        subsrf=obj_ref.Surface()\n        if subsrf:\n            res, cyl = subsrf.TryGetCylinder()\n            if res:\n                circle = cyl.CircleAt(0.0)\n                print \"Cylinder properties:\"\n                print \"axis vector:\", cyl.Axis\n                print \"center:\", cyl.Center\n                print \"height:\", cyl.TotalHeight\n                print \"diameter:\", circle.Diameter\n            else:\n                print \"sorry, i am not a cylinder\"\n\nif __name__==\"__main__\":\n    SubSelectCylinder()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef select_multiple_subobjects():\n    # Initialize an empty list to store selected sub-object indices\n    selected_subobjects = []\n    \n    # Prompt the user to select sub-objects (with sub-object selection enabled)\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select multiple sub-objects (faces, edges, vertices) from a polysurface\")\n    go.SubObjectSelect = True  # Enable sub-object selection\n    go.GetMultiple(1, 0)  # Allow multiple selections\n    \n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        print(\"No sub-objects were selected.\")\n        return\n    \n    # Loop through the selected sub-objects\n    for obj_ref in go.Objects():\n        # Get the geometry of the selected sub-object\n        subobject_index = obj_ref.GeometryComponentIndex.Index\n        # Get the sub-object type\n        subobject_type = obj_ref.GeometryComponentIndex.ComponentIndexType\n        \n        if subobject_type == Rhino.Geometry.ComponentIndexType.BrepFace:\n            # Store only face sub-object indices\n            selected_subobjects.append(subobject_index)\n            print(f\"Face with index {subobject_index} selected.\")\n        elif subobject_type == Rhino.Geometry.ComponentIndexType.BrepEdge:\n            print(f\"Edge with index {subobject_index} selected.\")\n        elif subobject_type == Rhino.Geometry.ComponentIndexType.BrepVertex:\n            print(f\"Vertex with index {subobject_index} selected.\")\n    \n    # Display the result\n    if selected_subobjects:\n        print(f\"Selected face indices: {selected_subobjects}\")\n    else:\n        print(\"No faces were selected.\")\n        \n# Run the function\nselect_multiple_subobjects()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 4604
+}

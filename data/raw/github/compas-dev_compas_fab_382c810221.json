@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_fab/blob/431e82c810ea299b9727b010b73a39abc73c5d62/src/compas_fab/ghpython/components/Cf_VisualizeTrajectory/code.py",
+  "repo": "compas-dev/compas_fab",
+  "repo_stars": 124,
+  "repo_description": "Robotic fabrication package for the COMPAS Framework.",
+  "license": "MIT",
+  "filepath": "src/compas_fab/ghpython/components/Cf_VisualizeTrajectory/code.py",
+  "instruction": "Visualizes a trajectory.",
+  "code": "\"\"\"\nVisualizes a trajectory.\n\nCOMPAS FAB v1.0.2\n\"\"\"\n\nfrom compas_ghpython import draw_frame\nfrom compas_ghpython.sets import list_to_ghtree\nfrom ghpythonlib.componentbase import executingcomponent as component\n\n\nclass TrajectoryVisualize(component):\n    def RunScript(self, robot, group, trajectory):\n        start_configuration = None\n        configurations = []\n        fraction = 0.0\n        time = 0.0\n\n        planes = []\n        positions = []\n        velocities = []\n        accelerations = []\n\n        if robot and trajectory:\n            group = group or robot.main_group_name\n\n            for c in trajectory.points:\n                configurations.append(\n                    robot.merge_group_with_full_configuration(c, trajectory.start_configuration, group)\n                )\n                frame = robot.forward_kinematics(c, group, options=dict(solver=\"model\"))\n                planes.append(draw_frame(frame))\n                positions.append(c.positions)\n                velocities.append(c.velocities)\n                accelerations.append(c.accelerations)\n\n            start_configuration = trajectory.start_configuration\n            fraction = trajectory.fraction\n            time = trajectory.time_from_start\n\n        P = list_to_ghtree(list(zip(*positions)))\n        V = list_to_ghtree(list(zip(*velocities)))\n        A = list_to_ghtree(list(zip(*accelerations)))\n\n        # return outputs if you have them; here I try it for you:\n        return (start_configuration, configurations, fraction, time, planes, P, V, A)\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,52 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-rhinocommon-command-in-python-to-access-brep-vertices/161933",
+  "topic_id": 161933,
+  "title": "Using RhinoCommon command in Python to access Brep Vertices",
+  "question": "Hello,\n\nI am trying to use Rhino Python (Version 7) to access and translate brep vertices.  It seems like there is a RhinoCommon command to access the vertex list that returns BrepVertex objects.  These objects have a Translate and Transform method.  That is encouraging - it seems like the functionality is there.\n\n\nBut I am missing some piece of knowledge that will let me use these functions/methods on an existing brep surface.  Could somebody please enlighten me on how I am supposed to use these methods in Python?\n\n\nThank you for your help.\n\n\nLink to the BrepVertex class\n\n\nLink to BrepVertexList class\n\n\nHow to access brep vertex\n1339×621 130 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def DoSomething():\n    \n    brep_id = rs.GetObject(\"Select brep box\", rs.filter.polysurface, True, False)\n    if not brep_id: return\n    \n    brep = rs.coercebrep(brep_id, True)\n    \n    # vertex numbers to transform\n    numbers = [2, 7]\n\n    index_type = Rhino.Geometry.ComponentIndexType.BrepVertex\n    components = [Rhino.Geometry.ComponentIndex(index_type, i) for i in numbers]\n    \n    xform = Rhino.Geometry.Transform.Translation(0,0,10)\n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    \n    rc = brep.TransformComponent(components, xform, tolerance, 10, True)\n    if rc:\n        scriptcontext.doc.Objects.Replace(brep_id, brep)\n        scriptcontext.doc.Views.Redraw()\n        \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "# For testing, just get direct references to the mesh and surface\nTargetSurface = rs.ObjectsByName('upper')[0]\n\n# Deselect everything and turn the grips on\nrs.UnselectAllObjects()\nrs.EnableObjectGrips(TargetSurface)\n\n# The number of grips = rs.SurfacePointCount()\nGripCount = rs.ObjectGripCount(TargetSurface)\n\n# Return the GUID of grip number 10 (for example)\nrs.SelectObjectGrip(TargetSurface, 10)\nSelectedGrip = rs.SelectedObjects(False, True)\n\n# To add the grip to the TransformObjectList, it needs an ObjRef not GUID\nGripReference = Rhino.DocObjects.ObjRef(SelectedGrip[0])\nObjectList = Rhino.Collections.TransformObjectList()\nObjectList.Add(GripReference)\n\n# Transformation +20mm in Z direction\nDirection = Rhino.Geometry.Vector3d(0.0, 0.0, 20.0)\nTransform = Rhino.Geometry.Transform.Translation(Direction)\n\n# Move the grip\nTheGrip = ObjectList.GripArray()[0]\nTheGrip.Move(Transform)\n\n# Let the owner of the grip (surface?) know it was moved\nGripOwner = ObjectList.GripOwnerArray()[0]\nsc.doc.Objects.GripUpdate(GripOwner, True)\n\n# May be needed, maybe not\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\nobj_ids = rs.ObjectsByName('upper')\nif obj_ids:\n    obj_id = obj_ids[0]\n    if rs.IsSurface(obj_id):\n        \n        rhino_object = rs.coercerhinoobject(obj_id)\n        print rhino_object\n        \n        brep_face = rs.coercesurface(obj_id, True)\n        print brep_face\n        \n        nurbs_srf = brep_face.ToNurbsSurface()\n        print nurbs_srf\n        print nurbs_srf.Points",
+      "language": "python",
+      "author": "clement",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 1422
+}

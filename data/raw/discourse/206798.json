@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unroll-a-curve-and-markers/206798",
+  "topic_id": 206798,
+  "title": "\"Unroll\" a Curve and markers?",
+  "question": "Is there a command to “unroll” a profile with markers on it, or do I have to split it at the points and use “Length” on each section?\n\n\nC__Users_cmgui_CAD_Musical Instrument_Guitar_335-345_ES-335 Side Bending form II.3dm (271 KB) - Rhino 7 Commercial - Top 7_5_2025 1_59_22 PM\n2048×1109 155 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef UnrollCurve():\n    # Get the base curve\n    result, curve_ref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, Rhino.DocObjects.ObjectType.Curve)\n    if result != Rhino.Commands.Result.Success: return result\n\n    base_curve = curve_ref.Curve()\n    if not base_curve: return Rhino.Commands.Result.Failure\n\n    # Create a straight line with the same length as the curve\n    straight_line = Rhino.Geometry.Line(\n        Rhino.Geometry.Point3d.Origin,\n        Rhino.Geometry.Vector3d.XAxis,\n        base_curve.GetLength()\n    )\n    sc.doc.Objects.AddLine(straight_line)\n\n    # Get the objects to unroll along the curve\n    result, object_refs = Rhino.Input.RhinoGet.GetMultipleObjects(\n        \"Select objects to unroll along curve\",\n        False,\n        Rhino.DocObjects.ObjectType.AnyObject\n    )\n    if result == Rhino.Commands.Result.Success:\n        flow_morph = Rhino.Geometry.Morphs.FlowSpaceMorph(base_curve, straight_line.ToNurbsCurve(), False)\n\n        for obj_ref in object_refs:\n            original_geometry = obj_ref.Geometry()\n            if original_geometry:\n                morphed_geometry = original_geometry.Duplicate()\n                flow_morph.Morph(morphed_geometry)\n                sc.doc.Objects.Add(morphed_geometry)\n\n    sc.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__ == \"__main__\":\n    UnrollCurve()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 6,
+  "views": 135
+}

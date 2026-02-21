@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-common-api/201614",
+  "topic_id": 201614,
+  "title": "Rhino common api",
+  "question": "I tried using ArcCurve and LineCurve but the joinCurve is still not working i also checked if they are touching.\n\nThe creation of curves is successful but when I use JoinCurves in the end it gives an input type error again\n\n\n# Define width and height\n\nwidth = 3\nheight = 3\n\n# Define the line\n\nz = -radius - height\nstart_point_line = Rhino.Geometry.Point3d(0, -width / 2, z)\nend_point_line = Rhino.Geometry.Point3d(0, width / 2, z)\n\nline = Rhino.Geometry.LineCurve(start_point_line, end_point_line)\n\n# Add the line to the document\n\nmodel.Objects.AddCurve(line)\n\n# Define the arc\n\nstart_arc_point = Rhino.Geometry.Point3d(0, width / 2, -radius - width)\nend_arc_point = Rhino.Geometry.Point3d(0, -width / 2, -radius - width)\narc_point = Rhino.Geometry.Point3d(0, 0, -radius)\narc = Rhino.Geometry.Arc(start_arc_point, arc_point, end_arc_point)\n\n# Create an ArcCurve from the Arc\n\narc_curve = Rhino.Geometry.ArcCurve(arc)\n\n# Add the arc curve to the document\n\nmodel.Objects.AddCurve(arc_curve)\n\n# Ensure the curves are in a list\n\ncurves = [line, arc_curve]\njoined_curves = Rhino.Geometry.Curve.JoinCurves(curves)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nwidth = 3\nheight = 3\n\nz = -radius - height\nstart_point_line = Rhino.Geometry.Point3d(0, -width / 2, z)\nend_point_line = Rhino.Geometry.Point3d(0, width / 2, z)\n\nline = AddLine(start_point_line, end_point_line)\n\nstart_arc_point = Rhino.Geometry.Point3d(0, width / 2, -radius - width)\nend_arc_point = Rhino.Geometry.Point3d(0, -width / 2, -radius - width)\narc_point = Rhino.Geometry.Point3d(0, 0, -radius)\n\narc = rs.AddArc3Pt(start_arc_point, end_arc_point, arc_point)\n\njoined_curves = rs.JoinCurves([line, arc])",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\n\n# Define width and height\nwidth = 3\nheight = 3\n\n# Define the line\nradius = 1\n\nz = -radius - height\nstart_point_line = Rhino.Geometry.Point3d(0, -width / 2, z)\nend_point_line = Rhino.Geometry.Point3d(0, width / 2, z)\n\nline = Rhino.Geometry.LineCurve(start_point_line, end_point_line)\n\n# Add the line to the document\n#sc.doc.Objects.AddCurve(line)\n\n# Define the arc\nstart_arc_point = Rhino.Geometry.Point3d(0, width / 2, -radius - width)\nend_arc_point = Rhino.Geometry.Point3d(0, -width / 2, -radius - width)\narc_point = Rhino.Geometry.Point3d(0, 0, -radius)\narc = Rhino.Geometry.Arc(start_arc_point, arc_point, end_arc_point)\n\n# Create an ArcCurve from the Arc\narc_curve = Rhino.Geometry.ArcCurve(arc)\n\n# Add the arc curve to the document\n#sc.doc.Objects.AddCurve(arc_curve)\n\n# Ensure the curves are in a list\ncurves = [line, arc_curve]\ntol = 2.1 * sc.doc.ModelAbsoluteTolerance\njoined_curves = Rhino.Geometry.Curve.JoinCurves(curves, tol)\nif joined_curves:\n    for c in joined_curves:\n        sc.doc.Objects.AddCurve(c)\n\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "# Define width and height\n\nwidth = 3\nheight = 3\n\n# Define the line\n\nz = -radius - height\nstart_point_line = Rhino.Geometry.Point3d(0, -width / 2, z)\nend_point_line = Rhino.Geometry.Point3d(0, width / 2, z)\n\nline = Rhino.Geometry.LineCurve(start_point_line, end_point_line)\n\n# Add the line to the document\n\nmodel.Objects.AddCurve(line)\n\n# Define the arc\n\nstart_arc_point = Rhino.Geometry.Point3d(0, width / 2, -radius - width)\nend_arc_point = Rhino.Geometry.Point3d(0, -width / 2, -radius - width)\narc_point = Rhino.Geometry.Point3d(0, 0, -radius)\narc = Rhino.Geometry.Arc(start_arc_point, arc_point, end_arc_point)\n\n# Create an ArcCurve from the Arc\n\narc_curve = Rhino.Geometry.ArcCurve(arc)\n\n# Add the arc curve to the document\n\nmodel.Objects.AddCurve(arc_curve)\n\n# Ensure the curves are in a list\n\ncurves = [line, arc_curve]\njoined_curves = Rhino.Geometry.Curve.JoinCurves(curves)",
+      "language": "unknown",
+      "author": "jjjer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 110
+}

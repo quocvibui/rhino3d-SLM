@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python/55904",
+  "topic_id": 55904,
+  "title": "Rhino Python",
+  "question": "If i have four curves in a layer, and i want to select two of them ( i need their object ids). These two have the longer lengths as opposed to the other ones, how should i go about it?\n\n\nI have already selected them all and i can produce a cumulative length. But i want to detect each length and than select the highest two. any idea?\n\n\nSorry bout the amateur post, but i am very new. A good explanation would help me learn as well as a sample.\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n#user selects a collection of curves\ncrvs=rs.GetObjects(\"Select some curves\",4,preselect=True)\nif crvs:\n    #ask the user how many of the longest  curves they want to select\n    msg=\"How many of the longest curves to select?\"\n    count=rs.GetInteger(msg,minimum=1,maximum=len(crvs))\n    if count:\n        #create a nested list of tuples of (curve length,curve id) for all curves\n        crv_info=[(rs.CurveLength(crv_id),crv_id) for crv_id in crvs]\n        #sort the nested list by the length, biggest first (reverse=True)\n        #if you want the shortest, leave out the reverse=True\n        crv_info.sort(reverse=True)\n        #get the desired number of longest curves, from beginning of sorted list\n        for i in range(count):\n            #select the curve ID's which are in index 1 of each tuple\n            rs.SelectObject(crv_info[i][1])\n            #print the curve length for reference\n            print \"Curve {} length: {}\".format(i+1,crv_info[i][0])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# user selects a collection of curves\ncrvs = rs.GetObjects(\"Select some curves\", 4, preselect=True)\n\nif crvs:\n    # ask the user how many of the longest  curves they want to select\n    msg = \"How many of the longest curves to select?\"\n    count = rs.GetInteger(msg, minimum=1, maximum=len(crvs))\n    if count:\n        # Pass in the function rs.CurveLength as the 'key' argument\n        # This function is called for every item in the list, and its return value (curve length) is used for sorting\n        # if you want the shortest, leave out the reverse=True\n        crvs.sort(reverse=True, key = rs.CurveLength)\n        longest_curves = crvs[:count] # slices the first 'count' items from the list\n\n        for crv_id in longest_curves:\n            # select the curve ID's \n            rs.SelectObject(crv_id)\n            # print the curve length for reference\n            print \"Curve {} length: {}\".format(i + 1, rs.CurveLength(crv_id))",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 2183
+}

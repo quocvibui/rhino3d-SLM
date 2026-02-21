@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-command-for-creating-an-arc-using-centre-start-angle/136322",
+  "topic_id": 136322,
+  "title": "Python script command for creating an Arc using Centre,Start,Angle",
+  "question": "Hello,\n\n\nIs there a rhinoscriptsyntax command that replicates the  _Arc command using the Centre, Start and Angle option through the interface or will I have to use Rhino.Command?\n\n\nThe only 3 methods I see are AddArc, AddArc3pt and AddArcPtTanPt, none of which I can pass in the Centre, Start and Angle parameters.\n\n\nAny help is greatly appreciated",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\npt = rg.Point3d(0, 0, 0)\nradius = 1.0\nangle = math.pi / 2  # radians\narc = rg.Arc(pt, radius, angle)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\nimport System\nimport math\n\npt = rg.Point3d(0, 0, 0)\nradius = 1.0\nangle = math.pi / 2  # radians\narc = rg.Arc(pt, radius, angle)\n\nguid = sc.doc.Objects.AddArc(arc)\nif guid == System.Guid.Empty: \n    raise RuntimeError(\"Unable to add arc to document\")",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef CreateArcCtrStartEnd(ctr,start,end,cw):\n    plane=Rhino.Geometry.Plane(ctr,start,end)\n    start_tan_vec=plane.YAxis\n    #if cw is true, invert the tangent vector, the arc goes the other way\n    if cw: start_tan_vec=-start_tan_vec\n    arc=Rhino.Geometry.Arc(start,start_tan_vec,end)\n    return arc\n\nctr_pt=Rhino.Geometry.Point3d(10.0,10.0,0)\nstart_pt=Rhino.Geometry.Point3d(31.651,22.5,0)\nend_pt=Rhino.Geometry.Point3d(22.5,31.651,0)\n\narc=CreateArcCtrStartEnd(ctr_pt,start_pt,end_pt,False)\nif arc:\n    sc.doc.Objects.AddArc(arc)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "ctr_pt=Rhino.Geometry.Point3d(0,0,0)\nstart_pt=Rhino.Geometry.Point3d(-25,0,0)\nend_pt=Rhino.Geometry.Point3d(0,0,25)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1706
+}

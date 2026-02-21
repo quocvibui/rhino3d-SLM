@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trying-to-understand-parameters-for-shear-transformation/45178",
+  "topic_id": 45178,
+  "title": "Trying to understand parameters for Shear transformation",
+  "question": "I am not able to wrap my head around setting up a shear transformation…\n\n\nThe xform wants a base plane and 3 “scale” vectors…  Base plane, OK, but how do the \nscale\n vectors work?\n\n\nLet’s say I want to take a simple cube with the lower left corner at the World origin, and shear it over 45° along the +Y axis (looking at it in right view, that would be a shear angle of -45° if one used the shear command)…  I’ve tried a few things, but I cannot figure out how to set this up yet…  I can manage to scale along one or more axes, but not shear over…  Do I have to somehow align the base plane to the shear axis?\n\n\nThanks, --Mitch",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef main():\n  rep = Rhino.Geometry.Brep.CreateFromBox(\n      Rhino.Geometry.BoundingBox(\n        Rhino.Geometry.Point3d.Origin,\n        Rhino.Geometry.Point3d( 100.0, 100.0, 100.0 ) ) )\n  xfo = Rhino.Geometry.Transform.Shear(\n      Rhino.Geometry.Plane.WorldXY,\n      Rhino.Geometry.Vector3d( 1.0, 0.0, 0.0 ),\n      Rhino.Geometry.Vector3d( 0.0, 1.0, 0.0 ),\n      Rhino.Geometry.Vector3d( 0.0, 1.0, 1.0 ) )\n  rep.Transform( xfo )\n  scriptcontext.doc.Objects.AddBrep( rep )\n  scriptcontext.doc.Views.Redraw()\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1731
+}

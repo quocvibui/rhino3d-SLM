@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caseprince/rhino-python-scripts/blob/639ae6ea1dd6cc00408db4f7a97ae689e61fc589/post-it-frame.py",
+  "repo": "caseprince/rhino-python-scripts",
+  "repo_stars": 0,
+  "repo_description": "Parametric lampshades for 3D Printing in RhinoScript",
+  "license": "unknown",
+  "filepath": "post-it-frame.py",
+  "instruction": "Post it frame",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef box2pt(p1, p2):\n\n    pt0 = p1\n    pt1 = rs.coerce3dpoint([p2[0], p1[1], p1[2]])\n    pt2 = rs.coerce3dpoint([p2[0], p2[1], p1[2]])\n    pt3 = rs.coerce3dpoint([p1[0], p2[1], p1[2]])\n    pt4 = rs.coerce3dpoint([p1[0], p1[1], p2[2]])\n    pt5 = rs.coerce3dpoint([p2[0], p1[1], p2[2]])\n    pt6 = p2\n    pt7 = rs.coerce3dpoint([p1[0], p2[1], p2[2]])\n\n    return rs.AddBox([pt0, pt1, pt2, pt3, pt4, pt5, pt6, pt7])\n\ndef reset():\n    arr1 = rs.AllObjects()\n    if arr1: rs.DeleteObjects(arr1)\n    #rs.Command(\"ClearAllMeshes\")\n    rs.Command(\"ClearUndo\")\n\nreset()\n\nw = 333;\nh = 254;\nd = 10;\n\nrows = 6;\ncols = 5;\n\nframe = box2pt([0, 0, 0], [w, h-1, d])\n\nholeW = 51;\nholeH = 38;\n\npaddingW = 20;\npaddingH = 5;\nholesWidth = w - (paddingW * 2) - holeW\nholesHeight = h - (paddingH * 2) - holeH\n\nbevel = 1;\nplane = rs.WorldXYPlane()\n\nfor x in range(0, cols):\n    for y in range(0, rows):\n        holeX = paddingW + (holesWidth * (x/(cols-1)))\n        holeY = paddingH + (holesHeight * (y/(rows-1)))\n\n        hole1 = box2pt([holeX, holeY+1, d-2], [holeX + holeW, holeY + holeH - 1, d])\n        hole2 = box2pt([holeX, holeY, d-2], [holeX + holeW, holeY + holeH, d-1])\n\n        hole3 = box2pt([holeX, holeY, 0], [holeX + holeW, holeY + holeH, d-4])\n\n        rect_top = rs.AddRectangle( plane, holeW + 2, holeH )\n        rs.MoveObject(rect_top, [holeX - bevel, holeY, d])\n\n        rect_bottom = rs.AddRectangle( plane, holeW, holeH - 2)\n        rs.MoveObject(rect_bottom, [holeX, holeY+1, d-1])\n\n        rail =  rs.AddLine([holeX+(holeW/2), holeY+(holeH/2),d-1], [holeX+(holeW/2), holeY+(holeH/2),d])\n\n        top_sup_neg = rs.AddSweep1(rail, [rect_bottom, rect_top], True)\n        rs.CapPlanarHoles(top_sup_neg)\n\n        frame = rs.BooleanDifference([frame], [hole1, hole2, top_sup_neg, hole3])[0]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

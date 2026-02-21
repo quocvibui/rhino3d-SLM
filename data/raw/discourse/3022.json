@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/draw-half-circle/3022",
+  "topic_id": 3022,
+  "title": "Draw Half_circle",
+  "question": "Hi\n\nthe attached  Python_Script draw a  half _circle and i share it.\n\n\n\n# This Python script draws a half circle dynamically\n# Autor  ing. Carlotto Vittorio  carlottovittorio@gmail.com\n# 10-10-2013   Bassano del Grappa  Italy\n#-*- encoding: utf-8 -*-\nimport Rhino\nimport System.Drawing.Color\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport math\ndef half_circle():    \n    line_color = System.Drawing.Color.FromArgb(255,255,255)    \n    #cur_lay=rs.CurrentLayer()\n    #arc_color=rs.LayerColor(cur_lay) \n    position=rs.GetDocumentData(\"HalfCircle\",\"position\")    \n    if position==\"\":position=\"Right\"\n    options=[\"Right\",\"Left\"]\n    position=rs.GetString(\"Position of Arc <Enter to confirm>\",position,options)\n    rs.SetDocumentData(\"HalfCircle\",\"position\",str(position))    \n    stringa=position\n    if stringa==\"Right\":\n        rad=-math.pi/2\n        angle=-90\n    if stringa==\"Left\":\n        rad=math.pi/2\n        angle=90\n    \n    while True: \n         \n        pt_start=rs.GetPoint(\"StartPoint of half Circle < Enter for End>\")  # con metodo script \n        cur_lay=rs.CurrentLayer()\n        arc_color=rs.LayerColor(cur_lay)\n        if pt_start==None :break\n        arrplane=rs.ViewCPlane()\n        ZA=arrplane.ZAxis     \n        def GetPointDynamicDrawFunc( sender, args ): \n            #print Rhino.DocObjects.Layer.Color()\n            mid_point=(pt_start+args.CurrentPoint)/2            \n            args.Display.DrawLine(pt_start, args.CurrentPoint,line_color,1)\n            vect_l=pt_start-mid_point            \n            Rhino.Geometry.Vector3d.Rotate(vect_l,rad,ZA)                    \n            p3=Rhino.Geometry.Point3d.Add(mid_point,vect_l)            \n            arc=Rhino.Geometry.Arc(pt_start, p3,args.CurrentPoint)\n            args.Display.DrawArc(arc,arc_color,2)            \n        gp = Rhino.Input.Custom.GetPoint()        \n        gp.DynamicDraw += GetPointDynamicDrawFunc  # chiamo in continuo la funzione che mostra le curve dinamiche\n        gp.Get()     \n ...",
+  "code_blocks": [
+    {
+      "code": "# This Python script draws a half circle dynamically\n# Autor  ing. Carlotto Vittorio  carlottovittorio@gmail.com\n# 10-10-2013   Bassano del Grappa  Italy\n#-*- encoding: utf-8 -*-\nimport Rhino\nimport System.Drawing.Color\nimport rhinoscriptsyntax as rs\nimport math\nimport scriptcontext\n\ndef compute_arc(start, end, length, side, zaxis):\n    current_point = end\n    if length>0:\n        direction = end - start\n        line = Rhino.Geometry.Line(start, direction, length)\n        current_point = line.To\n    mid_point = (start+current_point)/2\n    vect_l = start - mid_point\n    rad = side * math.pi/2\n    angle = side * 90\n    Rhino.Geometry.Vector3d.Rotate(vect_l,rad,zaxis)\n    p3=Rhino.Geometry.Point3d.Add(mid_point,vect_l)\n    return Rhino.Geometry.Arc(start, p3, current_point)\n\ndef half_circle():\n    line_color = System.Drawing.Color.Black\n    side = 1\n    if scriptcontext.sticky.has_key('side'):\n        side = scriptcontext.sticky['side']\n\n    while True:\n        pt_start=rs.GetPoint(\"Start point\")\n        if not pt_start: return\n\n        current_layer=rs.CurrentLayer()\n        arc_color=rs.LayerColor(current_layer)\n        ZA = rs.ViewCPlane().ZAxis\n\n        length_option = Rhino.Input.Custom.OptionDouble(0, True, 0)\n        side_option = Rhino.Input.Custom.OptionToggle(side==1, \"Right\", \"Left\")\n        def GetPointDynamicDrawFunc( sender, args ): \n            current_point = args.CurrentPoint\n            length = length_option.CurrentValue\n            if length>0:\n                direction = current_point-pt_start\n                line = Rhino.Geometry.Line(pt_start, direction, length)\n                current_point = line.To\n                args.Display.DrawDottedLine(current_point, args.CurrentPoint, line_color)\n            args.Display.DrawLine(pt_start, current_point, line_color, 1)\n            \n            arc = compute_arc(pt_start, args.CurrentPoint, length, side, ZA)\n            args.Display.DrawArc(arc,arc_color,2)\n\n        gp = Rhino.Input.Custom.GetPoint()\n        gp.AddOptionDouble(\"FixedLength\",length_option)\n        gp.AddOptionToggle(\"Side\", side_option)\n        gp.DynamicDraw += GetPointDynamicDrawFunc  # chiamo in continuo la funzione che mostra le curve dinamiche\n        while gp.Get()==Rhino.Input.GetResult.Option:\n            if side_option.CurrentValue: side = 1\n            else: side = -1\n            scriptcontext.sticky['side'] = side\n\n        if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n            end_point= gp.Point()  # qui ho le coordinate del punto del mouse\n            length = length_option.CurrentValue\n            arc = compute_arc(pt_start, end_point, length, side, ZA)\n            scriptcontext.doc.Objects.AddArc(arc)\n            scriptcontext.doc.Views.Redraw()\n\nhalf_circle()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "gp = Rhino.Input.Custom.GetPoint()\ngp.SetBasePoint(pt_start, False)\n...",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "# This Python script draws a half circle dynamically\n# Autor  ing. Carlotto Vittorio  carlottovittorio@gmail.com\n# 10-10-2013   Bassano del Grappa  Italy\n#-*- encoding: utf-8 -*-\nimport Rhino\nimport System.Drawing.Color\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport math\ndef half_circle():    \n    line_color = System.Drawing.Color.FromArgb(255,255,255)    \n    #cur_lay=rs.CurrentLayer()\n    #arc_color=rs.LayerColor(cur_lay) \n    position=rs.GetDocumentData(\"HalfCircle\",\"position\")    \n    if position==\"\":position=\"Right\"\n    options=[\"Right\",\"Left\"]\n    position=rs.GetString(\"Position of Arc <Enter to confirm>\",position,options)\n    rs.SetDocumentData(\"HalfCircle\",\"position\",str(position))    \n    stringa=position\n    if stringa==\"Right\":\n        rad=-math.pi/2\n        angle=-90\n    if stringa==\"Left\":\n        rad=math.pi/2\n        angle=90\n    \n    while True: \n         \n        pt_start=rs.GetPoint(\"StartPoint of half Circle < Enter for End>\")  # con metodo script \n        cur_lay=rs.CurrentLayer()\n        arc_color=rs.LayerColor(cur_lay)\n        if pt_start==None :break\n        arrplane=rs.ViewCPlane()\n        ZA=arrplane.ZAxis     \n        def GetPointDynamicDrawFunc( sender, args ): \n            #print Rhino.DocObjects.Layer.Color()\n            mid_point=(pt_start+args.CurrentPoint)/2            \n            args.Display.DrawLine(pt_start, args.CurrentPoint,line_color,1)\n            vect_l=pt_start-mid_point            \n            Rhino.Geometry.Vector3d.Rotate(vect_l,rad,ZA)                    \n            p3=Rhino.Geometry.Point3d.Add(mid_point,vect_l)            \n            arc=Rhino.Geometry.Arc(pt_start, p3,args.CurrentPoint)\n            args.Display.DrawArc(arc,arc_color,2)            \n        gp = Rhino.Input.Custom.GetPoint()        \n        gp.DynamicDraw += GetPointDynamicDrawFunc  # chiamo in continuo la funzione che mostra le curve dinamiche\n        gp.Get()     \n        \n        if( gp.CommandResult() == Rhino.Commands.Result.Success ):\n            rs.EnableRedraw(False)\n            end_point= gp.Point()  # qui ho le coordinate del punto del mouse\n            mid_point=(pt_start+end_point)/2                  \n            mat_rot=rs.XformRotation2(angle,ZA,mid_point)\n            p3=rs.PointTransform(pt_start,mat_rot)                \n            arco=rs.AddArc3Pt(pt_start,end_point,p3) \n            rs.EnableRedraw(True)\n        \nhalf_circle()",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 3704
+}

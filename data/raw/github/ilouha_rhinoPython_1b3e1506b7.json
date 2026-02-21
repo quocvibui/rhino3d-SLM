@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ilouha/rhinoPython/blob/4194fbd3f384073a9a648e1a52490737a4509e1d/SaveAllNamedViews.py",
+  "repo": "ilouha/rhinoPython",
+  "repo_stars": 1,
+  "repo_description": "general scripting repository for quick hacks in Rhino using Python",
+  "license": "unknown",
+  "filepath": "SaveAllNamedViews.py",
+  "instruction": "Save all named views",
+  "code": "import rhinoscriptsyntax as rs\nimport os\n\ndef export_saved_views():\n    # Prompt the user to select a folder\n    folder_path = rs.BrowseForFolder(None, \"Select Folder to Save Views\")\n    \n    # If the user cancels the selection, exit the function\n    if not folder_path:\n        print(\"No folder selected. Exiting.\")\n        return\n    \n    # Ensure the folder exists (it should, since the user selected it, but check anyway)\n    if not os.path.exists(folder_path):\n        print(\"Invalid folder path.\")\n        return\n\n    # Get a list of all named views\n    views = rs.NamedViews()\n\n    if views:\n        # Loop through each named view\n        for view in views:\n            try:\n                # Restore the view\n                rs.RestoreNamedView(view)\n                \n                # Set the file path and name for each view\n                file_path = os.path.join(folder_path, \"{0}.png\".format(view))\n                \n                # Capture the view to file\n                rs.Command(\"-ViewCaptureToFile \\\"{0}\\\" _Enter\".format(file_path))\n\n            except Exception as e:\n                print(\"Error capturing view {0}: {1}\".format(view, e))\n        \n        print(\"Exported {0} views to {1}\".format(len(views), folder_path))\n    else:\n        print(\"No saved views found.\")\n\n# Run the function\nexport_saved_views()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

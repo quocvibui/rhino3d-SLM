@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/3d-regular-boundingbox-from-python-component/109136",
+  "topic_id": 109136,
+  "title": "3D regular BoundingBox from python component",
+  "question": "Hello,\n\n\nI currently don’t understand on how to get the 3D Bounding Box of a component.\n\nI’m sorry for asking so much.\n\n\nimport rhinoscriptsyntax as rs\nimport ghpythonlib as ghpy\nimport Grasshopper as gh\nimport Rhino\n\npt = rs.CreatePoint(0,0,0)\n\nbox = ghpy.components.BoundingBox(mesh,ghpy.components.XYPlane(pt))\n\n\n#print(dir(box)) # <-- Is this a bug?\n\"\"\"\nRuntime error (TypeErrorException): unsupported operand type(s) for +: 'list' and 'Array[str]'\n\nTraceback:\n line 81, in __dir__, \"\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\ghpythonlib\\components.py\"\n line 14, in script\n\"\"\"\n\nprint(box.Volume)\nprint(box.Corner)\nprint(box.Properties)\nprint(box.sdfsdf)\n# These all return Rhino.Geometry.Box, even when using nonsense attributes like in the last line.\n\n\n\nI already checked the forum, but these posts didn’t really help me:\n\nThis one is using pure grasshopper for the bounding box though:\n\n\nhttps://discourse.mcneel.com/t/bounding-box-size/68060\n\nThis one is for the minimum bounding box, all I need is a regular one:\n\n\nhttps://discourse.mcneel.com/t/minimum-oriented-bounding-box-implementation-in-grasshopper-python-script-node/64344\n\n…",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\npt = rg.Point3d(0, 0, 0) # or rg.Point2d.Origin (also creates a point at the origin)\nbbox = mesh.GetBoundingBox(False) # or mesh.GetBoundingBox(True) for physical accuracy but slower\n\nprint bbox.Volume, bbox.MinimumCoordinate, bbox.MaximumCoordinate",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib as ghpy\nimport Grasshopper as gh\nimport Rhino\n\npt = rs.CreatePoint(0,0,0)\n\nbox = ghpy.components.BoundingBox(mesh,ghpy.components.XYPlane(pt))\n\n\n#print(dir(box)) # <-- Is this a bug?\n\"\"\"\nRuntime error (TypeErrorException): unsupported operand type(s) for +: 'list' and 'Array[str]'\n\nTraceback:\n line 81, in __dir__, \"\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\ghpythonlib\\components.py\"\n line 14, in script\n\"\"\"\n\nprint(box.Volume)\nprint(box.Corner)\nprint(box.Properties)\nprint(box.sdfsdf)\n# These all return Rhino.Geometry.Box, even when using nonsense attributes like in the last line.",
+      "language": "python",
+      "author": "martinborst1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 1284
+}

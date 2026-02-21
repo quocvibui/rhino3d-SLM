@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/parametric-6-dof-plane-in-grasshopper/208068",
+  "topic_id": 208068,
+  "title": "Parametric 6‑DOF Plane in Grasshopper",
+  "question": "Built a 6‑DOF parametric plane setup:\n\n\n\n\nBase: \nXY Plane\n\n\nRotation: yaw → pitch → roll using chained \nRotate 3D\n\n\nAxes: \nLine SDL\n + \nUnit X/Y/Z\n\n\nAngles: degree sliders converted to radians\n\n\nTranslation: planning to use \nMove\n with dx/dy/dz\n\n\nIntermediate previews clutter the viewport — will clean up\n\n\n\n\nScreenshot attached. Posting for reference — open to suggestions.\n\n\nimage\n1529×648 140 KB",
+  "code_blocks": [
+    {
+      "code": "def add(a,b):\n    return a+b\n\n\n\nif __name__ == \"__main__\":\n    a = add(x,y) #this has to match the input/output of the grasshopper python node",
+      "language": "python",
+      "author": "dn.aur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "from math import radians, cos, sin\nimport Rhino.Geometry as rg\n\n\"\"\"\nInputs:\n    roll: Roll angle in degrees\n    pitch: Pitch angle in degrees\n    yaw: Yaw angle in degrees\n    x, y, z: Origin coordinates of the plane\n    axis_len: Length of preview axis lines\n    sx, sy: Plane surface size\n\nOutputs:\n    plane: Constructed plane\n    origin: Origin point\n    x_axis: X direction vector\n    y_axis: Y direction vector\n    z_axis: Z direction vector\n    axes: Preview axis lines\n    srf: Plane surface\n    rect: Rectangle curve on plane\n\"\"\"\n\ndef RunScript(self, roll, pitch, yaw, x, y, z, axis_len, sx, sy):\n\n    # --- Convert to radians ---\n    roll  = radians(roll)\n    pitch = radians(pitch)\n    yaw   = radians(yaw)\n\n    # --- Precompute trig ---\n    cx, cy, cz = cos(roll), cos(pitch), cos(yaw)\n    sx_, sy_, sz_ = sin(roll), sin(pitch), sin(yaw)\n\n    # --- Rotation matrix (Z-Y-X intrinsic) ---\n    R = [\n        [cz*cy,  cz*sy_*sx_ - sz_*cx,  cz*sy_*cx + sz_*sx_],\n        [sz_*cy, sz_*sy_*sx_ + cz*cx,  sz_*sy_*cx - cz*sx_],\n        [  -sy_,            cy*sx_,            cy*cx    ]\n    ]\n\n    # --- Axes and origin ---\n    x_axis = rg.Vector3d(R[0][0], R[0][1], R[0][2])\n    y_axis = rg.Vector3d(R[1][0], R[1][1], R[1][2])\n    z_axis = rg.Vector3d.CrossProduct(x_axis, y_axis)\n    origin = rg.Point3d(x, y, z)\n\n    # --- Final plane ---\n    plane = rg.Plane(origin, x_axis, y_axis)\n\n    # --- Axes as preview lines ---\n    lx = rg.Line(origin, origin + x_axis * axis_len)\n    ly = rg.Line(origin, origin + y_axis * axis_len)\n    lz = rg.Line(origin, origin + z_axis * axis_len)\n    axes = [lx, ly, lz]\n\n    # --- Centered plane surface ---\n    srf = rg.PlaneSurface(\n        plane,\n        rg.Interval(-sx * 0.5, sx * 0.5),\n        rg.Interval(-sy * 0.5, sy * 0.5)\n    )\n\n    # --- Rectangle curve ---\n    rect = rg.Rectangle3d(\n        plane,\n        rg.Interval(-sx * 0.5, sx * 0.5),\n        rg.Interval(-sy * 0.5, sy * 0.5)\n    )\n\n    return plane, origin, x_axis, y_axis, z_axis, axes, srf, rect",
+      "language": "python",
+      "author": "lander",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "from math import radians, cos, sin\nimport Rhino.Geometry as rg\n\ndef RunScript(self, roll, pitch, yaw, x, y, z, axis_len, sx, sy):\n    # ----- safe defaults WITHOUT changing the signature -----\n    def d(v, default): return default if v is None else v\n    roll     = d(roll, 0.0)\n    pitch    = d(pitch, 0.0)\n    yaw      = d(yaw, 0.0)\n    x        = d(x, 0.0)\n    y        = d(y, 0.0)\n    z        = d(z, 0.0)\n    axis_len = max(1e-6, d(axis_len, 10.0))\n    sx       = max(1e-6, d(sx, 20.0))\n    sy       = max(1e-6, d(sy, 20.0))\n\n    # ----- angles (deg -> rad) -----\n    roll, pitch, yaw = map(radians, (roll, pitch, yaw))\n\n    # ----- trig -----\n    cx, cy, cz = cos(roll),  cos(pitch), cos(yaw)\n    sx_, sy_, sz_ = sin(roll), sin(pitch), sin(yaw)\n\n    # ----- Z-Y-X intrinsic (yaw-pitch-roll) -----\n    R = [\n        [cy*cz,              cz*sx_*sy_ - cx*sz_,   cx*cz*sy_ + sx_*sz_],\n        [cy*sz_,             cx*sy_*sz_ + cz*sx_,   cx*cz   - sx_*sy_*sz_],\n        [-sy_,               cy*sx_,                cx*cy]\n    ]\n\n    # ----- axes from columns, orthonormalize -----\n    x_axis = rg.Vector3d(R[0][0], R[1][0], R[2][0]); x_axis.Unitize()\n    y_axis = rg.Vector3d(R[0][1], R[1][1], R[2][1]); y_axis.Unitize()\n    z_axis = rg.Vector3d.CrossProduct(x_axis, y_axis); z_axis.Unitize()\n    # re-derive y to guarantee right-handed frame\n    y_axis = rg.Vector3d.CrossProduct(z_axis, x_axis); y_axis.Unitize()\n\n    # ----- origin & plane -----\n    origin = rg.Point3d(x, y, z)\n    plane  = rg.Plane(origin, x_axis, y_axis)\n\n    # ----- preview axes -----\n    axes = [\n        rg.Line(origin, origin + x_axis * axis_len),\n        rg.Line(origin, origin + y_axis * axis_len),\n        rg.Line(origin, origin + z_axis * axis_len),\n    ]\n\n    # ----- centered surface & rectangle -----\n    ix = rg.Interval(-sx * 0.5, sx * 0.5)\n    iy = rg.Interval(-sy * 0.5, sy * 0.5)\n    srf  = rg.PlaneSurface(plane, ix, iy)\n    rect = rg.Rectangle3d(plane, ix, iy)\n\n    return plane, origin, x_axis, y_axis, z_axis, axes, srf, rect",
+      "language": "python",
+      "author": "lander",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 139
+}

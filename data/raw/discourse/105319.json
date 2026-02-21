@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-split-shatter-curves/105319",
+  "topic_id": 105319,
+  "title": "Python split / shatter curves",
+  "question": "Continuing the discussion from \nPython Split curve with curve?\n:\n\n\nhi there,\n\n\nI am trying exactly that on python (learning python at the moment) but i found several problems\n\n\nhere is my code at the moment:\n\n\n#shift\n curves list\n\nnew_list = \n\nfor i in Curves:\n\nnew_list.insert(len(new_list)-1, i)\n\n\n#get\n points at intersection\n\nint_events = \n\nfor crv in Curves:\n\nfor n_crv in new_list:\n\nint = rs.CurveCurveIntersection(crv, n_crv)\n\nint_events.append(int[0])\n\n\n#extract\n elements from list of lists\n\ndef Extract(a, lst):\n\nreturn [item[a] for item in lst]\n\n\nint_pts_a = Extract(1, int_events)\n\nint_param_a = Extract(5, int_events)\n\n\n#output\n\nIntersection_Points = int_pts_a\n\nCrv_param_at_int_Points = int_param_a\n\na = int_events\n\n\nthe problems I am facing so far are:\n\n\nthere is one intersection missing…???\n\nif I use the shatter component with the output produced, I get a list of non-sense points…???\n\n\nany help here please\npython_split_curves.gh\n (6.5 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\nparams = []\nfor i in range(len(crvs)):\n    params.append([])\nfor i in range(len(crvs)):\n    for j in range(i+1, len(crvs)):\n        events = rs.CurveCurveIntersection(crvs[i], crvs[j])\n        for event in events:\n            params[i].append(event[5])\n            params[j].append(event[7])\na = th.list_to_tree(params)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "from ghpythonlib.treehelpers import list_to_tree\nfrom Rhino.Geometry.Intersect import Intersection\nfrom scriptcontext import doc\ntol = doc.ModelAbsoluteTolerance\nparams = []\nfor i in range(len(crvs)):\n    params.append([])\nfor i in range(len(crvs)):\n    for j in range(i+1, len(crvs)):\n        events = Intersection.CurveCurve(crvs[i], crvs[j], tol, tol)\n        for event in events:\n            params[i].append(event.ParameterA)\n            params[j].append(event.ParameterB)\nsub_curves = []\nfor i in range(len(crvs)):\n        sub_curves.append(crvs[i].Split(params[i]))\na = list_to_tree(sub_curves)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "from ghpythonlib.treehelpers import list_to_tree\nfrom Rhino.Geometry.Intersect import Intersection\nfrom scriptcontext import doc\ntol = doc.ModelAbsoluteTolerance\nparams = []\nfor i in range(len(crvs)):\n    params.append([])\nfor i in range(len(crvs)):\n    for j in range(len(cutter)):\n        events = Intersection.CurveCurve(crvs[i], cutter[j], tol, tol)\n        for event in events:\n            params[i].append(event.ParameterA)\n\nsub_curves = []\nfor i in range(len(crvs)):\n        sub_curves.append(crvs[i].Split(params[i]))\na = list_to_tree(sub_curves)",
+      "language": "python",
+      "author": "architect.civil5",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "#python\nfrom Rhino.Geometry.Intersect import Intersection\nfrom scriptcontext import doc\ntol = doc.ModelAbsoluteTolerance\nparameters = []\nfor cutter in cutters:\n    events = Intersection.CurveCurve(crv, cutter, tol, tol)\n    for e in events:\n        parameters.append(e.ParameterA)\na = crv.Split(parameters)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "//C#\nprivate void RunScript(Curve crv, List<Curve> cutters, ref object A)\n{\n  var tol = RhinoDocument.ModelAbsoluteTolerance;\n  var parameters = new List<double>();\n  foreach(var cutter in cutters)\n  {\n    var events = Intersection.CurveCurve(crv, cutter, tol, tol);\n    foreach(var e in events)\n      parameters.Add(e.ParameterA);\n  }\n  A = crv.Split(parameters);\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1837
+}

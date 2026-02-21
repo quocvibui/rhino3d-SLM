@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/delete-points-in-the-middle-of-straight-edges-of-a-surface/112567",
+  "topic_id": 112567,
+  "title": "Delete points in the middle of straight edges of a surface",
+  "question": "Hi all,\n\nI am generating different geometries starting from squared cells. Once I find the cells and I join them to get the shape I want, I would like to get right of the points between my corners. I am looking for a way to do this in rhinocommon and python if possible. This is what I get, you can see the midpoints on the edges due to the generation from smaller cells:\n\n\nimage\n724×591 78.8 KB\n\n\nFor now, I was just able to do get rid of those points using the \nDiscontinuity\n component. So, I implemented it in my code like this after picking the cells:\n\n\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as gh\njoinedCells = rg.Brep.JoinBreps(cells, 0.01)[0] # put [0] to get one brep, otherwise it is an Array[Brep]\n# use three lines to delete inner edges and keep only countour curve and create surface from that\nnakedEdges = joinedCells.DuplicateNakedEdgeCurves(True, False)\ncurveFromEdges = rg.Curve.JoinCurves(nakedEdges, 0.01, True)[0]\ncurveNoMidPoints = gh.PolyLine(gh.Discontinuity(curveFromEdges, 1)[0], True) # this line to avoid having points in the middle of a straight line\nsurfaceFromCurve = rg.Brep.CreatePlanarBreps(curveNoMidPoints , 0.01)[0]\n\n\n\nAs you can see from the picture below I don’t have those points anymore. But I would like to solve this issue by using rhinocommon.\n\n\nimage\n703×589 52.2 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport ghpythonlib.components as gh\njoinedCells = rg.Brep.JoinBreps(cells, 0.01)[0] # put [0] to get one brep, otherwise it is an Array[Brep]\n# use three lines to delete inner edges and keep only countour curve and create surface from that\nnakedEdges = joinedCells.DuplicateNakedEdgeCurves(True, False)\ncurveFromEdges = rg.Curve.JoinCurves(nakedEdges, 0.01, True)[0]\ncurveNoMidPoints = gh.PolyLine(gh.Discontinuity(curveFromEdges, 1)[0], True) # this line to avoid having points in the middle of a straight line\nsurfaceFromCurve = rg.Brep.CreatePlanarBreps(curveNoMidPoints , 0.01)[0]",
+      "language": "python",
+      "author": "fbattini",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 516
+}

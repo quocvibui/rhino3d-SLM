@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/namedcplane-to-namedview/94034",
+  "topic_id": 94034,
+  "title": "NamedCplane to NamedView",
+  "question": "Hi anyone\n\n\nI’d like to know how to save NamedView that is a  parallel projection of  NamedCplane in Rhinocommon(Python).\n\nI think it would be possible if Plan command could be implemented in Rhinocommon.\n\nPlease tell me how to write it.\n\n\n\n\n2019-12-24_22h05_49\n462×937 44.1 KB\n\n\n\n\n\n\nplane\n848×288 44.8 KB\n\n\n\nKind regards,\n\nReomaru",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\nnames = rs.NamedCPlanes()\nfor name in names:\n    plane = rs.NamedCPlane(name)\n    vect = rs.VectorAdd((0,0,100),plane.ZAxis)\n    vp = sc.doc.Views.ActiveView.ActiveViewport\n    vp.SetCameraLocation(plane.Origin, False)\n    vp.SetCameraDirection(vect, True)\n    rs.AddNamedView(name)",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino.DocObjects.Tables.NamedConstructionPlaneTable nctable = RhinoDoc.ActiveDoc.NamedConstructionPlanes;\nPrint(\"Named cPlanes: {0}\", nctable.Count);\nif(!nctable.Any())return;\n\nif(index >= nctable.Count)index = nctable.Count - 1;\nConstructionPlane cPlane = nctable[index];\nPoint3d camLoc = cPlane.Plane.Origin;\nVector3d camUp = cPlane.Plane.ZAxis;\n\nRhino.Display.RhinoView view = doc.Views.ActiveView;\nRhino.Display.RhinoViewport vp = view.ActiveViewport;\nstring name = view.ActiveViewport.Name;\n\nvp.PushViewProjection();\nvp.CameraUp = -camUp;\nvp.SetCameraLocation(camLoc + camUp * pFactor, false);\nvp.SetCameraDirection(-camUp, true);\nvp.Name = name;\n\ndoc.NamedViews.Add(name, vp.Id);\nview.Redraw();",
+      "language": "unknown",
+      "author": "PeterFotiadis",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 681
+}

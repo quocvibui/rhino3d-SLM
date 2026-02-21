@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/ZacZhangzhuo/3d_printing_teamwork/blob/1ae8e701e83329eb292170fc8bc483fa912b639b/working_file_zac/shellShape/shellShape.py",
+  "repo": "ZacZhangzhuo/3d_printing_teamwork",
+  "repo_stars": 1,
+  "repo_description": "This is the 3D Printing teamwork repository of team 4 of MAS dfab 2023",
+  "license": "MIT",
+  "filepath": "working_file_zac/shellShape/shellShape.py",
+  "instruction": "Shell shape",
+  "code": "import Rhino.Geometry as rg\nimport copy\nimport math\n\n# def OrientPlane(plane):\n#     zAxis = plane.ZAxis\n#     if zAxis.Z < 0:\n#         zAxis = -zAxis\n#     outPlane = rg.Plane(plane.Origin, zAxis)\n#     xAxis = copy.copy(outPlane.XAxis)\n#     xAxis.Transform(rg.Transform.ProjectAlong(rg.Plane.WorldXY, outPlane.YAxis))\n#     outPlane.Transform(rg.Transform.Rotation(outPlane.XAxis, xAxis, outPlane.Origin))\n#     if outPlane.YAxis.Z < 0:\n#         outPlane = rg.Plane(outPlane.Origin, -outPlane.XAxis, -outPlane.YAxis)\n#     return outPlane\n\ndef OrientPlane(plane, guide):\n    yPt = plane.Origin + rg.Vector3d(0,0,1)\n    project = rg.Transform.ProjectAlong(plane,plane.ZAxis)\n    yPt.Transform(project)\n    yAxis = rg.Vector3d(yPt-plane.Origin)\n    \n    zAxis = plane.ZAxis\n    if zAxis*guide <0: zAxis = -zAxis\n\n    outPlane = rg.Plane(plane.Origin,-rg.Vector3d.CrossProduct(zAxis,yAxis), yAxis)\n    return outPlane\n\n\n\n\n\nplanes = []\nflip = False\nfor i in range(LayerNumber):\n    for c in Curves:\n\n        params = c.DivideByCount(DivideCount, True)\n        # params = []\n        # for p in theParams: params.append(p)\n        # params.append(params[0])\n\n        tempPlane = []\n        for k,p in enumerate(params):\n                pt0 = c.PointAt(p)\n                pt1 = Brep.ClosestPoint(pt0)\n                temp = rg.Plane(pt1, rg.Vector3d(pt0-pt1))\n\n                plane = OrientPlane(temp,rg.Vector3d(rg.Point3d.Origin - temp.Origin))\n                # plane = temp\n\n                dir = rg.Vector3d(pt0-pt1)\n                dir.Unitize()\n                move = rg.Transform.Translation( dir*LayerHight*i)\n                plane.Transform(move)\n\n                wave = rg.Transform.Translation(plane.YAxis * math.sin((100*k)/len(params))*i*1)\n                plane.Transform(wave)\n\n                halfLength = len(params)/2\n                rotation2 = rg.Transform.Rotation((((halfLength - abs(halfLength-k))/halfLength)*-math.pi), plane.Normal, plane.Origin)\n                # plane.Transform(rotation2)\n\n\n\n                tempPlane.append(plane)\n        if flip : tempPlane.reverse()\n        flip = not flip\n        planes.extend(tempPlane)\n\nfor p in planes:\n    z = p.ZAxis\n    z.Unitize()\n    newZ = z*Inclination + rg.Vector3d.ZAxis*(1-Inclination)\n    rotation = rg.Transform.Rotation(z, newZ,p.Origin)\n    p.Transform(rotation)\n\n\n\n\nPlanes = planes\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

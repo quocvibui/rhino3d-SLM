@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/need-help-gh-python-using-global-list/40849",
+  "topic_id": 40849,
+  "title": "Need Help! GH_Python : Using global List",
+  "question": "Hi,\n\n\nI’m writing a code to generate simple branch structure in grasshopper.\n\nI use couple of ‘global list variable’ to store lines and points.\n\nThe list for points is fine, but the list for curves only stores ‘null’.\n\nPlease see the screenshot and code below. Thanks for your help in advance.\n\n\nrandomBranching_WIP.gh\n (9.0 KB)\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nimport Rhino.Geometry as rg\n\nimport random as rnd\n\n\nif go :\n\n\nwanderpt (attr, walkingDist)\ncheckdistandaggr(attr, boundary, min_dist)\n\n\n\nelse:\n\naggr = \n\nlines = \n\n\nwander_pt = rg.Curve.PointAt(boundary, rnd.uniform(0, 1))\naggr.append(attr)\n\n\n\na = wander_pt\n\nb = lines\n\nc = aggr\n\n\ndef wanderpt (attr, scaleDist) :\n\nglobal wander_pt\n\n\nvec = rs.VectorCreate(attr, wander_pt)\nvec = rs.VectorUnitize(vec)\nvec = rs.VectorScale(vec, scaleDist)\nang = rnd.uniform(-75, 75)\nvec = rs.VectorRotate(vec, ang, rs.VectorCreate( [0,0,1], [0,0,0]))\n\nwander_pt = rs.VectorAdd(vec, wander_pt)\n\n\n\ndef checkdistandaggr(attr, boundary, m_dist) :\n\n\nglobal wander_pt\nglobal aggr\nglobal lines\n\n\nfor i in range(len(aggr)):\n    dist = rs.Distance(wander_pt, aggr[i])\n    \n    if dist < m_dist:\n        \n        lines.append(rs.AddLine(wander_pt, aggr[i]))\n        aggr.append(wander_pt)\n        wander_pt = rg.Curve.PointAt(boundary, rnd.uniform(0, 1))\n        break",
+  "code_blocks": [
+    {
+      "code": "vec = rs.VectorCreate(attr, wander_pt)\nvec = rs.VectorUnitize(vec)\nvec = rs.VectorScale(vec, scaleDist)\nang = rnd.uniform(-75, 75)\nvec = rs.VectorRotate(vec, ang, rs.VectorCreate( [0,0,1], [0,0,0]))\n\nwander_pt = rs.VectorAdd(vec, wander_pt)",
+      "language": "python",
+      "author": "lepli",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "global wander_pt\nglobal aggr\nglobal lines\n\n\nfor i in range(len(aggr)):\n    dist = rs.Distance(wander_pt, aggr[i])\n    \n    if dist < m_dist:\n        \n        lines.append(rs.AddLine(wander_pt, aggr[i]))\n        aggr.append(wander_pt)\n        wander_pt = rg.Curve.PointAt(boundary, rnd.uniform(0, 1))\n        break",
+      "language": "python",
+      "author": "lepli",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 966
+}

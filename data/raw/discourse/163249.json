@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-quadmesh/163249",
+  "topic_id": 163249,
+  "title": "Select QuadMesh",
+  "question": "Is there a way to distinguish between quad and tri meshes? Thanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\n\ndef SelQuadMesh():\n    ids = rs.ObjectsByType(32,False, 1)\n    if not ids: return\n    \n    geos = [rs.coercemesh(id) for id in ids]\n    \n    for i in range(len(geos)):\n        sel= True\n        for face in geos[i].Faces:\n            if face.IsTriangle:\n                sel= False\n                break\n        if sel:\n            rs.SelectObject(ids[i])\n\nif __name__ == \"__main__\":\n    SelQuadMesh()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\n\ndef SelTriMesh():\n    ids = rs.ObjectsByType(32,False, 1)\n    if not ids: return\n    \n    geos = [rs.coercemesh(id) for id in ids]\n    \n    for i in range(len(geos)):\n        sel= True\n        for face in geos[i].Faces:\n            if not face.IsTriangle:\n                sel= False\n                break\n        if sel:\n            rs.SelectObject(ids[i])\n\nif __name__ == \"__main__\":\n    SelTriMesh()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\ndef SelMixedMesh():\n    ids = rs.ObjectsByType(32,False, 1)\n    if not ids: return\n    \n    geos = [rs.coercemesh(id) for id in ids]\n    \n    for i in range(len(geos)):\n        tri = 0\n        quad = 0\n        for face in geos[i].Faces:\n            if face.IsTriangle:\n                tri= 1\n            else:\n                quad = 1\n            if tri + quad == 2:\n                rs.SelectObject(ids[i])\n                break\n\nif __name__ == \"__main__\":\n    SelMixedMesh()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 3,
+  "views": 249
+}

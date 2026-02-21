@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/missingmemberexception-rhino-geometry-object-has-no-attribute-rhino/178113",
+  "topic_id": 178113,
+  "title": "MissingMemberException: 'Rhino.Geometry' object has no attribute 'Rhino'",
+  "question": "hey so i try to run this code but get always an error, the code is below and i tried changing line 24 to something else like : radians = angle * math.pi / 180 or import math then radians = math.radians(angle) but none of it works, i also tried in both rhino 7 and 8 same error:\n\n\nimport Rhino\n\nimport rhinoscriptsyntax as rs\n\n\nDefine circle parameters\n\n\nradius = 5.0  # meters\n\nnum_pillars = 10\n\n\nCalculate angular spacing\n\n\nangle_spacing = 360.0 / num_pillars\n\n\nFunction to create a pillar object at a specific location\n\n\ndef create_pillar(x, y, height):\n\npt = Rhino.Geometry.Point3d(x, y, 0.0)\n\ncircle = Rhino.Geometry.Circle(pt, radius)\n\ncylinder = Rhino.Geometry.Cylinder(circle, height)\n\nrs.AddObject(cylinder)\n\n\nLoop to place pillars\n\n\nfor i in range(num_pillars):\n\n# Calculate angle for current pillar position\n\nangle = i * angle_spacing\n\n\n# Convert angle to radians for trigonometric functions\nradians = Rhino.Geometry.DegreesToRadians(angle)\n\n# Calculate x and y coordinates based on radius and angle\nx = radius * math.cos(radians)\ny = radius * math.sin(radians)\n\n# Create the pillar object\ncreate_pillar(x, y, 2.0)  # Adjust height as needed\n\n\n\nPrint completion message\n\n\nprint(“Created”, num_pillars, “pillars in a circular arrangement.”)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport math\n\ncylinders = []\n\n# Define circle parameters\n\nradius = 5.0 # meters\nnum_pillars = 10\n\n# Calculate angular spacing\n\nangle_spacing = 360.0 / num_pillars\n\n# Function to create a pillar object at a specific location\n\ndef create_pillar(x, y, height):\n    pt = Rhino.Geometry.Point3d(x, y, 0.0)\n    circle = Rhino.Geometry.Circle(pt, radius)\n    cylinder = Rhino.Geometry.Cylinder(circle, height)\n    cylinders.Add(cylinder)\n\n# Loop to place pillars\n\nfor i in range(num_pillars):\n    # Calculate angle for current pillar position\n    angle = i * angle_spacing\n\n    # Convert angle to radians for trigonometric functions\n    radians = Rhino.RhinoMath.ToRadians(angle)\n\n    # Calculate x and y coordinates based on radius and angle\n    x = radius * math.cos(radians)\n    y = radius * math.sin(radians)\n\n    # Create the pillar object\n    create_pillar(x, y, 2.0)  # Adjust height as needed\n\na = cylinders",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "# Convert angle to radians for trigonometric functions\nradians = Rhino.Geometry.DegreesToRadians(angle)\n\n# Calculate x and y coordinates based on radius and angle\nx = radius * math.cos(radians)\ny = radius * math.sin(radians)\n\n# Create the pillar object\ncreate_pillar(x, y, 2.0)  # Adjust height as needed",
+      "language": "python",
+      "author": "hasanalhusseini900",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 278
+}

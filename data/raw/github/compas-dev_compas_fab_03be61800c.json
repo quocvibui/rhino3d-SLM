@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/compas-dev/compas_fab/blob/431e82c810ea299b9727b010b73a39abc73c5d62/src/compas_fab/ghpython/components/Cf_RosConnect/code.py",
+  "repo": "compas-dev/compas_fab",
+  "repo_stars": 124,
+  "repo_description": "Robotic fabrication package for the COMPAS Framework.",
+  "license": "MIT",
+  "filepath": "src/compas_fab/ghpython/components/Cf_RosConnect/code.py",
+  "instruction": "Connect or disconnect to ROS.",
+  "code": "\"\"\"\nConnect or disconnect to ROS.\n\nCOMPAS FAB v1.0.2\n\"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nfrom scriptcontext import sticky as st\n\nfrom compas_fab.backends import RosClient\nfrom compas_fab.ghpython.components import create_id\n\n\nclass ROSConnect(component):\n    def RunScript(self, ip, port, connect):\n        ros_client = None\n\n        ip = ip or \"127.0.0.1\"\n        port = port or 9090\n\n        key = create_id(self, \"ros_client\")\n        ros_client = st.get(key, None)\n\n        if ros_client:\n            st[key].close()\n        if connect:\n            st[key] = RosClient(ip, port)\n            st[key].run(5)\n\n        ros_client = st.get(key, None)\n        is_connected = ros_client.is_connected if ros_client else False\n        return (ros_client, is_connected)\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

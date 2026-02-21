@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-explodetext-appears-broken-on-mac/35598",
+  "topic_id": 35598,
+  "title": "rs.ExplodeText appears broken on Mac",
+  "question": "Hey.\n\nI have written a small python script for previewing text as curves in the rhino viewport, and then when toggled, bake the text as text objects so that they can be further edited in Rhino/Illustrator/etc. The script works fine on PC, but the preview is broken on Mac seemingly due to a broken rs.ExplodeText function? rs.AddText works although it doesn’t seem to automatically detect changes to the variables and re-compute and add the new text. When called from within an if statement it is however no problem. ie:\n\n\nif BAKE == True:\n    bakeText = rs.AddText(text, plane, height, font, font_style=0, justification=None)\n\n\n\nBelow here is the small script working on PC but not on Mac, and attached is an example file with the GHpython component:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino \n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ncrvsList = []\n\ntextCrvs = rs.ExplodeText(rs.AddText(text, plane, height, font, font_style=fontStyle, justification=None), True)\n\nif textCrvs:\n    for i in textCrvs:\n        crvsList.append(rs.coercegeometry(i))\n        rs.DeleteObject(i)\nelse:\n    print \"error creating textCrvs\"\n\nif BAKE == True:\n    bakeText = rs.AddText(text, plane, height, font, font_style=0, justification=None)\n\n\n\nBakeAsText2.gh\n (6.0 KB)\n\n\nIs it me doing something wrong or is the rs.ExplodeText really broken for Mac? I really need some help with this, and I’d be super grateful for any pointers or comments on whats up with this!!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino \n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ncrvsList = []\n\ntextCrvs = rs.ExplodeText(rs.AddText(text, plane, height, font, font_style=fontStyle, justification=None), True)\n\nif textCrvs:\n    for i in textCrvs:\n        crvsList.append(rs.coercegeometry(i))\n        rs.DeleteObject(i)\nelse:\n    print \"error creating textCrvs\"\n\nif BAKE == True:\n    bakeText = rs.AddText(text, plane, height, font, font_style=0, justification=None)",
+      "language": "python",
+      "author": "Mertzi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 58,
+  "posts_count": 3,
+  "views": 710
+}

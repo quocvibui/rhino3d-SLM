@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-cancel-a-long-running-operation-like-booleandifference-or-booleanunion-in-rhinocommon/97483",
+  "topic_id": 97483,
+  "title": "How to cancel a long running operation like BooleanDifference or BooleanUnion in RhinoCommon",
+  "question": "It happens that certain operations like BooleanUnion or BooleanDifference run for several hours.\n\n\nIs there a way to abort the running operation after a certain time in the code?\n\n\nE.g. by using a Task based CancellationToken (\nhttps://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads\n)?\n\n\nMany thanks in advance.",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n        try\n        {\n            RhinoApp.WriteLine(\n                $\"Executing the command {EnglishName} on ManagedThreadId={Thread.CurrentThread.ManagedThreadId}. Should be 1 for the UI tread\");\n\n            BoundingBox boundingBox1 = new BoundingBox(0, 0, 0, 10, 10, 10);\n            BoundingBox boundingBox2 = new BoundingBox(5, 5, 5, 15, 15, 15);\n\n            Brep brep1 = Brep.CreateFromBox(boundingBox1);\n            Brep brep2 = Brep.CreateFromBox(boundingBox2);\n\n            List<Brep> breps = new List<Brep>();\n            breps.Add(brep1);\n            breps.Add(brep2);\n\n            var result = Task<List<Brep>>.Factory.StartNew(() => CalculateBooleanUnionOnDifferentThread(breps), CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);\n            result.Wait();\n            foreach (var brep in result.Result)\n            {\n                doc.Objects.AddBrep(brep);\n            }\n\n            doc.Views.Redraw();\n            RhinoApp.WriteLine($\"The {EnglishName} added {result.Result.Count} brep(s) to the document\");\n\n            // ---\n\n            return Result.Success;\n        }\n        catch (Exception e)\n        {\n            RhinoApp.WriteLine(e.ToString());\n            throw;\n        }\n    }\n\n    private static List<Brep> CalculateBooleanUnionOnDifferentThread(List<Brep> breps)\n    {\n        RhinoApp.WriteLine($\"Create boolean union for {breps.Count} breps on ManagedThreadId={Thread.CurrentThread.ManagedThreadId}\");\n        return Brep.CreateBooleanUnion(breps, 0.001).ToList();\n    }",
+      "language": "csharp",
+      "author": "thomas.k",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n        try\n        {\n\n\n            // TODO: start here modifying the behaviour of your command.\n            // ---\n            RhinoApp.WriteLine(\n                $\"Executing the command {EnglishName} on ManagedThreadId={Thread.CurrentThread.ManagedThreadId}. Should be 1 for the UI tread\");\n\n            BoundingBox boundingBox1 = new BoundingBox(0, 0, 0, 10, 10, 10);\n            BoundingBox boundingBox2 = new BoundingBox(5, 5, 5, 15, 15, 15);\n\n            Brep brep1 = Brep.CreateFromBox(boundingBox1);\n            Brep brep2 = Brep.CreateFromBox(boundingBox2);\n\n            List<Brep> breps = new List<Brep>();\n            breps.Add(brep1);\n            breps.Add(brep2);\n\n            var cancellationSource = new CancellationTokenSource();\n            var cancellationToken = cancellationSource.Token;\n            var task = Task<List<Brep>>.Factory.StartNew(() => CalculateBooleanUnionOnDifferentThread(breps, cancellationToken), cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);\n\n            // wait for a certain time until the task is finished \n            if (task.Wait(1000))\n            {\n                foreach (var brep in task.Result)\n                {\n                    doc.Objects.AddBrep(brep);\n                }\n\n                doc.Views.Redraw();\n                RhinoApp.WriteLine(\n                    $\"The {EnglishName} added {task.Result.Count} brep(s) to the document.  ManagedThreadId={Thread.CurrentThread.ManagedThreadId}\");\n                return Result.Success;\n            }\n            else\n            {\n                // task did not complete execution within the allotted time\n                // cancel the thread\n                cancellationSource.Cancel();\n\n                //todo: catch the ThreadAbortException\n            }\n\n            return Result.Failure;\n\n        }\n        catch (Exception e)\n        {\n            RhinoApp.WriteLine(e.ToString());\n            return Result.Failure;\n        }\n      \n    }\n\n    private static List<Brep> CalculateBooleanUnionOnDifferentThread(List<Brep> breps,\n        CancellationToken cancellationToken)\n    {\n        var thread = Thread.CurrentThread;\n        RhinoApp.InvokeOnUiThread(new Action(() => RhinoApp.WriteLine($\"Create boolean union for {breps.Count} breps on ManagedThreadId={thread.ManagedThreadId}\")));\n\n        //Register the cancel action\n        cancellationToken.Register(() =>\n        {\n            RhinoApp.InvokeOnUiThread(new Action(() => RhinoApp.WriteLine($\"Aborting the thread.  ManagedThreadId={thread.ManagedThreadId}\")));\n            // It is not recommended to use Thread.Abort()... but could not find a better solution\n            thread.Abort();\n        });\n\n        while (true)\n        {\n            // very long running operation\n            // Brep.CreateBooleanUnion(breps, 0.001).ToList();\n        }\n\n        return null;\n    }",
+      "language": "csharp",
+      "author": "thomas.k",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 15,
+  "views": 1593
+}

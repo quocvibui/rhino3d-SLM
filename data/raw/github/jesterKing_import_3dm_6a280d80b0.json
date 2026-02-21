@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jesterKing/import_3dm/blob/b3c680c3fe049bae8e421fac9da7f13c6c9cd927/import_3dm/converters/rdk_manager.py",
+  "repo": "jesterKing/import_3dm",
+  "repo_stars": 372,
+  "repo_description": "Blender importer script for Rhinoceros 3D files",
+  "license": "MIT",
+  "filepath": "import_3dm/converters/rdk_manager.py",
+  "instruction": "Rdk manager",
+  "code": "import rhino3dm as r3d\nimport xml.etree.ElementTree as ET\n\nclass RdkManager():\n  def __init__(self, document : r3d.File3dm) -> None:\n    self.doc = document\n    self.rdkxml = ET.fromstring(self.doc.RdkXml())\n    self.mgr = self.rdkxml.find(\"render-content-manager-document\")\n    self.materials_xml = self.mgr.find(\"material-section\")\n    self.environments_xml = self.mgr.find(\"environment-section\")\n    self.textures_xml = self.mgr.find(\"texture-section\")\n\n  def get_materials(self):\n    materials = []\n    for material in self.materials_xml.findall(\"material\"):\n      rm = r3d.RenderMaterial()\n      rm.SetXML(ET.tostring(material, encoding=\"utf-8\").decode())\n      materials.append(rm)\n    return materials\n\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/random-point-inside-a-closed-curve-python/19846",
+  "topic_id": 19846,
+  "title": "Random point inside a closed curve / python",
+  "question": "Hello guys , i have a question : what is the best and most efficient way to generate some random point inside a closed planar curve !?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\nimport Rhino\n\nrandomPtsNum = rs.GetInteger(\"number of random pts\")\ncurveId = rs.GetObject(\"pick up the curve\")\ncurveObj = rs.coercegeometry(curveId)\nplanarBrep = Rhino.Geometry.Brep.CreatePlanarBreps([curveObj])[0]\nsrf = planarBrep.Faces[0]\ndomU = srf.Domain(0)\ndomV = srf.Domain(1)\n\npts = []\ninside =  Rhino.Geometry.PointFaceRelation.Interior\nborder = Rhino.Geometry.PointFaceRelation.Boundary\nwhile len(pts) < randomPtsNum:\n    u = random.uniform(domU[0],domU[1])\n    v = random.uniform(domV[0],domV[1])\n    if (srf.IsPointOnFace(u,v) == inside) or (srf.IsPointOnFace(u,v) == border):\n        pts.append(srf.PointAt(u,v))\nrs.AddPoints(pts)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 5135
+}

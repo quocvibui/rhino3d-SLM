@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Fablab-Sevilla/ghPython101/blob/176caf1c854234051661b0d3bbdf458b39447cc6/D%C3%ADa_003/01_EJ/divSrf%20%2B%20panels.py",
+  "repo": "Fablab-Sevilla/ghPython101",
+  "repo_stars": 9,
+  "repo_description": "Documentation and exercises from ghPython101 course",
+  "license": "MIT",
+  "filepath": "Día_003/01_EJ/divSrf + panels.py",
+  "instruction": "Div srf + panels",
+  "code": "﻿'''\nEn este ejemplo se han mezclado los dos componentes antes separados\ny se ha convertido el código de planarize.py en una función que\ndevuelve una lista de datos\n\n'''\n\nimport Rhino.Geometry as rg\nfrom Grasshopper import DataTree as Tree\nfrom Grasshopper.Kernel.Data import GH_Path as Path\n\n\ndef planarize(pts,T):\n    \n    '''\n    Creates a planar quad panel from a serie of 4 points projecting one of\n    those over a plane defined by the other 3 points.\n    \n    Returns a list where [0] is a polyline \n    and [1] is the panel area (Float).\n    '''\n    \n    data = []\n    \n    #Creamos un plano con tres puntos cualesquiera\n    plane = rg.Plane(pts[0],pts[1],pts[2])\n\n    #Proyectamos el punto 3 sobre el plano calculado\n    newPt3 = plane.ClosestPoint(pts[3])\n\n    #Calculamos el desplazamiento de cada punto\n    dev = pts[3].DistanceTo(newPt3)\n\n    #Sustituimos el punto 3 por su nuevo valor\n    pts[3] = newPt3\n    lines = []\n\n    #Creamos una marca en cada panel fuera de tolerancia\n    if dev>T:\n    \n        l0 = rg.Line(pts[0],pts[2])\n        l1 = rg.Line(pts[1],pts[3])\n        lines.extend([l0,l1])\n\n    #Creamos la polilinea de cada panel y calculamos su area    \n    pol = rg.PolylineCurve((pts[0],pts[1],pts[2],pts[3],pts[0]))\n\n    areaObj = rg.AreaMassProperties.Compute(pol)\n    area = areaObj.Area\n\n    w = lines\n        \n    data.extend([pol,area])\n    return data\n\npanels = []\nptList = []\npolList = []\n\n#Initializing an empty data tree\nptTree = Tree[object]()\n\nfor i in range(uDiv+1):\n    ptListTemp = []\n    \n    for j in range(vDiv+1):\n        \n        ptTemp = srf.Evaluate(i/uDiv,j/vDiv,2)[1]\n        ptListTemp.append(ptTemp)\n        \n    ptList.append(ptListTemp)\n\n# Contador necesario para crear una rama de datos por cada panel   \ncounter = 0\n\nfor i in range(uDiv):\n    for j in range(vDiv):\n        \n        pt0 = ptList[i][j]\n        pt1 = ptList[i+1][j]\n        pt2 = ptList[i][j+1]\n        pt3 = ptList[i+1][j+1]\n        \n        # Adding points to datatree\n        # The commented lines produce the flipped tree.\n        #ptTree.Add(pt0,Path(0))\n        #ptTree.Add(pt1,Path(1))\n        #ptTree.Add(pt2,Path(2))\n        #ptTree.Add(pt3,Path(3))\n        \n        ptTree.AddRange([pt0,pt1,pt3,pt2],Path(counter))\n        counter += 1\n        \n        polList.append(rg.Polyline([pt0,pt1,pt3,pt2,pt0]))\n        \n# Loop para iterar en el arbol de datos creado en el loop anterior\nfor  i in range(ptTree.BranchCount):    \n    panels.append(planarize(ptTree.Branch(Path(i)),tol))            \n\n\n'''\n## Salida de datos\n'''\npanel = polList\n# Salida de datos de nuestra lista\nfpanel = [p[0] for p in panels]  \narea = [p[1] for p in panels]",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ESteelEx/gcode2cutsim/blob/95aa5678ec3848954cd855838198d3c5a8802a51/RhinoInterface/controlSimulation.py",
+  "repo": "ESteelEx/gcode2cutsim",
+  "repo_stars": 2,
+  "repo_description": "- gcode 2 cutsim code for 3D Simulation with Verifier Engine",
+  "license": "unknown",
+  "filepath": "RhinoInterface/controlSimulation.py",
+  "instruction": "Control simulation",
+  "code": "import os, sys\nimport rhinoscriptsyntax as rs\n\nclass controlSimulation():\n    def __init__(self, feature, pluginPath, corePath):\n        self.feature = feature  # string defines what to control on 1st Layer. Use as specified in INI file\n        self.pluginPath = pluginPath\n        self.corePath = corePath\n        self.INI_CONFIG = self.corePath + r'\\Mesh.ini'\n        self.INI_MachSim = self.corePath + r'\\bin\\MachSim\\mwMachineSimulator_App\\Initial_files\\Part\\mwMachineSimulator.ini'\n\n    # ------------------------------------------------------------------------------------------------------------------\n    def set_sweep_shape(self, sweepShape='rectangle', simType='verifier'):\n        sys.path.append(self.pluginPath)\n        print self.pluginPath\n        print os.getcwd()\n        from Utilities import ini_worker\n        reload(ini_worker)\n\n        if simType == 'verifier':\n\n            section_params = ini_worker.get_section_from_ini(self.INI_CONFIG, 'SIMULATION')\n\n            for key, value in section_params.iteritems():\n                if key == 'sweepShape':\n                    print 'SIMULATION SWEEP SHAPE SWITCHED TO ' + sweepShape\n                    ini_worker.write_to_section(self.INI_CONFIG, 'SIMULATION', 'sweepShape', sweepShape)\n\n        elif simType == 'MachSim':\n\n            section_params = ini_worker.get_section_from_ini(self.INI_MachSim, 'startup')\n\n            print section_params\n\n            for key, value in section_params.iteritems():\n                if key == 'tpSweepShape':\n                    print 'SIMULATION SWEEP SHAPE SWITCHED TO ' + sweepShape\n                    ini_worker.write_to_section(self.INI_MachSim, 'startup', 'tpSweepShape', sweepShape)\n\n    # ------------------------------------------------------------------------------------------------------------------\n    def set_simulation_precision(self):\n        sys.path.append(self.pluginPath)\n        from Utilities import ini_worker\n        reload(ini_worker)\n\n        num = raw_input('Define simulation precision [mm]. Press ESC for automated calculation: ')\n        try:\n            num = float(num)\n        except:\n            print 'Simulation set to automatic solution'\n            ini_worker.write_to_section(self.INI_CONFIG, self.feature, 'precision', 'auto')\n            return\n\n        try:\n            ini_worker.write_to_section(self.INI_CONFIG, self.feature, 'precision', num)\n        except:\n            ini_worker.write_to_section(self.INI_CONFIG, self.feature, 'precision', 'auto')\n\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

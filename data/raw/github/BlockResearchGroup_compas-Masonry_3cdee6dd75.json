@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas-Masonry/blob/41cf6ce10135782dcef8de413281702f3702775e/src/compas_masonry/scene/igraphobject.py",
+  "repo": "BlockResearchGroup/compas-Masonry",
+  "repo_stars": 4,
+  "repo_description": "Rhino plugin for the design and equilibrium analysis of block models and for the stability assessment of (historic) masonry structures.",
+  "license": "NOASSERTION",
+  "filepath": "src/compas_masonry/scene/igraphobject.py",
+  "instruction": "Igraphobject",
+  "code": "import scriptcontext as sc  # type: ignore\n\nimport compas_rhino.conversions\nfrom compas.colors import Color\nfrom compas.geometry import Line\nfrom compas.scene.descriptors.color import ColorAttribute\nfrom compas_dem.elements import Block\nfrom compas_masonry.session import MasonrySession as Session\nfrom compas_model.models import InteractionGraph\nfrom compas_rhino.scene import RhinoSceneObject\n\n\nclass RhinoInteractionGraphObject(RhinoSceneObject):\n    \"\"\"Class for representing a block in a Rhino scene.\"\"\"\n\n    session: Session = Session()\n\n    nodecolor = ColorAttribute(default=Color.cyan())\n    edgecolor = ColorAttribute(default=Color.cyan())\n\n    def __init__(\n        self,\n        **kwargs,\n    ):\n        super().__init__(**kwargs)\n\n    @property\n    def graph(self) -> InteractionGraph:\n        \"\"\"The COMPAS DEM InteractionGraph element.\n\n        Returns\n        -------\n        :class:`compas_model.models.InteractionGraph`\n\n        \"\"\"\n        return self.item  # type: ignore\n\n    @graph.setter\n    def graph(self, graph: InteractionGraph) -> None:\n        self.item = graph  # type: ignore\n\n    def draw(self) -> list[str]:\n        \"\"\"Draw the interaction graph in Rhino.\n\n        Returns\n        -------\n        list[str]\n            A list of GUIDs of the drawn objects.\n\n        \"\"\"\n        guids = []\n\n        node_point = {}\n\n        element: Block\n        for node in self.graph.nodes():\n            element = self.graph.node_element(node)  # type: ignore\n            node_point[node] = element.point\n\n            geometry = compas_rhino.conversions.point_to_rhino(element.point)\n            attr = self.compile_attributes(name=\"Block_{}\".format(node), color=self.nodecolor)\n            guid = sc.doc.Objects.AddPoint(geometry, attr)\n            guids.append(guid)\n\n        for u, v in self.graph.edges():\n            line = Line(node_point[u], node_point[v])\n            geometry = compas_rhino.conversions.line_to_rhino(line)\n            attr = self.compile_attributes(name=\"Interaction_{}_{}\".format(u, v), color=self.edgecolor)\n            guid = sc.doc.Objects.AddLine(geometry, attr)\n            guids.append(guid)\n\n        if self.group:\n            self.add_to_group(self.group, guids)\n\n        self._guids = guids\n        return guids\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

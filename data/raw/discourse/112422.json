@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/a-question-about-brep-createfilletedges-method/112422",
+  "topic_id": 112422,
+  "title": "A Question About Brep.CreateFilletEdges Method",
+  "question": "I am trying to use this method to fillet only the edges that are close to a certain point. I get this error:\n\n\nRuntime error (ArgumentTypeException): expected IEnumerable[int], got list\n\n\n\nPlease see the .gh file…\n\n\nCreateFilletEdges.gh\n (15.9 KB)\n\n\nWhat am I doing wrong?\n\n\nHere’s the code for reference:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rh\nimport System as sys\n\nindex_list = []\n\nfor i in range(len(edges)):\n    midPt = rs.CurveMidPoint(edges[i])\n    \n    surfaceCPuv = rs.SurfaceClosestPoint(top_surface, midPt)\n    surfaceCP = rs.SurfaceEvaluate(top_surface, surfaceCPuv, 1)[0]\n    \n    dist = rh.Geometry.Point3d.DistanceTo(midPt, surfaceCP)\n    \n    if abs(dist) <= rs.UnitAbsoluteTolerance() * 3:\n        index_list.append(i)\n\nindexes = index_list\nprint indexes\n#indexes = sys.Collections.Generic.IEnumerable(indexes)\n\nblendType = rh.Geometry.BlendType.Fillet\nrailType = rh.Geometry.RailType.RollingBall\ntolerance = rh.FileIO.File3dmSettings.ModelAbsoluteTolerance\n\nfinal_prong = rh.Geometry.Brep.CreateFilletEdges(prong, indexes, radius, radius, blendType, railType, tolerance)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport System as sys\n\nindex_list = []\n\nfor i in range(len(edges)):\n    midPt = rs.CurveMidPoint(edges[i])\n    \n    surfaceCPuv = rs.SurfaceClosestPoint(top_surface, midPt)\n    surfaceCP = rs.SurfaceEvaluate(top_surface, surfaceCPuv, 1)[0]\n    \n    dist = rh.Geometry.Point3d.DistanceTo(midPt, surfaceCP)\n    \n    if abs(dist) <= rs.UnitAbsoluteTolerance() * 3:\n        index_list.append(i)\n\nindexes = index_list\nprint indexes\n#indexes = sys.Collections.Generic.IEnumerable(indexes)\n\nblendType = rh.Geometry.BlendType.Fillet\nrailType = rh.Geometry.RailType.RollingBall\ntolerance = rh.FileIO.File3dmSettings.ModelAbsoluteTolerance\n\nfinal_prong = rh.Geometry.Brep.CreateFilletEdges(prong, indexes, radius, radius, blendType, railType, tolerance)",
+      "language": "python",
+      "author": "Erdem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 10,
+  "views": 776
+}

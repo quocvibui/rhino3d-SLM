@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wish-billboard-images/26848",
+  "topic_id": 26848,
+  "title": "WISH : Billboard Images",
+  "question": "I know this has been brought up and discussed outside this group but I thought I’d share it in case there’s a half cooked piece of code that could be tested in the WIP or included in release.\n\n\nA billboard image, like a 2D RPC or a sketchup face-me component would be extremely helpful for architecture visualizations. The support would be for image transparency and constant facing camera and a proper export to render. I know that Archvision support was added in 5 and it seems Archvision claims that you can make your own RPCs for free but I don’t think they work with Rhino…\n\n\nMaybe another drag-and-drop option for images to convert them to billboards…",
+  "code_blocks": [
+    {
+      "code": "from Rhino import Commands, DocObjects, Geometry, Input\nimport scriptcontext\n\n\ndef generate_frame(forward):\n    forward.Unitize() # could fail should really check\n    up = Geometry.Vector3d.ZAxis\n    if forward.IsParallelTo(up) != 0:\n        up = Geometry.Vector3d.YAxis\n    side = Geometry.Vector3d.CrossProduct(forward, up)\n    side.Unitize() # could fail should really check\n    up = Geometry.Vector3d.CrossProduct(side, forward)\n    return (forward, side, up)\n\n\ndef orient_unconstrained(surface, camera_pt):\n    u = (surface.Domain(0).T0 + surface.Domain(0).T1) / 2.0\n    v = (surface.Domain(1).T0 + surface.Domain(1).T1) / 2.0\n\n    srf_pt = surface.PointAt(u, v)\n    srf_fwd = surface.NormalAt(u, v)\n    srf_fwd, srf_side, srf_up = generate_frame(srf_fwd)\n\n    target_fwd = camera_pt - srf_pt\n    target_fwd, target_side, target_up = generate_frame(target_fwd)\n\n    trans = Geometry.Transform.Translation(-Geometry.Vector3d(srf_pt))\n    rot = Geometry.Transform.Rotation(srf_side, srf_up, srf_fwd, target_side, target_up, target_fwd)\n    inv_trans = Geometry.Transform.Translation(Geometry.Vector3d(srf_pt))\n\n    return inv_trans * rot * trans\n\n\ndef orient_constrained(surface, camera_pt):\n    u = (surface.Domain(0).T0 + surface.Domain(0).T1) / 2.0\n    v = (surface.Domain(1).T0 + surface.Domain(1).T1) / 2.0\n\n    srf_pt = surface.PointAt(u, v)\n    srf_fwd = surface.NormalAt(u, v)\n    srf_fwd.Z = 0\n\n    target_fwd = camera_pt - srf_pt\n    target_fwd.Z = 0\n\n    return Geometry.Transform.Rotation(srf_fwd, target_fwd, srf_pt)\n\n\ndef orient_to_camera():\n    result, obj_refs = Input.RhinoGet.GetMultipleObjects(\"Select objects\", False, DocObjects.ObjectType.Surface)\n    if result != Commands.Result.Success:\n        return\n\n    result, constrained = Input.RhinoGet.GetBool(\"Constrain z-axis\", True, \"no\", \"yes\", True)\n    if result != Commands.Result.Success:\n        return\n\n    result, view = Input.RhinoGet.GetView(\"Select view\")\n    if result != Commands.Result.Success:\n        return\n    camera_pt = view.ActiveViewport.CameraLocation\n\n    for obj_ref in obj_refs:\n        surface = obj_ref.Surface()\n        if not surface:\n            continue\n\n        xform = None\n        if constrained:\n            xform = orient_constrained(surface, camera_pt)\n        else:\n            xform = orient_unconstrained(surface, camera_pt)\n\n        scriptcontext.doc.ActiveDoc.Objects.Transform(obj_ref, xform, True)\n\n\nif( __name__ == '__main__' ):\n    orient_to_camera()\n    scriptcontext.doc.ActiveDoc.Views.Redraw()",
+      "language": "python",
+      "author": "tobiasjewson",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 11,
+  "views": 3585
+}

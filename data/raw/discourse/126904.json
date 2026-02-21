@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-can-i-place-a-diagonal-dimension-between-these-markers-in-3d-and-not-ortho/126904",
+  "topic_id": 126904,
+  "title": "How can I place a diagonal dimension between these markers in 3D and not Ortho?",
+  "question": "Hi\n\nV5\n\nAligned dim fails to put a dimension centre to centre on these ‘markers’ when placed in perspective view.\n\nIf I do so in ortho view the dim does not travel from marker to marker.\n\nBott left to middle right I hope is 54 inches measured on site on the front face. for example but I am unable to get a dimension with arrows and number to sit between the two.\n\nThey have been plotted from site measurements in a side view and now I want to see what they measure as on the front face of the object.\n\n\nAligned are for ortho views, what dims are there for angled work in 3D space ?\n\n\nmarkers need diagonal dims between.3dm\n (71.6 KB)\n\n\nSteve",
+  "code_blocks": [
+    {
+      "code": "#! python3\ndef mark_distance():\n    \"\"\"\n    script written by Gijs de Zwart\n    draws a line with arrows and dot annotation with the distance between the\n    two picked points\n    \"\"\"\n    import Rhino\n    import rhinoscriptsyntax as rs\n    import scriptcontext as sc\n    \n    \n    result = rs.GetLine(0,message1 = \"pick two points\")\n    if not result:\n        return\n    else:\n        pt1, pt2 = result\n    if not pt1 or not pt2:\n        return\n        \n    \n    line  = Rhino.Geometry.Line(pt1, pt2)\n    length = round(line.Length,3)\n    \n    mid = (pt1+pt2)/2\n    \n    \n    rs.EnableRedraw(False)\n    newline = sc.doc.Objects.AddLine(line)\n    rs.CurveArrows(newline,3)\n    obj = sc.doc.Objects.Find(newline)\n    obj.Attributes.DisplayOrder=1\n    obj.CommitChanges()\n    \n    dot = rs.AddTextDot(str(length),mid)\n    obj = sc.doc.Objects.Find(dot)\n    obj.Attributes.DisplayOrder=2\n    obj.CommitChanges()\n    groupname = rs.AddGroup(\"dim-3d : \"+str(length))\n    rs.AddObjectsToGroup([newline, dot],groupname)\n    rs.EnableRedraw(True)\n    sc.doc.Views.Redraw()\nif __name__ == \"__main__\":  \n    mark_distance()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 13,
+  "views": 2965
+}

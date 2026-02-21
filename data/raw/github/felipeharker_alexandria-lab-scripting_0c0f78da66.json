@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_issurfaceinplane.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_issurfaceinplane.py",
+  "instruction": "Ex issurfaceinplane",
+  "code": "import Rhino\nfrom Rhino.Geometry import *\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nimport math\n\ndef RunCommand():\n  surface_id = rs.GetSurfaceObject()[0]\n  if surface_id == None:\n    return\n  surface = rs.coercesurface(surface_id)\n\n  corners = rs.GetRectangle()\n  if corners == None:\n    return\n    \n  plane = Plane(corners[0], corners[1], corners[2])\n\n  is_or_isnt = \"\" if IsSurfaceInPlane(surface, plane, doc.ModelAbsoluteTolerance) else \" not \"\n  print \"Surface is{0} in plane.\".format(is_or_isnt)\n\ndef IsSurfaceInPlane(surface, plane, tolerance):\n  if not surface.IsPlanar(tolerance):\n    return False\n \n  bbox = surface.GetBoundingBox(True)\n  rc = True\n  for corner in bbox.GetCorners():\n      if math.fabs(plane.DistanceTo(corner)) > tolerance:\n          rc = False\n          break\n          \n  return rc\n\nif __name__ == \"__main__\":\n    RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

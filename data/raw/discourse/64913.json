@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-ensure-consistency-of-normal-direction-while-using-network-curves-in-rhinopython-scr/64913",
+  "topic_id": 64913,
+  "title": "How to ensure consistency of normal direction while using Network curves in RhinoPython?Scr",
+  "question": "Hi everyone,\n\n\nI am trying to figure use of NetworkSurface in Rhino using RhinoPython. Before moving to non-straight edge geometries, I am working on creating just a single rectangular surface. Please give your feedback on the issue.\n\n\nWhile creating the surface, I am facing a trouble that the normal direction of the surface created does not remain consistent. I am also implementig a flag to flip the normal using the FlipNormal function if necessary but I would really like the normal direction to be consistent for a given NetworkSurface function call for a given order of curves/lines created.\n\n\nSee the code below. This if you run once will have normal in one direction. But delete that surface and say run again then it might end up having a flipped normal.\n\n\nimport rhinoscriptsyntax as rs\n\n\ndef srfCreate(P1=None,P2=None,P3=None,P4=None):\n\nLine1 = rs.AddLine(P1,P2)\n\nLine2 = rs.AddLine(P2,P3)\n\nLine3 = rs.AddLine(P3,P4)\n\nLine4 = rs.AddLine(P4,P1)\n\ncurves = {Line1,Line2,Line3,Line4}\n\nRectangle_obj = rs.AddNetworkSrf(curves,edge_tolerance=1e-5, interior_tolerance=1e-4,angle_tolerance=0)\n\n\nif \nname\n == ‘\nmain\n’:\n\nP1=(0,0,0)\n\nP2=(0,1,0)\n\nP3=(1,1,0)\n\nP4=(1,0,0)\n\nnormal_flag=‘FALSE’\n\nsrf1=srfCreate(P1,P2,P3,P4)\n\nif(normal_flag):\n\nrs.FlipSurface(srf1, normal_flag)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\ndef srfCreate():\n    pts = rs.GetPoints(max_points=4)\n    if not pts: return\n    Line1 = rs.AddLine(pts[0],pts[1])\n    Line2 = rs.AddLine(pts[3],pts[2])\n    Line3 = rs.AddLine(pts[1],pts[2])\n    Line4 = rs.AddLine(pts[0],pts[3])\n    curves = [Line1,Line2,Line3,Line4]\n    Rectangle_obj = rs.AddNetworkSrf(curves,edge_tolerance=1e-5, interior_tolerance=1e-4,angle_tolerance=0)\n    \nsrfCreate()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport math\n\ndef NormalCheck(id, testVec):\n    \"\"\"\n    Checks to see if a vector is more parallel or anti-parallel to another\n    \n    \"\"\"\n    pi = math.pi\n    \n    #get the surface domain and find the middle of U and V domains\n    # as a 'useful' location to check the normal \n    domU = rs.SurfaceDomain(id, 0)\n    domU = Rhino.Geometry.Interval(domU[0], domU[1])\n    domV = rs.SurfaceDomain(id, 1)\n    domV = Rhino.Geometry.Interval(domV[0], domV[1])\n    parU = domU.Mid\n    parV = domV.Mid\n    \n    # get the normal\n    vecNorm = rs.SurfaceNormal(id,[parU, parV])\n    print Rhino.Geometry.Vector3d.VectorAngle(testVec, vecNorm)\n    \n    #Check the angle against the test normal and return the result\n    #for parallel-ness\n    if Rhino.Geometry.Vector3d.VectorAngle(testVec, vecNorm) > pi/2:\n        print False\n        return False\n    print True\n    return True\n    pass\n    \n    \ndef srfCreate():\n    pts = rs.GetPoints(max_points=4)\n    if not pts: return\n    Line1 = rs.AddLine(pts[0],pts[1])\n    Line2 = rs.AddLine(pts[3],pts[2])\n    Line3 = rs.AddLine(pts[1],pts[2])\n    Line4 = rs.AddLine(pts[0],pts[3])\n    curves = {Line1,Line2,Line3,Line4}\n    id = rs.AddNetworkSrf(curves,edge_tolerance=1e-5, interior_tolerance=1e-4,angle_tolerance=0)\n    \n    \n    \n    if not id: return\n    rs.DeleteObjects(curves)\n    \n    # Check the angle of World Z with a surface normal\n    if not NormalCheck(id, Rhino.Geometry.Vector3d(0,0,1)):\n        #if it's not pointing more or less the same way, reverse U and V\n        rs.ReverseSurface(id,4)\n        srf = sc.doc.Objects.Find(id).Geometry.Faces[0]\n        # make sure the flip flag is off\n        rs.FlipSurface(id, False)\n    pass\n    \nsrfCreate()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 1149
+}

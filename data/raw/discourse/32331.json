@@ -1,0 +1,54 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-this-pycode-does-not-work/32331",
+  "topic_id": 32331,
+  "title": "Help! This pycode does not work",
+  "question": "Hi,\n\n\nThis pycode does not work,can you help me?\n\n\nimport rhinoscriptsyntax as rs\n\nsrf = rs.GetObject(\"select Extrude surface\",rs.filter.surface)\nif srf:\n    cmd = \"_ExtrudeSrf _Pause S=_Yes \"\n    rc = rs.command(cmd + chr(34) + srf + chr(34), True)\n    rs.HideObject(srf)\nelse:\n    print \"not select surface\"\n\n\n\nIt does not work,please help me.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsrf = rs.GetObject(\"Select surface to extrude\",rs.filter.surface,select=True)\nif srf:\n    rc = rs.Command(\"_ExtrudeSrf _Solid=_Yes \", True)\n    rs.HideObject(srf)\nelse:\n    print \"No surface selected\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmsg=\"Select a surface or polysurface face\"\nobj_ref=rs.GetObject(msg,8,preselect=True,select=True,subobjects=True)\nrs.Command(\"_ExtrudeSrf _Solid=_Yes _DeleteInput=_Yes\", True)\n\nHTH, --Mitch",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmsg=\"Select a closed planar curve, surface or polysurface face\"\nobj_ref=rs.GetObject(msg,4+8,True,True,subobjects=True)\n#separate curves and surfaces\nobj_ID=obj_ref.ObjectId\nif rs.IsCurve(obj_ID):\n    if rs.IsCurveClosed(obj_ID) and rs.IsCurvePlanar(obj_ID):\n        rs.Command(\"_ExtrudeCrv _Solid=_Yes\", True)\n    else:\n        print \"Unable to extrude, curve is not closed and planar!\"\nelse:\n    rs.Command(\"_ExtrudeSrf _Solid=_Yes _DeleteInput=_Yes\", True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef cp_crv_filt(rhino_object, geometry, component_index):\n    #filter for closed planar curves\n    return rs.IsCurvePlanar(geometry) and rs.IsCurveClosed(geometry)\n\nmsg=\"Select a closed planar curve, surface or polysurface face\"\nobj_ref=rs.GetObject(msg,4+8,True,True,custom_filter=cp_crv_filt,subobjects=True)\n#separate curves and surfaces\nif rs.IsCurve(obj_ref.ObjectId):\n    rs.Command(\"_ExtrudeCrv _Solid=_Yes\", True)\nelse:\n    rs.Command(\"_ExtrudeSrf _Solid=_Yes _DeleteInput=_Yes\", True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsrf = rs.GetObject(\"select Extrude surface\",rs.filter.surface)\nif srf:\n    cmd = \"_ExtrudeSrf _Pause S=_Yes \"\n    rc = rs.command(cmd + chr(34) + srf + chr(34), True)\n    rs.HideObject(srf)\nelse:\n    print \"not select surface\"",
+      "language": "python",
+      "author": "robinyss",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 1567
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-construct-multiple-layered-data-tree-by-filtering/101986",
+  "topic_id": 101986,
+  "title": "GHPython: Construct Multiple Layered Data Tree by Filtering",
+  "question": "Hi everyone,\n\n\nI’ve looked very hard to try and solve my challenge, and found a lot of good posts. But I cannot find this issue or tips to solve it.\n\n\nI want to build a data tree with about 4 layers. In the ghpython component, there are 4 inputs, each one is part of a branch layer hierarchy, example:\n\nDevs = {0}\n\nPlots = {0,0}\n\nBuildings = {0,0,0}\n\nMassing = {0,0,0,0}\n\n\nThe goal is to be able to see what items are contained below each higher-order element. The tree can then be used for calculations of (# items, M2, GFA, etc.)\n\n\nI want to organize the items on each lower (successive) layer underneath the item which contains them. example:\n\n\nDev[1] contains Plots[3,4,5] contains Buildings[10,11,15] contains Massing[90,91,92]\n\n\nProblems:\n\n\nMy problem is that the data is duplicating and not filtering\n\n\n\n\nI might be using the wrong filtering techniques (ex. Curve.Contain might be bad method)\n\n\nI might be structuring the for loops incorrectly\n\n\nI might be constructing the dataTree incorrectly\n\n\n\n\ndataTree by containment Filter\n885×1096 130 KB\n\n\nMassDataMaker_0.4_SentOut.gh\n (31.3 KB)\n\n\nI’ve already read through these important posts, and more\n\n\n\n\nGH SDK \nDataTree(Of T) Class\n\n\n\n\nGH SDK \nGH_Path Class\n\n\n\n\n\n\nghpthon.treehelpers\n - \nGist on Github\n\n\n\n\nDiscourse \nTree Operations in Python\n\n\n\n\nDiscourse \nC# Create Data Tree\n\n\n\n\nDiscourse \nC# 3 Layer Data Tree\n\n\n\n\nJames Ramsden \nC# Data Trees in GH\n\n\n\n\nGrasshopper3D \nConvert Array to datatree",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rc\nimport Grasshopper as gh\nimport Grasshopper.Kernel.Data.GH_Path as GH_Path\nimport ghpythonlib.treehelpers as th\n\n\n#--------------------------------------------------------\n# FUNCTIONS\n\ndef rcCentroid(c):\n    \"\"\" Get CENTROID from CURVE \"\"\"\n    rcCentroids = rc.Geometry.AreaMassProperties.Compute(c)\n    return rcCentroids.Centroid\n    \ndef dataTreeGenerator(dataTree, data):\n    \"\"\" \n    Create DATA TREE from data\n    Args: dataTree, data\n    \"\"\"\n    dLength = len(data)\n    for i in range(dLength):\n        path = GH_Path(i)\n        dataTree.Add(data[i], path)\n    return dataTree\n\ndef rcCurveInside(curve, points):\n    \"\"\"Tests if POINTS (p) are inside CURVES (c) \"\"\"\n    results = []\n    for p in points:\n        result = rc.Geometry.Curve.Contains(curve, p)\n        results.append(result)\n    return results\n\n\n#--------------------------------------------------------\n# EXECUTION\n\n# construct Empty Data Tree\ndTree = gh.DataTree[object]()\n\nplotCentroids = []\nfor c in plots:\n    plotCentroids.append(rcCentroid(c))\nbuildingsCentroids = []\nfor c in buildings:\n    buildingsCentroids.append(rcCentroid(c))\nmassingCentroids = []\nfor c in massing:\n    massingCentroids.append(rcCentroid(c))\n\n\n# Construct DATATREE from DEVS\ndTree = dataTreeGenerator(dTree, devs)\nprint dTree\n#print type(dTree)\n#print dTree.Path(0)\nprint dTree.Branch(1)\n#print dTree.BranchCount\n\n# Iterate the first layer of branches\nfor i in range(dTree.BranchCount):\n    branchData = dTree.Branch(GH_Path(i))\n    branchPath = dTree.Path\n    # get the curves in each branch\n    for j in branchData:\n        # get both items of PLOT CURVE and PLOT CENTROID\n        for plot, centroid in zip(plots, plotCentroids):\n            \n            # test inclusions\n            result = rc.Geometry.Curve.Contains(j, centroid)\n            print result\n            print i\n            # filter by inclusion to create tree\n            if result == rc.Geometry.PointContainment.Inside:\n                dTree.Add(plot, GH_Path(i,0))\n                \n                for building, centroid2 in zip(buildings, buildingsCentroids):\n                    result = rc.Geometry.Curve.Contains(plot, centroid2)\n                    if result == rc.Geometry.PointContainment.Inside:\n                        dTree.Add(building, GH_Path(i,len(dTree.Branch(GH_Path(i,0)))-1,0))\n                        \n                        for mass, centroid3 in zip(massing, massingCentroids):\n                            result = rc.Geometry.Curve.Contains(building, centroid3)\n                            if result == rc.Geometry.PointContainment.Inside:\n                                dTree.Add(mass, GH_Path(i,len(dTree.Branch(GH_Path(i,0)))-1,len(dTree.Branch(GH_Path(i,len(dTree.Branch(GH_Path(i,0)))-1,0)))-1,0))",
+      "language": "python",
+      "author": "christopher.ho",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 1692
+}

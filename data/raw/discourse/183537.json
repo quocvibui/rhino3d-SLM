@@ -1,0 +1,102 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/keyboard-shortcuts-to-conditionally-collapse-expand-layers/183537",
+  "topic_id": 183537,
+  "title": "Keyboard Shortcuts to Conditionally Collapse/Expand Layers",
+  "question": "Is it possible to create a keyboard shortcut that will Expand All Layers in the Layers Menu? Also one for Collapse All Layers?\n\n\nRegards,\n\nTerry.",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\n\nfor layer in sc.doc.Layers:\n    layer.IsExpanded=True",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "_-RunPythonScript (\nimport scriptcontext as sc\n\nfor layer in sc.doc.Layers:\n    layer.IsExpanded=False\n)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "from scriptcontext import doc\ndoc.Views.RedrawEnabled = False\nfor layer in doc.Layers:\n    layer.IsExpanded = True\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\ndoc.Views.RedrawEnabled = False\nfor layer in doc.Layers:\n    layer.IsExpanded = False\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\ndoc.Views.RedrawEnabled = False\nfor layer in doc.Layers:\n\tif not layer.IsVisible:\n\t\tlayer.IsExpanded = False\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\ndoc.Views.RedrawEnabled = False\n# Get full name of current layer.\ncurrent_name = doc.Layers.CurrentLayer.FullPath\n# Collapse layers that do not share part of current layer full name.\nfor layer in doc.Layers:\n\tfull_path = layer.FullPath\n\tif full_path:\n\t\t# Collapse layer if its name is not in the beginning of current's.\n\t\tif current_name.find(full_path) != 0:\n\t\t\tlayer.IsExpanded = False\n\t\t# If layer name is in the beggining of current's, do more checks.\n\t\telse:\n\t\t\tlc = len(current_name)\n\t\t\tlf = len(full_path)\n\t\t\t# If layer name is the same length as current's or\n\t\t\t# it fills a hierarchy of current, then do not collapse it.\n\t\t\tif not (lf == lc or (lc > lf and current_name[lf] == \":\")):\n\t\t\t\tlayer.IsExpanded = False\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nselectedLayers = Rhino.RhinoDoc.ActiveDoc.Layers.GetSelected() # get the currently selected layers\nfor l in selectedLayers[1]: # array of indices of selected layers\n    lname = Rhino.RhinoDoc.ActiveDoc.Layers.FindIndex(l) # use index to find layername\n    print lname.Name #layername property",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\ndoc.Views.RedrawEnabled = False\n# Get the currently selected layers\nselectedLayers = doc.Layers.GetSelected()\n# Get full name for all layers.\nnames = [layer.FullPath for layer in doc.Layers]\n# Get full name of selected layers.\nselected_names = [names[l] for l in selectedLayers[1]]\n# Collect index of layers that share part of selected layer name.\ni = 0; ok = set()\nfor full_path in names:\n\tif full_path:\n\t\tfor selected_name in selected_names:\n\t\t\tif selected_name.find(full_path) == 0:\n\t\t\t\tls = len(selected_name); lf = len(full_path)\n\t\t\t\tif lf == ls or (ls > lf and selected_name[lf] == \":\"):\n\t\t\t\t\tok.add(i)\n\ti += 1\n# Collapse layers that do not share part of selected layer name.\nfor j in range(i):\n\tif j not in ok: doc.Layers[j].IsExpanded = False\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\nfrom rhinoscriptsyntax import SetDocumentUserText\ndoc.Views.RedrawEnabled = False\n# Save state of all valid layers.\nfor layer in doc.Layers:\n\tif layer.IsValid:\n \t\tSetDocumentUserText(str(layer.Index), str(layer.IsExpanded))\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\nfrom rhinoscriptsyntax import GetDocumentUserText\ndoc.Views.RedrawEnabled = False\n# Restore state of all valid layers.\nfor layer in doc.Layers:\n\tif layer.IsValid:\n\t\tlayer.IsExpanded = GetDocumentUserText(str(layer.Index)) == \"True\"\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\nfrom rhinoscriptsyntax import SetDocumentUserText\nselectedLayers = doc.Layers.GetSelected()[1]\n# Save expanded/collapsed, visible and selected state of all valid layers.\nfor layer in doc.Layers:\n\tif layer.IsValid:\n\t\tSetDocumentUserText(str(layer.Index),\n\t\t\tstr(layer.IsExpanded) + \" \" + str(layer.IsVisible) + \" \" +\n\t\t\tstr(layer.Index in selectedLayers))",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 21,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\nfrom rhinoscriptsyntax import GetDocumentUserText\ndoc.Views.RedrawEnabled = False\n# Restore expanded/collapsed and visible state of all valid layers.\nfor layer in doc.Layers:\n\tif layer.IsValid:\n\t\tE_V_S = GetDocumentUserText(str(layer.Index)).split()\n\t\tlayer.IsExpanded = E_V_S[0] == 'True'\n\t\tlayer.IsVisible = E_V_S[1] == 'True'\n\t\t# This does not work:\n\t\t#if E_V_S[2] == 'True':\n\t\t#\tlayer.Index.IsSelected = True\ndoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 21,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 24,
+  "views": 702
+}

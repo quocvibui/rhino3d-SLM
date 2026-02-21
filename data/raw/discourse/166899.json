@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-of-baking/166899",
+  "topic_id": 166899,
+  "title": "Problem of baking",
+  "question": "Hello everyone, I am a newbie to gh with python. I am currently learning from a youtube and encountered a problem in Baking even I have followed the video. Are there any kind people share your knowledge on it? Many thanks.\n\n\nimage\n1218×560 149 KB\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as rml\nimport scriptcontext as sc\nimport System.Drawing as sd\nimport Rhino.DocObjects as rd\n        \ngeo = []\ncolours =[]\n        \n        \nfor x in range(int(eX)):\n    for y in range(int(eY)):\n        pt1 = rg.Point3d(x*eX,y*eY,0)\n        pt2 = rg.Point3d(x*eX+1,y*eY,0)\n        pt3 = rg.Point3d(x*eX,y*eY+1,0)\n        plane = rs.PlaneFromPoints(pt1,pt2,pt3)\n        dis = rs.Distance(pt,pt1)\n        geo.append(rg.Box(plane,rg.Interval(sX/2*-0.9,sX/2*0.9),rg.Interval(sY/2*-0.9,sY/2*0.9),rg.Interval(sZ/2*-0.9,dis/2*0.9)))\n        colours.append(sd.Color.FromArgb(x/eX*250,y/eY*250,150))\n        \ndef baker():\n    for i in range(len(geo)):\n        brep = rg.Brep.CreateFromBox(geo[i])\n        attr = rd.ObjectAttributes()\n        attr.ColorSource=rd.ObjectColorSource.ColorFromObject\n        attr.ObjectColor = colours[i]\n        sc.doc.Objects.AddBrep(brep, attr)\n                \nif bake:\n    baker()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as rml\nimport scriptcontext as sc\nimport System.Drawing as sd\nimport Rhino.DocObjects as rd\n\nimport Rhino\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\ngeo = []\ncolours =[]\n        \n        \nfor x in range(int(eX)):\n    for y in range(int(eY)):\n        pt1 = rg.Point3d(x*eX,y*eY,0)\n        pt2 = rg.Point3d(x*eX+1,y*eY,0)\n        pt3 = rg.Point3d(x*eX,y*eY+1,0)\n        plane = rs.PlaneFromPoints(pt1,pt2,pt3)\n        dis = rs.Distance(pt,pt1)\n        geo.append(rg.Box(plane,rg.Interval(sX/2*-0.9,sX/2*0.9),rg.Interval(sY/2*-0.9,sY/2*0.9),rg.Interval(sZ/2*-0.9,dis/2*0.9)))\n        colours.append(sd.Color.FromArgb(x/eX*250,y/eY*250,150))\n        \ndef baker():\n    for i in range(len(geo)):\n        brep = rg.Brep.CreateFromBox(geo[i])\n        attr = rd.ObjectAttributes()\n        attr.ColorSource=rd.ObjectColorSource.ColorFromObject\n        attr.ObjectColor = colours[i]\n        sc.doc.Objects.AddBrep(brep, attr)\n                \nif bake:\n    baker()",
+      "language": "python",
+      "author": "Petingo_Yang",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def baker():\n    for i in range(len(geo)):\n        brep = rg.Brep.CreateFromBox(geo[i])\n        attr = rd.ObjectAttributes()\n        material = rd.Material()\n        material.DiffuseColor = colours[i]\n        material_index = sc.doc.Materials.Add(material)\n        attr.MaterialIndex = material_index\n        attr.MaterialSource = rd.ObjectMaterialSource.MaterialFromObject\n        sc.doc.Objects.AddBrep(brep, attr)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "the_Monty",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as rml\nimport scriptcontext as sc\nimport System.Drawing as sd\nimport Rhino.DocObjects as rd\n        \ngeo = []\ncolours =[]\n        \n        \nfor x in range(int(eX)):\n    for y in range(int(eY)):\n        pt1 = rg.Point3d(x*eX,y*eY,0)\n        pt2 = rg.Point3d(x*eX+1,y*eY,0)\n        pt3 = rg.Point3d(x*eX,y*eY+1,0)\n        plane = rs.PlaneFromPoints(pt1,pt2,pt3)\n        dis = rs.Distance(pt,pt1)\n        geo.append(rg.Box(plane,rg.Interval(sX/2*-0.9,sX/2*0.9),rg.Interval(sY/2*-0.9,sY/2*0.9),rg.Interval(sZ/2*-0.9,dis/2*0.9)))\n        colours.append(sd.Color.FromArgb(x/eX*250,y/eY*250,150))\n        \ndef baker():\n    for i in range(len(geo)):\n        brep = rg.Brep.CreateFromBox(geo[i])\n        attr = rd.ObjectAttributes()\n        attr.ColorSource=rd.ObjectColorSource.ColorFromObject\n        attr.ObjectColor = colours[i]\n        sc.doc.Objects.AddBrep(brep, attr)\n                \nif bake:\n    baker()",
+      "language": "python",
+      "author": "lily5",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 279
+}

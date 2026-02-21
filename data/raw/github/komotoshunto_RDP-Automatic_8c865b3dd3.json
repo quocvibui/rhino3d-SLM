@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/komotoshunto/RDP-Automatic/blob/680b2cc9081582547d1b37440ec7ea97a94a14ea/%E9%96%A2%E6%95%B0/%E3%81%9D%E3%81%AE%E5%B1%8B%E6%A0%B9%E3%81%AB%E9%9B%A8%E3%81%8C%E6%9C%80%E3%82%82%E5%BD%93%E3%81%9F%E3%82%8B%E8%A7%92%E5%BA%A6%E3%82%92%E6%8A%BD%E5%87%BA%E3%81%99%E3%82%8B.py",
+  "repo": "komotoshunto/RDP-Automatic",
+  "repo_stars": 0,
+  "repo_description": "雨水排水計画を自動化するツール",
+  "license": "unknown",
+  "filepath": "関数/その屋根に雨が最も当たる角度を抽出する.py",
+  "instruction": "Input rain_angle, Item Access, int mesh_list, List Access, Mesh",
+  "code": "#Input\n#rain_angle, Item Access, int\n#mesh_list, List Access, Mesh\n\n#Output\n#AnswerVector_list, \n#centroid_list, \n#collision_list,\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as ghcomp\nimport math\n\n\n#各角度を定義する\nmax_angle = rain_angle\nmin_angel = 0\nvec_list = []\nstep = 10\naxis1 = rg.Vector3d(0.0, 1.0, 0.0)\naxis2 = rg.Vector3d(0.0, 0.0, 1.0)\nfor i in range(min_angel, max_angle + 1, step):\n    for k in range(0, 360, step):\n        if i == 0:\n            vec = rg.Vector3d(0.0, 0.0, 1.0)\n            vec_list.append(vec)\n            break\n        else:\n            angleRad1 = math.radians(i)\n            angleRad2 = math.radians(k)\n            vec = rg.Vector3d(0.0, 0.0, 1.0)\n            re_vec1 = rg.Vector3d.Rotate(vec, angleRad1, axis1)\n            re_vec2 = rg.Vector3d.Rotate(vec, angleRad2, axis2)\n            vec_list.append(vec)\n\ndef max_RainAngle_list(mesh_list):\n    centroid_list = []\n    collision_list = []\n    AnswerVector_list = []\n    #重心を求める\n    for num, mesh in enumerate(mesh_list):\n        meshfacelist = mesh.Faces\n        centroid = []\n        for h in range(len(meshfacelist)):\n            center = rg.Collections.MeshFaceList.GetFaceCenter(meshfacelist, h)\n            centroid.append(center)\n            centroid_list.append(center)\n        \n        #ProjectPointに引っかからないように照射点と同じ位置にあるmeshを削除する\n        add = mesh\n        mesh_list.pop(num)\n        \n        ans_cou = float(\"inf\")\n        ans_collision = []\n        for vec in vec_list:\n            projectpoint = ghcomp.ProjectPoint(centroid, vec, mesh_list)\n            if projectpoint[0] == None:\n                ans_vec = vec\n                if isinstance(projectpoint[1], int):\n                    ans_collision = [projectpoint[1]]\n                else:\n                    ans_collision = projectpoint[1]\n                break\n            else:\n                count = len(projectpoint[0])\n                cou = count\n                if cou < ans_cou:\n                    ans_cou = cou\n                    ans_vec = vec\n                    ans_collision = projectpoint[1]\n        \n        for i in ans_collision:\n            if i == -1:\n                collision_list.append(True)\n            else:\n                collision_list.append(False)\n        \n        for k in range(len(centroid)):\n            AnswerVector_list.append(ans_vec)\n        \n        #消したmeshを元に戻す\n        mesh_list.insert(num, add)\n    return centroid_list, AnswerVector_list, collision_list\n\ncentroid_list, AnswerVector_list, collision_list = max_RainAngle_list(mesh_list)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,62 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-show-line-when-mouse-move-event/74193",
+  "topic_id": 74193,
+  "title": "Help show line when mouse move event",
+  "question": "I want to show line to location of mouse, when mouse move line to redraw. I can’t do that. Please help me.\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\ndef handle_mouse_move(object, e):\n    try:\n        ptS=[]\n        t= e.WindowPoint.X, e.WindowPoint.Y\n        ptS.append(t[0])\n        ptS.append(t[1])\n        ptS.append(0)\n        ptS=rs.coerce3dpoint(ptS)\n        print ptS\n        #Show line begin 0 to location ptS\n    except Exception as exp:\n        print(exp)\n\ndef GetLoMouse():\n    getter = Rhino.Input.Custom.GetPoint()\n    getter.AcceptNothing(True)\n    getter.PermitObjectSnap(False)\n    getter.PermitOrthoSnap(False)\n    getter.PermitConstraintOptions(False)\n    getter.MouseMove += handle_mouse_move\n    getter.Get(True, False)\n\nif __name__ == '__main__':\n    GetLoMouse()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\ndef handle_mouse_move(object, e):\n    try:\n        sc.doc.Views.Redraw()\n        ptS=[]\n        t= e.WindowPoint.X, e.WindowPoint.Y\n        ptS.append(t[0])\n        ptS.append(t[1])\n        ptS.append(0)\n        ptS=rs.coerce3dpoint(ptS)\n        ptSS=rs.coerce3dpoint([0,0,0])\n        #Show line begin 0 to location ptS\n        color = Rhino.ApplicationSettings.AppearanceSettings.TrackingColor\n        Rhino.Display.DisplayPipeline.DrawDirectionArrow(ptSS,ptS,color)\n    except Exception as exp:\n        print(exp)\n\ndef GetLoMouse():\n    getter = Rhino.Input.Custom.GetPoint()\n    getter.AcceptNothing(True)\n    getter.PermitObjectSnap(False)\n    getter.PermitOrthoSnap(False)\n    getter.PermitConstraintOptions(False)\n    getter.MouseMove += handle_mouse_move\n    getter.Get(True, False)\n\nif __name__ == '__main__':\n    GetLoMouse()",
+      "language": "python",
+      "author": "xiix.xoox",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\ndef handle_mouse_move(object,self,e):\n    try:\n        sc.doc.Views.Redraw()\n        ptS=[]\n        t= e.WindowPoint.X, e.WindowPoint.Y\n        ptS.append(t[0])\n        ptS.append(t[1])\n        ptS.append(0)\n        ptS=rs.coerce3dpoint(ptS)\n        ptSS=rs.coerce3dpoint([0,0,0])\n        #Show line begin 0 to location ptS\n        color = Rhino.ApplicationSettings.AppearanceSettings.TrackingColor\n        e.Display.DrawDirectionArrow(ptSS,ptS,color)\n    except Exception as exp:\n        print(exp)\n\ndef GetLoMouse():\n    getter = Rhino.Input.Custom.GetPoint()\n    getter.AcceptNothing(True)\n    getter.PermitObjectSnap(False)\n    getter.PermitOrthoSnap(False)\n    getter.PermitConstraintOptions(False)\n    getter.MouseMove += handle_mouse_move\n    getter.Get(True, False)\n\nif __name__ == '__main__':\n    GetLoMouse()",
+      "language": "python",
+      "author": "xiix.xoox",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\ndef handle_mouse_move(object,self,e):\n    try:\n        t= e.WindowPoint.X, e.WindowPoint.Y\n        ptS.append(t[0])\n        ptS.append(t[1])\n        ptS.append(0)\n        ptS=rs.coerce3dpoint(ptS)\n        ptSS=rs.coerce3dpoint([0,0,0])\n        #Show line begin 0 to location ptS\n        color = Rhino.ApplicationSettings.AppearanceSettings.TrackingColor\n        e.Display.DrawDirectionArrow(ptSS,ptS,color)\n        sc.doc.Views.Redraw()\n    except Exception as exp:\n        print(exp)\ndef GetLoMouse():\n    getter = Rhino.Input.Custom.GetPoint()\n    getter.AcceptNothing(True)\n    getter.PermitObjectSnap(False)\n    getter.PermitOrthoSnap(False)\n    getter.PermitConstraintOptions(False)\n    getter.MouseMove += handle_mouse_move\n    getter.Get(True, False)\nif __name__ == '__main__':\n    GetLoMouse()",
+      "language": "python",
+      "author": "xiix.xoox",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    base_pt = Rhino.Geometry.Point3d.Origin\n    test_pt = rs.GetPoint(\"Point\", base_pt)\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\ndef DoSomething():\n    \n    base_pt = Rhino.Geometry.Point3d.Origin\n    color = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor\n    \n    def GetPointDynamicDrawFunc(sender, args):\n        line = Rhino.Geometry.Line(base_pt, args.CurrentPoint)\n        args.Display.DrawArrow(line, color)\n    \n    gp = Rhino.Input.Custom.GetPoint()\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    gp.Get()\n    if gp.CommandResult() == Rhino.Commands.Result.Success:\n        picked_pt = gp.Point()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\ndef handle_mouse_move(object, e):\n    try:\n        ptS=[]\n        t= e.WindowPoint.X, e.WindowPoint.Y\n        ptS.append(t[0])\n        ptS.append(t[1])\n        ptS.append(0)\n        ptS=rs.coerce3dpoint(ptS)\n        print ptS\n        #Show line begin 0 to location ptS\n    except Exception as exp:\n        print(exp)\n\ndef GetLoMouse():\n    getter = Rhino.Input.Custom.GetPoint()\n    getter.AcceptNothing(True)\n    getter.PermitObjectSnap(False)\n    getter.PermitOrthoSnap(False)\n    getter.PermitConstraintOptions(False)\n    getter.MouseMove += handle_mouse_move\n    getter.Get(True, False)\n\nif __name__ == '__main__':\n    GetLoMouse()",
+      "language": "python",
+      "author": "xiix.xoox",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 1092
+}

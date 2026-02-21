@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/intersection-curvecurve-bug-rhino-8/210745",
+  "topic_id": 210745,
+  "title": "Intersection.CurveCurve bug Rhino 8",
+  "question": "Hi,\n\n\nWe are working on upgrading one of our Rhino plugins from Rhino 7 to Rhino 8. We came across the following bug with CurveCurve intersections for circles and arcs.\n\n\nIf you run the code below on Rhino 7 the intersections for the circle and arc are the same. It correctly shows that the circle completely overlaps the arc. In Rhino 8 for the second call, with the arc as the first parameter and curve as the second parameter, it return an incorrect overlap.\n\n\n\t\tvar tolerance = 1e-3;\n\t\tvar circle = new Circle(new Point3d(0, 0, 0), 1);\n\t\tvar arc1 = new Arc(circle, new Interval(0, RhinoMath.ToRadians(45)));\n\n\t\tvar circleCurve = new ArcCurve(circle).ToNurbsCurve();\n\t\tvar arc1Curve = new ArcCurve(arc1).ToNurbsCurve();\n\n\t\tvar intersections = Intersection.CurveCurve(circleCurve, arc1Curve, tolerance, tolerance);\n\t\tvar intersection1 = intersections[0];\n\t\tvar interval1 = intersection1.OverlapA;\n\n\t\tintersections = Intersection.CurveCurve(arc1Curve, circleCurve, tolerance, tolerance);\n\t\tvar intersection2 = intersections[0];\n\t\tvar interval2 = intersection2.OverlapA; \n\n\n\nThe code is mainly used for filtering out duplicate curves for exports out of rhino. So running it on any list of curves in reverse could be used as a temporary solution since it would only impact performance. Still, it is an underlying bug that probably impacts other curve intersections as well.\n\n\nLet me know if anyone has a fix or workaround for this.",
+  "code_blocks": [
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino;\nusing Rhino.Geometry;\nusing Rhino.Geometry.Intersect;\nusing Rhino.DocObjects;\n\ndouble tolerance = 1e-3;\nvar circle = new Circle(new Point3d(0, 0, 0), 1);\nvar arc1 = new Arc(circle, new Interval(0, RhinoMath.ToRadians(45)));\n\nvar circleCurve = new ArcCurve(circle);//.ToNurbsCurve();\nvar arc1Curve = new ArcCurve(arc1);//.ToNurbsCurve();\n\nRhino.RhinoDoc.ActiveDoc.Objects.Add(circleCurve);\nRhino.RhinoDoc.ActiveDoc.Objects.Add(arc1Curve);\n\nvar intersections = Intersection.CurveCurve(circleCurve, arc1Curve, tolerance, tolerance);\nvar intersection1 = intersections[0];\nvar interval1 = intersection1.OverlapA;\n\n\nintersections = Intersection.CurveCurve(arc1Curve, circleCurve, tolerance, tolerance);\nvar intersection2 = intersections[0];\nvar interval2 = intersection2.OverlapA; \n\n\nCurve sub1 = circleCurve.Trim(interval1);\nRhino.RhinoDoc.ActiveDoc.Objects.Add(\n    sub1,\n    new Rhino.DocObjects.ObjectAttributes()\n    {\n        ObjectColor = System.Drawing.Color.DarkGreen,\n        ColorSource = ObjectColorSource.ColorFromObject,\n        Name = \"sub1\"\n    });\nCurve sub2 = arc1Curve.Trim(interval2);\n\nRhino.RhinoDoc.ActiveDoc.Objects.Add(\n    sub2,\n    new Rhino.DocObjects.ObjectAttributes()\n    {\n        ObjectColor = System.Drawing.Color.DarkRed,\n        ColorSource = ObjectColorSource.ColorFromObject,\n        Name = \"sub2\"\n    });",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "var tolerance = 1e-3;\n\t\tvar circle = new Circle(new Point3d(0, 0, 0), 1);\n\t\tvar arc1 = new Arc(circle, new Interval(0, RhinoMath.ToRadians(45)));\n\n\t\tvar circleCurve = new ArcCurve(circle).ToNurbsCurve();\n\t\tvar arc1Curve = new ArcCurve(arc1).ToNurbsCurve();\n\n\t\tvar intersections = Intersection.CurveCurve(circleCurve, arc1Curve, tolerance, tolerance);\n\t\tvar intersection1 = intersections[0];\n\t\tvar interval1 = intersection1.OverlapA;\n\n\t\tintersections = Intersection.CurveCurve(arc1Curve, circleCurve, tolerance, tolerance);\n\t\tvar intersection2 = intersections[0];\n\t\tvar interval2 = intersection2.OverlapA;\n\n\t\tCurve sub1 = circleCurve.Trim(interval1);\n\t\tvar rhinoDoc = RhinoDoc.ActiveDoc;\n\t\trhinoDoc.Objects.Add(\n\t\t\tsub1,\n\t\t\tnew Rhino.DocObjects.ObjectAttributes()\n\t\t\t{\n\t\t\t\tObjectColor = System.Drawing.Color.DarkGreen,\n\t\t\t\tColorSource = ObjectColorSource.ColorFromObject,\n\t\t\t\tName = \"sub1\"\n\t\t\t});\n\n\t\tCurve sub2 = arc1Curve.Trim(interval2);\n\t\trhinoDoc.Objects.Add(\n\t\t\tsub2,\n\t\t\tnew Rhino.DocObjects.ObjectAttributes()\n\t\t\t{\n\t\t\t\tObjectColor = System.Drawing.Color.DarkRed,\n\t\t\t\tColorSource = ObjectColorSource.ColorFromObject,\n\t\t\t\tName = \"sub2\"\n\t\t\t});",
+      "language": "csharp",
+      "author": "SK-Structurecraft",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 162
+}

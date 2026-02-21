@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/fstwn/ghautoknit/blob/5ca6d07df601d34be5a67fe6c76a942daef50a85/usrobj_src/GHAutoknit_LoadAutoknitConstraintFile.py",
+  "repo": "fstwn/ghautoknit",
+  "repo_stars": 3,
+  "repo_description": "A prototypical bridge between Grasshopper and Autoknit.",
+  "license": "MIT",
+  "filepath": "usrobj_src/GHAutoknit_LoadAutoknitConstraintFile.py",
+  "instruction": "Load an Autoknit *.cons file and interpret the constraints in it.\nTODO: update docstring\n    Inputs:\n        FP: The File Path of the constraint file {item, str}\n    Outputs:\n        V: The vertices...",
+  "code": "\"\"\"\nLoad an Autoknit *.cons file and interpret the constraints in it.\nTODO: update docstring\n    Inputs:\n        FP: The File Path of the constraint file {item, str}\n    Outputs:\n        V: The vertices from the constraint file as tuples {list, tuple}\n        P: The vertices from the constraint file as points {list, point}\n        C: The constraints from the constraint file as tuples {list, tuple}\n        AKC: The constraints from the constraint file as Autoknit Constraint objects {list, SavedConstraint}\n    Remarks:\n        Author: Max Eschenbach\n        License: MIT License\n        Version: 211029\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS\nfrom __future__ import division\nfrom string import join\n\n# GHPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n# LOCAL MODULE IMPORTS\nfrom ghautoknit import FileIO, StoredConstraint\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"LoadAutoknitConstraintFile\"\nghenv.Component.NickName =\"LACF\"\nghenv.Component.Category = \"GHAutoknit\"\nghenv.Component.SubCategory = \"1 Autoknit Constraints\"\n\nclass LoadAutoknitConstraintFile(component):\n    \n    def RunScript(self, FP):\n        # define outputs so they're never empty\n        V = []\n        P = []\n        C = []\n        \n        # if theres no filepath, don't even try ;)\n        if FP:\n            filepath = FP\n        else:\n            rml = self.RuntimeMessageLevel.Warning\n            msg = \"No File Path specified!\"\n            self.AddRuntimeMessage(rml, msg)\n            return None\n        \n        # give some feedback to the user\n        if len(filepath) > 100:\n            end = join(str(filepath).split(\"\\\\\\\\\")[-7:], \"/\")\n            fn = \".../\" + end\n        else:\n            fn = join(str(filepath).split(\"\\\\\\\\\"), \"/\")\n        rml = self.RuntimeMessageLevel.Remark\n        msg = \"Reading from file '{}'\".format(fn)\n        self.AddRuntimeMessage(rml, msg)\n        \n        # load the constraints\n        result = FileIO.LoadConstraints(filepath)\n        if result[0] == False:\n            rml = self.RuntimeMessageLevel.Error\n            msg = \"Error Loading constraints! \" + str(result[1])\n            self.AddRuntimeMessage(rml, msg)\n            return None\n        else:\n            R, V, C = result\n            P = [Rhino.Geometry.Point3d(v[0], v[1], v[2]) for v in V]\n        \n        AKSC = [StoredConstraint(c[0], c[1], c[2]) for c in C]\n        \n        AKC = FileIO.InterpretStoredConstraints(V, AKSC)\n        \n        # return outputs if you have them; here I try it for you:\n        return (V, P, C, AKC)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/code/gMesh.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "code/gMesh.py",
+  "instruction": "Creates a distance field from a mesh.\nIf the mesh is closed, points inside will return negative values.\n    Inputs:\n        m: the mesh\n    Output:\n        d: the mesh object (sdf)",
+  "code": "\"\"\"Creates a distance field from a mesh.\nIf the mesh is closed, points inside will return negative values.\n    Inputs:\n        m: the mesh\n    Output:\n        d: the mesh object (sdf)\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT'\n__license__    = 'MIT License'\n__email__      = ['<bernhard@arch.ethz.ch>']\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nclass Mesh(object):\n\n    def __init__(self,m=None):\n        self.m = m\n\n    def get_distance(self,x,y,z):\n        p = rg.Point3d(x,y,z)\n        cp = rs.MeshClosestPoint(self.m,p)\n        d = rs.Distance(p,cp[0])\n        bln = self.m.IsPointInside(p,0.1,False)\n        if bln:\n            d *= -1\n        return d\n\n\nif __name__==\"__main__\":\n    if not m is None:\n        d = Mesh(m)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

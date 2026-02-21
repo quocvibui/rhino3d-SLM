@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/fstwn/ghpyanimation/blob/380f8bcf304ed36d7d8ce466c293f748442cd6b8/usrobj_src/GhPyAnimation_SetActiveCamera.py",
+  "repo": "fstwn/ghpyanimation",
+  "repo_stars": 2,
+  "repo_description": "Simple animation toolkit for Grasshopper written using GhPython.",
+  "license": "MIT",
+  "filepath": "usrobj_src/GhPyAnimation_SetActiveCamera.py",
+  "instruction": "Set the camera of the active Rhino viewport.\n    Inputs:\n        Toggle: If True, camera control is activated.\n                {item, bool}\n        Location: The location of the camera.\n             ...",
+  "code": "\"\"\"\nSet the camera of the active Rhino viewport.\n    Inputs:\n        Toggle: If True, camera control is activated.\n                {item, bool}\n        Location: The location of the camera.\n                  {item, point3d}\n        Target: The target for the camera (i.e. where the camera is looking at)\n                {item, point3d}\n        LensLength: The lenslength for the camera.\n                    Defaults to 50.\n                    {item, float}\n        Remarks:\n            Author: Max Eschenbach\n            License: MIT License\n            Version: 200703\n\"\"\"\n\n# GHPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"SetActiveCamera\"\nghenv.Component.NickName =\"SAC\"\nghenv.Component.Category = \"GhPyAnimation\"\nghenv.Component.SubCategory = \"01 Camera\"\n\nclass SetActiveCamera(component):\n    \n    def RunScript(self, Toggle, Location, Target, LensLength):\n        \n        if LensLength == None:\n            LensLength = 50\n        \n        Camera = Grasshopper.DataTree[object]()\n        \n        if Location and Target and Toggle:\n            av = scriptcontext.doc.Views.ActiveView\n            vp = av.ActiveViewport\n            \n            vp.SetCameraLocation(Location, True)\n            vp.SetCameraDirection(Target - Location, True);\n            \n            vp.Camera35mmLensLength = LensLength\n        else:\n            if not Location:\n                rml = self.RuntimeMessageLevel.Warning\n                self.AddRuntimeMessage(rml, \n                            \"Input parameter Location failed to collect data\")\n            if not Target:\n                rml = self.RuntimeMessageLevel.Warning\n                self.AddRuntimeMessage(rml, \n                            \"Input parameter Target failed to collect data\")\n        \n        # return outputs if you have them; here I try it for you:\n        return Camera\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-does-rhino-find-mtl-file-for-obj-file/86961",
+  "topic_id": 86961,
+  "title": "How does Rhino find mtl file for .OBJ file?",
+  "question": "@pascal\n, \n@tim\n,\n\n\nI wrote a Python script to import a .OBJ file for a mesh.  It parses the .OBJ file and creates vertices, faces and vertex colors and vertex textures for the mesh.  The script skips the mtllib and usemtl lines near the top of the file.  After the import is complete, I switch to rendered mode and all the texture is properly displayed.\n\n\nMy Question:  How in the world did Rhino manage to find the .mtl and the JPG texture files for this mesh??\n\n\nI have been using Rhino’s Import tool up until now for my .OBJ files and that has been working fine.  I just wanted to see if I could create a faster importer for the .OBJ files.  I recently did this for .XYZRGB point cloud files and got a 15X speedup over Rhino’s Import tool.  So I thought I would try this same approach for .OBJ files to see how much speedup is possible.  I can already see from the early timings that a 2X speedup may be possible but not 15X.  Apparently Rhino’s point cloud importer has been worked on a lot less than the .OBJ file importer.\n\n\nThe .OBJ file import was done in a new Rhino session.  I did use another Rhino session to time Rhino’s Import tool to import the same mesh.  Do the Rhino sessions talk to each other with respect to what .mtl file and PNG files for textures are active?  Is this how the new Rhino session with the Python script was able to access these files?  At some point I will restart my computer and see if the first Rhino session can find these files.  But perhaps you know already?\n\n\nRegards,\n\nTerry.",
+  "code_blocks": [
+    {
+      "code": "def AddMaterial():\n    # materials are stored in the document's material table\n    index = scriptcontext.doc.Materials.Add()\n    mat = scriptcontext.doc.Materials[index]\n    mat.DiffuseColor = System.Drawing.Color.Chocolate\n    mat.SpecularColor = System.Drawing.Color.CadetBlue\n    mat.CommitChanges()",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 5233
+}

@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dimension-aligned-dimaligned-in-rhino-common/20595",
+  "topic_id": 20595,
+  "title": "Dimension Aligned \"DimAligned\" in Rhino common",
+  "question": "We know the Linear dimension works as below.\n\nIf I want to Align the dimension to the object, i mean Rhino Command  “DimAligned”\n\nHow to implement it in RhinoCommon. I could not find anything in rhinoCommon for DimAligned\n\n\nThe below code only serves as  command name “Dim”\n\nI am looking for  “DimAligned” code in RhinoCommon…\n\n\nprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n\n{\n\nPoint3d origin = new Point3d(1, 1, 5);\n\nPoint3d offset = new Point3d(110, 120, 90);\n\n\n        Line line = new Line(origin, offset);\n        doc.Objects.AddLine(line);\n        \n        \n        //Point3d pt = new Point3d((offset.X - origin.X) / 2, 3, 0);\n        Point3d pt = new Point3d((offset.X + origin.X) / 2, (offset.Y + origin.Y) / 2, 0);\n        Plane plane = Plane.WorldXY;\n        plane.Origin = origin;\n\n        double u, v;\n        plane.ClosestParameter(origin, out u, out v);\n        Point2d ext1 = new Point2d(u, v);\n\n        plane.ClosestParameter(offset, out u, out v);\n        Point2d ext2 = new Point2d(u, v);\n\n        plane.ClosestParameter(pt, out u, out v);\n        Point2d linePt = new Point2d(u, v);\n\n        LinearDimension dimension = new LinearDimension(plane, ext1, ext2, linePt);\n        dimension.Aligned = true;\n        \n        if (doc.Objects.AddLinearDimension(dimension) != Guid.Empty)\n        {\n            doc.Views.Redraw();\n            return Rhino.Commands.Result.Success;\n        }\n        return Rhino.Commands.Result.Failure;\n    }",
+  "code_blocks": [
+    {
+      "code": "{\n        Point3d origin = new Point3d(1, 1, 0);\n        Point3d offset = new Point3d(110, 120, 0);\n        Line line = new Line(origin, offset);\n        doc.Objects.AddLine(line);\n\n        //Point3d pt = new Point3d((offset.X - origin.X) / 2, 3, 0);\n        Point3d pt = new Point3d((offset.X + origin.X) / 2, (offset.Y + origin.Y) / 2, 0);\n\n        Plane plane = new Plane();\n        plane.Origin = origin;\n\n        Vector3d vx = vector3d(origin, offset);\n        Vector3d vy = Vector3d.CrossProduct(vx, Vector3d.ZAxis);\n\n        vx.Unitize();\n        vy.Unitize();\n\n        plane.XAxis = vx;\n        plane.YAxis = vy;\n        plane.ZAxis = Vector3d.ZAxis;\n\n        Point2d ext1 = new Point2d(origin.X, origin.Y);\n        Point2d ext2 = new Point2d(offset.X, offset.Y);\n        Point2d linePt = new Point2d(pt.X, pt.Y);\n\n        LinearDimension dimension = new LinearDimension(plane, ext1, ext2, linePt);\n        dimension.Aligned = true;\n\n        if (doc.Objects.AddLinearDimension(dimension) != Guid.Empty)\n        {\n            doc.Views.Redraw();\n            return Rhino.Commands.Result.Success;\n        }\n\n        return Result.Success;\n\n    }",
+      "language": "csharp",
+      "author": "matteo.forlani.90",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "using Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\n\nnamespace SampleCsCommands\n{\n  public class SampleCsAddAlignedDimension : Command\n  {\n    public override string EnglishName\n    {\n      get { return \"SampleCsAddAlignedDimension\"; }\n    }\n\n    protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n    {\n      var style = doc.DimStyles.Current;\n      var plane = Plane.WorldXY;\n\n      var p1 = new Point3d(1.0, 1.0, 0.0);\n      var p2 = new Point3d(5.0, 2.0, 0.0);",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DoSomething():\n    \n    p0 = Rhino.Geometry.Point3d(0,0,0)\n    p1 = Rhino.Geometry.Point3d(10,5,0)\n    pd = Rhino.Geometry.Point3d(11,9,0)\n\n    plane = Rhino.Geometry.Plane(p0, p1, pd)\n    if not plane.IsValid: return\n    \n    rc, s, t = plane.ClosestParameter(p0)\n    start_pt = Rhino.Geometry.Point2d(s,t)\n    rc, s, t = plane.ClosestParameter(p1)\n    end_pt = Rhino.Geometry.Point2d(s,t)\n    rc, s, t = plane.ClosestParameter(pd)\n    on_dim_pt = Rhino.Geometry.Point2d(s,t)\n    \n    dim = Rhino.Geometry.LinearDimension(plane, start_pt, end_pt, on_dim_pt)\n    if not dim: return \n    \n    dim.Aligned = True\n    \n    dim_id = scriptcontext.doc.Objects.AddLinearDimension(dim)\n    if not dim_id: print \"Error adding aligned dimension\"; return\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "Line line = new Line(origin, offset);\n        doc.Objects.AddLine(line);\n        \n        \n        //Point3d pt = new Point3d((offset.X - origin.X) / 2, 3, 0);\n        Point3d pt = new Point3d((offset.X + origin.X) / 2, (offset.Y + origin.Y) / 2, 0);\n        Plane plane = Plane.WorldXY;\n        plane.Origin = origin;\n\n        double u, v;\n        plane.ClosestParameter(origin, out u, out v);\n        Point2d ext1 = new Point2d(u, v);\n\n        plane.ClosestParameter(offset, out u, out v);\n        Point2d ext2 = new Point2d(u, v);\n\n        plane.ClosestParameter(pt, out u, out v);\n        Point2d linePt = new Point2d(u, v);\n\n        LinearDimension dimension = new LinearDimension(plane, ext1, ext2, linePt);\n        dimension.Aligned = true;\n        \n        if (doc.Objects.AddLinearDimension(dimension) != Guid.Empty)\n        {\n            doc.Views.Redraw();\n            return Rhino.Commands.Result.Success;\n        }\n        return Rhino.Commands.Result.Failure;\n    }",
+      "language": "csharp",
+      "author": "tsiddikee",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 3566
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/replace-object-in-a-block/108115",
+  "topic_id": 108115,
+  "title": "Replace object in a block",
+  "question": "Hello,\n\n\nI have posted a similar question at the end of this topic:\n\n\n\n\n\n\n\n\nWhat happens to Custom Objects on Save?\n \nRhino Developer\n\n\n\n\n\n    One immediate optimization that comes to mind, is doing all your filtering inside of one loop: \n// try get all different user data types\nforeach obj in doc.Objects {\n    var myCbrep1 = obj.Attributes.UserData.Find(typeof(MyCustomBrepUserData1)) as MyCustomBrepUserData1;\n    var myCbrep2 = obj.Attributes.UserData.Find(typeof(MyCustomBrepUserData2)) as MyCustomBrepUserData2;\n    var myCcurve = obj.Attributes.UserData.Find(typeof(MyCustomCurveUserData)) as MyCustomCurveUserData;\n\n    // at max only…\n  \n\n\n\n\nBut maybe it is more visible inside a new topic.\n\n\nI would like to replace an object which is not inside Document.Objects, but part of an (or more) InstanceDefinition(s).\n\nHow should I do it?\n\nFor a normal object I can use Document.Objects.Replace, but because this object is not registered in Document.Objects this doesn’t work for me.\n\n\nIs there a list for RhinoObjects which are not in Document.Objects but belongs to one or more blocks? What I can see this object has Id and also Document property, so it is attached to the document.\n\n\nMárton",
+  "code_blocks": [
+    {
+      "code": "#Python\nfrom scriptcontext import doc\nimport Rhino.Geometry as rg\nimport Rhino\n\ndef ModifyInstanceDefinition():\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select instance\", False, Rhino.DocObjects.ObjectType.InstanceReference)\n    if rc != Rhino.Commands.Result.Success: return\n    iref = objref.Object()\n    if not iref: return\n    idef = iref.InstanceDefinition\n    geos = [obj.Geometry for obj in idef.GetObjects()]\n    geos[0] = rg.Sphere(rg.Plane.WorldXY, 3).ToBrep()\n    i = doc.InstanceDefinitions.InstanceDefinitionIndex(idef.Id, True)\n    doc.InstanceDefinitions.ModifyGeometry(i, geos)\nif __name__==\"__main__\":\n    ModifyInstanceDefinition()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "//C#\nprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  var rc = RhinoGet.GetOneObject(\"Select instance\", false, ObjectType.InstanceReference, out var objRef);\n  if (rc != Result.Success) return Result.Nothing;\n  var iRef = (InstanceObject)objRef.Object();\n  if (iRef == null) return Result.Nothing;\n  var iDef = iRef.InstanceDefinition;\n  var geos = iDef.GetObjects().Select(obj => obj.Geometry).ToList();\n  geos[0] = new Sphere(Plane.WorldXY, 3).ToBrep();\n  var i = doc.InstanceDefinitions.InstanceDefinitionIndex(iDef.Id, true);\n  doc.InstanceDefinitions.ModifyGeometry(i, geos);\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 892
+}

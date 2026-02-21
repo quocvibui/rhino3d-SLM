@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/eto-location-on-rhino-view-point/205474",
+  "topic_id": 205474,
+  "title": "Eto_Location on Rhino_view_point",
+  "question": "I want the eto form position to be aligned to the top left or top right corner of the Rhino view, but I can’t seem to find the right way so far\n\n\n#! python 3\nimport Eto.Forms as ef\nimport Rhino\nimport Eto.Drawing as ed\nimport scriptcontext\n\nview = scriptcontext.doc.Views.ActiveView\n\nrt = Rhino.UI.EtoExtensions.ToEtoScreen(view.ClientRectangle)\n\nprint(rt.Width)\nprint(rt.Height)\nprint(rt.X)\nprint(rt.Y)\n\nform = ef.Form()\nform.Width = 200\nform.Height = 100\nform.Location = ed.PointF(view.ClientRectangle.X , view.ClientRectangle.Y)\nform.Show()\n\n\n\nThis is the effect I want\n\n\nimage\n1803×1015 219 KB\n\n\nI took some inspiration from this\n\n\nViewport dimension in world view - Scripting - McNeel Forum",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Eto.Forms as ef\nimport Rhino\nimport Eto.Drawing as ed\nimport scriptcontext\n\nview = scriptcontext.doc.Views.ActiveView\nrt = Rhino.UI.EtoExtensions.ToEtoScreen(view.ScreenRectangle)\n\nform = ef.Form()\nform.Width = 200\nform.Height = 100\nform.Location = ed.PointF(rt.X , rt.Y)\nform.Show()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "#! python 3\nimport Eto.Forms as ef\nimport Rhino\nimport Eto.Drawing as ed\nimport scriptcontext\n\nview = scriptcontext.doc.Views.ActiveView\nrt = Rhino.UI.EtoExtensions.ToEtoScreen(view.ScreenRectangle)\nfor i in range(4):\n    form = ef.Form()\n    form.Width = 200\n    form.Height = 100\n    if i == 1:\n        form.Location = ed.PointF(rt.X, rt.Y )\n        form.Title = str(i)\n    elif i== 2:\n        form.Location = ed.PointF(rt.X, rt.Y + rt.Height - 100)\n        form.Title = str(i)\n    elif i == 3:\n        form.Location = ed.PointF(rt.X + rt.Width - 200, rt.Y )\n        form.Title = str(i)\n    elif i == 0:\n        form.Location = ed.PointF(rt.X + rt.Width - 200, rt.Y + rt.Height - 100)\n        form.Title = str(i)\n    form.Show()",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Eto.Forms as ef\nimport Rhino\nimport Eto.Drawing as ed\nimport scriptcontext\n\nview = scriptcontext.doc.Views.ActiveView\n\nrt = Rhino.UI.EtoExtensions.ToEtoScreen(view.ClientRectangle)\n\nprint(rt.Width)\nprint(rt.Height)\nprint(rt.X)\nprint(rt.Y)\n\nform = ef.Form()\nform.Width = 200\nform.Height = 100\nform.Location = ed.PointF(view.ClientRectangle.X , view.ClientRectangle.Y)\nform.Show()",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 107
+}

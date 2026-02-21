@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/weird-dimension-python-script/22929",
+  "topic_id": 22929,
+  "title": "Weird dimension python script",
+  "question": "Hi, I want to add the dimension on \"front\"plane, the height from the center(center of gravity) to the left bottom corner(basepoint) of the box. I used the following python script.\n\n\ncenterofgravity = x, y, z+gz  #the coordinate of the center of gravity\nbasepoint = x,y,z                  #the coordinate of the basepoint\nDimpoint = x,y,z+0.5*gz  #let the dimension in the middle of the height.\n\n\n\n#since\n the dimension will be inserted on YZ plane, I try to rotate it to XZ plane\n\nobj = rs.AddLinearDimension( centerofgravity, basepoint, Dimpoint )\n\nif obj:\n\npoint = Dimpoint\n\nif point: rs.RotateObject(obj, point, 90, (0,0,1), copy=False)\n\n\nBut it appears to be 0, like in the picture. Does anyone know why this happens?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport System\n\ndef MyLinearDimension(view_plane, start_point, end_point, point_on_dimension_line):\n    # Coerce input\n    plane = rs.coerceplane(view_plane)\n    start = rs.coerce3dpoint(start_point, True)\n    end = rs.coerce3dpoint(end_point, True)\n    onpoint = rs.coerce3dpoint(point_on_dimension_line, True)\n    # Set origin of plane\n    plane.Origin = start\n    # Calculate 2d dimension points\n    success, s, t = plane.ClosestParameter(start)\n    start = Rhino.Geometry.Point2d(s,t)\n    success, s, t = plane.ClosestParameter(end)\n    end = Rhino.Geometry.Point2d(s,t)\n    success, s, t = plane.ClosestParameter(onpoint)\n    onpoint = Rhino.Geometry.Point2d(s,t)    \n    # Add the dimension\n    ldim = Rhino.Geometry.LinearDimension(plane, start, end, onpoint)\n    if not ldim: return scriptcontext.errorhandler()\n    rc = scriptcontext.doc.Objects.AddLinearDimension(ldim)\n    if rc==System.Guid.Empty: raise Exception(\"unable to add dimension to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "# World Top plane\nview_plane = rs.PlaneFromFrame([0,0,0], [1,0,0], [0,1,0])\nstart_point = (5,5,0)\nend_point = (15,5,0)\npoint_on_dimension_line = (15,7,0)\nMyLinearDimension(view_plane, start_point, end_point, point_on_dimension_line)\n\n# World Front plane\nview_plane = rs.PlaneFromFrame([0,0,0], [1,0,0], [0,0,1])\nstart_point = (5,0,5)\nend_point = (15,0,5)\npoint_on_dimension_line = (15,0,7)\nMyLinearDimension(view_plane, start_point, end_point, point_on_dimension_line)\n\n# World Right plane\nview_plane = rs.PlaneFromFrame([0,0,0], [0,1,0], [0,0,1])\nstart_point = (0,5,5)\nend_point = (0,15,5)\npoint_on_dimension_line = (0,15,7)\nMyLinearDimension(view_plane, start_point, end_point, point_on_dimension_line)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1088
+}

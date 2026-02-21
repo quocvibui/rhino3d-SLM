@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/969flash/DesignAutomationLecture/blob/4e85efcd91e11c0715f2ff7d7e1162cc84c942f1/Week2_GIS_Integration/match_parcels_buildings.py",
+  "repo": "969flash/DesignAutomationLecture",
+  "repo_stars": 0,
+  "repo_description": "DesignAutomationLecture",
+  "license": "unknown",
+  "filepath": "Week2_GIS_Integration/match_parcels_buildings.py",
+  "instruction": "Match parcels buildings",
+  "code": "# r: pyshp\nimport shapefile\nimport Rhino.Geometry as geo\nimport scriptcontext as sc\n\nparcel_sf = shapefile.Reader(\"TL_PARCEL.shp\")\nbuilding_sf = shapefile.Reader(\"TL_SPRD_BUILD.shp\")\n\nparcel_shapes = [(s.shape.points, s.record) for s in parcel_sf.iterShapeRecords()]\nbuilding_shapes = [(s.shape.points, s.record) for s in building_sf.iterShapeRecords()]\n\nfor p_coords, p_rec in parcel_shapes:\n    p_poly = geo.Polyline([geo.Point3d(x, y, 0) for x, y in p_coords])\n    p_brep = geo.Brep.CreatePlanarBreps(p_poly.ToNurbsCurve())\n    matched = []\n    for b_coords, b_rec in building_shapes:\n        pt = geo.Point3d(b_coords[0][0], b_coords[0][1], 0)\n        if p_brep and p_brep[0].IsPointInside(pt, 0.01, True):\n            matched.append(b_rec)\n\n    if matched:\n        sc.doc.Objects.AddPolyline(p_poly)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

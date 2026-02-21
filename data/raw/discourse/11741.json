@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/meshcontourpoints-in-python/11741",
+  "topic_id": 11741,
+  "title": "MeshContourPoints in python?",
+  "question": "So i found this in VB, but i think maby MeshContourPoints does not exict in python.\n\nIs there some other way of doing this?\n\n\n-Eivind",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Gets mesh contour points similar to vb Rhinoscript function\"\"\"\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef GetMeshContourPoints(meshID,cp1,cp2,dist):\n    \"\"\"mesh is a GUID representing a Rhino mesh object\n    p1, p2 are  point3d's indicating the direction normal to contours\n    dist is the contour spacing \"\"\"\n    mesh=rs.coercemesh(meshID)\n    if mesh:\n        contours=Rhino.Geometry.Mesh.CreateContourCurves(mesh,cp1,cp2,dist)\n        if contours:\n            cPts=[]\n            for contour in contours:\n                rc,pl=contour.TryGetPolyline()\n                if rc: cPts.append(pl)\n            return cPts\n\n\ndef TestMeshContourPoints():\n    meshID=rs.GetObject(\"Select mesh to contour\",32,True)\n    if not meshID: return\n    \n    msg1=\"Contour plane base point\"\n    msg2=\"Direction perpendicular to contour planes\"\n    dirPts=rs.GetPoints(True,False,msg1,msg2,2)\n    if not dirPts: return\n    \n    msg1=\"Distance between contours\"\n    cDist=rs.GetReal(msg1,minimum=rs.UnitAbsoluteTolerance())\n    if not cDist: return\n    \n    ContourPtList=GetMeshContourPoints(meshID,dirPts[0],dirPts[1],cDist)\n    if ContourPtList:\n        for ptList in ContourPtList:\n            sc.doc.Objects.AddPoints(ptList)\n        sc.doc.Views.Redraw()\n    \nTestMeshContourPoints()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 2181
+}

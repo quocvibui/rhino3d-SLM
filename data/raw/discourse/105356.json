@@ -1,0 +1,74 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-right-now/105356",
+  "topic_id": 105356,
+  "title": "Python right now",
+  "question": "Hello! I would like to get some Python now, I will be glad to any materials, if only they were not so huge and they could be understood",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as stex\nimport Rhino\n\ndef ObjectsToPoints():\n    for id in objects:\n        id_pieces = rs.ExplodePolysurfaces(id, True)\n        for piece in id_pieces:\n            meshParameters = [1, 3, 1, 0.0001, 0.005, 0.01, 0, True, False, False, False]\n            mPiece = Rhino.DocObjects.MeshObject(piece, -1, meshParameters)\n            rs.DeleteObject(piece)\n            points = rs.MeshVertices(mPiece)\n            rs.DeleteObject(mPiece)\n            \n            pc = Rhino.Geometry.PointCloud()\n            color = rs.LayerColor(layer)\n            for pt in points:\n                pc.Add(pt, color)\n            id = stex.doc.Objects.AddPointCloud(pc)\n\nunsel = rs.UnselectAllObjects()\nif unsel:\n    print(unsel, \"objects were selected\")\n\nchoose_mode = rs.MessageBox(\"Yes/select and No/all\", 4 + 32, \"Mode, please\")\n\nif choose_mode == 6:\n    layer = rs.GetLayer(\"Layer, please\")\n    if layer:\n        rs.CurrentLayer(layer)\n        objects = rs.ObjectsByLayer(layer, False)\n        ObjectsToPoints()\n        \n    else:\n        print(\"Layer was not selected\")\n\nelif choose_mode == 7:\n    layers = rs.LayerNames()\n    for layer in layers:\n        lock = rs.IsLayerLocked(layer)\n        if not lock:\n            rs.CurrentLayer(layer)\n            objects = rs.ObjectsByLayer(layer, False)\n            ObjectsToPoints()\n            \n        else:\n            print(\"%s layer was blocked\" % layer)\n\nelse:\n    print(\"Cancel\")",
+      "language": "python",
+      "author": "Modeler3D",
+      "post_number": 38,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as stex\nimport Rhino.Geometry\n\ndef MeshParameters():\n    p = Rhino.Geometry.MeshingParameters(1)\n    p.MaximumEdgeLength = 0.02\n    p.GridAspectRatio = 1\n    return p\n    \ndef ObjectsToPoints():\n    for i,obj in enumerate(objects):\n        IDpieces = rs.ExplodePolysurfaces(obj, True)\n        pieces = [rs.coercebrep(id) for id in IDpieces]\n        rs.DeleteObjects(IDpieces)\n        for ii,piece in enumerate(pieces):\n            mesh = Rhino.Geometry.Mesh.CreateFromBrep(piece, MeshParameters())\n            \n            p3f = mesh[0].Vertices\n            pt = [Rhino.Geometry.Point3d(f) for f in p3f]\n            \n            color = rs.LayerColor(layer)\n            \n            pCloud = Rhino.Geometry.PointCloud()\n            for p in pt:\n                pCloud.Add(p, color)\n            IDc = stex.doc.Objects.AddPointCloud(pCloud)\n            \n            stex.doc.Views.Redraw()\n            \n            rs.SelectObject(IDc)\n            \n            name = \"{0}_{1}.{2}\".format(layer.translate(None, \"\\/:\"), i, ii)\n            path = r\"F:\\Export\\{0}.ply\".format(name)\n            rs.Command(\"_-Export \" + chr(34) + path + chr(34) + \" _Enter\", False)\n            \n            result = rs.LastCommandResult()\n            if result == 0:\n                rs.DeleteObject(IDc)\n                \n            elif result != 0:\n                rs.UnselectObject(IDc)\n                print(\"Export error\")\n                \nunsel = rs.UnselectAllObjects()\nif unsel:\n    print(\"%d objects were selected\" % unsel)\n    \nchooseMode = rs.MessageBox(\"Yes/select and No/all\", 4 + 32, \"Mode, please\")\n\nif chooseMode == 6:\n    layer = rs.GetLayer(\"Layer, please\")\n    if layer:\n        rs.CurrentLayer(layer)\n        objects = rs.ObjectsByLayer(layer, False)\n        if objects:\n            ObjectsToPoints()\n            print(\"Done!\")\n            \n        else:\n            print(\"The %s layer is empty\" % layer)\n            \n    else:\n        print(\"Layer was not selected\")\n        \nelif chooseMode == 7:\n    layers = rs.LayerNames()\n    for layer in layers:\n        lock = rs.IsLayerLocked(layer)\n        if not lock:\n            rs.CurrentLayer(layer)\n            objects = rs.ObjectsByLayer(layer, False)\n            if objects:\n                ObjectsToPoints()\n                print(\"Done!\")\n                \n            else:\n                print(\"The %s layer is empty\" % layer)\n                \n        else:\n            print(\"%s layer was blocked\" % layer)\n            \nelse:\n    print(\"Cancel\")",
+      "language": "python",
+      "author": "Modeler3D",
+      "post_number": 57,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\n\n# ...\nwhile True:\n# ...\n    scriptcontext.escape_test()\n# ...",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 67,
+      "is_solution": false
+    },
+    {
+      "code": "# scriptcontext module\nimport RhinoPython.Host as __host\n\n'''The Active Rhino document (Rhino.RhinoDoc in RhinoCommon) while a script\nis executing. This variable is set by Rhino before the exection of every script.\n'''\ndoc = None\n\n\n'''Identifies how the script is currently executing\n1 = running as standard python script\n2 = running inside grasshopper component\n3... potential other locations where script could be running\n'''\nid = 1\n\n\n'''A dictionary of values that can be reused between execution of scripts\n'''\nsticky = dict()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 67,
+      "is_solution": false
+    },
+    {
+      "code": "from ghpythonlib import treehelpers\n\nnums = [0, 1, 2]\nnested_nums = [[n] for n in nums]\n\na = treehelpers.list_to_tree(nested_nums)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 72,
+      "is_solution": false
+    },
+    {
+      "code": "def ObjectsToPoints():\n    print objects\n    for id in objects:\n        \n        id_pieces = rs.ExplodePolysurfaces(id, True)\n        id_pieces_r = [rs.coercebrep(i) for i in id_pieces]\n        rs.DeleteObjects(id_pieces)\n        for piece in id_pieces_r:\n            \n            meshParameters = [1, 3, 1, 0.0001, 0.005, 0.01, 0, True, False, False, False]\n            #mPiece = Rhino.DocObjects.MeshObject(piece, -1, meshParameters)\n            mc = Rhino.Geometry.MeshingParameters.Coarse\n            mPiece = Rhino.Geometry.Mesh.CreateFromBrep(piece, mc)\n            \n            points = mPiece[0].Vertices\n            pts = [Rhino.Geometry.Point3d(pt) for pt in points]\n                       \n            color = rs.LayerColor(layer)\n            pc = Rhino.Geometry.PointCloud(pts)\n            id = stex.doc.Objects.AddPointCloud(pc)\n            stex.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 41,
+      "is_solution": false
+    },
+    {
+      "code": "def main():\n    unsel = rs.UnselectAllObjects()\n    if unsel:\n        print(\"%d objects were selected\" % unsel)\n    \n    chooseMode = rs.MessageBox(\"Yes/select and No/all\", 4 + 32, \"Mode, please\")\n\n    if chooseMode == 2:\n        return",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 63,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 75,
+  "views": 4050
+}

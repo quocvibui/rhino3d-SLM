@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/multiple-boxes/124093",
+  "topic_id": 124093,
+  "title": "Multiple Boxes",
+  "question": "Adsız\n1889×824 237 KB\n\n\n\n\nin this picture i wanna try to create one box and add to boxList and show all boxes on my screen. However ,in every timer cycle it creates one box and it makes it  throw at boxList and update just the box position.it  is not created multiple boxes through  timer cycle.\n\n\nhow can i do that_?\n\n\nmakeBox.gh\n (5.5 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\n\nclass Agent:\n    def __init__(self,p):\n        self.pos = p\n    \n    def update(self):\n        self.pos += rg.Vector3d(10, 10, 10)\n    \n    def get_box(self):\n        sizex = rg.Interval(0, 10)\n        sizey = rg.Interval(0, 10)\n        sizez = rg.Interval(0, 10)\n        plane = rg.Plane(self.pos, rg.Vector3d(0,0,1))\n        return rg.Box(plane, sizex, sizey, sizez)\n    \n    def __copy__(self):\n        return Agent(self.pos)\n\n\nif __name__ == \"__main__\":\n\n    if reset or \"agents\" not in globals():\n        agents = []\n        ag = Agent(rg.Point3d(0, 0, 0))\n        agents.append(ag)\n    else:\n        ag = agents[-1].__copy__()\n        ag.update()\n        agents.append(ag)\n\n    boxes = []  # Output\n    if \"agents\" in globals():\n        for ag in agents:\n            boxes.append(ag.get_box())",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 693
+}

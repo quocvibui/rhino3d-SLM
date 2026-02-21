@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/polyline-through-planar-circle-quads/201366",
+  "topic_id": 201366,
+  "title": "Polyline through planar circle quads",
+  "question": "Hi All\n\n\nI have four planar circles not all the same diameters and I need to create a polyline through the quad points of each circle at 0 degrees or top dead centre, 90 degrees, 180 degrees and 270 degrees.\n\nWhat is the best approach as I cannot find anything in Rhinoscriptsyntax that might help but I could have missed it.\n\n\nI can do it by co ordinates but it is not a neat solution, all help appreciated.\n\n\nRoger",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    message = \"Select 4 cirles in order\"\n    crv_ids = rs.GetObjects(message, 4, True, False, False, None, 4, 4)\n    if not crv_ids: return\n    \n    curves = [rs.coercecurve(c, -1, True).ToNurbsCurve() for c in crv_ids]\n    params = curves[0].DivideByCount(4, True)\n    points = [curves[0].PointAt(t) for t in params]\n    plists = []\n    plists.append(points)\n    \n    for crv in curves[1:]:\n        pts = [crv.PointAt(crv.ClosestPoint(pt)[1]) for pt in points]\n        plists.append(pts)\n    \n    for pts in zip(*plists):\n        polyline = Rhino.Geometry.Polyline(pts)\n        scriptcontext.doc.Objects.AddPolyline(polyline)\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 130
+}

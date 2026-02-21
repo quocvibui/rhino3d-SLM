@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Doerge/rhino-developer-samples/blob/beb34e5f5daf7f8da651d732aadf165bdf32a74d/rhinopython/SampleDupSeam.py",
+  "repo": "Doerge/rhino-developer-samples",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "NOASSERTION",
+  "filepath": "rhinopython/SampleDupSeam.py",
+  "instruction": "SampleDupSeam.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleDupSeam.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext\n\n# Duplicates the seam of a closed Brep\ndef SampleDupSeam():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select edges to duplicate\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.SeamEdge\n    go.GetMultiple(1,0)\n    if (go.CommandResult() == Rhino.Commands.Result.Success):\n        for i in range(0, go.ObjectCount):\n            ref = go.Object(i)\n            edge = ref.Edge()\n            crv = edge.DuplicateCurve()\n            scriptcontext.doc.Objects.AddCurve(crv)\n\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == \"__main__\":\n    SampleDupSeam() # Call the function defined above",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/copy-groups.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/copy-groups.py",
+  "instruction": "Copy groups",
+  "code": "import Rhino\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\n\ndef RhinoUpdateObjectGroups(obj, group_map):\n    if obj == None: return\n\n    attrib_group_count = obj.Attributes.GroupCount\n    if attrib_group_count == 0: return\n\n    doc = obj.Document\n    if doc == None: return\n\n    groups = doc.Groups\n\n    group_count = groups.Count\n    if group_count == 0: return\n\n    if group_map.Count == 0:\n        for i in range(0, group_count):\n            group_map.append(-1)\n\n    attributes = obj.Attributes\n    group_list = attributes.GetGroupList()\n    if group_list == None: return\n    attrib_group_count = group_list.Length\n\n    for i in range(0, attrib_group_count):\n        old_group_index = group_list[i]\n        new_group_index = group_map[old_group_index]\n        if new_group_index == -1:\n            new_group_index = doc.Groups.Add()\n            group_map[old_group_index] = new_group_index\n        group_list[i] = new_group_index\n\n    attributes.RemoveFromAllGroups()\n    for i in range(0, attrib_group_count):\n        attributes.AddToGroup(group_list[i])\n\n    obj.CommitChanges()\n\ndef RunCommand():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects to copy in place\")\n    go.GroupSelect = True\n    go.SubObjectSelect = False\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Result.Success:\n        return go.CommandResult()\n\n    xform = Rhino.Geometry.Transform.Identity\n    group_map = []\n\n    for obj_ref in go.Objects():\n        if obj_ref != None:\n            obj = obj_ref.Object()\n            duplicate = doc.Objects.Transform(obj_ref.ObjectId, xform, False)\n            RhinoUpdateObjectGroups(obj, group_map)\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

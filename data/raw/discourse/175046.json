@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-properly-interface-with-guids/175046",
+  "topic_id": 175046,
+  "title": "How to properly interface with GUIDs",
+  "question": "Hello\n\n\nI am trying to understand how to properly interface with Rhino GUIDs in python. When I want to access the properties, whether geometric or otherwise, of the object the GUID represents should I create a new geometry from the GUID using CreateX and work with that in Python? This effectively duplicates the original geometry that the GUID points to, which seems odd, but works. If I want to work with the original geometry via the GUID, where can I find a list of methods for this? I found one such function I was looking for in RS: rs.CurveStartPoint and rs.CurveEndPoint.\n\n\nThese two discussions have been helpful:\n\n\nhttps://discourse.mcneel.com/t/how-to-get-line-start-end-without-casting-it-into-curve/90452/11\n\n\nhttps://discourse.mcneel.com/t/functionality-of-rs-coercex-methods/65813/2\n\nbut I am wondering if there is updated documentation I am missing.\n\n\nThanks for pointing me in the right direction of resources, and for general comments on the general approach to working with GUIDs.\n\n\nAnother side of this is how to send geometry through to Grasshopper through GhPython. Should I be using the GUIDs? Convert to geometry first? Somehow access the original geometry via GUID?",
+  "code_blocks": [
+    {
+      "code": "def convert_lines_to_curves(lines):\n    curves = []\n    for line in lines:\n        # Check if the input is a GUID and convert it to a geometry object\n        if isinstance(line, str):\n            line_obj = rs.coercecurve(line, -1, True)\n            if line_obj and rs.IsLine(line_obj):\n                print(\"The centerline is a line.\")\n                crvstart = rs.CurveStartPoint(line_obj)\n                crvend = rs.CurveEndPoint(line_obj)\n                curve = Rhino.Geometry.LineCurve(crvstart, crvend)\n                curves.append(curve)\n            else:\n                print(\"The centerline is not a line or could not be found.\")\n        elif rs.IsLine(line):\n            print(\"The centerline is a line.\")\n            crvstart = rs.CurveStartPoint(line)\n            crvend = rs.CurveEndPoint(line)\n            curve = Rhino.Geometry.LineCurve(crvstart, crvend)\n            curves.append(curve)\n        else:\n            print(\"The input is not recognized as a line.\")\n    return curves",
+      "language": "python",
+      "author": "brianorser",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "var go = new GetObject();\ngo.SetCommandPrompt(\"Select curve\");\ngo.GeometryFilter = ObjectType.Curve;\ngo.SubObjectSelect = false;\ngo.Get(); // get one object",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 21,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 30,
+  "views": 1471
+}

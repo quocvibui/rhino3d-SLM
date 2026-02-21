@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/different-behaviour-of-boolean-difference-between-gui-and-pythonscript/39757",
+  "topic_id": 39757,
+  "title": "Different behaviour of boolean difference between GUI and PythonScript",
+  "question": "Hi everyone !\n\n\nI’m having an issue with BooleanDifference. Basically i have two closed polysurfaces: a symmetrical boat (X-axis) and a box all over the port side of the boat (Y>=0). So as to be clear, port side (‘left side’) of the boat is inside the box while starboard side (‘right side’) is outside the box. I want to perform a boolean difference so as to get the box minus the boat.\n\n\nMy issue is: if i do it in the GUI with boolean difference selecting subtract from BOX and subtract with BOAT it works fine. But, if I use the following script, it deletes everything … (I already verified that the 2 first lines were selecting the right solid)\n\nbox = rs.FirstObject(select = True)   \n#\nselect\n the box\n\nship = rs.InvertSelectedObjects()   \n#\nselect\n the boat\n\nbool = rs.BooleanDifference(box, ship)\n\n\nAnd if I print “bool” it shows me: [<System.Guid object at 0x000000000000008C [00000000-0000-0000-0000-000000000000]>]\n\n\nAny thoughts ? Am i clear enough ?\n\n\nI also tried to do it with simple geometries (a box and a sphere), trying to subtract half of the sphere from the box, and this time, the result with the script is quite random … Or i get the right thing, i.e the box minus half oh the sphere, or i get the “other part” of the sphere, the one which does not intersect the box.\n\n\nThanks a lot,\n\nNathan",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    ship_id = rs.GetObject(\"Select Ship\", 16, True, False)\n    if not ship_id: return\n    \n    ship_brep = rs.coercebrep(ship_id, True)\n    \n    a = Rhino.Geometry.Point3d(-9.0, 0.0, -4.5)\n    b = Rhino.Geometry.Point3d( 7.5, 6.0, 3.0)\n    bbox = Rhino.Geometry.BoundingBox(a, b)\n    box_brep = bbox.ToBrep()\n    \n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    results = Rhino.Geometry.Brep.CreateBooleanDifference(ship_brep, box_brep, tolerance)\n    if not results: print \"No Boolean result\"; return\n    \n    for brep in results:\n        rc, log = brep.IsValidWithLog()\n        if not rc:\n            print \"Invalid Brep created: {}\".format(log)\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 2467
+}

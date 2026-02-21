@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/subd-vertex-tag-method-not-working-properly/168866",
+  "topic_id": 168866,
+  "title": "SubD vertex tag method not working properly",
+  "question": "Hi all.\n\n\nThis might seems a grasshopper post, but it is mainly a rhinocommon problem, I guess. Rhino 7.\n\nSetting a SubD vertex tag result in an odd shape. This can be fixed by moving the whole SubD, but it doesn’t always work, sometime you are left with a null or an invalid SubD.\n\n\nIn this simple case:\n\n\nsubd.Vertices.First.Tag = Rhino.Geometry.SubDVertexTag.Corner;\n\nreturn the same result as this:\n\n\n2023-11-10 10_49_29-Window\n735×171 17.6 KB\n\n\nsubd vertex tag bug.gh\n (4.8 KB)\n\n\n(I remember I did report this months ago, as well as other users…)\n\n\nPlease tell me if i’m using rhinocommon or grasshopper not correctly.\n\n\n\n\nPS\n\n\n\n\nGH point deform still doesn’t care to work with SubDs\n\n\nGH SubD components “Short names” (Full names option off) are messy:\n\n\n2023-11-10 11_08_57-Window\n789×354 61.1 KB\n\n“Extracting” the identifiers are outputted as “I” but setting tags takes identifiers as “E” or “V” … make no sense to me.\n\n(Other gh components short names rarely make confusion like this)\n\nImo changing output/input order or name shouldn’t cause backwards compatibility problems, as apparently not many users are using this components… as abc bugs like this are still present… \n\n\ncomponents to set SubD tags take the tag (crease/corner/smooth/etc) as single item, but identifiers as list! This is tricky because to set many different kind of tags you have to chain multiple gh components, and this is a different mentality than the rest of gh components.\n\n\n\n\n@pierrec",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(\n\tDataTree<SubD> S,\n\tDataTree<string> T,\n\tDataTree<int> V,\n\tref object A)\n{\n    this.Component.Message = \"SubD Vert Tags\";\n\n    GH_Structure<GH_SubD> resultTree = new GH_Structure<GH_SubD>();\n\n    // 1. Iterate through the branches of the SubD tree (S)\n    for (int i = 0; i < S.Paths.Count; i++)\n    {\n        GH_Path path = S.Paths[i];\n        List<SubD> sBranch = S.Branches[i];\n\n        // 2. Resolve corresponding branches for Tags and Indices\n        // Use Modulo to handle structure mismatches (e.g. S={0;1} vs T={0})\n        List<string> tBranch = T.Branches[i % T.Paths.Count];\n        List<int> vBranch = V.Branches[i % V.Paths.Count];\n\n        // 3. Process items within the branch\n        for (int j = 0; j < sBranch.Count; j++)\n        {\n            // Extract the geometry safely\n            // Since input is DataTree<SubD>, 'wrapper' is already the SubD object\n            SubD existingSubD = sBranch[j];\n            \n            if (existingSubD == null) continue;\n\n            // Create a Deep Copy of the geometry\n            // Duplicate() is a method of GeometryBase. We cast the result back to SubD.\n            SubD geometry = (SubD)existingSubD.Duplicate();\n\n            // 4. Apply changes\n            int opCount = vBranch.Count;\n            int tCount = tBranch.Count;\n\n            for (int k = 0; k < opCount; k++)\n            {\n                // Get Vertex Index\n                int vIndex = vBranch[k] + 1; // Get SubD 1-based indexing from Grasshopper 0-based indexing \n\n                // Get Tag (Safe access with cyclic wrapping for Longest List logic)\n                string tagString = tBranch[k % tCount];\n                SubDVertexTag tag = ParseTag(tagString);\n\n                // Apply to Geometry\n                // We check against geometry.Vertices.Count to prevent crashes\n                if (vIndex >= 0 && vIndex < geometry.Vertices.Count)\n                {\n                    SubDVertex vertex = geometry.Vertices.Find(vIndex);\n                    if (vertex != null)\n                    {\n                        vertex.Tag = tag;\n                    }\n                }\n            }\n\n            // Important: Update the SubD to recalculate the limit surface\n            geometry.ClearEvaluationCache();\n\n            // Add to output tree preserving the original path\n            resultTree.Append(new GH_SubD(geometry), path);\n        }\n    }\n\n    A = resultTree;\n}\n\n// Helper method to parse strings/numbers into SubD tags\nprivate SubDVertexTag ParseTag(string input)\n{\n    if (string.IsNullOrEmpty(input)) return SubDVertexTag.Smooth;\n\n    string s = input.ToLower().Trim();\n\n    // Check for Crease\n    if (s == \"crease\" || s == \"c\" || s == \"1\") \n        return SubDVertexTag.Crease;\n    \n    // Check for Corner\n    if (s == \"corner\" || s == \"co\" || s == \"2\") \n        return SubDVertexTag.Corner;\n\n    // Default to Smooth\n    return SubDVertexTag.Smooth;\n}",
+      "language": "csharp",
+      "author": "PetrVacek",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 347
+}

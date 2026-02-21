@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/use-hops-to-make-a-viewport-capture-function/198190",
+  "topic_id": 198190,
+  "title": "Use HOPS to make a Viewport Capture Function",
+  "question": "I am planning to create a modular \nHOPS\n function and run it in \nRhino.Compute\n. My goal is to use Grasshopper to design patterns and export the drawings in bitmap format. To achieve this, I utilized the \nRhino.Display.ViewCapture.CaptureToBitmap(settings)\n method as the core function. I wrote a Python script within the Grasshopper Python component, and it works well within the Grasshopper environment.\n\n\nimport Rhino\nimport System.Drawing\nimport Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport scriptcontext as sc\nimport os\nimport System, operator\nresult = []\nroaming = []\n# Get x and y coordinates of frame vertices\npx, py = set(frame.X), set(frame.Y)\n# Get horizontal and vertical lengths\ndx = abs(reduce(operator.sub, px))\ndy = abs(reduce(operator.sub, py))\n\n# Construct the points that will set the print area\noffx = (dx/dy) * (3/factor)\noffy = (dy/dx )* (3/factor)\np1 = rg.Point3d(min(px) + offx, min(py) + offy, 0)\np2 = rg.Point3d(max(px) - offx, max(py) - offy, 0)\n\n\n# Set resolution to chosen scaling factor\npix, piy = dx*factor, dy*factor\n\n\ndef Capture():\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n#    print(RhinoDocument)\n    if RhinoDocument != None:\n        roaming.append(RhinoDocument)\n    else:\n        roaming.append('No RhinoDocument')\n#    print (roaming)\n    try:\n        view = RhinoDocument.Views.Find(selectview, False)\n    except Exception as a:\n        roaming.append(a)\n    size = System.Drawing.Size(pix, piy) \n\n    settings = rd.ViewCaptureSettings(view, size, 300) #view, size, dpi\n    settings.SetWindowRect(p1, p2)\n    settings.RasterMode = True\n    settings.DrawGrid = False\n    settings.DrawAxis = False\n    settings.DrawWallpaper = False\n\n    bitmap = rd.ViewCapture.CaptureToBitmap(settings)\n    print(bitmap)\n    bitmap.Save(path+filename+\".png\")\n\n\nif save:\n    try:\n        if not os.path.exists(path):\n            os.makedirs(path)\n            result.append('new folder created')\n        Capture()\n    except Exception as e:\n        alarm1='!A...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System.Drawing\nimport Rhino.Geometry as rg\nimport Rhino.Display as rd\nimport scriptcontext as sc\nimport os\nimport System, operator\nresult = []\nroaming = []\n# Get x and y coordinates of frame vertices\npx, py = set(frame.X), set(frame.Y)\n# Get horizontal and vertical lengths\ndx = abs(reduce(operator.sub, px))\ndy = abs(reduce(operator.sub, py))\n\n# Construct the points that will set the print area\noffx = (dx/dy) * (3/factor)\noffy = (dy/dx )* (3/factor)\np1 = rg.Point3d(min(px) + offx, min(py) + offy, 0)\np2 = rg.Point3d(max(px) - offx, max(py) - offy, 0)\n\n\n# Set resolution to chosen scaling factor\npix, piy = dx*factor, dy*factor\n\n\ndef Capture():\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n#    print(RhinoDocument)\n    if RhinoDocument != None:\n        roaming.append(RhinoDocument)\n    else:\n        roaming.append('No RhinoDocument')\n#    print (roaming)\n    try:\n        view = RhinoDocument.Views.Find(selectview, False)\n    except Exception as a:\n        roaming.append(a)\n    size = System.Drawing.Size(pix, piy) \n\n    settings = rd.ViewCaptureSettings(view, size, 300) #view, size, dpi\n    settings.SetWindowRect(p1, p2)\n    settings.RasterMode = True\n    settings.DrawGrid = False\n    settings.DrawAxis = False\n    settings.DrawWallpaper = False\n\n    bitmap = rd.ViewCapture.CaptureToBitmap(settings)\n    print(bitmap)\n    bitmap.Save(path+filename+\".png\")\n\n\nif save:\n    try:\n        if not os.path.exists(path):\n            os.makedirs(path)\n            result.append('new folder created')\n        Capture()\n    except Exception as e:\n        alarm1='!An unexpected error occurred: '+str(e)\n        print(alarm1)\n        result.append(alarm1)\n    else:\n        alarm2 = str(filename)+'output successful.'\n        print(alarm2)\n        result.append(alarm2)\nelse:\n    pass",
+      "language": "python",
+      "author": "Bingze_Li",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 152,
+  "posts_count": 1,
+  "views": 76
+}

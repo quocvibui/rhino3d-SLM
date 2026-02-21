@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getting-point-coordinates-python/75871",
+  "topic_id": 75871,
+  "title": "Getting Point coordinates [python]",
+  "question": "I usually get coordinates with \npoint.X\n, \npoint.Y\n, \npoint.Z\n, but it doesn’t work in the following code:\n\n\n\nimport scriptcontext as rs\nimport Rhino.Geometry as rg\nimport Rhino.DocObjects\nimport Rhino.Input\n\nrs, list = Rhino.Input.RhinoGet.GetMultipleObjects(\"select control points\",False,Rhino.DocObjects.ObjectType.AnyObject)\n\ngripList = []\n\nfor gr in list:\n    gripList.append(gr.Object())\n    print(type(gr))\n\ngroList = []\nfor gro in gripList:\n    groList.append(gro.DuplicateGeometry())\n    print(type(gro))\n\nfor geo in groList:\n    print(type(geo))\n    \np1 = groList[0]\n\nfor p in groList:\n    print(p)\n    print(p.X)\n\n\n\n\n\nand according to \ntype(p)\n it is normal Rhino.Geometry.Point",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as rs\nimport Rhino.Geometry as rg\nimport Rhino.DocObjects\nimport Rhino.Input\n\nrs, list = Rhino.Input.RhinoGet.GetMultipleObjects(\"select control points\",False,Rhino.DocObjects.ObjectType.AnyObject)\n\ngripList = []\n\nfor gr in list:\n    gripList.append(gr.Object())\n    print(type(gr))\n\ngroList = []\nfor gro in gripList:\n    groList.append(gro.DuplicateGeometry())\n    print(type(gro))\n\nfor geo in groList:\n    print(type(geo))\n    \np1 = groList[0]\n\nfor p in groList:\n    print(p)\n    print(type(p))\n    print(p.Location.X)\n    print(p.Location.Y)\n    print(p.Location.Z)\n    p.Location.X = p1.Location.X\n    p.Location.Y = p1.Location.Y\n    p.Location.Z = p1.Location.Z\n    print(type(gripList[groList.index(p)]))\n    rs.ObjectGripLocation(gripList[groList.index(p)], groList.index(p), p1)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsrfs=rs.GetObjects(\"Select surfaces to edit\",8,True)\n#turn on grips\nfor srf in srfs: rs.EnableObjectGrips(srf,True)\n#pick some\ngrip_list=rs.GetObjectGrips(\"Pick some grips\")\n#extract objIDs, indices and locations\nobjIDs,indices,locations=zip(*grip_list)\n#average the Z of all picked points\navg_Z=sum(location.Z for location in locations)/len(locations)\n#set all the picked grips to that average Z\nfor i in range(len(grip_list)):\n    locations[i].Z=avg_Z\n    rs.ObjectGripLocation(objIDs[i],indices[i],locations[i])\n#turn off grips\nfor srf in srfs: rs.EnableObjectGrips(srf,False)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npoint_list=[]\nfor i in range(10):\n    #create a 3d point\n    pt=rs.coerce3dpoint([5*i,i**2,0])\n    #append it to the list\n    point_list.append(pt)\n#add polyline\nrs.AddPolyline(point_list)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 26,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\nrad=10.0\ncount=24\ninc=2*math.pi/count  #math functions work in radians, 2*pi is full circle\npoint_list=[]\n#circle parametric formula\nfor i in range(count):\n    x=math.sin(i*inc)*rad\n    y=math.cos(i*inc)*rad\n    #create your 3d point\n    pt=rs.coerce3dpoint([x,y,0])\n    #append it to the list\n    point_list.append(pt)\n#add first point to end of list (to close circular polyline)\npoint_list.append(point_list[0])\n#add polyline\nrs.AddPolyline(point_list)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 26,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as rs\nimport Rhino.Geometry as rg\nimport Rhino.DocObjects\nimport Rhino.Input\n\nrs, list = Rhino.Input.RhinoGet.GetMultipleObjects(\"select control points\",False,Rhino.DocObjects.ObjectType.AnyObject)\n\ngripList = []\n\nfor gr in list:\n    gripList.append(gr.Object())\n    print(type(gr))\n\ngroList = []\nfor gro in gripList:\n    groList.append(gro.DuplicateGeometry())\n    print(type(gro))\n\nfor geo in groList:\n    print(type(geo))\n    \np1 = groList[0]\n\nfor p in groList:\n    print(p)\n    print(p.X)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 27,
+  "views": 12490
+}

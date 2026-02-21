@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/normals-issue-with-exported-mesh-of-mirrored-linked-blocks/38992",
+  "topic_id": 38992,
+  "title": "Normals issue with exported mesh of mirrored linked blocks",
+  "question": "Having an issue where the normals are getting flipped on the exported mesh when I mirror linked blocks.\n\n\n\n\nBoth of these stanchions are instances of the same block. Left side looks correct, where as right side is rendering inside out.\n\n\nNo real way for me to correct this, other than not mirror things (Which is a disaster for workload when making a symmetrical boat) or possibly having a duplicate block that starts out inside out then replace block on the other side?",
+  "code_blocks": [
+    {
+      "code": "Dim arrObjects\narrObjects = Rhino.GetObjects(\"Select blocks to copy across boat\", 4096, True, True)\nIf Not IsArray(arrObjects) Then Exit Sub\n\nRhino.EnableRedraw True      \n\n' For each selected block object\nDim strObject, arrPoint, arrEnd, strCopiedBlock, arrCopiedBlockInsertPoint\nFor Each strObject In arrObjects\n\t' Get the block's insertion point\n\tarrPoint = Rhino.BlockInstanceInsertPoint(strObject)\n\t'Get the destination//////// HELP\n\tarrEnd = Rhino.GetPoint(\"to here\", arrPoint)\n\t' Copy the object across the boat\n\tstrCopiedBlock = Rhino.CopyObject(strObject, arrPoint, arrEnd)\n\t'Find copied object inert point\n\tarrCopiedBlockInsertPoint = Rhino.BlockInstanceInsertPoint(strCopiedBlock)\n\t'Rotate 180 on Z\n\tRhino.RotateObject strCopiedBlock, arrCopiedBlockInsertPoint, 180\n\t\nNext  \n\nRhino.EnableRedraw True",
+      "language": "unknown",
+      "author": "wynott",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "'f will be added to the angle result value\n' f=0 origin at 9 oclock,  f=-90 if origin at 12 oclock, -180 origin at 3 oclock, etc\nDim f : f = 0   \nDim d,i,r,v,block\nblock = Rhino.GetObject(\"Block Instance ?\", 4096,, True)\nr = DecomposeXformRotation(Rhino.BlockInstanceXform(block)) 'get rotation in radians\nv = Round(r(2) * (-180 / (4 * Atn(1))), 0) + f 'conver into degrees and add 'Vray' factor\n'Minus sign at 180 if clockwise \nIf v < 0 Then\n\tv = v + 360\nEnd If\nRhino.RotateObject block, Rhino.BlockInstanceInsertPoint(block), v, , False\nCall Rhino.Print(\"Block rotation reset to zero\")",
+      "language": "python",
+      "author": "wynott",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "Sub Main()\nDim sBlock: sBlock = Rhino.GetObject(, 4096, True, True)\nIf isNull(sBlock) Then Exit Sub\n\n'the block instance's transform\nDim xform\nxform = Rhino.BlockInstanceXform(sBlock)\n\n'Find a plane transformed like the block instance\nDim tempPlane\ntempPlane = Rhino.PlaneTransform(Rhino.WorldXYPlane(), xform)\n\n'find a point on the block's Y axis.\nDim py\npy = Rhino.PointAdd(tempPlane(0), tempPLane(2))\n\n'find the center of rotation\nDim p1\np1 = Rhino.LinePlaneIntersection(array(tempPlane(0), py), Rhino.WorldYZPlane())\n\n'Get a point on the YZ plane\nDim p2\np2 = Rhino.PlaneClosestPoint(Rhino.WorldYZPlane(), py)\n\n'The block Y vector projected to the World YZ plane\nDim vecDir\nvecDir = Rhino.VectorCreate(p1, p2)\n\nDim ang\nang = Rhino.VectorAngle(tempPLane(2), vecDir) \n\n'Right to left use - angle, left to right use + angle\nRhino.RotateObject sBlock, p1, -ang * 2, tempPlane(3), True",
+      "language": "unknown",
+      "author": "pascal",
+      "post_number": 21,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 30,
+  "views": 3062
+}

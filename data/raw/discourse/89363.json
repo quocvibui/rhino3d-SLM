@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/identifying-duplicate-curves-between-2-lists/89363",
+  "topic_id": 89363,
+  "title": "Identifying Duplicate Curves between 2 lists",
+  "question": "Hello everyone,\n\nI’m trying to solve what would seem like a straightforward problem but can’t seem to get it to work. I’m trying to find duplicates between 2 lists of curves. The first list is made of subdivided smaller lines while the second list is made of joined polylines. I need to identify curves that aren’t duplicates and add them to a separate list. I think the logic is pretty straight forward:\n\n\nFor every curve in list A, get end points, find closest point in list B, if distances>0, add them to another list\n\n\n#ID PROJECTED CURVES\n#FOR EVERY CURVE IN A, GET END POINTS, FIND CRVCLOSEST POINT IN B, IF T0 + T1 = 0, CULL\n\n        def IDprojectedCurves(curves1, curves2):\n        a = []\n        b = []\n        totalDist = 0                                       #START VALUE OF TOTAL DIST\n        maxDist = 0                                         #START VALUE OF MAX DIST\n\n        for x in curves1:                                   #ADD CURVES1 TO LIST A\n            a.append(x)\n\n        for y in curves2:                                   #ITERATE LIST OF LISTS [FLATTEN INTO 1 LIST]\n            for j in y:\n                b.append(j)\n\n        for crvA in a:                                          #FOR EACH CURVE IN A\n            crv = rs.coercecurve(crvA)              \n            t00 = rs.CurveStartPoint(crv)                       #START POINT\n            t05 = rs.CurveMidPoint(crv)                         #MID POINT\n            t10 = rs.CurveEndPoint(crv)                         #END POINT\n            rs.AddPoint(t00)\n            rs.AddPoint(t05)\n            rs.AddPoint(t10)\n\n            for crvB in b:                                          #FOR EACH CURVE IN B\n                dist0 = rs.CurveClosestPoint(crvB,t00)              #FIND CLOSEST POINT IN CURVE B\n                dist1 = rs.CurveClosestPoint(crvB,t10)              #FIND CLOSEST POINT IN CURVE B\n                dist2 = rs.CurveClosestPoint(crvB,t05)              #FIND CLOSEST POINT IN CURVE B\n          ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nlines = rs.GetObjects(\"Select lines\")\npolylines = rs.GetObjects(\"Select polylines\")\nsafeList = []\n\nif lines and polylines:\n    for line in lines:\n        overlap = None\n        for polyline in polylines:\n            if overlap == None:\n                intersections = rs.CurveCurveIntersection(line, polyline)\n                if intersections != None:\n                    for intersection in intersections:\n                        if intersection[0] == 2:\n                            overlap = True\n                            break\n        if overlap == None:\n            safeList.append(line)\n\nrs.SelectObjects(safeList)",
+      "language": "python",
+      "author": "crtn-hrd",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#ID PROJECTED CURVES\n#FOR EVERY CURVE IN A, GET END POINTS, FIND CRVCLOSEST POINT IN B, IF T0 + T1 = 0, CULL\n\n        def IDprojectedCurves(curves1, curves2):\n        a = []\n        b = []\n        totalDist = 0                                       #START VALUE OF TOTAL DIST\n        maxDist = 0                                         #START VALUE OF MAX DIST\n\n        for x in curves1:                                   #ADD CURVES1 TO LIST A\n            a.append(x)\n\n        for y in curves2:                                   #ITERATE LIST OF LISTS [FLATTEN INTO 1 LIST]\n            for j in y:\n                b.append(j)\n\n        for crvA in a:                                          #FOR EACH CURVE IN A\n            crv = rs.coercecurve(crvA)              \n            t00 = rs.CurveStartPoint(crv)                       #START POINT\n            t05 = rs.CurveMidPoint(crv)                         #MID POINT\n            t10 = rs.CurveEndPoint(crv)                         #END POINT\n            rs.AddPoint(t00)\n            rs.AddPoint(t05)\n            rs.AddPoint(t10)\n\n            for crvB in b:                                          #FOR EACH CURVE IN B\n                dist0 = rs.CurveClosestPoint(crvB,t00)              #FIND CLOSEST POINT IN CURVE B\n                dist1 = rs.CurveClosestPoint(crvB,t10)              #FIND CLOSEST POINT IN CURVE B\n                dist2 = rs.CurveClosestPoint(crvB,t05)              #FIND CLOSEST POINT IN CURVE B\n                totalDist = dist0+dist1+dist2                       #ADD DISTANCES AND SAVE TO TOTAL DIST\n                if totalDist > maxDist:                             #IF TOTAL DIST > MAX DIST\n                    totalDist = maxDist                             #   TOTAL DIST = MAX DIST\n                else:\n                    maxDist = maxDist                               #ELSE MAX DIST = MAX DIST\n            if maxDist>0:                                       #IF MAX DIST>0\n                projected = crv                             \n                projectedCurves.append(projected)               #ADD TO PROJECTED CURVES LIST",
+      "language": "python",
+      "author": "a.nigam",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 527
+}

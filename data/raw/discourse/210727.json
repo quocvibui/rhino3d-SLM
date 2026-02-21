@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/blockdefinition-import-and-export-error-in-python/210727",
+  "topic_id": 210727,
+  "title": "BlockDefinition import and export Error in PYTHON",
+  "question": "I want to create new rhino file and copy all block definition from origin file.\n\nBut This code is work incompletely. The TextEntities in original block definition are not copied as expected.\n\n\nI found that if the origin definition have 4 geometries(1 curve, 4 texts) but copied definition has only one curve geometry.\n\n\nI think this happens in this method.\n\ntemp_doc.InstanceDefinitions.Add()\n\n\nIf I change this temp_doc to current_doc(document currently opened), it works well.\n\n\nOne thing more! similar things happen, when I import InstanceDefinitions, InstanceObject in InstanceDefinition is skipped.\n\n\nWhy this happen, and How can I fix this?\n\n\ndef export_block_definition_to_3dm(current_doc, filepath):\n    \"\"\"Block definition을 3dm 파일로 저장\"\"\"\n    # CREATE TEMP DOC\n    temp_doc = Rhino.RhinoDoc.CreateHeadless(None)\n\n    try:\n        block_defs = sinutils.get_all_block_definitions(current_doc)\n\n        for block_def in block_defs:\n            # Block definition을 임시 문서에 추가\n            origin_geoms = sinutils.get_geom_list_from_block_defintion(\n                current_doc, block_def\n            )\n\n            res = temp_doc.InstanceDefinitions.Add(\n                f\"{block_def.Name} COPY\",\n                block_def.Description,\n                geo.Point3d(0, 0, 0),\n                [obj.Geometry for obj in block_def.GetObjects()],\n                [obj.Attributes for obj in block_def.GetObjects()],\n            )\n\n            created_def = temp_doc.InstanceDefinitions[res]\n            created_geoms = sinutils.get_geom_list_from_block_defintion(\n                temp_doc, created_def\n            )\n            if len(origin_geoms) != len(created_geoms):\n\n                raise ValueError(\n                    f\"{block_def.Name} ERROR input {len(origin_geoms)} != output {len(created_geoms)}\"\n                )\n\n        # SAVE 3dm \n        temp_doc.WriteFile(filepath, FILE_WRITE_OPTION)  # 8 = Rhino 8 버전\n        print(f\"Saved: {filepath}\")\n\n    finally:\n        temp_doc.Dispose()",
+  "code_blocks": [
+    {
+      "code": "def export_block_definition_to_3dm(current_doc, filepath):\n    \"\"\"Block definition을 3dm 파일로 저장\"\"\"\n    # CREATE TEMP DOC\n    temp_doc = Rhino.RhinoDoc.CreateHeadless(None)\n\n    try:\n        block_defs = sinutils.get_all_block_definitions(current_doc)\n\n        for block_def in block_defs:\n            # Block definition을 임시 문서에 추가\n            origin_geoms = sinutils.get_geom_list_from_block_defintion(\n                current_doc, block_def\n            )\n\n            res = temp_doc.InstanceDefinitions.Add(\n                f\"{block_def.Name} COPY\",\n                block_def.Description,\n                geo.Point3d(0, 0, 0),\n                [obj.Geometry for obj in block_def.GetObjects()],\n                [obj.Attributes for obj in block_def.GetObjects()],\n            )\n\n            created_def = temp_doc.InstanceDefinitions[res]\n            created_geoms = sinutils.get_geom_list_from_block_defintion(\n                temp_doc, created_def\n            )\n            if len(origin_geoms) != len(created_geoms):\n\n                raise ValueError(\n                    f\"{block_def.Name} ERROR input {len(origin_geoms)} != output {len(created_geoms)}\"\n                )\n\n        # SAVE 3dm \n        temp_doc.WriteFile(filepath, FILE_WRITE_OPTION)  # 8 = Rhino 8 버전\n        print(f\"Saved: {filepath}\")\n\n    finally:\n        temp_doc.Dispose()",
+      "language": "python",
+      "author": "이신후",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 55
+}

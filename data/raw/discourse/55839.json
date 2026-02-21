@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/model-serialization/55839",
+  "topic_id": 55839,
+  "title": "Model serialization",
+  "question": "Hello,\n\n\nIs it possible to serialize the whole Rhino 3D model object (the RhinoDoc class I guess) into an string (XML, json, or any format) so that then you can deserialize the string to recover the original object?\n\n(without using WriteFile functions)\n\n\nThank you,",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport pickle\nimport Rhino.Geometry as rg\nimport Rhino.DocObjects as rd\n\nfor o in sc.doc.Objects:\n\tsg = pickle.dumps(o.Geometry, -1)\n\tsa = pickle.dumps(o.Attributes, -1)\n\tog = pickle.loads(sg)\n\tat = pickle.loads(sa)\n\tprint(og.ObjectType)\n\tprint(at.Name)\n\tif og.ObjectType==rd.ObjectType.Brep:\n\t\tprint(og.Faces.Count, og.Edges.Count)\n\tif og.ObjectType==rd.ObjectType.Mesh:\n\t\tprint(og.Faces.Count, og.Vertices.Count)\n\tif og.ObjectType==rd.ObjectType.Extrusion:\n\t\tprint(og.CapCount, og.ProfileCount)",
+      "language": "python",
+      "author": "jesterking",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 3061
+}

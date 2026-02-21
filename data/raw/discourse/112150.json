@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-works-differently-on-rhino-wip-and-rhino-6/112150",
+  "topic_id": 112150,
+  "title": "Python script works differently on Rhino WIP and Rhino 6",
+  "question": "Hi to all,\n\n\nI just tried my Python script (written for Rhino 6) in Rhino WIP and it does not work properly.\n\nIt is script for reading xml file generated in Bentley Microstation. Script read all points coordinates in written in xml and generate points in rhino. However, it seems that some parts of coordinates are left out in Rhino WIP. Any suggestions?\n\n\nThanks for any kind of reply.\n\n\nOndřej\n\n\nRead_XML2_cmd.py\n (1.4 KB)\n\n\nDTM usek SO203.xml\n (148.2 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport System.Guid, System.Drawing.Color\nfrom scriptcontext import doc\nimport Rhino.DocObjects as rd\nimport rhinoscriptsyntax as rs\n\nimport clr\n\nclr.AddReferenceByName(\"System.Xml\")\n\nimport System\nimport System.Xml\n\n\n__commandname__ = \"Read_XML2\"\n\n# RunCommand is the called when the user enters the command name in Rhino.\n# The command name is defined by the filname minus \"_cmd.py\"\ndef RunCommand( is_interactive ):\n    xml_file = rs.OpenFileName(\"Please select xml-file to import points (XXXX.xml)\")\n    \n    xdoc = System.Xml.XmlDocument()\n    xdoc.Load(xml_file)\n    \n    breaklines = xdoc.GetElementsByTagName(\"Breakline\")\n    \n    for breakline in breaklines:\n        # Set up layer and object\n        attr = breakline.GetAttributeNode(\"name\")\n        name = attr.Value\n        layer_name=name\n        layer=doc.Layers.Add(layer_name,System.Drawing.Color.Yellow)\n        ObjA=rd.ObjectAttributes()\n        ObjA.LayerIndex=layer\n        ObjA.Name=name\n        \n        # load and create points \n        points = breakline[\"PntList3D\"].InnerText.strip().split()\n        for z in range(int(len(points)/3)):\n            px = float(points[3*z])\n            py = float(points[3*z+1])\n            pz = float(points[3*z+2])\n            pnt=rg.Point3d(px, py, pz)\n            doc.Objects.AddPoint(pnt,ObjA)\n            doc.Views.Redraw()\n    \n    return 0\n    \nRunCommand(True)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 8,
+  "views": 546
+}

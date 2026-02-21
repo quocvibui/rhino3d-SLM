@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-change-start-point-of-closed-curve/73313",
+  "topic_id": 73313,
+  "title": "How to change start point of closed curve",
+  "question": "I want to change start point of curve by rhino python but not. Please help me solution\n\nI try make code\n\n\nimport rhinoscriptsyntax as rs\n#Get Curve\ncur=rs.GetObject(\"Select Cur:\",4)\nsp=rs.CurveStartPoint(cur)\nrs.AddPoint(sp)\npoint =rs.GetPointOnCurve(cur)\npoint =rs.coerce3dpoint(point)\ncur=rs.coercecurve(cur,-1,True)\ncur.SetStartPoint(point)\n#cur.SetStartPoint(point)\nsp=rs.CurveStartPoint(cur)\nrs.AddPoint(sp)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#get Curve\ncurveID=rs.GetObject(\"Select Curve\",4)\nsp=rs.CurveStartPoint(curveID)\nrs.AddPoint(sp)\n#get new point to change seam to\npoint=rs.GetPointOnCurve(curveID)\n#point=rs.coerce3dpoint(point) - you do not need this\n\n#you need to get the *parameter* of the point on the curve to adjust the seam\nparam=rs.CurveClosestPoint(curveID,point)\n#now change the curve seam\nrs.CurveSeam(curveID,param)\n#check the result by adding a point\nrs.AddPoint(rs.CurveStartPoint(curveID))",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#get Curve\ncurveID=rs.GetObject(\"Select Curve\",4)\nsp=rs.CurveStartPoint(curveID)\nrs.AddPoint(sp)\n#get new point to change seam to\npoint=rs.GetPointOnCurve(curveID)\n#point=rs.coerce3dpoint(point) - you do not need this\n\n#you need to get the *parameter* of the point on the curve to adjust the seam\nparam=rs.CurveClosestPoint(curveID,point)\n#now change the curve seam\nrs.CurveSeam(curveID,param)\n#check the result by adding a point\nrs.AddPoint(rs.CurveStartPoint(curveID))",
+      "language": "python",
+      "author": "Cumberland",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n#Get Curve\ncur=rs.GetObject(\"Select Cur:\",4)\nsp=rs.CurveStartPoint(cur)\nrs.AddPoint(sp)\npoint =rs.GetPointOnCurve(cur)\npoint =rs.coerce3dpoint(point)\ncur=rs.coercecurve(cur,-1,True)\ncur.SetStartPoint(point)\n#cur.SetStartPoint(point)\nsp=rs.CurveStartPoint(cur)\nrs.AddPoint(sp)",
+      "language": "python",
+      "author": "xiix.xoox",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 3914
+}

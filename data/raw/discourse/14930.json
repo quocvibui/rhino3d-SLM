@@ -1,0 +1,232 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/poor-mans-scripting/14930",
+  "topic_id": 14930,
+  "title": "Poor man's scripting",
+  "question": "a proof of concept exercise using numbers.app to create macros with variables & repeatability…\n\n\ndon’t laugh (ok. please do \n )\n\n\nexported columnC to .txt then \n_-readcommandfile\n\n\nfwiw–\n\nB4=B1*11\n\nC4=B$2\n\nC10= B$3\n\nC12 =IF(ROW()>B$4,\"\",C1)\n\n\n \n\n\n \n\n\n\n\ni’ll post some more experiments if i come up with anything else successful (i ultimately have some goals with this which i can use for real world stuff. not sure if i’ll lose interest prior to getting to that point but i’m pretty sure i’ll avoid learning python at all costs ; ) )",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nrs.Command(\"_Box 0,11,5.2540 12.5,6.75 6.75\")\nlco=rs.LastCreatedObjects(select=True)\nrs.Command(\"_ArrayLinear 6 0,11,5.25 0,22,12\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nstartpoint = '0,11,5.25 '\nwidth='10 '\ndepth='20 '\nheight='30 '\n\nrs.Command('_Box '+startpoint+width+depth+height)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# rs.Command take a string (ascii characters as input)\n# to form a string in python you need to place in in either quotes 'string' or double quotes \"string\"\n# as mostly each input in a command macro requires a space to confirm I set them behind the values like so:\nstartpoint = '0,11,5.25 '\nwidth='10 '\ndepth='20 '\nheight='30 '\n\n# to combine strings in python you can use the + sign\nrs.Command('_Box '+startpoint+width+depth+height)\n\n# working with strings to represent values is not very useful\n# here is a way to keep the variables as numbers as opposed to strings so you can do math with them\n\nx = 0\ny = -50\nz = 5.25 \nwidth=10 \ndepth=20\nheight=30\n\n#in python there is a way to format a string in such a way that you can fill in the positions marked by {}\n# the {} items will be filled in order of items placed withon the parentheses after format\n\n#        '_Box x,y,z width depth height'\nstring = '_Box {},{},{} {} {} {} '.format(x,y,z,width,depth,height)\nrs.Command(string)\n\n#now lets change the x to 100\n\nx = 100\n# all other variables remain the same but x is now 100\nstring = '_Box {},{},{} {} {} {} '.format(x,y,z,width,depth,height)\nrs.Command(string)\n\n# one more step multiply \n\nx= x*-1\ny = y*0.5\nz = z*11\nwidth=width*2\ndepth=depth * 5\nheight=height *0.2\n\nstring = '_Box {},{},{} {} {} {} '.format(x,y,z,width,depth,height)\nrs.Command(string)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nwidth=40\ndepth=8\nheight=0.8\n\nx= 5\ny = depth/-2 #creates the box centered on x axis\nz = 0\n\n#notice the w befor x,y,x this is to make sure world coordinates are set instaed of cplane coordinates\n#this makes it not neccasery to set the correct view active\nstring = '_Box w{},{},{} {} {} {} '.format(x,y,z,width,depth,height)\nrs.Command(string)\n\n\nrs.Command('_SelNone _SelLast ') #make sure nothing is selected and select the box\n\n#copy and rotate the box\nstep_height= 10\n\nrs.Command('_Copy w0,0,0 w0,0,{} _Enter _SelNone _SelLast '.format(step_height))\n\nstep_angle = 15\n#using Rotate3D to make sure the active cplane is irrelevant\nrs.Command('_Rotate3D w0,0,0 w0,0,1 {} '.format (step_angle))\n\n# at this point we could start copying all the code N numert of times for each step\n# but we start doing itterations:\n\nnumber_of_steps = 50\n\n# a for loop will loop number_of_steps times\nfor N in xrange(number_of_steps):\n    #the last step is still selected so we can do this\n    rs.Command('_Copy w0,0,0 w0,0,{} _Enter _SelNone _SelLast '.format(step_height))\n    step_angle = 15\n    rs.Command('_Rotate3D w0,0,0 w0,0,1 {} '.format (step_angle))\n    #notice these lines are indented\n    #this means we are inside the for loop\n    \n    \n    \n#now we are out of the for loop\n\n#Note I have notice some stalling of the script in the execution of the copying macro",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nwidth=40\ndepth=8\nheight=0.8\n\nx= 5\ny = depth/-2 #creates the box centered on x axis\nz = 0\n\n\n#notice the w befor x,y,x this is to make sure world coordibates are set insted of cplane coordinates\n#this makes it not neccasery to set the correct view active\nstring = '_Box w{},{},{} {} {} {} '.format(x,y,z,width,depth,height)\nrs.Command(string)\nrs.Command('_SelNone _SelLast ') #make sure nothing is selected and select the box\n# I left creating a box via rs.AddBox for now as that requires A list of eight 3-D points that define the corners of the box.\n\n\n# we can get the ID's of the selected objects in Rhino via\nselected_objects = rs.SelectedObjects()\n#notice this is plural, this means we get a list retuned instead of a single object\n#we work around this for now by simply getting the first item in the list\n#items in a list are counted starting at 0 so to get the first item we do\nbox_object = selected_objects[0]\n\n\n#now we set some variables for our steps\nstep_height= 10\nstep_angle = 15\nnumber_of_steps = 50\n\n#and run through the loop  'number_of_steps' times\n\nfor N in xrange(number_of_steps):\n    # the method rs.CopyObject returns the ID of the copied object\n    # we input the id of the object to copy and \n    # a list [0,0,10] representing the vector (direction) to copy to \n    copied_object = rs.CopyObject(box_object, [0,0,step_height])\n    \n    # rotate the copy around center-point [0,0,0] \n    # at angle 15 an axis=[0,0,1] (vertical)\n    rs.RotateObject(copied_object,[0,0,0],15,axis=[0,0,1])\n    \n    #for the next loop we need to use this copied and rotated object\n    # so the variable box_object is set to contain the new rotated copy\n    box_object = copied_object",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na=0\nb=0\nc=0\nd=0\ne=0\nf=5.02315116973\n\nvertline = \"_Line w{},{},{} {},{},{} \".format(a,b,c,d,e,f)\nrs.Command(vertline)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 23,
+      "is_solution": false
+    },
+    {
+      "code": "def Loupe(board,group):\n\n    for i in range(1,int(trdNum-2)):\n        copy = rs.CopyObjects (board)\n        rs.MoveObject (copy,(i*0,i*11,i*rise))\n        rs.AddObjectToGroup(copy,\"+str(group)+\")",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 55,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\ndef IsRunningOnWindows():\n    \"Returns True if this script is being executed on a Windows platform\"\n    print Rhino.Runtime.HostUtils.RunningOnWindows\nIsRunningOnWindows()",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 73,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\nrs.Command('_Show _SelAll _Delete') #temporary\n\ndef getInput():\n    \"\"\"Height & Radius are the main variables in the script.. there are also options to have the template\n    cut to the ground or raised up 5 1/2' for joining to flatbottom.. The Framed option will mirror the\n    template and add ribs in between \"\"\"\n    \n    options= ('CutTo', 'Ground', '2x6Flat') , ('Output', 'TemplateOnly' ,'Framed')\n    bool= rs.GetBoolean('Template Maker', options, (False,True))\n    if bool == None: return\n    flat=bool[0]\n    width=bool[1]\n\n    height= rs.GetReal('Height - Flat to top of template',66)\n    if height == None: return\n\n    radius=rs.GetReal('Radius',90)\n    if radius == None: return\n    if width == True:\n        width= rs.GetReal('Width of Section', 96)\n\n    return (radius, height, flat, width) ## RADIUS->globe[0] HEIGHT->globe[1] FLAT->globe[2] WIDTH->globe[3]\nglobe= getInput()\n\n\n\ndef arcCP():\n    \"\"\"Centerpoint of the main arc which will be used throughout.. it's on the Zaxis at 0,0..\n    if the ramp has flat, the cPt will be 5.5\" higher than the radius\"\"\"\n    radius=globe[0]\n    height=globe[1]\n    flat= globe[2]\n    \n    if flat == True:\n        gheight = height + 5.5 #gheight is the distance from ground to top of template\n        arcCPz= radius + 5.5 #arcCPz is the distance from the ground to the main arc's centerpoint\n    else:\n        gheight= height\n        arcCPz= radius\n\n    arcCP= rs.coerce3dpoint([0,0,arcCPz])\n\n    PtOfCtr= rs.AddPoint(arcCP) #put these in the layout function later\n    PtOfStart= rs.AddPoint(0,0,0)\n    return (arcCP, gheight, arcCPz)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 93,
+      "is_solution": false
+    },
+    {
+      "code": "def board(x,y,z):\n    \"\"\" draws a box at origin\"\"\"\n    pt1= rs.coerce3dpoint([0,0,0])\n    pt2= rs.coerce3dpoint([0,y,0])\n    pt3= rs.coerce3dpoint([0,y,z])\n    pt4= rs.coerce3dpoint([0,0,z])\n    pt5= rs.coerce3dpoint([x,0,0])\n    profile= rs.AddPolyline([pt1,pt2,pt3,pt4,pt1])\n    board= rs.ExtrudeCurveStraight(profile,pt1,pt5)\n    rs.CapPlanarHoles (board)\n    rs.DeleteObject(profile)  ##eventually- save this for the layout view\n    return board",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 93,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport othermodules as needed\n\ndef SomeFunction1(arg1,arg2,arg3):\n    #do some stuff\n    return something\n\ndef SomeFunction2(argA,argB,argC):\n    #do some stuff\n    return something_else\n\ndef SomeFunction3(argX,argY):\n    #do some stuff\n    return other_thing\n\ndef MyMainScript():\n    input1=rs.GetSomething()\n    input2=rs.GetSomething()\n    input3=rs.GetSomething()\n\n    #do some stuff\n\n    result1=SomeFunction1(input1,input2,input3)\n\n    #do some stuff\n\n    result2=SomeFunction2(input1,input2,result1)\n\n    #do some stuff\n\n    result3=SomeFunction2(result1,result2)\n\n    #finish script and final reporting\n\n    print \"Did this, that and the other thing, added junk to document\"\n\n#call main function\nMyMainScript()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 94,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na=0\nb=0\nc=0\nd=0\ne=0\nf=5.02315116973\n\na_line=rs.AddLine([a,b,c] ,[d,e,f])\nrs.ObjectName(a_line, \"RS_AddLine\")\n\nvertline = \"_Line w{},{},{} {},{},{} \".format(a,b,c,d,e,f)\nrs.Command(vertline)\nlco=rs.LastCreatedObjects()\nrs.ObjectName(lco[0],\"RS_Command_Line\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 27,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# height\nheight=5.02315116973\n\n# get start of line\nstart=rs.GetPoint(\"Base of vertical line:\")\n# start is now basically a list of three values, the x,y and z value.\n# start[0] is the first value, x\n# start[1] is the first value, y\n# start[2] is the first value, z\n\n# The end point will be a copy of start and then we alter the Z value\nend = list(start)\nend[2]=end[2]+height\n\n# and then we add a line to the document\nrs.AddLine(start,end)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 28,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\n\n# enter your numbers\nheight=rs.GetReal(\"Final Deck Height\",54)\nwidth=rs.GetReal(\"Width: \",48)\nmaxrise=rs.GetReal(\"Maximum Rise per Step\",7.25)\n\n# find amount of steps\ntreads=math.ceil(height/maxrise)\n\n# find the rise per step\nrise=height/treads\n\n# draw the bottom riser.. it needs to be 1.5\" smaller than the rest\nbrise=rise-1.5\nrs.Command(\"_Box 0 \"+str(width)+\",1.5 \"+str(brise))\n\n# draw the other risers.\nrx=1.5 #leave room for the cap which will be drawn at x=0\nry=11\nrw=width-3 #side caps will add the other 3 inches\nrd=1.5\n\nRiserString = \"_Box w{},{},{} {} {} {} \".format(rx,ry,brise,rw,rd,rise)\nrs.Command(RiserString)\nrs.Command(\"_SelNone _SelLast \")\n\n#Array riser.. 2 less than amount of steps since the top step is the deck and the bottom riser is custom\nRiserArray = \"_ArrayLinear {} w{},{},{} {},{},{}\".format(treads-2,rx,ry,brise,rx,ry+11,rise+brise)\nrs.Command(RiserArray)\nrs.Command(\"_SelAll _Group \")\n\n#draw tread.. 1/4\" nose\nty=-.25\ntd=11.25\nTreadString = \"_Box w{},{},{} {} {} {} \".format(rx,ty,brise,rw,td,rd)\nrs.Command(TreadString)\nrs.Command(\"_SelNone _SelLast \")\n\n#array tread.. one less than amount of steps.. deck = last step\nTreadArray = \"_ArrayLinear {} w{},{},{} {},{},{}\".format(treads-1,rx,0,brise,rx,11,rise+brise)\nrs.Command(TreadArray)\n\n\n#STRINGERS\n\nslope=math.atan(rise/11)\nslopeDegree=math.degrees(slope)\noppSlope=math.radians(90-slopeDegree)\n\n#vertical width of stringer (2x10stringer)\nvws=9.25/math.sin(oppSlope)\n#vertical width of stringer minus bottom riser\nbvws=vws-brise\n\n\n#vertical length at top/back of stringer\nvts=vws-(9.5*math.tan(slope))\n\n\n#length of stringer's bottom edge\nbes=bvws/math.tan(slope)\n\nrs.Command(\"_Polyline 1.5,1.5,0 1.5,1.5,\"+str(brise)+\" r0,11,0 _Enter\")\nrs.Command(\"_Polyline 1.5,12.5,\"+str(brise)+\" r0,0,\"+str(rise)+\" r0,11,0 r0,0,0 _Enter\")\nrs.Command(\"_SelLast\")\n\n#Array last polyline.. leave the top one out.. it's shorter.\nStringerArray = \"_ArrayLinear {} w{},{},{} {},{},{}\".format(treads-3,1.5,12.5,brise,1.5,23.5,brise+rise)\nrs.Command(StringerArray)\n\n#Draw top of stringer\ntsx=1.5\ntsy=1.5+((treads-2)*11)\ntsz=brise+(rise*(treads-3))\n\nTopPiece = \"_Polyline w{},{},{} {},{},{} {},{},{} {},{},{} {},{},{} {},{},{} {}\".format(tsx,tsy,tsz,\"r0\",0,rise,\"r0\",9.5,0,\"r0\",0,-(vts),tsx,1.5+bes,0,tsx,1.5,0, \"_Enter\")\nrs.Command(TopPiece)\n\n\n#Draw top/back of stringer -- a different way -- still not accurate\n#toppiece = \"_Polyline w{},{},{} {},{},{} {},{},{} _Enter\".format(tsx,tsy,tsz,\"r0\",0,rise,\"r0\",9.5,0)\n#rs.Command(toppiece)\n\n#tszb=tsz+rise\n#bsbz=tszb-vts\n#topback = \"_Line w{},{},{} {},{},{} \".format(1.5,tsy+9.5,bsbz,1.5,tsy+9.5,tszb)\n#rs.Command(topback)\n\nrs.Command(\"_SelCrv _Join\")\nrs.Command(\"_ExtrudeCrv Solid=yes DeleteInput=yes 1.5 \")\nrs.Command(\"_SelLast\")\nrs.Command(\"_Mirror copy=yes \"+str(width/2)+\",0 \"+str(width/2)+\",1 \")\n\n\n\n#STRINGER CAP\n\n#vertical width of cap (2x12cap)\n\n\n#NewVWS=11.25/math.sin(oppSlope)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 30,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na=0\nb=0\nc=0\nd=0\ne=0\nf=5.02315116973\n\nvertline = \"_Line w{},{},{} {},{},{} \".format(a,b,c,d,e,f)\nrs.Command(vertline)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 32,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.Command(\"_Line 0,0,0 0,0,5.02315116973 \")",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 32,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nf=5.02315116973\n\nrs.Command(\"_Line 0,0,0 0,0,\"+str(f)+\" \")",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 32,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na=0\nb=0\nc=0\nd=0\ne=0\nf=5.02315116973\n\nvertline = \"_Line w{},{},{} {},{},{} \".format(str(a),str(b),str(c),str(d),str(e),str(f))\nrs.Command(vertline)",
+      "language": "python",
+      "author": "jordy1989",
+      "post_number": 34,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na=str(0)\nb=str(0)\nc=str(0)\nd=str(0)\ne=str(0)\nf=str(5.02315116973)\n\nvertline = \"_Line w{},{},{} {},{},{} \".format(a,b,c,d,e,f)\nrs.Command(vertline)",
+      "language": "python",
+      "author": "jordy1989",
+      "post_number": 34,
+      "is_solution": false
+    },
+    {
+      "code": "def Loupe(board,group):\n    rise=7.0\n    for i in range(1,int(trdNum-2)):\n        moveVec=rs.coerce3dvector([0,11.0,rise])\n        copy=rs.CopyObject (board,i*moveVec)\n        rs.AddObjectToGroup(copy,group)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 56,
+      "is_solution": false
+    },
+    {
+      "code": "mPt1= rs.coerce3dpoint([width/2,0,0])\nmPt2= rs.coerce3dpoint([width/2,1,0])\nrs.MirrorObjects([Stringer, Cap], mPt1, mPt2, True)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 58,
+      "is_solution": false
+    },
+    {
+      "code": "Upper = rs.ExtrudeCurveStraight(upperCrv, (0,0,0),(.75,0,0))\n#check to see if the extrusion succeeded\nif Upper:\n    cap = rs.CapPlanarHoles(Upper)\nelse:\n    print \"Unable to extrude upper curve\"\n    return\n#check if it capped\nif not cap:\n    print \"Unable to cap extrusion\"\n    return",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 81,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\nnum=rs.GetReal(\"Pick a number for square root\",minimum=0)\nsquare_root=math.sqrt(num)\nprint \"The square root of your number is {}\".format(square_root)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 84,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\ndef FindMySquareRoot():\n    num=rs.GetReal(\"Pick a number for square root\",minimum=0)\n    if num !=None:\n        square_root=math.sqrt(num)\n        print \"The square root of your number is {}\".format(square_root)\n        return square_root\n    else:\n        print \"Invalid input\"\n        return\nFindMySquareRoot()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 84,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\ndef FindMySquareRoot(num):\n    return math.sqrt(num) \n        \ndef GetNumberForSqrt():\n    num=rs.GetReal(\"Pick a number for square root\",minimum=0)\n    if num != None:\n        square_root=FindMySquareRoot(num)\n        print \"The square root of your number is {}\".format(square_root)\n    else:\n        print \"Invalid input\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 84,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na=0\nb=0\nc=0\nd=0\ne=0\nf=5.02315116973\n\nvertline = \"_Line w{:.11f},{:.11f},{:.11f} {:.11f},{:.11f},{:.11f} \".format(a,b,c,d,e,f)\nrs.Command(vertline)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 41,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n#plane (just for the example)\nplane=rs.WorldYZPlane()\n#create the transform - you need a point on the plane plus its normal\nxform=rs.XformMirror(plane.Origin, plane.Normal)\n#now, transform the objects using the transform you created:\nmirr_objs=rs.TransformObjects(objIDs,xform,copy=True) #or False",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 59,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\n\n# enter your numbers\nheight=rs.GetReal(\"Final Deck Height\",54)\nwidth=rs.GetReal(\"Width: \",48)\nmaxrise=rs.GetReal(\"Maximum Rise per Step\",7.25)\n\n# find amount of steps\ntreads=math.ceil(height/maxrise)\n\n# find the rise per step\nrise=height/treads\n\n# overall length (not counting the 1/4\" tread nose)\nlength=(treads-1)*11\n\n\n# draw the bottom riser.. it needs to be 1.5\" smaller than the rest\nbrise=rise-1.5\nrs.Command(\"_Box 0 \"+str(width)+\",1.5 \"+str(brise))\n\n# draw the other risers.\nrx=1.5 #leave room for the cap which will be drawn at x=0\nry=11.0\nrw=width-3 #side caps will add the other 3 inches\nrd=1.5\n\nRiserString = \"_Box w{:.12f},{:.12f},{:.12f} {:.12f} {:.12f} {:.12f} \".format(rx,ry,brise,rw,rd,rise)\nrs.Command(RiserString)\nrs.Command(\"_SelNone _SelLast \")\n\n#Array riser.. 2 less than amount of steps since the top step is the deck and the bottom riser is custom\nRiserArray = \"_ArrayLinear {:.12f} w{:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f}\".format(treads-2,rx,ry,brise,rx,ry+11,rise+brise)\nrs.Command(RiserArray)\nrs.Command(\"_SelAll _Group \")\n\n#draw bottom tread.\n\nrs.Command(\"_Polyline 0,-.25,\"+str(brise)+\" r0,1.75,0 r1.5,0,0 r0,9.5,0 r\"+str(width-3)+\",0,0 r0,-9.5,0 r1.5,0,0 r0,-1.75,0 0,-.25,\"+str(brise)+\" _enter\")\nrs.Command(\"_SelLast\")\nrs.Command(\"_ExtrudeCrv Solid=yes DeleteInput=yes 1.5 \")\n\n\n#draw treads..\nty=10.75\ntd=11.25\nTreadString = \"_Box w{:.12f},{:.12f},{:.12f} {:.12f} {:.12f} {:.12f} \".format(rx,ty,brise+rise,rw,td,rd)\nrs.Command(TreadString)\nrs.Command(\"_SelNone _SelLast \")\n\n#array tread.. one less than amount of steps.. deck = last step\nTreadArray = \"_ArrayLinear {:.12f} w{:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f}\".format(treads-2,rx,0.0,brise,rx,11.0,rise+brise)\nrs.Command(TreadArray)\n\n\n#STRINGERS\n\nslope=math.atan(rise/11)\nslopeDegree=math.degrees(slope)\noppSlope=math.radians(90-slopeDegree)\n\n#vertical width of stringer (2x10stringer)\nvws=9.25/math.sin(oppSlope)\n#vertical width of stringer minus bottom riser\nbvws=vws-brise\n\n\n#vertical length at top/back of stringer\nvts=vws-(9.5*math.tan(slope))\n\n\n#length of stringer's bottom edge\nbes=bvws/math.tan(slope)\n\nrs.Command(\"_Polyline 1.5,1.5,0 1.5,1.5,\"+str(brise)+\" r0,11,0 _Enter\")\nrs.Command(\"_Polyline 1.5,12.5,\"+str(brise)+\" r0,0,\"+str(rise)+\" r0,11,0 r0,0,0 _Enter\")\nrs.Command(\"_SelLast\")\n\n#Array last polyline.. leave the top one out.. it's shorter.\nStringerArray = \"_ArrayLinear {:.12f} w{:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f}\".format(treads-3,1.5,12.5,brise,1.5,23.5,brise+rise)\nrs.Command(StringerArray)\n\n#Draw top of stringer\ntsx=1.5\ntsy=1.5+((treads-2)*11)\ntsz=brise+(rise*(treads-3))\n\nTopPiece = \"_Polyline w{:.12f},{:.12f},{:.12f} {},{:.12f},{:.12f} {},{:.12f},{:.12f} {},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {}\".format(tsx,tsy,tsz,\"r0\",0.0,rise,\"r0\",9.5,0.0,\"r0\",0.0,-(vts),tsx,1.5+bes,0.0,tsx,1.5,0.0, \"_Enter\")\nrs.Command(TopPiece)\n\n\nrs.Command(\"_SelCrv _Join\")\nrs.Command(\"_ExtrudeCrv Solid=yes DeleteInput=yes 1.5 \")\nrs.Command(\"_SelLast\")\nrs.Command(\"_Mirror copy=yes \"+str(width/2)+\",0 \"+str(width/2)+\",1 \")\n\n\n\n#STRINGER CAP\n\n#vertical width of cap (2x12cap)\nvwc=11.25/math.sin(oppSlope)\nvwcd=vwc-vws\nttz=((treads-1)*rise)-1.5\nbotgap=((11*(treads-1))-bes)-1.5\ntcz=math.tan(slope)*botgap\n\ncapline= \"_Polyline w{:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {}\".format(0.0,1.5,0.0,0.0,bes+1.5,0.0,0.0,length,tcz,0.0,length,tcz+vwc,0.0,1.5,brise+vwcd,0.0,1.5,0.0,\"_Enter\")\nrs.Command(capline)\n\nrs.Command(\"_SelLast\")\nrs.Command(\"_ExtrudeCrv Solid=yes DeleteInput=yes 1.5 \")\nrs.Command(\"_SelLast\")\nrs.Command(\"_Mirror copy=yes \"+str(width/2)+\",0 \"+str(width/2)+\",1 \")\n\n\n#WALL\n\n#leave square ends instead of long bevels on the plates\n#Floor Plate\nfpgap=1.5/math.tan(slope)\nfpy=bes+1.5+fpgap\n\nfloorplate=\"_Box {:.12f},{:.12f},{:.12f} {:.12f} {:.12f} {:.12f} \".format(0.0,length,0.0,3.5,-(length-fpy),1.5)\nrs.Command(floorplate)\n\nrs.Command(\"_SelLast\")\nrs.Command(\"_Mirror copy=yes \"+str(width/2)+\",0 \"+str(width/2)+\",1 \")\n\n\n#Top Plate\ntpgap=1.5/math.sin(slope)\ntpy=fpy+tpgap\ntpty=tpy-(math.sin(slope)*1.5)\ntptz=1.5+(math.cos(slope)*1.5)\ntpblen=1.5/math.sin(oppSlope)\n\n\ntopplate=\"_Polyline {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {}\".format(0.0,tpy,1.5,0.0,length,tcz-tpblen,0.0,length,tcz,0.0,tpty,tptz,0.0,tpy,1.5,\"_Enter\")\nrs.Command(topplate)\n\nrs.Command(\"_SelLast\")\nrs.Command(\"_ExtrudeCrv Solid=yes DeleteInput=yes 3.5 \")\nrs.Command(\"_SelLast\")\nrs.Command(\"_Mirror copy=yes \"+str(width/2)+\",0 \"+str(width/2)+\",1 \")\n\n\n#Studs\n\nsang=1.5*math.tan(slope) #difference between backZ and frontZ\n\n#back stud\nbsz=tcz-tpblen\nbackstd=\"_Polyline {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {:.12f},{:.12f},{:.12f} {}\".format(0.0,length,1.5,0.0,length,bsz,0.0,length-1.5,bsz-sang,0.0,length-1.5,1.5,0.0,length,1.5,\"_Enter\")\nrs.Command(backstd)\n\nrs.Command(\"_SelLast\")\nrs.Command(\"_ExtrudeCrv Solid=yes DeleteInput=yes 3.5 \")\nrs.Command(\"_SelLast\")\nrs.Command(\"_Mirror copy=yes \"+str(width/2)+\",0 \"+str(width/2)+\",1 \")\n\n\n#other studs.. #selLast gets the back stud on the other side.. array then cut? ask someone how to keep track of objects for later use\n\n#number of studs\nstuds=(math.ceil(length/16))-1\n\nrs.Command(\"_SelLast\")\nrs.Command(\"_Copy 0,0,0 0,.75,0 _Enter\")\nrs.Command(\"_SelLast\")\n\nrs.Command(\"_ArrayLinear \"+str(studs)+\" 0,0,0 0,-16,0 \")\nrs.Command(\"_Delete _SelLast\")\n\n#wirecutting makes it switch to wireframe mode.. redraw switch seems to stop it\nrs.EnableRedraw(False)\nrs.Command(\"_-WireCut line=yes 0,\"+str(length)+\",\"+str(bsz)+\" 0,\"+str(tpy)+\",1.5 Direction=X _Enter _Enter\")\nrs.Command(\"_SelLast\")\nrs.Command(\"_Mirror copy=yes \"+str(width/2)+\",0 \"+str(width/2)+\",1 \")\nrs.Command(\"_SelAll _ShrinkTrimmedSrf _SelNone\")\n\nrs.EnableRedraw(True)\n\n\nprint (\"LENGTH= \"+str(length))",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 48,
+      "is_solution": false
+    },
+    {
+      "code": "## Stair design by jeff hammond.. meant to be used in inches using standard dimensional lumber (2bys).. feel free to drive a truck up these things- they'll hold.. but hey, no liabilty on my part etc...\n\nimport rhinoscriptsyntax as rs\nimport math\n\nrs.AddGroup(\"Risers\")\nrs.AddGroup(\"Treads\")\nrs.AddGroup(\"Stringers\")\nrs.AddGroup(\"Caps\")\nrs.AddGroup(\"Walls\")\n\nheight=rs.GetReal(\"Final Deck Height\",54)\nwidth=rs.GetReal(\"Width: \",48)\nmaxrise=rs.GetReal(\"Maximum Rise per Step\",7.25, minimum=2, maximum=15)\n\n# find amount of steps\ntrdNum= int(math.ceil(height/maxrise))\n\n# find the rise per step\nrise=height/trdNum\n\nbt= 1.5 #board thickness\nbw= 11.25 #2x12 width\nbw2 = 9.25 #2x10 width\nrx= 1.5 #x position of risers\nrw= width - 1.5 #riser pos on x\n\nlength= (trdNum-1)*11\nbrise = rise -1.5\nslope= math.atan(rise/11)\nslopeDegree= math.degrees(slope)\nmoveVec=rs.coerce3dvector([0,11,rise])\n\n#Loop for arraying along slope\ndef Loupe(board,group):\n    for i in range(1,trdNum-2):\n        copy=rs.CopyObject (board,i*moveVec)\n        rs.AddObjectToGroup(copy,group)\n\ndef Mirror(mList):\n    plane=rs.WorldYZPlane()\n    xform=rs.XformMirror([width/2,0,0], plane.Normal)\n    mirr_objs=rs.TransformObjects(mList,xform,copy=True)\n\ndef RiserArray():\n    #bottom riser\n    bRiser= rs.AddBox([[0,0,0],[width,0,0],[width,bt,0],[0,bt,0],\n                       [0,0,brise],[width,0,brise],[width,bt,brise],[0,bt,brise]])\n\n    #second step then array\n    r1z= brise + rise #bottm riser + first riser height\n    Riser= rs.AddBox([[rx,11,brise],[rw,11,brise],[rw,12.5,brise],[rx,12.5,brise],\n                      [rx,11,r1z],[rw,11,r1z],[rw,12.5,r1z],[rx,12.5,r1z]])\n    rs.AddObjectsToGroup([Riser,bRiser], \"Risers\")\n\n    Loupe(Riser,\"Risers\")\nRiserArray()\n\ndef TreadArray():\n    b= brise\n    w= width\n    c= brise+ rise\n    d= c+bt\n    y= 10.75\n    \n    tr1pl= rs.AddPolyline([[0,-.25,b],[0,1.5,b],[1.5,1.5,b],[1.5,11,b],\n                           [w-1.5,11,b],[w-1.5,1.5,b],[w,1.5,b],[w,-.25,b],[0,-.25,b]])\n    tr1= rs.ExtrudeCurveStraight (tr1pl, (0,0,0), (0,0,bt))\n    rs.CapPlanarHoles(tr1)\n    rs.DeleteObject(tr1pl)\n    rs.ShrinkTrimmedSurface(tr1)\n    \n    Tread= rs.AddBox([[rx,y,c],[rw,y,c],[rw,22,c],[rx,22,c],\n                      [rx,y,d],[rw,y,d],[rw,22,d],[rx,22,d]])\n    rs.AddObjectsToGroup([tr1,Tread],\"Treads\")\n    \n    Loupe(Tread,\"Treads\")\nTreadArray()\n\ndef Stringers():\n    vWidth= bw2/math.cos(slope)\n    stlen= (length/math.cos(slope))+12\n    rotCp= rs.coerce3dpoint([0,1.5,0])\n    rotVec= rs.coerce3dvector([1,0,0])\n    movVec= rs.coerce3dvector([0,0,-(vWidth-brise)])\n\n    rawStringer = rs.AddBox([[1.5,0,0],[3,0,0],[3,stlen,0],[1.5,stlen,0],\n                             [1.5,0,bw2],[3,0,bw2],[3,stlen,bw2],[1.5,stlen,bw2]])\n    rawCap =rs.AddBox([[0,0,0],[bt,0,0],[bt,stlen,0],[0,stlen,0],\n                       [0,0,bw],[bt,0,bw],[bt,stlen,bw],[0,stlen,bw]])\n    rs.RotateObjects ([rawStringer,rawCap], rotCp ,slopeDegree, axis=rotVec, copy=False)\n    rs.MoveObjects ([rawStringer,rawCap], movVec)\n    bdlist= [rawStringer,rawCap]\n\n    ## cutters ##\n    b=brise\n    cx1= -6\n    cx2= 6\n    cy=length\n    cz= 16\n    cz2= height +cz\n\n    flrCut= rs.AddBox([[cx1,-12,0],[cx2,-12,0],[cx2,cy,0],[cx1,cy,0],\n                       [cx1,-12,-cz],[cx2,-12,-cz],[cx2,cy,-cz],[cx1,cy,-cz]])\n    fntCut= rs.AddBox([[cx1,1.5,0],[cx1,-cy,0],[cx2,-cy,0],[cx2,1.5,0],\n                       [cx1,1.5,cz],[cx1,-cy,cz],[cx2,-cy,cz],[cx2,1.5,cz]])\n    bckCut= rs.AddBox([[cx1,length,0],[cx2,length,0],[cx2,length+cy,0],[cx1,length+cy,0],\n                       [cx1,length,cz2],[cx2,length,cz2],[cx2,length+cy,cz2],[cx1,length+cy,cz2]])\n    stpCut= rs.AddBox([[1.5,0,b],[cx2,0,b],[cx2,12.5,b],[1.5,12.5,b],\n                       [1.5,0,b+cz],[cx2,0,b+cz],[cx2,12.5,b+cz],[1.5,12.5,b+cz]])\n\n    cutlist= [flrCut,fntCut,bckCut,stpCut]\n    \n    for i in range(1,trdNum-1):\n        stpCutCopy= rs.CopyObjects(stpCut,i*moveVec)\n        cutlist.append(stpCutCopy)\n    \n    tempMove1= rs.coerce3dvector([-1,0,0])\n    tempMove2= rs.coerce3dvector([1,0,0])\n    rs.MoveObject (rawCap, tempMove1)\n    cuts= rs.BooleanDifference (bdlist,cutlist,delete_input=True)\n    Stringer=cuts[0]\n    Cap=cuts[1]\n    rs.ShrinkTrimmedSurface(Stringer)\n    rs.ShrinkTrimmedSurface(Cap)\n    rs.MoveObject (Cap, tempMove2)\n    rs.AddObjectToGroup(Stringer,\"Stringers\")\n    rs.AddObjectToGroup(Cap,\"Caps\")\n    mList= [Stringer, Cap]\n    Mirror (mList)\nStringers()\n\ndef Walls():\n    vWidth= bw2/math.cos(slope)\n    q= vWidth-brise+1.5\n    fpy= (q/math.tan(slope))+1.5\n    tpy1= (1.5/math.sin(slope))+fpy\n    tpy2= tpy1+((length-tpy1)/math.cos(slope))\n    tpy3= tpy2+ (1.5* math.tan(slope))\n    bsy = length-1.5\n    h= height\n    l= length\n\n    botPlate= rs.AddBox([[0,fpy,0],[3.5,fpy,0],[3.5,l,0],[0,l,0],\n                         [0,fpy,1.5],[3.5,fpy,1.5],[3.5,l,1.5],[0,l,1.5]])\n    topPlate= rs.AddBox([[0,tpy1,1.5],[3.5,tpy1,1.5],[3.5,tpy2,1.5],[0,tpy2,1.5],\n                         [0,tpy1,3],[3.5,tpy1,3],[3.5,tpy3,3],[0,tpy3,3]])\n    rotCp= rs.coerce3dpoint([0,tpy1,1.5])\n    rotVec= rs.coerce3dvector([1,0,0])\n    rs.RotateObject(topPlate, rotCp, slopeDegree, rotVec, False )\n\n    stud= rs.AddBox([[0,l,1.5],[0,bsy,1.5],[3.5,bsy,1.5],[3.5,l,1.5],\n                     [0,l,h],[0,bsy,h],[3.5,bsy,h],[3.5,l,h]])\n    rs.AddObjectsToGroup([botPlate, topPlate], \"Walls\")\n    \n    fpl= length- fpy\n    stdNum= int((math.ceil((fpl-4)/16))-1)\n    stdVec1= rs.coerce3dvector([0,-15.25,0])\n    stdVec2= rs.coerce3dvector([0,-16,0])\n    stud2=rs.CopyObject(stud,stdVec1)\n    stdList = [stud,stud2]\n\n    for i in range(1,stdNum):\n        copy= rs.CopyObject(stud2,i*stdVec2)\n        stdList.append(copy)\n\n    stdz= 1.5+((length-tpy1)*math.tan(slope))\n    stdCutter= rs.AddBox([[-3,tpy1,1.5],[6,tpy1,1.5],[6,l,stdz],[-3,l,stdz],\n                          [-3,tpy1,h],[6,tpy1,h],[6,l,h],[-3,l,h]])\n    mList= rs.BooleanDifference(stdList, stdCutter, True)\n    rs.AddObjectsToGroup((mList), \"Walls\")\n    mList.extend([topPlate, botPlate])\n    Mirror(mList)\nWalls()",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 61,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\ndef Loft():\n    crvlist=[]\n    for i in range(0,10):\n        ptlist= []\n        y=i*50\n\n        for i in range(0,10):\n            rand=random.uniform(0,50)\n            pt= ([i*50, y, rand])\n            pt= rs.AddPoint(pt)\n            ptlist.append(pt)\n\n        crv= rs.AddCurve(ptlist,2)\n        crvlist.append(crv)\n        rs.DeleteObjects(ptlist)\n    return crvlist\n\ncrvlist= Loft()\nrs.AddLoftSrf(crvlist)\nrs.HideObjects(crvlist)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 67,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 93,
+  "views": 8584
+}

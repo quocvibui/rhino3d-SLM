@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/create-mesh-from-brep.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/py/create-mesh-from-brep.py",
+  "instruction": "Create mesh from brep",
+  "code": "import Rhino\nfrom Rhino.Geometry import *\nfrom Rhino.Input import RhinoGet\nfrom Rhino.Commands import Result\nfrom Rhino.DocObjects import ObjectType\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, objRef = RhinoGet.GetOneObject(\"Select surface or polysurface to mesh\", True, ObjectType.Surface | ObjectType.PolysrfFilter)\n    if rc != Result.Success:\n        return rc\n    brep = objRef.Brep()\n    if None == brep:\n        return Result.Failure\n\n    jaggedAndFaster = MeshingParameters.Coarse\n    smoothAndSlower = MeshingParameters.Smooth\n    defaultMeshParams = MeshingParameters.Default\n    minimal = MeshingParameters.Minimal\n\n    meshes = Mesh.CreateFromBrep(brep, smoothAndSlower)\n    if meshes == None or meshes.Length == 0:\n        return Result.Failure\n\n    brepMesh = Mesh()\n    for mesh in meshes:\n        brepMesh.Append(mesh)\n    doc.Objects.AddMesh(brepMesh)\n    doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trying-to-expand-the-easy-cut-script-with-area/182888",
+  "topic_id": 182888,
+  "title": "Trying to expand the Easy_cut script with area",
+  "question": "I’m trying to add two measurements /surface area and boundingbox area)to the Easy_Cut Python script, but I get a formatting error \"ValueError: Unknown format code ‘f’ for object of type ‘str’ \"…I may have to add stuff to the second sq bracket in the return, but what…?\n\n\nAny ideas as to how I fix this?..\n\nanders\n\n\nHere are the critical snippets:\n\n\n\n\n###added code\n    actArea=g.AreaMassProperties.Compute(face) # Calculate actual surface area\n    bbArea=width * length # calculate bounding box area\n###end of added code\n###return [[length,width,thickness], [xVec,yVec,faceNor]]\n    return [[length,width,thickness,actArea,bbArea], [xVec,yVec,faceNor]] ###ActArea & bbArea has been added \n    ### Do I need to add something in the second square bracket as well?\n\nclass attr:\n    def __init__(self, name, isEditable, isOn, valType, exportPos):\n        self.name = name\n        self.isEditable = isEditable\n        self.isOn = isOn\n        self.valType = valType\n        self.exportPos = exportPos\n\nATTRS = (attr(\"ID#\",True,True,int,1), #Converted from N to ID#\nattr(\"Name\",True,True,str,0), #Where does it come from...manually entered in user texts?\nattr(\"Length\",False,True,int,2),\nattr(\"Width\",False,True,int,3),\nattr(\"Thickness\",False,True,int,4),\nattr(\"Texture\",True,True,str,-1), \nattr(\"actArea\",True,True,str,6), #changed to actural area calculated above\nattr(\"bbArea\",True,True,str,7), #changed to boundingbox area calculated above\nattr(\"Edge_L\",True,True,str,8),\nattr(\"Edge_W\",True,True,str,9),\nattr(\"Layer\",False,True,str,10),\nattr(\"Comment\",True,True,str,11)\n)\n\n\n\n\n\n\nand here:\n\n\n\n\n\n\n self.dims, self.lcs = computeDims(self.obj)\n\n    self.Length = format(self.dims[0],'.' + str(DIM_PRECISION) + 'f')\n    self.Width = format(self.dims[1],'.' + str(DIM_PRECISION) + 'f')\n    self.Thickness = format(self.dims[2],'.' + str(DIM_PRECISION) + 'f')\n    self.Area = format(self.dims[3],'.' + str(DIM_PRECISION) + 'f') # I've added the actual area....and get a formatting error when I run the script (...",
+  "code_blocks": [
+    {
+      "code": "objRef = Rhino.DocObjects.ObjRef(obj)\nbrep = objRef.Geometry()    \nedges = list(brep.Edges)\nedges.sort(key=lambda edge: edge.GetLength(), reverse=True)\nedge = edges[0]\nadFaces = list(edge.AdjacentFaces())\nfaces = list(brep.Faces)\nadFaces = [faces[i] for i in adFaces]\nadFaces.sort(key=lambda face:face.GetSurfaceSize()[1]*face.GetSurfaceSize()[2],reverse=True)\nface = adFaces[0]",
+      "language": "python",
+      "author": "anders",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 323
+}

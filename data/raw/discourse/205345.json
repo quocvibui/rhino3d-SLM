@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/displayconduit-hide-objects-from-user-interaction-osnaps-etc/205345",
+  "topic_id": 205345,
+  "title": "DisplayConduit: Hide Objects from User Interaction (Osnaps, etc.)?",
+  "question": "Hi everyone!!!\n\n\nSmall presentation for my first post: I’m Mario, an Italian architect working in France, Marseille!\n\nI’m currently developing a custom plugin in C# using RhinoCommon to better handle object visibility following some personal rules.\n\n\nI’m using a \nDisplayConduit\n to selectively hide some object types in specific viewports by setting \nCullObject = true\n in the \nObjectCulling\n method. This successfully prevents the objects from being drawn in those viewports. I’ve already blocked selection using custom filters which works well. I know that the display conduit does not really hide the object from the scene, it just prevents drawing.\n\n\nSo now I’m facing an issue and i cannot find a workaround:\n\n\nEven though objects are culled and cannot be selected, \nthey still participate in object snaps and smart tracking\n. It is still possible to snap to points on these “hidden” objects.\n\n\nI understand that object visibility controlled via \nHide()\n or document visibility flags will resolve this, but I need to keep these objects visible in some viewports and hidden in others…so the standard visibility flags are not suitable in this case.\n\n\nIs there a way to make an object completely ignored (not drawn, not selectable, not snappable) in a specific viewport via DisplayConduit or another technique? This filter should apply just to the active Viewport\n\n\nAny help or insight would be greatly appreciated,\n\n\nMario",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport System\n\ndef TogglePerViewObjVisibility():\n    # makes object visible only in a certain view\n    obj_id = rs.GetObject(\"Select object in desired view\", 0, False, False)\n    if not obj_id: return\n    \n    rh_obj = rs.coercerhinoobject(obj_id, True, True)\n    view_id = scriptcontext.doc.Views.ActiveView.ActiveViewportID\n    if rh_obj.Attributes.ViewportId == System.Guid.Empty:\n        rh_obj.Attributes.ViewportId = view_id\n    else:\n        rh_obj.Attributes.ViewportId = System.Guid.Empty\n\n    rh_obj.CommitChanges()\n    \nTogglePerViewObjVisibility()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 124
+}

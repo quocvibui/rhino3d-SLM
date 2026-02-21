@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/handle-paste-command-with-getpoint-class-the-getbaseclass-getstring/120170",
+  "topic_id": 120170,
+  "title": "Handle _Paste command with GetPoint class (the GetBaseClass -> GetString,...)",
+  "question": "Hello,\n\n\nI spend a bunch of time trying to collect data send by _Paste command during the execution of the GetPoint class into a loop. The loop is working by entering values manually, but not with the _Paste command.\n\nMy goal is to immit the _Points command.\n\nSee the capture bellow.\n\n\n\n\nI’ve tried almost every GetBaseClass methods unsuccessfully. (AcceptNothing, AcceptString, EnableTransparentCommands, AcceptEnterWhenDone, …)\n\n\nI’ve tried with :\n\nRhino.Input.RhinoGet.GetPoint object\n\nRhino.Input.Custom.GetPoint object\n\nrhinoscriptsyntax.getPoints → which use the RhinoCommon API as well\n\n\nI’m all available to discuss this issue, thank you so much for your help.\n\n\nThe code trials down here:\n\n\n\n\n#with\n RhinoGet\n\nstring = “enter points”\n\nimport rhinoscriptsyntax as rs\n\nimport Rhino.Geometry.Point3d as Point3d\n\nimport clr\n\nimport Rhino\n\noutPoint = clr.StrongBox\nPoint3d\n\npoints = \n\nbool = Rhino.Input.RhinoGet.GetPoint(string, True, outPoint)\n\nwhile bool == Rhino.Commands.Result.Success:\n\npoint = outPoint.ToString()\n\nprint(point)\n\npoints.append(point)\n\nbool = Rhino.Input.RhinoGet.GetPoint(string, True, outPoint)\n\nrs.AddPoints(points)\n\n\n\n\n\n\n#with\n Input.Custom\n\nstring = “enter points”\n\ngs = Rhino.Input.Custom.GetPoint()\n\ngs.SetCommandPrompt(string)\n\n# gs.SetDefaultString(string)\n\ngs.AcceptEnterWhenDone(True)\n\ngs.AcceptNothing(True)\n\ngs.AcceptString(True)\n\ngs.EnableTransparentCommands(True)\n\ngs.Get()\n\n# gs.GetLiteralString()\n\npoints = [gs.StringResult().Trim()]\n\nwhile gs.CommandResult() == Rhino.Commands.Result.Success:\n\ngs.Get()\n\nprevString = gs.StringResult().Trim()\n\nvalues = prevString.split(“,”)\n\nif len(values) == 3:\n\npoints.append(map(float, values))\n\nrs.AddPoints(points)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_point_paster():\n    points = []\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Location of point\")\n    while (True):\n        gp.Get()\n        if (gp.CommandResult() != Rhino.Commands.Result.Success):\n            break\n        points.append(gp.Point())\n        gp.SetCommandPrompt(\"Location of point. Press Enter when done\")\n    \n    for pt in points:\n        print(pt)\n\nif __name__ == \"__main__\":\n    test_point_paster()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 880
+}

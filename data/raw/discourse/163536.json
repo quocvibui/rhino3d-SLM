@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cannot-escape-from-a-rhino-python-script/163536",
+  "topic_id": 163536,
+  "title": "Cannot escape from a Rhino Python script",
+  "question": "Hello,\n\nI am trying to have a function that allows the user to pick some points.  Maybe one point, maybe dozens.  I used the example located here as a starting point:\n\n\nRhino Guide Canceling a Python script in Rhino\n\n\nHere is the minimal example that shows the problem:\n\n\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n# Example: https://developer.rhino3d.com/guides/rhinopython/python-canceling-scripts/\n\ndef DotAtPickedPoints(Text, Layer):\n\n\tprint('Press the ESC key when finished')\n\n\tfor i in range(10):\n\t\tprint(i)\n\t\tif (sc.escape_test(False)):\n\t\t\tprint('Time to return')\n\t\t\treturn\n\n\t\tClicked = rs.GetPoint('Select a point to mark...')\n\t\tif Clicked != None:\n\t\t\tprint( type(Clicked) )\n\nDotAtPickedPoints('x', 'Default'\n\n\n\nBut I am obviously doing something wrong because pressing the escape key will never exit the function.  Limiting the loop number to ten was easier than killing Rhino with the task manager but will not be useful in the final script.\n\n\nBonus points: where do I find the documentation page on\n scriptcontext.escape_test()\n ?\n\n\nThank you for your help!\n\n\nMinimum Example.py\n (479 Bytes)",
+  "code_blocks": [
+    {
+      "code": "while True:\n        Clicked = rs.GetPoint('Select a point to mark...')\n        if Clicked is None:\n            break\n        else:\n            print(\"Point\")",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n# Example: https://developer.rhino3d.com/guides/rhinopython/python-canceling-scripts/\n\ndef DotAtPickedPoints(Text, Layer):\n\n\tprint('Press the ESC key when finished')\n\n\tfor i in range(10):\n\t\tprint(i)\n\t\tif (sc.escape_test(False)):\n\t\t\tprint('Time to return')\n\t\t\treturn\n\n\t\tClicked = rs.GetPoint('Select a point to mark...')\n\t\tif Clicked != None:\n\t\t\tprint( type(Clicked) )\n\nDotAtPickedPoints('x', 'Default'",
+      "language": "python",
+      "author": "Henry_Wede",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 323
+}

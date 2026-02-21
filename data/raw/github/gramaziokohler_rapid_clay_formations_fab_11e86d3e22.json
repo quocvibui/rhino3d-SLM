@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/gramaziokohler/rapid_clay_formations_fab/blob/9c884fe34a9e27ca0c8a4ed883a99197b209badd/src/rapid_clay_formations_fab/utils.py",
+  "repo": "gramaziokohler/rapid_clay_formations_fab",
+  "repo_stars": 1,
+  "repo_description": "python module for MAS DFAB Rapid Clay Formations",
+  "license": "MIT",
+  "filepath": "src/rapid_clay_formations_fab/utils.py",
+  "instruction": "********************************************************************************\nrapid_clay_formations_fab.utils\n********************************************************************************\n.....",
+  "code": "\"\"\"\n********************************************************************************\nrapid_clay_formations_fab.utils\n********************************************************************************\n.. currentmodule:: rapid_clay_formations_fab.utils\n\"\"\"\nfrom __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport compas.geometry as cg\n\ntry:\n    from typing import Any\nexcept ImportError:\n    pass\n\n\ndef wrap_list(list_, idx):  # type: (list, int) -> Any\n    \"\"\"Return value at index, wrapping if necessary.\n\n    Parameters\n    ----------\n    list_ : :class:`list`\n        List to wrap around.\n    idx : :class:`int`\n        Index of item to return in list.\n\n    Returns\n    -------\n    :class:`list` element\n        Item at given index, index will be wrapped if necessary.\n    \"\"\"\n    return list_[idx % len(list_)]\n\n\ndef ensure_frame(frame_like):  # type: (Any) -> cg.Frame\n    \"\"\"Convert geometry objects to :class:`compas.geometry.Frame`.\n\n    Parameters\n    ----------\n    frame_like\n        Frame like object, currently :class:`compas.geometry.Frame`,\n        :class:`compas.geometry.Plane`, :class:`compas.geometry.Point`,\n        :class:`Rhino.Geometry.Plane`, or :class:`Rhino.Geometry.Point3d`.\n\n    Returns\n    -------\n    :class:`compas.geometry.Frame`\n\n    Notes\n    -----\n    If a point is given the point is used as the frames origin and the X and\n    Y will be the X and Y unit vectors.\n\n    :class:`compas.geometry.Plane` is defined only by origin and normal, the\n    X and Y axis will be chosen arbitrarely,\n    see :meth:`compas.geometry.Frame.from_plane`.\n    \"\"\"\n    if isinstance(frame_like, cg.Frame):\n        return frame_like\n\n    if isinstance(frame_like, cg.Plane):\n        return cg.Frame.from_plane(frame_like)\n\n    if isinstance(frame_like, cg.Point):\n        return cg.Frame(frame_like, [1, 0, 0], [0, 1, 0])\n\n    try:  # try to compare to Rhino objects\n        import Rhino.Geometry as rg\n        from rapid_clay_formations_fab.rhino import rgplane_to_cgframe\n        from rapid_clay_formations_fab.rhino import rgpoint_to_cgpoint\n\n        if isinstance(frame_like, rg.Plane):\n            return rgplane_to_cgframe(frame_like)\n        if isinstance(frame_like, rg.Point3d):\n            pt = rgpoint_to_cgpoint(frame_like)\n            return cg.Frame(pt, [1, 0, 0], [0, 1, 0])\n    except ImportError:\n        pass\n\n    raise TypeError(\n        \"Can't convert {} to compas.geometry.Frame\".format(type(frame_like))\n    )\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

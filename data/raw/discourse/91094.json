@@ -1,0 +1,86 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rotate-text-object-in-a-circle/91094",
+  "topic_id": 91094,
+  "title": "Rotate text object in a circle",
+  "question": "Hi,\n\nI’ve create a list of text objects in a circle, and now I want to ‘orient’ them towards the center of that circle.\n\nAs inputs I have:\n\n\n\n\nx\n = text entity list from the ‘Text 3D Advanced’ component.\n\n\npts\n = list of center points for the text objects\n\n\nangle\n = list of angles in degrees between the X axis and the vector between center of circle and each text object\n\n\n\n\nThe script is:\n\n\nimport rhinoscriptsyntax as rs\n\nfor i in range(0,len(x)):\n    pt = pts[i]\n    deg = float(angle[i])\n    rs.RotateObject(i, pt, deg)\n\n\n\nI get the following error:\n\n\nRuntime error (TypeErrorException): iteration over non-sequence of type int\n\nTraceback:\n  line 1795, in TransformObjects, \"C:\\Users\\yafim\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\object.py\"\n  line 1498, in RotateObjects, \"C:\\Users\\yafim\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\object.py\"\n  line 1466, in RotateObject, \"C:\\Users\\yafim\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\object.py\"\n  line 18, in script\n\n\n\nAny ideas what I’m doing wrong?\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npt_objs=rs.ObjectsByType(1)\npts=[rs.coerce3dpoint(pt_obj) for pt_obj in pt_objs]\ntext_objs=rs.ObjectsByType(512)\nctr=rs.coerce3dpoint([0,0,0])\nangles=[rs.Angle(ctr,pt)[0] for pt in pts]\n\nfor i in range(len(text_objs)):\n    rs.RotateObject(text_objs[i], pts[i], angles[i])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "ctr=rs.coerce3dpoint([0,0,0])\nangles=[rs.Angle(ctr,pt)[0] for pt in pts]\n\nfor i in range(len(x)):\n    rs.RotateObject(x[i], pts[i], angles[i])",
+      "language": "python",
+      "author": "yafimski",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "Runtime error (MissingMemberException): 'CustomTable' object has no attribute 'GetObjectList'\n\nTraceback:\n  line 1000, in ObjectsByType, \"C:\\Users\\yafim\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\selection.py\"\n  line 13, in script",
+      "language": "unknown",
+      "author": "yafimski",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n#generate 8 points in a specific order (centered at world 0)\npts=[]\npts.append(Rhino.Geometry.Point3d(50,0,0))\npts.append(Rhino.Geometry.Point3d(50,50,0))\npts.append(Rhino.Geometry.Point3d(0,50,0))\npts.append(Rhino.Geometry.Point3d(-50,50,0))\npts.append(Rhino.Geometry.Point3d(-50,0,0))\npts.append(Rhino.Geometry.Point3d(-50,-50,0))\npts.append(Rhino.Geometry.Point3d(0,-50,0))\npts.append(Rhino.Geometry.Point3d(50,-50,0))\n\n#generate text objects A-H in the same order, centered on pts\ntext_list=[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\"]\ntext_objs=[]\nfor i in range(len(pts)):\n    text_objs.append(rs.AddText(text_list[i],pts[i],10,justification=2+131072))\n    \n#generate the angles. Note that the rs.Angle function is based on world 0 -\n#elsewhere it will not work correctly, you need to calculate the angles differently\nctr=Rhino.Geometry.Point3d(0,0,0)\nangles=[rs.Angle(ctr,pt)[0] for pt in pts]\n\n#Now run the rotate part of the script\nfor i in range(len(text_objs)):\n    rs.RotateObject(text_objs[i], pts[i], angles[i])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npts = []\n\nfor i in range(0,len(texts)):\n    pts.append(rs.TextObjectPoint(texts[i]))\n\na = pts\n\nctr = rs.coerce3dpoint([0,0,0])\nangles = [rs.Angle(ctr,pt)[0] for pt in pts]\n\nfor i in range(len(texts)):\n    #print texts[i]\n    #print pts[i]\n    #print angles[i]\n    rs.RotateObject(texts[i], pts[i], angles[i])",
+      "language": "python",
+      "author": "yafimski",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "for i in range(len(pts)):\n    sc.doc = Rhino.RhinoDoc.ActiveDoc #required to manipulate the Rhino document\n    text_objs.append(rs.AddText(text_list[i],pts[i],10,justification=2+131072))\n    sc.doc = ghdoc #bring back editor to manipulate gh",
+      "language": "python",
+      "author": "yafimski",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "// will bake in this layer\n    var toBake = RhinoDocument.Layers.FindName(layerToBake);\n    string layername = RhinoDocument.Layers.CurrentLayer.Name;\n\n    Rhino.DocObjects.RhinoObject[] rhobjs = doc.Objects.FindByLayer(layername);\n\n    List<Curve> curves = new List<Curve>();\n    List<Point3d> origins = new List<Point3d>();\n\n\n\n    for (int i = 0; i < rhobjs.Length; i++)\n    {\n\n      GeometryBase geoBase = rhobjs[i].Geometry;\n      BoundingBox b = geoBase .GetBoundingBox(true);\n      origins.Add(b.Center);\n\n      Rhino.DocObjects.TextObject textobj = rhobjs[i] as Rhino.DocObjects.TextObject;\n      TextEntity textentity = textobj.Geometry as TextEntity;\n            \n      bool success = textobj.Geometry.Rotate(ToRadians(angles[i]), Vector3d.ZAxis, textentity.Plane.Origin);\n\n      if(success)\n      {\n\n\n        if(bake)\n        {\n          Rhino.DocObjects.ObjectAttributes att = new Rhino.DocObjects.ObjectAttributes ();\n\n          att.LayerIndex = toBake.LayerIndex;\n          att.ObjectColor = Color.DodgerBlue;\n          RhinoDocument.Objects.AddText(textentity, att);\n        }\n\n        // just for vis\n        var crv = textentity.Explode();\n\n        foreach (var item in crv)\n        {\n          curves.Add(item);\n\n\n        }\n      }\n    }\n\n\n\n    A = curves;\n    B = origins;\n  }\n\n  // <Custom additional code> \n  public static double ToRadians(double degrees)\n  {\n    return degrees * Math.PI / 180;\n  }",
+      "language": "csharp",
+      "author": "rawitscher-torres",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "var doc = Rhino.RhinoDoc.ActiveDoc;\nif (doc == null)\n{\n    Rhino.RhinoApp.WriteLine(\"No active document found.\");\n    return null;\n}\n\n// Duplicate the current dimension style to modify it\nvar style = doc.DimStyles.Current.Duplicate();\n\n// Modify the font size\nstyle.TextHeight = fontSize;\n\n// Set a custom font\nstyle.Font = new Font(\"Arial\", Font.FontWeight.Bold, Font.FontStyle.Upright, false, false);\nstyle.TextHorizontalAlignment = TextHorizontalAlignment.Center;\nstyle.TextVerticalAlignment = TextVerticalAlignment.Middle;\n\nstyle.TextOrientation = TextOrientation.InPlane;\n\n\n// **Rotate the plane before creating text**\ndouble rotationRadians = RhinoMath.ToRadians(rotationDegree);\nplane.Rotate(rotationRadians, plane.ZAxis);\n\n// Create the TextEntity with the rotated plane\nvar te = TextEntity.Create(text, plane, style, false, 100, 0); // Set rotation to 0 since plane is already rotated\n\nif (!te.IsValid)\n{\n    Rhino.RhinoApp.WriteLine(\"Invalid TextEntity created.\");\n    return null;\n}\n\n\nreturn te;",
+      "language": "csharp",
+      "author": "Bakuri_Gogua",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfor i in range(0,len(x)):\n    pt = pts[i]\n    deg = float(angle[i])\n    rs.RotateObject(i, pt, deg)",
+      "language": "python",
+      "author": "yafimski",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 20,
+  "views": 2757
+}

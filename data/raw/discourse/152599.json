@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-split-returns-runtime-error-multiple-targets-could-match/152599",
+  "topic_id": 152599,
+  "title": "Brep.Split returns Runtime Error: Multiple targets could match",
+  "question": "Heya!\n\n\nI’m quite new to scripting, trying to work with rhinocommon as exclusively as I can.\n\nNow I’m creating a circle in the center of a Brep and then trying to extend lines to cut that Brep, the split command returns the Runtime Error:\n\n\nRuntime error (ArgumentTypeException): Multiple targets could match: Split(IEnumerable[Curve], float), Split(IEnumerable[Brep], float)\n\nTraceback:\n  line 30, in script\n\n\n\nThis is the code:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n#Find Centroid and Circle to Curve\ncentroidPlot = rg.AreaMassProperties.Compute(srfs).Centroid\ncentCirc = rg.Circle(centroidPlot, 2)\ncircNurb = rg.Circle.ToNurbsCurve(centCirc)\ncircNurb.Domain = rg.Interval(0, 1)\nrep = rg.NurbsCurve.PointAt(circNurb, 0.5)\n\n#Domain\ndomain = rg.Interval(0, 1)\n\ncircDiv = rg.Curve.DivideByCount(circNurb, 10, True)\n\ndivPts = []\ndivLines = []\n\nfor pt in circDiv:\n    divPt = rg.Curve.PointAt(circNurb, pt)\n    divPts.append(divPt)\n    divLine = rg.Line(centroidPlot, divPt)\n    divLines.append(divLine)\n\nfor srf in srfs:\n    rg.Brep.Split(srf, divLines, 0.001)\n\n\n\n\nThanks a lot!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n#Find Centroid and Circle to Curve\ncentroidPlot = rg.AreaMassProperties.Compute(srfs).Centroid\ncentCirc = rg.Circle(centroidPlot, 2)\ncircNurb = rg.Circle.ToNurbsCurve(centCirc)\ncircNurb.Domain = rg.Interval(0, 1)\nrep = rg.NurbsCurve.PointAt(circNurb, 0.5)\n\n#Domain\ndomain = rg.Interval(0, 1)\n\ncircDiv = rg.Curve.DivideByCount(circNurb, 10, True)\n\ndivPts = []\ndivLines = []\n\nfor pt in circDiv:\n    divPt = rg.Curve.PointAt(circNurb, pt)\n    divPts.append(divPt)\n    divLine = rg.Line(centroidPlot, divPt)\n    divLines.append(divLine)\n\nfor srf in srfs:\n    rg.Brep.Split(srf, divLines, 0.001)",
+      "language": "python",
+      "author": "l.zhitnik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 604
+}

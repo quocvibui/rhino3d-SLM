@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-getpoints-base-point-argument-not-hooked-up/140104",
+  "topic_id": 140104,
+  "title": "rs.GetPoints() - base_point argument not hooked up?",
+  "question": "I was playing around with something and I stumbled on this…  I looked at the code for \nrs.GetPoints()\n and although the method’s input arguments do include an optional argument \nbase_point\n (starting point), it doesn’t appear to be hooked up to anything else in the code.  Seems odd that nobody has discovered this yet?\n\n\nimage\n1360×619 58.4 KB\n\n\nHere is an image of the full \nrs.GetPoints()\n code in the editor, if I highlight the \nbase_point\n argument, you can see that the only other thing that gets highlighted is in the initial comment section:\n\n\nimage\n1444×1348 119 KB\n\n\nJust to confirm my finding after inspecting the code, I tested with this:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nstart_pt=Rhino.Geometry.Point3d(0,0,0)\npts=rs.GetPoints(True,base_point=start_pt)\n\n\n\nIf you run that, you can see that the first point pick can be anywhere, not just constrained to 0.\n\n\nWhile I’m here, I made the following request concerning rs.GetPoints() about a year ago, seems to have gone unanswered…\n\n\n\n\n\n\n\n\n\n\nrs.GetPoints() method - in_plane option is 'too constrained'\n \nScripting\n\n\n\n\n\n    The optional argument currently accepts only a Boolean value to constrain the points to the active CPlane (True) or not.  Methinks this is too limited - instead of a binary yes/no answer, why can’t this input be a plane - any plane - and not just an option to use the active CPlane or not.  It would add a lot to the flexibility of the method. \nI think the code could be modified to accommodate this without breaking existing scripts… \nCurrent excerpt: \n    if in_plane:\n        gp.ConstrainToConstru…",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef AddLine():\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Start of line\")\n    gp.Get()\n    if gp.CommandResult() != Rhino.Commands.Result.Success:\n        return\n\n    pt_start = gp.Point()\n\n    gp.SetCommandPrompt(\"End of line\")\n    gp.SetBasePoint(pt_start, False)\n    gp.DrawLineFromPoint(pt_start, True)\n    gp.Get()\n    if gp.CommandResult()  !=  Rhino.Commands.Result.Success:\n        return\n\n    pt_end = gp.Point()\n\n    v = pt_end - pt_start\n    if v.IsTiny(Rhino.RhinoMath.ZeroTolerance):\n        return\n\n    id = scriptcontext.doc.Objects.AddLine(pt_start, pt_end)\n    if id != System.Guid.Empty:\n        scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    AddLine()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef AddLine():\n    pt_start = Rhino.Geometry.Point3d(0,0,0)\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"End of line\")\n    gp.SetBasePoint(pt_start, False)\n    gp.DrawLineFromPoint(pt_start, True)\n    gp.Get()\n    if gp.CommandResult()  !=  Rhino.Commands.Result.Success:\n        return\n\n    pt_end = gp.Point()\n\n    v = pt_end - pt_start\n    if v.IsTiny(Rhino.RhinoMath.ZeroTolerance):\n        return\n\n    id = scriptcontext.doc.Objects.AddLine(pt_start, pt_end)\n    if id != System.Guid.Empty:\n        scriptcontext.doc.Views.Redraw()\nAddLine()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef GetPointsCustom1(message1=None, message2=None, base_point=None):\n    draw_lines=True #change later\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.DrawLineFromPoint(base_point,True)\n    if message1: gp.SetCommandPrompt(message1)\n    gp.SetBasePoint(base_point,False)\n    gp.EnableDrawLineFromPoint(True)\n    if base_point: rc=[base_point]\n    getres = gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success: return None\n    prevPoint = gp.Point()\n    rc.append(prevPoint)\n    if message2: gp.SetCommandPrompt(message2)\n    def GetPointDynamicDrawFunc( sender, args ):\n        if len(rc)>1:\n            c = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor\n            args.Display.DrawPolyline(rc, c)\n    if draw_lines: gp.DynamicDraw += GetPointDynamicDrawFunc\n    while True:\n        if draw_lines: gp.DrawLineFromPoint(prevPoint, True)\n        gp.SetBasePoint(prevPoint, True)\n        getres = gp.Get()\n        if getres==Rhino.Input.GetResult.Cancel: break\n        if gp.CommandResult()!=Rhino.Commands.Result.Success: return None\n        prevPoint = gp.Point()\n        rc.append(prevPoint)\n    return rc\n\ntest=GetPointsCustom1(base_point=Rhino.Geometry.Point3d(0,0,0))\nif test:\n    sc.doc.Objects.AddPolyline(test)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\npt_start = Rhino.Geometry.Point3d(0,0,0)\n\ngp = Rhino.Input.Custom.GetPolyline()\ngp.SetFirstPoint(pt_start)\nrc, polyline = gp.Get()\nif rc == Rhino.Commands.Result.Success:\n    sc.doc.Objects.AddPolyline(polyline)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nstart_pt=Rhino.Geometry.Point3d(0,0,0)\npts=rs.GetPoints(True,base_point=start_pt)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 509
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-script-for-renaming-layers-in-multiple-files-with-xlsx-tablesc/75504",
+  "topic_id": 75504,
+  "title": "Rhino Python Script for Renaming Layers in multiple files with .XLSX tablesc",
+  "question": "Hey all, I am new to Rhino Python and am looking for an easier way to do a painful task in Rhino. I am currently using Rhino 6 (we just upgraded from 5) to design aluminum ships. We need the ability to rename multiple layers (parent or child) to a specific name. I have been using the Python script I found from Steve Baer \n(FROM HERE)\nwhich works great if you only need to rename 1 layer. I have searched for days trying to piece this together and would love for someone to take a look and see if there is a better way. I have close to 500 “OldName” “NewName” instances in about 500 individual .3dm files.\n\n\nHere is my current working script…\n\n\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\ndef rename():\n    layerName = (\"OLDNAME\")\n\n    matchingLayers = [layer for layer in doc.Layers if layer.Name == layerName]\n\n    layerToRename = None\n    if len(matchingLayers) == 0:\n        return\n    if len(matchingLayers) == 1:\n        layerToRename = matchingLayers[0]\n    elif len(matchingLayers) > 1:\n        i = 0;\n        for layer in matchingLayers:\n            print \"({0}) {1}\".format(\n                i+1, matchingLayers[i].FullPath.replace(\"::\", \"->\"))\n            i += 1\n\n        selectedLayer = rs.GetInteger(\n            \"which layer?\", -1, 1, len(matchingLayers))\n        if selectedLayer == None:\n            return\n        layerToRename = matchingLayers[selectedLayer - 1]\n\n    layerName = (\"NEWNAME\")\n    layerToRename.Name = layerName\n    layerToRename.CommitChanges()\n    return\n\nif __name__ == \"__main__\":\n    rename()\n\n\n\nAfter this is done, I start it over with the next  “Old / New” names.\n\n\n\n\nI have an excel .xlsx file but can’t figure out how to get it to open, then lookup the correct old name and replace it with the correct new name.\n\n\n\n\nimage\n763×610 12.8 KB\n\n\n\n\nAs you can see below, our layer structure\n\n\n\n\nIm not sure it is even possible, but would love to be able to run this one time and it opens all files in a folder, runs the script, saves, and opens th...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\ndef rename():\n    layerName = (\"OLDNAME\")\n\n    matchingLayers = [layer for layer in doc.Layers if layer.Name == layerName]\n\n    layerToRename = None\n    if len(matchingLayers) == 0:\n        return\n    if len(matchingLayers) == 1:\n        layerToRename = matchingLayers[0]\n    elif len(matchingLayers) > 1:\n        i = 0;\n        for layer in matchingLayers:\n            print \"({0}) {1}\".format(\n                i+1, matchingLayers[i].FullPath.replace(\"::\", \"->\"))\n            i += 1\n\n        selectedLayer = rs.GetInteger(\n            \"which layer?\", -1, 1, len(matchingLayers))\n        if selectedLayer == None:\n            return\n        layerToRename = matchingLayers[selectedLayer - 1]\n\n    layerName = (\"NEWNAME\")\n    layerToRename.Name = layerName\n    layerToRename.CommitChanges()\n    return\n\nif __name__ == \"__main__\":\n    rename()",
+      "language": "python",
+      "author": "ectapia",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 2120
+}

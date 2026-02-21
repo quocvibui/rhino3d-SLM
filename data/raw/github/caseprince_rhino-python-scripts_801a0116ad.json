@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caseprince/rhino-python-scripts/blob/639ae6ea1dd6cc00408db4f7a97ae689e61fc589/fib-sphere.py",
+  "repo": "caseprince/rhino-python-scripts",
+  "repo_stars": 0,
+  "repo_description": "Parametric lampshades for 3D Printing in RhinoScript",
+  "license": "unknown",
+  "filepath": "fib-sphere.py",
+  "instruction": "Fib sphere",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math, random\n\ndef fibonacci_sphere(samples=1, randomize=True, radius=2.5):\n    rnd = 1.\n    if randomize:\n        rnd = random.random() * samples\n\n    points = []\n    offset = 2./samples\n    increment = math.pi * (3. - math.sqrt(5.));\n\n    for i in range(samples):\n        z = (((i * offset) - 1) + (offset / 2));\n        r = math.sqrt(1 - pow(z,2))\n\n        phi = ((i + rnd) % samples) * increment\n\n        x = math.cos(phi) * r * radius\n        y = math.sin(phi) * r * radius\n        z *= -radius\n\n        points.append([x,y,z])\n\n    return points\n\ndef addPts(pt1, pt2):\n    return [pt1[0]+pt2[0], pt1[1]+pt2[1], pt1[2]+pt2[2]]\n\ndef box2pt(p1, p2):\n\n    pt0 = p1\n    pt1 = rs.coerce3dpoint([p2[0], p1[1], p1[2]])\n    pt2 = rs.coerce3dpoint([p2[0], p2[1], p1[2]])\n    pt3 = rs.coerce3dpoint([p1[0], p2[1], p1[2]])\n    pt4 = rs.coerce3dpoint([p1[0], p1[1], p2[2]])\n    pt5 = rs.coerce3dpoint([p2[0], p1[1], p2[2]])\n    pt6 = p2\n    pt7 = rs.coerce3dpoint([p1[0], p2[1], p2[2]])\n\n    return rs.AddBox([pt0, pt1, pt2, pt3, pt4, pt5, pt6, pt7])\n\ndef reset():\n    arr1 = rs.AllObjects()\n    if arr1: rs.DeleteObjects(arr1)\n    rs.Command(\"ClearAllMeshes\")\n    rs.Command(\"ClearUndo\")\n\nreset()\n\n# 10\"\n# radius_mm = 127\n# petals = 4098\n\n# 8.5\"\nradius_mm = 108\nsq_mm_per_petal = 50.25 # 50.25 square mm per petal\ns = 35 #30.48 #0.48 * radius_mm\n\n# 12\" w/ larger petals\nradius_mm = 152\nsq_mm_per_petal = 160\ns = 60\n\nsurfaceArea = 4 * math.pi * radius_mm**2\npetals = int(surfaceArea / sq_mm_per_petal)\npoints = fibonacci_sphere(petals, False, radius_mm)\n\n\ncone = rs.AddCone([0,0,0], .2 * s, .2 * s, True)\ncone2 = rs.AddCone([0,-.05 * s,0], .21 * s, .19 * s, True)\npetal = rs.BooleanDifference([cone], [cone2])[0]\nrs.RotateObject(petal, [0,0,0], -13, rg.Vector3d.XAxis)\n\nclipBoxZ = .43 * s\nclipBox = box2pt([.3 * s, .3 * s, (.3 * s) + clipBoxZ], [-.3 * s, -.3 * s, (-.3 * s) + clipBoxZ])\nrs.RotateObject(clipBox, [0,0,0], 5, rg.Vector3d.XAxis)\npetal = rs.BooleanDifference([petal], [clipBox])[0]\n\n\nfor pt in points:\n\n    vector = rs.VectorCreate(pt, [0,0,0])\n    newPetal = rs.CopyObject(petal, vector)\n\n    rs.OrientObject(newPetal, [pt, addPts(pt,[0,0,1]), addPts(pt,[0,1,0])], [pt, [0,0,0], addPts(pt,[0,0,1])])\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

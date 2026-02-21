@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/failure-with-the-mirror/148322",
+  "topic_id": 148322,
+  "title": "Failure with the mirror",
+  "question": "hi, i’m having a trouble with a mirror. At first when I create it it’s alright (like on the first picture). But at some point, while working on the script, the mirror stops working. The guid of “mirrored object” stays, but it is no longer mirrored (in the second picture you can see that both surfaces overlap on the same place). Whenever I restart the program, it is either correct or not working again.\n\n\nthe line looks like this:\n\n\nmirHull = rs.MirrorObject(loftHull, axPoStart, axPoEnd, True)\n\n\nand it doesn’t change throughout the work process, nor objects used in it. No error returns.\n\n\nis someone familiar with this problem? what could be wrong?\n\n\n \n\n\nghm2\n481×558 8.67 KB\n\n\n\n\nP.S. also noticed that it occurs whenever I press test/ok from front view, but was alright from perspective. Is it bug?",
+  "code_blocks": [
+    {
+      "code": "def MirrorObject(object_id, start_point, end_point, copy=False):\n    \"\"\"Mirrors a single object\n    Parameters:\n      object_id (guid): The identifier of an object to mirror\n      start_point (point): start of the mirror plane\n      end_point (point): end of the mirror plane\n      copy (bool, optional): copy the object\n    Returns:\n      guid: Identifier of the mirrored object if successful\n      None: on error\n    Example:\n      import rhinoscriptsyntax as rs\n      obj = rs.GetObject(\"Select object to mirror\")\n      if obj:\n          start = rs.GetPoint(\"Start of mirror plane\")\n          end = rs.GetPoint(\"End of mirror plane\")\n          if start and end:\n              rs.MirrorObject( obj, start, end, True )\n    See Also:\n      MirrorObjects\n    \"\"\"\n    rc = MirrorObjects(object_id, start_point, end_point, copy)\n    if rc: return rc[0]",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def MirrorObjects(object_ids, start_point, end_point, copy=False):\n    \"\"\"Mirrors a list of objects\n    Parameters:\n      object_ids ([guid, ...]): identifiers of objects to mirror\n      start_point (point): start of the mirror plane\n      end_point (point): end of the mirror plane\n      copy (bool, optional): copy the objects\n    Returns:\n      list(guid, ...): List of identifiers of the mirrored objects if successful\n    Example:\n      import rhinoscriptsyntax as rs\n      objs = rs.GetObjects(\"Select objects to mirror\")\n      if objs:\n          start = rs.GetPoint(\"Start of mirror plane\")\n          end = rs.GetPoint(\"End of mirror plane\")\n          if start and end:\n              rs.MirrorObjects( objs, start, end, True )\n    See Also:\n      MirrorObject\n    \"\"\"\n    start_point = rhutil.coerce3dpoint(start_point, True)\n    end_point = rhutil.coerce3dpoint(end_point, True)\n    vec = end_point-start_point\n    if vec.IsTiny(0): raise Exception(\"start and end points are too close to each other\")\n    normal = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal\n    vec = Rhino.Geometry.Vector3d.CrossProduct(vec, normal)\n    vec.Unitize()\n    xf = Rhino.Geometry.Transform.Mirror(start_point, vec)\n    rc = TransformObjects(object_ids, xf, copy)\n    return rc",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "normal = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal\n    vec = Rhino.Geometry.Vector3d.CrossProduct(vec, normal)\n    vec.Unitize()\n    xf = Rhino.Geometry.Transform.Mirror(start_point, vec)",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 818
+}

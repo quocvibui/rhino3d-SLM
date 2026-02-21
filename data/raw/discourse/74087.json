@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/porting-rhinoscriptsyntax-from-python-to-c/74087",
+  "topic_id": 74087,
+  "title": "Porting Rhinoscriptsyntax from Python to C#",
+  "question": "I’m in the process of porting a collection of rhinoscript (python) functions to C# in order to develop a collection of custom grasshopper components. My problem is I’m having trouble access some rhinoscript methods such as VectorUnitize(),  VectorScale() and PointAdd(). I can’t seem to find any references that include these in C#. Does anyone have any experience with this kind of thing as to point me in the right direction?\n\n\nRhinoscript I’m working from:\n\n\n    # FIND THE ALIGNMENT VECTOR\n        aVec = self.AlignmentVector(neighborAgents, neighborAgentsDistances)\n        if rs.VectorLength(aVec) > 0:\n            aVec = rs.VectorUnitize(aVec)\n        aVec = rs.VectorScale(aVec, self.alignment)\n\n        # FIND THE SEPARATION VECTOR\n        sVec = self.SeparationVector(neighborAgents, neighborAgentsDistances)\n        if rs.VectorLength(sVec) > 0:\n            sVec = rs.VectorUnitize(sVec)\n        sVec = rs.VectorScale(sVec, self.separation)\n\n        # FIND THE COHESION VECTOR\n        cVec = self.CohesionVector(neighborAgents)\n        if rs.VectorLength(cVec) > 0:\n            cVec = rs.VectorUnitize(cVec)\n        cVec = rs.VectorScale(cVec, self.cohesion)\n\n        # ADD ALL OF THE VECTOR TOGETHER to find the new position of the agent\n        acc = [0, 0, 0]\n        acc = rs.PointAdd(acc, aVec)\n        acc = rs.PointAdd(acc, sVec)\n        acc = rs.PointAdd(acc, cVec)\n\n        # update the self vector\n        self.vec = rs.PointAdd(self.vec, acc)\n        self.vec = rs.VectorUnitize(self.vec)\n\n\n\nWhat I’ve got so far:\n\n\n        // if there is more than 0 neighbors within the neighbor radius then perform the follow actions\n        if (neighborAgents.Count > 0)\n        {\n            // Find the alignment Vector\n            Vector3d aVec = AlignmentVector(neighborAgents, neighborAgentsDistances);\n            if (aVec.Length > 0)\n                aVec.Unitize();\n            aVec = aVec * Alignment;\n            \n            Vector3d sVec = SeparationVector(neighborAgents, neighbo...",
+  "code_blocks": [
+    {
+      "code": "# FIND THE ALIGNMENT VECTOR\n        aVec = self.AlignmentVector(neighborAgents, neighborAgentsDistances)\n        if rs.VectorLength(aVec) > 0:\n            aVec = rs.VectorUnitize(aVec)\n        aVec = rs.VectorScale(aVec, self.alignment)\n\n        # FIND THE SEPARATION VECTOR\n        sVec = self.SeparationVector(neighborAgents, neighborAgentsDistances)\n        if rs.VectorLength(sVec) > 0:\n            sVec = rs.VectorUnitize(sVec)\n        sVec = rs.VectorScale(sVec, self.separation)\n\n        # FIND THE COHESION VECTOR\n        cVec = self.CohesionVector(neighborAgents)\n        if rs.VectorLength(cVec) > 0:\n            cVec = rs.VectorUnitize(cVec)\n        cVec = rs.VectorScale(cVec, self.cohesion)\n\n        # ADD ALL OF THE VECTOR TOGETHER to find the new position of the agent\n        acc = [0, 0, 0]\n        acc = rs.PointAdd(acc, aVec)\n        acc = rs.PointAdd(acc, sVec)\n        acc = rs.PointAdd(acc, cVec)\n\n        # update the self vector\n        self.vec = rs.PointAdd(self.vec, acc)\n        self.vec = rs.VectorUnitize(self.vec)",
+      "language": "python",
+      "author": "ken.marold",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 490
+}

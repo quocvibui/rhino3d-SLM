@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/StrucEng-Library-kfmresearch/strucenglib-snippets/blob/2e4b498eaa5b2928c1766e9ed99bf6493e5fe056/strucenglib/standalone/automated_area_maker.py",
+  "repo": "StrucEng-Library-kfmresearch/strucenglib-snippets",
+  "repo_stars": 1,
+  "repo_description": "StrucEng Library (snippets) for Rhinoceros",
+  "license": "unknown",
+  "filepath": "strucenglib/standalone/automated_area_maker.py",
+  "instruction": "Annotate the endpoints of curve objects",
+  "code": "# Annotate the endpoints of curve objects\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport System.Guid, System.Drawing.Color\nimport math\n \n# Inputs\nq_Gl=4.8 # In N/mm\nb_Bs=1000\nh_Strich=200\nh_Pl=200\nbeta=110 # in Grad\nlayer='Gleis_1_Mittelachse'# Layer with Polyline (Mittelachse des Gleises)\n\n# Basic definitions\n#-------------------------------------------------------\n\n# Create layername with load area\narea_load_layer=layer+'_area_load'\n\n# Definition eines neues Layers fur alle belasteten Elementmittelpunkte \nif rs.IsLayer(area_load_layer):\n    rs.PurgeLayer(area_load_layer)\n    scriptcontext.doc.Layers.Add(area_load_layer, System.Drawing.Color.Green)\nelse:\n    scriptcontext.doc.Layers.Add(area_load_layer, System.Drawing.Color.Green)\n\n# Get the curve object from the layer\n# ---------------------------------------------------------------------------------\nselectcurve = rs.ObjectsByLayer(layer)\n\n# Calculate End and Startpoints\npoint_start = rs.CurveStartPoint(selectcurve)\npoint_end = rs.CurveEndPoint(selectcurve)\n\n# Geometrische Berechnung der Lastflachen\n# ---------------------------------------------------------------------------------\n# Berechnung b_Gl\nb_Gl=(b_Bs/2+h_Strich/4+h_Pl/2)*2\n\n# Berechnung b_strich_Gl\nb_Strich_Gl=b_Gl/math.sin(math.radians(beta))\n\n# Berechnung der vier Eckpunkte der Lastflache\n# ---------------------------------------------------------------------------------\n# x Koordinanten\nP_A_x=(point_start[0]-b_Strich_Gl/2)\nP_B_x=(point_start[0]+b_Strich_Gl/2)\nP_C_x=(point_end[0]+b_Strich_Gl/2)\nP_D_x=(point_end[0]-b_Strich_Gl/2)\n\n# y Koordinanten\nP_A_y=(point_start[1])\nP_B_y=(point_start[1])\nP_C_y=(point_end[1])\nP_D_y=(point_end[1])\n\n# z Koordinanten\nP_A_z=(point_start[2])\nP_B_z=(point_start[2])\nP_C_z=(point_end[2])\nP_D_z=(point_end[2])\n\n# Berechnung der vier Eckpunkte der Lastflache und Kurvne in Rhino Layer ploten\n# ---------------------------------------------------------------------------------\nrs.CurrentLayer(area_load_layer)\nrs.AddPolyline([(P_A_x,P_A_y,P_A_z),(P_B_x,P_B_y,P_B_z),(P_C_x,P_C_y,P_C_z),(P_D_x,P_D_y,P_D_z),(P_A_x,P_A_y,P_A_z)])\n\n# Berechnung der Belastung q_k der Gleise\nq_k_Gl=q_Gl/b_Gl\n\n\n\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

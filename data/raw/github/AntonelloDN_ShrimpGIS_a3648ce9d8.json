@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/AntonelloDN/ShrimpGIS/blob/cb74a8e1be14c854c7d0e88d4557f77f4c507a18/src/ShrimpGIS%20CurveZ.py",
+  "repo": "AntonelloDN/ShrimpGIS",
+  "repo_stars": 18,
+  "repo_description": "A basic plugin for Grasshopper to read and write shapefile and geojson (GPL)",
+  "license": "GPL-3.0",
+  "filepath": "src/ShrimpGIS CurveZ.py",
+  "instruction": "Construct a ShrimpGIS CurveZ. Use it if you have z values.\n    Args:\n        _surface: A Rhino or Grasshopper Curve to export.\n        _location_: ShrimpGIS Location.\n        _num_: Number of point...",
+  "code": "# ShrimpGIS: A basic plugin to read and write shapefile (GPL).\n# This file is part of ShrimpGIS.\n#\n# Copyright (c) 2020, Antonello Di Nunzio <antonellodinunzio@gmail.com>.\n# You should have received a copy of the GNU General Public License\n# along with ShrimpGIS; If not, see <http://www.gnu.org/licenses/>.\n# \n# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>\n\n\"\"\"\nConstruct a ShrimpGIS CurveZ. Use it if you have z values.\n    Args:\n        _surface: A Rhino or Grasshopper Curve to export.\n        _location_: ShrimpGIS Location.\n        _num_: Number of point to consider for discretization of curves. If it is a polyline component automatically recognizes points.\n        -\n        Default value is 10.\n    \n    Returns:\n        shp_curve: ShrimpGIS Curve [plugin::type::n.point].\n\"\"\"\n\nghenv.Component.Name = \"ShrimpGIS CurveZ\"\nghenv.Component.NickName = \"shrimp_curvez\"\nghenv.Component.Category = \"ShrimpGIS\"\nghenv.Component.SubCategory = \"0 || Settings\"\ntry: ghenv.Component.AdditionalHelpFromDocStrings = \"2\"\nexcept: pass\n\nimport scriptcontext as sc\nimport os\nimport sys\n##################ShrimpGIS#####################\ntry:\n    user_path = os.getenv(\"APPDATA\")\n    sys.path.append(user_path)\n    from shrimp_gis import __version__\n    from shrimp_gis import Location\n    from shrimp_gis.geometry import ShpCurveZ\n    from shrimp_gis.io import get_latlon_from_location\n    ghenv.Component.Message = __version__\nexcept ImportError as e:\n    raise ImportError(\"\\nFailed to import ShrimpGIS: {0}\\n\\nCheck your 'shrimp_gis' folder in {1}\".format(e, os.getenv(\"APPDATA\")))\n################################################\n\nimport scriptcontext as sc\nimport Grasshopper\nimport Rhino\n\nwarning = Grasshopper.Kernel.GH_RuntimeMessageLevel.Warning\n\ndef is_in_meter():\n    units = sc.doc.ModelUnitSystem\n    if `units` != 'Rhino.UnitSystem.Meters': return False\n    return True\n\ndef main():\n    \n    if not is_in_meter():\n        ghenv.Component.AddRuntimeMessage(warning, \"Rhino model have to be in meter.\")\n        return\n    \n    location = Location() if not _location_ else _location_\n    num = 10 if not _num_ else _num_\n    \n    if _curve:\n        shp_curve = [ShpCurveZ(crv, num) for crv in _curve]\n        for geo in shp_curve:\n            geo.coordinates = get_latlon_from_location(geo.points, location, True)\n        \n        return shp_curve\n\nshp_curve = main()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

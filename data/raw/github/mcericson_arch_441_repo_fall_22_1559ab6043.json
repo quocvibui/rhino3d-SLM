@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcericson/arch_441_repo_fall_22/blob/51976acc603fbc68cdef1edff124885fe3d917b0/05_week/surface_grid_inclass_2.py",
+  "repo": "mcericson/arch_441_repo_fall_22",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "05_week/surface_grid_inclass_2.py",
+  "instruction": "mark ericson 9/12/2022 This program creates a cubic grid",
+  "code": "#mark ericson \n#9/12/2022\n#This program creates a cubic grid\n\nimport rhinoscriptsyntax as rs\nfrom random import uniform\nfrom random import randint\n\ndef cubic_grid(x_number, y_number, z_number, cell_size):\n    rs.EnableRedraw(False)\n    point_list = []\n    for i in range(0, x_number, cell_size):\n        x = i\n        for j in range(0, y_number, cell_size):\n            y = j\n            for p in range(0, z_number, cell_size):\n                z = p\n                point = (x,y,z)\n                point_list.append(point)\n    return point_list\n\ndef random_color(ceiling):\n    red = uniform(0,ceiling)\n    green = uniform(0, ceiling)\n    blue = uniform(0, ceiling)\n    color = rs.CreateColor(red, green, blue)\n    return color\n\n\ndef assign_material_color(object, color):\n    rs.AddMaterialToObject(object)\n    index = rs.ObjectMaterialIndex(object)\n    rs.MaterialColor(index, color)\n\ndef solid_from_line(line, height, width):\n    path_1 = rs.AddLine((0,0,0), (0, 0, height))\n    path_2 = rs.AddLine((0,0,0), (width, width, height))\n    surf = rs.ExtrudeCurve(line, path_1)\n    solid = rs.ExtrudeSurface(surf, path_2) \n    color = random_color(255)\n    assign_material_color(solid, color)\n    rs.ObjectColor(line, color)\n    rs.ObjectColor(surf, color)\n    rs.ObjectColor(solid, color)\n    rs.DeleteObject(line)\n    rs.DeleteObject(surf)\n    \n###main program\ndef line_grid(x_number, y_number, z_number, cell_size, height, width):\n    #Add a variable line in a cubic grid of points.\n    points =  cubic_grid(x_number, y_number, z_number, cell_size)\n    max_index = len(points) - 1 \n    for i in points:\n        index_1 = randint(0, max_index)\n        index_2 = randint(0, max_index)\n        point_1 = points[index_1]\n        point_2 = points[index_2]\n        if point_1 == point_2:\n            pass\n        else:\n           \n            line = rs.AddLine(point_1, point_2)\n            solid_from_line(line, 1, 1)\n\n\n\n\nline_grid(10, 10, 10, 1, 1, 1)\n\n\n\n\n\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

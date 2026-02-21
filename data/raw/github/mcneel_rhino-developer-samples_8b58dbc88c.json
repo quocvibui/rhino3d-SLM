@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_addobjectstogroup.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_addobjectstogroup.py",
+  "instruction": "Ex addobjectstogroup",
+  "code": "import Rhino\nimport scriptcontext\n\ndef AddObjectsToGroup():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects to group\")\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    \n    ids = [go.Object(i).ObjectId for i in range(go.ObjectCount)]\n    index = scriptcontext.doc.Groups.Add(ids)\n    scriptcontext.doc.Views.Redraw()\n    if index>=0: return Rhino.Commands.Result.Success\n    return Rhino.Commands.Result.Failure\n\n\nif __name__ == \"__main__\":\n    AddObjectsToGroup()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

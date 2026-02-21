@@ -1,0 +1,69 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-a-new-floating-viewport-and-change-its-display-mode/94367",
+  "topic_id": 94367,
+  "title": "Create a new floating viewport and change its display mode",
+  "question": "I’m trying to create a python code using RhinoCommon to do multiple Rhino commands at once.\n\n\n\n\nNewFloatingViewport Projection Perspective\n\n\nMaxViewport\n\n\nZoom Extents\n\n\nSetDisplayMode Mode Shade\n\n\n\n\nI think the following code makes it to step 2, MaxViewport, but I can’t seem to complete the rest quickly. Can someone help? I don’t want to use rhinoscriptsyntax.Command(), because it made my Grasshopper file very unstable executing multiple commands.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport System\nfrom scriptcontext import doc\n\nif r:\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"Test\", Rhino.Display.DefinedViewportProjection.Perspective, System.Drawing.Rectangle(0, 0, 600, 600), True)\n    newView.Maximized = True",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n\n\nif r:\n    #Create a new floating view\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"TEST\", Rhino.Display.DefinedViewportProjection.Perspective, System.Drawing.Rectangle(0, 0, 600, 600), True)\n    #Maximize a view\n    newView.Maximized = True\n    #Zoom extents\n    rs.ZoomExtents\n    #Set display mode\n    views = rs.ViewNames()\n    for view in views:\n        rs.ViewDisplayMode(view, \"Shaded\")",
+      "language": "python",
+      "author": "Dongyeop_Lee",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System\nimport rhinoscriptsyntax as rs\n\nif r:\n    #Create a new floating view\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"TEST\", Rhino.Display.DefinedViewportProjection.Perspective, System.Drawing.Rectangle(0, 0, 600, 600), True)\n    #Maximize a view\n    newView.Maximized = True\n    #Zoom extents\n    rs.ZoomExtents\n    \n    #Set display mode\n    view = rs.CurrentView(\"TEST\")\n    viewName = rs.CurrentView(return_name = True)\n    print viewName\n    rs.ViewDisplayMode(view, \"Shaded\")",
+      "language": "python",
+      "author": "Dongyeop_Lee",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\nprojection = Rhino.Display.DefinedViewportProjection.Perspective\nrect = System.Drawing.Rectangle(0, 0, 600, 600)\nnew_view = sc.doc.Views.Add(\"Test\", projection, rect, True)\n\nshaded_id = Rhino.Display.DisplayModeDescription.ShadedId\ndisplay_mode = Rhino.Display.DisplayModeDescription.GetDisplayMode(shaded_id)\nnew_view.ActiveViewport.DisplayMode = display_mode\n\nnew_view.Maximized = True\nnew_view.ActiveViewport.ZoomExtents()\n\nnew_view.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System\nimport rhinoscriptsyntax as rs\n\n\nif r:\n    #Create a new floating view\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"TEST\", Rhino.Display.DefinedViewportProjection.Perspective, System.Drawing.Rectangle(0, 0, 600, 600), True)\n    \n    #Change display mode to \"Shaded\"\n    shaded_id = Rhino.Display.DisplayModeDescription.ShadedId\n    display_mode = Rhino.Display.DisplayModeDescription.GetDisplayMode(shaded_id)\n    newView.ActiveViewport.DisplayMode = display_mode\n    \n    #Maximize viewport\n    newView.Maximized = True\n    \n    #Zoom extents\n    newView.ActiveViewport.ZoomExtents()\n    \n    newView.Redraw()",
+      "language": "python",
+      "author": "Dongyeop_Lee",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nview = sc.doc.Views.ActiveView\nif view:\n    if not view.Maximized:\n        view.Maximized = True",
+      "language": "python",
+      "author": "dale",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "if OS == \"Windows\":\n                # print(\"Using Windows OS method of viewport creation\")\n                # This doesn't work on Mac OS\n                self.viewport = sc.doc.Views.Add(\n                    \"MyFloatingViewport\",\n                    rd.DefinedViewportProjection.Perspective,\n                    view_rectangle,\n                    floating=True)\n\n            else:\n                # print(\"Using Mac OS method of viewport creation\")\n                # Test work around for 0 height, 0 width Mac OS viewport bug\n                rs.Command(\"_NewFloatingViewport _Projection Perspective\")  # This works on Mac OS\n                viewport = sc.doc.Views.ActiveView.ActiveViewport\n                viewport.Name = \"MyFloatingViewport\"\n                viewport.ScreenRectangle = view_rectangle\n                self.viewport = sc.doc.Views.ActiveView",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport System\nfrom scriptcontext import doc\n\nif r:\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"Test\", Rhino.Display.DefinedViewportProjection.Perspective, System.Drawing.Rectangle(0, 0, 600, 600), True)\n    newView.Maximized = True",
+      "language": "python",
+      "author": "Dongyeop_Lee",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 3094
+}

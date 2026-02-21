@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sqlite-in-rhinopython/24183",
+  "topic_id": 24183,
+  "title": "SQLite in RhinoPython",
+  "question": "Hey Folks,\n\nI am looking for a way to use SQLite in RhinoPython.\n\nSince Rhino uses IronPython 2.7 and the sqlite3 module is part of the standard library since Python 2.5, I don’t quite understand why I can’t just call:\n\n\nimport sqlite3\n\n\n\nThis will give me an error, since the module is not available for some reason.\n\nCan anyone explain / help?",
+  "code_blocks": [
+    {
+      "code": "# import RhinoCommon\nimport Rhino\n\n# create serialization options\noptions = Rhino.FileIO.SerializationOptions()\n\n# set RhinoVersion (optional)\nif RhinoVersion:\n    options.RhinoVersion = RhinoVersion\n\n# set if userdata should be written (optional)\noptions.WriteUserData = WriteUserData\n\n# get json string\nJSONString = Geometry.ToJSON(options)",
+      "language": "python",
+      "author": "efestwin",
+      "post_number": 24,
+      "is_solution": false
+    },
+    {
+      "code": "# import RhinoCommon\nimport Rhino\nimport json\nimport System\n\n# convert the JSON String to python dictionary using the json module\nPyDict = json.loads(JSONString)\n\n# create a new .NET dictionary\nSysDict = System.Collections.Generic.Dictionary[str, str]()\n\n# loop through python dict and fill .NET dict\nfor key in PyDict.keys():\n    value = str(PyDict[key])\n    SysDict.Add(key, value)\n\n# de-serialize the geometry by creating geometry from the json dict\nGeometry = Rhino.Geometry.GeometryBase.FromJSON(SysDict)",
+      "language": "python",
+      "author": "efestwin",
+      "post_number": 24,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 30,
+  "views": 6870
+}

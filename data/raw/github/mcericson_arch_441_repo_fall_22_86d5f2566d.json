@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcericson/arch_441_repo_fall_22/blob/51976acc603fbc68cdef1edff124885fe3d917b0/07_week/image_analysis_inclass.py",
+  "repo": "mcericson/arch_441_repo_fall_22",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "07_week/image_analysis_inclass.py",
+  "instruction": "mark ericson 10/3/2022 This program generates geometry from images",
+  "code": "#mark ericson\n#10/3/2022\n#This program generates geometry from images\n\nimport rhinoscriptsyntax as rs\nimport System.Drawing.Bitmap as Bitmap\nfrom capture_view import capture_view\nfrom box_tools import center_cube\nfrom box_tools import center_box\nfile_path  = \"web_mountains_small.jpg\"\n\n\n\ndef assign_material_color(object, color):\n    rs.AddMaterialToObject(object)\n    index = rs.ObjectMaterialIndex(object)\n    rs.MaterialColor(index, color)\n\ndef image_to_circle(file_path, resolution):\n    rs.EnableRedraw(False)\n    img = Bitmap.FromFile(file_path)\n    \n    width = img.Width\n    height = img.Height\n    \n    print (width, height)\n    \n    w_step = int(width/resolution)\n    h_step = int(height/resolution)\n    for i in range(0, width, w_step):\n        x = i\n        for j in range(0, height, h_step):\n            y = j\n            r, g, b, a = img.GetPixel(x, y)\n            location = (x, y, 0)\n            circle = rs.AddCircle(location, b/20 + .01)\n            color = rs.CreateColor(r, g, b, a)\n            rs.ObjectColor(circle, color)\n\ndef image_to_line(file_path, resolution):\n    rs.EnableRedraw(False)\n    img = Bitmap.FromFile(file_path)\n    \n    width = img.Width\n    height = img.Height\n    \n    print (width, height)\n    \n    w_step = int(width/resolution)\n    h_step = int(height/resolution)\n    for i in range(0, width, w_step):\n        x = i\n        for j in range(0, height, h_step):\n            y = j\n            r, g, b, a = img.GetPixel(x, y)\n            location_1 = (x, y, 0)\n            location_2 = (r/20, g/20, b/20)\n            line = rs.AddLine(location_1, location_2)\n            color = rs.CreateColor(r, g, b, a)\n            rs.ObjectColor(line, color)\n\ndef image_to_cube(file_path, resolution):\n    rs.EnableRedraw(False)\n    img = Bitmap.FromFile(file_path)\n    \n    width = img.Width\n    height = img.Height\n    \n    print (width, height)\n    \n    w_step = int(width/resolution)\n    h_step = int(height/resolution)\n    for i in range(0, width, w_step):\n        x = i\n        for j in range(0, height, h_step):\n            y = j\n            r, g, b, a = img.GetPixel(x, y)\n            location = (x, y, 0)\n            cube = center_box(location, r/10 + .01, g/10 + .01, b/10 + .01)\n            color = rs.CreateColor(r, g, b, a)\n            assign_material_color(cube, color)\n            rs.ObjectColor(cube, color)\n\nimage_to_cube(file_path, 50)\ncapture_view(2, \"mountain_test\", \"mountain_test\")",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

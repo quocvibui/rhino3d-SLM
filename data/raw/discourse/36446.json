@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hsl-to-rgb-conversion-via-rhinocommon-or-rhinoscriptsyntax/36446",
+  "topic_id": 36446,
+  "title": "HSL to RGB conversion via RhinoCommon or (rhinoscriptsyntax)",
+  "question": "I can’t seem to get this to work.  rhinoscriptsyntax wants different stuff from RhinoCommon, but I can’t get either of them working…\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ncount=5\nhsl_colors=[Rhino.Display.ColorHSL(i/(count-1),1,1) for i in range(count)]\nfor color in hsl_colors: print \"H={}, S={}, L={}\".format(color.H,color.S,color.L)\n\nrgb_colors=[Rhino.Display.ColorHSL.ToArgbColor(color) for color in hsl_colors]\nfor color in rgb_colors: print \"R={}, G={}, B={}\".format(color.R,color.G,color.B)\n\n\n\nResult:\n\n\nH=0.0, S=1.0, L=1.0\nH=0.25, S=1.0, L=1.0\nH=0.5, S=1.0, L=1.0\nH=0.75, S=1.0, L=1.0\nH=1.0, S=1.0, L=1.0\nR=255, G=255, B=255\nR=255, G=255, B=255\nR=255, G=255, B=255\nR=255, G=255, B=255\nR=255, G=255, B=255\n\n\n\nWhat am I doing wrong here?\n\n\nThanks,\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ncount=200\nhsl_colors=[Rhino.Display.ColorHSL(i/(count-1),1,0.5) for i in range(count)]\nfor color in hsl_colors: print \"H={}, S={}, L={}\".format(color.H,color.S,color.L)\n\nrgb_colors=[Rhino.Display.ColorHSL.ToArgbColor(color) for color in hsl_colors]\nfor color in rgb_colors: \n    point_obj = rs.AddPoint([color.R,color.G,color.B])\n    rs.ObjectColor(point_obj,color)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef InterpolatedSatColorList(count,start,end):\n    \"\"\"returns an interpolated list of fully saturated RGB colors (via HSL). If\n    start and end are both between 0 and 1, input will be interpreted as the HSL\n    normalized domain; else as a degree value between 0 and 360 (color wheel)\"\"\"\n    if start<0 or start>360 or end<0 or end>360: return\n    if not(start<=1 and end<=1):\n        #remap from 0-360 to 0-1\n        start=start/360 ; end=end/360\n    inc=(end-start)/(count-1)\n    hsl_colors=[Rhino.Display.ColorHSL(start+(i*inc),1,0.5) for i in range(count)]\n    rgb_colors=[Rhino.Display.ColorHSL.ToArgbColor(color) for color in hsl_colors]\n    return rgb_colors\n\ndef TestFunction():\n    objs=rs.GetObjects(\"Select objects to color\",preselect=True)\n    if not objs: return\n    \n    start_hue=rs.GetReal(\"Enter start hue (0-360 or 0-1)\",0,0,360)\n    if start_hue is None: return\n    \n    end_hue=rs.GetReal(\"Enter end hue (0-360 or 0-1)\",360,0,360)\n    if end_hue is None: return\n    \n    color_list=InterpolatedSatColorList(len(objs),start_hue,end_hue)\n    rs.EnableRedraw(False)\n    for i,obj in enumerate(objs): rs.ObjectColor(obj,color_list[i])\nTestFunction()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ncount=5\nhsl_colors=[Rhino.Display.ColorHSL(i/(count-1),1,1) for i in range(count)]\nfor color in hsl_colors: print \"H={}, S={}, L={}\".format(color.H,color.S,color.L)\n\nrgb_colors=[Rhino.Display.ColorHSL.ToArgbColor(color) for color in hsl_colors]\nfor color in rgb_colors: print \"R={}, G={}, B={}\".format(color.R,color.G,color.B)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2336
+}

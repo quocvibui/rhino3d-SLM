@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/255ribeiro/LPACAF/blob/a9d170b0feff9a66624dcb3b3fa181aae502130c/Aula_14/Sierpinski3D.py",
+  "repo": "255ribeiro/LPACAF",
+  "repo_stars": 3,
+  "repo_description": "Repositório do curso Lógica de programação Aplicada à Criação e Análise da Forma. ",
+  "license": "unknown",
+  "filepath": "Aula_14/Sierpinski3D.py",
+  "instruction": "Sierpinski3d",
+  "code": "﻿#Curso de Extensão:\n#Lógica de programação aplicada à criação e análise da forma\n#UFBa - Faculdade de Arquitetura - 2017.2\n#Professor: Fernando Ferraz Ribeiro\n#Exemplo: Triângulo de Sierpinski (análogo 3d)\n\n\nimport rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Point3d, Brep\nimport ghpythonlib.components as ghcomp\n\n\n# --- entradas\n# raio (item, float)\n# iterac (item, int)\n\n#plano de trabalho\npl = rs.WorldXYPlane()\n#decompondo o plano\no,vrx, vry, vrz = pl\n\n#base da piramide\nbase = ghcomp.Polygon(pl,Raio,3,0.0)\n\n#vertice superior da piramide\np1 = Point3d(Raio*vrz)+ Point3d(o)\n\n#desenhando a piramide\npiramide = ghcomp.ExtrudePoint(base,p1)\n\n#listas auxiliares\nlista1 = [piramide]\nlista2 = []\n\n\n#iterações\nfor i in range(iterac):\n    # para cada piramide\n    for j in lista1:\n        #extrair os vertices\n        vert = ghcomp.DeconstructBrep(j)[2]\n        #para cada vertice\n        for k in vert:\n            # escalonar a piramide em direção ao vertice\n            elemento = ghcomp.Scale(j,k,.5)[0]\n            #olocar o elelemnto na lista\n            lista2.append(elemento)\n    # preparando listas para nova iteração\n    lista1 = lista2\n    lista2 = []\n    \n# mostrando os resultados\na = lista1\n    \n    ",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

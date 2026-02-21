@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/caadxyz/caad4rhino/blob/d3df5a030b2bd0ab58954fb341f04a4e814835d9/dev/wall_join_cmd.py",
+  "repo": "caadxyz/caad4rhino",
+  "repo_stars": 22,
+  "repo_description": " Caad4Rhino is a python package whose purpose is to provide computer aided architectural design tools in rhino 3d software",
+  "license": "LGPL-3.0",
+  "filepath": "dev/wall_join_cmd.py",
+  "instruction": "Copyright\ncreate on 2020.02.19\n@author mahaidong",
+  "code": "#coding=utf-8\n'''\nCopyright\ncreate on 2020.02.19\n@author mahaidong\n\ndescription:\n'''\n\nimport System\nimport math\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nfrom caad.geometry.DoubleLine import DoubleLine\nimport caad.utility as util\n\ndef wallJoin(layer):\n    if not rs.IsLayer(\"Wall\"): \n        util.initCaadLayer(\"Wall\")\n    if not rs.IsLayer(\"Axis\"): \n        util.initCaadLayer(\"Axis\")\n\n    haveLayer = True\n    items = (layer, \"Off\", \"On\")\n    result = rs.GetBoolean(\"current layer option\", items, True )\n    if result:\n        haveLayer = result[0]\n  \n    oldLockMode = rs.LayerLocked(\"Axis\", True)\n    while True:\n        go = Rhino.Input.Custom.GetObject()\n        go.SetCommandPrompt( \"Select 4 lines, each two parallel to anthor\" )\n        go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n        go.GetMultiple( 4, 4 )\n\n        if go.CommandResult() != Rhino.Commands.Result.Success : \n            rs.LayerLocked(\"Axis\", oldLockMode)\n            return go.CommandResult()\n\n        if go.ObjectCount!=4: return Rhino.Commands.Result.Failure\n        crv= []\n        for obj in go.Objects():\n            crv.append(obj.Geometry().Line)\n\n        rc, doubleLines = DoubleLine.GetIntersectedDoubleline(crv)\n        if rc:\n            doubleLine0 = doubleLines[0]\n            doubleLine1 = doubleLines[1]\n            if haveLayer:\n                oldLayer = rs.CurrentLayer(layer)\n            doubleLine0.drawIntersectionWithDoubleLine(doubleLine1)\n            if haveLayer:\n                rs.CurrentLayer(oldLayer); \n            rs.DeleteObjects(go.Objects())\n        else:\n            print \"Error: no two doubleLines\"\n\n\n\n__commandname__ = \"WallJoin\"\ndef RunCommand( is_interactive ):\n    wallJoin(\"wall\")\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

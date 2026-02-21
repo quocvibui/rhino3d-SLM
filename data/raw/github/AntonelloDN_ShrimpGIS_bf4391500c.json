@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/AntonelloDN/ShrimpGIS/blob/cb74a8e1be14c854c7d0e88d4557f77f4c507a18/src/ShrimpGIS%20Merge%20Geojson.py",
+  "repo": "AntonelloDN/ShrimpGIS",
+  "repo_stars": 18,
+  "repo_description": "A basic plugin for Grasshopper to read and write shapefile and geojson (GPL)",
+  "license": "GPL-3.0",
+  "filepath": "src/ShrimpGIS Merge Geojson.py",
+  "instruction": "This is a special component that merges together geojson files with features into a new file.\n-\nIt is very helpful if you work with separate and massive geojson and then you want to create just one...",
+  "code": "# ShrimpGIS: A basic plugin to read and write shapefile (GPL).\n# This file is part of ShrimpGIS.\n#\n# Copyright (c) 2020, Antonello Di Nunzio <antonellodinunzio@gmail.com>.\n# You should have received a copy of the GNU General Public License\n# along with ShrimpGIS; If not, see <http://www.gnu.org/licenses/>.\n# \n# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>\n\n\"\"\"\nThis is a special component that merges together geojson files with features into a new file.\n-\nIt is very helpful if you work with separate and massive geojson and then you want to create just one file for them.\nE.g. a point layer with information about trees; a polygon layer with information about building and so on.\n    Args:\n        _geojson_file: geojson files to merge.\n        -\n        Standard rfc7946. Reference here: https://en.wikipedia.org/wiki/GeoJSON\n        _folder: Path of directory where you want to save geojson file. For example, \"C:\\Example\".\n        _name_: Name of geojson which you want to save on your machine. Default name is \"Geojson\".\n        run_it_: Set it to True to write geojson.\n    \n    Returns:\n        read_me: Message for users.\n        geojson_file: Complete path with extension of the new geojson.\n\"\"\"\n\nghenv.Component.Name = \"ShrimpGIS Merge Geojson\"\nghenv.Component.NickName = \"shrimp_merge_geojson\"\nghenv.Component.Category = \"ShrimpGIS\"\nghenv.Component.SubCategory = \"1 || IO\"\ntry: ghenv.Component.AdditionalHelpFromDocStrings = \"2\"\nexcept: pass\n\nimport scriptcontext as sc\nimport os\nimport sys\nimport Grasshopper\nimport Rhino\n\n##################ShrimpGIS#####################\ntry:\n    user_path = os.getenv(\"APPDATA\")\n    sys.path.append(user_path)\n    from shrimp_gis import __version__\n    from shrimp_gis.io import GeojsonWriter\n    ghenv.Component.Message = __version__\nexcept ImportError as e:\n    raise ImportError(\"\\nFailed to import ShrimpGIS: {0}\\n\\nCheck your 'shrimp_gis' folder in {1}\".format(e, os.getenv(\"APPDATA\")))\n################################################\n\nwarning = Grasshopper.Kernel.GH_RuntimeMessageLevel.Warning\n\ndef main():\n    \n    name = \"Geojson\" if _name_ == None else _name_\n    \n    if (run_it_):\n        result = GeojsonWriter.merge_geojson(_folder, name, _geojson_file)\n        \n        return result\n\n\ngeojson_file = main() if _geojson_file and run_it_ and _folder != None else None\nif not geojson_file:\n    print(\"Add _geojson_file and folder.\\nThen set run_it to 'True'.\")\nelse:\n    print(\"File written.\")\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

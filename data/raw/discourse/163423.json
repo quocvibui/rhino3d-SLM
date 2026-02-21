@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/custom-sprite-component/163423",
+  "topic_id": 163423,
+  "title": "Custom Sprite Component",
+  "question": "Hello,\n\n\nI am trying my hand at creating a custom sprite component for use in Grasshopper that will take a Point list (P input) and File Path (F input) and add the image sprite at the P locations.\n\n\nI feel like I am close but struggling to figure out how to use the BitmapDrawList method?\n\n\nGraph Space:\n\n\nimage\n753×221 18 KB\n\n\nHere’s the API info:\n\n\nhttps://mcneel-apidocs.herokuapp.com/api/rhinocommon/rhino.display.displaybitmapdrawlist\n\n\nHere’s my code thus far:\n\n\nimport Rhino\nimport scriptcontext as sc\nimport Grasshopper as gh\n\nbitmap = None\n\ndef create_display_bitmap(F):\n    global bitmap  # Declare bitmap as global to modify the global variable\n    try:\n        # Load the image from the specified file path\n        bitmap = Rhino.Display.DisplayBitmap.Load(F)\n        return bitmap\n    except Exception as ex:\n        print(\"Error loading the image:\", ex)\n        return None\n\ndef custom_sprite(P, bitmap):\n    # Check if the input image is valid\n    if not isinstance(bitmap, Rhino.Display.DisplayBitmap):\n        raise ValueError(\"Invalid input image. Please provide a valid DisplayBitmap.\")\n    \n    # Get the active display pipeline\n    dp = Rhino.Display.DisplayPipeline\n    \n    # Draw the sprite at each specified point location\n    for point in P:\n        if point.IsValid:\n            size = 1.0  # You can adjust the size of the sprite if needed\n            translation = Rhino.Geometry.Vector3d(0, 0, 0)  # No translation from the original point\n            size_in_world_space = False  # Size is in screen space\n            \n            # Draw the sprite\n            dp.DrawSprites(bitmap, Rhino.Display.DisplayBitmapDrawList, size, translation, size_in_world_space)\n    \n    return \"Sprites drawn successfully.\"\n\n# Run the component in Grasshopper\nif P and F:\n    create_display_bitmap(F)\n    custom_sprite(P, bitmap)\n\n\n\nI would appreciate some guidance in how to handle the draw list and any other issues you all see.\n\n\nThank you for your time and assistance!",
+  "code_blocks": [
+    {
+      "code": "from ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport Rhino as rh\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, P, F, S, D, V):\n\n        if S == None: S = 20\n        \n        self.F = F\n        self.P = P\n        self.D = D  # Store the value of D as an instance variable\n        \n        if self.F:\n            bitmap = System.Drawing.Bitmap.FromFile(F)\n            self.B = rh.Display.DisplayBitmap(bitmap)\n\n        self.S = S\n        self.size = V\n        \n        if self.P and len(P) > 0:\n            bb = rg.BoundingBox(P)\n            self.bb = bb\n        else:\n            self.bb = rh.Geometry.BoundingBox.Empty\n\n    def DrawForeground(self, sender, e):\n        if self.D:  # If D is True, draw the sprite in the foreground\n            if self.P and self.F:\n                items = rh.Display.DisplayBitmapDrawList()\n                items.SetPoints(self.P)\n                e.Display.DrawSprites(self.B, items, self.S, self.size)\n\n    def DrawViewportWires(self, arg):\n        if not self.D:  # If D is False, draw the sprite as before using DrawViewportWires\n            if self.P and self.F:\n                items = rh.Display.DisplayBitmapDrawList()\n                items.SetPoints(self.P)\n                arg.Display.DrawSprites(self.B, items, self.S, self.size)\n    \n    def get_ClippingBox(self):\n        return self.bb\n    \n    def IsPreviewCapable(self):\n        return True\n\n    def __exit__(self):\n        rh.Display.DisplayPipeline.DrawForeground -= self.DrawForeground\n\n    def __enter__(self):\n        rh.Display.DisplayPipeline.DrawForeground += self.DrawForeground",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport Grasshopper as gh\n\nbitmap = None\n\ndef create_display_bitmap(F):\n    global bitmap  # Declare bitmap as global to modify the global variable\n    try:\n        # Load the image from the specified file path\n        bitmap = Rhino.Display.DisplayBitmap.Load(F)\n        return bitmap\n    except Exception as ex:\n        print(\"Error loading the image:\", ex)\n        return None\n\ndef custom_sprite(P, bitmap):\n    # Check if the input image is valid\n    if not isinstance(bitmap, Rhino.Display.DisplayBitmap):\n        raise ValueError(\"Invalid input image. Please provide a valid DisplayBitmap.\")\n    \n    # Get the active display pipeline\n    dp = Rhino.Display.DisplayPipeline\n    \n    # Draw the sprite at each specified point location\n    for point in P:\n        if point.IsValid:\n            size = 1.0  # You can adjust the size of the sprite if needed\n            translation = Rhino.Geometry.Vector3d(0, 0, 0)  # No translation from the original point\n            size_in_world_space = False  # Size is in screen space\n            \n            # Draw the sprite\n            dp.DrawSprites(bitmap, Rhino.Display.DisplayBitmapDrawList, size, translation, size_in_world_space)\n    \n    return \"Sprites drawn successfully.\"\n\n# Run the component in Grasshopper\nif P and F:\n    create_display_bitmap(F)\n    custom_sprite(P, bitmap)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 13,
+  "views": 1234
+}

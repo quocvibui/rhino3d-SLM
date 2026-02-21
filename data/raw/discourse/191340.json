@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/remove-normals-from-single-mesh-face/191340",
+  "topic_id": 191340,
+  "title": "Remove normals from single mesh face",
+  "question": "Hi,\n\nmy progress stopped understanding the rhino behavoir as i’m unable to remove normals from a mesh i have exploded into single faces.\n\n\nIn the example file the explode is done on the left with a commercial plugin that creates mesh faces without normals. If i make a mesh offset i get perfect quad elements.\n\n\nimage\n1213×879 227 KB\n\n\n\n\n\n\nMy own script always creates a normal on the face the leads to intersecting quad elements.\n\nis there a way to remove this normal?\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport Rhino\nimport scriptcontext\nimport math\nimport os\n\n\ndef unweld_all_faces(mesh_id):\n    # Netz aus der Rhino-Dokumentation abrufen\n    mesh = rs.coercemesh(mesh_id)\n    \n    if not mesh:\n        print(\"Kein Netz gefunden.\")\n        return\n    \n    # Das Netz explodieren (d.h. in einzelne Faces zerlegen)\n    exploded_meshes = []\n    \n    for face_index in range(mesh.Faces.Count):\n        # Extrahiere jede Face als einzelnes Netz\n        single_face_mesh = Rhino.Geometry.Mesh()\n        \n        # Hole die Eckpunkte der aktuellen Face\n        face = mesh.Faces[face_index]\n        vertices = [mesh.Vertices[face.A], mesh.Vertices[face.B], mesh.Vertices[face.C], mesh.Vertices[face.D]]\n        \n        # Füge die Vertices zum neuen Netz hinzu\n        for vertex in vertices:\n            single_face_mesh.Vertices.Add(vertex)\n        \n        # Füge die Face zum neuen Netz hinzu (unabhängig von der Anzahl der Punkte)\n        if face.IsQuad:\n            single_face_mesh.Faces.AddFace(0, 1, 2, 3)  # Quad Face\n        else:\n            single_face_mesh.Faces.AddFace(0, 1, 2)  # Triangular Face\n        \n       #Normals, Texturen, Farben usw. können hier auch übertragen werden, falls nötig\n       #single_face_mesh.Normals.ComputeNormals()\n       #single_face_mesh.Compact()\n        \n        # Füge das explodierte Netz zur Liste hinzu\n        exploded_meshes.append(single_face_mesh)\n    \n    # Lösche das ursprüngliche Netz\n    rs....",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef unweld_all_faces(mesh_id):\n    # Netz aus der Rhino-Dokumentation abrufen\n    mesh = rs.coercemesh(mesh_id)\n    \n    if not mesh:\n        print(\"Kein Netz gefunden.\")\n        return\n    \n    # Das Netz explodieren (d.h. in einzelne Faces zerlegen)\n    exploded_meshes = []\n    \n    for face_index in range(mesh.Faces.Count):\n        # Extrahiere jede Face als einzelnes Netz\n        single_face_mesh = Rhino.Geometry.Mesh()\n        \n        # Hole die Eckpunkte der aktuellen Face\n        face = mesh.Faces[face_index]\n        vertices = [mesh.Vertices[face.A], mesh.Vertices[face.B], mesh.Vertices[face.C]]\n        \n        # Füge die Vertices zum neuen Netz hinzu und kopiere die Normalen\n        for i, vertex in enumerate(vertices):\n            single_face_mesh.Vertices.Add(vertex)\n            # Kopiere die Normalen der Vertices\n            normal = mesh.Normals[face[i]]  # Hole die Normalen des entsprechenden Vertex\n            single_face_mesh.Normals.Add(normal)\n        \n        # Füge die Face zum neuen Netz hinzu\n        if face.IsQuad:\n            single_face_mesh.Vertices.Add(mesh.Vertices[face.D])  # Füge den vierten Vertex bei Quad hinzu\n            single_face_mesh.Normals.Add(mesh.Normals[face.D])  # Füge den vierten Vertex Normal hinzu\n            single_face_mesh.Faces.AddFace(0, 1, 2, 3)  # Quad Face\n        else:\n            single_face_mesh.Faces.AddFace(0, 1, 2)  # Triangular Face\n        \n        # Komprimiere das Netz\n        single_face_mesh.Compact()\n        \n        # Füge das explodierte Netz zur Liste hinzu\n        exploded_meshes.append(single_face_mesh)\n    \n    # Lösche das ursprüngliche Netz\n    rs.DeleteObject(mesh_id)\n    \n    # Füge die explodierten Netze zur Rhino-Dokumentation hinzu\n    for single_mesh in exploded_meshes:\n        sc.doc.Objects.AddMesh(single_mesh)\n    \n    sc.doc.Views.Redraw()\n    print(f\"{len(exploded_meshes)} Faces erfolgreich unwelded und explodiert.\")\n\ndef main():\n    # Benutzer wählt ein Netz aus\n    mesh_id = rs.GetObject(\"Bitte das Netz auswählen\", rs.filter.mesh)\n    \n    if mesh_id:\n        unweld_all_faces(mesh_id)\n    else:\n        print(\"Kein Netz ausgewählt.\")\n\n# Skript ausführen\nmain()",
+      "language": "python",
+      "author": "David_Seidel",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport Rhino\nimport scriptcontext\nimport math\nimport os\n\n\ndef unweld_all_faces(mesh_id):\n    # Netz aus der Rhino-Dokumentation abrufen\n    mesh = rs.coercemesh(mesh_id)\n    \n    if not mesh:\n        print(\"Kein Netz gefunden.\")\n        return\n    \n    # Das Netz explodieren (d.h. in einzelne Faces zerlegen)\n    exploded_meshes = []\n    \n    for face_index in range(mesh.Faces.Count):\n        # Extrahiere jede Face als einzelnes Netz\n        single_face_mesh = Rhino.Geometry.Mesh()\n        \n        # Hole die Eckpunkte der aktuellen Face\n        face = mesh.Faces[face_index]\n        vertices = [mesh.Vertices[face.A], mesh.Vertices[face.B], mesh.Vertices[face.C], mesh.Vertices[face.D]]\n        \n        # Füge die Vertices zum neuen Netz hinzu\n        for vertex in vertices:\n            single_face_mesh.Vertices.Add(vertex)\n        \n        # Füge die Face zum neuen Netz hinzu (unabhängig von der Anzahl der Punkte)\n        if face.IsQuad:\n            single_face_mesh.Faces.AddFace(0, 1, 2, 3)  # Quad Face\n        else:\n            single_face_mesh.Faces.AddFace(0, 1, 2)  # Triangular Face\n        \n       #Normals, Texturen, Farben usw. können hier auch übertragen werden, falls nötig\n       #single_face_mesh.Normals.ComputeNormals()\n       #single_face_mesh.Compact()\n        \n        # Füge das explodierte Netz zur Liste hinzu\n        exploded_meshes.append(single_face_mesh)\n    \n    # Lösche das ursprüngliche Netz\n    rs.DeleteObject(mesh_id)\n    \n    # Füge die explodierten Netze zur Rhino-Dokumentation hinzu\n    for single_mesh in exploded_meshes:\n        sc.doc.Objects.AddMesh(single_mesh)\n    \n    sc.doc.Views.Redraw()\n    print(f\"{len(exploded_meshes)} Faces erfolgreich unwelded und explodiert.\")\n\nmesh = rs.GetObject(\"getmesh\")\n\nunweld_all_faces(mesh)",
+      "language": "python",
+      "author": "David_Seidel",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 158
+}

@@ -1,0 +1,51 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-there-a-python-code-equivalent-to-proximity-2d/87688",
+  "topic_id": 87688,
+  "title": "Is there a Python code equivalent to Proximity 2D?",
+  "question": "I would like to put this code under a button with similar options on the command line. I have it running perfectly in Grasshopper but fear it is too cumbersome to distribute in a group working environment.\n\n\nTIA\n\nRobb",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\n\ndef test():\n    num = 10\n    if sc.sticky.has_key('NUM_CLOSEST_PTS'):\n        num = sc.sticky['NUM_CLOSEST_PTS']\n    \n    ids = rs.GetObjects(\"Select points\", filter=1, preselect=True)\n    if not ids: return\n    pts = rs.coerce3dpointlist(ids)\n    \n    id = rs.GetObject(\"Select test point\", filter=1)\n    if not id: return\n    testPt = rs.coerce3dpoint(id)\n    \n    num = rs.GetInteger(\"Number of closest points?\",num)\n    if not num: return\n    sc.sticky['NUM_CLOSEST_PTS'] = num\n    \n    pList = Rhino.Collections.Point3dList(pts)\n    ptIds = []\n    count = 0\n\n    while count <= num:\n        idx = Rhino.Collections.Point3dList.ClosestIndexInList(pList, testPt)\n        ptIdx = pts.index(pList[idx])\n        pList.RemoveAt(idx)\n        ptIds.append(ids[ptIdx])\n        count += 1\n        \n    if len(ptIds)>0:\n        \n        rs.SelectObjects(ptIds)\n        rs.UnselectObject(id)\n    pass\n    \ntest()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport System.Drawing.Color\nimport itertools\n\nclass ConnectorConduit(Rhino.Display.DisplayConduit):\n    \n    def __init__(self, lines):\n        self.lines = lines",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport System.Drawing.Color\nimport itertools\n\nclass ConnectorConduit(Rhino.Display.DisplayConduit):\n    \n    def __init__(self, lines):\n        self.lines = lines",
+      "language": "python",
+      "author": "wim",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Search for three-dimensional proximity within a point list.\"\"\"\n\n__author__ = \"p1r4t3b0y\"\n\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\ndef point_cloud_closest_points(pt_cloud, max_radius):\n    \"\"\"Finds the points in a point cloud that are closest to each of\n        its items/points within a certain maximum radius with the\n        RTree algorithm.\n    Args:\n      pt_cloud (Rhino.Geometry.PointCloud): A point cloud.\n      max_radius (float): A maximum radius to search within. \n    Returns:\n      A nested list with a sublist of closest point indices \n        for each point in the point cloud.\n    \"\"\"\n    rtree = rg.RTree()\n    # Populate the RTree with point cloud points\n    for i in xrange(pt_cloud.Count):\n        rtree.Insert(pt_cloud.Item[i].Location, i) # i is custom id\n    closest_indices = []\n    for i in xrange(pt_cloud.Count):\n        # Construct the sphere as bounds used for searching\n        center_pt = pt_cloud.Item[i].Location\n        search_sphere = rg.Sphere(center_pt, max_radius)\n        # Perform the search within the spherical bounds\n        closest_ids = [] # list of custom ids per point\n        rtree_callback = lambda sender, args: closest_ids.append(args.Id) \\\n             if i != args.Id else None\n        rtree.Search(search_sphere, rtree_callback)\n        # Sort the search result by closest distance\n        closest_dists = (pt_cloud.Item[j].Location.DistanceTo(center_pt) \\\n            for j in closest_ids)\n        closest_ids = [x for _, x in sorted(zip(closest_dists, closest_ids))]\n        closest_indices.append(closest_ids)\n    return closest_indices\n\n\ndef proximity_3d(points, max_num, link=True, min_radius=None, max_radius=None):\n    \"\"\"Search for three-dimensional proximity within a point list.\n    \n    Args:\n      points (list): A collection of three-dimensional points.\n      max_num (int): A maximum number of closest points to find.\n      link (bool): Optional True to output topology links. \n      min_radius (float): An optional minimum search radius.\n      max_radius (float): An optional maximum search radius.\n    Returns:\n      A nested list of proximity topology indices [0] and\n        a nested list of proximity links [1].\n    \"\"\"\n    # Initalise a point cloud from the points\n    pt_cloud = rg.PointCloud(points)\n    # Initalise the proximity topology tree (closest point cloud item indices)\n    prox_indices = [[j for j in range(len(points))] for i in points]\n    prox_lines = []\n    \n    # Get the closest indices for each point cloud item by maximum radius\n    if max_radius != None and max_radius > 0.0:\n        max_rad_cl_idcs = point_cloud_closest_points(pt_cloud, max_radius)\n        # Replace the initial closesest indices\n        prox_indices = list(max_rad_cl_idcs)\n        \n    # Get the closest indices for each point cloud item by minimum radius\n    if min_radius != None and min_radius > 0.0:\n        min_rad_cl_idcs = point_cloud_closest_points(pt_cloud, min_radius)\n        # Cull the closest indices of each point within the minimum radius\n        for i in xrange(len(prox_indices)):\n            if len(min_rad_cl_idcs[i]) > 0:\n                for idx in min_rad_cl_idcs[i]:\n                    prox_indices[i].pop(prox_indices[i].index(idx))\n\n    # Cull indices by maximum number per point cloud item\n    for i in range(len(prox_indices)):\n        if len(prox_indices[i]) > max_num:\n            # Initalise a temporary current closest points point cloud\n            cl_cloud = rg.PointCloud()\n            idcs_map = {} # maps the inital to the new cloud item indices\n            idx_count = 0 # keeps track of current point cloud item index\n            for j, pt in enumerate(points):\n                if j in prox_indices[i] and j != i:\n                    cl_cloud.Add(pt)\n                    idcs_map[idx_count] = j\n                    idx_count += 1\n            # Get the closest indices in the current point cloud by max. count\n            pt = [points[i]] # single point in a list    \n            pcl_cl_idcs = rg.RTree.PointCloudKNeighbors(cl_cloud, pt, max_num)\n            # Remap the current point cloud closest to the inital indices       \n            cl_indices = [idcs_map[idx] for lt in pcl_cl_idcs for idx in lt]\n            # Remove the superfluous from the current proximity 3d indices\n            merged_idcs = prox_indices[i] + cl_indices\n            cull_idcs = [x for x in merged_idcs if merged_idcs.count(x) == 1]\n            for idx in cull_idcs:\n                prox_indices[i].pop(prox_indices[i].index(idx))\n    \n    if link:\n        for i in range(len(points)):\n            closest_pts = [points[j] for j in prox_indices[i]]\n            for pt in closest_pts:\n                prox_lines.append(rg.Line(points[i], pt))\n        \n    return prox_indices, prox_lines\n    \n\n###############################################################################\n\n\nif __name__ == \"__main__\":\n    pt_guids = rs.GetObjects(message=\"Select points\", filter=1, preselect=True)\n    points = []\n    for guid in pt_guids:\n        pt = rs.coerce3dpoint(guid)\n        points.append(pt)\n    \n    max_num = rs.GetInteger(message=\"Maximum number of closest points\", \n                            number=3, \n                            minimum=1, \n                            maximum=len(points)-1)\n    \n    min_radius = rs.GetReal(message=\"Opitional minimum search radius\", \n                            number=0.0)\n    \n    max_radius = rs.GetReal(message=\"Opitional maximum search radius\", \n                            number=0.0)\n    \n    prox_indices, prox_links = proximity_3d(points, max_num, True, min_radius, max_radius)\n    \n    for link in prox_links:\n        rs.AddLine(link.From, link.To)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 21,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 21,
+  "views": 1772
+}

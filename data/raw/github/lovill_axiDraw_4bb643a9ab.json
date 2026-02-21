@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/lovill/axiDraw/blob/9f7b4621b519aac3596f9e8029ed423d9e867e54/PYTHON_SCRIPTS/crvs_to_gcode.py",
+  "repo": "lovill/axiDraw",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "PYTHON_SCRIPTS/crvs_to_gcode.py",
+  "instruction": "Crvs to gcode",
+  "code": "import rhinoscriptsyntax as rs\n\nfp = \"gcode_out.txt\"\n\ninCrv = rs.GetObjects(\"Select curves to draw\")\n\n\nsubD = rs.GetReal(\"Input segment length\", number=1.0)\n\nwith open(fp, mode='w') as outfile:\n    if len(inCrv) >= 1:\n        for crv in inCrv:\n            pts = rs.DivideCurveLength(crv, subD)\n            for i, pt in enumerate(pts):\n                if i == 0:\n                    #raise pen\n                    outfile.write(\"M03 S0 \\n\")\n                    #go to first position\n                    outfile.write(\"G00 X%.3f Y%.3f \\n\" %(pt.X,pt.Z) )\n                    #drop pen\n                    outfile.write(\"M03 S1024 \\n\")\n                    continue\n                #go to next position (with pen down)\n                outfile.write(\"G00 X%.3f Y%.3f \\n\" %(pt.X,pt.Z) )\n            #lift pen\n            outfile.write(\"M03 S0 \\n\")\n        outfile.write(\"G00 X0 Y0 \\n\")\n\noutfile.close()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

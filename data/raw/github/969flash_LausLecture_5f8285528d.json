@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/969flash/LausLecture/blob/004c0a8938bf805b8d70c744ddf5eb911fd4277f/Lecture2/00_get_shape_info.py",
+  "repo": "969flash/LausLecture",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Lecture2/00_get_shape_info.py",
+  "instruction": "00 get shape info",
+  "code": "# r: pyshp\n\nimport Rhino.Geometry as geo\nimport shapefile\nimport os\nfrom typing import List, Tuple, Any, Optional\n\nimport utils\nimport importlib\n\nimportlib.reload(utils)\n\n\nif __name__ == \"__main__\":\n    # 파일 경로 설정\n    shp_path = os.path.join(os.path.dirname(__file__), \"AL_D194_11680_20250123.shp\")\n\n    # SHP 파일 읽기\n    shapes, records, fields = utils.read_shp_file(shp_path)\n\n    # Parcel 객체 생성\n    parcels = utils.get_parcels_from_shapes(shapes, records, fields)\n\n    # 필지 분류\n    lots, roads = utils.classify_parcels(parcels)\n    print(f\"대지: {len(lots)}개, 도로: {len(roads)}개\")\n\n    # 지목별 카운트\n    jimok_counter = {}\n    for parcel in parcels:\n        jimok = parcel.jimok\n        if jimok in jimok_counter:\n            jimok_counter[jimok] += 1\n        else:\n            jimok_counter[jimok] = 1\n\n    total_count = len(parcels)\n    sorted_jimok = sorted(jimok_counter.items(), key=lambda x: x[1], reverse=True)\n\n    # 결과 출력\n    print(f\"\\n전체 필지: {total_count:,}개\")\n    print(f\"\\n지목별 분포:\")\n    print(\"-\" * 40)\n\n    for jimok, count in sorted_jimok:\n        percentage = (count / total_count) * 100\n        print(f\"{jimok:10s}: {count:6,}개 ({percentage:5.2f}%)\")\n\n    print(\"-\" * 40)\n    print(f\"총 지목 종류: {len(jimok_counter)}개\")\n\n    # 주요 지목 TOP 5\n    print(\"\\n주요 지목 TOP 5:\")\n    for i, (jimok, count) in enumerate(sorted_jimok[:5]):\n        percentage = (count / total_count) * 100\n        print(f\"{i+1}. {jimok}: {count:,}개 ({percentage:.1f}%)\")\n\n    # Grasshopper 출력용 변수\n    all_lot_crvs = [lot.region for lot in lots]\n    road_crvs = [road.region for road in roads]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

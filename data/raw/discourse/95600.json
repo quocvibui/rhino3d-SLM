@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/automatically-bake-to-a-layer-and-coerce/95600",
+  "topic_id": 95600,
+  "title": "Automatically bake to a layer and coerce",
+  "question": "How do I get an object from GUID?\n\n\n\n\nCan you elaborate or link to documentation? I can’t really find anything about these “Coerce” functions. Where are they?\n\n\n\n\n\n\n~Four years later and I still can’t find an API reference for ‘coercerhinoobject’ \nanywhere\n?  In particular, what are the effects of using the optional second and third parameters?  Depending on where you start, using the search feature returns either zero or one result, neither of which answers the question:\n\n\nhttps://developer.rhino3d.com/search-results.html?q=coercerhinoobject+site%3Adeveloper.rhino3d.com\n\n\nhttps://developer.rhino3d.com/api/RhinoCommon/search.html?SearchText=coercerhinoobject\n\n\nIn some examples found on the forum, the optional params are omitted, in others they are both set ‘True’ and in another example, “-1, True”:\n\n\ndoc_object = rs.coercerhinoobject(G, True, True)\n\n\nThis is far from a unique example of searching and failing to find terms referred to in (Python) script error messages.  Example: where is ‘AttributedGeometry’ documented?\n\n\nhttps://developer.rhino3d.com/search-results.html?q=AttributedGeometry+site%3Adeveloper.rhino3d.com",
+  "code_blocks": [
+    {
+      "code": "def coercerhinoobject(object_id, raise_if_bad_input=False, raise_if_missing=False):\n    \"\"\"attempt to get RhinoObject from the document with a given id\n    Parameters:\n        object_id = object's identifier\n        raise_if_bad_input [opt] = True or False\n        raise_if_missing [opt] = True or False",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "doc_object = rs.coercerhinoobject(geo)\nprint type(doc_object)\n\nprint type(geo)\nif type(geo) is not System.Guid: #assume 'List[object]' for group\n    for G in geo:\n        print 'G =', type(G), type(rs.coercerhinoobject(G))",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "__author__ = \"Joseph Oster, IslandCAD.com\"\n__version__ = \"2020.01.29\"\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\nimport System\n\n\ndef perform_baking(geo, layer, rM, mSrc):\n    \n    if geo:\n        if layer is None: layer = 'Default'\n        if not rs.IsLayer(layer): rs.AddLayer(layer)\n        \n        attributes = scriptcontext.doc.CreateDefaultAttributes()\n\n        if rM is not None:\n            matIndex = scriptcontext.doc.Materials.Add(rM)\n            attributes.MaterialIndex = matIndex\n\n        if (mSrc < 0) or (mSrc > 3): mSrc = 1 #must be 0=layer, 1=object or 2=parent\n        if (mSrc == 0): #from layer\n            if rM is not None:\n                layerIndex = rs.LayerNames().index(layer)\n                scriptcontext.doc.Layers[layerIndex].RenderMaterial = Rhino.Render.RenderMaterial.CreateBasicMaterial(rM)\n            attributes.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromLayer\n        elif (mSrc == 1): #from object\n            attributes.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n        else: #from parent\n            attributes.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromParent\n\n        # add both the geo and the attributes to the Rhino doc\n        rhino_id = scriptcontext.doc.Objects.Add(geo, attributes)\n        print rhino_id\n        rs.ObjectLayer(rhino_id, layer)\n        return rhino_id\n\nif active:\n    #we change the scriptcontext\n    scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n    try:\n        if type(geo) is System.Guid:\n            geo = ghdoc.Objects.Find(geo)\n            if geo: geo = geo.Geometry\n            perform_baking(geo, layer, rM, mSrc)\n        else: #assume group\n            ids = []\n            for g in geo: ids.append(perform_baking(g, layer, rM, mSrc))\n            groupName = rs.AddGroup()\n            rs.AddObjectsToGroup(ids, groupName)\n    finally: #put back the original Grasshopper document as default\n        scriptcontext.doc = ghdoc",
+      "language": "python",
+      "author": "piac",
+      "post_number": 26,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "layers",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 32,
+  "views": 4699
+}

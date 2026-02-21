@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/JonasWard/ClayAdventures/blob/70e453eab058ddb92ad4ee34f3148155e4c1cf31/src/ghPython/PatternBrickLibrary/patternGenv0.py",
+  "repo": "JonasWard/ClayAdventures",
+  "repo_stars": 3,
+  "repo_description": "A width range of different tests and experiments for fdm clay printing",
+  "license": "MIT",
+  "filepath": "src/ghPython/PatternBrickLibrary/patternGenv0.py",
+  "instruction": "Pattern genv0",
+  "code": "import Rhino.Geometry as rg\nimport math\n\n# grasshoppper variables\n\n# geometric variables\nbase_points\nnormals\nlayer_count\nlayer_height\n\n# pattern variables\nmin_max_val\nperiod\nphase_shift\n\nclass PointWithNormal(object):\n\n    def __init__(self, pt, normal):\n\n        self.o = pt\n        self.n = normal\n\n    def new_pt(self, scale_val = 0):\n\n        return rg.Point3d(self.o + self.n * scale_val)\n\nbase_layer_set = []\n\nfor i, pt in enumerate(base_points):\n\n    local_pt = rg.Point3d(pt.X, pt.Y, 0.0)\n\n    base_layer_set.append(PointWithNormal(local_pt, normals[i]))\n\nprint(base_layer_set)\n\ncurve_list = []\n\nclass PatternMap(object):\n\n    def __init__(self, base_crv, origin = rg.Point3d(0,0,0)):\n\n        self.base_crv\n\n    def subdivide(self, div_length):\n\n        length = self.base_crv.GetLength()\n        divisions = int(length / div_length)\n        self.div_length = length / divisions\n        \n        t_vals = self.base_crv.DivideByLength(self.div_length, True)\n\n        planes = [self.base_crv.FraneAt(t) for t in t_vals]\n\n        # self.base_lay = \n\n        return planes\n\n    def generate(self, layer_height, layer_count):\n\n        self.lay_h = layer_height\n        self.lay_c = layer_height\n\n        # for z_in in layer_count:\n\n        #     z_val = z_in * self.lay_h\n\n        #     for x_in, pt in enumerate(self.base_lay):\n\n        #         scale_val = math.sin(local_phase_shift + x_in / period) * min_max_val\n\n        #         shifted_pt = o_pt.new_pt(scale_val)\n\n        #         local_crv_set.append(shifted_pt + z_mv_pt)\n\n        #     local_crv_set.append(local_crv_set[0])\n\n        #     curve_list.append(rg.Polyline(local_crv_set))\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/offset-curve-on-surface-and-selection-of-surface-in-brep/77222",
+  "topic_id": 77222,
+  "title": "Offset curve on surface and selection of surface in brep",
+  "question": "Hi, i am trying to select a surface into a brep and obtain a offsetcurveonsurface metod.\n\nThis code is a copypaste of all the piece that i found useful but i realy cannot understand how rhinoscriptsintax.offsectcurveonsurface() work.\n\n\nThanks in advance\n\n\nimport rhinoscriptsyntax as rs\n\n\ndef TestOffset():\n    curve = rs.GetEdgeCurves(\"dammi le curve\")\n    if curve is None: return False\n    curve = rs.JoinCurves(\n    reference = SubObjectSelect()\n    surface = reference[0]\n    point = reference[1]\n    if surface is None: return False\n    point = reference[1]\n    if point is None: return False\n    parameter = 4\n    rc = rs.OffsetCurveOnSurface( curve, surface, parameter )\n    return rc is not None\ndef SubObjectSelect():\n    obj_ref = rs.GetObject(message=\"Bla\", filter=8, preselect=False, subobjects=True)\n    if obj_ref:\n        return  [obj_ref.Surface(),obj_ref.SelectionPoint()]\n        print \"Surface:\", obj_ref.Surface()\n        print \"Selection Point:\", obj_ref.SelectionPoint()\nTestOffset()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs  \n\ndef TestOffset():\n    curve = rs.GetEdgeCurves(\"dammi le curve\")\n    if curve is None: return False\n    \n    crvs = [curve[n][0] for n in range(len(curve))]\n    newCurve = rs.JoinCurves(crvs,True)[0]\n    \n    reference = SubObjectSelect()\n    surface = reference[0]\n    point = reference[1]\n    if surface is None: return False\n    point = reference[1]\n    if point is None: return False\n    distance = 4\n    offset = rs.OffsetCurveOnSurface( newCurve, surface, distance )\n    if not offset: rs.OffsetCurveOnSurface( newCurve, surface, -1*distance )\n    return offset\ndef SubObjectSelect():\n    obj_ref = rs.GetObject(message=\"Bla\", filter=8, preselect=False, subobjects=True)\n    if obj_ref:\n        return  [obj_ref.Surface(),obj_ref.SelectionPoint()]\n        print \"Surface:\", obj_ref.Surface()\n        print \"Selection Point:\", obj_ref.SelectionPoint()\nTestOffset()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def TestOffset():\n    curve = rs.GetEdgeCurves(\"dammi le curve\")\n    if curve is None: return False\n    curve = rs.JoinCurves(\n    reference = SubObjectSelect()\n    surface = reference[0]\n    point = reference[1]\n    if surface is None: return False\n    point = reference[1]\n    if point is None: return False\n    parameter = 4\n    rc = rs.OffsetCurveOnSurface( curve, surface, parameter )\n    return rc is not None\ndef SubObjectSelect():\n    obj_ref = rs.GetObject(message=\"Bla\", filter=8, preselect=False, subobjects=True)\n    if obj_ref:\n        return  [obj_ref.Surface(),obj_ref.SelectionPoint()]\n        print \"Surface:\", obj_ref.Surface()\n        print \"Selection Point:\", obj_ref.SelectionPoint()\nTestOffset()",
+      "language": "python",
+      "author": "s.branca",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 729
+}

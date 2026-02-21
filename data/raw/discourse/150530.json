@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/can-you-add-user-text-to-block-definition/150530",
+  "topic_id": 150530,
+  "title": "Can you add User Text to Block Definition?",
+  "question": "rs.SetUserText(block_definition_id, \"key\", \"value\") \n\ngave this error:\n\n\nMessage: 9d0ecdd8-b3ad-4d9d-80bb-020002811910 does not exist in ObjectTable\n\n\nSome context:\n\n\nI’m trying to add “Edit in place” functionality to linked blocks - I think that will be useful in case you move your block from original position and need to change it with reference to objects in the active document.\n\n\nOpening them separately in a new rhino instance loses the context. Worksessions preserve the context, but you can’t move parts of worksessions to new place the way you can transform linked blocks (also I don’t like keeping a separate .rws file)\n\n\nSo I’m trying to change block into an embedded type, make changes and export it again into a linked type (overwriting the previous file).\n\n\nI wanted to store source archive path on the block definition - saving it on block instance isn’t the safest, because that one instance may be deleted. Saving them in document globally isn’t great neither, because block definition can be renamed/reinsterted. So ideally you could store them on block definitions.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nblock_id = rs.GetObject(filter=4096, preselect=True)\nblock_definition = rs.coercerhinoobject(block_id).InstanceDefinition\n\nupdate_type = rs.ComboListBox([\"Embedded\", \"Linked\"])\nif update_type == \"Embedded\" and \\\nblock_definition.UpdateType == Rhino.DocObjects.InstanceDefinitionUpdateType.Linked:\n    if rs.SetUserText(block_id, key=\"SourceArchive\", \n                    value=block_definition.SourceArchive):\n        sc.doc.InstanceDefinitions.ModifySourceArchive(block_definition.Index,\n                                         block_definition.SourceArchive,\n                                         Rhino.DocObjects.InstanceDefinitionUpdateType.Static,\n                                         quiet=1)\n\n# use Static instead of Embedded\n# Rhino will default to Static even if Embedded was set in ModifySourceArchive function\n# https://...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport scriptcontext as sc\n\ndef SetUserTextInstanceDef():\n    block_id = rs.GetObject(\"select instance\", filter=4096, preselect=False)\n    instanceDef = rs.coercerhinoobject(block_id).InstanceDefinition\n    instanceDef.UserDictionary.Set(\"key4\",\"value4\")\n\nif __name__==\"__main__\":\n    SetUserTextInstanceDef()",
+      "language": "python",
+      "author": "Tom_P",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport scriptcontext as sc\n\ndef GetUserTextInstanceDef():\n    block_id = rs.GetObject(\"select instance\", filter=4096, preselect=False)\n    instanceDef = rs.coercerhinoobject(block_id).InstanceDefinition\n    key = \"key4\"\n    if instanceDef.UserDictionary.ContainsKey(key):\n        value = instanceDef.UserDictionary.GetString(key)\n        print('value = ' + value)\n    else:\n        print('key not found')\n\nif __name__==\"__main__\":\n    GetUserTextInstanceDef()",
+      "language": "python",
+      "author": "Tom_P",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nblock_id = rs.GetObject(filter=4096, preselect=True)\nblock_definition = rs.coercerhinoobject(block_id).InstanceDefinition\n\nupdate_type = rs.ComboListBox([\"Embedded\", \"Linked\"])\nif update_type == \"Embedded\" and \\\nblock_definition.UpdateType == Rhino.DocObjects.InstanceDefinitionUpdateType.Linked:\n    if rs.SetUserText(block_id, key=\"SourceArchive\", \n                    value=block_definition.SourceArchive):\n        sc.doc.InstanceDefinitions.ModifySourceArchive(block_definition.Index,\n                                         block_definition.SourceArchive,\n                                         Rhino.DocObjects.InstanceDefinitionUpdateType.Static,\n                                         quiet=1)\n\n# use Static instead of Embedded\n# Rhino will default to Static even if Embedded was set in ModifySourceArchive function\n# https://github.com/mcneel/rhinocommon/blob/master/dotnet/rhino/rhinosdkinstance.cs#L23\nif update_type == \"Linked\" and \\\nblock_definition.UpdateType == Rhino.DocObjects.InstanceDefinitionUpdateType.Static:\n    # you can't store user text on block definition \n    # and I'd rather not use the description field\n    # so store it on the first block instance user clicked and\n    # iterate through all of them (hoping that wasn't deleted)\n    # don't want to store it in document, because the block may be renamed/reinserted\n    # https://discourse.mcneel.com/t/can-you-add-user-text-to-block-definition/150530\n    for block_instance_id in rs.BlockInstances(block_definition.Name):\n        block_instance_source_archive = rs.GetUserText(block_instance_id, key=\"SourceArchive\")\n        if block_instance_source_archive:\n            model_base_point = Rhino.FileIO.File3dm.Read(block_instance_source_archive).Settings.ModelBasepoint\n            sc.doc.ModelBasepoint = model_base_point\n            rs.Command(\"-Cplane World Top\")\n            rs.Command(\"-Insert File=No \" + chr(34) + block_definition.Name + chr(34) + \" Block \" + str(model_base_point) + \" 1 0\")\n            rs.Command(\"SelLast\")\n            rs.Command(\"Explode\")\n            rs.Command(\"-Export \" + chr(34) + block_instance_source_archive + chr(34))\n            rs.Command(\"Delete\")\n            sc.doc.ModelBasepoint = Rhino.Geometry.Point3d(0,0,0)\n            \n            sc.doc.InstanceDefinitions.ModifySourceArchive(block_definition.Index,\n                                         block_instance_source_archive,\n                                         Rhino.DocObjects.InstanceDefinitionUpdateType.Linked,\n                                         quiet=1)\n            \n            # use the first one found - problably should \n            # add extra checks in case there are multiple paths\n            break\n        else:\n            raise Exception(\"Couldn't find file path for the Linked Block in any of its instances\")",
+      "language": "python",
+      "author": "Daniel_Krajnik",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 569
+}

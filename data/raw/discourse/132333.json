@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rebuild-a-curve-with-no-inflection-points/132333",
+  "topic_id": 132333,
+  "title": "Rebuild a curve with no inflection points",
+  "question": "Is there an easy way to do this? The rebuild command always puts some small inflections when I rebuild two lines connected with a radius fillet. I use manual point manipulation or the fair command to force the curve to only have curvature in one direction. Is there an easier way to do this? Has anyone written a grasshopper script that does this?\n\n\n\n\nScreenshot 2021-10-27 120016\n1567×784 19.4 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef main():\n    \n    gCrvs = rs.GetObjects(\n        \"Select curves\",\n        filter=rs.filter.curve,\n        preselect=True)\n    if gCrvs is None: return\n    \n    for gCrv in gCrvs:\n        crv = rs.coercecurve(gCrv)\n        \n        nc0 = crv.ToNurbsCurve() # Regardless if crv already is one.\n        \n        ncs_WIP = []\n        devs = []\n        \n        for iDeg in range(1, 11+1):\n            \n            if nc0.Points.Count < (iDeg + 1):\n                break\n            \n            nc_WIP = rg.NurbsCurve.Create(\n                periodic=nc0.IsPeriodic,\n                degree=iDeg,\n                points=[cp.Location for cp in nc0.Points])\n            \n            if nc_WIP is None:\n                continue\n            \n            rc = rg.Curve.GetDistancesBetweenCurves(\n                nc_WIP, nc0, tolerance=0.1*sc.doc.ModelAbsoluteTolerance)\n            \n            if not rc[0]:\n                continue\n            \n            ncs_WIP.append(nc_WIP)\n            \n            devs.append(rc[1])\n        \n        if len(ncs_WIP) == 0:\n            print \"No curves were generated for {}.\".format(gCrv)\n            continue\n        \n        nc_LeastDev = ncs_WIP[devs.index(min(devs))]\n        \n        nc_LeastDev.Domain = nc0.Domain\n        \n        if (\n            isinstance(crv, rg.NurbsCurve) and\n            nc_LeastDev.EpsilonEquals(nc0, Rhino.RhinoMath.ZeroTolerance)\n        ):\n            print \"Input and output curves are equivalent for {}.\".format(gCrv)\n        else:\n            gOut = sc.doc.Objects.AddCurve(curve=nc_LeastDev)\n            if gOut == gOut.Empty:\n                print \"Could not add curve to document.\"\n                continue\n            \n            sc.doc.Objects.Select(objectId=gOut)\n    \n    sc.doc.Views.Redraw()\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 6,
+  "views": 789
+}

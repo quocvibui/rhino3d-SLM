@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unroll-addfollowinggeometry-overloads-ienumerable-rhino-geometry-curve-bug/126899",
+  "topic_id": 126899,
+  "title": "unroll.AddFollowingGeometry.Overloads[IEnumerable[Rhino.Geometry.Curve]] bug?",
+  "question": "I’m having an issue with unrolled curves being indexed in reverse.\n\nIn other words:\n\nOn some breps curves would get indexed in proper order, on some in reversed.\n\nSame breps would get indexed the same unless something is changed/modified.\n\nHow do I determine that before assigning attributes to unrolled curves?\n\nOr how do I make them get indexed one way?\n\n\nAssembling curves list:\n\n\n    for j in panel:\n        if typ == Rhino.Geometry.LineCurve\\\n            or typ == Rhino.Geometry.ArcCurve\\\n            or typ == Rhino.Geometry.NurbsCurve\\\n            or typ == Rhino.Geometry.PolyCurve\\\n            or typ == Rhino.Geometry.PolylineCurve:\n                panelcrvs.append(j)\n                crvsgeo.append(j.Geometry)\n\n\n\nPerforming unroll:\n\n\n    unroll = Rhino.Geometry.Unroller(panelsrf.BrepGeometry)\n    unroll.AddFollowingGeometry.Overloads[IEnumerable[Rhino.Geometry.Curve]](crvsgeo)\n    unroll.AddFollowingGeometry.Overloads[IEnumerable[Rhino.Geometry.TextDot]](dotsgeo)\n    unroll.ExplodeOutput = False\n    pbreps, pcurves, ppoints, pdots = unroll.PerformUnroll()\n\n\n\nTransferring attributes:\n\n\n    if pcurves:\n        for j in range(pcurves.Count):\n            attr = panelcrvs[j].Attributes\n            attr.RemoveFromAllGroups()\n            curves.append(Rhino.DocObjects.ObjRef(sc.doc.Objects.AddCurve(pcurves[j], attr)).Object())\n\n\n\nResult:\n\n\nimage\n1036×682 17.3 KB\n\n\nTransferring attributes in reverse order:\n\n\n    if pcurves:\n        rev = pcurves.Count - 1\n        for j in range(pcurves.Count):\n            attr = panelcrvs[rev - j].Attributes\n            attr.RemoveFromAllGroups()\n            curves.append(Rhino.DocObjects.ObjRef(sc.doc.Objects.AddCurve(pcurves[j], attr)).Object())\n\n\n\nimage\n1117×761 16.9 KB",
+  "code_blocks": [
+    {
+      "code": "for j in panel:\n        if typ == Rhino.Geometry.LineCurve\\\n            or typ == Rhino.Geometry.ArcCurve\\\n            or typ == Rhino.Geometry.NurbsCurve\\\n            or typ == Rhino.Geometry.PolyCurve\\\n            or typ == Rhino.Geometry.PolylineCurve:\n                panelcrvs.append(j)\n                crvsgeo.append(j.Geometry)",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "unroll = Rhino.Geometry.Unroller(panelsrf.BrepGeometry)\n    unroll.AddFollowingGeometry.Overloads[IEnumerable[Rhino.Geometry.Curve]](crvsgeo)\n    unroll.AddFollowingGeometry.Overloads[IEnumerable[Rhino.Geometry.TextDot]](dotsgeo)\n    unroll.ExplodeOutput = False\n    pbreps, pcurves, ppoints, pdots = unroll.PerformUnroll()",
+      "language": "unknown",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "if pcurves:\n        for j in range(pcurves.Count):\n            attr = panelcrvs[j].Attributes\n            attr.RemoveFromAllGroups()\n            curves.append(Rhino.DocObjects.ObjRef(sc.doc.Objects.AddCurve(pcurves[j], attr)).Object())",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "if pcurves:\n        rev = pcurves.Count - 1\n        for j in range(pcurves.Count):\n            attr = panelcrvs[rev - j].Attributes\n            attr.RemoveFromAllGroups()\n            curves.append(Rhino.DocObjects.ObjRef(sc.doc.Objects.AddCurve(pcurves[j], attr)).Object())",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "nurbs",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 366
+}

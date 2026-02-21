@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/a01110946/timber_framing_generator/blob/0b689e23c0ee24a9cfbdf280b219f659a54afd43/src/timber_framing_generator/framing_elements/framing_geometry.py",
+  "repo": "a01110946/timber_framing_generator",
+  "repo_stars": 3,
+  "repo_description": "A Python tool bridging Revit and Rhino through Rhino.Inside.Revit to automate timber frame design. Processes Revit walls to generate complete framing solutions including studs, plates, headers, and cripples. Features intelligent wall decomposition, opening analysis, and automated documentation generation.",
+  "license": "unknown",
+  "filepath": "src/timber_framing_generator/framing_elements/framing_geometry.py",
+  "instruction": "File: timber_framing_generator/framing_elements/framing_geometry.py",
+  "code": "# File: timber_framing_generator/framing_elements/framing_geometry.py\n\nimport sys\nfrom typing import Dict, Any\n\n# Check if we're running in Grasshopper/Rhino\nis_rhino_environment = 'rhinoscriptsyntax' in sys.modules or 'Rhino' in sys.modules\n\n# Only import rhinoinside if not already in Rhino environment\nif not is_rhino_environment:\n    import rhinoinside\n    rhinoinside.load(r\"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Rhino 8\")\n    import Rhino  # type: ignore\n    import Rhino.Geometry as rg  # type: ignore\nelse:\n    # If in Rhino, directly import Rhino.Geometry\n    import Rhino  # type: ignore\n    import Rhino.Geometry as rg  # type: ignore\n\n\ndef create_stud_profile(\n    base_point: rg.Point3d, base_plane: rg.Plane, stud_width: float, stud_depth: float\n) -> rg.Rectangle3d:\n    \"\"\"\n    Creates a rectangular profile for a stud element, centered on its reference point.\n\n    This function creates a profile that:\n    1. Is centered on the base_point\n    2. Is oriented according to the base_plane\n    3. Has dimensions specified by stud_width and stud_depth\n\n    Args:\n        base_point: Center point for the profile\n        base_plane: Reference plane for orientation\n        stud_width: Width of the stud (across the wall thickness)\n        stud_depth: Depth of the stud (along the wall direction)\n\n    Returns:\n        A Rectangle3d representing the stud profile\n    \"\"\"\n    # Create a profile plane where:\n    # - XAxis goes into the wall (for width)\n    # - YAxis goes along the wall (for depth)\n    profile_plane = rg.Plane(\n        base_point,\n        base_plane.XAxis,  # Normal points into wall\n        base_plane.YAxis,  # Profile's up direction along wall\n    )\n\n    profile_rect = rg.Rectangle3d(\n        profile_plane,\n        rg.Interval(-stud_width / 2, stud_width / 2),  # Centered depth\n        rg.Interval(-stud_depth / 2, stud_depth / 2),  # Centered width\n    )\n\n    # Create the rectangle with width going into wall, depth along wall\n    return profile_rect\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

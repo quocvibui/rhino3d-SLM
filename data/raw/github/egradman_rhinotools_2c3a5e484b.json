@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/egradman/rhinotools/blob/db6e79170674b887c00ad096eba3ba834382a98d/mortisetenon.py",
+  "repo": "egradman/rhinotools",
+  "repo_stars": 23,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "mortisetenon.py",
+  "instruction": "mortise and tenon generator for rhino3d",
+  "code": "\"\"\"\nmortise and tenon generator for rhino3d\n\"\"\"\n\nimport Rhino\nimport System.Guid\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nfrom getsubsurface import GetSubSurface\n\ndef main():\n  to_delete = []\n\n  rs.ProjectOsnaps(False)\n\n  positive_object = rs.GetObject(\"select positive object\", 16)\n  negative_object = rs.GetObject(\"select negative object\", 16)\n  rs.HideObject(negative_object)\n\n  polysurface, face = GetSubSurface(\"select tenon surface\")\n  to_delete.append(face)\n\n  normal = rs.VectorUnitize(rs.SurfaceNormal(face, (0.5,0.5)))\n  plane = rs.PlaneFromNormal(rs.EvaluateSurface(face, 0.5, 0.5), normal)\n  rs.ViewCPlane(plane=plane)\n  rs.ProjectOsnaps(True)\n\n  tenon_rects = rs.GetObjects(message=\"select tenon curves\", filter=4)\n\n  tenon_faces = []\n  for rect in tenon_rects:\n    tenon_faces.append(rs.AddPlanarSrf(rect)[0])\n\n  rs.ShowObject(negative_object)\n\n  rs.ProjectOsnaps(False)\n  height_pt = rs.GetPoint(\"enter height point\")\n\n  # compule a vector normal to plane of the desired height\n  extrude_vec_a = rs.EvaluateSurface(face, 0.5, 0.5)\n  dist = rs.DistanceToPlane(plane, height_pt)\n  extrude_vec_b = [ dist * el for el in normal]\n  extrude_vec_b = rs.VectorAdd(extrude_vec_a, extrude_vec_b)\n  extrude_curve = rs.AddCurve((extrude_vec_a, extrude_vec_b))\n  to_delete.append(extrude_curve)\n\n  tenons = []\n  for tenon_face in tenon_faces:\n    tenon = rs.ExtrudeSurface(tenon_face, extrude_curve)\n    tenons.append(tenon)\n\n  rs.BooleanUnion([positive_object] + tenons, delete_input=False)\n  rs.BooleanDifference([negative_object], tenons, delete_input=False)\n\n  to_delete.append(positive_object)\n  to_delete.append(negative_object)\n\n  rs.DeleteObjects(to_delete)\n  rs.DeleteObjects(tenon_faces)\n  rs.DeleteObjects(tenons)\n\nif __name__ == '__main__':\n  main()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

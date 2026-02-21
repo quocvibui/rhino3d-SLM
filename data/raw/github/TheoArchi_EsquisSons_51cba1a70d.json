@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TheoArchi/EsquisSons/blob/00d1b02f7ce3e190b5c4c3429d3e84756c29bfdb/WIP_ESQUISSONS%20PYTHON%20FILES/Built_Environment.py",
+  "repo": "TheoArchi/EsquisSons",
+  "repo_stars": 3,
+  "repo_description": "Esquissons is a grasshopper plugin which help you to design with sound ;)",
+  "license": "NOASSERTION",
+  "filepath": "WIP_ESQUISSONS PYTHON FILES/Built_Environment.py",
+  "instruction": "EsquisSons Built Environment allows to transform geometries into envirronment for the sonic sketch.\r\nYou can connect multiple brep to one component. Avoid flat surfaces.\r\n-\r\nAAU / Theo Marchal / BETA...",
+  "code": "\"\"\"EsquisSons Built Environment allows to transform geometries into envirronment for the sonic sketch.\r\nYou can connect multiple brep to one component. Avoid flat surfaces.\r\n-\r\nAAU / Theo Marchal / BETA VERSION / AVRIL2020\r\nWith the Contribution of Manon COUTIER & Domitille GRANDJEAN\"\"\"\r\n\r\nfrom ghpythonlib.componentbase import executingcomponent as component\r\nimport Grasshopper, GhPython\r\nimport System\r\nimport Rhino\r\nimport rhinoscriptsyntax as rs\r\nimport Grasshopper.Kernel as gh\r\n\r\n\r\nclass BuiltEnvironment(component):\r\n\r\n    def RunScript(self, environment_geo, _opacity, _abs_coef):\r\n\r\n        # block init\r\n        __author__ = \"theomarchal\"\r\n        self.Params.Input[\r\n            0].Description = \"Built Environment : Use brep ; You can connect multiple brep, Avoid flat surfaces and meshes ;)\"\r\n        self.Params.Input[\r\n            1].Description = \"*Optional* Geometry acoustic opacity [Between 1 and 10]  (if none or 0, default = 4)\"\r\n        self.Params.Input[\r\n            2].Description = \"*Optional* Absorption coefficient of the geometry [Float number between 0.01 and 0.99] (if none = 0.4)\"\r\n        self.Params.Output[0].Description = \"Environment representation\"\r\n        self.Params.Output[1].Description = \"Environment object (plug it into EsquisSons MainEngine)\"\r\n        self.Name = \"Built Environment\"\r\n        self.NickName = \"Environment\"\r\n        self.Message = \"EsquisSons V3\"\r\n        self.Category = \"EsquisSons\"\r\n        self.SubCategory = \"1/ Scene\"\r\n\r\n        # environment_geo check\r\n        if environment_geo is None:\r\n            self.AddRuntimeMessage(gh.GH_RuntimeMessageLevel.Warning, 'You must link a geometry to environment_geo')\r\n        if rs.IsMesh(environment_geo):\r\n            self.AddRuntimeMessage(gh.GH_RuntimeMessageLevel.Error,\r\n                                   \"You cannot use meshes here... sorry about that, we'll figure it out !\")\r\n\r\n        # _opacity and _abs_coef default values\r\n        if _opacity <= 0 or _opacity is None:\r\n            _opacity = 4\r\n        if _abs_coef <= 0 or _abs_coef is None:\r\n            _abs_coef = 0.4\r\n\r\n        # creation of an environment (as a list of list)\r\n        geometry = [environment_geo, _opacity, _abs_coef]\r\n        environment = [geometry]\r\n\r\n        print\r\n        environment\r\n\r\n        environment_preview = environment_geo\r\n\r\n        return (environment_preview, environment)\r\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

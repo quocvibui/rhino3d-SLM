@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pythonevaluate-in-rhino-compute/90877",
+  "topic_id": 90877,
+  "title": "PythonEvaluate in Rhino.Compute",
+  "question": "Has anyone experimented with compute_rhino3d.Util.PythonEvaluate(script, input, output)?\n\nIt’s supposed to take a python script as a string and evaluate that inside compute server and return the result, I just started playing around and it seems to exactly do that.\n\nWell I tested it with a very basic example below:\n\n\nscript=\"\"\"\nc=a+b\n\"\"\"\nresult = compute_rhino3d.Util.PythonEvaluate(script,{\"a\":3, \"b\":5},[\"c\"])\n\n\n\nAnd I get result = {c: 8}\n\n\nBut I’m running into issues trying to get non-text outputs out. For example:\n\n\nscript=\"\"\"\nimport Rhino\nplane = Rhino.Geometry.Plane.WorldXY\nc = Rhino.Geometry.Circle(plane,r)\n\"\"\"\nresult = compute_rhino3d.Util.PythonEvaluate(script,{\"r\":3},[\"c\"])\n\n\n\nGives me the error below:\n\n\nPythonEvaluate\n    output = rhino3dm.ArchivableDictionary.DecodeDict(json.loads(response))\n  File \"/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/lib/python3.7/json/__init__.py\", line 341, in loads\n    raise TypeError(f'the JSON object must be str, bytes or bytearray, '\n\n\n\nWhich I think means that the output is not the type expected.\n\nMy question is what’s the proper way to convert the circle in this case to an accepted type (str, bytes or bytearray) that can be decoded to rhino geometry later in the host application using \nrhino3dm.CommonObject.Decode(data)\n ?",
+  "code_blocks": [
+    {
+      "code": "script=\"\"\"\nimport Rhino\nplane = Rhino.Geometry.Plane.WorldXY\nc = Rhino.Geometry.Circle(plane,r)\n\"\"\"\nresult = compute_rhino3d.Util.PythonEvaluate(script,{\"r\":3},[\"c\"])",
+      "language": "unknown",
+      "author": "mkarimi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 90,
+  "posts_count": 3,
+  "views": 976
+}

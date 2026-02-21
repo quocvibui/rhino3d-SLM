@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/movegrips-encountered-some-problems/39442",
+  "topic_id": 39442,
+  "title": "MoveGrips encountered some problems",
+  "question": "Hello everyone\n\nI want to move the control point to the curve,But I have some problems.Only the first control point is correct, the other is not the result I want.\n\nI want to do this effect.\n\nmy code：\n\n\n#coding=utf-8\nimport Rhino.Geometry as rg\nimport Rhino as r\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nresult,grips = r.Input.RhinoGet.GetGrips(\"选择要移动的控制点\")\ncurve = rs.GetObject(\"选择用于干扰的曲线\",rs.filter.curve)\ndis = {}\nif (result == r.Commands.Result.Success and curve):\n    geo_curve = sc.doc.Objects.Find(curve).Geometry\n    t = 0\n    for i in grips:\n        oid = i.OwnerId\n        obj = sc.doc.Objects.Find(oid)\n        if (obj and dis.has_key(oid)==False):\n            dis.Add(oid,obj)\n        Bool = geo_curve.ClosestPoint(i.Geometry.Location,t)\n        if Bool[0]:\n            cpt = geo_curve.PointAt(Bool[1])\n            i.Move(cpt)\nfor guid in dis:\n    if dis[guid]:\n        sc.doc.Objects.GripUpdate(dis[guid],True)\n\nsc.doc.Views.Redraw()\n\n\n\nMoveGrips.py\n (824 Bytes)\n\n\nMoveGrips.3dm\n (559.5 KB)\n\n\nQQ截图20161207233116.png\n1071×640 118 KB\n\n\n\n\nThanks\n\n——NARUTO",
+  "code_blocks": [
+    {
+      "code": "#coding=utf-8\nimport Rhino.Geometry as rg\nimport Rhino as r\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nresult,grips = r.Input.RhinoGet.GetGrips(\"选择要移动的控制点\")\ncurve = rs.GetObject(\"选择用于干扰的曲线\",rs.filter.curve)\ndis = {}\nif (result == r.Commands.Result.Success and curve):\n    geo_curve = sc.doc.Objects.Find(curve).Geometry\n    t = 0\n    for i in grips:\n        oid = i.OwnerId\n        obj = sc.doc.Objects.Find(oid)\n        if (obj and dis.has_key(oid)==False):\n            dis.Add(oid,obj)\n        Bool = geo_curve.ClosestPoint(i.Geometry.Location,t)\n        if Bool[0]:\n            cpt = geo_curve.PointAt(Bool[1])\n            i.Move(cpt)\nfor guid in dis:\n    if dis[guid]:\n        sc.doc.Objects.GripUpdate(dis[guid],True)\n\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 807
+}

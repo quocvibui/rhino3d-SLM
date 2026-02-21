@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/JobdeVogel/Solar-Irradiation-Prediction/blob/ce25b61727edaaaeb0e965bb821506de01cb0dcc/dataset/input_output/load.py",
+  "repo": "JobdeVogel/Solar-Irradiation-Prediction",
+  "repo_stars": 0,
+  "repo_description": "Graduation repository for Master Building Technology",
+  "license": "unknown",
+  "filepath": "dataset/input_output/load.py",
+  "instruction": null,
+  "code": "import Rhino.Geometry as rg\n\nimport Rhino\nimport json\nimport numpy as np\nimport pickle\n\n# Honeybee Core dependencies\nfrom honeybee.model import Model\n\n# Load a mesh from a json file\ndef load_mesh_from_json(name, folder, mesh_types):\n    path = folder + \"/\" + name + \".json\"\n\n    with open(path, \"r\") as file:\n        data = json.load(file)\n\n    if isinstance(mesh_types, str):\n        if mesh_types == 'meta':\n            return data['meta']\n        else:\n            return [rg.Mesh.FromJSON(data[mesh_types])], data['meta']\n    else:\n        meta = data['meta']\n        data.pop('meta')\n        meshes = []\n        \n        for key in data.keys():\n            meshes.append(rg.Mesh.FromJSON(data[key]))\n        \n        return meshes, meta\n\n# Load a mesh from a json file\ndef load_outlines_from_json(name, folder):\n    path = folder + \"/\" + name + \".json\"\n\n    with open(path, \"r\") as file:\n        data = json.load(file)\n\n    curves = []\n    for key in data.keys():\n        curves.append(rg.NurbsCurve.FromJSON(data[key]))\n        \n    return data\n\ndef load_array(file):\n     return np.load(file)\n\ndef load_array_as_list(name, folder):\n    path = folder + \"/\" + name + \".json\"\n    \n    with open(path, 'r') as file:\n        data = json.load(file)\n    \n    data = json.loads(data)\n        \n    # with open(file, 'rb') as file:\n    #     data = pickle.load(file)\n    \n    return data\n\n# Load an HB model from a file\ndef load_hbjson(name, folder):\n    path = folder + \"/\" + name + \".hbjson\"\n    model = Model.from_file(path)\n    \n    return model",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

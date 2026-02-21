@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/layer-fullpath-returns-differing-results/36185",
+  "topic_id": 36185,
+  "title": "layer.FullPath returns differing results",
+  "question": "When using layer.FullPath on the DocObject layer it is returning the \nlayer.Name\n rather than the full path.  However once the layer has been added to the document, doc.Layers[layerIndex].FullPath gets the correct value.\n\n\nIs this how the layer.FullPath was intended to function?  Below is some example code.\n\n\nimport Rhino\nimport scriptcontext\n\nparent = Rhino.DocObjects.Layer.GetDefaultLayerProperties()\nparent.Name = \"Parent\"\nparentIndex = scriptcontext.doc.Layers.Add(parent)\nparentId = scriptcontext.doc.Layers[parentIndex].Id\n\nchild = Rhino.DocObjects.Layer.GetDefaultLayerProperties()\nchild.Name = \"Child\"\nchild.ParentLayerId = parentId\n\nchildIndex = scriptcontext.doc.Layers.Add(child)\nchildLayer = scriptcontext.doc.Layers[childIndex]\n\nprint child.FullPath        ## prints Child ##\n\nprint childLayer.FullPath   ## prints Parent::Child ##\n\n\n\nThanks,",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\nparent = Rhino.DocObjects.Layer.GetDefaultLayerProperties()\nparent.Name = \"Parent\"\nparentIndex = scriptcontext.doc.Layers.Add(parent)\nparentId = scriptcontext.doc.Layers[parentIndex].Id\n\nchild = Rhino.DocObjects.Layer.GetDefaultLayerProperties()\nchild.Name = \"Child\"\nchild.ParentLayerId = parentId\n\nchildIndex = scriptcontext.doc.Layers.Add(child)\nchildLayer = scriptcontext.doc.Layers[childIndex]\n\nprint child.FullPath        ## prints Child ##\n\nprint childLayer.FullPath   ## prints Parent::Child ##",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 669
+}

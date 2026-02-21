@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-find-adjacent-breps/125303",
+  "topic_id": 125303,
+  "title": "How to find adjacent breps?",
+  "question": "How to script a component that finds if two or more breps are adjacent one to the other?\n\nI need to script a component that assesses if two or more breps are adjacent, they need to have at least one surface or part of it touching but they do not have to intersect. I tried using the Intersect and IsPointInside methods but I couldn’t find a solution.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef Main(tolerance = None):\n    brep1 = rs.GetObject(\"Select the first brep\", rs.filter.surface | rs.filter.polysurface)\n    if brep1:\n        brep2 = rs.GetObject(\"Select the second\", rs.filter.surface | rs.filter.polysurface)\n        if brep2: \n            brep1 = rs.coercebrep(brep1, True)\n            brep2 = rs.coercebrep(brep2, True)\n            if tolerance is None or tolerance < 0.0:\n                tolerance = sc.doc.ModelAbsoluteTolerance\n            rc = rg.Intersect.Intersection.BrepBrep(brep1, brep2, tolerance)\n            if not rc[0]:\n                return None\n            out_curves = rc[1]\n            out_points = rc[2]\n            if out_curves or out_points:\n                print(\"The breps intersect\")\n            else: print(\"The breps do not intersect\")\n\nif __name__ == \"__main__\":\n    Main()",
+      "language": "python",
+      "author": "Dromaius",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 406
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/temporarily-suspend-mouse-wheel-zooming/185294",
+  "topic_id": 185294,
+  "title": "Temporarily suspend mouse wheel zooming?",
+  "question": "Hello,\n\n\nI’m fiddling about using the mouse wheel as an input, using the keyboard and mouse modules to intercept the events.  The sketch below gives the idea.\n\n\nFor it to be useful, I would need to temporarily suspend the mouse wheel zooming the display.  Does anyone have any suggestions how that may be done?\n\n\nBest, Paul.\n\n\n#! python3\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\nimport Rhino.Commands as rc\nimport Rhino.Input.Custom as ric\n\nimport System\nimport System.Drawing\nimport System.Collections.Generic\nimport math\n\n#r: keyboard, mouse\nimport keyboard\nimport mouse\n\nclass GetCircleRadiusPoint (ric.GetPoint):\n\n    def __init__(self, initial_radius):\n        ric.GetPoint.__init__(self)\n        self.line_color = System.Drawing.Color.FromArgb(255,0,0)\n        self.keydown = False\n        self.radius = initial_radius\n\n    def HookaKey(self, key):\n        keyboard.on_press_key(key, self.KeyboardDownfunc)\n        keyboard.on_release_key(key, self.KeyboardUpfunc)\n\n    def UnHook(self):\n        keyboard.unhook_all()\n        mouse.unhook_all()\n        \n    def MouseWheelFunc(self, event):\n        if isinstance(event, mouse.WheelEvent):\n            #print('wheel:', event.delta, event.time)\n            self.radius += int(event.delta)*200\n    \n    def KeyboardDownfunc(self, event):\n        if isinstance(event, keyboard.KeyboardEvent):\n            if not self.keydown: \n                mouse.hook(self.MouseWheelFunc)\n                self.keydown = True\n\n    def KeyboardUpfunc(self, event):\n        if isinstance(event, keyboard.KeyboardEvent):\n            self.keydown = False\n            mouse.unhook_all()\n\n    def OnDynamicDraw(self, e):\n        cplane = e.RhinoDoc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        circle = rg.Circle(cplane, e.CurrentPoint, self.radius)\n        e.Display.DrawCircle(circle, self.line_color)\n\n\ndef RunCommand():\n    '''\n    Change circle radius with mouse wheel while 'b' key is depr...",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport Rhino.ApplicationSettings as appsettings\n#get zoomscale\ndbZoomScale = appsettings.ViewSettings.ZoomScale\n#set zoomscale\nappsettings.ViewSettings.ZoomScale = 1",
+      "language": "python",
+      "author": "Jarek",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "#! python3\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport Rhino.Geometry as rg\nimport Rhino.Commands as rc\nimport Rhino.Input.Custom as ric\n\nimport System\nimport System.Drawing\nimport System.Collections.Generic\nimport math\n\n#r: keyboard, mouse\nimport keyboard\nimport mouse\n\nclass GetCircleRadiusPoint (ric.GetPoint):\n\n    def __init__(self, initial_radius):\n        ric.GetPoint.__init__(self)\n        self.line_color = System.Drawing.Color.FromArgb(255,0,0)\n        self.keydown = False\n        self.radius = initial_radius\n\n    def HookaKey(self, key):\n        keyboard.on_press_key(key, self.KeyboardDownfunc)\n        keyboard.on_release_key(key, self.KeyboardUpfunc)\n\n    def UnHook(self):\n        keyboard.unhook_all()\n        mouse.unhook_all()\n        \n    def MouseWheelFunc(self, event):\n        if isinstance(event, mouse.WheelEvent):\n            #print('wheel:', event.delta, event.time)\n            self.radius += int(event.delta)*200\n    \n    def KeyboardDownfunc(self, event):\n        if isinstance(event, keyboard.KeyboardEvent):\n            if not self.keydown: \n                mouse.hook(self.MouseWheelFunc)\n                self.keydown = True\n\n    def KeyboardUpfunc(self, event):\n        if isinstance(event, keyboard.KeyboardEvent):\n            self.keydown = False\n            mouse.unhook_all()\n\n    def OnDynamicDraw(self, e):\n        cplane = e.RhinoDoc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n        circle = rg.Circle(cplane, e.CurrentPoint, self.radius)\n        e.Display.DrawCircle(circle, self.line_color)\n\n\ndef RunCommand():\n    '''\n    Change circle radius with mouse wheel while 'b' key is depressed\n    '''\n    gcp = GetCircleRadiusPoint(400)\n    gcp.SetCommandPrompt('Radius')\n    gcp.ConstrainToConstructionPlane(False)\n    gcp.HookaKey('b')\n    gcp.Get()\n    gcp.UnHook()\n    if gcp.CommandResult() != rc.Result.Success:\n        return gcp.CommandResult()   \n    radius = gcp.radius\n    center_point = gcp.Point()\n    gcp.Dispose()\n    cplane = sc.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    sc.doc.Objects.AddCircle(rg.Circle(cplane, center_point, radius))\n    sc.doc.Views.Redraw()\n    return rc.Result.Success\n\nif __name__ == '__main__':\n    RunCommand()",
+      "language": "python",
+      "author": "Greenbox",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 177
+}

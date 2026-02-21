@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas-IGS/blob/be44e0ba12ce1156015b02b0ab9dd61c8006fc85/commands/IGS_form_select_ind.py",
+  "repo": "BlockResearchGroup/compas-IGS",
+  "repo_stars": 1,
+  "repo_description": "Rhino plugin for Interactive Graphic Statics using an algebraic graph-based approach to graphic statics",
+  "license": "MIT",
+  "filepath": "commands/IGS_form_select_ind.py",
+  "instruction": "venv: brg-csd r: compas_session>=0.4.5, compas_ags>=1.3.2",
+  "code": "#! python3\n# venv: brg-csd\n# r: compas_session>=0.4.5, compas_ags>=1.3.2\n\nimport rhinoscriptsyntax as rs  # type: ignore  # noqa: F401\n\nfrom compas_igs.session import IGSSession\n\n# =============================================================================\n# Command\n# =============================================================================\n\n\ndef RunCommand():\n    session = IGSSession()\n\n    form = session.find_formdiagram(warn=True)\n    if not form:\n        return\n\n    # =============================================================================\n    # Conmmand\n    # =============================================================================\n\n    if not form.select_independent_edges():\n        return\n\n    # =============================================================================\n    # Update Scene\n    # =============================================================================\n\n    rs.UnselectAllObjects()\n\n    session.set(\"equilibrium\", False)\n    session.settings.form.show_external_force_labels = False\n    session.settings.form.show_independent_edge_labels = True\n\n    session.scene.redraw()\n\n    if session.settings.autosave:\n        session.record(name=\"Form Select Independent Edges\")\n\n\n# =============================================================================\n# Main\n# =============================================================================\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

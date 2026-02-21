@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/goznauk/rhinoscriptsyntax-extras/blob/dd82e221db60c2bcaabf206875fc2b89ec0380dc/rsextrasScript/surface.py",
+  "repo": "goznauk/rhinoscriptsyntax-extras",
+  "repo_stars": 5,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "rsextrasScript/surface.py",
+  "instruction": "Surface",
+  "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport math\n\ndef SurfaceMidDomain(surface_id) :\n    \"\"\"Returns the mid domain of a surface \n    Parameters:\n      surface_id = the surface's identifier\n    Returns:\n      tuple of the mid domain u, v on success\n    Example:\n      import rsextras as rsext\n      srf = rs.GetObject(\"Select a surface\", rs.filter.surface)\n      if rs.IsSurface(srf):\n        print rsext.SurfaceMidDomain(srf)\t\n    See Also:\n      \n    \"\"\"\n    surface = rs.coercesurface(surface_id, True)\n    u = rs.SurfaceDomain(surface, 0)\n    u = (u[1]+u[0])/2\n    v = rs.SurfaceDomain(surface, 1)\n    v = (v[1]+v[0])/2\n    if u is None or v is None :\n        return scriptcontext.errorhandler()\n    return (u,v)\n\ndef SurfaceMidPoint(surface_id) :\n    \"\"\"Returns the point of mid domain of a surface \n    Parameters:\n      surface_id = the surface's identifier\n    Returns:\n      point of the mid domain of a surface on success\n    Example:\n      import rsextras as rsext\n      srf = rs.GetObject(\"Select a surface\", rs.filter.surface)\n      if rs.IsSurface(srf):\n        print rsext.SurfaceMidPoint(srf)\t\n    See Also:\n      \n    \"\"\"\n    surface = rs.coercesurface(surface_id, True)\n    u,v = getMidDomain(surface)\n    es = rs.EvaluateSurface(surface, u, v)\n    if es is None :\n        return scriptcontext.errorhandler()\n    return es\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

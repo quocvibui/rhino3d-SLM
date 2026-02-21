@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-filewatcher-multiple-recomputes/149813",
+  "topic_id": 149813,
+  "title": "GH_FileWatcher multiple recomputes",
+  "question": "Hi All,\n\n\nI’m working on a (what seemed to be simple) component that fires up a GH_FileWatcher to check if a file has been changed and expire the solution and recompute if it did. For testing purposes I’ve simplified it to this:\n\n\n  private void RunScript(string filePath, bool create, bool dispose, ref object A)\n  {\n    if(create){\n      //create watcher\n      CreateWatcher(filePath);\n    }\n    if(dispose){\n      //dispose all watchers\n      DestroyFileWatchers();\n    }\n\n    i = _fileWatchers.Values.Count();\n    Print(i.ToString() + \" FileWatchers active\");\n\n    A = \"Something changed\";\n  }\n\n  private static readonly Dictionary<string, GH_FileWatcher> _fileWatchers = new Dictionary<string, GH_FileWatcher>();\n  private int i;\n\n  private void CreateWatcher(string fldr)\n  {\n    try\n    {\n      if (!File.Exists(fldr))\n      {\n        MessageBox.Show(\"file doesn't exist: \" + fldr);\n        return;\n      }\n      _fileWatchers[fldr] = GH_FileWatcher.CreateFileWatcher(fldr, GH_FileWatcherEvents.Changed, new GH_FileWatcher.FileChangedSimple(fileChanged));\n    }\n    catch\n    {\n    }\n  }\n\n  private static void DestroyFileWatchers()\n  {\n    foreach (GH_FileWatcher ghFileWatcher in _fileWatchers.Values){\n      if (ghFileWatcher != null){\n        ghFileWatcher.Dispose();\n      }\n    }\n    _fileWatchers.Clear();\n  }\n\n  private void fileChanged(string filePath){\n    //cause the component to fire a new solution.\n    Component.ExpireSolution(true);\n  }\n\n\n\nIt does create the watcher and it also disposes it fine. But when I have (what I think is one) a watcher active, it expires the solution multiple times (usually two). Is there a way to check all active watchers? And did anyone else encounter this issue before?\n\n\nKind regards,\n\n\nMerijn",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(string filePath, bool create, bool dispose, ref object A)\n  {\n    if(create){\n      //create watcher\n      CreateWatcher(filePath);\n    }\n    if(dispose){\n      //dispose all watchers\n      DestroyFileWatchers();\n    }\n\n    i = _fileWatchers.Values.Count();\n    Print(i.ToString() + \" FileWatchers active\");\n\n    A = \"Something changed\";\n  }\n\n  private static readonly Dictionary<string, GH_FileWatcher> _fileWatchers = new Dictionary<string, GH_FileWatcher>();\n  private int i;\n\n  private void CreateWatcher(string fldr)\n  {\n    try\n    {\n      if (!File.Exists(fldr))\n      {\n        MessageBox.Show(\"file doesn't exist: \" + fldr);\n        return;\n      }\n      _fileWatchers[fldr] = GH_FileWatcher.CreateFileWatcher(fldr, GH_FileWatcherEvents.Changed, new GH_FileWatcher.FileChangedSimple(fileChanged));\n    }\n    catch\n    {\n    }\n  }\n\n  private static void DestroyFileWatchers()\n  {\n    foreach (GH_FileWatcher ghFileWatcher in _fileWatchers.Values){\n      if (ghFileWatcher != null){\n        ghFileWatcher.Dispose();\n      }\n    }\n    _fileWatchers.Clear();\n  }\n\n  private void fileChanged(string filePath){\n    //cause the component to fire a new solution.\n    Component.ExpireSolution(true);\n  }",
+      "language": "csharp",
+      "author": "merijndeleur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 480
+}

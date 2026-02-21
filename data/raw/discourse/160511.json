@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/adddetail-script-crashing-rhino/160511",
+  "topic_id": 160511,
+  "title": "AddDetail script crashing Rhino",
+  "question": "I can’t figure out why my script is crashing rhino. I can successfully complete the layout but not the detail.\n\nThe instant before rhino crashes a white rectangle appears on top of all four rhino viewports. Its definitely something that I am doing wrong. Not a rhino problem.\n\n\nscreenshot script\n1711×1349 223 KB\n\n\nLayout.py\n (852 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef AddLayout():\n    scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    page_number = 1\n    if page_views: page_number = len(page_views) + 1\n    pageview = scriptcontext.doc.Views.AddPageView(\"A0_{0}\".format(page_number), 1189, 841)\n    if pageview:\n        top_left = Rhino.Geometry.Point2d(20,821)\n        bottom_right = Rhino.Geometry.Point2d(1169, 20)\n        detail = pageview.AddDetailView(\"ModelView\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n        if detail:\n            pageview.SetActiveDetail(detail.Id)\n            detail.Viewport.ZoomExtents()\n            detail.DetailGeometry.IsProjectionLocked = True\n            detail.DetailGeometry.SetScale(1, scriptcontext.doc.ModelUnitSystem, 10, scriptcontext.doc.PageUnitSystem)\n            # Commit changes tells the document to replace the document's detail object\n            # with the modified one that we just adjusted\n            detail.CommitChanges()\n        pageview.SetPageAsActive()\n        scriptcontext.doc.Views.ActiveView = pageview\n        scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    AddLayout()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 21,
+  "views": 980
+}

@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/copy-nested-blocks-in-place-python/98845",
+  "topic_id": 98845,
+  "title": "Copy nested blocks in place -- python",
+  "question": "i’m trying to copy out the nested blocks but having trouble getting them back in their instance locations, they go back to 0.  Do i need to create a plane at their instance origin and do plane to plane transformation?  It seems to hold some sort of relation to the Top Level Block.\n\n\nMy attempts so far.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\n#Select Block\n#Get all instances of block\n#Explode and get 1st level nested blocks\n#place instance of said block at its locations\n\nselBlks = rs.GetObjects(\"Select Blocks\", 4096)\nblkcpy = []\n\nfor blk in selBlks:\n    name = rs.BlockInstanceName(blk)\n    allBlks = rs.BlockInstances(name)\n    for bk in allBlks:\n        blkObjs = rs.BlockObjects(rs.BlockInstanceName(allBlks[0]))\n        for blkblk in blkObjs:\n            if rs.IsBlockInstance(blkblk):\n                blkcpy.append(blkblk)\n\nrs.CopyObjects(blkcpy)\nprint blkcpy\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n\n#Select Block\n#Get all instances of block\n#Explode and get 1st level nested blocks\n#place instance of said block at its locations\n\nselBlks = rs.GetObjects(\"Select Blocks\", 4096)\n\nfor blk in selBlks:\n    name = rs.BlockInstanceName(blk)\n    allBlks = rs.BlockInstances(name)\n    for bk in allBlks:\n        blkObjs = rs.BlockObjects(rs.BlockInstanceName(allBlks[0]))\n        bkx = rs.BlockInstanceXform(bk)\n        for blkblk in blkObjs:\n            if rs.IsBlockInstance(blkblk):\n                xform = rs.BlockInstanceXform(blkblk)\n                bname = rs.BlockInstanceName(blkblk)\n                #needs transformation of bkx to xform\n                #insrtbk = rs.InsertBlock2(bname, bkx)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\n#Select Block\n#Get all instances of block\n#Explode and get 1st level nested blocks\n#place instance of said block at its locations\n\nselBlks = rs.GetObjects(\"Select Blocks\", 4096)\nblkcpy = []\n\nfor blk in selBlks:\n    name = rs.BlockInstanceName(blk)\n    xform = rs.BlockInstanceXform(blk)\n    allBlks = rs.BlockInstances(name)\n    for bk in allBlks:\n        blkObjs = rs.BlockObjects(rs.BlockInstanceName(allBlks[0]))\n        for blkblk in blkObjs:\n            if rs.IsBlockInstance(blkblk):\n                blkcpy.append(blkblk)\n\nnew = rs.CopyObjects(blkcpy)\nrs.TransformObjects(new, xform, False)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\n#Select Block\n#Get all instances of block\n#Explode and get 1st level nested blocks\n#place instance of said block at its locations\n\nselBlks = rs.GetObjects(\"Select Blocks\", 4096)\n\n\nfor blk in selBlks:\n    blkcpy = []\n    name = rs.BlockInstanceName(blk)\n    xform = rs.BlockInstanceXform(blk)\n    allBlks = rs.BlockInstances(name)\n    for bk in allBlks:\n        blkObjs = rs.BlockObjects(rs.BlockInstanceName(allBlks[0]))\n        for blkblk in blkObjs:\n            if rs.IsBlockInstance(blkblk):\n                blkcpy.append(blkblk)\n\n    new = rs.CopyObjects(blkcpy)\n    rs.TransformObjects(new, xform, False)",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\n#Select Block\n#Get all instances of block\n#Explode and get 1st level nested blocks\n#place instance of said block at its locations\n\nselBlks = rs.GetObjects(\"Select Blocks\", 4096)\nblkcpy = []\n\nfor blk in selBlks:\n    name = rs.BlockInstanceName(blk)\n    allBlks = rs.BlockInstances(name)\n    for bk in allBlks:\n        blkObjs = rs.BlockObjects(rs.BlockInstanceName(allBlks[0]))\n        for blkblk in blkObjs:\n            if rs.IsBlockInstance(blkblk):\n                blkcpy.append(blkblk)\n\nrs.CopyObjects(blkcpy)\nprint blkcpy",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\n\n#Select Block\n#Get all instances of block\n#Explode and get 1st level nested blocks\n#place instance of said block at its locations\n\nselBlks = rs.GetObjects(\"Select Blocks\", 4096)\n\nfor blk in selBlks:\n    name = rs.BlockInstanceName(blk)\n    allBlks = rs.BlockInstances(name)\n    for bk in allBlks:\n        blkObjs = rs.BlockObjects(rs.BlockInstanceName(allBlks[0]))\n        bkx = rs.BlockInstanceXform(bk)\n        for blkblk in blkObjs:\n            if rs.IsBlockInstance(blkblk):\n                xform = rs.BlockInstanceXform(blkblk)\n                bname = rs.BlockInstanceName(blkblk)\n                #needs transformation of bkx to xform\n                #insrtbk = rs.InsertBlock2(bname, bkx)",
+      "language": "python",
+      "author": "Rickson",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 575
+}

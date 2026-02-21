@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/labryga/rhino/blob/041fe843df221b8ab5c6feec92d4adbd6de4be9a/tests/test.py",
+  "repo": "labryga/rhino",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "tests/test.py",
+  "instruction": null,
+  "code": "import rhinoscriptsyntax as rs\nimport math as mt\nfrom random import (randint as ri, uniform as uf)\nimport random\nfrom itertools import product, starmap\n\n\nmap(lambda x: rs.ObjectColor(\n    x[0](listPoints2), x[1]), [\n        (rs.AddPolyline, (222,220,10)),\n        (rs.AddCurve, (22,220,55)),\n        (rs.AddInterpCurve, (0,100,50))\n    ])\n\nmap(rs.AddPoint, listPoints2)\n\nmap(lambda x: rs.AddPoint(x*mt.cos(x), x*mt.sin(x), 0), \n        [x for x in rs.frange(0.0, 70.0, 0.2)])\n\n\n\nrs.AddCurve(\n        [ ((i*mt.cos(i)), (i*mt.sin(i)), i) \n            for i in rs.frange(0.0, 70.0, 0.2)]\n        )\n\nrs.AddCurve(\n        [ tuple( map(lambda x: ri(-100,100), range(3)) ) \n            for i in range(30) ])\n\n\nfor x, y, z in product( *[range(0,256,10) for i in range(3)] ):\n    rs.ObjectColor(\n            rs.AddPoint([x,y,z]), [x,y,z])\n\n#\n# for x, y in product(*[rs.frange(0.0, 10.0, 0.1) for i in range(2)]):\n#     rs.AddPoint(x, y, (mt.sin(x) * mt.cos(y)) )\n#\n#\n# starmap(lambda x,y,z,r,g,b: rs.ObjectColor(\n#     rs.AddPoint(x,y,z), [r,g,b]),\n#     [(ri(0,100),)*3 + (uf(0,255),)*3) for i in range(30)]))\n#\n#\nmap(lambda x: rs.AddPoint(x[0],x[1],x[2]),\n        [tuple(map(lambda x: ri(0,100), range(3))) + tuple(map(lambda x: uf(0,255), \\\n                range(3))) for i in range(10000)])\n\n\ntuple(starmap(lambda x,y,z,r,g,b: rs.ObjectColor(\n    rs.AddPoint(x,y,z), [r,g,b]),\n\n    [tuple( map(lambda x: ri(0,100), range(3)) ) + \\\n            tuple( map(lambda x: uf(0,255), range(3)) ) \n            for i in range(10000)]\n    ))\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

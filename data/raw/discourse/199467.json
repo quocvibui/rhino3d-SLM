@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-use-rhinocommon-to-batch-export-detail-views-from-layout/199467",
+  "topic_id": 199467,
+  "title": "How to use RhinoCommon to batch export detail views from layout",
+  "question": "I need to batch export detail drawings from layout views to PDF, but I currently don’t have a clear approach. Here is the code I have so far. Can anyone help me with this?\n@Dale\n\n\npdf\n1372×716 95.9 KB\n\n\n protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            Rhino.DocObjects.Tables.ViewTable viewTable = Rhino.RhinoDoc.ActiveDoc.Views;\n            var pageViews = doc.Views.GetPageViews();\n            var dir = \"C:\\\\Users\\\\Administrator\\\\Desktop\\\\\";\n            int dpi = 600;\n\n            foreach (var pageView in pageViews)\n            {\n                var pdf = Rhino.FileIO.FilePdf.Create();\n                DetailViewObject[] detailView = pageView.GetDetailViews();\n                foreach (var detailViewItem in detailView)\n                {\n                    detailViewItem.IsActive = true;\n                }\n            }\n            return Result.Success;\n        }\n    }",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n    Rhino.DocObjects.Tables.ViewTable viewTable = Rhino.RhinoDoc.ActiveDoc.Views;\n    string dir = \"C:\\\\Users\\\\jimmy\\\\Desktop\\\\\";\n    int dpi = 600;\n    var pvs = doc.Views.GetPageViews();\n    foreach (var view in pvs)\n    {\n        var dvs = view.GetDetailViews();\n        foreach (DetailViewObject detail in dvs)\n        {\n            var pdf = Rhino.FileIO.FilePdf.Create();\n            view.SetPageAsActive();\n            view.SetActiveDetail(detail.Id);\n            view.SetPageAsActive();\n            int w = Convert.ToInt32(view.PageHeight);\n            int h = Convert.ToInt32(view.PageWidth);\n            System.Drawing.Size size = new System.Drawing.Size(Convert.ToInt32(h * 600 / 25.4), Convert.ToInt32(w * 600 / 25.4));\n            Rhino.Display.ViewCaptureSettings settings = new Rhino.Display.ViewCaptureSettings(view, size, dpi);\n            settings.RasterMode = false;\n            double res = settings.Resolution;\n            pdf.AddPage(settings);\n            string filePath = System.IO.Path.Combine(dir, detail.Id.ToString() + \".pdf\");\n            pdf.Write(filePath);\n\n        }\n    }\n\n    return Result.Success;\n}",
+      "language": "csharp",
+      "author": "Fan",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            Rhino.DocObjects.Tables.ViewTable viewTable = Rhino.RhinoDoc.ActiveDoc.Views;\n            var pageViews = doc.Views.GetPageViews();\n            var dir = \"C:\\\\Users\\\\Administrator\\\\Desktop\\\\\";\n            int dpi = 600;\n\n            foreach (var pageView in pageViews)\n            {\n                var pdf = Rhino.FileIO.FilePdf.Create();\n                DetailViewObject[] detailView = pageView.GetDetailViews();\n                foreach (var detailViewItem in detailView)\n                {\n                    detailViewItem.IsActive = true;\n                }\n            }\n            return Result.Success;\n        }\n    }",
+      "language": "csharp",
+      "author": "Fan",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 101
+}

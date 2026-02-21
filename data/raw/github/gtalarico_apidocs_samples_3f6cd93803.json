@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_extendsurface.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_extendsurface.py",
+  "instruction": "Ex extendsurface",
+  "code": "import Rhino\nfrom Rhino.Input.Custom import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  go = Rhino.Input.Custom.GetObject()\n  go.SetCommandPrompt(\"Select edge of surface to extend\")\n  go.GeometryFilter = ObjectType.EdgeFilter\n  go.GeometryAttributeFilter = GeometryAttributeFilter.EdgeCurve\n  go.Get()\n  if go.CommandResult() != Result.Success:\n    return go.CommandResult()\n  obj_ref = go.Object(0)\n\n  surface = obj_ref.Surface()\n  if surface == None:\n    print \"Unable to extend polysurfaces.\"\n    return Result.Failure\n\n  brep = obj_ref.Brep()\n  face = obj_ref.Face()\n  if brep == None or face == None:\n    return Result.Failure\n  if face.FaceIndex < 0:\n    return Result.Failure\n\n  if not brep.IsSurface:\n    print \"Unable to extend trimmed surfaces.\"\n    return Result.Nothing\n\n  curve = obj_ref.Curve()\n\n  trim = obj_ref.Trim()\n  if trim == None:\n    return Result.Failure\n\n  if trim.TrimType == BrepTrimType.Seam:\n    print \"Unable to extend surface at seam.\"\n    return Result.Nothing\n\n  extended_surface = surface.Extend(trim.IsoStatus, 5.0, True)\n  if extended_surface != None:\n    mybrep = Brep.CreateFromSurface(extended_surface)\n    doc.Objects.Replace(obj_ref.ObjectId, mybrep)\n    doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

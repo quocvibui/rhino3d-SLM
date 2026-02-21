@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-it-possible-to-add-a-plane-to-geometry-what-do-you-use-user-data-for/103436",
+  "topic_id": 103436,
+  "title": "Is it possible to add a plane to geometry? What do you use User Data for?",
+  "question": "I’m creating objects through a command I made and I’m wondering if it’s possible to add a plane to that object, such that I can access that plane from a different command without having to do lots of analysations. Is this something suitable for User Data? Or what do you use User data for?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n\n\n\n\ndef add_plane(plane, size = 200):\n    \n    xid = rs.AddLine(plane.Origin, plane.Origin + plane.XAxis*size)\n    yid = rs.AddLine(plane.Origin, plane.Origin + plane.YAxis*size)\n    zid = rs.AddLine(plane.Origin, plane.Origin + plane.ZAxis*size)\n\n    rs.ObjectColor(xid, [255,0,0])\n    rs.ObjectColor(yid, [0,255,0])\n    rs.ObjectColor(zid, [0,0,255])\n    rs.AddObjectsToGroup([xid,yid,zid],rs.AddGroup())\n\ndef get_geometry_dict_key(geom,key):\n    for KV in geom.UserDictionary:\n        if KV.Key == key:\n            return KV.Value\n\ndef set_geometry_dict(geom,key,geom_to_store):\n    udict = geom.UserDictionary\n    udict.Set(key,geom_to_store)\n    \n\n\n#creae geometry for example\nline_curve = Rhino.Geometry.LineCurve(Rhino.Geometry.Point3d(0,0,0), Rhino.Geometry.Point3d(300,600,800))\nplane = Rhino.Geometry.Plane(Rhino.Geometry.Point3d(0,0,0), line_curve.TangentAtStart)\n\n\n#add line to doc to get id\nline_id = sc.doc.Objects.AddCurve(line_curve)\n\n\n\n#store the plane on the line\nline_geom = rs.coercegeometry(line_id)\nset_geometry_dict(line_geom,'my_plane',plane)\n\n\n#retrieve the plane from the userdict\nmy_plane = get_geometry_dict_key(line_geom,'my_plane')\n\n#helper to visualize the plane\nadd_plane(my_plane, size = 200)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 564
+}

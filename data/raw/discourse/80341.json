@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-how-to-create-a-box-from-two-points-diagonal/80341",
+  "topic_id": 80341,
+  "title": "[python] How to create a box from two points (diagonal)",
+  "question": "Is there a single method that does that but I cannot find due to it’s weird name or I just have to do it in several steps?\n\n\nThanks in advance.",
+  "code_blocks": [
+    {
+      "code": "bbox_json = [[64396.8984375,4499.89892578125,14999.900390625],[73620.1015625,4518.10107421875,18000.099609375]]\n#p1 = Rhino.Geometry.Point3d(bbox_json[0][0],bbox_json[0][1],bbox_json[0][2])\n#p2 = Rhino.Geometry.Point3d(bbox_json[1][0],bbox_json[1][1],bbox_json[1][2])\n#bbox = Rhino.Geometry.BoundingBox(p1,p2)\n#brep = bbox.ToBrep()\np1 = rs.AddPoints(bbox_json)\nbbb = rs.BoundingBox(p1)\nprint bbb",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def BoundingBox(objects, view_or_plane=None, in_world_coords=True):\n    \"\"\"Returns either world axis-aligned or a construction plane axis-aligned\n    bounding box of an object or of several objects\n    Parameters:\n      objects = The identifiers of the objects\n      view_or_plane[opt] = Title or id of the view that contains the\n          construction plane to which the bounding box should be aligned -or-\n          user defined plane. If omitted, a world axis-aligned bounding box\n          will be calculated\n      in_world_coords[opt] = return the bounding box as world coordinates or\n          construction plane coordinates. Note, this option does not apply to\n          world axis-aligned bounding boxes.\n    Returns:\n      Eight 3D points that define the bounding box. Points returned in counter-\n      clockwise order starting with the bottom rectangle of the box.\n      None on error\n    \"\"\"\n    def __objectbbox(object, xform):\n        geom = rhutil.coercegeometry(object, False)\n        if not geom:\n            pt = rhutil.coerce3dpoint(object, True)\n            return Rhino.Geometry.BoundingBox(pt,pt)\n        if xform: return geom.GetBoundingBox(xform)\n        return geom.GetBoundingBox(True)\n\n    xform = None\n    plane = rhutil.coerceplane(view_or_plane)\n    if plane is None and view_or_plane:\n        view = view_or_plane\n        modelviews = scriptcontext.doc.Views.GetStandardRhinoViews()\n        for item in modelviews:\n            viewport = item.MainViewport\n            if type(view) is str and viewport.Name==view:\n                plane = viewport.ConstructionPlane()\n                break\n            elif type(view) is System.Guid and viewport.Id==view:\n                plane = viewport.ConstructionPlane()\n                break\n        if plane is None: return scriptcontext.errorhandler()\n    if plane:\n        xform = Rhino.Geometry.Transform.ChangeBasis(Rhino.Geometry.Plane.WorldXY, plane)\n    bbox = Rhino.Geometry.BoundingBox.Empty\n    if type(objects) is list or type(objects) is tuple:\n        for object in objects:\n            objectbbox = __objectbbox(object, xform)\n            bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    else:\n        objectbbox = __objectbbox(objects, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    if not bbox.IsValid: return scriptcontext.errorhandler()\n\n    corners = list(bbox.GetCorners())\n    if in_world_coords and plane is not None:\n        plane_to_world = Rhino.Geometry.Transform.ChangeBasis(plane, Rhino.Geometry.Plane.WorldXY)\n        for pt in corners: pt.Transform(plane_to_world)\n    return corners",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 2884
+}

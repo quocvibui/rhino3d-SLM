@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/performance-comparison-block-instantiation-vs-duplicateshallow/207034",
+  "topic_id": 207034,
+  "title": "Performance Comparison: Block instantiation vs DuplicateShallow",
+  "question": "Hi there,\n\n\nI have a class that contains several geometric members. Say one Brep and three meshes.\n\n\nI need to display a few hundred to thousands of copies of this class and its geometric members to the user. I don’t need the user to be able to edit any of thsi geometry, just visualisation and further internal processing at a later stage.\n\n\nWhat is more efficient: Turning the geometric properties of my class into a block definition and instantiating it at different locations or duplicating my class instance by performing DuplicateShallow() and applying a transform on all its geometric members?\n\n\nIs there even a noticeable difference?\n\n\nAlso am I assuming correctly that once I add my newly duplicated class instance (in case I go with DuplicateShallow) to the RhinoDoc it will actually increase file size? (as opposed to block definitions)\n\n\nAny insight would be very helpful.\n\n\nThanks\n\nBenjamin",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n    var rand = new Random();\n\n    List<Brep> blocks = new List<Brep>();\n    for (int i = 0; i < 1000; i++) {\n        var xInterval = new Interval(rand.Next(-100, 100), rand.Next(-100, 100));\n        xInterval.MakeIncreasing();\n        var yInterval = new Interval(rand.Next(-100, 100), rand.Next(-100, 100));\n        yInterval.MakeIncreasing();\n        var zInterval = new Interval(rand.Next(-100, 100), rand.Next(-100, 100));\n        zInterval.MakeIncreasing();\n\n        var box = new Box(Plane.WorldXY, xInterval, yInterval, zInterval).ToBrep();\n        if(box == null)\n        {\n            i--;\n            continue;\n        }\n\n        blocks.Add(new Box(Plane.WorldXY, xInterval, yInterval, zInterval).ToBrep());\n    }\n\n    List<Plane> planes = new List<Plane>();\n    for (int i = 0; i < 1000; i++)\n    {\n        var point = new Point3d(\n            rand.Next(-1000, 1000),\n            rand.Next(-1000, 1000),\n            rand.Next(-1000, 1000));\n        var vector = new Vector3d(\n            rand.NextDouble() - .5,\n            rand.NextDouble() - .5,\n            rand.NextDouble() - .5);\n        Plane p = new Plane(point, vector);\n        planes.Add(p);\n    }\n\n    int idef_inx = doc.InstanceDefinitions.Add(\"test_definition\", \"A test block definition\", Plane.WorldXY.Origin, blocks); // 77 ms\n    var instance = doc.InstanceDefinitions[idef_inx]; // 2 ms\n\n    List<GeometryBase> geometries = new List<GeometryBase>();\n    \n    geometries = MoveCopyElements(blocks, planes); // 24,824 ms\n    AddGeometryToDoc(geometries, doc); //~200,000 ms\n\n    MoveCopyDefinition(instance, planes, doc); // 66 ms\n\n    doc.Views.Redraw();\n\n    return Result.Success;\n}\n\nprivate List<GeometryBase> MoveCopyElements(List<Brep> geoms, List<Plane> planes)\n{\n    List<GeometryBase> m_geom_list = new List<GeometryBase>();\n    foreach (var plane in planes)\n    {\n        foreach (var geom in geoms)\n        {\n            var moved_brep = geom.DuplicateShallow();\n            Transform xform = Transform.PlaneToPlane(Plane.WorldYZ, plane);\n            moved_brep.Transform(xform);\n            m_geom_list.Add(moved_brep);\n        }\n    }\n    return m_geom_list;\n}\n\nprivate void AddGeometryToDoc(List<GeometryBase> list, RhinoDoc doc)\n{\n    foreach(var geom in list) doc.Objects.Add(geom);\n}\n\nprivate void MoveCopyDefinition(InstanceDefinition def, List<Plane> planes, RhinoDoc doc)\n{\n    List<InstanceDefinition> m_def_list = new List<InstanceDefinition>();\n    foreach (var plane in planes) {\n        var xform = Transform.PlaneToPlane(Plane.WorldXY, plane);\n        doc.Objects.AddInstanceObject(def.Index, xform);\n    }\n}",
+      "language": "csharp",
+      "author": "Cole_Howell1",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n    var base_box = new Box(Plane.WorldXY, \n        new Interval(0,10),\n        new Interval(0,10),\n        new Interval(0,10));\n\n    var base_box_brep = base_box.ToBrep();\n    var copy_box_brep = base_box_brep.DuplicateShallow();\n\n    // Before moving the original:\n    // Both boxes have the same vertices\n    WriteVertices(base_box_brep, \"Brep Base\");\n    WriteVertices(copy_box_brep, \"Brep Copy\");\n\n    base_box_brep.Transform(Transform.Translation(10, 10, 10));\n\n    // After moving the original:\n    // Despite moving only the original, the copy is moved as well\n    WriteVertices(base_box_brep, \"Brep Base 1\");\n    WriteVertices(copy_box_brep, \"Brep Copy 1\");\n\n    copy_box_brep.Transform(Transform.Translation(10, 10, 10));\n\n    // After moving the copy:\n    // The copy moves without the original moving\n    WriteVertices(base_box_brep, \"Brep Base 2\");\n    WriteVertices(copy_box_brep, \"Brep Copy 2\");\n\n    base_box_brep.Transform(Transform.Translation(10, 10, 10));\n\n    // After moving the original again after modifying the copy:\n    // Copy is no longer referencing the original geometry\n    WriteVertices(base_box_brep, \"Brep Base 3\");\n    WriteVertices(copy_box_brep, \"Brep Copy 3\");\n\n    return Result.Success;\n}\n\nprivate void WriteVertices(GeometryBase geom, string msg)\n{\n    foreach(var pt in geom.GetBoundingBox(true).ToBrep().Vertices)\n    {\n        RhinoApp.WriteLine($\"{msg}: {pt.Location.X}, {pt.Location.Y}, {pt.Location.Z}\");\n    }\n    RhinoApp.WriteLine();\n}",
+      "language": "csharp",
+      "author": "Cole_Howell1",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 153
+}

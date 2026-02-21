@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/JobdeVogel/Solar-Irradiation-Prediction/blob/ce25b61727edaaaeb0e965bb821506de01cb0dcc/dataset/visualize/mesh.py",
+  "repo": "JobdeVogel/Solar-Irradiation-Prediction",
+  "repo_stars": 0,
+  "repo_description": "Graduation repository for Master Building Technology",
+  "license": "unknown",
+  "filepath": "dataset/visualize/mesh.py",
+  "instruction": null,
+  "code": "import Rhino.Geometry as rg\nimport System\nimport time\n\nfrom ladybug.graphic import GraphicContainer\nfrom ladybug_rhino.togeometry import to_mesh3d\nfrom ladybug_rhino.fromgeometry import from_mesh3d\nfrom ladybug_rhino.color import color_to_color\n\nfrom ladybug.legend import LegendParameters\nfrom ladybug_rhino.togeometry import to_plane\n\ndef legend(colors=[(134, 144, 252), (247, 228, 10), (189, 88, 51), (212, 49, 0)], seg_count=20):\n    colors = [System.Drawing.Color.FromArgb(System.Int32(color[0]), System.Int32(color[1]), System.Int32(color[2])) for color in colors]\n\n    base_plane_ = to_plane(rg.Plane.WorldXY)\n\n    leg_par = LegendParameters(segment_count=seg_count, colors=colors, base_plane=base_plane_)\n\n    leg_par.continuous_legend = True\n    leg_par.decimal_count = 0\n    \n    return leg_par\n    \ndef generate_colored_mesh(mesh, values, legend_par, legend_title='(kWh/m2)', title='Solar Irradiance Simulation'):\n    # generate Ladybug objects\n    lb_mesh = to_mesh3d(mesh)\n    \n    graphic = GraphicContainer(values, lb_mesh.min, lb_mesh.max, legend_par)\n\n    # generate titles\n    graphic.legend_parameters.title = legend_title\n\n    # draw rhino objects # ! Most time consuming!\n    lb_mesh.colors = graphic.value_colors\n    mesh = from_mesh3d(lb_mesh)\n    \n    return mesh\n    \n    \n    \n    ",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

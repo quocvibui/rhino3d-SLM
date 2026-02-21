@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/connecting-spheres-and-surrounding-wall-at-smaller-minimum-distances-with-cylinder-bridges/43263",
+  "topic_id": 43263,
+  "title": "Connecting spheres and surrounding wall at smaller minimum distances with cylinder bridges",
+  "question": "Hi,\n\n\nI am trying to connect a cluster of spheres with a wall surrounding it. However, only the closest spheres are to be connected at the following criterion:\n\n\ngap = cylinder wall radius - sphere radius - rs.Distance(point1, point2);\ntolerance = 0.080\nval = gap/radius\n\n\n\n\n\nSince there is no easy way to connect them solely on sphere particle and wall coordinates and dimensions, I decide to make an orientation from center points of cross-sectional area of the cylinder wall, as the bridge is perpendicular to the wall (z-axis).\n\n\n\n\ncross section.png\n526×562 20.3 KB\n\n\n\n\nTherefore, gap could be determined as\n\n\ngap = radiuswall – radiusparticle – rs.Distance([0,0,zi] – point1)\n\n\nTo make the geometry, I wrote coding as follows:\n\n\nimport rhinoscriptsyntax as rs\nimport math as math\n\ndef isclose(a, b, rel_tol=1e-09, abs_tol=0.0):\n    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)\n\n# determination of particle-particle bridge is given as follows\ndef isConnected(point1, point2):\n    gap = 31.5 - radius - rs.Distance(point1, point2);\n    tolerance = 0.080\n    val = gap/radius\n    return (isclose(val, tolerance) or (val < tolerance))\n\n#sphere center coordinates, namely 'point i'\n\nradius = 9.5\npoints = []\npoints.append([3.8004, -10.7703, -14.7366])\npoints.append([6.89814, 9.90892, -14.7361])\npoints.append([-14.1991, -1.3038, -14.7362])\npoints.append([-2.50297, -1.28871, 1.70578])\npoints.append([12.3037, -17.4367, 2.09313])\npoints.append([21.1603, -2.79959, -8.81348])\npoints.append([-11.5506, -18.1149, -4.23054])\npoints.append([-11.1571, 18.5256, -14.736])\npoints.append([4.63671, 21.0576, 1.71328])\npoints.append([-19.803, 8.74576, 1.62201])\npoints.append([19.4772, 8.88409, 7.33124])\npoints.append([19.7547, -8.05903, 18.1097])\npoints.append([8.40554, -19.6233, 29.834])\npoints.append([19.879, 7.92851, 30.1251])\npoints.append([4.80376, 21.0154, 28.916])\npoints.append([-14.0158, -14.7737, 29.5774])\npoints.append([-19.7362, -8.70016, 11.4009])\npoints.append([-3.47392, -2...",
+  "code_blocks": [
+    {
+      "code": "gap = cylinder wall radius - sphere radius - rs.Distance(point1, point2);\ntolerance = 0.080\nval = gap/radius",
+      "language": "python",
+      "author": "Anthony_Hamzah",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math as math\n\ndef isclose(a, b, rel_tol=1e-09, abs_tol=0.0):\n    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)\n\n# determination of particle-particle bridge is given as follows\ndef isConnected(point1, point2):\n    gap = 31.5 - radius - rs.Distance(point1, point2);\n    tolerance = 0.080\n    val = gap/radius\n    return (isclose(val, tolerance) or (val < tolerance))\n\n#sphere center coordinates, namely 'point i'\n\nradius = 9.5\npoints = []\npoints.append([3.8004, -10.7703, -14.7366])\npoints.append([6.89814, 9.90892, -14.7361])\npoints.append([-14.1991, -1.3038, -14.7362])\npoints.append([-2.50297, -1.28871, 1.70578])\npoints.append([12.3037, -17.4367, 2.09313])\npoints.append([21.1603, -2.79959, -8.81348])\npoints.append([-11.5506, -18.1149, -4.23054])\npoints.append([-11.1571, 18.5256, -14.736])\npoints.append([4.63671, 21.0576, 1.71328])\npoints.append([-19.803, 8.74576, 1.62201])\npoints.append([19.4772, 8.88409, 7.33124])\npoints.append([19.7547, -8.05903, 18.1097])\npoints.append([8.40554, -19.6233, 29.834])\npoints.append([19.879, 7.92851, 30.1251])\npoints.append([4.80376, 21.0154, 28.916])\npoints.append([-14.0158, -14.7737, 29.5774])\npoints.append([-19.7362, -8.70016, 11.4009])\npoints.append([-3.47392, -21.1316, 13.8154])\npoints.append([-20.8642, 5.75207, 25.1795])\npoints.append([3.10321, 2.98932, 20.421])\npoints.append([-9.83524, 19.2703, 15.4012])\npoints.append([-21.4772, -2.41992, 43.4234])\npoints.append([19.6639, -8.27222, 41.8506])\npoints.append([-12.3412, 17.7824, 38.6932])\npoints.append([-2.90253, 21.4069, 55.9492])\npoints.append([-0.923667, 0.666779, 39.873])\npoints.append([-3.82574, -21.0765, 45.5909])\npoints.append([14.4364, 15.8948, 47.644])\npoints.append([-7.73744, -5.57666, 57.6097])\n\n\nfor i in range(len(points)):\n    rs.AddPoint(points[i], radius)\n    rs.AddSphere(points[i], radius)\n    \n#cylinder wall plane center points (point j) at same plane as center points\n\npoints = []\npoints.append([0, 0, -14.7366])\npoints.append([0, 0, -14.7361])\npoints.append([0, 0, -14.7362])\npoints.append([0, 0, 1.70578])\npoints.append([0, 0, 2.09313])\npoints.append([0, 0, -8.81348])\npoints.append([0, 0, -4.23054])\npoints.append([0, 0, -14.736])\npoints.append([0, 0, 1.71328])\npoints.append([0, 0, 1.62201])\npoints.append([0, 0, 7.33124])\npoints.append([0, 0, 18.1097])\npoints.append([0, 0, 29.834])\npoints.append([0, 0, 30.1251])\npoints.append([0, 0, 28.916])\npoints.append([0, 0, 29.5774])\npoints.append([0, 0, 11.4009])\npoints.append([0, 0, 13.8154])\npoints.append([0, 0, 25.1795])\npoints.append([0, 0, 20.421])\npoints.append([0, 0, 15.4012])\npoints.append([0, 0, 43.4234])\npoints.append([0, 0, 41.8506])\npoints.append([0, 0, 38.6932])\npoints.append([0, 0, 55.9492])\npoints.append([0, 0, 39.873])\npoints.append([0, 0, 45.5909])\npoints.append([0, 0, 47.644])\npoints.append([0, 0, 57.6097])\n\nfor j in range(len(points)):\n    rs.AddPoint(points[j], 31.5)\n\n\n#forming wall-particle connections \n\nfor i in range(len(points)):\n    for j in range(len(points)):\n        if (isConnected(points[i], points[j])):            \n            direction_vector = rs.VectorCreate(points[i], points[j])\n            cylinder_plane = rs.PlaneFromNormal(points[i],direction_vector)\n            \n            rs.AddCylinder(cylinder_plane, 8, 1, cap=True)\n            \n#cylinder wall\ncylinder = rs.AddCylinder([0,0,-30], 110, 31.5, False)",
+      "language": "python",
+      "author": "Anthony_Hamzah",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 870
+}

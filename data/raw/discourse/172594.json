@@ -1,0 +1,62 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-in-rs-popupmenu-location/172594",
+  "topic_id": 172594,
+  "title": "Error in rs.PopupMenu() location",
+  "question": "Does anyone have a workaround for rs.PopupMenu() popping up in the wrong position?  By default it is supposed to popup under the cursor, but since V7 or earlier it always is way far away for me, most often in the lower right hand corner of the screen.\n\n\nI have posted about this a long time ago, but nothing has been done.  It may be that this phenomenon is due to display scaling?  I just now tried to figure out how to get the cursor position and calculate myself in screen coordinates to feed to the method, but I failed miserably - I’m not very good with this stuff.\n\n\nHas anyone ever tried to program a workaround?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\n\nitems=[\"A\",\"B\",\"C\",\"D\",\"None of the Above\"]\nds=100/225  #display scaling factor\nscreen_point=System.Windows.Forms.Cursor.Position\nscreen_point.X*=ds\nscreen_point.Y*=ds\nresult=Rhino.UI.Dialogs.ShowContextMenu(items, screen_point, None)\nprint (\"You chose {}\".format(items[result]))",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nitems = [\"A\",\"B\",\"C\",\"D\",\"None\"]\nrc = rs.PopupMenu(items)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nitems = \"Line\", \"\", \"Circle\", \"Arc\"\nmodes = 2,0,0,0\nresult = rs.PopupMenu(items, modes)\nif result>=0: \n    rs.MessageBox(items[result])",
+      "language": "python",
+      "author": "tpuaup",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport System\n\ndef MyPopupMenu(items, modes):\n    size = Rhino.UI.RhinoEtoApp.MainWindow.LogicalPixelSize\n    point = System.Windows.Forms.Cursor.Position\n    point.X = point.X * size\n    point.Y = point.Y * size\n    return Rhino.UI.Dialogs.ShowContextMenu(items, point, modes);\n\ndef TestMyPopupMenu():\n    items = \"Line\", \"\", \"Circle\", \"Arc\"\n    modes = 2,0,0,0\n    result = MyPopupMenu(items, modes)\n    if result >= 0: \n        print(items[result])\n\nif __name__ == \"__main__\":\n    TestMyPopupMenu()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\nitems = [\"Test\", \"One\", \"Two\", \"Three\"]\nmodes = [1]\n\nscreen_point = rs.GetCursorPos()[1]\nscale_factor = Rhino.UI.RhinoEtoApp.MainWindow.LogicalPixelSize\nview_point = rs.XformScreenToWorld(screen_point/scale_factor, screen_coordinates=True)\nresult = rs.PopupMenu(items, modes, view_point)",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino, System\nfrom Rhino.UI import EtoExtensions as EE\nimport Eto\n\nitems=[\"A\",\"B\",\"C\",\"D\",\"None of the Above\"]\nscreen_point= Eto.Forms.Mouse.Position\np = System.Drawing.Point(screen_point.X, screen_point.Y)\nresult=Rhino.UI.Dialogs.ShowContextMenu(items, p, None)\nprint (\"You chose {}\".format(items[result]))",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 298
+}

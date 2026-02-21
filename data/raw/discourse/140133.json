@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-script-to-weld-unweld-mesh/140133",
+  "topic_id": 140133,
+  "title": "Rhino python script to Weld / Unweld Mesh",
+  "question": "Hi there,\n\n\nI’m new in scripting Rhino via Python and I’d like to ask you a question.\n\n\nI have a problem with Unweld / Weld Mesh, I need to select lot of geometries in Rhino and then with Python script process them all. Scrip works (I mean, it can explode or hide geometries) but when it comes to Unweld mesh it doesn’t do nothing and I don’t know where is the problem\n\n\nthis is my code\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry.Mesh as rgm\n\nmeshObjects = rs.GetObjects(\"Pick meshes you want to process\", rs.filter.mesh)\n\nfor mesh in meshObjects: \n    rs.SelectObject(mesh)\n    toHide = rs.InvertSelectedObjects()\n    rs.HideObjects(toHide)\n    \n    selMesh = rs.coercemesh(mesh)\n    rgm.Unweld(selMesh, 0, True)\n\n\n\nand after that nothing is happening, I can see that Mesh is not unwelded\n\n\nWhat am I doing wrong ? thanks ofr any help",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_unweld():\n    filter = Rhino.DocObjects.ObjectType.Mesh\n    rc, objrefs = Rhino.Input.RhinoGet.GetMultipleObjects(\"Select polygon meshes to unweld\", False, filter)\n    if rc != Rhino.Commands.Result.Success:\n        return\n    if not objrefs: \n        return\n    \n    degrees = 10.0\n    rc, degrees = Rhino.Input.RhinoGet.GetNumber(\"Angle tolerance\", False, degrees)\n    if rc != Rhino.Commands.Result.Success:\n        return\n        \n    radians = Rhino.RhinoMath.ToRadians(degrees)\n    \n    for objref in objrefs:\n        old_mesh = objref.Mesh()\n        if old_mesh:\n            new_mesh = old_mesh.DuplicateMesh()\n            new_mesh.Unweld(radians, True)\n            new_mesh.Compact()\n            sc.doc.Objects.Replace(objref, new_mesh)\n    \n    sc.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    test_unweld()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry.Mesh as rgm\n\nmeshObjects = rs.GetObjects(\"Pick meshes you want to process\", rs.filter.mesh)\n\nfor mesh in meshObjects: \n    rs.SelectObject(mesh)\n    toHide = rs.InvertSelectedObjects()\n    rs.HideObjects(toHide)\n    \n    selMesh = rs.coercemesh(mesh)\n    rgm.Unweld(selMesh, 0, True)",
+      "language": "python",
+      "author": "Andrzej_Zuzański",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 726
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/govizlora/Solid-Split/blob/8a8d96660176e1ddc6752348f981c60476c23b09/SolidSplit.py",
+  "repo": "govizlora/Solid-Split",
+  "repo_stars": 0,
+  "repo_description": "A Rhinoceros 3D plugin that splits solids into solids.",
+  "license": "MIT",
+  "filepath": "SolidSplit.py",
+  "instruction": "Solid split",
+  "code": "import rhinoscript.userinterface\nimport rhinoscript.geometry\nimport rhinoscriptsyntax as rs\n\n__commandname__ = \"SolidSplit\"\n\ndef SplitObject(solid, cSrf):\n    \n    preInnerSrf = rs.CopyObject(cSrf)\n    innerSrfs = rs.TrimBrep(preInnerSrf, solid)\n    if not innerSrfs:\n        rs.DeleteObject(preInnerSrf)\n        return [solid]\n    solids = []\n    solids.append(solid)\n    \n    for srf in innerSrfs:\n        newSolids = []\n        for obj in solids:\n            splitObjs = rs.SplitBrep(obj, srf, True)\n            if not splitObjs:\n                newSolids.append(obj)\n            else:\n                for sObj in splitObjs:\n                    toJoin = [sObj, srf]\n                    newSolids.append(rs.JoinSurfaces(toJoin))\n                rs.DeleteObjects(splitObjs)\n        solids = newSolids\n    \n    rs.DeleteObjects(innerSrfs)\n    \n    return solids\n\ndef RunCommand( is_interactive ):\n    \n    filter = rs.filter.polysurface\n    objs = rs.GetObjects(\"Select solid objects to split\", filter)\n    if not objs: return 1\n    \n    solids = []\n    for obj in objs:\n        if rs.IsObjectSolid(obj):\n            solids.append(obj)\n    if len(solids) == 0:\n        print \"No solid object found\"\n        return 1\n        \n    cSrfs = rs.GetObjects(\"Select cutting surfaces\", filter)\n    if not cSrfs:\n        return 1\n    \n    rs.EnableRedraw(False)\n    \n    for srf in cSrfs:\n        newSolids = []\n        for solid in solids:\n            newSolids.extend(SplitObject(solid, srf))\n        solids = newSolids\n\n    rs.EnableRedraw(True)\n        \n    return 0\n\nRunCommand(True)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

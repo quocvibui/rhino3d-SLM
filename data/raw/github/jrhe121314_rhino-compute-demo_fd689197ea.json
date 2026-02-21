@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jrhe121314/rhino-compute-demo/blob/0ec00779fbd01a92428cd35b4eb7c0c515bcbd13/compute.rhino3d/src/ghhops-server-py/examples/app_http.py",
+  "repo": "jrhe121314/rhino-compute-demo",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "compute.rhino3d/src/ghhops-server-py/examples/app_http.py",
+  "instruction": "Hops default HTTP server example",
+  "code": "\"\"\"Hops default HTTP server example\"\"\"\r\nimport ghhops_server as hs\r\nimport rhino3dm\r\n\r\nhops = hs.Hops()\r\n\r\n\r\n@hops.component(\r\n    \"/add\",\r\n    name=\"Add\",\r\n    nickname=\"Add\",\r\n    description=\"Add numbers with CPython\",\r\n    inputs=[\r\n        hs.HopsNumber(\"A\", \"A\", \"First number\"),\r\n        hs.HopsNumber(\"B\", \"B\", \"Second number\"),\r\n    ],\r\n    outputs=[hs.HopsNumber(\"Sum\", \"S\", \"A + B\")]\r\n)\r\ndef add(a, b):\r\n    return a + b\r\n\r\n\r\n@hops.component(\r\n    \"/pointat\",\r\n    name=\"PointAt\",\r\n    nickname=\"PtAt\",\r\n    description=\"Get point along curve\",\r\n    icon=\"examples/pointat.png\",\r\n    inputs=[\r\n        hs.HopsCurve(\"Curve\", \"C\", \"Curve to evaluate\"),\r\n        hs.HopsNumber(\"t\", \"t\", \"Parameter on Curve to evaluate\"),\r\n    ],\r\n    outputs=[\r\n        hs.HopsPoint(\"P\", \"P\", \"Point on curve at t\")\r\n    ]\r\n)\r\ndef pointat(curve, t=0.0):\r\n    return curve.PointAt(t)\r\n\r\n\r\n# same as pointat, but with a list of numbers as input\r\n# and list of points returned\r\n@hops.component(\r\n    \"/pointsat\",\r\n    name=\"PointsAt\",\r\n    nickname=\"PtsAt\",\r\n    description=\"Get points along curve\",\r\n    icon=\"examples/pointat.png\",\r\n    inputs=[\r\n        hs.HopsCurve(\"Curve\", \"C\", \"Curve to evaluate\"),\r\n        hs.HopsNumber(\"t\", \"t\", \"Parameters on Curve to evaluate\", hs.HopsParamAccess.LIST),\r\n    ],\r\n    outputs=[\r\n        hs.HopsPoint(\"P\", \"P\", \"Points on curve at t\")\r\n    ]\r\n)\r\ndef pointsat(curve, t):\r\n    points = [curve.PointAt(item) for item in t]\r\n    return points\r\n\r\n\r\n@hops.component(\r\n    \"/srf4pt\",\r\n    name=\"4Point Surface\",\r\n    nickname=\"Srf4Pt\",\r\n    description=\"Create ruled surface from four points\",\r\n    inputs=[\r\n        hs.HopsPoint(\"Corner A\", \"A\", \"First corner\"),\r\n        hs.HopsPoint(\"Corner B\", \"B\", \"Second corner\"),\r\n        hs.HopsPoint(\"Corner C\", \"C\", \"Third corner\"),\r\n        hs.HopsPoint(\"Corner D\", \"D\", \"Fourth corner\")\r\n    ],\r\n    outputs=[hs.HopsSurface(\"Surface\", \"S\", \"Resulting surface\")]\r\n)\r\ndef ruled_surface(a, b, c, d):\r\n    edge1 = rhino3dm.LineCurve(a, b)\r\n    edge2 = rhino3dm.LineCurve(c, d)\r\n    return rhino3dm.NurbsSurface.CreateRuledSurface(edge1, edge2)\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    hops.start(debug=True)\r\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

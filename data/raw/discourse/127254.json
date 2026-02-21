@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-physically-based-material-with-python/127254",
+  "topic_id": 127254,
+  "title": "How to create physically Based Material with Python",
+  "question": "I’ve been going through past posts about the creation of materials in Rhino with python and it doesnt seem very straight forward.\n\n\nI was wandering if anyone knows how to create and add a PBR texture to the document. I then want to add bitmaps to it.\n\n\nThanks for any help!",
+  "code_blocks": [
+    {
+      "code": "import Rhino \nimport scriptcontext as sc\n\n\n\nbmtex = Rhino.Render.RenderContentType.NewContentFromTypeId(Rhino.Render.ContentUuids.BitmapTextureType)\nbmtex.Filename = \"C:\\\\Users\\\\Nathan\\\\Pictures\\\\uvtester.png\"\n\nsimtex = bmtex.SimulatedTexture(Rhino.Render.RenderTexture.TextureGeneration.Allow)\n\n#\n#print(Rhino.Render.ContentUuids.PhysicallyBasedMaterialType)\n\n# first create an empty PBR material\npbr_rm = Rhino.Render.RenderContentType.NewContentFromTypeId(Rhino.Render.ContentUuids.PhysicallyBasedMaterialType)\n\n# to get to a Rhino.DocObjects.PhysicallyBasedMaterial we need to simulate the\n# render material first.\nsim = pbr_rm.SimulatedMaterial(Rhino.Render.RenderTexture.TextureGeneration.Allow)\n\n# from the simulated material we can get the Rhino.DocObjects.PhysicallyBasedMaterial\npbr = sim.PhysicallyBased;\n\n# now we have an instance of a type that has all the API you need to set the PBR\n# properties. For simple glass we set color to white, opacity to 0 and opacity\n# IOR to 1.52\npbr.Opacity = 0.0\npbr.OpacityIOR = 1.52\npbr.BaseColor = Rhino.Display.Color4f.White\n\npbr.SetTexture(simtex.Texture(), Rhino.DocObjects.TextureType.PBR_BaseColor)\n\n# convert it back to RenderMaterial\nnew_pbr = Rhino.Render.RenderMaterial.FromMaterial(pbr.Material, sc.doc)\n# Set a good name\nnew_pbr.Name = \"My Own Glass\"\n\n# Add it to the document\nsc.doc.RenderMaterials.Add(new_pbr)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino \nimport scriptcontext as sc\n\n\n\nbmtex = Rhino.Render.RenderContentType.NewContentFromTypeId(Rhino.Render.ContentUuids.BitmapTextureType)\nbmtex.Filename = \"C:\\\\Users\\\\Nathan\\\\Pictures\\\\uvtester.png\"\n\nsimtex = bmtex.SimulatedTexture(Rhino.Render.RenderTexture.TextureGeneration.Allow)\n\n#\n#print(Rhino.Render.ContentUuids.PhysicallyBasedMaterialType)\n\n# first create an empty PBR material\npbr_rm = Rhino.Render.RenderContentType.NewContentFromTypeId(Rhino.Render.ContentUuids.PhysicallyBasedMaterialType)\n\n# to get to a Rhino.DocObjects.PhysicallyBasedMaterial we need to simulate the\n# render material first.\nsim = pbr_rm.SimulatedMaterial(Rhino.Render.RenderTexture.TextureGeneration.Allow)\n\n# from the simulated material we can get the Rhino.DocObjects.PhysicallyBasedMaterial\npbr = sim.PhysicallyBased;\n\n# now we have an instance of a type that has all the API you need to set the PBR\n# properties. For simple glass we set color to white, opacity to 0 and opacity\n# IOR to 1.52\npbr.Opacity = 0.0\npbr.OpacityIOR = 1.52\npbr.BaseColor = Rhino.Display.Color4f.White\n\npbr.SetTexture(simtex.Texture(), Rhino.DocObjects.TextureType.PBR_BaseColor)\n\n# convert it back to RenderMaterial\nnew_pbr = Rhino.Render.RenderMaterial.FromMaterial(pbr.Material, sc.doc)\n# Set a good name\nnew_pbr.Name = \"My Own Glass\"\n\n# Set pbr ui sections visible\nnew_pbr.SetParameter(\"pbr-show-ui-basic-metalrough\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-subsurface\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-specularity\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-anisotropy\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-sheen\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-clearcoat\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-opacity\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-emission\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-bump-displacement\", True);\nnew_pbr.SetParameter(\"pbr-show-ui-ambient-occlusion\", True);\n\n# Add it to the document\nsc.doc.RenderMaterials.Add(new_pbr)",
+      "language": "python",
+      "author": "maxsoder",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nimport System\nimport System.Collections.Generic\nimport Rhino\nimport os\n\ndef makeMaterial(filepathname):\n    # split the filepathname into path and name, then split out the name without prefix\n    imageName = os.path.splitext(os.path.basename(filepathname))[0]\n    bmtex = Rhino.Render.RenderContentType.NewContentFromTypeId(Rhino.Render.ContentUuids.BitmapTextureType)\n    bmtex.Filename = filepathname\n    simtex = bmtex.SimulatedTexture(Rhino.Render.RenderTexture.TextureGeneration.Allow)\n    # first create an empty PBR material\n    pbr_rm = Rhino.Render.RenderContentType.NewContentFromTypeId(Rhino.Render.ContentUuids.PhysicallyBasedMaterialType)\n    # to get to a Rhino.DocObjects.PhysicallyBasedMaterial we need to simulate the render material first.\n    sim = pbr_rm.SimulatedMaterial(Rhino.Render.RenderTexture.TextureGeneration.Allow)\n    # from the simulated material we can get the Rhino.DocObjects.PhysicallyBasedMaterial\n    pbr = sim.PhysicallyBased;\n    # now we have an instance of a type that has all the API you need to set the PBR properties. \n    pbr.BaseColor = Rhino.Display.Color4f.White\n    pbr.SetTexture(simtex.Texture(), Rhino.DocObjects.TextureType.PBR_BaseColor)\n    # convert it back to RenderMaterial\n    new_pbr = Rhino.Render.RenderMaterial.FromMaterial(pbr.Material, sc.doc)\n    # Set a good name\n    new_pbr.Name = imageName\n    # Add it to the document\n    result = sc.doc.RenderMaterials.Add(new_pbr)\n    print (result)\n\nfilepathname = \"C:\\\\path\\\\image.png\"\nmakeMaterial(filepathname)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 26,
+      "is_solution": false
+    },
+    {
+      "code": "obj_id = rs.GetObject(\"Object\", 4+8+16+32, True, False)\nif obj_id:\n    rh_obj = rs.coercerhinoobject(obj_id, True, True)\n    rh_obj.RenderMaterial = new_pbr\n    rh_obj.CommitChanges()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 27,
+      "is_solution": false
+    },
+    {
+      "code": "using Rhino;\nusing Rhino.Render;\n\nRhinoDoc doc = RhinoDoc.ActiveDoc;\n\n// Create new Rhino material and convert to PBR\nvar rMaterial = new Rhino.DocObjects.Material();\nrMaterial.ToPhysicallyBased();\n\n// Create simulated texture from image path\nSimulatedTexture simtex = new SimulatedTexture(doc);\nsimtex.Filename = \"C:\\\\Users\\\\tsrch\\\\Documents\\\\test.jpg\";\n\n// Assign texture to base color\nrMaterial.PhysicallyBased.SetTexture(simtex.Texture(), Rhino.DocObjects.TextureType.PBR_BaseColor);\n\n// Convert to RenderMaterial and add to document, this allows the material to show in the material editor\n// without being assigned to any objects\nvar pbr = RenderMaterial.FromMaterial(rMaterial, doc);\npbr.Name = \"testo\";\ndoc.RenderMaterials.Add(pbr);",
+      "language": "csharp",
+      "author": "tsrchapman",
+      "post_number": 34,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 32,
+  "views": 3208
+}

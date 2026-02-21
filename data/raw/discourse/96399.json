@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mesh-ismanifold-returns-true-for-non-manifold-meshes/96399",
+  "topic_id": 96399,
+  "title": "Mesh.IsManifold returns true for non-manifold meshes",
+  "question": "i’m trying to understand what exactly the output of Mesh.IsManifold means.\n\nTherefore I have created a series of simple examples.\n\n\n\n\nclosed mesh\n\n\nlid of the box is incorrectly oriented\n\n\nnon-manifold edge\n\n\nlid of the box is missing\n\n\n\n\nmanifold_samples.3dm\n (45.8 KB)\n\n\n\n\nimage\n1324×700 210 KB\n\n\n\n\nThe output of this script shows that all meshes are manifold=true.\n\n\nimport clr\nimport Rhino\nimport scriptcontext\nimport System.Guid\nfrom Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport System.Guid\n\ndef RunCommand():\n  \n    layername = scriptcontext.doc.Layers.CurrentLayer.Name\n    \n    # Get all of the objects on the layer. If layername is bogus, you will\n    # just get an empty list back\n    rhobjs = scriptcontext.doc.Objects.FindByLayer(layername)\n    if not rhobjs: Rhino.Commands.Result.Cancel\n\n    for obj in rhobjs:\n        oriented = clr.StrongBox[bool]()\n        boundary = clr.StrongBox[bool]()\n        \n        is_manifold = obj.Geometry.IsManifold(True, oriented, boundary) \n        out_oriented = str(oriented.Value)\n        out_boundary = str(boundary.Value)\n        print \"IsManifold={0}, oriented={1}, hasBoundary={2}, isClosed={3}, isValid={4}\".format( str(is_manifold), out_oriented, out_boundary, str(obj.Geometry.IsClosed), str(obj.Geometry.IsValid) )\n\n    return Rhino.Commands.Result.Success\n\n\nif __name__ == \"__main__\":\n  RunCommand()\n\n\n\nThis is the output of the script:\n\n\nIsManifold=True, oriented=True, hasBoundary=True, isClosed=True, isValid=True\nIsManifold=True, oriented=True, hasBoundary=True, isClosed=True, isValid=True\nIsManifold=True, oriented=True, hasBoundary=True, isClosed=False, isValid=True\nIsManifold=True, oriented=True, hasBoundary=True, isClosed=False, isValid=True\n\n\n\nWhat am I doing wrong?",
+  "code_blocks": [
+    {
+      "code": "import clr\nimport Rhino\nimport scriptcontext\nimport System.Guid\nfrom Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport System.Guid\n\ndef RunCommand():\n  \n    layername = scriptcontext.doc.Layers.CurrentLayer.Name\n    \n    # Get all of the objects on the layer. If layername is bogus, you will\n    # just get an empty list back\n    rhobjs = scriptcontext.doc.Objects.FindByLayer(layername)\n    if not rhobjs: Rhino.Commands.Result.Cancel\n\n    for obj in rhobjs:\n        oriented = clr.StrongBox[bool]()\n        boundary = clr.StrongBox[bool]()\n        \n        is_manifold = obj.Geometry.IsManifold(True, oriented, boundary) \n        out_oriented = str(oriented.Value)\n        out_boundary = str(boundary.Value)\n        print \"IsManifold={0}, oriented={1}, hasBoundary={2}, isClosed={3}, isValid={4}\".format( str(is_manifold), out_oriented, out_boundary, str(obj.Geometry.IsClosed), str(obj.Geometry.IsValid) )\n\n    return Rhino.Commands.Result.Success\n\n\nif __name__ == \"__main__\":\n  RunCommand()",
+      "language": "python",
+      "author": "thomas.k",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 819
+}

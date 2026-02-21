@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/video-offset-curve-dave-hack/18349",
+  "topic_id": 18349,
+  "title": "Video : Offset Curve Dave Hack",
+  "question": "Learn a great ‘hack-nique’ for off-setting clean curves with equally clean new curves, as opposed to the usual complicated mess. These cleaner curves will make a huge difference in creating higher quality organic surfaces. Running time = 04:36.\n\n\n\n\nMore cool and free videos at \nprofessor3d.com",
+  "code_blocks": [
+    {
+      "code": "-_RunPythonScript (\nfrom Rhino import *\nfrom Rhino.Input import *\nfrom Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nimport math\n\ndef test():\n  go = Input.Custom.GetObject()\n  \n  go.SetCommandPrompt(\"Select Curve\")\n  go.GeometryFilter = DocObjects.ObjectType.Curve;\n  go.GetMultiple(1,0)\n  \n  if go.CommandResult()!=Commands.Result.Success:\n\treturn go.CommandResult()\n  \n  objrefs = go.Objects()\n  if not objrefs: return Commands.Result.Nothing\n  \n  for i, objref in enumerate(objrefs):\n\t\t# get the curve geometry\n\t\tcurve = objref.Curve().ToNurbsCurve()\n\t\t(res, plane) = curve.TryGetPlane()\n\t\t\n\t\t(res, con1 ) = curve.GetNextDiscontinuity( Continuity.C0_continuous, curve.Domain.Min , curve.Domain.Max)\n\t\t(res, con2 ) = curve.GetNextDiscontinuity( Continuity.C0_continuous, 0.1, curve.Domain.Max)\n\t\t\n\t\tseamMoved = False\n\t\t\n\t\tif con1 <= curve.Domain.Min and curve.IsClosed:\n\t\t\tif curve.ChangeClosedCurveSeam(con1 + con2):\n\t\t\t\tseamMoved = True\n\t\t\n\t\tcp = curve.Points.ControlPolygon()\n\t\tcp.ReduceSegments(RhinoDoc.ActiveDoc.ModelAbsoluteTolerance)\n\t\t\n\t\tcpNurbs = cp.ToNurbsCurve()\n\t\t\n\t\tcurves = cpNurbs.Offset(plane.PointAt(1000,1000), plane.ZAxis, 2.0, RhinoDoc.ActiveDoc.ModelAbsoluteTolerance, CurveOffsetCornerStyle.Sharp)\n\t\t# Use this to flip direction\n\t\t#curves = cpNurbs.Offset(plane.PointAt(0,0), plane.ZAxis, 2.0, RhinoDoc.ActiveDoc.ModelAbsoluteTolerance, CurveOffsetCornerStyle.Sharp)\n\t\t\n\t\tjoinCurves = Curve.JoinCurves(curves, 0.1)\n\t\t\n\t\tmaxLength = 0;        \n\t\tjoinedCurve = joinCurves[maxLength].ToNurbsCurve()\n\t\t(res, newCP) = joinedCurve.TryGetPolyline()\n\t\t\n\t\tmul = 0.5;\n\t\twhile newCP.Count > cp.Count:\n\t\t\tnewCP.ReduceSegments(RhinoDoc.ActiveDoc.ModelAbsoluteTolerance * mul)\n\t\t\tmul = mul + .5\n\t\t\n\t\t#RhinoApp.WriteLine( str(newCP.Count) + \":\" + str(cp.Count))\n\t\t\n\t\tfor j, p in enumerate(curve.Points):\n\t\t\tparam1 = cp.ClosestParameter(curve.Points[j].Location)\n\t\t\tnormParam1 = param1 / cp.Count\n\t\t\tcurve.Points[j] = ControlPoint(newCP.PointAt(math.floor(normParam1 * newCP.Count)) , curve.Points[j].Weight)\n\t\t\n\t\t#newRef = RhinoDoc.ActiveDoc.Objects.AddPolyline(cp)\n\t\t#newRef = RhinoDoc.ActiveDoc.Objects.AddPolyline(newCP)\n\t\tRhinoDoc.ActiveDoc.Objects.Select(objref, False)\n\t\tnewRef = RhinoDoc.ActiveDoc.Objects.AddCurve(curve)\n\t\tRhinoDoc.ActiveDoc.Objects.Select(newRef, True)\n\t\t\n\ntest()\n)",
+      "language": "python",
+      "author": "matt_newberg",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 40,
+  "views": 12459
+}

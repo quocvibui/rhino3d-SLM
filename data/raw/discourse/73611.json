@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-there-a-better-way-to-get-this/73611",
+  "topic_id": 73611,
+  "title": "Is there a better way to get this？",
+  "question": "I want to simulate the carving with a chisel.  So I wrote this below. But I think there must be a better way to get it.  Thanks！\n\n\nimport rhinoscriptsyntax as rs\n\n#Create a function for carving with rectangle.\ndef trianglecarving():\n#Create a sketch curve on a surf.\n    commandsketch = \"_Sketch\"\n    curve = rs.Command(commandsketch, False)\n    if not curve: return\n    new_curve01 = rs.LastCreatedObjects(select=True)\n\n#Create a triangle surrounding the curve.\n    #Creat the plane for the rectangle\n    if new_curve01:\n        plane = rs.CurvePerpFrame(new_curve01[0], 0)\n    #Creat the triangle\n        rectangle01 = rs.AddRectangle( plane, 3.0, 0.5)\n        if rectangle01:\n            #Mirror the rectangle and then create the rectangle\n            plane1 = rs.ViewCPlane()\n            xform = rs.XformMirror(plane1.Origin, plane1.Normal)\n            rectangle02 = rs.TransformObjects(rectangle01, xform, True )\n        if rectangle02:\n            explodedCurves = rs.ExplodeCurves([rectangle02], True)\n            curve0 = rs.FirstObject()\n            curve1 = rs.NextObject(curve0)\n            curve2 = rs.NextObject(curve1)\n            curve3 = rs.NextObject(curve2)\n            pointstart = rs.CurveStartPoint(curve3)\n            pointend = rs.CurveEndPoint(curve3)\n            point01 = rs.AddPoint(pointstart)\n            point02 = rs.AddPoint(pointend)\n            midpoint = rs.CurveMidPoint(curve1)\n            point03 = rs.AddPoint(midpoint)\n            trianglepolyline = rs.AddPolyline([point01,point02,point03,point01])\n            if trianglepolyline:\n              surface = rs.AddPlanarSrf(trianglepolyline)\n              #Extrude the triangle prism\n              triangleprism = rs.ExtrudeSurface(surface, new_curve01)\n            if triangleprism:\n                rs.DeleteObjects([rectangle01,trianglepolyline,new_curve01,surface,curve0,curve1,curve2,curve3,point01,point02,point03])\n            #Boolean the box\n            input0 = rs.LastObject()\n            input1 = rs.F...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#Create a function for carving with rectangle.\ndef trianglecarving():\n#Create a sketch curve on a surf.\n    commandsketch = \"_Sketch\"\n    curve = rs.Command(commandsketch, False)\n    if not curve: return\n    new_curve01 = rs.LastCreatedObjects(select=True)\n\n#Create a triangle surrounding the curve.\n    #Creat the plane for the rectangle\n    if new_curve01:\n        plane = rs.CurvePerpFrame(new_curve01[0], 0)\n    #Creat the triangle\n        rectangle01 = rs.AddRectangle( plane, 3.0, 0.5)\n        if rectangle01:\n            #Mirror the rectangle and then create the rectangle\n            plane1 = rs.ViewCPlane()\n            xform = rs.XformMirror(plane1.Origin, plane1.Normal)\n            rectangle02 = rs.TransformObjects(rectangle01, xform, True )\n        if rectangle02:\n            explodedCurves = rs.ExplodeCurves([rectangle02], True)\n            curve0 = rs.FirstObject()\n            curve1 = rs.NextObject(curve0)\n            curve2 = rs.NextObject(curve1)\n            curve3 = rs.NextObject(curve2)\n            pointstart = rs.CurveStartPoint(curve3)\n            pointend = rs.CurveEndPoint(curve3)\n            point01 = rs.AddPoint(pointstart)\n            point02 = rs.AddPoint(pointend)\n            midpoint = rs.CurveMidPoint(curve1)\n            point03 = rs.AddPoint(midpoint)\n            trianglepolyline = rs.AddPolyline([point01,point02,point03,point01])\n            if trianglepolyline:\n              surface = rs.AddPlanarSrf(trianglepolyline)\n              #Extrude the triangle prism\n              triangleprism = rs.ExtrudeSurface(surface, new_curve01)\n            if triangleprism:\n                rs.DeleteObjects([rectangle01,trianglepolyline,new_curve01,surface,curve0,curve1,curve2,curve3,point01,point02,point03])\n            #Boolean the box\n            input0 = rs.LastObject()\n            input1 = rs.FirstObject()\n            rs.BooleanDifference(input0, input1)\n\nif( __name__ == \"__main__\" ):\n    #Call the function\n    trianglecarving()",
+      "language": "python",
+      "author": "kyxiang1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 456
+}

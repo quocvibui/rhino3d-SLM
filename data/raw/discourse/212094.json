@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/screen-to-worldxy-exact-under-tip-of-pointer/212094",
+  "topic_id": 212094,
+  "title": "Screen To WorldXY - Exact under tip of pointer",
+  "question": "As the topic says, I’m looking for a direct, well-performing way to get the exact spot on WorldXY plane - going from there to an arbitrary plane should be fairly easy as long as we operate on xforms, though no matter how hard I would try, already mentioned methods in:\n\n\n\n\n\n\n\n\nwww.rhino3d.com\n\n\n\n\n\n\nTransform Screen to World Coordinates\n\n\nDemonstrates how to transform screen coordinates to world coordinates.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGet mouse position in active viewport + cplane coords\n \nRhino Developer\n\n\n\n\n\n\n\n    To transform a 2-D screen point to a 3-D world xy-plane point, you can do something like this: \nRhino.Display.RhinoView view = doc.Views.ActiveView;\nRhino.Geometry.Transform xform = view.ActiveViewport.GetTransform(\n    Rhino.DocObjects.CoordinateSystem.Screen, \n    Rhino.DocObjects.CoordinateSystem.World\n    );\nRhino.Geometry.Point3d world_point = new Rhino.Geometry.Point3d(\n    screen_point.X, \n    screen_point.Y, \n    0.0\n    );\nworld_point.Transform(xform);\n  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\nConverting between Screen and World coordinates\n \nRhino Developer\n\n\n\n\n\n\n\n    Hi \n@Matthieu_from_NAVINN\n, \nThis is how I would compute the transform: \nDim view as RhinoView = doc.Views.ActiveView\nIf (Not IsNothing(view)) Then\n  Dim xform as Transform = view.ActiveViewport.GetTransform(CoordinateSystem.Screen, CoordinateSystem.World)\n  ' TODO: transform objects...\nEnd If\n\n– Dale\n  \n\n\n\n\nI got wrong results that do not match the left-bottom Rhino window indication of XYZ, according to the methods mentioned above, code called in derived MouseCallback OnMouseMove:\n\n\nvar vp = e.View.ActiveViewport;\nvar screenToWorld = vp.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World);\nvar currentWorldPoint = screenToWorld * new Point3d(e.ViewportPoint.X, e.ViewportPoint.Y, 0);\n\nRhinoApp.WriteLine(currentWorldPoint.ToString());\n\n\n\nIt should be an elegant way to get the spot, instead of that, I get variable Z results, like it would be some kind of intermediate xfor...",
+  "code_blocks": [
+    {
+      "code": "var vp = e.View.ActiveViewport;\nvar screenToWorld = vp.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World);\nvar currentWorldPoint = screenToWorld * new Point3d(e.ViewportPoint.X, e.ViewportPoint.Y, 0);\n\nRhinoApp.WriteLine(currentWorldPoint.ToString());",
+      "language": "csharp",
+      "author": "D-W",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 107
+}

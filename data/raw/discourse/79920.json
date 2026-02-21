@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-mesh-face-at-pick-point/79920",
+  "topic_id": 79920,
+  "title": "How to get mesh face at pick point",
+  "question": "Hi guys,\n\n\nhow do I determine what mesh face is at a given 3D location? I want to start off a script by analyzing the face at the pick point of rs.GetObjectEx()\n\n\nCheers!",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nmesh = rs.GetObject(\"Select a mesh\", rs.filter.mesh)\npoint = rs.GetPointOnMesh(mesh, \"Select a point\")\nmesh = rs.coercemesh(mesh)\nface = mesh.ClosestMeshPoint(point, 1).FaceIndex\nprint \"The point is on face No.\" + str(face)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nmeshOrig = rs.GetObject(\"Select a mesh\", rs.filter.mesh)\nmesh = rs.coercemesh(meshOrig)\n\nwhile True:\n    point = rs.GetPointOnMesh(meshOrig, \"Select a point\")\n    if point:\n        \n        face = mesh.ClosestMeshPoint(point, 1).FaceIndex\n        print \"The point is on face No.\" + str(face)\n        \n        MeshFaceVertices= rs.MeshFaceVertices(mesh)\n        VerticesOfPickedFace = MeshFaceVertices[face]\n        \n        linePoints=[]\n        for vertex in VerticesOfPickedFace :\n            \n            linePoints.append ( mesh.Vertices[vertex] )\n        \n        #--- Add the first point to the list to form a closed loop\n        linePoints.append ( linePoints[0])\n        \n        border = rs.AddCurve(linePoints, degree=1)\n        \n        rs.SelectObject(border)\n    \n    else:\n        break",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 925
+}

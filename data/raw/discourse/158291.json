@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/export-from-script/158291",
+  "topic_id": 158291,
+  "title": "Export from script",
+  "question": "I’m using rs.Command(“_Export”) in a script.  Is there some way to call Export and have the script specify what file format I want so I don’t have to pick it from the list, and still let me name the file myself with the export dialog?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os\n\nfilename=rs.StringBox(\"Filename\",title=\"Save DXF file as\")\nfolder=rs.WorkingFolder() #or can use specific hard coded folder\nfullpath=os.path.join(folder,filename+\".dxf\")\nprint fullpath",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os\n\nfolder=rs.BrowseForFolder() #user selects folder\nfilename=rs.StringBox(\"Filename\",title=\"Save DXF file as\")\nfullpath=os.path.join(folder,filename+\".dxf\")\nprint fullpath",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndxf_filt=\"DXF files|*.dxf||\"\nfullpath=rs.SaveFileName(\"Save .dxf file\",dxf_filt)\nprint fullpath",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "filename = rs.SaveFileName (\"Export iges\", \"Iges Files (*.igs)|*.igs||\",rs.DocumentPath(),os.path.splitext(rs.DocumentName())[0])\nif str(filename) <> \"None\":\n   rs.Command(\"_-Export _Pause \\\"{0}\\\" vectorcam UnitSystem=Inches  StringType=Unicode  Tolerance=0.00001 _Enter\".format(filename))",
+      "language": "unknown",
+      "author": "James_Richters",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 1041
+}

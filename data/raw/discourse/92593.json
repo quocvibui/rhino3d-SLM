@@ -1,0 +1,113 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/polyline-in-python/92593",
+  "topic_id": 92593,
+  "title": "Polyline in python",
+  "question": "excuse me, but i don’t find the command “Add polyline” in python,\n\nand i don’t find how can i make a list of 3D points to construc my polyline… the list is generate in a loop…",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rc\n\n# Make vertices\nvts = []\nfor i in range(10):\n    pt = rc.Geometry.Point3d(i,i,i)\n    vts.append(pt)\n\n# Make polyline\npl = rc.Geometry.Polyline(vts)",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\n\n# Make polyline\npl = rc.Geometry.Polyline()\nfor i in range(10):\n    pt = rc.Geometry.Point3d(i,i,i)\n    pl.Add(pt)",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import math\nimport Rhino as rc\n\ndef makeRegularPolygon(point,radius,sides):\n    \n    \"\"\" Make a regular polygon with its centre at the point \"\"\"\n    \n    if sides > 2 and radius > 0:\n        \n        # Move point in Y direction\n        yVec = rc.Geometry.Vector3d(0,1*radius,0)\n        mPt = point + yVec\n        \n        # Compute step angle\n        stepAngle = (2*math.pi)/sides\n        \n        # Rotate moved point around central axis sides times\n        rotatedPts = []\n        for i in range(0,sides):\n            cPt = rc.Geometry.Point3d(mPt)\n            cPt.Transform(rc.Geometry.Transform.Rotation(stepAngle*i,point))\n            rotatedPts.append(cPt)\n            \n        # Make polyline\n        pl = rc.Geometry.Polyline(rotatedPts)\n        \n        return pl",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nc_pt=rs.GetPoint(\"Center point?\")\ndia=rs.GetReal(\"Diameter?\")\ncount=rs.GetInteger(\"Number of points?\",12,2)\n\n#create intiial point at \"top\" (center point + radius in Y+)\ni_pt=Rhino.Geometry.Point3d(c_pt+Rhino.Geometry.Vector3d(0,dia/2,0))\n#create an empty list\npts=[]\n#loop, incrementing the rotation angle by 360/count each time (starts at 0 deg.)\nfor i in range(count):\n    #create the transform\n    xform=rs.XformRotation2(i*(360/count),rs.ViewCPlane().Normal,c_pt)\n    #transform the point and add it to the list\n    pts.append(rs.PointTransform(i_pt,xform))\n#add the points (if you want)\nrs.AddPoints(pts)\n#add the polyline - need to add the first point to the end of the list for closed\npts.append(pts[0])\nrs.AddPolyline(pts)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "PassY=0\n\n#creation de la liste PtTraj\nPtTraj=[]\n#first point + creation de list PtTraj\nPtTraj.append(Rhino.Geometry.Point3d(X,Y,Z))\n\nfor a in range(0,int(NbObjY)-1):\n    testpair = math.modf(PassY/2)\n    If testpair[1]=0 or a=0:",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport rhinoscriptsyntax as rs\ndef GeneratePt(Diam,Delta):\n    #definition du centre du polygone\n    Center=rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam/2,0)\n    rs.AddPoint(Center)\n    Pts=[]\n\n    Pts.append(rc.Geometry.Point3d(0,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam,0))\n    rs.AddPoint(Pts[-1])\n    for i in range(12):\n    #create the transform\n        xform=rs.XformRotation2(i*(360/12),rs.ViewCPlane().Normal,Center)\n        #transform le dernier point realise\n        Pts.append(rs.PointTransform(Pts[-1],xform))\n        rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta+Diam,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    return Pts\n\nDiam=rs.GetInteger('Diametre a decouper',15)\nDelta=rs.GetInteger('Decalage de la forme',6)\n\nPtTraj=GeneratePt(Diam,Delta)\nrs.AddPolyline(PtTraj)",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 31,
+      "is_solution": false
+    },
+    {
+      "code": "# coding: utf-8\n\nimport Rhino as rc\nimport rhinoscriptsyntax as rs\n\ndef GeneratePt(Diam,Delta):\n    #definition du centre du polygone\n    Center=rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam/2,0)\n    rs.AddPoint(Center)\n    Pts=[]\n\n    Pts.append(rc.Geometry.Point3d(0,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam,0))\n    rs.AddPoint(Pts[-1])\n    for i in range(1, 13):\n    #create the transform\n        xform=rs.XformRotation2(i*(360/12),rs.ViewCPlane().Normal,Center)\n        #transform le dernier point realise\n        Pts.append(rs.PointTransform(Pts[2],xform))\n        rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta+Diam,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    return Pts\n\nDiam=rs.GetInteger('Diamètre à découper',15)\nDelta=rs.GetInteger('Décalage de la forme',6)\n\nPtTraj=GeneratePt(Diam,Delta)\nrs.AddPolyline(PtTraj)",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 35,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport rhinoscriptsyntax as rs\n\nBlocHg=rc.Geometry.Point3d(0,0,0)\nBlocBd=rc.Geometry.Point3d(200,200,0)\nPla=rs.ViewCPlane()\nBloc=rc.Geometry.Rectangle3d(Pla,BlocHg,BlocBd).ToPolyline()",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 42,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nBlocHg=rc.Geometry.Point3d(0,0,0)\nBlocBd=rc.Geometry.Point3d(200,200,0)\nPla=rs.ViewCPlane()\nBloc=rc.Geometry.Rectangle3d(Pla,BlocHg,BlocBd).ToPolyline()\nsc.doc.Objects.AddPolyline(Bloc)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 43,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nBlocHg=rc.Geometry.Point3d(0,0,0)\nBlocBd=rc.Geometry.Point3d(200,200,0)\nPla=rs.ViewCPlane()\nBloc=rc.Geometry.Rectangle3d(Pla,BlocHg,BlocBd)\nsc.doc.Objects.AddRectangle(Bloc)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 43,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript (\n# coding: utf-8\nimport Rhino as rc\nimport rhinoscriptsyntax as rs\n\ndef GeneratePt(Diam,Delta):\n    #definition du centre du polygone\n    Center=rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam/2,0)\n    Pts=[]\n    Pts.append(rc.Geometry.Point3d(0,Delta+Diam,0))\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam,0))\n    for i in range(1,13):\n    #create the transform\n        xform=rs.XformRotation2(i*(360/12),rs.ViewCPlane().Normal,Center)\n        #transform le dernier point realise\n        Pts.append(rs.PointTransform(Pts[2],xform))\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    Pts.append(rc.Geometry.Point3d(Delta+Diam,Delta+Diam,0))\n    return Pts\n\nDiam=rs.GetInteger('Diamètre à découper',15)\nDelta=rs.GetInteger('Décalage de la forme',6)\n\nPtTraj=GeneratePt(Diam,Delta)\nrs.AddPolyline(PtTraj)\n)",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 44,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript (\n\n# coding: utf-8\nimport Rhino as rc\nimport rhinoscriptsyntax as rs\nimport math\n\n\nDimX=rs.GetInteger('dimension du bloc en X',200)\nif DimX:DimY=rs.GetInteger('dimension du bloc en Y',200)\nif DimY:Traj=rs.GetObject('Selectionne la trajectoire a repeter',rs.filter.curve)\nif Traj:DeltaX=rs.GetInteger('decalage en X',0)\nDeltaY=rs.GetInteger('decalage en Y',5)\n\n#boite englobante Traj\nif Traj:\n    box = rs.BoundingBox(Traj)\n    if box:\n        Trajx=box[2][0]-box[0][0]+DeltaX\n        Trajy=box[2][1]-box[0][1]+DeltaY\n#Trace le Bloc\nBloc=rs.AddRectangle(rs.MovePlane(rs.WorldXYPlane(),box[3]), DimX, -DimY)\nrs.ObjectColor( Bloc,(255,0,0))\n\n#Nbre d'élement en X\nNbx=math.floor(DimX/Trajx)\n#Nbre d'élement en y\nNby=math.floor(DimY/Trajy)\nNb=int(Nbx*Nby)\n#récupère les points de la Traj\nListPts = rs.CurvePoints(Traj)\n#création de la liste de point ptTraj\nPtTraj=[]\n#création de la ligne X\nListX=[]\nfor j in range(0,int(Nbx)):\n    ListTemp=[]\n    ajout_en_x=j*Trajx\n    for Pt in ListPts:\n        PtTemp=rc.Geometry.Point3d(Pt)\n        PtTemp[0]+=ajout_en_x\n        ListTemp.append(PtTemp)\n    ListX+=ListTemp",
+      "language": "python",
+      "author": "onlyforpeace",
+      "post_number": 44,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport rhinoscriptsyntax as rs\ndef GeneratePt(Diam,Delta):\n    #definition du centre du polygone\n    Center=rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam/2,0)\n    rs.AddPoint(Center)\n    Pts=[]\n\n    Pts.append(rc.Geometry.Point3d(0,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta/2+Diam,0))\n    rs.AddPoint(Pts[-1])\n    for i in range(1,13):\n    #create the transform\n        xform=rs.XformRotation2(i*(360/12),rs.ViewCPlane().Normal,Center)\n        #transform le dernier point realise\n        Pts.append(rs.PointTransform(Pts[2],xform))\n        rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta/2+Diam/2,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    Pts.append(rc.Geometry.Point3d(Delta+Diam,Delta+Diam,0))\n    rs.AddPoint(Pts[-1])\n    return Pts\n\nDiam=rs.GetInteger('Diametre a decouper',15)\nDelta=rs.GetInteger('Decalage de la forme',6)\n\nPtTraj=GeneratePt(Diam,Delta)\nrs.AddPolyline(PtTraj)",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 33,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 49,
+  "views": 9098
+}

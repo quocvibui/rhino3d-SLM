@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-geometry-intersect-intersection-brepbrep-bugged/121349",
+  "topic_id": 121349,
+  "title": "Rhino.Geometry.Intersect.Intersection.BrepBrep() bugged",
+  "question": "Run this on \nbad output.3dm\n (42.5 KB)\n\n\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nj = rs.GetObject()\nk = rs.GetObject()\n\nchk = Rhino.Geometry.Intersect.Intersection.BrepBrep(rs.coercerhinoobject(j).Geometry, rs.coercerhinoobject(k).Geometry, sc.doc.ModelAbsoluteTolerance)\nsc.doc.Objects.AddCurve(chk[1][0])\n\n\n\nimage\n961×634 5.86 KB\n\n\nimage\n1044×652 6.03 KB\n\n\nThis kind of overlap works as intended:\n\n\nimage\n1050×629 7.05 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_intersect_breps():\n    filter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter\n    \n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select surfaces or polysurfaces to intersect\")\n    go.GeometryFilter = filter\n    go.GetMultiple(2, 2)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n    \n    brep0 = go.Object(0).Brep()\n    brep1 = go.Object(1).Brep()\n    if not brep0 or not brep1:\n        return\n        \n    tol = sc.doc.ModelAbsoluteTolerance\n    rc, out_curves, outpoints = Rhino.Geometry.Intersect.Intersection.BrepBrep(brep0, brep1, tol)\n    if rc:\n        for c in out_curves:\n            sc.doc.Objects.AddCurve(c)\n    \n    sc.doc.Views.Redraw()\n    \ntest_intersect_breps()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nj = rs.GetObject()\nk = rs.GetObject()\n\nchk = Rhino.Geometry.Intersect.Intersection.BrepBrep(rs.coercerhinoobject(j).Geometry, rs.coercerhinoobject(k).Geometry, sc.doc.ModelAbsoluteTolerance)\nsc.doc.Objects.AddCurve(chk[1][0])",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 504
+}

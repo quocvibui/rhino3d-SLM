@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-pipe-using-grasshopper-python-tree-growth-truck-thickness/115080",
+  "topic_id": 115080,
+  "title": "How to create pipe using grasshopper python(tree growth truck thickness)",
+  "question": "Hi all,\n\n\nI am trying to add thickness to the tree growth script i just developed, however I cannot figure out how to create a thickness(pipe) around the lines I created, I tried with the Rhino.Geometry.Brep.CreatePipe, but its not working. Can someone help me looking at the script?? Thank you very much!\n\n\ntree growth adding pipes.gh\n (6.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\nimport random\n\n# Set the document tolerances as global constants \nMTOL = sc.doc.ModelAbsoluteTolerance\nATOL = sc.doc.ModelAngleToleranceRadians\n\n# random.seed(10)  # optional random seed\n\n\ndef get_branch_rec(start, vec, spread, vspread, shrink, vshrink, depth):\n    # dir() is reserved in python and should not overwritten\n    end = start + vec\n    branches.append(rg.Line(start, end))\n\n    if (depth > 0):\n        normal_plane = rg.Plane(end, vec)\n\n        left_branch_vec = rg.Vector3d(vec)\n        left_branch_vec.Rotate(\n            -spread + random.uniform(0, vspread), \n            normal_plane.XAxis\n            )\n        left_branch_vec *= shrink + random.uniform(0, vshrink)\n        get_branch_rec(\n            end, left_branch_vec, spread, vspread, shrink, vshrink, depth - 1\n            )\n\n        right_branch_vec = rg.Vector3d(vec)\n        right_branch_vec.Rotate(\n            spread + random.uniform(0, vspread), \n            normal_plane.XAxis\n            )\n        right_branch_vec *= shrink + random.uniform(0, vshrink)\n\n        get_branch_rec(\n            end, right_branch_vec, spread, vspread, shrink, vshrink, depth - 1\n            )\n\n## -----------------------------------------------------------------------------\n\n# No need to initialise these above the function because it is called below\nbranches = []\npipes = []\n\nget_branch_rec(\n    iRootPosition, iRootDirection, \n    iSpreadAngle, iSpreadVariation, iShrink, iShrinkVariation,  \n    10\n    )\n\nfor i in range(len(branches)):\n    curve = rg.LineCurve(branches[i])  # no need to convert to Nurbs curve\n    # Rhino.Geometry.Brep.CreatePipe returns an array of breps not a single one\n    # cf. https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Brep_CreatePipe_1.htm\n    breps = list(rg.Brep.CreatePipe(curve, 0.1, True, 0, False, MTOL, ATOL))\n    if len(breps) < 1:  # check if no breps were created\n        print \"Failed to pipe branch at index,\", i\n        continue\n    # .extend adds items from one list to the end of another list\n    # .append adds the list of items to the end of another list, thus creating a list of lists\n    pipes.extend(breps)  \n\n# Outputs\na = branches\nb = pipes",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1580
+}

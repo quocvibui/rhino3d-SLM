@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/about-if-in-c-and-python/45794",
+  "topic_id": 45794,
+  "title": "About \"if\" in C# and Python",
+  "question": "Python:\n\n\nimport rhinoscriptsyntax as rs\n\nimport Rhino.Geometry as rg\n\nimport random\n\n\ndef recursiveLine(line, depth, resultList):\n\npt1 = line.PointAt(0)\n\npt2 = line.PointAt(1)\n\ndir1 = rg.Vector3d(pt2.X-pt1.X, pt2.Y-pt1.Y, pt2.Z-pt1.Z)\n\ndir2 = rg.Vector3d(dir1) # copy\n\n\ndir1.Rotate(random.random()*0.4+0.1, rg.Vector3d.ZAxis) # random angle\n dir2.Rotate(random.random()*-0.4-0.1, rg.Vector3d.ZAxis)\n dir1 *= random.random()*0.2 + 0.8; # random scale\n dir2 *= random.random()*0.2 + 0.8;\n line1 = rg.Line(pt2, pt2+dir1)\n line2 = rg.Line(pt2, pt2+dir2)\n resultList.append(line1)\n resultList.append(line2)\nif(depth>0):\n    if(random.random()<0.9): # random omission\n        recursiveLine(line1, depth-1, resultList)\n    if(random.random()<0.8): # random omission\n        recursiveLine(line2, depth-1, resultList)\n\n\n\n# main\n\na =\n\nrecursiveLine(line, 10,a)\n\n\nI translate this python script to C#:\n\n\n#main\n\n\nList a = new List();\n\nA = recursiveLine(line, 10, a);\n\n\nmethod\n\n\npublic List recursiveLine(Line line, int depth, List resultList)\n\n{\n\nPoint3d pt1 = line.PointAt(0);\n\nPoint3d pt2 = line.PointAt(1);\n\nVector3d dir1 = new Vector3d(pt2.X - pt1.X, pt2.Y - pt1.Y, pt2.X - pt2.Y);\n\nVector3d dir2 = new Vector3d(dir1);//copy\n\n\nRandom random = new Random(Guid.NewGuid().GetHashCode());\n dir1.Rotate(random.NextDouble() * 0.4 + 0.1, Rhino.Geometry.Vector3d.ZAxis);\n dir2.Rotate(random.NextDouble() * -0.4 - 0.1, Rhino.Geometry.Vector3d.ZAxis);\n dir1 *= random.NextDouble() * 0.2 + 0.8; //random scale\n dir2 *= random.NextDouble() * 0.2 + 0.8;\n\nLine line1 = new Line(pt2, pt2 + dir1);\n Line line2 = new Line(pt2, pt2 + dir2);\n\nresultList.Add(line1);\n resultList.Add(line2);\n\nif(depth > 0)\n{\n\n  if(random.NextDouble() < 0.9)\n  {\n    return recursiveLine(line1, depth - 1, resultList);\n  }\n  else if(random.NextDouble() < 0.8)\n  {\n    return recursiveLine(line2, depth - 1, resultList);\n  }\n  else\n  {\n    return resultList;\n  }\n}\nelse\n{\n  return resultList;\n}\n\n\n\n}\n\n\nThey give me different result.\n\n\nI’m confuse...",
+  "code_blocks": [
+    {
+      "code": "Random random = new Random(Guid.NewGuid().GetHashCode());\ndir1.Rotate(random.NextDouble() * 0.4 + 0.1, Rhino.Geometry.Vector3d.ZAxis);\ndir2.Rotate(random.NextDouble() * -0.4 - 0.1, Rhino.Geometry.Vector3d.ZAxis);\ndir1 *= random.NextDouble() * 0.2 + 0.8; //random scale\ndir2 *= random.NextDouble() * 0.2 + 0.8;\n\nLine line1 = new Line(pt2, pt2 + dir1);\nLine line2 = new Line(pt2, pt2 + dir2);\n\nresultList.Add(line1);\nresultList.Add(line2);\n\nif(depth > 0)\n{\n\n  if(random.NextDouble() < 0.9)\n  {\n    recursiveLine(line1, depth - 1, resultList);\n  }\n  if(random.NextDouble() < 0.8)\n  {\n    recursiveLine(line2, depth - 1, resultList);\n  }\n\n}",
+      "language": "csharp",
+      "author": "daizhuo",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "Random random = new Random(Guid.NewGuid().GetHashCode());\n dir1.Rotate(random.NextDouble() * 0.4 + 0.1, Rhino.Geometry.Vector3d.ZAxis);\n dir2.Rotate(random.NextDouble() * -0.4 - 0.1, Rhino.Geometry.Vector3d.ZAxis);\n dir1 *= random.NextDouble() * 0.2 + 0.8; //random scale\n dir2 *= random.NextDouble() * 0.2 + 0.8;\n\nLine line1 = new Line(pt2, pt2 + dir1);\n Line line2 = new Line(pt2, pt2 + dir2);\n\nresultList.Add(line1);\n resultList.Add(line2);\n\nif(depth > 0)\n{\n\n  if(random.NextDouble() < 0.9)\n  {\n    return recursiveLine(line1, depth - 1, resultList);\n  }\n  else if(random.NextDouble() < 0.8)\n  {\n    return recursiveLine(line2, depth - 1, resultList);\n  }\n  else\n  {\n    return resultList;\n  }\n}\nelse\n{\n  return resultList;\n}",
+      "language": "csharp",
+      "author": "daizhuo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 6,
+  "views": 1044
+}

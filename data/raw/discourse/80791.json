@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/noob-question-003-custom-point-class/80791",
+  "topic_id": 80791,
+  "title": "Noob question #003? Custom point class",
+  "question": "Is it possible to override the Point3d constructor directly or should I override the Rhino.Geometry.Point class then somehow create my own constructor mimicking Rhino.Geometry.Point3d but adding some new properties to it?\n\n\nSee what I do below, is this correct?\n\n\n\n\nI want a custom class that when run will place a point on x=0.0, y=0.0, z=0.0, always.",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing System.Diagnostics;\nusing System.Runtime.InteropServices;\nusing System.Runtime.Serialization;\nusing System.Security.Permissions;\n\nnamespace Rhino.Geometry\n{\n  /// <summary>\n  /// Represents an interval in one-dimensional space,\n  /// that is defined as two extrema or bounds.\n  /// </summary>\n  [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 16)]\n  [DebuggerDisplay(\"({m_t0}, {m_t1})\")]\n  [Serializable]\n  public struct Interval : ISerializable, IEquatable<Interval>, IComparable<Interval>, IComparable, IEpsilonComparable<Interval>\n  {\n    #region Members\n    private double m_t0;\n    private double m_t1;",
+      "language": "csharp",
+      "author": "Petras_Vestartas",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nclass Point3d:\n    def __init__(self):\n        self.x = 0.0\n        self.y = 0.0\n        self.z = 0.0\n\n    def get_point(self):\n        return Rhino.Geometry.Point3d(self.x, self.y, self.z)\n\npt = Point3d()\nprint pt.get_point()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nclass Point3d:\n    def __init__(self):\n        self.x = 0.0\n        self.y = 0.0\n        self.z = 0.0\n        self.usertext = None\n\n    def set_usertext(self, usertext):\n        self.usertext = usertext\n\n    def get_point(self):\n        return Rhino.Geometry.Point3d(self.x, self.y, self.z)\n\npt = Point3d()\nprint pt.set_usertext(\"My Usertext\")",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "class Point3d:\n    def __init__(self):\n        self.x = 0.0\n        self.y = 0.0\n        self.z = 0.0\n    def get_point(self):\n        return Rhino.Geometry.Point3d(self.x,self.y,self.z)\n    \n    def to_object(self):\n        import scriptcontext as sc\n        return sc.doc.objects.AddPoint(self.get_point()) \n\n    def set_usertext(self,key,value):\n        import rhinoscriptsyntax as rs\n        obj = self.to_object()\n        return rs.SetUserText(obj, key, value)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nclass Point3d:\n    def __init__(self):\n        self.x = 0.0\n        self.y = 0.0\n        self.z = 0.0\n    def get_point(self):\n        return Rhino.Geometry.Point3d(self.x,self.y,self.z)\n    \n    def to_object(self):\n        \n        return Rhino.RhinoDoc.ActiveDoc.Objects.AddPoint(self.get_point()) \n\n    def set_usertext(self,key,value):\n        \n        obj = self.to_object()\n        return rs.SetUserText(obj, key, value)\n        \npt = Point3d()\n\na = pt.to_object()",
+      "language": "python",
+      "author": "Petras_Vestartas",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n#import scriptcontext as sc\n#import rhinoscriptsyntax as rs\n\nclass Point3d:\n    def __init__(self):\n        self.x = 0.0\n        self.y = 0.0\n        self.z = 0.0\n        return self.set_usertext(\"Location\",[self.x,self.y,self.z])\n    \n    def get_point(self):\n        return Rhino.Geometry.Point3d(self.x,self.y,self.z)\n    \n    def to_object(self):\n        import scriptcontext as sc\n        return sc.doc.Objects.AddPoint(self.get_point()) \n\n    def set_usertext(self,key,value):\n        import rhinoscriptsyntax as rs\n        obj = self.to_object()\n        return rs.SetUserText( obj, key, value )\n\n\n\n\npt = Point3d()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 19,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 1065
+}

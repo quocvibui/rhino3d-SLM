@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-it-possible-to-constrain-getpoint-object-with-multiple-breps/146820",
+  "topic_id": 146820,
+  "title": "Is it possible to constrain GetPoint object with multiple breps?",
+  "question": "Hi everyone, \n@dale\n, I want to constrain the GetPoint object with multiple breps at the same time. Is it possible in C# with RhinoCommon API?\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    brep_ids = rs.GetObjects(\"Breps\", 8+16, False, False, False)\n    if not brep_ids: return\n    \n    breps = [rs.coercebrep(brep_id, True) for brep_id in brep_ids]\n    \n    tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    brep = Rhino.Geometry.Brep.MergeBreps(breps, tolerance)\n    if not brep: return\n    \n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Pick point on breps\")\n    gp.Constrain(brep, -1, -1, False)\n    \n    while True:\n        gp.Get()\n        if gp.CommandResult() == Rhino.Commands.Result.Success:\n            scriptcontext.doc.Objects.AddPoint(gp.Point())\n            scriptcontext.doc.Views.Redraw()\n        else:\n            break\n            \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 518
+}

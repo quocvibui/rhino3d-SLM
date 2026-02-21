@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-inset-with-rhinocommon/199302",
+  "topic_id": 199302,
+  "title": "Using _Inset with RhinoCommon?",
+  "question": "Greetings,\n\n\nCan’t seem to find _Inset tool in RhinoScriptSyntax\n\n\nIs it possible to call it using RhinoCommon ?\n\n\nNote: _Inset is found under Mesh Tools, and it works with both Meshes and Surfaces. It creates a border of a specified distance around a mesh face or surface.",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    brep_id = rs.GetObject(\"Brep to inset\", 16, True, True)\n    if not brep_id: return\n    \n    brep = rs.coercebrep(brep_id, True)\n    faces = range(brep.Faces.Count)\n    new_brep = Rhino.Geometry.Brep.InsetFaces(\n                                            brep,\n                                            faceIndices=faces,\n                                            distance=1.0,\n                                            loose=True,\n                                            ignoreSeams=True,\n                                            creaseCorners=False,\n                                            tolerance=0.001,\n                                            angleTolerance=0.1\n                                            )\n    \n    if isinstance(new_brep, Rhino.Geometry.Brep):\n        scriptcontext.doc.Objects.Replace(brep_id, new_brep)\n        scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "scriptcontext.doc.Objects.Replace(brep_id, new_brep)\n# one can also use Add\nscriptcontext.doc.Objects.Add(new_brep)",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 16,
+  "views": 171
+}

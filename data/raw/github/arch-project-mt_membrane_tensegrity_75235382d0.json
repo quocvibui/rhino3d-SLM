@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/arch-project-mt/membrane_tensegrity/blob/6dfaeec063b1f35b5eba602aea02765c3fd1bbee/src/rmsd_simulator.py",
+  "repo": "arch-project-mt/membrane_tensegrity",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "src/rmsd_simulator.py",
+  "instruction": "Rmsd simulator",
+  "code": "import random\nimport Rhino.Geometry as rg\nimport csv\nimport os\nimport subprocess\n\n\ntranslation_vector = rg.Vector3d(constant, constant, constant)\nmain_path = \"your_path\"\nvertices_num = 10\n\nos.chdir(main_path)\n\n\ndef main():\n    original_points = generate_random_points()\n    original_edges = generate_edges_from_points(original_points)\n    translated_points = generate_various_points(original_points)\n    moved_points = [rotate_point(pt, axis, angle) for pt in translated_points]\n    moved_edges = generate_edges_from_points(moved_points)\n    to_csv(original_points, \"original_points\")\n    to_csv(moved_points, \"moved_points\")\n    call_py_file(\"rmsd_calculator\")\n    return original_points, original_edges, moved_points, moved_edges\n\n\ndef to_csv(points, file_name):\n    with open(\"%s%s.csv\" % (main_path, file_name), \"w\") as file:\n        writer = csv.writer(file)\n        x_list = []\n        y_list = []\n        z_list = []\n        for coordinate in points:\n            x_list.append(coordinate[0])\n            y_list.append(coordinate[1])\n            z_list.append(coordinate[2])\n        writer.writerow(x_list)\n        writer.writerow(y_list)\n        writer.writerow(z_list)\n\n\ndef call_py_file(file_name):\n    subprocess.call([\"/usr/local/bin/docker\", \"exec\", \"mt\", \"./%s\" % (file_name)])\n\n\ndef generate_random_points(point_num=vertices_num):\n    points = []\n    random.seed(0)\n    for i in range(10):\n        x = random.uniform(-10, 10)\n        y = random.uniform(-10, 10)\n        z = random.uniform(-10, 10)\n        points.append(rg.Point3d(x, y, z))\n    return points\n\n\ndef generate_edges_from_points(points):\n    edges = []\n    for i in range(len(points) - 1):\n        edge = rg.Line(points[i], points[i + 1])\n        edges.append(edge)\n    return edges\n\n\ndef generate_various_points(points):\n    translated_points = []\n    for point in points:\n        translated_point = point + translation_vector\n        translated_points.append(translated_point)\n    return translated_points\n\n\ndef rotate_point(point, axis, angle, origin=rg.Point3d(0, 0, 0)):\n    transform = rg.Transform.Rotation(angle, axis, origin)\n    rotated_point = point.Clone()\n    rotated_point.Transform(transform)\n    return rotated_point\n\n\nif __name__ == \"__main__\":\n    original_points, original_edges, moved_points, moved_edges = main()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

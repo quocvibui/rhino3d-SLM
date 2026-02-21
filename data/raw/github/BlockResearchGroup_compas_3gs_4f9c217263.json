@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BlockResearchGroup/compas_3gs/blob/162cecfbeb8806340a55713ec3a0bce7cc932c89/examples/_old_examples/01_61_volmesh_transformation.py",
+  "repo": "BlockResearchGroup/compas_3gs",
+  "repo_stars": 11,
+  "repo_description": "3D graphic statics add-on for the COMPAS framework",
+  "license": "MIT",
+  "filepath": "examples/_old_examples/01_61_volmesh_transformation.py",
+  "instruction": "01 61 volmesh transformation",
+  "code": "from __future__ import absolute_import\nfrom __future__ import print_function\nfrom __future__ import division\n\nimport compas\n\nfrom compas_rhino.utilities import volmesh_from_polysurfaces\nfrom compas_rhino.objects.select import mesh_select_face\n\nfrom compas_3gs.diagrams import ForceVolMesh\n\nfrom compas_3gs.rhino import VolmeshHalffaceInspector\nfrom compas_3gs.rhino import rhino_volmesh_pull_halffaces\n\ntry:\n    import rhinoscriptsyntax as rs\nexcept ImportError:\n    compas.raise_if_ironpython()\n\n\n# ------------------------------------------------------------------------------\n# 1. make vomesh from rhino polysurfaces\n# ------------------------------------------------------------------------------\nlayer_force = 'force_volmesh'\n\nguids = rs.GetObjects(\"select polysurfaces\", filter=rs.filter.polysurface)\nrs.HideObjects(guids)\n\nforcediagram = ForceVolMesh()\nforcediagram = volmesh_from_polysurfaces(forcediagram, guids, '2f')\nforcediagram.layer = layer_force\nforcediagram.attributes['name'] = layer_force\n\nforcediagram.draw()\n\n\n# --------------------------------------------------------------------------\n#  1. display boundary halffaces\n# --------------------------------------------------------------------------\nboundary_halffaces = forcediagram.halffaces_on_boundaries()\n\nforcediagram.clear()\nforcediagram.draw_edges()\nforcediagram.draw_faces(faces=boundary_halffaces)\n\nrs.EnableRedraw(True)\n\n# --------------------------------------------------------------------------\n#  2. select halfface and its dependents\n# --------------------------------------------------------------------------\nhf_inspector = VolmeshHalffaceInspector(forcediagram,\n                                        dependents=True)\nhf_inspector.enable()\n\nhfkey = mesh_select_face(forcediagram)\n\nhf_inspector.disable()\n\ndel hf_inspector\n\n\n# ------------------------------------------------------------------------------\n# 2. volmesh face pull\n# ------------------------------------------------------------------------------\n\nrhino_volmesh_pull_halffaces(forcediagram)\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/problem-using-rhinocommon-to-fillet-breps/97839",
+  "topic_id": 97839,
+  "title": "Problem using rhinoCommon to fillet breps",
+  "question": "I uploaded two 3dm files in the posts below because a single example file with all objects was just too large (I think)…\n\n\nI used RhinoCommon in a Grasshopper component to make some solid “cuboids”: 6 faced closed polysurfaces, with BrepSolidOrientation.Outward.\n\n\nI checked in the Rhino UI, they look kosher.\n\n\nI used this to try and fillet some edges.\n\n\nprivate void FilletEdges(Brep[] cuboids, double radius, int[] edgeIndexes)\n        {\n            double t = DocumentTolerance();\n\n            double[] radii = new double[edgeIndexes.Length];\n            for(int i = 0; i < radii.Length; ++i)\n            {\n                radii[i] = radius;\n            }\n\n            for(int i = 0; i < cuboids.Length; ++i)\n            {\n                cuboids[i] = Brep.CreateFilletEdges(cuboids[i], edgeIndexes, radii, radii, BlendType.Blend, RailType.DistanceBetweenRails, t)[0];\n            }\n        }\n\n\n\nHere is where I called it:\n\n\n Surface[] outrPatches = new Surface[] { outrCuboidParameters.subsetPatches.outrPatches[0] };\n            Surface[] innrPatches = new Surface[] { innrCuboidParameters.subsetPatches.innrPatches[0] };\n            Brep[] cuboids = MakeCuboids(\n                //outrPatches,\n                //innrPatches\n                outrCuboidParameters.subsetPatches.outrPatches,\n                innrCuboidParameters.subsetPatches.innrPatches\n            );\n            AddTo(cuboids, C);\n            FilletEdges(cuboids, 0.03, new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });\n            //FilletEdges(cuboids, 0.03, new int[] { 0, 2, 5, 8 }); // just the straight edges that connect outr and innr patches\n            AddTo(cuboids, B);\n\n\n\nI initially just tried to fillet the edges that join my outer and inner patches (they are actually simple surfaces). I trimmed a generating surface using Surface.Trim\n\n\nAnyway,\n\n\nThe Brep.CreateFilletEdges call creates about 30 invalid breps out of about 166 input breps.\n\n\nI had already hand filleted 166 breps in the UI to see if the fill...",
+  "code_blocks": [
+    {
+      "code": "Surface[] outrPatches = new Surface[] { outrCuboidParameters.subsetPatches.outrPatches[0] };\n            Surface[] innrPatches = new Surface[] { innrCuboidParameters.subsetPatches.innrPatches[0] };\n            Brep[] cuboids = MakeCuboids(\n                //outrPatches,\n                //innrPatches\n                outrCuboidParameters.subsetPatches.outrPatches,\n                innrCuboidParameters.subsetPatches.innrPatches\n            );\n            AddTo(cuboids, C);\n            FilletEdges(cuboids, 0.03, new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });\n            //FilletEdges(cuboids, 0.03, new int[] { 0, 2, 5, 8 }); // just the straight edges that connect outr and innr patches\n            AddTo(cuboids, B);",
+      "language": "csharp",
+      "author": "jmcauley",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 553
+}

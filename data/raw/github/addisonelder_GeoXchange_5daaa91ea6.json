@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/addisonelder/GeoXchange/blob/fe2354fc957aa3a3bfce922ead691214c7851723/libs/gx_config.py",
+  "repo": "addisonelder/GeoXchange",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "libs/gx_config.py",
+  "instruction": "Gx config",
+  "code": "#! python3\nimport Rhino\nimport configparser\nimport rhinoscriptsyntax as rs # type: ignore\nfrom libs import filepicker\nfrom libs.constants import *\n\nclass GXConfig:\n    def __init__(self):\n        self.path = \"\"\n        self.x = 0.00\n        self.y = 0.00\n        self.z = 0.00\n        self.r = 0.00\n        self.schema = \"\"\n        self.header = \"\"\n        self.transform = None\n        self.inverse_transform = None\n\n        try:\n            self.pick_file()\n        except Exception as e:\n            print(e)\n            exit(1)\n\n        self.parse_file()\n        self.construct_transforms()\n\n    def pick_file(self):\n        self.path = filepicker.pick_file(\".ini\", \"Config File\", YAK_SERVER)\n\n    def parse_file(self):\n        config = configparser.ConfigParser()\n        config.read(self.path)\n        self.x = float(config.get(\"Transform\", \"x\"))\n        self.y = float(config.get(\"Transform\", \"y\"))\n        self.z = float(config.get(\"Transform\", \"z\"))\n        self.r = float(config.get(\"Transform\", \"r\"))\n        self.schema = config.get(\"Export\", \"Schema\")\n        self.header = config.get(\"Export\", \"Header\")\n\n    def construct_transforms(self):\n        translation = (self.x, self.y, self.z)\n        world_plane = rs.WorldXYPlane()\n        rotate = rs.RotatePlane(world_plane, self.r, [0,0,1])\n        move = rs.XformTranslation(translation)\n        target_plane = rs.PlaneTransform(rotate,move)\n        \n        self.transform = rs.XformChangeBasis(target_plane,world_plane)\n        self.inverse_transform = rs.XformChangeBasis(world_plane,target_plane)\n\n    def get_header_layers(self):\n        header_layers = []\n        for layer in Rhino.RhinoDoc.ActiveDoc.Layers:\n            layer_string = str(layer.FullPath)\n            if layer_string.startswith(self.header):\n                header_layers.append(layer)\n        print(f\"Header Layers: {header_layers}\")\n        return header_layers\n\n    def get_header_objects(self,layers):\n        objects = []\n        for layer in layers:\n            objs = Rhino.RhinoDoc.ActiveDoc.Objects.FindByLayer(layer)\n            if objs:\n                objects.extend(objs)\n        print(f\"Object List: {objects}\")\n        return objects",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

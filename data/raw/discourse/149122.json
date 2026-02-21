@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/annoying-inconsistencies-in-rs-get-methods-that-return-points/149122",
+  "topic_id": 149122,
+  "title": "Annoying inconsistencies in rs.Get() methods that return points",
+  "question": "…and auxiliary methods that use those points\n\n\nWe have:\n\n\nrs.GetPoints()     #returns a *list* of points\nrs.GetLine()       #returns a *tuple* of two points\nrs.GetRectangle()  #returns an *Array[Point3d]*\nrs.BoundingBox()   #returns a *list* of 8 points\n\n\n\nWhy don’t they all just return a list?  Let’s see some of the issues right now:\n\n\nLet’s start with \nline=rs.GetLine()\n.  So you run it and click two points. it returns the tuple of your two points clicked. Now, lets say you want to re-set the start point to, say, world 0.  You try:\n\n\nline[0]=rs.coerce3dpoint([0,0,0])\n\n\n\nYou get: \n‘tuple’ object does not support item assignment\n\nThis would not be a problem if the return was a list. Of course you can actively convert the tuple to a list to make this work, but why should that be necessary?\n\n\nNext case: \nrect=GetRectangle()\n\nRun it and draw your rectangle.  It returns not a list, not a tuple, but an Array[Point3d].  Now, supposing I want to actually add the rectangle to the document.  One can only do that with rs.AddPolyline(), and to get a closed rectangle you need \nfive\n points, the last point being a duplicate of the first point.\n\n\nrect=GetRectangle()\nrs.AddPolyline(rect) #works, but you only get three sides.\n\n\n\nOf course you can close after, but it’s easier to start closed.\n\n\nSo, let’s try adding the last point back in in the usual way:\n\n\nrect.append(rect[0])\n\n\n\nYou get:  \n‘Array[Point3d]’ object has no attribute ‘append’\n\n\nYes, this works:\n\n\nrect=list(rs.GetRectangle())\nrect.append(rect[0])\nrs.AddPolyline(rect)\n\n#or safer:\nrect=rs.GetRectangle()\nrect=list(rect)\nrect.append(rect[0])\nrs.AddPolyline(rect)\n\n\n\nBut again, why is that necessary? If it returned a list and not an \nArray[Point3d]\n it would be fine.  Both rs.BoundingBox() and rs.GetPoints() return nice lists of points, why can’t the others?  Is there a specific reason for that?\n\n\nAs a corrolary, one of the things that also annoys me is this:\n\n\nline=rs.GetLine()\nrs.AddLine(line) #doesn't work because it's un...",
+  "code_blocks": [
+    {
+      "code": "rs.GetPoints()     #returns a *list* of points\nrs.GetLine()       #returns a *tuple* of two points\nrs.GetRectangle()  #returns an *Array[Point3d]*\nrs.BoundingBox()   #returns a *list* of 8 points",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "rect=list(rs.GetRectangle())\nrect.append(rect[0])\nrs.AddPolyline(rect)\n\n#or safer:\nrect=rs.GetRectangle()\nrect=list(rect)\nrect.append(rect[0])\nrs.AddPolyline(rect)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "line=rs.GetLine()\nrs.AddLine(*line) # \"manual\" unpack\n\n#or\n\nline=rs.GetLine()\nrs.AddLine(line[0],line[1]) # manually separate the line into two arguments",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 377
+}

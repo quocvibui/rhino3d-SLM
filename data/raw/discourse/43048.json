@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-scripting-or-python-for-this/43048",
+  "topic_id": 43048,
+  "title": "Rhino scripting or Python for this?",
+  "question": "Hi\n\n\nI have been using Macro commands and I´m very happy with it´s simplicity, BUT I guess it has it´s limitations.\n\nI have several points in my file and I want to run the command “EvaluatePt” to place the coodinates on screen of every point I have selected.\n\n\nI think I would prefer to try Python since I belive it will allow me to do more stuff, but I´m receptive to Rhino scripting.\n\nWhat ever works is fine.\n\n\nThanks a lot.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ninputPtIDs = rs.GetObjects(\"select points\", 1)\ninputPts = [rs.coerce3dpoint(ID) for ID in inputPtIDs]\n\nfor pt in inputPts:\n    tagText = \"({0}, {1}, {2})\".format(pt.X, pt.Y, pt.Z)\n    rs.AddTextDot(tagText, pt)",
+      "language": "python",
+      "author": "owen",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ninputPtIDs = rs.GetObjects(\"select points\", 1)\ninputPts = [rs.coerce3dpoint(ID) for ID in inputPtIDs]\n\nplane=rs.ViewCPlane()\n\nfor pt in inputPts:\n    pt_xf=rs.XformWorldToCPlane(pt,plane)\n    tagText = \"({0}, {1}, {2}) CP\".format(pt_xf.X, pt_xf.Y, pt_xf.Z)\n    rs.AddTextDot(tagText, pt)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#this imports the rhinoscriptsyntax library, which provides the simplest access to Rhino in python\n# you should always import \"as rs\" for consistency with the rest of the community\nimport rhinoscriptsyntax as rs\n\n#sometimes you'll \"import Rhino\" for access to Rhino.Geometry, etc...\n#or maybe you'll \"import math\" or another builtin python module\n\n#the first line prompts the user to select inputs\n#the \"1\" forces the user to only select points\ninputPtIDs = rs.GetObjects(\"select points\", 1)\n\n#this line converts the list of GUIDs returned by GetObjects into 3dpoint objects, so we can get their x,y,z values\n#this syntax is \"list comprehension\" in python, a very useful python concept to read up on\ninputPts = [rs.coerce3dpoint(ID) for ID in inputPtIDs]\n\n# stores the current view cPlane\nplane=rs.ViewCPlane()\n\n#we now loop through all the selected points:\n#each of these lines happens once for each point.\nfor pt in inputPts:\n    #convert the world coordinates to Cplane coordinates\n    pt_xf=rs.XformWorldToCPlane(pt,plane)\n    #use python string formatting to create the text tag content\n    tagText = \"({0}, {1}, {2}) CP\".format(pt_xf.X, pt_xf.Y, pt_xf.Z)\n    #add the text dot object to the Rhino document\n    rs.AddTextDot(tagText, pt)",
+      "language": "python",
+      "author": "owen",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1275
+}

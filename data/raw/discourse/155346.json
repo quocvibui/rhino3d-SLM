@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/silhouette-python-or-grasshopper/155346",
+  "topic_id": 155346,
+  "title": "Silhouette python or grasshopper",
+  "question": "Hi All,\n\n\nI’m looking for a either a python example or a grasshopper component that returns a curve in the name manner as the Silhouette command - does anyone have an example?\n\n\nCheers\n\n\nDK",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\nBoard = x\nCamera = cam\nSil_Type = Rhino.Geometry.SilhouetteType(16)\nSil_Tol = 0.01\nAng_Tol = 0.01\n\nResults = Rhino.Geometry.Silhouette.Compute(Board,Sil_Type,Camera,Sil_Tol,Ang_Tol)\n\nOutput_Curves = []\nfor Result in Results:\n    Output_Curves.append(Rhino.Geometry.Silhouette.Curve.GetValue(Result))\n\na = Output_Curves",
+      "language": "python",
+      "author": "kiteboardshaper",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\n\ntol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\nangleTol = Rhino.RhinoDoc.ActiveDoc.ModelAngleToleranceRadians\n\nbrep.Faces.SplitFacesAtTangents()\n\nsilhouettes = rg.Silhouette.Compute(\n    brep,\n    rg.SilhouetteType.Boundary,\n    rg.Vector3d.ZAxis,\n    tol,\n    angleTol)\n\ncrvs = []\n\nfor sil in silhouettes:\n    crvs.append(rg.Curve.ProjectToPlane(sil.Curve, rg.Plane.WorldXY))\n\nregions = rg.Curve.CreateBooleanRegions(\n    crvs,\n    rg.Plane.WorldXY,\n    True,\n    tol)\n    \na = regions.RegionCurves(0)",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 21,
+  "views": 2034
+}

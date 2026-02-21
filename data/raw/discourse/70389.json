@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bendspacemorph-example-in-python/70389",
+  "topic_id": 70389,
+  "title": "BendSpaceMorph example in python",
+  "question": "I am trying to bend some text in an arc with a given radius. I can accomplish this manually with the \nbend\n command inside of rhino, but my goal is to automate this task with python. Here is a snippet of my code that I am writing to accomplish this, but it does not work. (The text stays planar)\n\n\ntext_object = rs.AddText(text, rs.ViewCPlane(\"Front\"), height=text_height, font=font, font_style=font_style, justification=131074)\ntext_curves = rs.ExplodeText(text_object)\ntext_surfaces = rs.AddPlanarSrf(text_curves)\nline = rs.AddLine((0, 0, 0), (0, -1, 0))\ntext_solids = [rs.ExtrudeSurface(srf, line) for srf in text_surfaces]\nrs.MoveObjects(text_solids, (0, radius, 0))\nmorph = Rhino.Geometry.Morphs.BendSpaceMorph(\n        Rhino.Geometry.Point3d(0, radius, 0),\n        Rhino.Geometry.Point3d(100, radius, 0),\n        Rhino.Geometry.Point3d(radius, 0, 0),\n        True,\n        True)\n[morph.Morph(rs.coercebrep(s)) for s in text_solids]\n\n\n\nI do not get an error or crash, but the text in the scene remains uncurved.\n\n\nLet me know if any more information is needed.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nrs.EnableRedraw(False)\nrs.Command('_-TextObject _HorizontalAlignment=_Left _VerticalAlignment=_Bottom _CreateGeometry=_Solids \"Hello Rhino!\" 0')\nobj_ids = rs.LastCreatedObjects()\nif obj_ids:\n    bbox = rs.BoundingBox(obj_ids)\n    start = Rhino.Geometry.Point3d.Origin\n    end = bbox[1]\n    point = bbox[2]\n    morph = Rhino.Geometry.Morphs.BendSpaceMorph(start, end, point, True, True)\n    for id in obj_ids:\n        brep = rs.coercebrep(id)\n        morph.Morph(brep)\n        sc.doc.Objects.Replace(id, brep)\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "text_object = rs.AddText(text, rs.ViewCPlane(\"Front\"), height=text_height, font=font, font_style=font_style, justification=131074)\ntext_curves = rs.ExplodeText(text_object)\ntext_surfaces = rs.AddPlanarSrf(text_curves)\nline = rs.AddLine((0, 0, 0), (0, -1, 0))\ntext_solids = [rs.ExtrudeSurface(srf, line) for srf in text_surfaces]\nrs.MoveObjects(text_solids, (0, radius, 0))\nmorph = Rhino.Geometry.Morphs.BendSpaceMorph(\n        Rhino.Geometry.Point3d(0, radius, 0),\n        Rhino.Geometry.Point3d(100, radius, 0),\n        Rhino.Geometry.Point3d(radius, 0, 0),\n        True,\n        True)\n[morph.Morph(rs.coercebrep(s)) for s in text_solids]",
+      "language": "python",
+      "author": "Jack_Minardi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 574
+}

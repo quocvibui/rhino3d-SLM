@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ZacZhangzhuo/3d_printing_teamwork/blob/1ae8e701e83329eb292170fc8bc483fa912b639b/working_file_joe/skin_testing/pt_variations%20copy.py",
+  "repo": "ZacZhangzhuo/3d_printing_teamwork",
+  "repo_stars": 1,
+  "repo_description": "This is the 3D Printing teamwork repository of team 4 of MAS dfab 2023",
+  "license": "MIT",
+  "filepath": "working_file_joe/skin_testing/pt_variations copy.py",
+  "instruction": "Pt variations copy",
+  "code": "import Rhino.Geometry as rg\nimport random as r\nimport ghpythonlib as ghc\nfrom ghpythonlib import treehelpers as th\nfrom copy import deepcopy\nimport math\n\n\ndef OrientPlane(plane, guide):\n    yPt = plane.Origin + rg.Vector3d(0, 0, 1)\n    project = rg.Transform.ProjectAlong(plane, plane.ZAxis)\n    yPt.Transform(project)\n    yAxis = rg.Vector3d(yPt-plane.Origin)\n\n    zAxis = plane.ZAxis\n    if zAxis*guide < 0:\n        zAxis = -zAxis\n\n    outPlane = rg.Plane(\n        plane.Origin, -rg.Vector3d.CrossProduct(zAxis, yAxis), yAxis)\n    return outPlane\n\n\ndef get_pts(crv):\n\n    all_pts = []\n\n    crv = curve.ToNurbsCurve(curve.Domain)\n    # params = crv.DivideByCount(divide_number, True)\n    params = crv.DivideByCount(2, True)\n\n\n    for i in params:\n        pt = crv.PointAt(i)\n        all_pts.append(pt)\n\n    return all_pts\n\n\ndef make_planes(pts):\n\n    pts_planes = []\n\n    for pt in pts:\n        point, uv_pt, distance = ghc.components.SurfaceClosestPoint(pt, srf)\n        pnt, normal, u, v, f = ghc.components.EvaluateSurface(srf, uv_pt)\n        plane = rg.Plane(pt, rg.Vector3d(u), rg.Vector3d(v))\n        rg.Plane.Rotate(plane, math.radians(-90), plane.ZAxis, plane.Origin)\n        pts_planes.append(plane)\n\n    return pts_planes\n\n\n# def move_planes(plns, plns_graph):\n\n#     moved_plns = []\n\n#     for k, value in enumerate(plns_graph):\n#         origin = plns[k].Clone()\n#         trans1 = rg.Transform.Translation(\n#             rg.Vector3d(plns[k].Normal*plns_graph[k]))\n#         origin.Transform(trans1)\n#         moved_plns.append(origin)\n\n#     return moved_plns\n\n\ndef make_layered_planes(plns, new_layer_height):\n\n    \n    if flip_vect:\n        for i in range(len(plns)):\n            plns[i] = rg.Plane(\n                plns[i].Origin, -plns[i].XAxis, plns[i].YAxis)\n        # print (new_layer_height)\n        # new_layer_height = -new_layer_height\n        # print (new_layer_height)\n    layered_planes = [plns]\n\n    for l in range(layer_nbr):\n        temp = []\n        for i, p in enumerate(layered_planes[l]):\n            layer_1 = deepcopy(p)\n            trans2 = rg.Transform.Translation(\n                rg.Vector3d(p.Normal*new_layer_height*plns_graph[i]))\n            layer_1.Transform(trans2)\n            temp.append(layer_1)\n\n        temp.reverse()\n        layered_planes.append(temp)\n\n    return layered_planes\n\nprint(layer_height)\npts_divisions = (get_pts(curve))\npts_planes = make_planes(pts_divisions)\nprint (pts_planes)\n# moved_planes = move_planes(pts_planes, plns_graph)\nlayered_planes = th.list_to_tree(make_layered_planes(pts_planes, layer_height))\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

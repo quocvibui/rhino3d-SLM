@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/converting-python-script-to-gh-python-component/56717",
+  "topic_id": 56717,
+  "title": "Converting Python Script to GH Python Component",
+  "question": "Hi All,\n\n\nI could use a hand converting a python script into a GH python component.  (noob alert)\n\nAttached are both files.  I’m getting null outputs from the GH component, and I cannot figure out why, but I suspect it has something to do with the point list not being read.  Thanks in advance for any insight.\n\n\nHex Problem_1.gh\n (8.2 KB)\n\n\nHexagon_ angle 4.715.py\n (1.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\nedges = 6\nlevels = 3\nhexGrid = []\nwork = 2 * math.sqrt((Hex_EL * Hex_EL) - ((Hex_EL / 2) * (Hex_EL / 2)))\n\ndef polygon(center,edges,size,angle):\n    tempCircle = rs.AddCircle(center,size)\n    tempPoints = rs.DivideCurve(tempCircle, edges, create_points=False, return_points=True)\n    tempPoints.append(tempPoints[0])\n    tempHexago = rs.AddPolyline(tempPoints)\n    tempReturn = rs.RotateObject(tempHexago, center, angle, axis=None, copy=False)\n    rs.DeleteObject(tempCircle)\n    return tempReturn\n    \nfor i in range(0, levels):\n    tempSize = work * (i + 1)\n    dut = polygon(Pts, edges, tempSize, 30 + Hex_RA)\n    temp = rs.DivideCurve(dut, (i+1) * edges, create_points=False, return_points=True)\n    rs.DeleteObject(dut)\n    hexGrid.extend(temp)\n        \nfor i in range(0, len(hexGrid)):\n    polygon(hexGrid[i], edges, Hex_EL, Hex_RA)\n    rs.AddPoint(hexGrid[i])",
+      "language": "python",
+      "author": "Nick_Bruscia",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "hexagons = []\nfor i in range(0, len(hexGrid)):\n    hexagon = polygon(hexGrid[i], edges, Hex_EL, Hex_RA))\n    hexagons.append(hexagon)\n    # rs.AddPoint(hexGrid[i]) -- not needed",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1975
+}

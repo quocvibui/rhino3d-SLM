@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/points-and-curve-intersection/158286",
+  "topic_id": 158286,
+  "title": "Points and Curve Intersection",
+  "question": "Hi,\n\n\nI want to filter all points which lie on this perimeter curve.\n\nDoes someone know a component for that?\n\nAnd I only find components which intersect lines with line or meshes with lines…\n\n\n\n\nimage\n713×357 5.74 KB\n\n\n\n\nThanks,\n\nLaurin",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef main():\n    # Get the input curve and points from the user\n    curve_id = rs.GetObject(\"Select a curve\", rs.filter.curve)\n    if not curve_id:\n        return\n    curve = rs.coercecurve(curve_id)\n\n    point_ids = rs.GetObjects(\"Select points\", rs.filter.point)\n    if not point_ids:\n        return\n    points = [rs.coerce3dpoint(point_id) for point_id in point_ids]\n\n    # Define a tolerance value\n    tolerance = 1\n\n    # Find the points lying on the curve\n    points_on_curve = []\n    for point in points:\n        point_on_curve = curve.ClosestPoint(point, tolerance)\n        print (str(point_on_curve[0]))\n        if point_on_curve[0]:\n            points_on_curve.append(point)\n    rs.UnselectAllObjects()\n    # If any points are on the curve, select them\n    if points_on_curve:\n        point_ids_on_curve = [rs.PointClosestObject(pt, point_ids)[0] for pt in points_on_curve]\n        rs.SelectObjects(point_ids_on_curve)\n        print(\"Selected point(s) on the curve.\")\n    else:\n        print(\"No points found on the curve.\")\n\nmain()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 548
+}

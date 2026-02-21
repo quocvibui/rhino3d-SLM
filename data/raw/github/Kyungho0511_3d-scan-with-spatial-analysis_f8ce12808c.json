@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Kyungho0511/3d-scan-with-spatial-analysis/blob/ae047ace35223fc021ac1c65d7b8d5c17f0043f4/scripts/hopsTests.py",
+  "repo": "Kyungho0511/3d-scan-with-spatial-analysis",
+  "repo_stars": 3,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "scripts/hopsTests.py",
+  "instruction": "Hops tests",
+  "code": "from flask import Flask\nimport ghhops_server as hs\nfrom ghhops_server.params import HopsCurve, HopsInteger, HopsNumber\nimport rhino3dm as rh\n\n\n# register hops app as middleware\napp = Flask(__name__)\nhops: hs.HopsFlask = hs.Hops(app)\n\n# flask app can be used for other stuff drectly\n@app.route(\"/help\")\ndef help():\n    return \"Welcome to Grashopper Hops for CPython!\"\n\n#-- Point At component --#\n@hops.component(\n    \"/pointat\",\n    name=\"PointAt\",\n    description=\"Get a point along a curve\",\n    inputs=[\n        hs.HopsCurve(\"Curve\", \"C\", \"Curve to evaluate\"),\n        hs.HopsNumber(\"t\", \"t\", \"Parameter on Curve to evaluate.\")\n    ],\n    outputs=[\n        hs.HopsPoint(\"P\", \"P\", \"Point on Curve at parameter t\")\n    ]\n)\ndef pointat(curve: rh.Curve, t: float=0):\n    pt = curve.PointAt(t)\n    return pt\n\nif __name__ == '__main__':\n    # set debug=True\n    app.run(debug=True)",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

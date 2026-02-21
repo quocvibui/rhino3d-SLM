@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/installing-yak-packages-via-rhinocommon/119454",
+  "topic_id": 119454,
+  "title": "Installing YAK packages via RhinoCommon",
+  "question": "Is there a way to install YAK packages via RhinoCommon or is the only way using command line? It would be useful to install YAK packages via RhinoCommon (or other .Net library) in order to automatically check for updates and install updated or new packages. It’s a bit cumbersome to use command line commands in C# code for that.",
+  "code_blocks": [
+    {
+      "code": "private static YakClient GetYakClient()\n{\n    YakClient yak = null;\n\n    try\n    {\n        // Construct package repos for source(s) set in Rhino's advanced settings\n        string[] yakSources = Rhino.ApplicationSettings.PackageManagerSettings.Sources.Split(';');\n        List<IPackageRepository> yakRepos = new List<IPackageRepository>();\n\n        foreach (string yakSource in yakSources)\n        {\n            // Product header value is included in user-agent for requests to yak.rhino3d.com (for analytics only)\n            yakRepos.Add(PackageRepositoryFactory.Create(yakSource, new ProductHeaderValue(\"jukka\")));\n        }\n\n        // Initialise Yak client and set package install folder for this version of Rhino\n        yak = new YakClient(yakRepos.ToArray())\n        {\n            PackageFolder = Rhino.Runtime.HostUtils.AutoInstallPlugInFolder(true) // user\n        };\n\n        yak.PackageInstalled += Yak_PackageInstalled;\n    }\n    catch (Exception ex)\n    {\n        RhinoApp.WriteLine(_name + \": \" + ex.ToString());\n    }\n\n    return yak;\n}\n\nprivate static void Yak_PackageInstalled(object sender, PackageInstalledEventArgs e)\n{\n    // Implement something here to notify about package installation\n    throw new NotImplementedException();\n}",
+      "language": "csharp",
+      "author": "jukka.maenpaa",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 71,
+  "posts_count": 11,
+  "views": 2236
+}

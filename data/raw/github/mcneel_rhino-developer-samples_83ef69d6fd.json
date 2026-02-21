@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_renamelayer.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_renamelayer.py",
+  "instruction": "Ex renamelayer",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\ndef rename():\n    layerName = rs.GetString(\"Name of layer to rename\")\n    \n    matchingLayers = [layer for layer in doc.Layers if layer.Name == layerName]\n    \n    layerToRename = None\n    if len(matchingLayers) == 0:\n        print \"Layer \\\"{0}\\\" does not exist.\".format(layerName)\n        return\n    if len(matchingLayers) == 1:\n        layerToRename = matchingLayers[0]\n    elif len(matchingLayers) > 1:\n        i = 0;\n        for layer in matchingLayers:\n            print \"({0}) {1}\".format(\n                i+1, matchingLayers[i].FullPath.replace(\"::\", \"->\"))\n            i += 1\n            \n        selectedLayer = rs.GetInteger(\n            \"which layer?\", -1, 1, len(matchingLayers))\n        if selectedLayer == None:\n            return\n        layerToRename = matchingLayers[selectedLayer - 1]\n    \n    layerName = rs.GetString(\"New layer name\")\n    layerToRename.Name = layerName\n    layerToRename.CommitChanges()\n    return\n\nif __name__ == \"__main__\":\n    rename()\n        ",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

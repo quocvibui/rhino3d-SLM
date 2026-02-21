@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-remove-colors-from-a-pointcloud/201047",
+  "topic_id": 201047,
+  "title": "How to remove colors from a pointcloud",
+  "question": "is there a method to remove the colors of a pointcloud? Current I do it in grasshopper by getting the attributes and replacing the color, but this is quite slow and cumbersome",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    cloud_id = rs.GetObject(\"Pointcloud\", rs.filter.pointcloud, True, False)\n    if not cloud_id: return\n    \n    cloud = rs.coercegeometry(cloud_id, True)\n    if not cloud.ContainsColors: return\n    \n    cloud.ClearColors()\n    \n    scriptcontext.doc.Objects.Replace(cloud_id, cloud)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 147,
+  "posts_count": 2,
+  "views": 83
+}

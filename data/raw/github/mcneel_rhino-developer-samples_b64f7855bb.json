@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_moveobjectstocurrentlayer.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_moveobjectstocurrentlayer.py",
+  "instruction": "Ex moveobjectstocurrentlayer",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.DocObjects import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  # all non-light objects that are selected\n  object_enumerator_settings = ObjectEnumeratorSettings()\n  object_enumerator_settings.IncludeLights = False\n  object_enumerator_settings.IncludeGrips = True\n  object_enumerator_settings.NormalObjects = True\n  object_enumerator_settings.LockedObjects = True\n  object_enumerator_settings.HiddenObjects = True\n  object_enumerator_settings.ReferenceObjects = True\n  object_enumerator_settings.SelectedObjectsFilter = True\n  selected_objects = doc.Objects.GetObjectList(object_enumerator_settings)\n\n  current_layer_index = doc.Layers.CurrentLayerIndex\n  for selected_object in selected_objects:\n    selected_object.Attributes.LayerIndex = current_layer_index\n    selected_object.CommitChanges()\n\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

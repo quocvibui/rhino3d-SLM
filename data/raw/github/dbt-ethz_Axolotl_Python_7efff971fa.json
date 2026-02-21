@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/_old_axolotl-1.0/code/primitives/gdf.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "_old_axolotl-1.0/code/primitives/gdf.py",
+  "instruction": "creates different platonic solids as generalized distance function (GDF)",
+  "code": "#!/usr/bin/env python2\n# -*- coding: utf-8 -*-\n\n\"\"\"\ncreates different platonic solids as generalized distance function (GDF)\n\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT / ETH Zurich'\n__license__    = 'MIT License'\n__email__      = '<bernhard@arch.ethz.ch>'\n\n\"\"\"\nGDF for Generalized Distance Function, see here for paper:\n    https://www.viz.tamu.edu/faculty/ergun/research/implicitmodeling/papers/sm99.pdf\n\"\"\"\n\nimport math\nimport Rhino.Geometry as rg\n\nif not center:\n    center = rg.Point3d(0,0,0)\n\nif not radius:\n    radius = 5\n\nif not type:\n    type = 0\n\nif not e:\n    e = 32.0\n\nstix = 0\nenix = 0\n\nif type>4 or type<0:\n    type = 0\n\nif type==0: # dodecahedron\n    stix = 13\n    enix = 18\nif type==1: # octahedron\n    stix = 3\n    enix = 6\nif type==2: # icosahedron\n    stix = 3\n    enix = 12\nif type==3: # truncated octahedron\n    stix = 0\n    enix = 6\nif type==4: # truncated icosahedron\n    stix = 3\n    enix = 18\n\n# PHI = math.sqrt(5.0)*0.5+0.5\nva = 0.577\nvb = 0.357\nvc = 0.943\nvd = 0.851\nve = 0.526\ngdf_vectors = []\ngdf_vectors.append(rg.Vector3d(1,0,0))\ngdf_vectors.append(rg.Vector3d(0,1,0))\ngdf_vectors.append(rg.Vector3d(0,0,1))\n\ngdf_vectors.append(rg.Vector3d(va,va,va))\ngdf_vectors.append(rg.Vector3d(-va,va,va))\ngdf_vectors.append(rg.Vector3d(va,-va,va))\ngdf_vectors.append(rg.Vector3d(va,va,-va))\n\ngdf_vectors.append(rg.Vector3d(0,vb,vc))\ngdf_vectors.append(rg.Vector3d(0,-vb,vc))\ngdf_vectors.append(rg.Vector3d(vc,0,vb))\ngdf_vectors.append(rg.Vector3d(-vc,0,vb))\ngdf_vectors.append(rg.Vector3d(vb,vc,0))\ngdf_vectors.append(rg.Vector3d(-vb,vc,0))\n\ngdf_vectors.append(rg.Vector3d(0,vd,ve))\ngdf_vectors.append(rg.Vector3d(0,-vd,ve))\ngdf_vectors.append(rg.Vector3d(ve,0,vd))\ngdf_vectors.append(rg.Vector3d(-ve,0,vd))\ngdf_vectors.append(rg.Vector3d(vd,ve,0))\ngdf_vectors.append(rg.Vector3d(-vd,ve,0))\n\ndef get_dist(p):\n    d = 0.0\n    for i in range(stix,enix+1):\n        dp = rg.Vector3d.Multiply(p-center,gdf_vectors[i])\n        d += math.pow(abs(dp), e)\n\n    d = math.pow(d, 1.0/e) - radius\n\n    return d\n\na = [get_dist(p) for p in pts]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

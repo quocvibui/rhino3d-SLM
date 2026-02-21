@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-a-new-layer-from-the-name-of-part/151705",
+  "topic_id": 151705,
+  "title": "Create a new layer from the name of part",
+  "question": "Goodmorning,\n\n\nI need a script to create a new layer from the name of the parts.\n\nI need this to convert the trees of other cad to the layers of RHINO.\n\n\nCould you help me?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef LayerFromName():\n    objects = rs.GetObjects(\"Select the objects to include\", 0, True, True, False)\n    if objects:\n        rs.EnableRedraw(False)\n        for object in objects:\n            name = rs.ObjectName(object)\n            if name:\n                colour = rs.ObjectColor(object)\n                if not rs.IsLayer(name):\n                    layer = rs.AddLayer(name, (colour))\n                    rs.ObjectLayer(object, layer)\n                elif rs.IsLayer(name):\n                    rs.ObjectLayer(object, name)\n            else:\n                print \"Unnamed object found.\"\n                rs.EnableRedraw(True)\n    else:\n        print \"No objects selected.\"\n        return\n    rs.EnableRedraw(True)\n\nif __name__ == \"__main__\":\n    LayerFromName()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef LayerFromName():\n    objects = rs.AllObjects()\n    if objects:\n        rs.EnableRedraw(False)\n        for object in objects:\n            name = rs.ObjectName(object)\n            if name:\n                colour = rs.ObjectColor(object)\n                if not rs.IsLayer(name):\n                    layer = rs.AddLayer(name, (colour))\n                    rs.ObjectLayer(object, layer)\n                elif rs.IsLayer(name):\n                    rs.ObjectLayer(object, name)\n            else:\n                print \"Unnamed object found.\"\n                rs.EnableRedraw(True)\n    else:\n        print \"No objects selected.\"\n        return\n    rs.EnableRedraw(True)\n\nif __name__ == \"__main__\":\n    LayerFromName()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 437
+}

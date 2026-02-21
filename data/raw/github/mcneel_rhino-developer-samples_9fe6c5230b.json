@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_ortho.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_ortho.py",
+  "instruction": "Ex ortho",
+  "code": "from Rhino import *\nfrom Rhino.ApplicationSettings import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  gp = GetPoint()\n  gp.SetCommandPrompt(\"Start of line\")\n  gp.Get()\n  if gp.CommandResult() != Result.Success:\n    return gp.CommandResult()\n  start_point = gp.Point()\n\n  original_ortho = ModelAidSettings.Ortho\n  if not original_ortho:\n    ModelAidSettings.Ortho = True\n\n  gp.SetCommandPrompt(\"End of line\")\n  gp.SetBasePoint(start_point, False)\n  gp.DrawLineFromPoint(start_point, True)\n  gp.Get()\n  if gp.CommandResult() != Result.Success:\n    return gp.CommandResult()\n  end_point = gp.Point()\n\n  if ModelAidSettings.Ortho != original_ortho:\n    ModelAidSettings.Ortho = original_ortho\n\n  doc.Objects.AddLine(start_point, end_point)\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

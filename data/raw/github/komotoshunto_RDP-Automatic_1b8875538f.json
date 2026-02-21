@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/komotoshunto/RDP-Automatic/blob/680b2cc9081582547d1b37440ec7ea97a94a14ea/%E9%96%A2%E6%95%B0/%E9%9B%A8%E3%81%AE%E5%88%B0%E7%9D%80%E5%9C%B0%E7%82%B9%E3%81%A8%E3%81%9D%E3%81%AE%E8%BB%8C%E8%B7%A1%E3%82%92%E6%B1%82%E3%82%81%E3%82%8B.py",
+  "repo": "komotoshunto/RDP-Automatic",
+  "repo_stars": 0,
+  "repo_description": "雨水排水計画を自動化するツール",
+  "license": "unknown",
+  "filepath": "関数/雨の到着地点とその軌跡を求める.py",
+  "instruction": "雨の到着地点とその軌跡を求める",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as ghcomp\n\n\n#PointをVector方向へ指定の長さ分ずらす\ndef MovePoint(point, vector, length):\n    rg.Vector3d.Unitize(vector)\n    normal = vector * length\n    transform = rg.Transform.Translation(normal)\n    rg.Point3d.Transform(point, transform)\n    return point\n\n\n#屋根面を伝って、降下するpointを返す関数\ndef DescentPoint(center, normal_vec, barriers):\n    flow_vec = FlowVector(normal_vec)\n    projectpoint = ghcomp.ProjectPoint(center, flow_vec, barriers)\n    point = projectpoint[0]\n    return point\n\n\n#雨の到着地点とその軌跡を返す関数\n#point, Item Access, Point3d, 雨が流れるスタート地点\n#normal_vec, Item Access, Vector3d, スタート地点の法線\n#barriers, List Access, Surface, その屋根のエッジから法線方向に立ち上げたもの\n#LandingSurface_list, List Access, Geometry\ndef RainFlow(point, normal_vec, barriers, LandingSurface_list):\n    moved_point = MovePoint(point, normal_vec, 0.5)\n    descent_point = DescentPoint(moved_point, normal_vec, barriers)        \n    projectpoint = ghcomp.ProjectPoint(descent_point, rg.Vector3d(0, 0, -1), LandingSurface_list)\n    project_index = projectpoint[1]\n    \n    #軌跡を表す\n    if projectpoint[1] != -1:\n        locus_end_point = projectpoint[0]\n    else:\n        locus_end_point = rg.Point3d(descent_point[0], descent_point[1], descent_point[2] - 1000)\n    locus_points = [moved_point, descent_point, locus_end_point]\n    locus = rg.Polyline(locus_points)\n    return project_index, locus\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

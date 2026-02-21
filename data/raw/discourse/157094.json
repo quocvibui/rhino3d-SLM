@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/deleting-geometry-from-blocks-using-python/157094",
+  "topic_id": 157094,
+  "title": "Deleting geometry from blocks using Python",
+  "question": "Hello everyone,\n\n\nI’ve been trying to find a way to remove and add new geometry to nested blocks using Python. Using a recursive function I am able to change the properties of the nested geometry, but trying to remove or replace geometry does nothing. The DeleteObjects functions returns a success, but nothing happens to the block geometry. Example code below, highlighted line does nothing.\n\n\nimport rhinoscriptsyntax as rs\n\ndef RemoveBlockGeo():\n    ids = rs.GetObjects(\"Select block instances\", 4096, preselect=True)\n    if not ids:return\n    targ = rs.GetLayer()\n    if not targ:return\n    names = list(set([rs.BlockInstanceName(id) for id in ids]))\n    done = []\n    def BlockDrill(names):\n        while True:\n            if len (names) > 0 :\n                name = names.pop()\n            else: break\n            done.append(name)\n            temp = rs.BlockObjects(name)\n            for tempid in temp: \n                if rs.ObjectType == 4096: \n                    **rs.DeleteObject(tempid)**\n                    rs.Redraw()\n            for tempId in temp:\n                if rs.IsBlockInstance(tempId):\n                    tempName = rs.BlockInstanceName(tempId)\n                    if tempName not in names and tempName not in done:\n                        names.append(tempName)\n                        BlockDrill(names)\n    BlockDrill(names)\nif __name__ == \"__main__\": RemoveBlockGeo()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef RemoveBlockGeo():\n    ids = rs.GetObjects(\"Select block instances\", 4096, preselect=True)\n    if not ids:return\n    targ = rs.GetLayer()\n    if not targ:return\n    names = list(set([rs.BlockInstanceName(id) for id in ids]))\n    done = []\n    def BlockDrill(names):\n        while True:\n            if len (names) > 0 :\n                name = names.pop()\n            else: break\n            done.append(name)\n            temp = rs.BlockObjects(name)\n            for tempid in temp: \n                if rs.ObjectType == 4096: \n                    **rs.DeleteObject(tempid)**\n                    rs.Redraw()\n            for tempId in temp:\n                if rs.IsBlockInstance(tempId):\n                    tempName = rs.BlockInstanceName(tempId)\n                    if tempName not in names and tempName not in done:\n                        names.append(tempName)\n                        BlockDrill(names)\n    BlockDrill(names)\nif __name__ == \"__main__\": RemoveBlockGeo()",
+      "language": "python",
+      "author": "mgntth",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 532
+}

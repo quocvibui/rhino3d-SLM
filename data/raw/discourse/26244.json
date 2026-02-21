@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-objects-by-layout/26244",
+  "topic_id": 26244,
+  "title": "How to get objects by layout",
+  "question": "Hi\n\n\nWhat’s the easiest way to select all objects that are on a specific layout space.\n\n\nIn my case there is a rhino file with 10 different layouts.\n\n\nI’m trying to alter a text element that lies on a specific page.\n\n\nHow would i do that with rhino common\n\n\nThanks\n\nMartin",
+  "code_blocks": [
+    {
+      "code": "import Rhino, scriptcontext\n    \ndef DoSomething():\n    pv = scriptcontext.doc.Views.GetPageViews()\n    if pv.Count == 0: return None\n    d = dict()\n    for page in pv: d[page.ActiveViewportID] = page.PageName\n    \n    for obj in scriptcontext.doc.Objects:\n            if obj.Attributes.Space == Rhino.DocObjects.ActiveSpace.PageSpace:\n                    page_name = d[obj.Attributes.ViewportId]\n                    if isinstance(obj.Geometry, Rhino.Geometry.DetailView):\n                        print \"DetailView:\", obj.Name\n                        print \"PageName:\", page_name\n                    else:\n                        print \"ObjectType:\", obj.Geometry.ObjectType\n                        print \"PageName:\", page_name\n                        \n                        t = Rhino.DocObjects.ObjectType.Annotation\n                        if obj.Geometry.ObjectType == t:\n                            if page_name == \"Page 2\": \n                                if obj.Geometry.Text == \"Text to edit\":\n                                    obj.Select(True)\n                    print \"\"\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 724
+}

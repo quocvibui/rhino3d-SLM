@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_projectpointstomeshesex.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_projectpointstomeshesex.py",
+  "instruction": "Ex projectpointstomeshesex",
+  "code": "from System.Collections.Generic import *\nfrom Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Geometry.Intersect import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  rc, obj_ref = RhinoGet.GetOneObject(\"mesh\", False, ObjectType.Mesh)\n  if rc != Result.Success: return rc\n  mesh = obj_ref.Mesh()\n\n  rc, obj_ref_pts = RhinoGet.GetMultipleObjects(\"points\", False, ObjectType.Point)\n  if rc != Result.Success: return rc\n  points = []\n  for obj_ref_pt in obj_ref_pts:\n    pt = obj_ref_pt.Point().Location\n    points.append(pt)\n\n  prj_points, indices = Intersection.ProjectPointsToMeshesEx({mesh}, points, Vector3d(0, 1, 0), 0)\n  for prj_pt in prj_points: \n    doc.Objects.AddPoint(prj_pt)\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

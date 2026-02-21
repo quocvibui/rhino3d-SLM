@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripcontext-escape-test-crashes-rhino/34680",
+  "topic_id": 34680,
+  "title": "Scripcontext.escape_test crashes Rhino",
+  "question": "I made a small branching exercise in python that can lead to a near-infinite loop. Is very light but I used escape_test to be able to break it.\n\nMy problem is that it sometimes breaks the scripts, leaving the lines and flowers created by the script on Rhino, and sometimes it just shuts the whole program without warning.\n\n\nIs it normal?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\nimport scriptcontext as sc\n\np = 0,0,0 #rs.GetPoint(\"pick point\")\nh = 3 #rs.GetInteger(\"set height\")\nt = 0,h,0\ndef palm(trunk):\n    t = rs.CurveEndPoint(trunk)\n    o = rs.CurveStartPoint(trunk)\n    v = rs.VectorCreate(t,o)\n    n = random.randint(1,5)\n    s = random.uniform(0.3,1.2)\n    for i in range(n):\n        alfa = random.randint(-30,30)\n        w = rs.VectorRotate(v,alfa,(0,0,1))\n        w = rs.VectorScale(w,s)\n        long = rs.VectorLength(w)\n        u = rs.PointAdd(t,w)\n        sc.escape_test()\n        branch = rs.AddLine(t,u)\n        rojo1 = random.randint(10,55)\n        verde1 = random.randint(100,215)\n        azul1 = random.randint(40,55)\n        rs.ObjectColor(branch,(rojo1,verde1,azul1))\n        if (long>=1):\n            palm(branch)\n        elif sc.escape_test(False):\n            print \"ESC pressed \"\n            break      #get out of the loop\n        else:\n            f= rs.AddCircle(u,.2)\n            rojo = random.randint(100,185)\n            verde = random.randint(100,135)\n            azul = random.randint(100,155)\n            rs.ObjectColor(f,(rojo,verde,azul))\ntr = rs.AddLine(p,t)\npalm(tr)",
+      "language": "python",
+      "author": "arquitextonica",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino, random\nimport scriptcontext as sc\n\np = rs.coerce3dpoint([0,0,0]) #rs.GetPoint(\"pick point\")\nh = 3 #rs.GetInteger(\"set height\")\nt = 0,h,0\ndef palm(trunk):\n    t = rs.CurveEndPoint(trunk)\n    o = rs.CurveStartPoint(trunk)\n    v = rs.VectorCreate(t,o)\n    n = random.randint(1,5)\n    s = random.uniform(0.3,1.2)\n    for i in range(n):\n        alfa = random.randint(-30,30)\n        w = rs.VectorRotate(v,alfa,(0,0,1))\n        w = rs.VectorScale(w,s)\n        long = rs.VectorLength(w)\n        u = rs.PointAdd(t,w)\n        sc.escape_test()\n        branch = rs.AddLine(t,u)\n        rojo1 = random.randint(10,55)\n        verde1 = random.randint(100,215)\n        azul1 = random.randint(40,55)\n        rs.ObjectColor(branch,(rojo1,verde1,azul1))\n        Rhino.RhinoApp.Wait()\n        if sc.escape_test(False):\n            print \"ESC pressed \"\n            break      #get out of the loop\n        if (long>=1):\n            palm(branch)\npalm(rs.AddLine(p,p+rs.coerce3dvector([0,h,0])))",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1475
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/return-values-for-each-point-in-the-list/35191",
+  "topic_id": 35191,
+  "title": "Return values for each point in the list",
+  "question": "Hi, I have this code, which returns the coordinates for only one 3dpoint, although I selected more points. How can I get the coordinates for each point that I select?\n\n\nimport rhinoscriptsyntax as rs\n\n\npoints = rs.GetObjects(“referentiaza punctele”,1)\n\n\nfor pt in points:\n\nptCoord = rs.PointCoordinates(pt)\n\nx = ptCoord[0]\n\ny = ptCoord[1]\n\nz = ptCoord[2]\n\n\nprint “x: %.2f, y: %.2f, z:%.2f” %(x,y,z)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npoints = rs.GetObjects(\"referentiaza punctele\",1)\n\nfor pt in points:\n    ptCoord = rs.PointCoordinates(pt)\n    x = ptCoord[0]\n    y = ptCoord[1]\n    z = ptCoord[2]\n    \n    print \"x: %.2f, y: %.2f, z:%.2f\" %(x,y,z)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npoints = rs.GetObjects(\"referentiaza punctele\",1)\n\n#create a list of point3d objects from your selected Rhino points\n#the syntax is called a \"list comprehension\"\npts=[rs.coerce3dpoint(ptID) for ptID in points]\nfor pt in pts:\n    #point3d objects have properties .X, .Y, .Z which are the coordinates\n    #Below uses the \"format\" statement to format the numbers\n    print \"x: {:.2f}, y: {:.2f}, z: {:.2f}\".format(pt.X,pt.Y,pt.Z)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 8,
+  "views": 1280
+}

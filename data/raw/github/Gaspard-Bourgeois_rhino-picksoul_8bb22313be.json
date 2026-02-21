@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Gaspard-Bourgeois/rhino-picksoul/blob/9431b8335b62d43ec3539852d1a1af603f0ce1c5/dev/cplane/alignCPlaneToBFitPoints.py",
+  "repo": "Gaspard-Bourgeois/rhino-picksoul",
+  "repo_stars": 1,
+  "repo_description": "Generic plugin to manage blocs, materials and trajectories in rhino.",
+  "license": "Apache-2.0",
+  "filepath": "dev/cplane/alignCPlaneToBFitPoints.py",
+  "instruction": "Author: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 22/12/25",
+  "code": "\"\"\"\nAuthor: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 22/12/25\n\"\"\"\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math\n\n\ndef update_best_fit_cplane():\n    # 1. Sélection des points\n    point_ids = rs.GetObjects(\"Sélectionnez les points\", 1, preselect=True)\n    if not point_ids: return\n\n\n    points = [rs.PointCoordinates(id) for id in point_ids]\n    count = len(points)\n    \n    if count < 3:\n        print(\"Erreur : Sélectionnez au moins 3 points.\")\n        return\n\n\n    # 2. Calcul du Centroïde (Moyenne des positions)\n    sum_x = sum(p.X for p in points)\n    sum_y = sum(p.Y for p in points)\n    sum_z = sum(p.Z for p in points)\n    centroid = rg.Point3d(sum_x/count, sum_y/count, sum_z/count)\n\n\n    # 3. Calcul du plan moyen (Best Fit)\n    # On calcule d'abord le plan, puis on force son origine au centroïde\n    plane = rs.PlaneFitFromPoints(points)\n    if not plane: \n        print(\"Erreur : Calcul du plan impossible.\")\n        return\n    \n    # On replace l'origine du plan précisément sur le centroïde calculé\n    plane.Origin = centroid\n\n\n    # 4. Calcul des statistiques\n    total_dist_to_plane = 0\n    total_dist_to_origin = 0\n\n\n    for pt in points:\n        # Distance perpendiculaire au plan\n        total_dist_to_plane += abs(rs.DistanceToPlane(plane, pt))\n        # Distance directe (Euclidienne) à l'origine (centroïde)\n        total_dist_to_origin += rs.Distance(pt, centroid)\n\n\n    avg_error_plane = total_dist_to_plane / count\n    avg_dist_to_origin = total_dist_to_origin / count\n\n\n    # 5. Mise à jour de l'interface\n    view = rs.CurrentView()\n    rs.ViewCPlane(view, plane)\n\n\n    # 6. Affichage des résultats\n    print(\"--- Rapport Best-Fit CPlane ---\")\n    print(\"Points traités : {}\".format(count))\n    print(\"Origine du CPlane : {:.3f}, {:.3f}, {:.3f}\".format(centroid.X, centroid.Y, centroid.Z))\n    print(\"Erreur moyenne de projection : {:.4f} mm\".format(avg_error_plane))\n    print(\"Distance moyenne des points à l'origine : {:.4f} mm\".format(avg_dist_to_origin))\n\n\nif __name__ == \"__main__\":\n    update_best_fit_cplane()\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

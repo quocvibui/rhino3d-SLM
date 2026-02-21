@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/localcode/localcode/blob/3089aee227d257adc856021a4e1eb678d9527f50/jsonsToRhino.py",
+  "repo": "localcode/localcode",
+  "repo_stars": 4,
+  "repo_description": "Code repository for the local code project",
+  "license": "unknown",
+  "filepath": "jsonsToRhino.py",
+  "instruction": "Jsons to rhino",
+  "code": "import sys\r\n\r\nif 'rhinopythonscripts' in sys.modules:\r\n    del sys.modules['rhinopythonscripts']\r\n\r\n## this is an IronPython script\nimport Rhino\nimport scriptcontext\n\n\nimport rhinopythonscripts\nfrom rhinopythonscripts.FileUtils import deleteAll, exportFile\nfrom rhinopythonscripts.RunCPythonScript import run as runC\r\nfrom rhinopythonscripts.GeoJson2Rhino import load as jsonLoad\n\ncModule = 'C:\\\\Users\\\\demonchaux\\\\Dropbox\\\\localcode\\\\loadAmigosData.py'\n\ndef createJsonFiles(idList):\n    froot = 'C:\\\\amigos\\\\dump\\\\%s-site.3dm'\n    for id in idList:\n        deleteAll()\n        print \"loading site %s\" % id\n        out, err, code = runC(cModule, [id])\r\n        if code == 1: # there's an error\r\n            print err\r\n        else:\n            print 'building geometry'\n            guids = jsonLoad(out)\n\n            fpath = froot % id\n            exportFile(fpath)\n            print \"Successfully wrote %s\" % fpath\n\n    print 'done'\n\nif __name__=='__main__':\n    idList = range(767)\n    createJsonFiles(idList)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-access-object-details-within-rhinoscript-or-python-script/169482",
+  "topic_id": 169482,
+  "title": "How to Access Object Details within Rhinoscript or Python Script",
+  "question": "Hi all,\n\nI’m trying to write a script that is able to see and output part of the object details that are shown when I click the “Details” button in the properties tab.  I’m specifically looking for it to output the object description from the geometry section.  The goal of the script is to quickly see whether a bunch of arcs are NURBS arcs or standard arcs.  This is helpful for me to know when exporting to DXF.\n\n\nThanks!\n\n\nJosh",
+  "code_blocks": [
+    {
+      "code": "#\n# Test for a curve that is or looks like an arc\n#\ndef _is_arc(curve):\n    closed = False\n    rc = curve is None\n    # Is curve an ArcCurve?\n    if not rc:\n        rc = isinstance(curve, Rhino.Geometry.ArcCurve)\n        if rc:\n            closed = curve.IsCompleteCircle\n    # Is curve a PolyCurve that looks like an arc?\n    if not rc:\n        if isinstance(curve, Rhino.Geometry.PolyCurve):\n            rc, arc = curve.TryGetArc()\n            if rc:\n                closed = arc.IsCircle\n    # Is curve a NurbsCurve that looks like an arc?\n    if not rc:\n        if isinstance(curve, Rhino.Geometry.NurbsCurve):\n            rc, arc = curve.TryGetArc()\n            if rc:\n                closed = arc.IsCircle\n    # Done\n    return rc, closed",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test():\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return \n\n    rc, closed =_is_arc(curve)\n    if rc:\n        if closed:\n            print(\"Curve is a circle\")\n        else:\n            print(\"Curve is an arc\")",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n\n\nCall Main()\nSub Main()\n\n\tDim strArcEval\n\tDim strDescription\n\tDim boolIsArc\n\t\n\tstrArcEval = Rhino.GetObject(\"Select curves for evaluation\")\n\tstrDescription = Rhino.ObjectDescription(strArcEval)\n\tboolIsArc = Rhino.IsNurbsCurve(strArcEval)\n\t\n\t\n\tRhino.Print(strDescription)\n\tRhino.Print(boolIsArc)\n\n\t\nEnd Sub",
+      "language": "python",
+      "author": "jodanvids",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 508
+}

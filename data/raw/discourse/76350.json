@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-turn-on-material-option-self-illumination-in-python-script/76350",
+  "topic_id": 76350,
+  "title": "How to turn on material option: self-illumination in Python script",
+  "question": "@Alain\n, \n@pascal\n, \n@John_Brock\n,\n\n\nI trimmed a textured mesh with an arbitrary curve using a Python script and the texturing in the trimmed mesh perfectly matches the appearance of the original mesh right up to the boundary if I go to the Materials tab and turn on self-illumination.  How do I do turn on self-illumination in the Python script?\n\n\nTrimmed, textured mesh with self-illumination manually turned-on:\n\n\n\n\nTrimmed\n1069×935 301 KB\n\n\n\n\nOriginal, textured mesh:\n\n\n\n\nOriginal\n1063×939 572 KB\n\n\n\n\nI obtained the texture material from the original mesh using:\n\n\nmobj = doc.Objects.Find(mesh)\n# Get texture material for original mesh.\nsource_mat = mobj.Attributes.MaterialIndex\n\n\n\nand I applied this to the trimmed mesh: tmesh using:\n\n\nobj = doc.Objects.Find(tmesh)\n# Apply source texture material to new mesh.\nobj.Attributes.MaterialIndex = source_mat\nobj.Attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject\nobj.CommitChanges()\n\n\n\nbut this does nothing to the setting for self-illumination.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    obj_id = rs.GetObject(\"Select object\", 8+16+32, True, True)\n    if not obj_id: return\n    \n    obj = rs.coercerhinoobject(obj_id, True, True)\n    \n    mat_index = obj.Attributes.MaterialIndex\n    if not mat_index >= 0: return\n    \n    # toggle diffuse lightning\n    material = scriptcontext.doc.Materials[mat_index]\n    material.DisableLighting = not material.DisableLighting\n    material.CommitChanges()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\n\n# Make sure self-illumination is turned on or else the trimmed mesh will be dark.\nmaterial = doc.Materials[source_mat]\nmaterial.DisableLighting = True\nmaterial.CommitChanges()",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport Rhino.Render as Render\n\nfor m in sc.doc.Materials:\n\trm = m.RenderMaterial\n\trm.BeginChange(Render.RenderContent.ChangeContexts.Program)\n\trm.SetParameter('disable-lighting', True)\n\trm.EndChange()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 24,
+  "views": 1727
+}

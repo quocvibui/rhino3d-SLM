@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-curve-fit-with-degree-1-curves/48697",
+  "topic_id": 48697,
+  "title": "RhinoCommon Curve.Fit with degree 1 curves",
+  "question": "Hi all,\n\n\nNoticed this while trying to script something like FitCrv to work on a polyline.  The Curve class has a Fit() method that is inherited by other subclasses, including PolylineCurve and NurbsCurve.  The problem happens when I try and run the Fit() method directly on a degree 1 input curve - it fails in that the returned curve is identical to the input curve…\n\n\nThe scriptlet below returns a NURBS curve of degree 1 identical to the original polyline curve (SelDup selects it), despite the fact that I asked it to fit to degree 3…\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\npl_ID=rs.GetObject(\"Select polyline curve to fit\",4,True)\nif pl_ID:\n    plc=rs.coercecurve(pl_ID)\n    #degree 3, fit tolerance 0.1, no kinks preserved\n    result=plc.Fit(3,0.1,0)\n    if result: sc.doc.Objects.AddCurve(result)\nsc.doc.Views.Redraw()\n\n\n\nConverting the polyline curve to a NURBS curve of degree 1 first does not change things…\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\npl_ID=rs.GetObject(\"Select polyline curve to fit\",4,True)\nif pl_ID:\n    plc=rs.coercecurve(pl_ID)\n    nc=plc.ToNurbsCurve()\n    result=nc.Fit(3,0.1,0)\n    if result: sc.doc.Objects.AddCurve(result)\nsc.doc.Views.Redraw()\n\n\n\nThe only thing that works is to convert first to NURBS and then increase the degree.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\npl_ID=rs.GetObject(\"Select polyline curve to fit\",4,True)\nif pl_ID:\n    plc=rs.coercecurve(pl_ID)\n    nc=plc.ToNurbsCurve()\n    nc.IncreaseDegree(2) #anything larger than 1 works\n    result=nc.Fit(3,0.1,0)\n    if result: sc.doc.Objects.AddCurve(result)\nsc.doc.Views.Redraw()\n\n\n\nThe above works as it should (IMO).\n\n\nSo, either there is a bug in the method, or the input degree limitation needs to be expressed in the api guide.  The guide only talks about the return degree of Fit() being bigger than 1, not the input.\n\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\npl_ID=rs.GetObject(\"Select polyline curve to fit\",4,True)\nif pl_ID:\n    plc=rs.coercecurve(pl_ID)\n    #degree 3, fit tolerance 0.1, no kinks preserved\n    result=plc.Fit(3,0.1,0)\n    if result: sc.doc.Objects.AddCurve(result)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\npl_ID=rs.GetObject(\"Select polyline curve to fit\",4,True)\nif pl_ID:\n    plc=rs.coercecurve(pl_ID)\n    nc=plc.ToNurbsCurve()\n    result=nc.Fit(3,0.1,0)\n    if result: sc.doc.Objects.AddCurve(result)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\npl_ID=rs.GetObject(\"Select polyline curve to fit\",4,True)\nif pl_ID:\n    plc=rs.coercecurve(pl_ID)\n    nc=plc.ToNurbsCurve()\n    nc.IncreaseDegree(2) #anything larger than 1 works\n    result=nc.Fit(3,0.1,0)\n    if result: sc.doc.Objects.AddCurve(result)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 853
+}

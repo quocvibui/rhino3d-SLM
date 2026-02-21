@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-selection/207074",
+  "topic_id": 207074,
+  "title": "Python Selection",
+  "question": "@stevebaer\n \n@eirannejad\n\n\nError in second 0:40 states:\n\n\n\n\non a newly opened file any selected object is always none\n\n\nthis happens on python installed packages\n\n\n\n\nHow to solve this problem?",
+  "code_blocks": [
+    {
+      "code": "def select_points(message=\"Select multiple points.\"):\n    \"\"\"Select multiple points in the Rhino view.\n\n    Parameters\n    ----------\n    message : str, optional\n        Instruction for the user.\n\n    Returns\n    -------\n    list[System.Guid]\n        The identifers of the selected points.\n\n    \"\"\"\n    return rs.GetObjects(message, preselect=True, select=True, group=False, filter=rs.filter.point)",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nguids = rs.GetObjects(\"Select points\", filter=rs.filter.point, group=False, preselect=True, select=True)\npoints = []\nfor guid in guids:\n  point_obj = Rhino.RhinoDoc.ActiveDoc.Objects.Find(guid)\n  point = Rhino.RhinoDoc.ActiveDoc.Objects.Find(guid)\n  points.append(point_obj.Geometry.Location)\n\nprint(points)",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 168
+}

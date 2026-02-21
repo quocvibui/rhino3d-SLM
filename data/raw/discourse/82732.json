@@ -1,0 +1,58 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/could-not-convert-rhino-geometry-point3d-object-to-a-point3d/82732",
+  "topic_id": 82732,
+  "title": "Could not convert Rhino.Geometry.Point3d object to a Point3d",
+  "question": "Hello\n\nI am a beginner of RhinoPython and learning through the book RhinoPythonPrimerRev3,  Unfortunately. I encountered problems in the example exercises. the following is my code and return, please give me a hint, and where can I understand Different similar issues…\n\nI have been troubled for a long time, because the information searched in the forum is incomplete.\n\n\nthank you very much~\n\n\n> import rhinoscriptsyntax as rs\n> \n> def smoothingvector(pt, prevpt, nextpt, s):\n>     pm = (prevpt+nextpt)/2.0\n>     va = rs.VectorCreate(pm, pt)\n>     vm = rs.VectorScale(va, s)\n>     return vm\n>     \n>     \n> def smoothcurve(crv_id, s):\n>     crv_pts = rs.CurvePoints(crv_id)\n>     newcrv_pts = [  ]\n>     \n>     for i in range(len(crv_pts)-1):\n>         vm = smoothingvector(crv_pts[i],crv_pts[i-1],crv_pts[i+1],s)\n>         newcrv_pts.append(rs.PointAdd(crv_pts, vm))\n>         \n>     knots = rs.CurveKnots(crv_id)\n>     degree = rs.CurveDegree(crv_id)\n>     weights = rs.CurveWeights(crv_id,0)\n>     newcrv_id = rs.AddNurbsCurve(newcrv_pts, knots, degree, weights)\n>     if newcrv_id: rs.DeleteObject(crv_id)\n>     return newcrv_id\n> \n> \n> def iterativeshortencurve():\n>     crv_id = rs.GetObject(\"open curve to smooth\", 4, True)\n>     if crv_id is None or rs.IsCurveClosed(crv_id): return\n>     \n>     min = rs.Distance(rs.CurveStartPoint(crv_id), rs.CurveEndPoint(crv_id))\n>     max = rs.CurveLength(crv_id)\n>     goal = rs.GetReal(\"Goal length\", 0.5*(min+max), min, max)\n>     if goal is None: return\n>     \n>     while rs.CurveLength(crv_id)> goal:\n>         rs.EnableRedraw(False)\n>         crv_id = smoothcurve(crv_id, 0.1)\n>         rs.EnableRedraw(True)\n>         if crv_id is None: break\n>         \n>         \n> iterativeshortencurve()\n\n\n\nreturn:\n\n\n\n\nMessage: Could not convert [<Rhino.Geometry.Point3d object at 0x0000000000000067 [-28,29,0]>, <Rhino.Geometry.Point3d object at 0x0000000000000068 [-4,34,0]>, <Rhino.Geometry.Point3d object at 0x0000000000000069 [2,-15,0]>, <Rhino.Geometry...",
+  "code_blocks": [
+    {
+      "code": "for i in range(len(crv_pts)-1):\n    vm = smoothingvector(crv_pts[i],crv_pts[i-1],crv_pts[i+1],s)\n    newcrv_pts.append(rs.PointAdd(crv_pts, vm))\n    \nknots = rs.CurveKnots(crv_id)\ndegree = rs.CurveDegree(crv_id)\nweights = rs.CurveWeights(crv_id,0)\nnewcrv_id = rs.AddNurbsCurve(newcrv_pts, knots, degree, weights)\nif newcrv_id: rs.DeleteObject(crv_id)\nreturn newcrv_id",
+      "language": "python",
+      "author": "chiahsuanchao",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "min = rs.Distance(rs.CurveStartPoint(crv_id), rs.CurveEndPoint(crv_id))\nmax = rs.CurveLength(crv_id)\ngoal = rs.GetReal(\"Goal length\", 0.5*(min+max), min, max)\nif goal is None: return\n\nwhile rs.CurveLength(crv_id)> goal:\n    rs.EnableRedraw(False)\n    crv_id = smoothcurve(crv_id, 0.1)\n    rs.EnableRedraw(True)\n    if crv_id is None: break",
+      "language": "python",
+      "author": "chiahsuanchao",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef smoothingvector(pt, prevpt, nextpt, s):\n    pm = (prevpt+nextpt)/2.0\n    va = rs.VectorCreate(pm, pt)\n    vm = rs.VectorScale(va, s)\n    return vm\n    \n    \ndef smoothcurve(crv_id, s):\n    crv_pts = rs.CurvePoints(crv_id)\n    #start the new point list with the first point on the original curve which is unchanged\n    newcrv_pts = [crv_pts[0]]\n    \n    #process all points *except* the ends\n    #start with index 1, finish with next to last index \n    for i in range(1,len(crv_pts)-1):\n        vm = smoothingvector(crv_pts[i],crv_pts[i-1],crv_pts[i+1],s)\n        newcrv_pts.append(rs.PointAdd(crv_pts[i], vm))\n        \n    #add the last point from the original curve to the new point list make the end\n    newcrv_pts.append(crv_pts[-1])\n    \n    knots = rs.CurveKnots(crv_id)\n    degree = rs.CurveDegree(crv_id)\n    weights = rs.CurveWeights(crv_id,0)\n    newcrv_id = rs.AddNurbsCurve(newcrv_pts, knots, degree, weights)\n    if newcrv_id: rs.DeleteObject(crv_id)\n    return newcrv_id\n\n\ndef iterativeshortencurve():\n    crv_id = rs.GetObject(\"open curve to smooth\", 4, True)\n    if crv_id is None or rs.IsCurveClosed(crv_id): return\n    \n    min = rs.Distance(rs.CurveStartPoint(crv_id), rs.CurveEndPoint(crv_id))\n    max = rs.CurveLength(crv_id)\n    goal = rs.GetReal(\"Goal length\", 0.5*(min+max), min, max)\n    if goal is None: return\n    \n    while rs.CurveLength(crv_id)>goal:\n        rs.EnableRedraw(False)\n        crv_id = smoothcurve(crv_id, 0.1)\n        rs.EnableRedraw(True)\n        if crv_id is None: break\n        \n        \niterativeshortencurve()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef iterativeshortencurve():\n    curve_id = rs.GetObject(\"Open curve to smooth\", 4, True)\n    if curve_id is None or rs.IsCurveClosed(curve_id): return\n    \n    min = rs.Distance(rs.CurveStartPoint(curve_id), rs.CurveEndPoint(curve_id))\n    max = rs.CurveLength(curve_id)\n    goal = rs.GetReal(\"Goal length\", 0.5*(min+max) , min, max)\n    if goal is None: return\n\n    while rs.CurveLength(curve_id)>goal:\n        rs.EnableRedraw(False)\n        curve_id = smoothcurve(curve_id, 0.1)\n        rs.EnableRedraw(True)\n        if curve_id is None: break\n\n\ndef smoothcurve(curve_id, s):\n    curve_points = rs.CurvePoints(curve_id)",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "> import rhinoscriptsyntax as rs\n> \n> def smoothingvector(pt, prevpt, nextpt, s):\n>     pm = (prevpt+nextpt)/2.0\n>     va = rs.VectorCreate(pm, pt)\n>     vm = rs.VectorScale(va, s)\n>     return vm\n>     \n>     \n> def smoothcurve(crv_id, s):\n>     crv_pts = rs.CurvePoints(crv_id)\n>     newcrv_pts = [  ]\n>     \n>     for i in range(len(crv_pts)-1):\n>         vm = smoothingvector(crv_pts[i],crv_pts[i-1],crv_pts[i+1],s)\n>         newcrv_pts.append(rs.PointAdd(crv_pts, vm))\n>         \n>     knots = rs.CurveKnots(crv_id)\n>     degree = rs.CurveDegree(crv_id)\n>     weights = rs.CurveWeights(crv_id,0)\n>     newcrv_id = rs.AddNurbsCurve(newcrv_pts, knots, degree, weights)\n>     if newcrv_id: rs.DeleteObject(crv_id)\n>     return newcrv_id\n> \n> \n> def iterativeshortencurve():\n>     crv_id = rs.GetObject(\"open curve to smooth\", 4, True)\n>     if crv_id is None or rs.IsCurveClosed(crv_id): return\n>     \n>     min = rs.Distance(rs.CurveStartPoint(crv_id), rs.CurveEndPoint(crv_id))\n>     max = rs.CurveLength(crv_id)\n>     goal = rs.GetReal(\"Goal length\", 0.5*(min+max), min, max)\n>     if goal is None: return\n>     \n>     while rs.CurveLength(crv_id)> goal:\n>         rs.EnableRedraw(False)\n>         crv_id = smoothcurve(crv_id, 0.1)\n>         rs.EnableRedraw(True)\n>         if crv_id is None: break\n>         \n>         \n> iterativeshortencurve()",
+      "language": "python",
+      "author": "chiahsuanchao",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 3587
+}

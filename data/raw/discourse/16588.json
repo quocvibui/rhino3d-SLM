@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/add-object-to-block-python-bypass-block-edit/16588",
+  "topic_id": 16588,
+  "title": "Add Object to Block Python (bypass block edit)",
+  "question": "Would it be possible to write a python script that allows the user to INSTANTLY add an object to a block definition without going through block edit?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef AddToBlock():\n    objects = rs.GetObjects(\"Choose Objects to Add to Block\", preselect=True)\n    if not objects: return\n    \n    block = rs.GetObject(\"Choose Block to Add Object to\", rs.filter.instance)\n    if not block: return\n    \n    objref = rs.coercerhinoobject(block)\n    idef = objref.InstanceDefinition\n    idefIndex = idef.Index\n    \n    #New Geo\n    newGeometry = []\n    newAttributes = []\n    for object in objects:\n        newGeometry.append(rs.coercegeometry(object))\n        ref = Rhino.DocObjects.ObjRef(object)\n        attr = ref.Object().Attributes\n        newAttributes.append(attr)\n    \n    #Existing Block Geo\n    blockCopy = rs.CopyObject(block)\n    blockObjects = rs.ExplodeBlockInstance(blockCopy, explode_nested_instances=False)\n    for object in blockObjects:\n        newGeometry.append(rs.coercegeometry(object))\n        ref = Rhino.DocObjects.ObjRef(object)\n        attr = ref.Object().Attributes\n        newAttributes.append(attr)\n\n    InstanceDefinitionTable = sc.doc.ActiveDoc.InstanceDefinitions\n    InstanceDefinitionTable.ModifyGeometry(idefIndex, newGeometry, newAttributes)\n    \n    rs.DeleteObjects(blockObjects)\n    \n    sc.doc.Views.Redraw()\n    \nAddToBlock()",
+      "language": "python",
+      "author": "Alasdair",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef AddToBlock():\n    objects = rs.GetObjects(\"Choose Objects to Add to Block\", preselect=True)\n    if not objects: return\n    \n    block = rs.GetObject(\"Choose Block to Add Object to\", rs.filter.instance)\n    if not block: return\n    \n    rs.EnableRedraw(False)\n    \n    blockName = rs.BlockInstanceName(block)\n    objref = rs.coercerhinoobject(block)\n    idef = objref.InstanceDefinition\n    idefIndex = idef.Index\n    \n    \n    if rs.IsBlockReference(blockName):\n        print \"Block is referenced from file; unable to add object(s)\"\n        return\n    \n    blnCopy = False\n    \n    XformBlock = rs.BlockInstanceXform(block)\n\n    rs.TransformObjects(objects, rs.XformInverse(XformBlock), blnCopy)\n    \n    objects.extend(rs.BlockObjects(blockName))\n    \n    newGeometry = []\n    newAttributes = []\n    for object in objects:\n        newGeometry.append(rs.coercegeometry(object))\n        ref = Rhino.DocObjects.ObjRef(object)\n        attr = ref.Object().Attributes\n        newAttributes.append(attr)\n    \n    InstanceDefinitionTable = sc.doc.ActiveDoc.InstanceDefinitions\n    InstanceDefinitionTable.ModifyGeometry(idefIndex, newGeometry, newAttributes)\n    \n    rs.DeleteObjects(objects)\n        \n    rs.EnableRedraw(True)\n\nAddToBlock()",
+      "language": "python",
+      "author": "Alasdair",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef RemoveFromBlock():\n    block = rs.GetObject(\"Select Block to extract objects from\", rs.filter.instance, preselect=True)\n    if not block: return\n\n    blockName = rs.BlockInstanceName(block)\n    objref = rs.coercerhinoobject(block)\n    idef = objref.InstanceDefinition\n    idefIndex = idef.Index\n    \n    XformBlock = rs.BlockInstanceXform(block)\n    blockObjects = rs.BlockObjects(blockName)\n    blockInstanceObjects = rs.TransformObjects(blockObjects, XformBlock, True)\n    \n    objs = rs.GetObjects(\"Select Objects to extract from Block\", objects =blockInstanceObjects)\n    if not objs: \n        rs.DeleteObjects(blockInstanceObjects)\n        return\n    \n    keep = [] #List to keep in block\n    delete = [] #list to delete from block and add to doc\n    \n    rs.EnableRedraw(False)\n    \n    for object in blockInstanceObjects:\n        if object in objs: delete.append(object)\n        else: keep.append(object)\n    \n    if rs.IsBlockReference(blockName):\n        print \"Block is referenced from file; unable to modify block\"\n        rs.DeleteObjects(keep)\n        return\n    \n    rs.TransformObjects(keep, rs.XformInverse(XformBlock), False)\n    \n    newGeometry = []\n    newAttributes = []\n    for object in keep:\n        newGeometry.append(rs.coercegeometry(object))\n        ref = Rhino.DocObjects.ObjRef(object)\n        attr = ref.Object().Attributes\n        newAttributes.append(attr)\n    \n    InstanceDefinitionTable = sc.doc.ActiveDoc.InstanceDefinitions\n    InstanceDefinitionTable.ModifyGeometry(idefIndex, newGeometry, newAttributes)\n    \n    rs.DeleteObjects(keep)  \n    rs.EnableRedraw(True)\n   \nRemoveFromBlock()",
+      "language": "python",
+      "author": "Alasdair",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 3288
+}

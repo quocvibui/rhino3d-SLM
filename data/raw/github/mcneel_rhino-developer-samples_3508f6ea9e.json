@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_drawoverlay.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_drawoverlay.py",
+  "instruction": "Ex drawoverlay",
+  "code": "import Rhino\nimport System.Drawing\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n# DisplayConduit subclass that overrides the DrawForeground function\n# e is an instance of Rhino.Display.DrawEventArgs\nclass CustomConduit(Rhino.Display.DisplayConduit):\n    def DrawForeground(self, e):\n        color = System.Drawing.Color.Red\n        bounds = e.Viewport.Bounds\n        pt = Rhino.Geometry.Point2d(bounds.Right - 100, bounds.Bottom - 30)\n        e.Display.Draw2dText(\"Hello\", color, pt, False)\n\n\ndef showafterscript():\n    # Create a custom conduit that can continue to draw after the\n    # script has completed. The conduit is kept in the sticky\n    # dictionary so we can get at it and turn it off in the future\n    #\n    # check to see if the conduit has been created and is in sticky\n    conduit = None\n    if scriptcontext.sticky.has_key(\"myconduit\"):\n        conduit = scriptcontext.sticky[\"myconduit\"]\n    else:\n        # create a conduit and place it in sticky\n        conduit = CustomConduit()\n        scriptcontext.sticky[\"myconduit\"] = conduit\n    \n    # Toggle enabled state for conduit. Every time this script is\n    # run, it will turn the conduit on and off\n    conduit.Enabled = not conduit.Enabled\n    if conduit.Enabled: print \"conduit enabled\"\n    else: print \"conduit disabled\"\n    scriptcontext.doc.Views.Redraw()\n\n\ndef showinscript():\n    # create a custom conduit that only displays during the execution\n    # of this script. Once the script has completed, the conduit is turned\n    # off and display goes back to normal\n    conduit = CustomConduit()\n    conduit.Enabled = True\n    scriptcontext.doc.Views.Redraw()\n    rs.GetString(\"Pausing for user input\")\n    conduit.Enabled = False\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    showinscript()\n    #showafterscript()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

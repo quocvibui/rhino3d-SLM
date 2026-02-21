@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/transform-guid-in-gh/139175",
+  "topic_id": 139175,
+  "title": "Transform GUID in GH?",
+  "question": "I am currently looking for a quick way to transform Rhino geometry from Grasshopper without referencing and baking.\n\n\nOpenNest’s Transform GUID is basically what I need, but unfortunately they did not expose the \ndelete orignal\n boolean, so you always keep the original.\n\n\nDoes anyone know a quick way of transforming GUID and deleting the original Geometry?\n\n\nMy pseudo code attempt in Python (ps: I don’t really know Python):\n\n\n\"\"\"Provides a scripting component.\n    Inputs:\n        x: List of GUIDs\n        y: List of Transforms\n        z: Bool delete original\n        u: Trigger transform\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"seltz\"\n__version__ = \"2022.03.09\"\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rc\nimport scriptcontext as sc\nimport System.Guid\n\nsc.doc = rc.RhinoDoc.ActiveDoc\n\nif u:\n    for i in x:\n        rhobj = x(i)\n        xform = y(i)\n        delete = z\n        sc.doc.Objects.Transform(rhobj, xform, delete)\n        sc.doc.Views.Redraw()\n\n\n\nThis post also seems relevant: \nCurious: Faster to Transform then delete rather than Transform with delete true\n\n\nHere is what I want to do:\n\n\nSet any number of “floor objects”, set any number of geometries placed above the floor, transform the objects so they sit directly on the floor objects:\n\n\n\n\nCanvas at 11;17;12\n1442×693 76.2 KB\n\n\n\n\nground_object.3dm\n (183.5 KB)\n\n\nground_object.gh\n (27.7 KB)\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(DataTree<Guid> id, DataTree<Transform> T, bool go)\n  {\n    if(go){\n      if(!ex){\n        ex = true;\n        ID = id;\n        t = T;\n        GrasshopperDocument.ScheduleSolution(5, SolutionCallback);\n      }\n    }else{ex = false;}\n  }\n\n  // <Custom additional code> \n  private bool ex;\n  private Grasshopper.DataTree<Guid> ID;\n  private Grasshopper.DataTree<Rhino.Geometry.Transform> t;\n\n  private void SolutionCallback(GH_Document doc){\n    for(int i = 0;i < ID.AllData().Count;i++){\n      Rhino.DocObjects.RhinoObject obj = this.RhinoDocument.Objects.FindId(ID.AllData()[i]);\n      obj.Geometry.Transform(t.AllData()[i]);\n      obj.CommitChanges();\n    }\n  }",
+      "language": "csharp",
+      "author": "maje90",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: List of GUIDs\n        y: List of Transforms\n        z: Bool delete original\n        u: Trigger transform\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"seltz\"\n__version__ = \"2022.03.09\"\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rc\nimport scriptcontext as sc\nimport System.Guid\n\nsc.doc = rc.RhinoDoc.ActiveDoc\n\nif u:\n    for i in x:\n        rhobj = x(i)\n        xform = y(i)\n        delete = z\n        sc.doc.Objects.Transform(rhobj, xform, delete)\n        sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "seltzdesign",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 14,
+  "views": 2192
+}

@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Nihalmannath/Grounded-one_click_structural_solution/blob/94373d5c3a0ea210040d9de1195b23acb6fba0c2/Experiments/2/TERM%203/20250519_TERM%203_RHINO_GLB_JSON/src/Rhino_to_mesh.py",
+  "repo": "Nihalmannath/Grounded-one_click_structural_solution",
+  "repo_stars": 0,
+  "repo_description": "Research studio/term_2",
+  "license": "unknown",
+  "filepath": "Experiments/2/TERM 3/20250519_TERM 3_RHINO_GLB_JSON/src/Rhino_to_mesh.py",
+  "instruction": "1) Install dependency",
+  "code": "# 1) Install dependency\nimport rhino3dm\nimport os\n\n# 2) Load the 3dm\ninput_path = r'./input model/rectangles3dcantilever.3dm'\nmodel = rhino3dm.File3dm.Read(input_path)\n\n# 3) Helper to mesh a Brep\ndef mesh_brep(brep, mesh_type=rhino3dm.MeshType.Default):\n    meshes = []\n    for face in brep.Faces:\n        try:\n            m = face.GetMesh(mesh_type)\n        except Exception:\n            continue\n        if m:\n            meshes.append(m)\n    return meshes\n\n# 4) Prepare output directory\nout_dir = r'./input model/meshed_layers_obj'\nos.makedirs(out_dir, exist_ok=True)\n\n# 5) Iterate through layers and export OBJ per layer\nfor lyr in model.Layers:\n    meshes = []\n    for obj in model.Objects:\n        if obj.Attributes.LayerIndex != lyr.Index:\n            continue\n        geom = obj.Geometry\n        if isinstance(geom, rhino3dm.Mesh):\n            meshes.append(geom)\n        elif isinstance(geom, rhino3dm.Brep):\n            meshes.extend(mesh_brep(geom))\n\n    print(\"Layer [{}] '{}' -> {} mesh(es)\".format(lyr.Index, lyr.Name, len(meshes)))\n    if not meshes:\n        continue\n\n    # Write OBJ file\n    safe_name = lyr.Name.replace(' ', '_')\n    obj_path = os.path.join(out_dir, f'meshed_layer_{lyr.Index}_{safe_name}.obj')\n    with open(obj_path, 'w') as f:\n        # write a comment header\n        f.write(f\"# Layer {lyr.Index}: {lyr.Name}\\n\")\n        vertex_offset = 0\n\n        # write vertices and faces\n        for mesh in meshes:\n            # vertices\n            for v in mesh.Vertices:\n                f.write(\"v {} {} {}\\n\".format(v.X, v.Y, v.Z))\n            # faces\n            for face in mesh.Faces:\n                if isinstance(face, tuple):\n                    idxs = face\n                else:\n                    if getattr(face, \"IsQuad\", False):\n                        idxs = (face.A, face.B, face.C, face.D)\n                    else:\n                        idxs = (face.A, face.B, face.C)\n                # OBJ indexing is 1-based\n                idxs = [i + 1 + vertex_offset for i in idxs]\n                f.write(\"f {}\\n\".format(\" \".join(map(str, idxs))))\n            vertex_offset += len(mesh.Vertices)\n\n    print(\"  Saved OBJ:\", obj_path)\n\nprint(\"Done. Check the folder './input model/meshed_layers_obj' for your OBJ files.\")",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": true
+}

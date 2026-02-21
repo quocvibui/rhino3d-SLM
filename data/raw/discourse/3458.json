@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-monitor-keydown-and-keyup-in-python/3458",
+  "topic_id": 3458,
+  "title": "How to monitor keydown and keyup in Python?",
+  "question": "@dale\n I am trying to make a script that can read key presses but I have no success yet. Is there a built in function in Python for this? I need this to be able to manipulate objects, similar to Rhino’s arrow key nudge.\n\nI have spent hours trying to figure this out, and the only thing I was able to find (probably due to my lack of search knowledge regarding the python universe) is a pygame module, but I would prefer to avoid third party modules so this can be used on “vanilla” Rhino installations.\n\n\nI know you gave me some hints on this on the old NG, a year ago or so, but I can not get to that info now.",
+  "code_blocks": [
+    {
+      "code": "import Tkinter as tk\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef handleKeypress(event):\n    pressedKey = event.char\n    print pressedKey\n\nwhile True:\n    if scriptcontext.escape_test(False):\n        break #get out of the loop\n    handleKeypress()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System.Drawing\nimport System.Windows.Forms\nimport scriptcontext\n\nclass Form1(System.Windows.Forms.Form):\n    def __init__(self):\n        self.InitializeComponent()\n    \n    def InitializeComponent(self):\n        self._button = System.Windows.Forms.Button()\n        self.SuspendLayout()\n        self._button.Location = System.Drawing.Point(150, 67)\n        self._button.Size = System.Drawing.Size(75, 23)\n        self._button.TabIndex = 0\n        self._button.Text = \"Done\"\n        self._button.Click += self.ButtonClick\n        self.ClientSize = System.Drawing.Size(250, 102)\n        self.Controls.Add(self._button)\n        self.KeyPreview = True\n        self.Text = \"Press J or K\"\n        self.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow\n        self.KeyDown += self.OnKeyDownEvent\n        self.Closing += self.OnClosingEvent\n        self.ResumeLayout(False)\n\n    def ButtonClick(self, sender, e):\n        self.Close()\n        \n    def OnKeyDownEvent(self, sender, e):\n        left = e.KeyCode == System.Windows.Forms.Keys.J\n        right = e.KeyCode == System.Windows.Forms.Keys.K\n        if left or right:\n            amount = 0.1\n            if right: amount = -0.1\n            viewport = scriptcontext.doc.Views.ActiveView.MainViewport\n            z = viewport.ConstructionPlane().ZAxis\n            viewport.Rotate(amount, z, Rhino.Geometry.Point3d.Origin)\n            scriptcontext.doc.Views.Redraw()\n        finish = e.KeyCode == System.Windows.Forms.Keys.Escape\n        finish = finish or e.KeyCode == System.Windows.Forms.Keys.Enter\n        if finish:\n            self.Close()\n        e.Handled = True\n    def OnClosingEvent(self, sender, e):\n        Rhino.Input.Custom.GetBaseClass.PostCustomMessage(\"exit\")\n\nf = Form1()\nf.Show(Rhino.RhinoApp.MainWindow())\ngs = Rhino.Input.Custom.GetString()\ngs.SetCommandPrompt(\"press escape to exit\")\ngs.AcceptCustomMessage(True)\ngs.Get()\nif not f.IsDisposed:\n    f.Close()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 22060
+}

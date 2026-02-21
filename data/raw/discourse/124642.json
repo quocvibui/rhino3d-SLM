@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/update-filepath-texture-material/124642",
+  "topic_id": 124642,
+  "title": "Update FilePath Texture Material",
+  "question": "Hi everyone,\n\nI attached a python definition as I am struggling to understand how to update the filepath of the textures loaded in a rhino material. Does anyone have any idea?\n\nThank you!\n\n\nUpdateMaterialTexture.py\n (600 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import os\nimport rhinoscriptsyntax\nimport scriptcontext\nimport Rhino.Render\nimport System.Convert\n\ndef handle_render_content(render_content, target):\n    child = render_content.FirstChild\n    while child:\n        handle_render_content(child, target)\n        if child.IsImageBased():\n            child.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program)\n            source_path = System.Convert.ToString(child.GetParameter(\"filename\"))\n            source_file = os.path.basename(source_path)\n            child.SetParameter(\"filename\", target + os.sep + source_file)\n            child.EndChange()\n        child = child.NextSibling\n\ntarget = rhinoscriptsyntax.BrowseForFolder()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 416
+}

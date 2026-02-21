@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/list-all-object-names-assigned-to-a-certain-material/189340",
+  "topic_id": 189340,
+  "title": "List all object names assigned to a certain material?",
+  "question": "Is it possible to get a vertical list (one object per line) with all object names assigned to a certain material? With ability to see the layer and object colour as RGB code?\n\nFor example, if I select material “Steel 01” and right-click on it, Rhino will let me open a pop-up list whose content could be copied in the clipboard or saved as a text file. It will look like this:\n\n\nMaterial: Steel 01\n\nObject name: Tube 1, Layer: Chassis, RGB 128, 128, 128\n\nObject name: Tube 1, Layer: Chassis, RGB 128, 128, 128\n\nObject name: Tube 1, Layer: Chassis, RGB 128, 128, 128\n\nObject name: Tube 2, Layer: Bumper sub-frame, RGB 90, 90, 90\n\n\netc…",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\n# select an object and get its RenderMaterial\n# from user Nathan Letwory at https://discourse.mcneel.com/t/rhinocommon-unable-to-get-rendermaterial-of-object/184978/7\nobjTypesFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Mesh\nrc, objRef = Rhino.Input.RhinoGet.GetOneObject( \"Select object\", False, objTypesFilter )\n\nselected_obj = objRef.Object()\nmtl = selected_obj.RenderMaterial\n\n\n# get a list of all objects that have that material\n# from user Clement at https://discourse.mcneel.com/t/select-by-material-name-with-python-and-or-rhinocommon/173074/2\nsettings = Rhino.DocObjects.ObjectEnumeratorSettings()\nsettings.NormalObjects = True\nobjs = scriptcontext.doc.Objects.GetObjectList(settings)\n\nrc = filter(lambda i: i.RenderMaterial and i.RenderMaterial.Name==mtl.Name, objs)\n\n# produce the output\ntext = \"Material Name: \" + mtl.Name + \"\\n\"\nfor ob in rc:\n    layer_name = rs.ObjectLayer(ob)\n    name = \"\"\n    if ob.Name:\n        name = ob.Name\n    else:\n        name = \"[unnamed]\"\n    text += \"Object Name: \" + name + \", Layer: \" + layer_name + \", \" + str(rs.LayerColor(layer_name)) + \"\\n\"\n\n# Alert user that the task is done\nrs.ClipboardText(text)\n\nrs.MessageBox(\"Object list has been copied to clipboard\")",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 2,
+  "views": 75
+}

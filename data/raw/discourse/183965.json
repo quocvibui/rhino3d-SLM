@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-grasshopper-blocks-cannot-delete-trapped-in-memory/183965",
+  "topic_id": 183965,
+  "title": "BUG - Grasshopper Blocks - Cannot Delete - Trapped In Memory?",
+  "question": "Hello,\n\n\nIt appears that when I add a Model Block Instance to the Rhino Model via a Grasshopper Script even after disabling the Content Cache, deleting the block, and running the Purge Command, the InstanceObject is still trapped in “memory” and exists in the layer table despite it not existing in GH or the Block Manager.\n\n\nVideo Showcasing Issue:\n\n\n\n\n\n\nI found this because I had a Python script that was querying InstanceDefinition UserText and it was crashing Rhino.\n\n\nI traced the issue to Grasshopper keeping these “empty?” references in memory still.\n\n\nTested on 8.8 and 8.7 builds\n\n\nPerhaps this is not a bug and just my limited understanding of how the InstanceDefinition Table works in scripting? Do I need to manually call a refresh or something?\n\n\nMy expectation would be that if Purge was ran on blocks and if all blocks have been deleted in the Rhino Model and GH model then I shouldn’t be able to “access” any of those blocks via scripting?\n\n\nExample of a “lighter” error when listing blocks in the model if these undeleted “ghost blocks” are present, other errors involve User Text and Grasshopper Proxy Tables\n\n\n[ERROR] FATAL UNHANDLED EXCEPTION: Python.Runtime.PythonException: 'NoneType'\n\n\n\nPython Script For Testing:\n\n\n20240609_Rhino_Grasshopper_Scripting_Conflict_01a.py\n (483 Bytes)\n\n\n\n\n\nSys Info\n\n\nRhino 8 SR8 2024-6-6 (Rhino 8, 8.8.24158.03001, Git hash:master @ c3cb4a9dc98ee25dc1f6e221e25c58a938d8d81a)\n\nLicense type: Commercial, build 2024-06-06\n\nLicense details: Cloud Zoo\n\n\nWindows 11 (10.0.22631 SR0.0) or greater (Physical RAM: 64GB)\n\n.NET 7.0.17\n\n\nComputer platform: LAPTOP  - Plugged in [99% battery remaining]\n\n\nStandard graphics configuration.\n\nPrimary display: DisplayLink USB Device (DisplayLink) Memory: 0MB, Driver date: 2-9-2024 (M-D-Y).\n\n> External USB display device with 4 adapter port(s)\n\n- Windows Main Display attached to adapter port \n0\n\n- Secondary monitor attached to adapter port \n1\n\nPrimary OpenGL: NVIDIA GeForce RTX 3080 Ti Laptop GPU (NVidia) Me...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\n\ndef search_and_clean_block_instances():\n    block_instances = sc.doc.InstanceDefinitions if hasattr(sc.doc, 'InstanceDefinitions') else []\n\n    if block_instances:\n        for instance in block_instances:\n            if not instance.IsDeleted:\n                # Print instance definition\n                Rhino.RhinoApp.WriteLine(f\"InstanceDefinition: {instance.Name} ({instance.Index})\")\n            else:\n                Rhino.RhinoApp.WriteLine(\"Instance Exists In Table\")\n    else:\n        Rhino.RhinoApp.WriteLine(\"No Blocks Exist\")\n\n\nif __name__ == \"__main__\":\n    search_and_clean_block_instances()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 169
+}

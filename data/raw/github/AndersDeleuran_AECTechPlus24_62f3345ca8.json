@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/AndersDeleuran/AECTechPlus24/blob/1c6ecd8208efc50843b14f890b68c95a837e3dac/Exercises/src/07_MouseHoverOverState.py",
+  "repo": "AndersDeleuran/AECTechPlus24",
+  "repo_stars": 34,
+  "repo_description": "For sharing files with workshop participants at AECTech+ Barcelona 2024.",
+  "license": "Apache-2.0",
+  "filepath": "Exercises/src/07_MouseHoverOverState.py",
+  "instruction": "07 mouse hover over state",
+  "code": "﻿import Rhino as rc\nimport Grasshopper as gh\nimport System.Drawing as sd\nimport GhPython.Assemblies.ExecutingComponent as component\n\nclass MyMouseCallback(rc.UI.MouseCallback):\n    \n    def __init__(self):\n        self.move = None\n        \n    def OnMouseMove(self,arg):\n        self.move = arg\n        ghenv.Component.ExpireSolution(True)\n\nclass MyComponent(component):\n    \n    def RunScript(self,Text,Color):\n        self.txt,self.c1,self.c2 = Text,Color,sd.Color.Black\n        \n    def DrawForeground(self,sender,arg):\n        if (not ghenv.Component.Hidden and not ghenv.Component.Locked \n            and ghenv.Component.OnPingDocument() == gh.Instances.ActiveCanvas.Document\n            and arg.Viewport.Id == arg.RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewportID):\n            \n            # Define rectangle to draw and get mouse position in viewport screen space\n            rec = sd.Rectangle(50,100,100,100)\n            mpt = rc.Geometry.Point2d(self.mouse.move.ViewportPoint.X,self.mouse.move.ViewportPoint.Y)\n            \n            # Check if mouse is inside rectangle and draw different stuff dependingly\n            if rec.X + rec.Width > mpt.X > rec.X and rec.Y + rec.Height > mpt.Y > rec.Y:\n                recPt = rc.Geometry.Point2d(rec.X + rec.Width+10,rec.Y)\n                arg.Display.Draw2dRectangle(rec,self.c2,10,sd.Color.DodgerBlue)\n                arg.Display.Draw2dText(self.txt,self.c2,mpt,False,25,\"Consolas\")\n                arg.Display.Draw2dText(str(mpt),self.c2,recPt,False,100,\"Consolas\")\n            else:\n                arg.Display.Draw2dRectangle(rec,self.c2,10,self.c1)\n                \n    def __enter__(self):\n        rc.Display.DisplayPipeline.DrawForeground += self.DrawForeground\n        self.mouse = MyMouseCallback()\n        self.mouse.Enabled = True\n        \n    def __exit__(self):\n        rc.Display.DisplayPipeline.DrawForeground -= self.DrawForeground\n        self.mouse.Enabled = False\n        del self.mouse",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

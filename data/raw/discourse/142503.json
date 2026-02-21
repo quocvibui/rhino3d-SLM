@@ -1,0 +1,45 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-set-material-to-the-face-of-the-brep-by-api/142503",
+  "topic_id": 142503,
+  "title": "How to set material to the face of the Brep by api?",
+  "question": "In rhino we can set material to every face of the Brep easily,but how to do this by api?",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  var rc = RhinoGet.GetOneObject(\"Select Brep\", false, ObjectType.Brep, out var objref);\n  if (rc != Result.Success || null == objref)\n    return rc;\n\n  if (!(objref.Object() is BrepObject brep_object))\n    return Result.Failure;\n\n  // Create red material\n  var red_material = new Material { DiffuseColor = Color.Red };\n  var red_material_index = doc.Materials.Add(red_material);\n\n  // Create blue material with red material on one channel\n  var blue_material = new Material { DiffuseColor = Color.Blue };\n  var red_channel_index = blue_material.MaterialChannelIndexFromId(doc.Materials[red_material_index].Id, true);\n  var blue_material_index = doc.Materials.Add(blue_material);\n\n  // Change object material to blue material\n  brep_object.Attributes.MaterialIndex = blue_material_index;\n  brep_object.Attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject;\n\n  // Set every second face material to red material channel\n  var brep = brep_object.BrepGeometry;\n  for (var i = 0; i < brep.Faces.Count; i++)\n  {\n    if (i % 2 == 0)\n      brep.Faces[i].MaterialChannelIndex = red_channel_index;\n    else\n      brep.Faces[i].ClearMaterialChannelIndex();\n  }\n\n  // Commit changes and redraw\n  brep_object.CommitChanges();\n  doc.Views.Redraw();\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "ObjRef objRef = gs.Object(i); // Get each selected object\nRhinoObject rhinoObj = objRef.Object(); // Get the RhinoObject\n\n// Apply the material or perform operations on the rhinoObj\nif (applyToSubelement && objRef.GeometryComponentIndex.ComponentIndexType == ComponentIndexType.BrepFace)\n{\n    // Handle subelement (BrepFace) material application\n    var brep = rhinoObj.Geometry as Brep;\n    if (brep != null)\n    {\n        // Get the face index from the selected component\n        int brepFaceIndex = objRef.GeometryComponentIndex.Index;\n        BrepFace brepFace = brep.Faces[brepFaceIndex];\n        \n\n        // Apply the material to the BrepFace\n        brepFace.MaterialChannelIndex = renderMaterial.ToMaterial(RenderTexture.TextureGeneration.Allow).Index;\n        rhinoObj.Attributes.MaterialSource = ObjectMaterialSource.MaterialFromParent; // Use material from parent\n\n        // Commit changes\n        rhinoObj.CommitChanges();\n        RhinoApp.WriteLine($\"Material applied to BrepFace (index: {brepFaceIndex}).\");\n    }\n}",
+      "language": "csharp",
+      "author": "svichare",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "// Apply the material or perform operations on the rhinoObj\n if (applyToSubelement && objRef.GeometryComponentIndex.ComponentIndexType == ComponentIndexType.BrepFace)\n {\n\n     // Get the face index from the selected component\n     int brepFaceIndex = objRef.GeometryComponentIndex.Index;\n\n     // check if chosen renderMaterial exists in the doc.Materials table or else add the material\n     var selectedDocMaterial = doc.Materials.FirstOrDefault(docMat => docMat.Id == selectedRenderMaterial.Id);\n\n     // adding material to doc.Material table returns its index\n     var selectedDocMaterialIndex = selectedDocMaterial == null ? doc.Materials.Add(selectedRenderMaterial.ToMaterial(RenderTexture.TextureGeneration.Allow)) : selectedDocMaterial.Index;\n\n     var parentObjectMaterialDuplicate = rhinoObj.GetMaterial(true);\n     var selectedMaterialChannelIndex = parentObjectMaterialDuplicate.MaterialChannelIndexFromId(doc.Materials[selectedDocMaterialIndex].Id, true);\n     var modifiedParentObjectMaterialIndex = doc.Materials.Add(parentObjectMaterialDuplicate);\n\n\n     // Apply the material to the BrepFace\n     rhinoObj.Attributes.MaterialIndex = modifiedParentObjectMaterialIndex;\n     rhinoObj.Attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject; // Use material from parent\n\n     // apply the material channel index to the brepface\n     brep.Faces[brepFaceIndex].MaterialChannelIndex = selectedMaterialChannelIndex;\n\n\n     // Commit changes\n     rhinoObj.CommitChanges();\n     RhinoApp.WriteLine($\"Material applied to BrepFace (index: {brepFaceIndex}).\");\n\n }",
+      "language": "csharp",
+      "author": "svichare",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "doc_materials = Rhino.RhinoDoc.ActiveDoc.Materials                \n\nfor i in range(doc_materials.Count):                \n    if doc_materials[i].Name == str(self.selected_material):                        \n        brep = rs.coercebrep(self.brep_id)\n        if brep:\n            the_face = brep.Faces[self.selected_face_index.Index]\n            the_face.MaterialChannelIndex = i",
+      "language": "python",
+      "author": "GaryC",
+      "post_number": 17,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 910
+}

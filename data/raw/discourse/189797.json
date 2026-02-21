@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/applying-outerloop-to-subdivided-surfaces-in-c/189797",
+  "topic_id": 189797,
+  "title": "Applying OuterLoop to Subdivided Surfaces in C#",
+  "question": "Hello everyone,\n\n\nI’m working with a Trimmed Surface and need help with the following tasks using C#:\n\n\n\n\nExtract the Surface and OuterLoop\n from the Trimmed Surface (this part is already implemented in my code).\n\n\nSplit the Surface in half\n along the U direction.\n\n\nApply the same OuterLoop\n to the resulting two surfaces.\n\n\n\n\nHere is the code I have so far:\n\n\npublic static Brep[] Subdivide(Brep brep)\n{\n    BrepFace brepFace = brep.Faces[0];\n\n    Surface surface = brepFace.UnderlyingSurface() ?? throw new Exception(\"Surface extraction failed\");\n    BrepLoop outerLoop = brepFace.OuterLoop;\n\n    var domainU = surface.Domain(0);\n    var domainV = surface.Domain(1);\n\n    Interval domainU1 = new Interval(domainU.Min, domainU.Mid);\n    Interval domainU2 = new Interval(domainU.Mid, domainU.Max);\n\n    Surface surface1 = surface.Trim(domainU1, domainV);\n    Surface surface2 = surface.Trim(domainU2, domainV);\n\n    Brep brep1 = Brep.CreateFromSurface(surface1);\n    Brep brep2 = Brep.CreateFromSurface(surface2);\n\n    // Here you need to apply the outerLoop to the new Breps\n\n    return new Brep[] { brep1, brep2 };\n}\n\n\n\nCould someone please provide guidance or a code snippet on how to \napply the extracted OuterLoop\n to the two new surfaces after splitting them?\n\n\nThank you in advance for your help!\n\n\nBelow are images showing how this should look in Rhino:\n\n\nSurfSubDivisionPic\n3540×665 119 KB\n\n\nAdditionally, here is how this can be achieved using Grasshopper components:\n\n\nGrasshopperDefinition\n1280×601 55.7 KB\n\n\nDefinition.gh\n (41.5 KB)\n\n\nBest regards,\n\nKlimenko Petr",
+  "code_blocks": [
+    {
+      "code": "static double tol = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n\n  public void Split(List<Brep> bList, int dir, double t){\n\n    bTree = new DataTree<Brep>();\n    cTree = new DataTree<Curve>();\n\n    for(int i = 0;i < bList.Count;i++){\n      Brep b = bList[i];\n      \n      for(int j = 0;j < b.Faces.Count;j++){\n\n        BrepFace face = b.Faces[j];\n\n        face.SetDomain(0, new Interval(0, 1));\n        face.SetDomain(1, new Interval(0, 1));\n\n        Curve splitter = face.IsoCurve(dir, t);\n        if(!splitter.IsValid) continue;\n\n        Brep splitted = face.Split(new Curve[1]{splitter}, tol);\n        if(splitted == null || !splitted.IsValid) continue;\n\n        for(int k = 0;k < splitted.Faces.Count;k++){\n          BrepFace bsf = splitted.Faces[k];\n\n          if(bsf.IsValid)bTree.Add(bsf.DuplicateFace(true), new GH_Path(i, j, k));\n          else {\n            bTree.Add(null, new GH_Path(i, j, k)); continue;\n          }\n\n          foreach(BrepLoop loop in bsf.Loops){\n            if(loop.LoopType == BrepLoopType.Outer){\n              Curve outer = loop.To3dCurve();\n              if(outer.IsValid)cTree.Add(outer, new GH_Path(i, j, k, 0));\n              else cTree.Add(null, new GH_Path(i, j, k, 0));\n            }\n            else{\n              Curve inner = loop.To3dCurve();\n              if(inner.IsValid)cTree.Add(inner, new GH_Path(i, j, k, 1));\n              else cTree.Add(null, new GH_Path(i, j, k, 1));\n            }\n          }\n        }\n      }\n    }\n  }",
+      "language": "csharp",
+      "author": "PeterFotiadis",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 102
+}

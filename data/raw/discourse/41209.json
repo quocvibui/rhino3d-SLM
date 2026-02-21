@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-extendsurface-returns-bool/41209",
+  "topic_id": 41209,
+  "title": "rs.ExtendSurface returns bool!?",
+  "question": "Hey,\n\nIm trying to create a rhinoscript/python node that extends an untrimmed surface, but reading the documentation on rs.extendSurface I found this in the online documentation:\n\n\nParameters:\nsurface_id = identifier of a surface\nparameter = tuple of two values definfing the U,V parameter to evaluate.\nThe surface edge closest to the U,V parameter will be the edge that is\nextended\nlength = amount to extend to surface\nsmooth[opt] = If True, the surface is extended smoothly curving from the\nedge. If False, the surface is extended in a straight line from the edge\nReturns:\nTrue or False indicating success or failure\n\n\n\nrs.ExtendSurface returns only true or false indicating success or failure, but no actual surface or surface_id!?\n\nHow can I retrieve the exteneded surface for further GH operations?",
+  "code_blocks": [
+    {
+      "code": "def ExtendSurface(surface_id, parameter, length, smooth=True):\n    \"\"\"Lengthens an untrimmed surface object\n    Parameters:\n      surface_id = identifier of a surface\n      parameter = tuple of two values definfing the U,V parameter to evaluate.\n        The surface edge closest to the U,V parameter will be the edge that is\n        extended\n      length = amount to extend to surface\n      smooth[opt] = If True, the surface is extended smoothly curving from the\n        edge. If False, the surface is extended in a straight line from the edge\n    Returns:\n      True or False indicating success or failure\n    Example:\n      import rhinoscriptsyntax as rs\n      pick = rs.GetObjectEx(\"Select surface to extend\", rs.filter.surface)\n      if pick:\n      parameter = rs.SurfaceClosestPoint(pick[0], pick[3])\n      rs.ExtendSurface(pick[0], parameter, 5.0)\n    See Also:\n      IsSurface\n    \"\"\"\n    surface = rhutil.coercesurface(surface_id, True)\n    edge = surface.ClosestSide(parameter[0], parameter[1])\n    newsrf = surface.Extend(edge, length, smooth)\n    if newsrf:\n        surface_id = rhutil.coerceguid(surface_id)\n        if surface_id: scriptcontext.doc.Objects.Replace(surface_id, newsrf)\n        scriptcontext.doc.Views.Redraw()\nreturn newsrf is not None",
+      "language": "python",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 982
+}

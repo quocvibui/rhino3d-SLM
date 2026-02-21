@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-createcurvebooleandifference-overload/25309",
+  "topic_id": 25309,
+  "title": "RhinoCommon CreateCurveBooleanDifference overload",
+  "question": "The method should accept either a single curve or a list of curves, but if I feed it a list, I get the following error:\n\n\nMessage: expected Curve, got Array[Curve]\n\n\nDoes this have something to do with having to specifically create an IEnumerable instead of a simple list?  ISTR something like that with a few other methods…\n\n\nThx, --Mitch\n\n\n\n\nCurve.CreateBooleanDifference Method (Curve, IEnumerable(Curve))\n\n\n\n\n\n\nCalculates the boolean difference between a closed planar curve, and a list of closed planar curves. Note, curves must be co-planar.\n\n\n\n\n\n\nParameters\n\ncurveA\n\nType: Rhino.Geometry.Curve\n\nThe first closed, planar curve.\n\n\n\n\n\n\nsubtractors\n\nType: System.Collections.Generic.IEnumerable(Curve)\n\ncurves to subtract from the first closed curve.\n\n\n\n\n\n\nReturn Value\n\nResult curves on success, empty array if no difference could be calculated.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef CurveBooleanDifference():\n    id_crv = rs.GetObject(\"curve to subtract from\", 4, True, False)\n    if not id_crv: return\n    \n    ids = rs.GetObjects(\"curves to subtract\", 4, False, False)\n    if not ids: return\n    \n    if id_crv in ids: return\n    \n    crv = rs.coercecurve(id_crv)\n    curves = [rs.coercecurve(i) for i in ids]\n    \n    arr = Rhino.Geometry.Curve.CreateBooleanDifference(crv, curves)\n    if not arr: return\n    \n    objs = [scriptcontext.doc.Objects.AddCurve(a) for a in arr]\n    rs.SelectObjects(objs)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__==\"__main__\":\n    CurveBooleanDifference()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\na=0\nsubtractors=[]\nfor i in range(4):\n    pt0=Rhino.Geometry.Point3d(5+a,0,0)\n    pt1=Rhino.Geometry.Point3d(0+a,5,0)\n    pt2=Rhino.Geometry.Point3d(-5+a,0,0)\n    pt3=Rhino.Geometry.Point3d(0+a,-5,0)\n    subtractors.append(Rhino.Geometry.PolylineCurve([pt0,pt1,pt2,pt3,pt0]))\n    a+=15\n    \npt0=Rhino.Geometry.Point3d(-10,0,0)\npt1=Rhino.Geometry.Point3d(55,0,0)\npt2=Rhino.Geometry.Point3d(55,-20,0)\npt3=Rhino.Geometry.Point3d(-10,-20,0)\nrect=Rhino.Geometry.PolylineCurve([pt0,pt1,pt2,pt3,pt0])\n\nresult=Rhino.Geometry.Curve.CreateBooleanDifference(rect,subtractors)\nfor crv in result: sc.doc.Objects.AddCurve(crv)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npt0=Rhino.Geometry.Point3d(-10,0,0)\npt1=Rhino.Geometry.Point3d(55,0,0)\npt2=Rhino.Geometry.Point3d(55,-20,0)\npt3=Rhino.Geometry.Point3d(-10,-20,0)\nrect=Rhino.Geometry.PolylineCurve([pt0,pt1,pt2,pt3,pt0])\n\na=0\nfor i in range(4):\n    pt0=Rhino.Geometry.Point3d(5+a,0,0)\n    pt1=Rhino.Geometry.Point3d(0+a,5,0)\n    pt2=Rhino.Geometry.Point3d(-5+a,0,0)\n    pt3=Rhino.Geometry.Point3d(0+a,-5,0)\n    pl=Rhino.Geometry.PolylineCurve([pt0,pt1,pt2,pt3,pt0])\n    result=Rhino.Geometry.Curve.CreateBooleanDifference(rect,pl)\n    if result and len(result)==1:\n        rect=result[0]\n    a+=15\nsc.doc.Objects.AddCurve(rect)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1150
+}

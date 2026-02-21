@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/no-method-found-for-ispointinside/200925",
+  "topic_id": 200925,
+  "title": "No method found for IsPointInside",
+  "question": "Hi all,\n\n\nI’m struggling with some code in python. I need to identify the layer of the object containing a point in space, based on multiple sources I found, I coded the following script (sorry I couldn’t attach a file).\n\n\n import rhinoscriptsyntax as rs\n import scriptcontext as sc\n import Rhino\n\n Breps = [sc.doc.Objects.Find(guid) for guid in rs.AllObjects() if rs.IsBrep(guid)]\n epsilon = sc.doc.ModelAbsoluteTolerance\n point3D = rs.CreatePoint(-45,45,45)\n for brep in Breps :\n     solid=Rhino.Geometry.Brep()\n     solid.Append(rs.coercebrep(brep))\n     if solid.IsPointInside(point3D,epsilon,1):\n         print(rs.ObjectLayer(brep))\n         break\n\n\n\nI’m running it inside rhino using the script editor, but then the following error shows up:\n\n\n\n\nno method matches given arguments for Brep.IsPointInside: (<class ‘Rhino.Geometry.Point3d’>,<class ‘float’>,<class ‘int’>)\n\n\n\n\nHowever, when I run it from the command ‘runpythonscript’ it works, so I don’t know what is going on or how to solve it. I guess it has something to do with the mess IronPython vs CPython (which to be honest I don’t get completely).\n\n\njust to be clear, I’m trying to run it inside Rhino because there I can import NumPy, whereas outside it doesn’t import it (again due to the CPython thingy)…\n\n\nanyway, I’d do appreciate if someone knows what is going on, or if I can somehow make the outside reader (a.k.a runpythonscript) to recognize NumPy.\n\n\nthx",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\n\ndef TestFerney(point):\n    object_type = Rhino.DocObjects.ObjectType.Brep\n    objects = sc.doc.Objects.FindByObjectType(object_type)\n    if not objects or 0 == len(objects):\n        return\n\n    tolerance = sc.doc.ModelAbsoluteTolerance\n    strictly_in = True\n\n    for obj in objects:\n        brep = obj.Geometry\n        if isinstance(brep, Rhino.Geometry.Brep):\n            if not brep.IsSolid:\n                continue\n            if not brep.IsPointInside(point, tolerance, strictly_in):\n                continue\n            obj.Select(True)\n            layer = sc.doc.Layers.FindIndex(obj.Attributes.LayerIndex)\n            if layer:\n                print(layer.Name)\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    point = Rhino.Geometry.Point3d(5,5,5)\n    TestFerney(point)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n import scriptcontext as sc\n import Rhino\n\n Breps = [sc.doc.Objects.Find(guid) for guid in rs.AllObjects() if rs.IsBrep(guid)]\n epsilon = sc.doc.ModelAbsoluteTolerance\n point3D = rs.CreatePoint(-45,45,45)\n for brep in Breps :\n     solid=Rhino.Geometry.Brep()\n     solid.Append(rs.coercebrep(brep))\n     if solid.IsPointInside(point3D,epsilon,1):\n         print(rs.ObjectLayer(brep))\n         break",
+      "language": "python",
+      "author": "Ferney",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 97
+}

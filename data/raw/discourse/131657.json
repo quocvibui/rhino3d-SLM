@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/long-run-time/131657",
+  "topic_id": 131657,
+  "title": "Long run time",
+  "question": "Hi everyone!\n\nHope you are doing well,\n\nI created a program in grasshopper with a loop using anemone, the loop is running a python script and looks like the code is creating the geometries as I expected, but there is an issue with the run time, it is so long around 5.4 s for each repetition. Please have a look at the image below:\n\n\n\n\nimage\n1680×438 115 KB\n\n\n\nSo as the loop is executing the script 4 times, the total computing time is around 24.2 sec, and it causes my program goes so slow. I wonder if some of you can give some advice on what can I do to reduce the run time. Do you think that in my script I’m using not good practices? or it is normal that the program takes a lot of time for its execution?.\n\nMany thanks in advance, any sugestion will be much aprecciate.\n\nEdwin\n\n\nCTS-RunTime.gh\n (265.9 KB)",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(Point3d P1, Point3d P2, double R1, double R2, ref object C)\n  {\n    C = FakeSphereSphereX(P1, P2, R1, R2);\n  }\n  // <Custom additional code>\n  public Circle FakeSphereSphereX(Point3d p1, Point3d p2, double r1, double r2){\n    Rhino.Geometry.Vector3d v = p2 - p1;\n    double d = v.Length;\n    if((d > r1 + r2) || (d < Math.Abs(r1 - r2))){\n      // No intersections\n      return Rhino.Geometry.Circle.Unset;\n    }\n    double h = 0.5 + (r1 * r1 - r2 * r2) / (2 * d * d);\n    double r = Math.Sqrt(r1 * r1 - h * h * d * d);\n    Point3d p = p1 + v * h;\n    return new Rhino.Geometry.Circle(new Plane(p, v), r);\n  }",
+      "language": "csharp",
+      "author": "maje90",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 15,
+  "views": 1939
+}

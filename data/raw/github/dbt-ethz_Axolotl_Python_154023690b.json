@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/code/pBox.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "code/pBox.py",
+  "instruction": "Creates a box with an optional edge fillet.\n    Inputs:\n        a: length along the x axis\n        b: length along the y axis\n        c: length along the z axis\n        r: edge fillet radius\n       ...",
+  "code": "\"\"\"Creates a box with an optional edge fillet.\n    Inputs:\n        a: length along the x axis\n        b: length along the y axis\n        c: length along the z axis\n        r: edge fillet radius\n        p: plane of origin of the box\n    Output:\n        d: the box object (sdf)\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT'\n__license__    = 'MIT License'\n__email__      = ['<bernhard@arch.ethz.ch>']\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math\n\nclass RBox(object):\n    \"\"\"\n    this is the box class\n    \"\"\"\n    def __init__(self, a=1, b=1, c=1, r=0):\n        self.a = a\n        self.b = b\n        self.c = c\n        self.r = r\n        self.plane = None\n        self.transform = None\n\n    def set_plane(self, p):\n        self.plane = p\n        matrix = rg.Transform.PlaneToPlane(rg.Plane.WorldXY, self.plane)\n        success, self.transform = matrix.TryGetInverse()\n\n    def get_distance(self,x,y,z):\n        \"\"\"\n        distance function\n        \"\"\"\n        if self.transform is not None:\n            p = rg.Point3f(x,y,z)\n            p.Transform(self.transform)\n            x = p.X\n            y = p.Y\n            z = p.Z\n\n        dx = abs(x)-(self.a/2.0-self.r)\n        dy = abs(y)-(self.b/2.0-self.r)\n        dz = abs(z)-(self.c/2.0-self.r)\n        inside = max([dx,dy,dz])-self.r\n        dx = max(dx,0)\n        dy = max(dy,0)\n        dz = max(dz,0)\n        if inside+self.r>0:\n            #rounded corner case\n            return math.sqrt(dx**2 + dy**2 + dz**2) - self.r\n        else:\n            return inside\n\n\nif __name__==\"__main__\":\n    if a is None:\n        a = 2\n    if b is None:\n        b = 3\n    if c is None:\n        c = 4\n    if r is None:\n        r = 0\n    d = RBox(a,b,c,r)\n    if p is not None:\n        d.set_plane(p)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

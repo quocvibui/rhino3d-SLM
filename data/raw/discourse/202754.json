@@ -1,0 +1,53 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/convert-to-a-flat-transparent-form/202754",
+  "topic_id": 202754,
+  "title": "Convert to a flat transparent form",
+  "question": "I’m trying to flatten the transparent form of the class.\n\nBut I can’t figure out what argument “control” is passing, and the editor is giving me an error about “control”\n\n\n@michaelvollrath\n Perhaps Sir There is something you should know, asking for your help\n\n\nimport Rhino\nimport Eto\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nEto_w = 300\nEto_h = 300\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        super().__init__()\n        self.WindowStyle = Eto.Forms.WindowStyle.NONE\n        self.Styles.Add[Eto.Forms.Panel](\"transparent\", self.TransparentFormStyler)\n        self.Style = \"transparent\"\n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(Eto_w, Eto_w)\n        self.Padding = Eto.Drawing.Padding(0)\n        self.MovableByWindowBackground = True\n        self.Location = ed.PointF(300,300)\n\n        self.bu = ef.Button()\n\n        self.layout_bi = ef.DynamicLayout()\n        self.layout_bi.AddRow(self.bu)\n\n        self.layout = Eto.Forms.PixelLayout()\n        self.layout.BackgroundColor = ed.Color(0,0,0,0.009)\n        self.layout.Add(self.layout_bi,12,12)\n        self.Content = self.layout\n\n    def TransparentFormStyler(self, control):\n        self.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.5  # win\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0, 0, 0, 25)  # mac\n\ndef EstablishForm():\n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\nif __name__ == \"__main__\":\n    EstablishForm()\n\n    def TransparentFormStyler(form,control):\n   ...",
+  "code_blocks": [
+    {
+      "code": "if __name__ == \"__main__\":\n    def TransparentFormStyler(form,control):\n        form.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.6\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0, 0, 0, 25)\n\n    form = ef.Form()\n\n    form.Width = Eto_w\n    form.Height = Eto_h\n    form.Topmost = True\n    form.Style(TransparentFormStyler(form,control))\n    form.Style = \"transparent\"\n\n    form.Show()",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Eto\nimport Rhino\n\ndef CreateMyForm():\n    form = Eto.Forms.Form()     \n    form.WindowStyle = Eto.Forms.WindowStyle.None\n    \n    form.Styles.Add[Eto.Forms.Panel](\"transparent\", MyFormStyler)\n    form.Style = \"transparent\"\n    \n    form.AutoSize = False\n    form.Resizable = True\n    # form.TopMost = True\n    form.ShowActivated = False\n    form.Size = Eto.Drawing.Size(300,300)\n    form.Padding = Eto.Drawing.Padding(80)\n    form.MovableByWindowBackground = True\n    form.Location = Eto.Drawing.Point(200,200)\n\n    return form\n\ndef MyFormStyler(control):\n    form.BackgroundColor = Eto.Drawing.Colors.Transparent\n    window = control.ControlObject\n    if hasattr(window, \"AllowsTransparency\"):\n        window.AllowsTransparency = True\n    if hasattr(window, \"Background\"):\n        brush = window.Background.Clone()\n        brush.Opacity = 0.1\n        window.Background = brush\n    else:\n        color = window.BackgroundColor\n        window.BackgroundColor = color.FromRgba(0,0,0,25)\n\ndef OnButtonClick(sender, e):\n    form.Close()\n\n\nif __name__==\"__main__\":\n    form = CreateMyForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "#! python2\n\nimport Rhino\nimport scriptcontext\nimport System\n\nimport Eto\n\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        \n        self.WindowStyle = Eto.Forms.WindowStyle.None\n        \n        self.Styles.Add[Eto.Forms.Panel](\"transparent\", self.MyFormStyler)\n        self.Style = \"transparent\"\n        \n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(300,300)\n        self.Padding = Eto.Drawing.Padding(80)\n        self.MovableByWindowBackground = True\n        self.Location = Eto.Drawing.Point(100,100)\n        \n        \n        self.Button = Eto.Forms.Button(Text = \"Close\")\n        self.Button.Click += self.OnButtonClick\n        \n        self.layout = Eto.Forms.DynamicLayout()\n        self.layout.AddRow(self.Button)\n        \n        self.Content = self.layout\n    \n    def MyFormStyler(self, control):\n        self.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.1\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0,0,0,25)\n\n    def OnButtonClick(self, sender, e):\n        self.Close()\n\ndef DoSomething():\n    \n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "\"\"\"Utility to convert py2 rhino-python files to py3 format\"\"\"\nimport os\nimport os.path as op\nimport shutil\nfrom lib2to3.main import main  # this is what 2to3 cli utility uses\n\n\n# read sources\nSOURCE_DIR = r\"../Scripts/\"\nDEST_DIR = r\"../python3/\"\n\nITEMS = [\n    r\"rhinoscript/\",\n    r\"rhinoscriptsyntax.py\",\n    r\"scriptcontext.py\",\n]\n\n\nTHIS_DIR = op.dirname(__file__)\nROOT_DIR = op.dirname(THIS_DIR)",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport Eto\nimport Eto.Forms as ef\nimport Eto.Drawing as ed\nEto_w = 300\nEto_h = 300\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        super().__init__()\n        self.WindowStyle = Eto.Forms.WindowStyle.NONE\n        self.Styles.Add[Eto.Forms.Panel](\"transparent\", self.TransparentFormStyler)\n        self.Style = \"transparent\"\n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(Eto_w, Eto_w)\n        self.Padding = Eto.Drawing.Padding(0)\n        self.MovableByWindowBackground = True\n        self.Location = ed.PointF(300,300)\n\n        self.bu = ef.Button()\n\n        self.layout_bi = ef.DynamicLayout()\n        self.layout_bi.AddRow(self.bu)\n\n        self.layout = Eto.Forms.PixelLayout()\n        self.layout.BackgroundColor = ed.Color(0,0,0,0.009)\n        self.layout.Add(self.layout_bi,12,12)\n        self.Content = self.layout\n\n    def TransparentFormStyler(self, control):\n        self.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.5  # win\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0, 0, 0, 25)  # mac\n\ndef EstablishForm():\n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\nif __name__ == \"__main__\":\n    EstablishForm()\n\n    def TransparentFormStyler(form,control):\n        form.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.6\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0, 0, 0, 25)\n\n    form = ef.Form()\n\n    form.Width = Eto_w\n    form.Height = Eto_h\n    form.Topmost = True\n    form.Style(TransparentFormStyler(form,control))\n    form.Style = \"transparent\"\n\n    form.Show()",
+      "language": "python",
+      "author": "tom33",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 242
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/run-gh-definition-from-an-external-python-script-using-python-rhinoinside/157851",
+  "topic_id": 157851,
+  "title": "Run GH definition from an external python script using python rhinoinside",
+  "question": "hello, I’ve been trying to use an external python script to start a grasshopper definition using the python rhinoinside module.\n\n\nso far it isn’t working and I can not figure out why, it is crashing in the openDocument.\n\n\nhere is the code:\n\n\nimport rhinoinside\nimport clr\n\n# Load Rhino.Inside\nrhinoinside.load()\n\n# Import necessary namespaces\nclr.AddReference('RhinoCommon')\nclr.AddReference('Grasshopper')\nimport Rhino\nimport Grasshopper\n\n# Load the Grasshopper document\ngh_file = r\"C:/Users/abc/Desktop/RunTest.gh\"\ngh_doc = Grasshopper.Instances.DocumentServer.OpenDocument(gh_file)\n\n# Set input parameters\ninput_params = gh_doc.Objects.OfType[Grasshopper.Kernel.Special.GH_NumberSlider]()\n\nfor param in input_params:\n    if param.NickName == \"Slider1\":\n        param.Slider.Value = 5.0\n    \n# Compute the Grasshopper document\ngh_doc.NewSolution(True)\n\n# Get the output parameters\noutput_params = gh_doc.Objects.OfType[Grasshopper.Kernel.Special.GH_NumberParam]()\n\nfor param in output_params:\n    if param.NickName == \"Output\":\n        print(f\"Result: {param.VolatileData.AllData(True)[0]}\")\n\n\n\nhas anyone been able to do this?\n\nThanks in advance.",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\nimport clr\n\n# Load Rhino.Inside\nrhinoinside.load()\n\n# Import necessary namespaces\nclr.AddReference('RhinoCommon')\nclr.AddReference('Grasshopper')\nimport Rhino\nimport Grasshopper\n\n# Load the Grasshopper document\ngh_file = r\"C:/Users/abc/Desktop/RunTest.gh\"\ngh_doc = Grasshopper.Instances.DocumentServer.OpenDocument(gh_file)\n\n# Set input parameters\ninput_params = gh_doc.Objects.OfType[Grasshopper.Kernel.Special.GH_NumberSlider]()\n\nfor param in input_params:\n    if param.NickName == \"Slider1\":\n        param.Slider.Value = 5.0\n    \n# Compute the Grasshopper document\ngh_doc.NewSolution(True)\n\n# Get the output parameters\noutput_params = gh_doc.Objects.OfType[Grasshopper.Kernel.Special.GH_NumberParam]()\n\nfor param in output_params:\n    if param.NickName == \"Output\":\n        print(f\"Result: {param.VolatileData.AllData(True)[0]}\")",
+      "language": "python",
+      "author": "quicova",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 2,
+  "views": 561
+}

@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-the-control-points-from-a-polysurface/19085",
+  "topic_id": 19085,
+  "title": "How to get the control points from a Polysurface",
+  "question": "Hello all\n\nI have a Polysurface it is from  a surfase I extrude\n\nand I want change the Length on start or end\n\n\nbut I have holes in so I can not scale it so I want move the control points\n\n\nist this possibel  and how I get the points and move the points\n\n\nThanks Robert",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Turns on an object's solid editing points and\nscales their locations about object's bounding box center.\nBeware, this script can lock up or crash Rhino!!!\"\"\"\n\nimport rhinoscriptsyntax as rs\n\ndef TestScaleObjSolidPts():\n    msg=\"Select object to solid edit\"\n    obj=rs.GetObject(msg,8+16,preselect=True,select=True)\n    if not obj: return\n    \n    sf=rs.GetReal(\"Scale factor for edit points?\")\n    if sf==None or sf<=0 :\n        rs.UnselectObject(obj)\n        return\n    \n    rs.EnableRedraw(False)\n    \n    #get object's solid point locations\n    rs.Command(\"_SolidPtOn\")\n    grip_pts=rs.ObjectGripLocations(obj)\n    \n    #scale transformation by scale factor sf around object center\n    bb=rs.BoundingBox(obj)\n    xform=rs.XformScale(sf,(bb[0]+bb[6])/2)\n    \n    #transform the  points and move solid grips\n    for i,pt in enumerate(grip_pts):\n        new_loc=rs.PointTransform(pt,xform)\n        rs.ObjectGripLocation(obj,i,new_loc)\n        \n    #turn off object grips\n    rs.EnableObjectGrips(obj,False)\nTestScaleObjSolidPts()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "rs.EnableObjectGrips(profil,True)\ngrip_pts = rs.ObjectGripLocations(profil)\n\nnew_p =[]\n\nfor i, point in enumerate(grip_pts):\n    # move or not\n    if ( check_start_or_end_point(point, x_move)):\n        new_x = point[0] + ( l * x_factor ) \n        new_loc = Rhino.Geometry.Point3d(new_x, point[1], point[2])\n        new_p.append(new_loc)\n    else:\n        new_loc = Rhino.Geometry.Point3d(point[0] ,point[1], point[2])\n        new_p.append(new_loc)\n        \n        \nrs.ObjectGripLocations(profil, new_p)\nrs.EnableObjectGrips(profil,False)",
+      "language": "python",
+      "author": "Robert",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 20855
+}

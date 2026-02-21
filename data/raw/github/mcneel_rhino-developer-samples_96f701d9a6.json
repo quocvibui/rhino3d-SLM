@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_addclippingplane.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_addclippingplane.py",
+  "instruction": "Ex addclippingplane",
+  "code": "import Rhino\nimport scriptcontext\nimport System.Guid\n\ndef AddClippingPlane():\n    # Define the corners of the clipping plane\n    rc, corners = Rhino.Input.RhinoGet.GetRectangle()\n    if rc!=Rhino.Commands.Result.Success: return rc\n\n    # Get the active view\n    view = scriptcontext.doc.Views.ActiveView\n    if view is None: return Rhino.Commands.Result.Failure\n\n    p0, p1, p2, p3 = corners\n    # Create a plane from the corner points\n    plane = Rhino.Geometry.Plane(p0, p1, p3)\n\n    # Add a clipping plane object to the document\n    id = scriptcontext.doc.Objects.AddClippingPlane(plane, p0.DistanceTo(p1), p0.DistanceTo(p3), view.ActiveViewportID)\n    if id!=System.Guid.Empty:\n        scriptcontext.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n    return Rhino.Commands.Result.Failure\n\nif __name__==\"__main__\":\n    AddClippingPlane()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/fstwn/pyembroideryGH/blob/ee7fd47316b364962a69976b4168ce9fef2702cf/usrobj_src/pyembroideryGH_Threadlist.py",
+  "repo": "fstwn/pyembroideryGH",
+  "repo_stars": 11,
+  "repo_description": "Set of UserObjects enabling Grasshopper to directly read, write and manipulate various kinds of embroidery formats. It is based on an IronPython-compatible fork of the original pyembroidery library.",
+  "license": "MIT",
+  "filepath": "usrobj_src/pyembroideryGH_Threadlist.py",
+  "instruction": "Gets the threads of one or many input patterns\n    Inputs:\n        Pattern: The embroidery pattern as\n                 pyembroidery.EmbPattern instance.\n                 {item, EmbPattern}\n   ...",
+  "code": "\"\"\"\nGets the threads of one or many input patterns\n    Inputs:\n        Pattern: The embroidery pattern as\n                 pyembroidery.EmbPattern instance.\n                 {item, EmbPattern}\n    Output:\n        Thread: The threads of the pattern as\n                pyembroidery.EmbThread instance.\n                {item/list/tree, EmbThread}\n    Remarks:\n        Author: Max Eschenbach\n        License: MIT License\n        Version: 201104\n\"\"\"\n\n# PYTHON STANDARD LIBRARY IMPORTS\nfrom __future__ import division\n\n# GHPYTHON SDK IMPORTS\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"ThreadList\"\nghenv.Component.NickName = \"TL\"\nghenv.Component.Category = \"pyembroideryGH\"\nghenv.Component.SubCategory = \"2 Pattern Analysis\"\n\n# LOCAL MODULE IMPORTS\ntry:\n    import pyembroidery\nexcept ImportError:\n    errMsg = (\"The pyembroidery python module seems to be not correctly \" +\n              \"installed! Please make sure the module is in you search \" +\n              \"path, see README for instructions!.\")\n    raise ImportError(errMsg)\n\nclass ThreadList(component):\n\n    def RunScript(self, Pattern):\n        # initialize output tree\n        Thread = Grasshopper.DataTree[object]()\n        \n        # make sure supplied pattern is really a valid pattern\n        if Pattern is not None:\n            if not isinstance(Pattern, pyembroidery.EmbPattern):\n                raise TypeError(\"The supplied pattern is not a valid \" +\n                                \"pyembroidery.EmbPattern instance!\")\n            else:\n                # get the threadlist of the pattern\n                Thread = Pattern.threadlist\n        else:\n            rml = self.RuntimeMessageLevel.Warning\n            errMsg = (\"Input Pattern failed to collect data!\")\n            self.AddRuntimeMessage(rml, errMsg)\n        \n        # return outputs if you have them; here I try it for you:\n        return Thread\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

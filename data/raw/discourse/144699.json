@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/capture-named-view-without-activate/144699",
+  "topic_id": 144699,
+  "title": "Capture Named View without activate?",
+  "question": "Recently I modify a bit of my previous script (\ncapture using rect\n) to capture views with \nViewNearCorners\n.\n\n\nHowever it was set up by using Active Viewports, meaning I have manually turn on Named Views one by one in order to capture those.\n\n\nI wonder if there’s a way to do the capture without activating them?\n\n\nimport Rhino\nimport System.Drawing\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino.Display as rd\nimport System\n\nfor i in view:\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n    selectview = RhinoDocument.Views.Find(i, False)\n    viewcorner = rs.ViewNearCorners(i)\n    clientarea = selectview.ClientRectangle\n    \npt0 = viewcorner[0]\npt1 = viewcorner[1]\npt2 = viewcorner[2]\npt3 = viewcorner[3]\n\nwidth = clientarea.Width\nheight = clientarea.Height\n\nfector = float(fector or '1')\n\nsize = 'w=' + str(int(width*fector)) + ', ' + 'h=' + str(int(height*fector))\n\n\n\ndef Capture():\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n    selectview = RhinoDocument.Views.Find(i, False)\n    size = System.Drawing.Size(int(width*fector), int(height*fector)) \n\n    settings = rd.ViewCaptureSettings(selectview, size, 300) #view, size, dpi\n    settings.SetWindowRect(pt0, pt2)\n    settings.RasterMode = True\n    settings.DrawGrid = False\n    settings.DrawAxis = False\n    settings.DrawWallpaper = False\n\n    bitmap = rd.ViewCapture.CaptureToBitmap(settings)\n    bitmap.Save(path+str(filename)+\".png\")\n\n\nif save:\n    \n    for i in view:\n    \n        RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n        selectview = RhinoDocument.Views.Find(i, False)\n        rs.ViewDisplayMode(i, mode)\n        rd.RhinoView.Redraw(selectview)\n    \n        Capture()\n    \n        print(path+str(filename)+\".png\")",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System.Drawing\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino.Display as rd\nimport System\n\nfor i in view:\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n    selectview = RhinoDocument.Views.Find(i, False)\n    viewcorner = rs.ViewNearCorners(i)\n    clientarea = selectview.ClientRectangle\n    \npt0 = viewcorner[0]\npt1 = viewcorner[1]\npt2 = viewcorner[2]\npt3 = viewcorner[3]\n\nwidth = clientarea.Width\nheight = clientarea.Height\n\nfector = float(fector or '1')\n\nsize = 'w=' + str(int(width*fector)) + ', ' + 'h=' + str(int(height*fector))\n\n\n\ndef Capture():\n    \n    RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n    selectview = RhinoDocument.Views.Find(i, False)\n    size = System.Drawing.Size(int(width*fector), int(height*fector)) \n\n    settings = rd.ViewCaptureSettings(selectview, size, 300) #view, size, dpi\n    settings.SetWindowRect(pt0, pt2)\n    settings.RasterMode = True\n    settings.DrawGrid = False\n    settings.DrawAxis = False\n    settings.DrawWallpaper = False\n\n    bitmap = rd.ViewCapture.CaptureToBitmap(settings)\n    bitmap.Save(path+str(filename)+\".png\")\n\n\nif save:\n    \n    for i in view:\n    \n        RhinoDocument = Rhino.RhinoDoc.ActiveDoc\n        selectview = RhinoDocument.Views.Find(i, False)\n        rs.ViewDisplayMode(i, mode)\n        rd.RhinoView.Redraw(selectview)\n    \n        Capture()\n    \n        print(path+str(filename)+\".png\")",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 2,
+  "views": 429
+}

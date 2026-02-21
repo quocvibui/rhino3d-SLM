@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/polyline-isclosed-api-version-7-7-32/164389",
+  "topic_id": 164389,
+  "title": "Polyline.IsClosed (API) Version 7.7.32",
+  "question": "Previous to Version 7.7.32, we were working with defined shapes using vertex and face definitions.  These shapes are formed successfully in other programs using mesh objects — converted to Breps.\n\n\nFor Rhino, we were using polylines to form mesh faces.\n\n\nAfter 7.7.32, the same objects failed to form in Rhino.  The problem seems to be a failure with IsClosed as applied to a Polyline object prior to conversion to a mesh face.\n\n\nI’ve attached a test script (Python) including three objects.  Two are derived from a simple box.\n\n\nThe box face data are as follows:\n\n\nData derived from Box created in Rhino:\n\nVertex\t\tPoint\n\n0\t\t\t0, 200, 0\n\n1\t\t\t300, 200, 0\n\n3\t\t\t300, 0, 0\n\n2\t\t\t0, 0, 0\n\nclose\t\t0, 200, 0\n\n\nData created by hand:\n\nVertex\t\tPoint\n\n3\t\t\t300, 0, 0\n\n2\t\t\t300, 200, 0\n\n1\t\t\t0, 200, 0\n\n0\t\t\t0, 0, 0\n\nclose\t\t300, 0, 0\n\n\nThese data sets represent opposite rotations (CW and CCW), but both sets are plainer and valid as Polylines that should rate as closed.\n\n\nFulcrumPolylineTest_cmd.py\n (8.5 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test1():\n    p0 = Rhino.Geometry.Point3d(0, 200, 0)\n    p1 = Rhino.Geometry.Point3d(300, 200, 0)\n    p2 = Rhino.Geometry.Point3d(300, 0, 0)\n    p3 = Rhino.Geometry.Point3d(0, 0, 0)\n    p4 = Rhino.Geometry.Point3d(0, 200, 0)\n    points = [p0, p1, p2, p3, p4]\n    pline = Rhino.Geometry.Polyline(points)\n    print(\"test1: Polyline.IsValid = {0}\".format(pline.IsValid))\n\n    \ndef test2():\n    p0 = Rhino.Geometry.Point3d(300, 0, 0)\n    p1 = Rhino.Geometry.Point3d(300, 200, 0)\n    p2 = Rhino.Geometry.Point3d(0, 200, 0)\n    p3 = Rhino.Geometry.Point3d(0, 0, 0)\n    p4 = Rhino.Geometry.Point3d(300, 0, 0)\n    points = [p0, p1, p2, p3, p4]\n    pline = Rhino.Geometry.Polyline(points)\n    print(\"test2: Polyline.IsValid = {0}\".format(pline.IsValid))\n\ntest1()\ntest2()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test1():\n    p0 = Rhino.Geometry.Point3d(0, 200, 0)\n    p1 = Rhino.Geometry.Point3d(300, 200, 0)\n    p2 = Rhino.Geometry.Point3d(300, 0, 0)\n    p3 = Rhino.Geometry.Point3d(0, 0, 0)\n    p4 = Rhino.Geometry.Point3d(0, 200, 0)\n    points = [p0, p1, p2, p3, p4]\n    pline = Rhino.Geometry.Polyline(points)\n    print(\"test1: Polyline.IsValid = {0}\".format(pline.IsValid))\n    print(\"test1: Polyline.IsClosed = {0}\".format(pline.IsClosed))\n\n    \ndef test2():\n    p0 = Rhino.Geometry.Point3d(300, 0, 0)\n    p1 = Rhino.Geometry.Point3d(300, 200, 0)\n    p2 = Rhino.Geometry.Point3d(0, 200, 0)\n    p3 = Rhino.Geometry.Point3d(0, 0, 0)\n    p4 = Rhino.Geometry.Point3d(300, 0, 0)\n    points = [p0, p1, p2, p3, p4]\n    pline = Rhino.Geometry.Polyline(points)\n    print(\"test2: Polyline.IsValid = {0}\".format(pline.IsValid))\n    print(\"test2: Polyline.IsClosed = {0}\".format(pline.IsClosed))\n\ntest1()\ntest2()",
+      "language": "python",
+      "author": "Tom_P",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 336
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/line-trimmed-surface-intersection-with-python/209945",
+  "topic_id": 209945,
+  "title": "Line - trimmed surface intersection with python",
+  "question": "hi, I am trying to get the intersection of a series of lines to a few surfaces (see example and image attached). However these surfaces have been trimmed, when I check for the intersection I get also the intersections to the trimmed part of the surface. Is there a way to get only the intersections to the actual visible surface?\n\n\nimport rhinoscriptsyntax as rs\n\nsrfs = rs.GetObjects(“srfs”,8)\n\nlines = rs.GetObjects(“lines”,4)\n\nrs.EnableRedraw(False)\n\nrs.AddLayer(“spheres”)\n\nrs.AddLayer(“text”)\n\nfor srf in srfs:\n\n\nfor line in lines:\n    \n    intersect1 = rs.CurveSurfaceIntersection(line, srf)\n    \n    if intersect1 is not None:\n        pt1 = intersect1[0][1]\n        rs.AddPoint(pt1)\n\n\n\nquestion on intersection.3dm\n (75.0 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsrfs = rs.GetObjects(\"Select surfaces\", 8)\nlines = rs.GetObjects(\"Select lines\", 4)\n\nrs.EnableRedraw(False)\nrs.AddLayer(\"spheres\")\nrs.AddLayer(\"text\")\n\nfor srf in srfs:\n    for line in lines:\n        # Use CurveBrepIntersect instead of CurveSurfaceIntersection\n        intersect = rs.CurveBrepIntersect(line, srf)\n        \n\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "for line in lines:\n    \n    intersect1 = rs.CurveSurfaceIntersection(line, srf)\n    \n    if intersect1 is not None:\n        pt1 = intersect1[0][1]\n        rs.AddPoint(pt1)",
+      "language": "python",
+      "author": "revink",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 83
+}

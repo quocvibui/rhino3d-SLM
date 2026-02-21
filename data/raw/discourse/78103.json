@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/access-contour-component-via-ghpythonlib-components/78103",
+  "topic_id": 78103,
+  "title": "Access \"Contour\" component via ghpythonlib.components",
+  "question": "I am trying to access grasshopper’s Contour (“Create a set of Brep or Mesh Contours”) component,\n\nbut I cannot find it!\n\n\nghpythonlib.components.Contour\n refers to the curve contouring component (“Create a set of Curve contours”).\n\n\nDoes anyone know how to find out by which name you can access a specific component?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghcomp\nimport ghpythonlib.parallel\n\nbrep = rs.coercebrep(x)\n\ndef slice(plane):\n    contours = brep.CreateContourCurves(brep, plane)\n    return contours\n    \nslices = ghpythonlib.parallel.run(slice, planes, True)",
+      "language": "python",
+      "author": "shwdehaan",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghcomp\nimport ghpythonlib.parallel\nimport Rhino.Geometry as rg\nimport math\n\nbrep = rs.coercebrep(x)\n\ndef slice(plane):\n    contours = brep.CreateContourCurves(brep, plane)\n    return contours\n    \nlayer_height = 2\n\nbbox = rs.BoundingBox(brep)\n\nbase_point = bbox[0]\nend_point = bbox[4]\n\nnumber_of_layers = int(1 + math.floor((end_point.Z - base_point.Z) / layer_height))\n\nplanes = []\n        \nfor i in range(1, number_of_layers):\n    \n    z = base_point.Z + i * layer_height\n    vector = rg.Vector3d(0,0,z)\n\n    planes.append(\n        rg.Plane(bbox[0]+vector, bbox[1]+vector, bbox[3]+vector)\n    )\n\nslices = ghpythonlib.parallel.run(slice, planes, True)",
+      "language": "python",
+      "author": "shwdehaan",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 2071
+}

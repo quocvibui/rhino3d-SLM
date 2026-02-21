@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-curve-toarcsandlines/194460",
+  "topic_id": 194460,
+  "title": "BUG Curve.ToArcsAndLines",
+  "question": "Hi,\n\n\nI’m running into a bug in \nCurve.ToArcsAndLines.\n\n\nThe result on the attached curve is degraded starting in Rhino7\n\nWhat I observe is that corners are being cut by chamfer type additional lines.\n\n\ninput_curve.3dm\n (23.5 KB)\n\n\nTo replicate, run the python script below in V6 V7 and V8\n\n\nimage\n1014×762 21.2 KB\n\n\nAny help is appreciated to work around this, or point out what I might be doing wrong here.\n\n\nThanks\n\n-Willem\n\n\nimport Rhino.Geometry as RG\nimport math\n\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ncurve_id = rs.SelectedObjects()[0]\ncurve = rs.coercecurve(curve_id)\n\ntolerance = 0.3\nangleTolerance = math.radians(2)\nminimumLength = 1\nmaximumLength = 0\n\nnew_curve = curve.ToArcsAndLines(tolerance, angleTolerance, minimumLength, maximumLength)\n\nnew_id = sc.doc.Objects.AddCurve(new_curve)\nrs.UnselectAllObjects()\nrs.SelectObject(new_id)\n\n\n\nNote that decreasing\n minimumLength\n tolerance will yield a visibily better result but still there is an additional line cutting the corners.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as RG\nimport math\n\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ncurve_id = rs.SelectedObjects()[0]\ncurve = rs.coercecurve(curve_id)\n\ntolerance = 0.3\nangleTolerance = math.radians(2)\nminimumLength = 1\nmaximumLength = 0\n\nnew_curve = curve.ToArcsAndLines(tolerance, angleTolerance, minimumLength, maximumLength)\n\nnew_id = sc.doc.Objects.AddCurve(new_curve)\nrs.UnselectAllObjects()\nrs.SelectObject(new_id)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 181
+}

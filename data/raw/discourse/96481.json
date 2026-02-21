@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/move-point-with-rhinocommon/96481",
+  "topic_id": 96481,
+  "title": "Move Point with RhinoCommon",
+  "question": "Any hint why this doesn’t work?\n\n\n#################################\n### TEST Move point by vector ###\n#################################\nimport System\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n\n\ndef TST():\n    pt0_id = rs.GetObject(\"select point: \",rs.filter.point)\n    pt0 = rs.coerce3dpoint(pt0_id)\n    \n    pt_move_transform = Rhino.Geometry.Transform.Translation.Overloads[Rhino.Geometry.Vector3d](Rhino.Geometry.Vector3d.XAxis*100)\n    print pt_move_transform\n    \"\"\"\n    Help on method-descriptor Transform\n\n |  Transform(...)\n |          Transform(self: Point3d, xform: Transform)\n |              Transforms the present point in place. The transformation matrix acts on the \n |               left of the point. i.e.,\n |                      result = transformation*point\n |          \n |          \n |              xform: Transformation to apply.\n\n    \"\"\"\n    pt1 = pt0.Transform(pt_move_transform) # THIS DOESN'T SEEM TO WORK\n    print \"PT0: \", pt0\n    print \"PT1: \", pt1\n    #\n    if pt1 is not None:\n        sc.doc.Objects.AddPoint(pt1)\n\nif __name__ == \"__main__\":\n    TST()\n\n\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nptA=Rhino.Geometry.Point3d(0,0,0)\nmove_vec=Rhino.Geometry.Vector3d(1,1,0)\nmove_vec*=10\nptB=ptA+move_vec\nsc.doc.Objects.AddPoint(ptB)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#################################\n### TEST Move point by vector ###\n#################################\nimport System\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n\ndef gimme_it():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects to group\")\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    \n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    \n    ids = [go.Object(i).ObjectId for i in range(go.ObjectCount)]\n    #geos = [go.Object(i).Geometry for i in range(go.ObjectCount)]\n    if len(ids) > 1:\n        return ids\n    if len(ids) == 1:\n        return ids[0]\n\n\ndef TST_RC():\n    get_object = gimme_it()\n    #pt0_id = rs.GetObject(\"select point: \",rs.filter.point)\n    pt0_id = get_object#[0][0]\n    \n    pt_move_transform = Rhino.Geometry.Transform.Translation.Overloads[Rhino.Geometry.Vector3d](Rhino.Geometry.Vector3d.XAxis*10000)\n    pt0_obj = sc.doc.Objects.Find(pt0_id)\n    \n    pt1_obj = pt0_obj.DuplicateGeometry()\n    pt1 = pt1_obj\n    pt1.Transform(pt_move_transform)\n    if pt1 is not None:\n        sc.doc.Objects.Replace(pt0_id,pt1)\n\nif __name__ == \"__main__\":\n    TST_RC()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 11,
+      "is_solution": true
+    },
+    {
+      "code": "#################################\n### TEST Move point by vector ###\n#################################\nimport System\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n\n\ndef TST():\n    pt0_id = rs.GetObject(\"select point: \",rs.filter.point)\n    pt0 = rs.coerce3dpoint(pt0_id)\n    \n    pt_move_transform = Rhino.Geometry.Transform.Translation.Overloads[Rhino.Geometry.Vector3d](Rhino.Geometry.Vector3d.XAxis*100)\n    print pt_move_transform\n    \"\"\"\n    Help on method-descriptor Transform\n\n |  Transform(...)\n |          Transform(self: Point3d, xform: Transform)\n |              Transforms the present point in place. The transformation matrix acts on the \n |               left of the point. i.e.,\n |                      result = transformation*point\n |          \n |          \n |              xform: Transformation to apply.\n\n    \"\"\"\n    pt1 = pt0.Transform(pt_move_transform) # THIS DOESN'T SEEM TO WORK\n    print \"PT0: \", pt0\n    print \"PT1: \", pt1\n    #\n    if pt1 is not None:\n        sc.doc.Objects.AddPoint(pt1)\n\nif __name__ == \"__main__\":\n    TST()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 2791
+}

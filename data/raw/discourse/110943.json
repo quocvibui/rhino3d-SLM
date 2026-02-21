@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/matchmeshedge-through-scripting-or-grasshopper-3d-components/110943",
+  "topic_id": 110943,
+  "title": "MatchMeshEdge through scripting or Grasshopper 3D components",
+  "question": "Hi all,\n\nI am aiming to close a mesh which due to some previous surface modifications (added approximated patch by blending two separate objects) has a number of small gaps at both ends. A closed mesh is required for the subsequent conversion into a solid SubD geometry and modifications in Grasshopper.\n\n\nimage\n1154×866 524 KB\n\n\nI did try to analyse previous topics/attempts regarding \n_MatchMeshEdge\n and came across the following:\n\n\n\n\nMatchMeshEdge C# Component - Grasshopper\n - I cannot access the file there;\n\n\nMatchMeshEdge\n - seems like a request for future work/Beta releases\n\n\n\n\nCould you please advise me on how I can replicate the existing manual \n_MatchMeshEdge\n Rhino command in Grasshopper 3D (avoiding to bake the geometry and scripting a customised command via the \nMacroEditor\n )\n\nAny \nGhPython\n and \nc#\n scripting solutions are also welcome.\n\n\nRhino 5 file and STL data of the depicted model above are attached here:\n\n\nMatchMeshEdge_discourse_request_25_10_2020.3dm\n (10.6 MB) \nMatchMeshEdge_discourse_request_25_10_2020.stl\n (4.6 MB)\n\n\nThe gaps are very tiny and manually I am able to close the mesh surface using the following \n_MatchMeshEdge\n parameters:\n\n*DistanceToAdjust=0.1\n\n*RatchetMode=On\n\n\nI have access to the most up-to-date \nRhino v6\n and \nRhino Beta\n versions.\n\n\nI look forward to receiving your help/advice.\n\nThank you,\n\nIlja",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Grasshopper\nimport Rhino\n\nrhdoc = Rhino.RhinoDoc.ActiveDoc\nrhdoc.Views.RedrawEnabled = False\n\nrh_mesh = rhdoc.Objects.AddMesh(mesh)\ncurrent = rhdoc.Objects.Find(rh_mesh).RuntimeSerialNumber\n\n# Select the mesh at the end of the command, when it is preselected the options are not available\nrhdoc.Objects.UnselectAll()\ncommand = \"\"\"_MatchMeshEdge _DistanceToAdjust 0.1 _RatchetMode=_On _SelId {} _EnterEnd\"\"\".format(str(rh_mesh))\nrs.Command(command)\n\nnew_obj = rhdoc.Objects.AllObjectsSince(current)\n\nif len(new_obj) > 0:\n    mesh_out = new_obj[0].Geometry.Duplicate()\nelse:\n    mesh_out = None\n\nfor m in new_obj:\n    rhdoc.Objects.Purge(m)\n\nrhdoc.Objects.Purge(current)\nrhdoc.Views.RedrawEnabled = True",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef test_match_mesh_edges(mesh):\n    meshobj = rs.coercemesh(mesh)\n    if not meshobj:\n        return None\n        \n    mcopy = meshobj.DuplicateMesh()\n    distance = 0.1\n    rachet = True\n    rc = mcopy.MatchEdges(distance, rachet)\n    if rc:\n        rs.Redraw()\n        return mcopy\n    return None\n\nmesh_out = test_match_mesh_edges(mesh)",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 12,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef test_match_mesh_edges(mesh):\n    meshobj = rs.coercemesh(mesh)\n    if not meshobj:\n        return None\n        \n    mcopy = meshobj.DuplicateMesh()\n    distance = 0.1\n    rachet = True\n    rc = mcopy.MatchEdges(distance, rachet)\n    if rc:\n        rs.Redraw()\n        return mcopy\n    return None\n\nmesh_out = test_match_mesh_edges(mesh)",
+      "language": "python",
+      "author": "ilmar_ik",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 21,
+  "views": 1433
+}

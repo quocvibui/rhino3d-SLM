@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/serial-communications-in-rhyno-python/47293",
+  "topic_id": 47293,
+  "title": "Serial Communications in rhyno python",
+  "question": "HI\n\nDoes anyone know how to get Serial Communications in rhyno python working in the rhino 5 python scripting.\n\nCan anyone show me how to install pySerial library so that it is recognized in rhyno5 python .\n\n\nthanks in advance.",
+  "code_blocks": [
+    {
+      "code": "from System.IO.Ports import *\nfrom Rhino import *\n\ndef Main():\n\t# Create a new SerialPort object with default settings.\n\tsp = SerialPort(\"COM3\", 9600)\n\tsp.Parity = Parity.None\n\tsp.DataBits = 8\n\tsp.StopBits = StopBits.One\n\tsp.Handshake = Handshake.None\n\tsp.DtrEnable = True\n\t# Set the read/write timeouts\n\tsp.ReadTimeout = 5000\n\tsp.WriteTimeout = 5000\n\tsp.DataReceived += Foo.sp_DataReceived\n\tsp.Open()\n\t_continue = True\n\twhile _continue:\n\t\tmessage = \"\"\n\t\tres, message = Input.RhinoGet.GetString(\"Type quit to exit loop\", True, message )\n\t\t\n\t\tif repr(message) ==  repr(\"quit\"):\n\t\t\t_continue = False\n\t\telse:\n\t\t\tRhinoApp.WriteLine(str(message))\n\t\t\t#sp.WriteLine(\n\t\t\t#    String.Format(\"<{0}>\", message));\n\t\t\t\n\tsp.Close()\n\nclass Foo:\n\tdef sp_DataReceived(sender, e):\n\t\tmessage = sender.ReadLine()\n\t\tRhinoApp.Write(message)\n\n\tsp_DataReceived = staticmethod(sp_DataReceived)\n\nif __name__ == \"__main__\":\n\tMain()",
+      "language": "python",
+      "author": "mnewberg",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2148
+}

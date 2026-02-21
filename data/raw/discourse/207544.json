@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/turn-extrusionobject-into-brepobject/207544",
+  "topic_id": 207544,
+  "title": "Turn ExtrusionObject into BrepObject",
+  "question": "I’m noticing that when I go to GetObject with GeometryFilter = Brep, sometimes I get a BrepObject, and sometimes I get an ExtrusionObject. Is there a good way to turn the ExtrusionObject into a BrepObject? Must I delete the extursion object from the doc and add it back in its brep form? This is a little bit annoying because I would also have to sychronize their attributes, and add this code everywhere I prompt a user to select a Brep, I guess I was just wondering If there is a better way?\n\n\nBest,\n\nNick",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  GetObject go = new GetObject();\n  go.SetCommandPrompt(\"Select surface or polysurface\");\n  go.GeometryFilter = ObjectType.Surface | ObjectType.PolysrfFilter;\n  go.SubObjectSelect = false;\n  go.Get();\n  if (go.CommandResult() != Result.Success)\n    return go.CommandResult();\n\n  ObjRef objRef = go.Object(0);\n  RhinoObject rhinoObject = objRef.Object();\n  if (null == rhinoObject)\n    return Result.Failure;\n\n  ObjectType objectType = rhinoObject.ObjectType;\n  RhinoApp.WriteLine(\"Object type: {0}\", objectType.ToString());\n\n  // Option 1:\n  if (objectType == ObjectType.Extrusion)\n  {\n    if (rhinoObject is ExtrusionObject extrusionObject)\n    {\n      Extrusion extrusion = extrusionObject.ExtrusionGeometry;\n      if (null != extrusion)\n      {\n        // TODO...\n      }\n    }\n  }\n  else if (objectType == ObjectType.Brep)\n  {\n    if (rhinoObject is BrepObject brepObject)\n    {\n      Brep brep = brepObject.BrepGeometry;\n      if (null != brep)\n      {\n        // TODO...\n      }\n    }\n  }\n      \n  // Option 2:\n  if (rhinoObject.Geometry is Extrusion extrusionGeometry)\n  {\n    // TODO...\n  }\n  else if (rhinoObject.Geometry is Brep brepGeometry)\n  {\n    // TODO...\n  }\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "var brepObj = obj as BrepObject;\n\nif (brepObj != null)\n{\n    m_Brep = brepObj.BrepGeometry;\n    m_BrepId = brepId;\n}\nelse\n{\n    var extrusionObj = obj as ExtrusionObject;\n    if (extrusionObj == null)\n    {\n        throw new Exception(\n            \"GetObject() GeometryFilter = Brep seems to get things that are not breps or extrusions\"\n        );\n    }\n    m_Brep = extrusionObj.ExtrusionGeometry.ToBrep();\n    var attributes = extrusionObj.Attributes;\n    m_BrepId = RhinoDoc.ActiveDoc.Objects.Add(m_Brep);\n    obj = RhinoDoc.ActiveDoc.Objects.FindId(m_BrepId);\n    brepObj = obj as BrepObject;\n    brepObj.Attributes = attributes;\n    brepObj.CommitChanges();\n    RhinoDoc.ActiveDoc.Objects.Delete(extrusionObj, true, true);\n}",
+      "language": "csharp",
+      "author": "Nick_Drian",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "GetObject go = new GetObject();\ngo.SetCommandPrompt(\"Select surface or polysurface\");\ngo.SetCustomGeometryFilter((rhinoObject, geometry, componentIndex) =>\n{\n  return rhinoObject.ObjectType == ObjectType.Brep;\n});\ngo.SubObjectSelect = false;\ngo.Get();\nif (go.CommandResult() != Result.Success)\n  return go.CommandResult();",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 72
+}

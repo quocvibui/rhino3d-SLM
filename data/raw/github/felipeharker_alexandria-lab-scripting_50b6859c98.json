@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/alexandria-scripts/ghpython/attractor_multi_point.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "alexandria-scripts/ghpython/attractor_multi_point.py",
+  "instruction": "GhPython: Multi-point attractor with remapped values",
+  "code": "# ALEXANDRIA IO SPEC (standardized)\n# Inputs:\n# - AttractorPts (GH: Attractors) | list[Rhino.Geometry.Point3d] | Attractor points\n# - GeoPts (GH: GeoPts) | list[Rhino.Geometry.Point3d] | Evaluated geometry points\n# - ScaleClosest (GH: ScaleClosest) | float | Value at nearest attractor distance\n# - ScaleFarthest (GH: ScaleFarthest) | float | Value at farthest attractor distance\n# Outputs:\n# - Remapped (GH: Remapped) | list[float] | Remapped value per GeoPt\n\n\"\"\"GhPython: Multi-point attractor with remapped values\n\nInputs:\n    Attractors   : list[Rhino.Geometry.Point3d] - attractor points\n    GeoPts       : list[Rhino.Geometry.Point3d] - geometry / evaluation points\n    ScaleClosest : float - value when point is closest to any attractor\n    ScaleFarthest: float - value when point is farthest from all attractors\n\nOutput:\n    Remapped     : list[float] - remapped values per geometry point\n\"\"\"\n\nimport Rhino.Geometry as rg\n\nRemapped = []\n\n# Safety checks\nif not Attractors or not GeoPts:\n    # Nothing to compute\n    Remapped = []\nelse:\n    # ------------------------------------------------------------\n    # 1. Compute minimum distance from each GeoPt to all Attractors\n    # ------------------------------------------------------------\n    min_dists = []\n    for p in GeoPts:\n        # Compute distance to each attractor and take the minimum\n        d_min = None\n        for a in Attractors:\n            d = p.DistanceTo(a)\n            if d_min is None or d < d_min:\n                d_min = d\n        min_dists.append(d_min)\n\n    # ------------------------------------------------------------\n    # 2. Find global min/max distance for normalization\n    # ------------------------------------------------------------\n    d_min_global = min(min_dists)\n    d_max_global = max(min_dists)\n\n    # ------------------------------------------------------------\n    # 3. Remap distances -> [ScaleClosest ... ScaleFarthest]\n    #    Closest distance  -> ScaleClosest\n    #    Farthest distance -> ScaleFarthest\n    # ------------------------------------------------------------\n    Remapped = []\n\n    # Avoid division by zero if all distances are identical\n    if d_max_global == d_min_global:\n        # All points are at the same distance; use ScaleClosest for all\n        Remapped = [ScaleClosest for _ in min_dists]\n    else:\n        span = float(d_max_global - d_min_global)\n        for d in min_dists:\n            # Normalize to [0, 1]\n            t = (d - d_min_global) / span\n            # Linear interpolation between ScaleClosest and ScaleFarthest\n            value = ScaleClosest + t * (ScaleFarthest - ScaleClosest)\n            Remapped.append(value)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

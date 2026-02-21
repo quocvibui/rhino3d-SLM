@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_zoomtoobject.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_zoomtoobject.py",
+  "instruction": "Ex zoomtoobject",
+  "code": "import Rhino\nimport scriptcontext\n\ndef ZoomToObject():\n    rc, rhobject = Rhino.Input.RhinoGet.GetOneObject(\"Select object to zoom\", False, Rhino.DocObjects.ObjectType.None)\n    if rc != Rhino.Commands.Result.Success: return\n\n    obj = rhobject.Object()\n    view = scriptcontext.doc.Views.ActiveView\n    if not obj or not view: return\n\n    bbox = obj.Geometry.GetBoundingBox(True)\n\n    pad = 0.05  #A little padding...\n    dx = (bbox.Max.X - bbox.Min.X) * pad\n    dy = (bbox.Max.Y - bbox.Min.Y) * pad\n    dz = (bbox.Max.Z - bbox.Min.Z) * pad\n    bbox.Inflate(dx, dy, dz);\n    view.ActiveViewport.ZoomBoundingBox(bbox)\n    view.Redraw()\n\nif __name__==\"__main__\":\n    ZoomToObject()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

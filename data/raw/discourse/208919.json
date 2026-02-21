@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-split-enumerable-brep-tolerance-not-work/208919",
+  "topic_id": 208919,
+  "title": "Brep.Split(Enumerable[Brep], Tolerance) not work",
+  "question": "Hi I’m rhino grasshopper python user.\n\n\nIt worked last month(code isn’t changed) but not work this month.\n\n\nI’v used Brep.Split(Enumerable[Brep], Tolerance) in python as you see below.\n\n\ndef split_brep(\n    brep: geo.Brep, cutters: Union[List[geo.Surface], List[geo.Brep]]\n) -> List[geo.Brep]:\n    if not brep or not cutters:\n        raise ValueError(\"Invalid Brep or surface.\")\n    # Check brep cutter intersection\n\n    # Perform the split operation\n    if isinstance(cutters[0], geo.Surface):\n        cutter_breps = [\n            cutter.ToBrep() for cutter in cutters\n        ]  # Convert surface to Brep\n    else:\n        cutter_breps = cutters\n\n    if all(not check_brep_brep_intersection(brep, cutter) for cutter in cutter_breps):\n        return [brep]\n\n    split_result = brep.Split(cutter_breps, TOL)\n    if split_result is None or len(split_result) == 0:\n        raise ValueError(\"Split operation failed or resulted in no parts.\")\n\n    return split_result\n\n\n\nBut it occurs error\n\n\nRhino.Geometry.Brep Rhino.Geometry.Brep\nTraceback (most recent call last):\n  File \"rhinocode:///grasshopper/1/41b5953c-8d9f-4a90-a42b-aa794fb3921c/45604f05-d083-4195-bf73-6f68e7949054\", line 5, in <module>\nTypeError: Rhino.Geometry.Brep value cannot be converted to Rhino.Geometry.Curve in method Rhino.Geometry.Brep[] Split(System.Collections.Generic.IEnumerable`1[Rhino.Geometry.Curve], Double)\n\n\n\nIs there any update about this method? Some bugs can exist in method overiding part in structure or class.\n\n\nPlease check this problem.",
+  "code_blocks": [
+    {
+      "code": "Rhino.Geometry.Brep Rhino.Geometry.Brep\nTraceback (most recent call last):\n  File \"rhinocode:///grasshopper/1/41b5953c-8d9f-4a90-a42b-aa794fb3921c/45604f05-d083-4195-bf73-6f68e7949054\", line 5, in <module>\nTypeError: Rhino.Geometry.Brep value cannot be converted to Rhino.Geometry.Curve in method Rhino.Geometry.Brep[] Split(System.Collections.Generic.IEnumerable`1[Rhino.Geometry.Curve], Double)",
+      "language": "csharp",
+      "author": "이신후",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 101
+}

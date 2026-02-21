@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dimstyletable-currentdimensionstyleindex-fails/62653",
+  "topic_id": 62653,
+  "title": "DimStyleTable CurrentDimensionStyleIndex fails",
+  "question": "Hi \n@dale\n, \n@Alain\n,\n\n\nthe \nexample\n python script in the RhinoCommon help gives an error:\n\n\n\n\nMessage: ‘TextEntity’ object has no attribute ‘Index’\n\n\n\n\nApart from that, I used \nCurrentDimensionStyleIndex\n in V5 but in V6 i get this error:\n\n\n\n\nMessage: ‘DimStyleTable’ object has no attribute ‘CurrentDimensionStyleIndex’\n\n\n\n\nas a replacement i used \nCurrentDimensionStyle.Index\n in V6, but it would be preferred if there is the same method which works in V5 and V6.\n\n\n_\n\nc.",
+  "code_blocks": [
+    {
+      "code": "style.CenterMarkSize = 2.5\nstyle.FontIndex = scriptcontext.doc.Fonts.FindOrCreate(\"Arial\", False, False)\nstyle.LeaderArrowType = Rhino.DocObjects.DimensionStyleArrowType.SolidTriangle\nstyle.LengthFormat = Rhino.DocObjects.DistanceDisplayMode.Decimal\nstyle.TextAlignment = Rhino.DocObjects.TextDisplayAlignment.AboveLine",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "if Rhino.RhinoApp.ExeVersion == 5:\n    if scriptcontext.doc.DimStyles.CurrentDimensionStyleIndex != style_index:\n        scriptcontext.doc.DimStyles.SetCurrentDimensionStyleIndex(style_index, True)\nelse:\n    if scriptcontext.doc.DimStyles.CurrentDimensionStyle.Index != style_index:\n        scriptcontext.doc.DimStyles.SetCurrent(style_index, True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#ds.ArrowType\nds.ArrowType1 = Rhino.DocObjects.DimensionStyle.ArrowType.Rectangle\nds.ArrowType2 = Rhino.DocObjects.DimensionStyle.ArrowType.Rectangle\nds.CentermarkSize = 1.0 # lowercase 'm'\n\n#ds.FontIndex #-> Fonts have changed considerably in 6.0 and are still changing for the next SR\n\nds.LeaderArrowType = Rhino.DocObjects.DimensionStyle.ArrowType.Tick\n\n#ds.LengthFormat #-> major change: formats are not independent of units. DimensionLengthDisplay : Rhino.DocObjects.LengthDisplay enum\n\n#ds.TextAlignment -> TextVerticalAlignment, TextHorizontalAlignment\ndoc.DimStyles.Modify(ds, ds.Id, True)",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 1435
+}

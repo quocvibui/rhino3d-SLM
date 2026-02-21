@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-python-how-to-get-out-result-from-function/71682",
+  "topic_id": 71682,
+  "title": "GH Python - How to get out result from function?",
+  "question": "Hello,\n\n\nI try to create a simple script to implement Rhino’s CloseCurve function in GH.\n\n\n2018_09_25_10_18_12_Grasshopper_openCloseCrv_.png\n1565×416 50.1 KB\n\n\n\n\nThe curve stays open.\n\n\none attempt:\n\n\nimport rhinoscriptsyntax as rs\n\nprint oCrv\nprint tol\n\n#ooCrv = rs.coercecurve(oCrv)\n#print ooCrv\nif not rs.IsCurveClosed(oCrv) and rs.IsCurveClosable(oCrv):\n    ooCrv = oCrv\n    cCrv = rs.CloseCurve( ooCrv, tolerance=tol )\n    print cCrv\n\nelse:\n    ccCrv = oCrv\n\n#cCrv = rs.CloseCurve( ooCrv, tolerance=tol )\n\n#cCrv = ooCrv\nprint cCrv\n\n\n\nanother attempt:\n\n\nimport rhinoscriptsyntax as rs\n\nprint oCrv\nprint tol\n\nooCrv = rs.coercecurve(oCrv)\nprint ooCrv\ndef CloCrv(oCrv): \n    \n    if not rs.IsCurveClosed(ooCrv) and rs.IsCurveClosable(ooCrv):\n        rs.CloseCurve( ooCrv, tolerance=tol )\n#        ooCrv = oCrv\n#        cCrv = rs.CloseCurve( ooCrv, tolerance=tol )\n#        print cCrv\n\ncCrv = (CloCrv(oCrv))\nprint cCrv\n\n\n\nAs you can see I already played around some unsuccesfully.\n\nHow can I get out the result: a closed Curve?\n\n\nKind regards\n\nluis",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nooCrv = rs.coercecurve(oCrv)\n\nif not ooCrv.IsClosed  and ooCrv.IsClosable(tol):\n    if ooCrv.MakeClosed(tol):\n        cCrv = ooCrv\nelse:\n    cCrv = oCrv",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nif not rs.IsCurveClosed(oCrv) and rs.IsCurveClosable(oCrv,tol):\n    cCrv = rs.CloseCurve( oCrv, tol )\nelse:\n    cCrv = oCrv",
+      "language": "python",
+      "author": "luisseyfer",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nprint oCrv\nprint tol\n\n#ooCrv = rs.coercecurve(oCrv)\n#print ooCrv\nif not rs.IsCurveClosed(oCrv) and rs.IsCurveClosable(oCrv):\n    ooCrv = oCrv\n    cCrv = rs.CloseCurve( ooCrv, tolerance=tol )\n    print cCrv\n\nelse:\n    ccCrv = oCrv\n\n#cCrv = rs.CloseCurve( ooCrv, tolerance=tol )\n\n#cCrv = ooCrv\nprint cCrv",
+      "language": "python",
+      "author": "luisseyfer",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nprint oCrv\nprint tol\n\nooCrv = rs.coercecurve(oCrv)\nprint ooCrv\ndef CloCrv(oCrv): \n    \n    if not rs.IsCurveClosed(ooCrv) and rs.IsCurveClosable(ooCrv):\n        rs.CloseCurve( ooCrv, tolerance=tol )\n#        ooCrv = oCrv\n#        cCrv = rs.CloseCurve( ooCrv, tolerance=tol )\n#        print cCrv\n\ncCrv = (CloCrv(oCrv))\nprint cCrv",
+      "language": "python",
+      "author": "luisseyfer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 918
+}

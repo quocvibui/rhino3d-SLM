@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-workflow-for-thread-fails-in-ghpython-succeeds-in-grasshopper/200728",
+  "topic_id": 200728,
+  "title": "Brep Workflow for Thread Fails in GHPython, Succeeds in Grasshopper?",
+  "question": "Hi,\n\n\nI’m back trying to construct a water-tight thread brep in GHPython from scratch and failing.\n\n\nScreenshot 2025-03-04 at 16.16.57\n1091×721 274 KB\n\n\nSome of you might remember \nthis topic\n from about two years ago, where I encountered the same issue, while trying something similar, and never really managed to solve it.\n\nI’m trying a different way of constructing the thread here, namely by lofting its defining helical curves.\n\n\nThis Grasshopper definition leads to a closed thread brep, which is fabulous.\n\n\nScreenshot 2025-03-04 at 16.22.38\n1071×469 77.7 KB\n\n\nHowever, when translated to GHPython using RhinoCommon a broken, open brep is the result.\n\n\nScreenshot 2025-03-04 at 16.25.23\n628×257 21.7 KB\n\n\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\nMTOL = sc.doc.ModelAbsoluteTolerance\nATOL = sc.doc.ModelAngleToleranceRadians\n\n# Hardcoded Constants Matching Input Geometry (don't change)\nPLANE = rg.Plane.WorldYZ\nMAJOR_DIAMETER = 4.0  # M4\nPITCH = 0.7           # M4\nTURN_COUNT = 123\n\nif __name__ == \"__main__\":\n    # Create Thread\n    thread_brep = rg.Brep.CreateFromLoft(C, rg.Point3d.Unset, rg.Point3d.Unset, rg.LoftType.Straight, False)[0]\n\n    # Trim Thread to Length And Construct Caps\n    start_plane = rg.Plane(PLANE.Origin + PLANE.ZAxis * (PITCH + MTOL), -PLANE.XAxis, PLANE.YAxis)\n    end_plane = rg.Plane(PLANE.Origin + PLANE.ZAxis * (PITCH * TURN_COUNT - MTOL), PLANE.XAxis, PLANE.YAxis)\n    \n    cutter_domain = rg.Interval(-MAJOR_DIAMETER, MAJOR_DIAMETER)\n    cutter_breps = []\n    cap_breps = []\n    for plane in [start_plane, end_plane]:\n        # End cutters\n        rect = rg.Rectangle3d(plane, cutter_domain, cutter_domain)\n        corners = [rect.Corner(i) for i in range(4)]\n        p, q, r, s = corners\n        cutter_breps.append(rg.Brep.CreateFromCornerPoints(p, q, r, s, MTOL))\n        # End caps\n        rc, crvs, _ = rg.Intersect.Intersection.BrepPlane(thread_brep, plane, MTOL)\n        boundary_breps = rg.Brep.CreatePlanarBreps(crvs, MTOL)\n        ca...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\n\nMTOL = sc.doc.ModelAbsoluteTolerance\nATOL = sc.doc.ModelAngleToleranceRadians\n\n# Hardcoded Constants Matching Input Geometry (don't change)\nPLANE = rg.Plane.WorldYZ\nMAJOR_DIAMETER = 4.0  # M4\nPITCH = 0.7           # M4\nTURN_COUNT = 123\n\nif __name__ == \"__main__\":\n    # Create Thread\n    thread_brep = rg.Brep.CreateFromLoft(C, rg.Point3d.Unset, rg.Point3d.Unset, rg.LoftType.Straight, False)[0]\n\n    # Trim Thread to Length And Construct Caps\n    start_plane = rg.Plane(PLANE.Origin + PLANE.ZAxis * (PITCH + MTOL), -PLANE.XAxis, PLANE.YAxis)\n    end_plane = rg.Plane(PLANE.Origin + PLANE.ZAxis * (PITCH * TURN_COUNT - MTOL), PLANE.XAxis, PLANE.YAxis)\n    \n    cutter_domain = rg.Interval(-MAJOR_DIAMETER, MAJOR_DIAMETER)\n    cutter_breps = []\n    cap_breps = []\n    for plane in [start_plane, end_plane]:\n        # End cutters\n        rect = rg.Rectangle3d(plane, cutter_domain, cutter_domain)\n        corners = [rect.Corner(i) for i in range(4)]\n        p, q, r, s = corners\n        cutter_breps.append(rg.Brep.CreateFromCornerPoints(p, q, r, s, MTOL))\n        # End caps\n        rc, crvs, _ = rg.Intersect.Intersection.BrepPlane(thread_brep, plane, MTOL)\n        boundary_breps = rg.Brep.CreatePlanarBreps(crvs, MTOL)\n        cap_breps.append(boundary_breps[0])\n\n    thread_brep_segments = thread_brep.Split(cutter_breps, MTOL)\n\n    thread_brep = None \n    for brep_seg in thread_brep_segments:\n        #brep_seg.Edges.RemoveNakedMicroEdges(MTOL)\n        #brep_seg.Edges.MergeAllEdges(ATOL)\n        bbox = brep_seg.GetBoundingBox(False)\n        dist_start = start_plane.DistanceTo(bbox.Center)\n        dist_end = end_plane.DistanceTo(bbox.Center)\n        if(abs(dist_start - dist_end) < MTOL):\n            thread_brep = brep_seg\n            break\n\n    #faces = [f.DuplicateFace(False) for f in thread_brep.Faces]\n    #thread_brep = rg.Brep.JoinBreps(faces, MTOL)[0]\n    \n    start_cap, end_cap = cap_breps\n    thread_brep.Join(start_cap, MTOL, False)\n    thread_brep.Join(end_cap, MTOL, True)\n\n    # Outputs\n    B = thread_brep",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 94
+}

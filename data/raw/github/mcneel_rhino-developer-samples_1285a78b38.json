@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/add-truncated-cone.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/add-truncated-cone.py",
+  "instruction": "Add truncated cone",
+  "code": "import Rhino\nimport scriptcontext\nimport System.Guid\n\ndef AddTruncatedCone():\n    bottom_pt = Rhino.Geometry.Point3d(0,0,0)\n    bottom_radius = 2\n    bottom_circle = Rhino.Geometry.Circle(bottom_pt, bottom_radius)\n\n    top_pt = Rhino.Geometry.Point3d(0,0,10)\n    top_radius = 6\n    top_circle = Rhino.Geometry.Circle(top_pt, top_radius)\n\n    shapeCurve = Rhino.Geometry.LineCurve(bottom_circle.PointAt(0), top_circle.PointAt(0))\n    axis = Rhino.Geometry.Line(bottom_circle.Center, top_circle.Center)\n    revsrf = Rhino.Geometry.RevSurface.Create(shapeCurve, axis)\n    tcone_brep = Rhino.Geometry.Brep.CreateFromRevSurface(revsrf, True, True)\n\n    if scriptcontext.doc.Objects.AddBrep(tcone_brep)!=System.Guid.Empty:\n        scriptcontext.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n    return Rhino.Commands.Result.Failure\n\n\nif __name__==\"__main__\":\n    AddTruncatedCone()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

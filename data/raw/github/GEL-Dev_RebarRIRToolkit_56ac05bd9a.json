@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/GEL-Dev/RebarRIRToolkit/blob/677b93783a0288e5b411858c133cb7e04a6a0a06/Temp/get_familyInstances_byName.py",
+  "repo": "GEL-Dev/RebarRIRToolkit",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Temp/get_familyInstances_byName.py",
+  "instruction": "Get family instances by name",
+  "code": "import rhinoscriptsyntax as rs\n\nimport clr\nclr.AddReference('RevitAPI')\nfrom Autodesk.Revit.DB import *\nfrom RhinoInside.Revit import Revit\nfrom System.Collections.Generic import List\n\ndef RunScript(FamilyName, Trigger):\n    if not FamilyName:\n        return []\n\n    doc = Revit.ActiveDBDocument\n\n    collector = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_CurtainWallPanels).OfClass(FamilyInstance)\n    cwPanels = [x for x in collector if x.Name == FamilyName]\n    print(cwPanels)\n\n    # The following block is not doing anything in the provided code, so it's not necessary in the Python version.\n    # However, it's retained for clarity.\n    if Trigger:\n        transaction = Transaction(doc, \"CSharpWall\")\n        transaction.Start()\n\n        try:\n            options = transaction.GetFailureHandlingOptions()\n            options.SetDelayedMiniWarnings(True)\n            options.SetForcedModalHandling(True)\n\n            doc.Regenerate()\n            transaction.Commit(options)\n\n        except Exception as txnErr:\n            # Print exception message for debugging\n            print(txnErr.Message)\n            # Rollback the changes made before error\n            transaction.RollBack()\n\n    return cwPanels\n\n# Example usage\nfamilyInstances = RunScript(FamilyName, Trigger)",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

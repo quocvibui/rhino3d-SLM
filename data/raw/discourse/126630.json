@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/globals-functionality-in-python-component/126630",
+  "topic_id": 126630,
+  "title": "Globals functionality in python component",
+  "question": "Hi,\n\nI want to use this code to generate some circles along a sin curve and when I complete the code and click on ‘Test’ or ‘Ok’ in ghpython component, everything works just fine, but when I want to refresh the algorithm by pressing ‘F5’ button or change the number sliders, the first circle’s radius starts to change abnormally and I guess it’s having a conflict with globals but I don’t know how to fix it.\n\n\nfrom math import sin , pi \nimport Rhino.Geometry as rg\nimport ghpythonlib.components as gh\na = []\nfor i in range(x):\n     j = t * sin(y*i*pi/x)\n     a.append(rg.Point3d( i , j , 0))\n     \nb = cylinders = []\nc = rads =[]\n\nfor i in range(len(a)):\n    if 'radius' not in globals() or reset:\n        radius = 0.65\n    else :\n        radius = gh.Distance(a[i], a[i-1]) / 2\n    circle = rg.Circle(a[i] , radius)\n    cylinders.append(rg.Cylinder(circle , radius*h))\n    rads.append(radius)\n\n\n\nhow can I stop this from happening? I want every circle’s radius to calculate from the distance of origin point with that of the previous circle and exit the loop when it gets to the last point, but in my algorithm, the last radius calculation gets wrong and I guess it calculates the distance between the last and first point somehow!\n\n\n\n\n01\n821×394 111 KB\n\n\n\n\n\n\n02\n834×462 232 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nfrom math import sin , pi \n\n\na = [rg.Point3d(i, t * sin(y * i * pi / x), 0) for i in xrange(x)]\n\ncircles = []\n\nfor i in xrange(x):\n    if i < x - 1:\n        radius = a[i].DistanceTo(a[i+1]) / 2\n    else:\n        radius = a[i].DistanceTo(a[i-1]) / 2\n    circle = rg.Circle(a[i] , radius)\n    circles.append(circle)\n\nc = circles\n\nb = [rg.Cylinder(cir, h) for cir in circles]",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 8,
+      "is_solution": true
+    },
+    {
+      "code": "from math import sin , pi \nimport Rhino.Geometry as rg\nimport ghpythonlib.components as gh\na = []\nfor i in range(x):\n     j = t * sin(y*i*pi/x)\n     a.append(rg.Point3d( i , j , 0))\n     \nb = cylinders = []\nc = rads =[]\n\nfor i in range(len(a)):\n    if 'radius' not in globals() or reset:\n        radius = 0.65\n    else :\n        radius = gh.Distance(a[i], a[i-1]) / 2\n    circle = rg.Circle(a[i] , radius)\n    cylinders.append(rg.Cylinder(circle , radius*h))\n    rads.append(radius)",
+      "language": "python",
+      "author": "alirahi32",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 12,
+  "views": 945
+}

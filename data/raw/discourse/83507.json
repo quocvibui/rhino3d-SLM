@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/convert-hatch-to-surface/83507",
+  "topic_id": 83507,
+  "title": "Convert hatch to surface",
+  "question": "Hi,\n\nI would like to find a way to convert a hatch to a surface to be recognized on GH after .\n\nCould you help me to resolve this issue?\n\nmany thanks\n\n\n\n\nimage.png\n894×712 8.87 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef ExplodeHatch():\n    filter = Rhino.DocObjects.ObjectType.Hatch\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select hatch to explode\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return\n\n    hatch = objref.Geometry()\n    if not hatch: return\n\n    hatch_geom = hatch.Explode()\n    if hatch_geom:\n      for geom in hatch_geom:\n          if geom.ObjectType == Rhino.DocObjects.ObjectType.Brep:\n              scriptcontext.doc.Objects.AddBrep(geom)\n      scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    ExplodeHatch()",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nobj = Rhino.RhinoDoc.ActiveDoc.Objects.Find(x)\nghHatchPattern = Rhino.RhinoDoc.ActiveDoc.HatchPatterns.FindIndex(obj.HatchGeometry.PatternIndex)\n\nRawGeo = obj.HatchGeometry.CreateDisplayGeometry(ghHatchPattern,1)\na = RawGeo[0]\nb = RawGeo[1]\nc = RawGeo[2]\n\n#https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Geometry_Hatch_CreateDisplayGeometry.htm",
+      "language": "unknown",
+      "author": "chanley",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 11,
+  "views": 3855
+}

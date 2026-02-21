@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/nurbs-to-mesh-in-python/118025",
+  "topic_id": 118025,
+  "title": "Nurbs to mesh in python",
+  "question": "Hi,\n\n\nI have a few Nurbs generated with rs.AddSphere in my python script and I wanted to convert them into meshes within the script. However, it does appear there is a rhinoscriptsyntax MeshToNurbs command but not the opposite NurbsToMesh.\n\n\nThe only work around I thought was to use the grasshopper component MeshSphere, see code below, however the spheres do not seem to appear after generated, and for example I can’t change their colour. Should I do some baking somehow?\n\n\nAny alternative way to convert a nurbs to a mesh (without sampling it and running a tesselation) you can think of?\n\n\nimport ghpythonlib.components as comps\n\n\nsp1 = rs.AddSphere(pt, 2) \n#not\n needed if I use the component below\n\nsp = comps.MeshSphere(pt,2,3,3)\n\nrs.ObjectColor(sp, color)\n\n\nError message: Message: iteration over non-sequence of type Mesh",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\nsphere = Rhino.Geometry.Sphere(pt, 2.0)\nmesh = Rhino.Geometry.Mesh.CreateFromSphere(sphere, 8, 8)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef MeshBrep(brep_id,params):\n    brep=rs.coercebrep(brep_id)\n    if brep:\n        mesh=Rhino.Geometry.Mesh()\n        mesh_parts=Rhino.Geometry.Mesh.CreateFromBrep(brep,params)\n        for mesh_part in mesh_parts: mesh.Append(mesh_part)\n        mesh.Compact()\n        return mesh\n    \ndef TestMeshBrep():\n    obj_id=rs.GetObject(\"Select surface or polysurface to mesh\",8+16,preselect=True)\n    if not obj_id: return\n    \n    #equivalent of 'jagged and faster'\n    mesh_params=Rhino.Geometry.MeshingParameters.Coarse\n    mesh_brep=MeshBrep(obj_id,mesh_params)\n    if mesh_brep:\n        mesh_id=sc.doc.Objects.AddMesh(mesh_brep)\n        sc.doc.Views.Redraw()\n        rs.SelectObject(mesh_id)\nTestMeshBrep()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport Rhino\n\npt = Rhino.Geometry.Point3d.Origin\nsphere = Rhino.Geometry.Sphere(pt, 5.0)\nmesh = Rhino.Geometry.Mesh.CreateFromSphere(sphere, 8, 8)\n\nguid = scriptcontext.doc.Objects.AddMesh(mesh)\nprint guid",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1657
+}

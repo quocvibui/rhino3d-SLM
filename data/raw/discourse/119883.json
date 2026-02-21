@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/material-for-plugin-objects/119883",
+  "topic_id": 119883,
+  "title": "Material for Plugin objects",
+  "question": "Hi everyone,\n\n\nI want to add material to my plugin objects to show colors also on the \nRendered\n display mode. I simply tried below code;\n\n\npublic void SetAttributes(ObjectAttributes attributes)\n{\n     // Assign Object Color\n     attributes.ObjectColor = System.Drawing.Color.Red;\n     attributes.ColorSource = ObjectColorSource.ColorFromObject;\n\n     // Introduce Material\n     Material material = new Material();\n     material.AmbientColor = System.Drawing.Color.Red;\n     material.Name = \"myBeautifulMaterial\";\n\n     // Add material to doc\n     int indexOfMaterial = RhinoDoc.ActiveDoc.Materials.Add(material);\n\n     // Assign Object Material\n     attributes.MaterialIndex = indexOfMaterial;\n     attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject;\n}\n\n\n\nWhen I create my object with this \nAttributes\n, material is creating as \nCustom\n type. But I want to define as \nPaint\n type with RGB values as it is for \nObjectColor\n. Is it possible with \nMaterial\n object because there is no any propery for \nType\n under the \nMaterial\n object, or should I use something different?\n\n\n\n\nmaterial\n612×692 102 KB\n\n\n\n\nThanks in advance,\n\n-Oğuzhan",
+  "code_blocks": [
+    {
+      "code": "import System\nimport Rhino.Display\nimport Rhino.Render\nimport scriptcontext\nimport random\n\n# get object selection\nobject_selection = [ob for ob in scriptcontext.doc.Objects if ob.IsSelected]\n\n# create material\nrender_material = Rhino.Render.RenderContent.Create(\n    Rhino.Render.RenderMaterial.PaintMaterialGuid,\n    Rhino.Render.RenderContent.ShowContentChooserFlags.None,\n    scriptcontext.doc)\nrender_material.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program)\nrender_material.Name = \"PYSCRIPTCREATED \" + System.Guid.NewGuid().ToString()\nrandom_color = Rhino.Display.Color4f(\n    random.random(),\n    random.random(),\n    random.random(),\n    1.0)\nrender_material.SetParameter(\"color\", random_color)\nrender_material.EndChange()\n\n# assign\nfor ob in object_selection:\n    print(\"Adding material\", render_material.Name, \"to\", ob)\n    ob.RenderMaterial = render_material\n    ob.CommitChanges()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "// Create render content\nRenderContent renderContent = Rhino.Render.RenderContent.Create(\n    Rhino.Render.RenderMaterial.PaintMaterialGuid, \n    RenderContent.ShowContentChooserFlags.None, \n    RhinoDoc.ActiveDoc);\n\n// Begin changes..\nrenderContent.BeginChange(RenderContent.ChangeContexts.Program);\n\nrenderContent.Name = \"sampleRenderContent\";\nSystem.Drawing.Color color = System.Drawing.Color.Red;\nRhino.Display.Color4f color = new Rhino.Display.Color4f(color);\nrenderContent .SetParameter(\"Color\", color);\n\n// ..End changes\nrenderContent .EndChange();\n\n// Add any brep to RhinoDoc\nGuid guid = RhinoDoc.ActiveDoc.Objects.AddBrep(Brep);\n\n// Get RhinoObject that is created after to addition by guid\nRhinoObject obj = RhinoDoc.ActiveDoc.Objects.FindId(guid);\n\n// Cast explicitly renderContent to RenderMaterial object\nobj.RenderMaterial = (RenderMaterial)renderContent;\nobj.CommitChanges();",
+      "language": "csharp",
+      "author": "oguzhankoral",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "public void SetAttributes(ObjectAttributes attributes)\n{\n     // Assign Object Color\n     attributes.ObjectColor = System.Drawing.Color.Red;\n     attributes.ColorSource = ObjectColorSource.ColorFromObject;\n\n     // Introduce Material\n     Material material = new Material();\n     material.AmbientColor = System.Drawing.Color.Red;\n     material.Name = \"myBeautifulMaterial\";\n\n     // Add material to doc\n     int indexOfMaterial = RhinoDoc.ActiveDoc.Materials.Add(material);\n\n     // Assign Object Material\n     attributes.MaterialIndex = indexOfMaterial;\n     attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject;\n}",
+      "language": "csharp",
+      "author": "oguzhankoral",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 772
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/transform-angles/203475",
+  "topic_id": 203475,
+  "title": "Transform Angles",
+  "question": "I’m trying to get angles from a plane using either GetEulerZYZ, GetYawPitchRoll and GetQuaternion.\n\nThis is to set work planes to a robot (I’m using robotdk) and at this point I don’t know which method will work for me.\n\nI’m stuck using any of those methods because I can’t extract any information from it.\n\n\nDim vTCPInfo = Transform.ChangeBasis(Plane.WorldXY, vTCPPlane)\n                'vTCPPlane = {Origin=-185.778389695857,76.745590069475,46.8938003683418 XAxis=0.441596373625533,0.896311660205494,0.0402249994462356, YAxis=-0.00177615020492446,0.0457064664330206,-0.998953334353841, ZAxis=-0.897212064169463,0.441062724230781,0.0217757939670092}\n                'vTCPInfo = {R0=(0.441596373625533,0.896311660205494,0.0402249994462356,11.3647928452118), R1=(-0.00177615020492446,0.0457064664330206,-0.998953334353841,43.0069781771568), R2=(-0.897212064169463,0.441062724230781,0.0217757939670092,-201.553381260991), R3=(0,0,0,1)}\n\n\n\nThen any method fails:\n\n\nvBolRes= vTCPInfo.GetEulerZYZ(alpha, beta, gamma) \nvBolRes= vTCPInfo.GetYawPitchRoll(yaw, pitch, roll)\nvBolRes= vTCPInfo.GetQuaternion(quaternion)\n\n\n\nAlso tried with Transform.PlaneToPlane with the same results.\n\nis this the correct way to use those functions, I’m missing something here?\n\nThanks in advance",
+  "code_blocks": [
+    {
+      "code": "#! python 3\nimport Rhino\n\ndef Test():\n    wp = Rhino.Geometry.Plane.WorldXY\n\n    xaxis = Rhino.Geometry.Vector3d(0.441596373625533,0.896311660205494,0.0402249994462356)\n    yaxis = Rhino.Geometry.Vector3d(-0.00177615020492446,0.0457064664330206,-0.998953334353841)\n    zaxis = Rhino.Geometry.Vector3d(-0.897212064169463,0.441062724230781,0.0217757939670092)\n    xaxis.Unitize()\n    yaxis.Unitize()\n    zaxis.Unitize()\n\n    xform = Rhino.Geometry.Transform.Rotation(wp.XAxis, wp.YAxis, wp.ZAxis, xaxis, yaxis, zaxis)\n\n    rc, a, b, c = xform.GetEulerZYZ()\n    if rc:\n        print(\"alpha: {}, beta: {}, gamma: {}\".format(a, b, c))\n\n    rc, a, b, c = xform.GetYawPitchRoll()\n    if rc:\n        print(\"yaw: {}, pitch: {}, roll: {}\".format(a, b, c))\n\n    rc, a = xform.GetQuaternion()\n    if rc:\n        print(\"quaternion: {}, \".format(a))\n\nif __name__ == \"__main__\":\n    Test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "// #! csharp\nusing System;\nusing Rhino;\nusing Rhino.Geometry;\n\nPlane wp = Plane.WorldXY;\n\nPoint3d origin = new Point3d(-185.778389695857,76.745590069475,46.8938003683418);\nVector3d xaxis = new Vector3d(0.441596373625533,0.896311660205494,0.0402249994462356);\nVector3d yaxis = new Vector3d(-0.00177615020492446,0.0457064664330206,-0.998953334353841);\nVector3d zaxis = new Vector3d(-0.897212064169463,0.441062724230781,0.0217757939670092);\nxaxis.Unitize();\nyaxis.Unitize();\nzaxis.Unitize();\n\nPlane tp = Rhino.Geometry.Plane.CreateFromFrame(origin, xaxis, yaxis);\n\nTransform xform = Rhino.Geometry.Transform.PlaneToPlane(wp, tp);\nif (xform.IsAffine)\n{\n    bool rc = xform.DecomposeAffine(out Rhino.Geometry.Transform linear, out Rhino.Geometry.Vector3d translation);\n    if (rc)\n    {\n        Console.WriteLine(\"translation: {0}\", translation);\n\n        double a, b, c;\n        rc = linear.GetEulerZYZ(out a, out b, out c);\n        if (rc)\n            Console.WriteLine(\"alpha: {0}, beta: {1}, gamma: {2}\", a, b, c);\n\n        rc = linear.GetYawPitchRoll(out a, out b, out c);\n        if (rc)\n            Console.WriteLine(\"yaw: {0}, pitch: {1}, roll: {2}\", a, b, c);\n\n        rc = linear.GetQuaternion(out Quaternion q);\n        if (rc)\n            Console.WriteLine(\"quaternion: {0}\", q);\n    }\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 85
+}

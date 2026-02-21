@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-volume-centroid-of-multiple-objects/120603",
+  "topic_id": 120603,
+  "title": "Get Volume Centroid of Multiple Objects",
+  "question": "Hi, I would like to take the volume centroids of lots of boxes (closed solid polysurfaces).\n\n\nWhen I select all the boxes (hundreds of them) and use VolumeCentroid, it gives me the centroid of their grouped bounding box. I need the individual centroid of each object selected. It’s easy enough if I’m just selecting a few boxes but I need to do it for hundreds of them.\n\n\nFor example, I’ve got some boxes:\n\n\nboxes\n608×444 8 KB\n\n\nWhen I select them all and use volumeCentroid I get their combined centroid, not what I want.\n\n\ncentroid\n540×398 5.28 KB\n\n\nThis is the result I want, a centroid for each selected volume.\n\n\ncentroids\n515×427 5.48 KB\n\n\nThe reason I can’t do it box-by-box is I have a lot of boxes.\n\n\nfull_city\n915×572 152 KB\n\n\nI’m not sure if I need .rvb or grasshopper for this. If I do, that’s fine, just please be specific because I don’t have any experience using them.\n\n\nThank you!",
+  "code_blocks": [
+    {
+      "code": "Option Explicit\n'adds a Dot at the selected objects' centroid\n'with the object volume in current file units\n\n' Rhino.AddStartupScript Rhino.LastLoadedScriptFile\n' Rhino.AddAlias \"VolumeTag\",\"_NoEcho _-Runscript (VolumeTag)\"\n\nCall VolumeTag()\nSub VolumeTag()\n\n\tDim arrObj, strObj,  strVol, arrVolume, strVolume, arrCent, arr3dCent, arrThings, strDot, strGroup\n\n\tarrObj = Rhino.GetObjects(\"Select closed objects for volume tag\", 8 + 16 + 32,, True)\n\n\tIf IsArray(arrObj) Then\n\n\t\tFor Each strObj In arrobj\n\n\t\t\tarrvolume = Null\n\t\t\tarrCent = Null\n\t\t\tarr3dCent = Null\n\n\n\t\t\tIf Rhino.IsSurface(strObj) Or Rhino.isPolysurface(strObj) Then\n\n\t\t\t\tIf Rhino.isObjectSolid(strObj) Then\n\t\t\t\t\tarrVolume = Rhino.SurfaceVolume(strObj)\n\t\t\t\t\tstrVolume = Round(arrVolume(0), 4)\n\t\t\t\t\tarrCent = Rhino.SurfaceVolumeCentroid(strObj)\n\t\t\t\t\tarr3dCent = arrCent(0)\n\t\t\t\tEnd If\n\n\t\t\tElseIf  Rhino.IsMesh(strObj) Then\n\n\t\t\t\tIf Rhino.IsMeshClosed(strObj) Then\n\t\t\t\t\tarrVolume = Rhino.MeshVolume(strObj)\n\t\t\t\t\tstrVolume = Round(arrVolume(1), 4)\n\t\t\t\t\tarr3dCent = Rhino.MeshAreaCentroid(strObj)\n\t\t\t\tEnd If\n\n\t\t\tEnd If\n\n\t\t\tIf IsArray(arr3dCent) Then\n\t\t\t\tstrDot = Rhino.AddTextDot(\"Vol = \" & strVolume, arr3dCent)\n\t\t\t\tstrgroup = Rhino.addGroup\n\t\t\t\tarrThings = array(strDot, strObj)\n\t\t\t\tRhino.AddObjectsToGroup arrThings, strGroup\n\t\t\tEnd If\n\n\t\tNext\n\n\tEnd If\n\nEnd Sub",
+      "language": "python",
+      "author": "kleerkoat",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1293
+}

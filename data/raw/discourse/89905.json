@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/addsrfsectioncrvs/89905",
+  "topic_id": 89905,
+  "title": "AddSrfSectionCrvs",
+  "question": "Hi everyone.\n\nI want to obtain the boundary curve resulting from the intersection of a defined cutting plane through a surface. To this end I employed the  AddSrfSectionCrvs in my python script. But I faced with this error and I don’t know how to figure it out.\n\ncoomand:\n\nScurve=rs.AddSrfSectionCrvs (Object, arrPlane)\n\n\nError:\n\nMessage: ‘module’ object has no attribute ‘AddSrfSectionCrvs’\n\n\nTraceback:\n\nline 38, in viewportclock, “D:\\Users\\suuser\\Documents\\sample python.py”\n\nline 85, in , “D:\\Users\\suuser\\Documents\\sample python.py”",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef AddSrfSectionCrvs(obj_id,plane,tol=sc.doc.ModelAbsoluteTolerance):\n    #mimics the Rhinoscript method not available in python rhinoscriptsyntax\n    #returns a list of curve ids of intersection or None if failure\n    brep=rs.coercebrep(obj_id)\n    if brep:\n        insec=Rhino.Geometry.Intersect.Intersection.BrepPlane(brep,plane,tol)\n        if insec and insec[0] and insec[1]:\n            crv_ids=[sc.doc.Objects.AddCurve(crv) for crv in insec[1]]\n            return crv_ids\n\n#test function\nobj_id=rs.GetObject(\"Select surface or polysurface to intersect\",8+16,True)\nif obj_id:\n    plane=rs.WorldXYPlane()\n    sec_crv_ids=AddSrfSectionCrvs(obj_id,plane)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 550
+}

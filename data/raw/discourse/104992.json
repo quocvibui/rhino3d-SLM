@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/list-trouble-python-grasshopper/104992",
+  "topic_id": 104992,
+  "title": "List Trouble - Python/Grasshopper",
+  "question": "Hi there - I’m hoping to get some help on a script that’s been causing me issues. I’ve been trying to group a list of values into 20 or so groups based on a range of values for each group. For example, let’s say I have a list of values 1-100 and I am assigning each to one of 5 groups. Each group is equally spaced along the interval of discrete values so for this example, if I have 5 groups for numbers 1-100, each group would be an interval of 20 (1-20, 21-40, 41-60, etc.). For each discrete value I’m investigating, I want to return the group it belongs to so if the number is 45, I want to return 3. For some reason, I’m getting a weird nested list when I return. Can anyone help out with this? I’m still pretty new to grasshopper so any help would be appreciated!\n\n\nI’ve attached some images showing the input and output as well as the python script.\n\n\nimage\n1213×824 76.7 KB",
+  "code_blocks": [
+    {
+      "code": "from Rhino.Geometry import Interval\nstep = (end - start) / count\nfor i in range(count):\n    interval = Interval(start, start + step)\n    start += step\n    if interval.IncludesParameter(value):\n        a = i\n        break",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Geometry import Interval\nstep = (end - start) / count\nintervals = []\nfor i in range(count):\n    intervals.append(Interval(start, start + step))\n    start += step\na = []\nfor v in values:\n    for i in range(len(intervals)):\n        if intervals[i].IncludesParameter(v):\n            a.append(i)\n            break",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 427
+}

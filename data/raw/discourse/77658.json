@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/conflict-between-rhinocommon-and-rhino3dmio/77658",
+  "topic_id": 77658,
+  "title": "Conflict between Rhinocommon and Rhino3dmIO",
+  "question": "Hello,\n\n\nI am developing a Rhino plug-in that uses an other library I wrote before. The other library uses Rhino3dmIO to deal with 3D geometry.\n\n\nWhen I try to call functions from the library within the plug-in, I get some errors:\n\n\n\n\nThe type ‘Plane’ is defined in an assembly that is not referenced. You must add a reference to assembly ‘Rhino3dmIO’\n\n\n\n\nHowever, when I install Rhino3dmIO packet, I obviously get an error about the Type being in both RhinoCommon and Rhino3dmIO.\n\n\nI am clearly missing something over here… Maybe I should cast all input/output from and to RhinoCommon ?\n\n\nAny tips would be appreciated!\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "<ProjectReference Include=\"..\\..\\..\\..\\DotNetSDK\\rhinocommon\\dotnet\\RhinoCommon.csproj\">\n    <Project>{ed38373e-290c-4bde-acba-1601484e582a}</Project>\n    <Name>RhinoCommon</Name>\n    <Private>False</Private>\n  </ProjectReference>\n  <ProjectReference Include=\"..\\cycles\\csycles\\csycles.csproj\">\n    <Project>{36396655-e087-4c00-990b-ce44f08e4fb2}</Project>\n    <Name>csycles</Name>\n  </ProjectReference>\n</ItemGroup>\n<Choose>\n  <When Condition=\"'$(OS)' == 'Windows_NT'\">\n    <ItemGroup>\n      <ProjectReference Include=\"..\\..\\..\\..\\DotNetSDK\\RhinoWindows\\RhinoWindows.csproj\">\n        <Project>{78e5c303-7764-446e-baba-fdb410bd98e1}</Project>\n        <Name>RhinoWindows</Name>\n        <Private>False</Private>\n      </ProjectReference>\n    </ItemGroup>\n  </When>\n  <When Condition=\"'$(OS)' == 'Unix'\">",
+      "language": "csharp",
+      "author": "nathanletwory",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "<PropertyGroup Condition=\"'$(Configuration)|$(Platform)' == 'Debug_Rhino3dmIO|x86'\">\n    <DebugSymbols>true</DebugSymbols>\n    <OutputPath>bin\\x86\\Debug_Rhino3dmIO\\</OutputPath>\n    <DefineConstants>DEBUG;TRACE</DefineConstants>\n    <DebugType>full</DebugType>\n    <PlatformTarget>x86</PlatformTarget>\n    <ErrorReport>prompt</ErrorReport>\n    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>\n  </PropertyGroup>\n  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)' == 'Rhinocommon|AnyCPU'\">\n    <DebugSymbols>true</DebugSymbols>\n    <OutputPath>bin\\Rhinocommon\\</OutputPath>\n    <DefineConstants>DEBUG;TRACE</DefineConstants>\n    <DebugType>full</DebugType>\n    <PlatformTarget>AnyCPU</PlatformTarget>\n    <ErrorReport>prompt</ErrorReport>\n    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>\n  </PropertyGroup>",
+      "language": "unknown",
+      "author": "laurent_delrieu",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 16,
+  "views": 1260
+}

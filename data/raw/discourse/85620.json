@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/need-a-script-that-can-do-what-selboundary-is-doing-in-py/85620",
+  "topic_id": 85620,
+  "title": "Need a script that can do what SelBoundary is doing, in Py",
+  "question": "Ok, so I have some closed curves with texts in them, each curve with only 1 text. I need to rename the curves using the text and with \nrs.Command(\"_SelBoundary selid {} _Enter\".format(str(obi)))\n line I manage to get the text of the \nobi\n curve, the problem is on 10-15 curves the script works with no problem, but I have around ~300 curves and sometimes it gets 2 different texts. This is the Script I am using:\n\n\nobj = rs.AllObjects(select=False)\n\ni = 1\n\n#Creates the Groups\nfor obi in obj:\n    \n    if rs.ObjectType(obi) == 4:\n        \n        rs.UnselectAllObjects()\n        \n        crv.append(obi)\n        rs.AddGroup(i)\n        rs.AddObjectToGroup(obi, i)\n        rs.Command(\"_SelBoundary selid {} _Enter\".format(str(obi)))\n        a = rs.SelectedObjects()\n        rs.UnselectAllObjects()\n        rs.AddObjectToGroup(a, i)\n        i += 1\n\n\n\nSo, do you know any replacement for “SelBoundary” command?",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rh\n\nCuType = rh.DocObjects.ObjectType.Curve\nTeType = rh.DocObjects.ObjectType.Annotation\n\nBB = []\nfor i in rh.RhinoDoc.ActiveDoc.Objects.GetObjectList(CuType):\n    if i.Geometry.IsClosed:\n        BB.append(i.Geometry.GetBoundingBox(False))\n\nBoundaryText = []\nfor i in rh.RhinoDoc.ActiveDoc.Objects.GetObjectList(TeType):\n    CenterPointText = i.Geometry.GetBoundingBox(False).Center\n    for b in BB:\n        if b.Contains(CenterPointText):\n            BoundaryText.append(i)\n\nif select:\n    for i in BoundaryText:\n        i.Select(True)\nelif deselect:\n    for i in BoundaryText:\n        i.Select(False)",
+      "language": "python",
+      "author": "flokart",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "obj = rs.AllObjects(select=False)\n\ni = 1\n\n#Creates the Groups\nfor obi in obj:\n    \n    if rs.ObjectType(obi) == 4:\n        \n        rs.UnselectAllObjects()\n        \n        crv.append(obi)\n        rs.AddGroup(i)\n        rs.AddObjectToGroup(obi, i)\n        rs.Command(\"_SelBoundary selid {} _Enter\".format(str(obi)))\n        a = rs.SelectedObjects()\n        rs.UnselectAllObjects()\n        rs.AddObjectToGroup(a, i)\n        i += 1",
+      "language": "python",
+      "author": "baciucristy",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1298
+}

@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptcontext-addmaterialtoobject-object-id-purges-usertext/84212",
+  "topic_id": 84212,
+  "title": "rhinoscriptcontext.AddMaterialToObject(object_id) purges UserText",
+  "question": "Hi,\n\n\nI found that after running rhinoscriptcontext.AddMaterialToObject(object_id) to add a material to an object, all it’s Usertexts are purged:\n\n\nimport rhinoscriptsyntax as rs\n\n\nid = rs.AddLine([0,0,0] , [1,1,1])\n\nrs.SetUserText(id, 'foo', 'bar')\n\n\nprint 'foo value : {}'.format(rs.GetUserText(id, 'foo'))\n\nrs.AddMaterialToObject(id)\n\nprint 'foo value : {}'.format(rs.GetUserText(id, 'foo'))\n\n\n\nprintout:\n\nfoo value : bar\n\nfoo value : None\n\n\nEdit \n@Dale\n I found the cause in the reply by \n@clement\n\n\nthe rhinoscript method fails to create a Duplicate of the attributes:\n\n\nattr = rhino_object.Attributes\n\n\n\nshould be\n\n\nattr = rhino_object.Attributes.Duplicate()\n\n\n\n\n\n\n\ngithub.com\n\n\n\n\n\n\nmcneel/rhinoscriptsyntax/blob/rhino-6.x/Scripts/rhinoscript/material.py#L54\n\n\n\n\n  obj = rs.GetObject()\n\n\n  if obj:\n\n\n      index = rs.ObjectMaterialIndex(obj)\n\n\n      if index==-1: index = rs.AddMaterialToObject(obj)\n\n\nSee Also:\n\n\n  IsMaterialDefault\n\n\n  ObjectMaterialIndex\n\n\n  ObjectMaterialSource\n\n\n\"\"\"\n\n\nrhino_object = rhutil.coercerhinoobject(object_id, True, True)\n\n\nattr = rhino_object.Attributes\n\n\nif attr.MaterialSource!=Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject:\n\n\n    attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n\n\n    scriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\n\n\n    attr = rhino_object.Attributes\n\n\nmaterial_index = attr.MaterialIndex\n\n\nif material_index>-1: return material_index\n\n\nmaterial_index = scriptcontext.doc.Materials.Add()\n\n\nattr.MaterialIndex = material_index\n\n\nscriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\n\n\nreturn material_index\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFor then the code works as expected\n\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "def AddMaterialToObjectEx(object_id):\n    rhino_object = rs.coercerhinoobject(object_id, True, True)\n    attr = rhino_object.Attributes.Duplicate()\n    if attr.MaterialSource != Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject:\n        attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n        scriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\n        attr = rhino_object.Attributes\n    material_index = attr.MaterialIndex\n    if material_index>-1: return material_index\n    material_index = scriptcontext.doc.Materials.Add()\n    attr.MaterialIndex = material_index\n    scriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\n    return material_index",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def AddMaterialToObjectEx(object_id):\n    rhino_object = rs.coercerhinoobject(object_id, True, True)\n    attr = rhino_object.Attributes\n    if attr.MaterialSource != Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject:\n        attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n        # scriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\n        # attr = rhino_object.Attributes\n    material_index = attr.MaterialIndex\n    if material_index>-1: return material_index\n    material_index = scriptcontext.doc.Materials.Add()\n    attr.MaterialIndex = material_index\n    scriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\n    return material_index",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\nid = rs.AddLine([0,0,0] , [1,1,1])\n\nrs.SetUserText(id, 'foo', 'bar')\n\n\nprint 'foo value : {}'.format(rs.GetUserText(id, 'foo'))\n\nrs.AddMaterialToObject(id)\n\nprint 'foo value : {}'.format(rs.GetUserText(id, 'foo'))",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "obj = rs.GetObject()\n  if obj:\n      index = rs.ObjectMaterialIndex(obj)\n      if index==-1: index = rs.AddMaterialToObject(obj)\nSee Also:\n  IsMaterialDefault\n  ObjectMaterialIndex\n  ObjectMaterialSource\n\"\"\"\nrhino_object = rhutil.coercerhinoobject(object_id, True, True)\nattr = rhino_object.Attributes\nif attr.MaterialSource!=Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject:\n    attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n    scriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\n    attr = rhino_object.Attributes\nmaterial_index = attr.MaterialIndex\nif material_index>-1: return material_index\nmaterial_index = scriptcontext.doc.Materials.Add()\nattr.MaterialIndex = material_index\nscriptcontext.doc.Objects.ModifyAttributes(rhino_object, attr, True)\nreturn material_index",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 565
+}

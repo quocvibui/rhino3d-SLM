@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/textobject-font-name-does-not-exist/19788",
+  "topic_id": 19788,
+  "title": "_-TextObject Font name does not exist",
+  "question": "Hi everyone,\n\n\nI want to create a TextObject with an installed font (Chez Vous). I have installed the font in Windows.\n\nIn Rhino command if I use \nTextObject\n I am able to select “Chez Vous” from the font dropdown and create a textobject with it. However when I use \n_-TextObjext _F “Chez Vous” … \n I get the error “Font name does not exist”. What am I missing?\n\n\nAny help would be much appreciated\n\nAlex",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nfontName = chr(34)+\"Chez Vous\"+chr(34)\ntext = \"someText\"\ntextHeight = 10\nItalic = \"No\"\nBold = \"Yes\"\npoint = rs.GetPoint(\"pick up the text object point\")\n\ncommandString = \"_-TextObject FontName=%s Height=%s Italic=%s Bold=%s %s %s\" % (fontName, textHeight, Italic, Bold, text, point)\nrs.Command(commandString)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef CreateTextObjsAsSolids():\n    text_string=rs.GetString(\"Text to insert?\")\n    if not text_string: return\n    pt=rs.GetPoint(\"Text insert point?\")\n    if not pt: return\n    ht=rs.GetReal(\"Text height?\",minimum=0)\n    if not ht: return\n    thk=rs.GetReal(\"Solid thickness?\",minimum=0)\n    if not thk: return\n    \n    opts='_GroupOutput=_Yes _FontName=\"Your Font Name\" _Italic=_No _Bold=_No '\n    opts+='_Height={} _Output=_Solids _Thickness={} '.format(ht,thk)\n    opts+='_LowerCaseAsSmallCaps=_No _AddSpacing=_No '\n    \n    rs.EnableRedraw(False)\n    rs.Command('_-TextObject '+opts+'\"'+text_string+'\"'+' '+str(pt),True)\nCreateTextObjsAsSolids()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    te = Rhino.Geometry.TextEntity()\n    te.Plane = Rhino.Geometry.Plane.WorldXY\n    te.Text = \"Hello World\"\n    te.TextHeight = 10.0\n    te.Justification = Rhino.Geometry.TextJustification.BottomLeft\n    te.FontIndex = scriptcontext.doc.Fonts.FindOrCreate(\"Arial\", False, False)\n    scriptcontext.doc.Objects.AddText(te)\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 22,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 25,
+  "views": 3120
+}

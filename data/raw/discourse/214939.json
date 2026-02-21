@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-set-linear-dimension-text-inline-rhino-8/214939",
+  "topic_id": 214939,
+  "title": "Python – Set Linear Dimension Text Inline (Rhino 8)",
+  "question": "Hello,\n\n\nIn \nRhino 8 (SR16)\n, using \nPython in the ScriptEditor\n, how can I:\n\n\n\n\n\n\nSelect an existing \nlinear dimension\n\n\n\n\n\n\nSet its text to \ninline\n, positioned \ninside the dimension line, between the arrowheads\n\n\n\n\n\n\nIs there a RhinoCommon property or method to change this text position via Python?\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n\n    dim_id = rs.GetObject(\"Select Dimension\", rs.filter.annotation, True)\n    if not dim_id: return\n    \n    dim_obj = rs.coercerhinoobject(dim_id, True, True)\n    if not isinstance(dim_obj, Rhino.DocObjects.DimensionObject): return\n    \n    s = Rhino.DocObjects.DimensionStyle()\n    s.CopyFrom(dim_obj.Geometry.DimensionStyle)\n    s.DimTextLocation = Rhino.DocObjects.DimensionStyle.TextLocation.InDimLine\n    \n    dim_obj.Geometry.SetOverrideDimStyle(s)\n    dim_obj.CommitChanges()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 57
+}

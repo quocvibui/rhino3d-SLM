@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-player-in-compiled-plugin-issue/207640",
+  "topic_id": 207640,
+  "title": "Grasshopper Player in compiled plugin issue",
+  "question": "Hello,\n\n\nit seems like the Grasshopper Player misbehaves in compiled plugins. I have made a plugin using GH definitions that are launched headlessly via C# script (the process is explained \nhere\n), which used to work up until RH8 SR15.\n\n\nI hadn’t tested this workflow in a while. I just did it with the latest SR21, and the player acts up. It seems like the definition executes only once and ignores the “Keep open after command completes” property.\n\n\nIf the same definition is launched manually via the GrasshopperPlayer command, everything works as expected, and the definition remains open until the “exit” button on the interface is pressed. When launching from the compiled plugin, it seems like the definition is executed once and then exited, leaving the custom UI disconnected from the definition (buttons do nothing).\n\n\nIn a nutshell:\n\n\n\n\nplugin command: the definition is executed only once (not what is expected)\n\n\ngrasshopperplayer launched manually in Rhino: works fine, as expected\n\n\n\n\nThis is something that can be tested using the attached rhp (it’s also in the PackageManager as “Test_RCP”).\n\n\nimage\n961×537 78.2 KB\n\n\nYou can try the “launch_Synapse” and “launch_HumanUI” commands from the plugin, and compare the behaviour by running the corresponding Grasshopper definitions using the GrasshopperPlayer manually from Rhino.\n\n\nThe plugin depends on \nHumanUI\n and \nSynapse\n (v. 0.4.0) plugin (you can try either, not necessarily both). It also has a command that uses UIplus, but you can skip that test (and avoid installing that dependency).\n\n\nTest_RCP.rhp\n (664 KB)\n\n\nTest_RCP_HumanUI.gh\n (26.6 KB)\n\n\nTest_RCP_Synapse.gh\n (87.6 KB)",
+  "code_blocks": [
+    {
+      "code": "#! python3\n\nimport rhinoscriptsyntax as rs\n\nimport Grasshopper as gh\n\n# Disable command line echo\n\n# rs.Command(\"NoEcho\")\n\n# Load Grasshopper with no Banner\n\n# Banner: Disable, Window: Show\n\nrs.Command(\"-Grasshopper B D W S _Enter\", echo=False)\n\n# Collapse GH Window to title bar\n\ngh.Instances.DocumentEditor.CollapseForm()\n\n# Window: Hide\n\nrs.Command(\"-Grasshopper W H _Enter\", echo=False)\n\n# Add the RCP to the current GH/Rhino\n\ngh.Instances.ShowRemotePanel()\n\n# Launch the Grasshopper Script Headless with GH Player\n\nrs.Command(\"Test_RCP_Synapse_SE \")",
+      "language": "python",
+      "author": "ale2x72",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 48,
+  "views": 823
+}

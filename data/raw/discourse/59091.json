@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/conditionally-link-the-rhinocommon-dll-v5-or-v6/59091",
+  "topic_id": 59091,
+  "title": "Conditionally link the RhinoCommon.dll v5 or v6",
+  "question": "Hi everyone, I’m developing a plugin for my company that \nappears\n to be working both for Rhino 5 and 6 with no changes (I’m looking at you, TODO tag in \nRhino - What's New?\n).\n\nI’m using the C# API on Windows (having VS as IDE). Thing is, I’d like to load one of the two different versions of the RhinoCommon.dll depending on which external program I’m running the code with (In VS ->debug ->properties → Debug tab → start external program).\n\nThe code I wrote looks like this:\n\n\n\n\npublic class MyPlugIn : PlugIn    {\n\n[…]\n\n\n\n\n   protected override LoadReturnCode OnLoad(ref string errorMessage)\n    {   \n            var v = Rhino.RhinoApp.ExeVersion;\n            if (v == 5)\n            {\n                Assembly.LoadFrom(\"C:\\\\Program Files\\\\Rhinoceros 5 (64-bit)\\\\System\\\\RhinoCommon.dll\");\n            }\n            else if (v == 6)\n            {\n                Assembly.LoadFrom(\"C:\\\\Program Files\\\\Rhino 6\\\\System\\\\RhinoCommon.dll\");\n            }\n            [...]\n    }\n\n\n\nproblem is that in order to resolve the references to the library I need to specify (obviously) a library at compile time. Unfortunately this dll is the one that will be loaded when the programs enters my plugin, essentially once I get into the OnLoad (which, correct me if I’m wrong is the entry point of my plugin) it’s already “too late” and the linking already happened, so I cannot decide which version of the dll to use.\n\nAm I doing something wrong? Is the whole idea stupid to begin with?\n\nCopying the “right” dll into the local path before executing doesn’t seem to be an option since Rhino 6 explicitly doesn’t like this.",
+  "code_blocks": [
+    {
+      "code": "<Optimize>false</Optimize>\n  <DefineConstants>DEBUG;TRACE</DefineConstants>\n  <WarningLevel>3</WarningLevel>\n  <StartAction>Program</StartAction>\n  <StartProgram>C:\\Program Files\\Rhino 6\\System\\Rhino.exe</StartProgram>\n  <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>\n  <StartArguments>/nosplash</StartArguments>\n  <OutputPath>C:\\Users\\Nathan\\AppData\\Roaming\\Grasshopper\\Libraries</OutputPath>\n</PropertyGroup>\n<ItemGroup>\n  <Reference Condition=\" '$(Configuration)' == 'Release' Or  '$(Configuration)' == 'Debug' \" Include=\"csycles\">\n    <HintPath>D:\\Dev\\Rhino\\rhino\\src4\\bin\\Release\\Plug-ins\\csycles.dll</HintPath>\n    <Private>False</Private>\n  </Reference>\n  <Reference Condition=\" '$(Configuration)' == 'ReleaseRhinoWIP' Or  '$(Configuration)' == 'DebugRhinoWIP' \" Include=\"csycles\">\n    <HintPath>C:\\Program Files\\Rhino WIP\\Plug-ins\\csycles.dll</HintPath>\n    <Private>False</Private>\n  </Reference>\n  <Reference Condition=\" '$(Configuration)' == 'ReleaseRhino6' Or  '$(Configuration)' == 'DebugRhino6' \" Include=\"csycles\">\n    <HintPath>C:\\Program Files\\Rhino 6\\Plug-ins\\csycles.dll</HintPath>\n    <Private>False</Private>",
+      "language": "csharp",
+      "author": "nathanletwory",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "protected override LoadReturnCode OnLoad(ref string errorMessage)\n    {   \n            var v = Rhino.RhinoApp.ExeVersion;\n            if (v == 5)\n            {\n                Assembly.LoadFrom(\"C:\\\\Program Files\\\\Rhinoceros 5 (64-bit)\\\\System\\\\RhinoCommon.dll\");\n            }\n            else if (v == 6)\n            {\n                Assembly.LoadFrom(\"C:\\\\Program Files\\\\Rhino 6\\\\System\\\\RhinoCommon.dll\");\n            }\n            [...]\n    }",
+      "language": "csharp",
+      "author": "Riccardo_Di_Lorenzo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 21,
+  "views": 1801
+}

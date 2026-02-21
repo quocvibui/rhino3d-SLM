@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/bic98/AI-based-Architectural-Design-Automation/blob/1371c5cbfef79af412e2bec5e2158c544e2f2470/02_plan_generator/floorPlan.py",
+  "repo": "bic98/AI-based-Architectural-Design-Automation",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "02_plan_generator/floorPlan.py",
+  "instruction": "Floor plan",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.componentbase\nimport random\nimport math\nimport time\n\nrandom.seed(seed)\n\nclass Floorplan:\n    def __init__ (self, room_names, widths, depths, origin):\n        self.room_names = room_names\n        self.widths = widths\n        self.depths = depths\n        self.origin = origin\n        self.rooms = []\n        self.areas = []\n    \n    def initialize(self):\n        self.initialize_rooms()\n        \n    def initialize_rooms(self):\n        initial_room_names = self.room_names\n        initial_widths = self.widths\n        initial_depths = self.depths\n        self.network, initial_locations = self.distribution_network()\n        for i in range(len(initial_room_names)):\n            cur_room = room(initial_room_names[i], initial_depths[i], initial_widths[i], initial_locations[i])\n            self.rooms.append(cur_room)\n\n    \n    def distribution_network(self):\n        cnt = self.origin\n        print(cnt)\n        k = len(self.room_names)\n        nums = list(range(k))\n        random.shuffle(nums)\n        lines = []\n        locations = []\n        rotation = 2 * math.pi / k;\n        for num in nums:\n            r = k * 15\n            pt = rg.Point3d(cnt.X + random.uniform(0, r) * math.cos(rotation*num), cnt.Y + random.uniform(0, r) * math.sin(rotation*num),0)\n            pt_plane = rg.Plane(pt, rg.Vector3d.ZAxis)\n            pt_plane.Rotate(random.uniform(0, 2), rg.Vector3d.ZAxis, pt_plane.Origin)\n            locations.append(pt_plane)\n            line = rg.Line(cnt, pt)\n            lines.append(line)\n        return lines, locations\n        \n\n\n\nfloor = Floorplan(rooms, widths, depths,origin)\nfloor.initialize()\ninitial_rooms = []\nrooms_3d = []\nrooms_areas = []\nfloor_network = floor.network\n\nfor room in floor.rooms:\n    room_3d,room_2d = room.visual_3d()\n    initial_rooms.append(room_2d)\n    rooms_3d.append(room_3d)\n    rooms_areas.append(room.area())\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

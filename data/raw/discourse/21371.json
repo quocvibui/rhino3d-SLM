@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/donut-donut-donut-but-more-about-cplane/21371",
+  "topic_id": 21371,
+  "title": "Donut donut donut :) (but more about Cplane)",
+  "question": "Hi everyone,\n\nhow can we simply create a point from a “dynamic” cplane in a loop (in python) ?\n\nin the attached exemple, i just try to describe a simple circle while revolving from Z\n\nfor making a simple donut shape \n , for that i need to orient my Cplane, so i easily do that with a crossproduct… but i still can’t create from the new Cplane at given time before the next loop … i try to keep thinks simple but there…  what i have missed ?\n\nthanks for any help  (i don’t think that is an hard topic to fix) ^^\n\n\nTorusModel.py\n (2.4 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Guid\n\ndef AddTorus():\n    major_radius = 4.0\n    minor_radius = 2.0\n\n    plane = Rhino.Geometry.Plane.WorldXY\n    torus = Rhino.Geometry.Torus(plane, major_radius, minor_radius)\n    revsrf = torus.ToRevSurface()\n\n    if scriptcontext.doc.Objects.AddSurface(revsrf)!=System.Guid.Empty:\n        scriptcontext.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n    return Rhino.Commands.Result.Failure\n\n\nif __name__==\"__main__\":\n    AddTorus()",
+      "language": "python",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nfrom math import cos\nfrom math import sin\nfrom math import pi\nfrom Rhino.Geometry import Point3d\nfrom Rhino.Geometry import Plane\nfrom Rhino.Geometry import Vector3d\nimport rhinoscriptsyntax as rs\nimport Rhino as rh\n\n# Degres to Radians\n\ndef degtoRad(deg):\n    radValue= (deg*2*pi)/360\n    return radValue\n\n# cross Product definition.\n\ndef CrossP(vect1,vect2):\n    cp = Vector3d(0,0,0)\n    cp.X , cp.Y , cp.Z = vect1.Y*vect2.Z-vect1.Z*vect2.Y , vect1.Z*vect2.X-vect1.X*vect2.Z , vect1.X*vect2.Y-vect1.Y*vect2.X\n    return cp\n\n# A simpleparametric Vector2D of length 10 and 45 deg from x (by default).\n\nMainDiameter = rs.GetReal(\"Diameter\",20,0.1,100)\nMainDiameter = MainDiameter/2\ndeg = rs.GetReal('Angle ( in deg )',45,0.1,360)\n\nRadialVector = Point3d(cos(degtoRad(deg))*MainDiameter,sin(degtoRad(deg))*MainDiameter,0)-Point3d(0,0,0)\norientationvector = CrossP(RadialVector,Vector3d(0,0,1))\n\n#  CPLANE orientation at the end of an RadialVector.\n\nplane1 = Plane(Point3d(cos(degtoRad(deg))*MainDiameter,sin(degtoRad(deg))*MainDiameter,0),orientationvector)\n\n# Vector Visualisation\n\nrs.AddLine(Point3d(0,0,0),Point3d(RadialVector.X,RadialVector.Y,RadialVector.Z))\nrs.AddLine(Point3d(0,0,0),Point3d(orientationvector.X,orientationvector.Y,orientationvector.Z))\nVectMidArc = Vector3d(0,0,0)\nVectMidArc.X,VectMidArc.Y,VectMidArc.Z = orientationvector.X,orientationvector.Y,orientationvector.Z\nVectMidArc.Rotate(pi/4,Vector3d(0,0,1))\narc = rh.Geometry.Arc(Point3d(orientationvector.X,orientationvector.Y,orientationvector.Z),Point3d(VectMidArc.X,VectMidArc.Y,VectMidArc.Z),Point3d(RadialVector.X,RadialVector.Y,RadialVector.Z))\nscriptcontext.doc.Objects.AddAngularDimension(rh.Geometry.AngularDimension(arc,5.0))\nscriptcontext.doc.Objects.AddArc(arc)\n\n# CPLANE setting.\n\nscriptcontext.doc.Views.ActiveView.ActiveViewport.SetConstructionPlane(plane1)\nprint scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n\n################################################################################\n# There the following torus is not created on Cplane \"plane1\" but on the world cplane origin Why ?\n\nrs.AddTorus(Point3d(0,0,0),MainDiameter,1.3)\n\n# of course there is an option in the function torus but does the Cplane\"plane1\"\n# SHOULD not be allready set ?\n\nrs.AddTorus(plane1,2,0.1)\n\n# should i must use always this kind of following operation ?\n\nrs.AddPoint(rs.XformCPlaneToWorld(Point3d(0,0,1),plane1))\n\nrs.AddPoint(Point3d(0,0,0))\n\n# so let's see what's is possible to do with just that.\n\nfor i in rs.frange(0,2*pi,pi/16):\n         rs.AddPoint(rs.XformCPlaneToWorld(Point3d(cos(i)*2.5,sin(i)*2.5,0),plane1))\n\n################################################################################\n\n# World Cplane Reninitialization.\nscriptcontext.doc.Views.ActiveView.ActiveViewport.SetConstructionPlane(Plane.WorldXY)",
+      "language": "python",
+      "author": "julz",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1199
+}

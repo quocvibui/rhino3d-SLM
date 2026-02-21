@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/Urlandi/news2rss_moinmoin/blob/69b4935a0c003f724461cf84e283e969292b1378/newday.py",
+  "repo": "Urlandi/news2rss_moinmoin",
+  "repo_stars": 3,
+  "repo_description": "Read and show feeds from Internet. MoinMoin plugin",
+  "license": "MIT",
+  "filepath": "newday.py",
+  "instruction": "Newday",
+  "code": "# -*- coding: utf-8 -*-\r\n\r\nfrom sys import path\r\n\r\nMOINMOIN_PATH = \"/srv/moinmoin\"\r\nMOINMOIN_PATH_SUP = \"/srv/moinmoin/MoinMoin/support\"\r\nMOINMOIN_PATH_WIKI = \"/srv/moinmoin/wiki\"\r\n\r\npath.append(MOINMOIN_PATH)\r\npath.append(MOINMOIN_PATH_SUP)\r\npath.append(MOINMOIN_PATH_WIKI)\r\n\r\ndef newday (Wiki, ParentPage, TemplatePage, NewPage, Editor, UidName, GidName):\r\n\r\n    from os import seteuid,setegid\r\n    from pwd import getpwnam\r\n    from grp import getgrnam\r\n\r\n    uid = getpwnam(UidName).pw_uid\r\n    gid = getgrnam(GidName).gr_gid\r\n\r\n    setegid(gid)\r\n    seteuid(uid)\r\n\r\n    from MoinMoin.PageEditor import PageEditor\r\n    from MoinMoin.Page import Page\r\n    from MoinMoin.user import getUserId, User\r\n    from MoinMoin.web.contexts import ScriptContext\r\n\r\n    PageName = \"%s/%s\" % (ParentPage,NewPage)\r\n\r\n    RequestPage = ScriptContext(Wiki, PageName)\r\n    UserId = getUserId(RequestPage, Editor)\r\n    RequestPage.user = User(RequestPage, UserId)\r\n\r\n    Editor = PageEditor(RequestPage, PageName)\r\n    Dummy, Revision, Exists = Editor.get_rev()\r\n\r\n    if not Exists:\r\n\r\n        RequestTemplate = ScriptContext(Wiki, TemplatePage)\r\n        Viewer = Page(RequestTemplate, TemplatePage)\r\n\r\n        Text = Viewer.getPageText().replace(\"@PAGE@\", NewPage)\r\n        Header = Viewer.getPageHeader()\r\n\r\n        Text=Header+Text\r\n\r\n        return Editor.saveText(Text, Revision)",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

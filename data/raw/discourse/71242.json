@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getline-returns-tupple-to-world-coordinates/71242",
+  "topic_id": 71242,
+  "title": "GetLine returns Tupple to World coordinates",
+  "question": "Hi,\n\n\nI have just realized that GetLine method returns World coordinates of two points. It makes sense however I just moved the CPlane and spend some time I realized its behaviour. I think it would be useful to include it in the documentation that points are according to the World coordinates and not the actual CPlane.\n\n\nBy the way I started building a script but something is not working properly. The XFormWorldtoCPlane does not translate.\n\n\nprofile CPlane.3dm\n (25.7 KB)\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport time\n\nworld = rs.PlaneFromFrame( [0,0,0], [1,0,0], [0,1,0] )\nrs.ViewCPlane (None, world)\n# curve = rs.GetObject(\"Select the path\", filter=4 )\n# rs.SetUserText (curve, \"Name\", \"route01\", False)\nprofile = rs.GetObject (\"Select profile\",0,False,False,None,False)\nplane = rs.CurvePlane (profile, segment_index=-1)\nplane0 = rs.ViewCPlane (None, plane)\nstartX = rs.GetLine(mode=0, point=None, message1=\"X Axis of the profile\", message2=None, message3=None)\nprint startX[0]\nprint startX[1]\npoint1 = rs.AddPoint(startX[0])\npoint2 = rs.AddPoint(startX[1])\npoint1 = rs.XformWorldToCPlane (startX[0], plane0)\npoint2 = rs.XformWorldToCPlane (startX[1], plane0)\nprint point1\nprint point2",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport time\n\nworld = rs.PlaneFromFrame( [0,0,0], [1,0,0], [0,1,0] )\nrs.ViewCPlane (None, world)\n# curve = rs.GetObject(\"Select the path\", filter=4 )\n# rs.SetUserText (curve, \"Name\", \"route01\", False)\nprofile = rs.GetObject (\"Select profile\",0,False,False,None,False)\nplane = rs.CurvePlane (profile, segment_index=-1)\nplane0 = rs.ViewCPlane (None, plane)\nrs.ViewCPlane ()\nstartX = rs.GetLine(mode=0, point=None, message1=\"X Axis of the profile\", message2=None, message3=None)\nprint startX[0]\nprint startX[1]\npoint1 = rs.AddPoint(startX[0])\npoint2 = rs.AddPoint(startX[1])\npoint1 = rs.XformWorldToCPlane (startX[0], plane0)\npoint2 = rs.XformWorldToCPlane (startX[1], plane0)\nprint point1\nprint point2",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport Rhino.Geometry\nimport scriptcontext\n\nworld = rs.PlaneFromFrame( [0,0,0], [1,0,0], [0,1,0] )\nrs.ViewCPlane (None, world)\n\ninputPt = rs.GetObject(\"select points\", 1)\ninputPt = rs.coerce3dpoint(inputPt)\n\ncurve = rs.GetObject(\"select curve\")\ncurve = rs.CurvePlane (curve, segment_index=-1)\n\nplane = rs.ViewCPlane (None, curve)\nplane = rs.coerceplane(plane)\n\nworld_point = inputPt\n\nworld_to_plane = Rhino.Geometry.Transform.ChangeBasis(plane, Rhino.Geometry.Plane.WorldXY)\nplane_point = world_point\npoint = plane_point.Transform(world_to_plane)\nid = scriptcontext.doc.Objects.AddPoint(point)",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\ndef Test():\n    \n    curve_id = rs.GetObject(\"Select curve\")\n    if not curve_id: return\n    \n    point_id = rs.GetObject(\"Select point\", 1)\n    if not point_id: return\n    \n    point = rs.coerce3dpoint(point_id)\n    print \"Point in world-xy plane coordinates = \", point\n    \n    curve_plane = rs.CurvePlane(curve_id)\n    xform = Rhino.Geometry.Transform.ChangeBasis(Rhino.Geometry.Plane.WorldXY, curve_plane)\n    point.Transform(xform)\n    print \"Point in curve plane coordinates = \", point\n\nTest()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport time\n\nworld = rs.PlaneFromFrame( [0,0,0], [1,0,0], [0,1,0] )\nrs.ViewCPlane (None, world)\n# curve = rs.GetObject(\"Select the path\", filter=4 )\n# rs.SetUserText (curve, \"Name\", \"route01\", False)\nprofile = rs.GetObject (\"Select profile\",0,False,False,None,False)\nplane = rs.CurvePlane (profile, segment_index=-1)\nplane0 = rs.ViewCPlane (None, plane)\nstartX = rs.GetLine(mode=0, point=None, message1=\"X Axis of the profile\", message2=None, message3=None)\nprint startX[0]\nprint startX[1]\npoint1 = rs.AddPoint(startX[0])\npoint2 = rs.AddPoint(startX[1])\npoint1 = rs.XformWorldToCPlane (startX[0], plane0)\npoint2 = rs.XformWorldToCPlane (startX[1], plane0)\nprint point1\nprint point2",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 690
+}

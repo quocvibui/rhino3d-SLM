@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/closest-point-pair-between-boundingbox-and-infinite-line/15797",
+  "topic_id": 15797,
+  "title": "Closest point pair between BoundingBox and infinite Line",
+  "question": "Does anyone know a fast way to measure the distance between a world oriented box (ON_BoundingBox or BoundingBox) and an infinite line? If the line intersects the box, I need a distance of zero.\n\n\nBest I could come up with is bouncing a point back and forth between the line and the box using closest point methods until the point remains the same, but this could take \nmany\n iterations if the line is nearly parallel to one of the box edges.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef closest(b, xline):\n    l1=rs.AddLine(b[0],b[1])\n    l2=rs.AddLine(b[1],b[2])\n    l3=rs.AddLine(b[2],b[3])\n    l4=rs.AddLine(b[3],b[0])\n    l5=rs.AddLine(b[4],b[5])\n    l6=rs.AddLine(b[5],b[6])\n    l7=rs.AddLine(b[6],b[7])\n    l8=rs.AddLine(b[7],b[4])\n    l9=rs.AddLine(b[0],b[4])\n    l10=rs.AddLine(b[1],b[5])\n    l11=rs.AddLine(b[2],b[6])\n    l12=rs.AddLine(b[3],b[7])\n\n    blines=[l1,l2,l3,l4,l5,l6,l7,l8,l9,l10,l11,l12]\n    distlist=[]\n\n    for i in range (0,12):\n        cco= rs.CurveClosestObject(xline, blines[i])\n        dist = rs.Distance(cco[1],cco[2])\n        distlist.append(dist)\n\n    shortest = distlist.index(min(distlist))\n    theone= blines.pop(shortest)\n    thex= rs.CurveClosestObject(theone, xline)\n\n    shrtdist= rs.Distance(thex[1],thex[2])\n    rs.AddPoint(thex[1])\n    rs.AddPoint(thex[2])\n\n    print \"Shortest Distance = \"+str(shrtdist)\n    rs.DeleteObject(xline)\n    rs.DeleteObjects(blines)\n\n\ndef input():\n    object = rs.GetObject(\"Select object\")\n    if not object: return\n    b = rs.BoundingBox(object)\n\n    line=rs.GetObject(\"select line\",4)\n    if not line: return\n    if not rs.IsCurveLinear(line): return\n    xline = rs.CopyObject(line)\n    xline = rs.ExtendCurveLength(xline,0,2,10000)\n    \n    box= rs.AddBox(b)\n    cbx= rs.CurveBrepIntersect (xline, box)\n    if cbx:\n        print 'Distance = 0'\n        rs.DeleteObject(xline)\n        return\n    closest(b, xline)\n\ninput()",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 4501
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/capturing-paste-event/207282",
+  "topic_id": 207282,
+  "title": "Capturing paste event",
+  "question": "I have a python script which responds to LayerTableEvent(s). When pasting an object from one Rhino file to another, which often results in added layers, there is no event triggered. An AddRhinoObject is triggered, but no LayerTableEvent. Layers ARE added to the layer table, but it does not seem this is triggering the expected event. Is this a bug or am I missing some other way to capture adding layers as a result of pasting geometry from another Rhino file?",
+  "code_blocks": [
+    {
+      "code": "def __init__(self):\n\t\tRhino.RhinoDoc.LayerTableEvent += self.OnLayerEvent\n    \n\t\n\tdef OnLayerEvent(self, sender, e):       \n        if e.EventType == Rhino.DocObjects.Tables.LayerTableEventType.Added:\n            try:                     \n                li = e.LayerIndex                \n                layer = Rhino.RhinoDoc.ActiveDoc.Layers.FindIndex(li)                                \n                views = sc.doc.Views.GetPageViews()    \n                counter = 0            \n                for v in views:\n                    dviews = v.GetDetailViews()\n                    for dv in dviews:                        \n                        layer.SetPerViewportVisible(dv.Id, False)\n                        counter += 1\n                print(\"Layer turned off in {} details\".format(counter))\n            \n            except:",
+      "language": "python",
+      "author": "GaryC",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport Rhino\nimport scriptcontext as sc\n\nclass test_event_handler(object):\n    def __init__(self): \n        self.AddEvents()\n      \n    def AddEvents(self):\n        Rhino.RhinoDoc.LayerTableEvent += self.OnLayerTableEvent \n        print('Event handlers added')\n        \n    def RemoveEvents(self):        \n        Rhino.RhinoDoc.LayerTableEvent -= self.OnLayerTableEvent\n        print('Event handlers removed')\n    \n    def OnLayerTableEvent(self, sender, e):\n        print(\">> LayerTableEvent\")\n        print(\">> EventType: {}\".format(e.EventType))\n\ndef test_toggle_event_handler():\n    key = \"test_event_handler\"\n    if sc.sticky.has_key(key):\n        handler = sc.sticky[key]\n        if handler:\n            handler.RemoveEvents()\n            handler = None\n            del sc.sticky[key]\n    else:\n        handler = test_event_handler()\n        sc.sticky[key] = handler\n\nif __name__ == \"__main__\":\n    test_toggle_event_handler()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 82
+}

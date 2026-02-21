@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-script-python-polyline/205140",
+  "topic_id": 205140,
+  "title": "Bug script python polyline",
+  "question": "Hello,\n\n\nI am currently working on a Python script in Rhino and have encountered an error that I am unable to resolve. The error message is as follows:\n\n\nTypeError: an integer is required in method Void .ctor(Int32)\n\n\nThis error occurs when I attempt to create a polyline using the rs.AddPolyline method. Despite my efforts to debug the script, I have not been able to identify the cause of the issue.\n\n\nThank you very much for your assistance.",
+  "code_blocks": [
+    {
+      "code": "#! python3\n\n## Auteur : Yannick Guillec\n## Date : 19/02/2025\n\nimport rhinoscriptsyntax as rs\nimport datetime\nimport random\nimport scriptcontext as sc\nscale = 1\n\n## Fonction ##\n\ndef numberCoupe():\n    dateTime = datetime.datetime.now()\n    number = random.randint(10, 99)\n\n    numberCoupe = dateTime.strftime(\"%Y%m%d%H%M%S\")\n    numberCoupe = numberCoupe+str(number)\n\n    return numberCoupe\n\ndef scaleZDT(point):\n    \n    rs.UnselectAllObjects()\n    allObjects = rs.AllObjects()\n    \n    ZoneDeTravail = [obj for obj in allObjects if rs.GetUserText(obj, \"Scale\") is not None]\n    if not ZoneDeTravail:\n        print(\"Aucun objet avec l'attribut Scale trouvé.\")\n\n    for rect in ZoneDeTravail:\n        if rs.PointInPlanarClosedCurve(point, rect):\n            rs.SelectObject(rect)\n            scale = rs.GetUserText(rect, \"Scale\")\n\n            return scale\n\n    print(\"Le point n'est à l'intérieur d'aucun rectangle.\")\n    scale = 1\n    return scale\n\ndef creationCoupe(point, vector, scale, vectorPerpendicular, texte, angle, numberCoupe):\n\n    scale = float(scale)\n    longueur = 20*scale\n    base = 2*scale\n    sommet = 5*scale\n    couleur = (255, 255, 0) #Jaune\n\n    hautSymbole = rs.PointAdd(point, rs.VectorScale(vector, longueur / rs.VectorLength(vector)))\n    lineCoupe = rs.AddLine(point, hautSymbole)\n\n    midPointCoupe = rs.CurveMidPoint(lineCoupe)\n    trianglePoint1 = rs.PointAdd(midPointCoupe, rs.VectorScale(vectorPerpendicular, base / rs.VectorLength(vectorPerpendicular)))\n    trianglePoint2 = rs.PointAdd(hautSymbole, rs.VectorScale(vectorPerpendicular, base / rs.VectorLength(vectorPerpendicular)))\n    \n    midLine = rs.AddLine(midPointCoupe, hautSymbole)\n    midPointMidLine = rs.CurveMidPoint(midLine)\n    trianglePoint3 = rs.PointAdd(midPointMidLine, rs.VectorScale(vectorPerpendicular, sommet / rs.VectorLength(vectorPerpendicular)))\n    \n    triangle = rs.AddPolyline((trianglePoint1,trianglePoint2,trianglePoint3,trianglePoint1))\n\n    midTexte = rs.AddLine(midPointCoupe, point)\n    midPointMidTexte = rs.CurveMidPoint(midTexte)\n    centreTexte = rs.PointAdd(midPointMidTexte, rs.VectorScale(vectorPerpendicular, 3.46*scale / rs.VectorLength(vectorPerpendicular)))\n    texte = rs.AddText(texte, centreTexte, 5, None, 0, 131074)\n\n    dimZDT = sc.doc.Objects.Find(texte)\n    dimZDT.Geometry.DimensionScale = float(scale)\n    dimZDT.CommitChanges()\n\n    rs.RotateObject(texte, centreTexte, angle, axis=None, copy=False)\n\n    rs.ObjectColor((triangle, lineCoupe), couleur)\n    rs.SetUserText(triangle, \"ID Coupe\", numberCoupe)\n    rs.SetUserText(lineCoupe, \"ID Coupe\", numberCoupe)\n    rs.SetUserText(texte, \"ID Coupe\", numberCoupe)\n\n    rs.DeleteObjects((midLine,midTexte))\n\n    if rs.IsLayer(\"COTEX\"):\n        rs.ObjectLayer((triangle, lineCoupe, texte), \"COTEX\")\n\n## Fonction ##  \n\n## Main ##\n\nnumberCoupe = numberCoupe()\n\ntexteCoupe = rs.GetString(\"Nom de la coupe \",\"1\")\n\nstartPoint = rs.GetPoint(\"Sélectionnez le point de départ\")\nendPoint = rs.GetPoint(\"Sélectionnez le point d'arrivée\", startPoint)\n\nline = rs.AddLine(startPoint, endPoint)\nmidPoint = rs.CurveMidPoint(line)\nscale = scaleZDT(midPoint)\n\nvector = rs.VectorCreate(startPoint, endPoint)\nvectorPerpendicular = rs.VectorCrossProduct(vector, (0, 0, 1))\n\nvectorZero = rs.VectorCreate(startPoint, (startPoint[0]+10,startPoint[1],startPoint[2]))\nangle = rs.VectorAngle(vectorZero, vector)\n\nif startPoint[1] > endPoint[1]:\n    angle = 180-angle\n\nif angle > 45:\n    if angle < 135:\n        angle = angle -90\n\ncreationCoupe(startPoint, vector, scale, vectorPerpendicular, texteCoupe, angle, numberCoupe)\nvector = rs.VectorReverse(vector)\ncreationCoupe(endPoint, vector, scale, vectorPerpendicular, texteCoupe, angle, numberCoupe)\n\nrs.DeleteObject(line)\nrs.UnselectAllObjects()\n\n## Main ##",
+      "language": "python",
+      "author": "Guillec",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\nimport rhinoscriptsyntax as rs\n\npoints = rs.GetPoints(True)\nif points: rs.AddPolyline(points)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 298
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_getpointdynamicdraw.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_getpointdynamicdraw.py",
+  "instruction": "Ex getpointdynamicdraw",
+  "code": "from Rhino import *\nfrom Rhino.Geometry import *\nfrom Rhino.Commands import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nfrom System.Drawing import *\n\ndef RunCommand():\n  gp = GetPoint()\n  gp.SetCommandPrompt(\"Center point\")\n  gp.Get()\n  if gp.CommandResult() <> Result.Success:\n    return gp.CommandResult()\n  center_point = gp.Point()\n  if center_point == Point3d.Unset:\n    return Result.Failure\n\n  gcp = GetCircleRadiusPoint(center_point)\n  gcp.SetCommandPrompt(\"Radius\")\n  gcp.ConstrainToConstructionPlane(False)\n  gcp.SetBasePoint(center_point, True)\n  gcp.DrawLineFromPoint(center_point, True)\n  gcp.Get()\n  if gcp.CommandResult() <> Result.Success:\n    return gcp.CommandResult()\n\n  radius = center_point.DistanceTo(gcp.Point())\n  cplane = doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n  doc.Objects.AddCircle(Circle(cplane, center_point, radius))\n  doc.Views.Redraw()\n  return Result.Success\n\nclass GetCircleRadiusPoint (GetPoint):\n  def __init__(self, centerPoint):\n    self.m_center_point = centerPoint\n  \n  def OnDynamicDraw(self, e):\n    cplane = e.RhinoDoc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    radius = self.m_center_point.DistanceTo(e.CurrentPoint)\n    circle = Circle(cplane, self.m_center_point, radius)\n    e.Display.DrawCircle(circle, Color.Black)\n\nif __name__ == \"__main__\":\n    RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

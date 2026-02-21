@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/localsoftware/localsoftware_rhino-grasshopper/blob/4aafec57e33b9f09cce6fd73dcda12b17cf794a5/python/SetView.py",
+  "repo": "localsoftware/localsoftware_rhino-grasshopper",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "BSD-2-Clause",
+  "filepath": "python/SetView.py",
+  "instruction": "Set the current Rhino viewport to a camera view.",
+  "code": "\"\"\"Set the current Rhino viewport to a camera view.\n\nOnce you have a camera created, the Set View component easily adjusts the view to it.\nYou can use these views to batch render, export or create presentation drawings from GH geometries easily.\nBased on the work of Jackie Berry.\n\n    Typical usage:\n        Once you have created a view with the Create View component, simply plug the Geometry, View Vector,\n        and View Target outputs into the geometry, vector, and target inputs of the component.\n        Once you have a view created, you can easily adjust the view with it. You can use these views to batch render.\n        Add a Boolean Toggle component to activate and deactivate the view change.\n\n    Inputs:\n        SetView: boolean to set view\n        geometry: geometry in view\n        target: 3D point defining camera target\n        vector: 3D vector defining camera direction\n\n    Outputs:\n        None\"\"\"\n\n__author__ = \"palomagr\"\n__version__ = \"2020.07.09\"\n\n#ghenv.Component.Name = \"Set View\"\n#ghenv.Component.NickName = \"Set View\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython, System, Rhino, os\nimport rhinoscriptsyntax as rs\nimport cPickle as pickle\nfrom scriptcontext import doc\n\nclass MyComponent(component):\n\n    def RunScript(self, setView, geometry, target, vector):\n        if setView:\n            vp = doc.Views.ActiveView.ActiveViewport\n            vp.SetCameraDirection(vector, True)\n            vp.SetCameraTarget(target, True)\n            bb = rs.BoundingBox(geometry)\n            rs.ZoomBoundingBox(bb)\n            doc.Views.ActiveView.Redraw()\n        return\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

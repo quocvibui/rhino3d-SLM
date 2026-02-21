@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getting-sub-object-material/201703",
+  "topic_id": 201703,
+  "title": "Getting sub-object material",
+  "question": "I have a python script that gets material names from polysurface objects and tagging the objects in layouts with text objects. This works well, except that I want to get the material names from faces of polysurfaces as many of the files I’m working with have materials assigned to faces, not the whole polysurface.\n\nI tried using materials_table.FindIndex(brep_face.MaterialChannelIndex) but this doesn’t return the correct material.\n\nClearly I don’t understand the MaterialChannelIndex property but cannot find any other way to get the material assigned to a face. I checked all the topics talking about materials on objects, no joy.\n\nAnyone know how to get this?",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef SubobjectMaterialNames():\n    \n    brep_id = rs.GetObject(\"Select brep with subobject materials\", 16)\n    if not brep_id: return\n    \n    brep_obj = rs.coercerhinoobject(brep_id, True, True)\n    if not brep_obj.HasSubobjectMaterials: return\n    \n    material_names = set()\n    \n    for component_index in brep_obj.SubobjectMaterialComponents:\n        render_material = brep_obj.GetMaterial(component_index)\n        material_names.add(render_material.Name)\n    \n    print list(material_names)\n    \nSubobjectMaterialNames()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nmsg=\"Select objects to get material\"\nobjs = rs.GetObjects(msg, 8 + 16, preselect=True)\n\nif objs:\n    for obj in objs:\n        rh_obj = rs.coercerhinoobject(obj, True, True)\n        if rh_obj.HasSubobjectMaterials:        \n            print(\"Object has sub-object materials.\")\n            for ci in rh_obj.SubobjectMaterialComponents:            \n                for f in rh_obj.Geometry.Faces:                \n                    if ci.Index == f.ComponentIndex().Index:                    \n                        area = Rhino.Geometry.AreaMassProperties.Compute(f).Area\n                        rm = rh_obj.GetMaterial(ci)\n                        print(f\"{rm.Name} = {area}\")\n                        break\n        else:\n            print(f\"Object has no sub-object materials. Object material is {rh_obj.RenderMaterial.Name}\")",
+      "language": "python",
+      "author": "GaryC",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\nimport Rhino\nimport rhinoscriptsyntax as rs\nfrom collections import defaultdict\n\ndef DoSomething():\n    brep_id = rs.GetObject(\"Select brep with subobject materials\", 16)\n    if not brep_id: return\n    \n    brep_obj = rs.coercerhinoobject(brep_id, True, True)\n    if not brep_obj.HasSubobjectMaterials: return\n    \n    brep = brep_obj.Geometry\n    dict_areas = defaultdict(lambda: 0.0)\n    \n    for ci in brep_obj.SubobjectMaterialComponents:\n        mat = brep_obj.GetMaterial(ci)\n        amp = Rhino.Geometry.AreaMassProperties.Compute(brep.Faces[ci.Index])\n        msg = \"Face: {}  Material: {}  Area: {}\"\n        print msg.format(ci.Index, mat.Name, amp.Area)\n        dict_areas[mat.Name] += amp.Area\n    \n    for mat_name, total_area in dict_areas.iteritems():\n        print \"Material: {}  TotalArea: {}\".format(mat_name, total_area)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 104
+}

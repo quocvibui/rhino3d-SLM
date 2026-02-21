@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/another-multi-threaded-solid-difference-topic/165244",
+  "topic_id": 165244,
+  "title": "Another Multi-Threaded Solid Difference Topic",
+  "question": "Hello,\n\n\nI have a script that relies on a large dataset of boolean difference operations. Please assume there isn’t a way to avoid this (via other geometry creation/manipulation methods)\n\n\nI’ve been looking for speedier Boolean operators in Grasshopper for a bit and recently stumbled upon a post where \n@magicteddy\n found a performance increase over the standard Solid Difference component by simply calling the Rhino Common equivalent inside a scripting component.\n\n\nWhile there is a noticeable performance difference between the two components (in favor of the magicteddy/Rhino Common version) I couldn’t help but remember reading through \nthis post\n and \nthis post\n in the past and thinking there is an option to leverage the magicteddy version plus enable parallel computing in the case of the A input being a long list of items.\n\n\nI’ve tried to take a stab at this myself but I’m stuck on understanding how to loop within a multithreading task or rather how to execute a single operation within the looping tasks.\n\n\n\n\nIf I have a list with inputs A as a list of 10 objects and a B list with 150 objects each, I’m assuming I commit a thread per each item in A and then operate on the corresponding B sublist within the thread task.\n\n\nI can’t seem to get it to work though and currently when I enable Parallel in my component I get an “appended” list of all possible A/B boolean differences per A item instead of the culminated result of all A/B differences merged together. I’m unclear of how to properly append the final R/result list to be single objects matching the length of A.\n\n\nHere’s the code and a test file:\n\n\nC#:\n\n\nusing System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Drawing;\n\nusing Rhino;\nusing Rhino.Geometry;\n\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    int processor_count;\n    double tol;\n\n    private void RunScript(System....",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(DataTree<Brep> S, DataTree<Brep> D, ref object R)\n  {\n    double tolerance = doc.ModelAbsoluteTolerance;\n\n    var mainBrepsMT = new System.Collections.Concurrent.ConcurrentDictionary<GH_Path,List<Rhino.Geometry.Brep>> ();\n\n    int totalMaxConcurrancy = System.Environment.ProcessorCount - 1;\n    this.Component.Message = totalMaxConcurrancy + \" threads\";\n\n    //start of the parallel engine\n    System.Threading.Tasks.Parallel.ForEach(S.Paths, new System.Threading.Tasks.ParallelOptions\n      { MaxDegreeOfParallelism = totalMaxConcurrancy},\n      pth => {\n      mainBrepsMT[pth] = Brep.CreateBooleanDifference(S.Branch(pth), D.Branch(pth), tolerance).ToList();\n      });\n    //end of the parallel engine\n\n    //convert dictionaries to regular old data trees\n    DataTree<Rhino.Geometry.Brep> mainBreps = new DataTree<Rhino.Geometry.Brep>();\n\n    foreach(KeyValuePair<GH_Path,List<Rhino.Geometry.Brep>> p in mainBrepsMT)\n    {\n      mainBreps.AddRange(p.Value, p.Key);\n    }\n\n    R = mainBreps;\n\n  }",
+      "language": "csharp",
+      "author": "Brian_Washburn",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "// Merge the lists\n        List<Rhino.Geometry.Brep> combinedList = new List<Rhino.Geometry.Brep>(S.Branch(pth));\n        combinedList.AddRange(D.Branch(pth));\n\n        mainBrepsMT[pth] = Brep.CreateBooleanUnion(combinedList, tolerance, manifoldOnly, out nakedEdgePoints, out badIntersectionPoints, out nonManifoldEdgePoints).ToList();\n    });",
+      "language": "csharp",
+      "author": "saeed_hasan_zadeh",
+      "post_number": 27,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Drawing;\n\nusing Rhino;\nusing Rhino.Geometry;\n\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Data;\nusing Grasshopper.Kernel.Types;\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    int processor_count;\n    double tol;\n\n    private void RunScript(System.Collections.Generic.IEnumerable<Rhino.Geometry.Brep> A, System.Collections.Generic.IEnumerable<Rhino.Geometry.Brep> B, bool Parallel, out object R)\n    {\n\n        //Display Component Message\n        processor_count = System.Environment.ProcessorCount - 1;\n\n        tol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n\n        if (Parallel)\n        {\n            R = ParallelCreateBooleanDifference(A, B);\n            //this.Component.Message = \"processor_count + \" Threads Available\"\";\n            this.Component.Message = \"Parallel\";\n        }\n        else\n        {\n            R = Brep.CreateBooleanDifference(A, B, tol);\n            this.Component.Message = \" \";\n        }\n    }\n\n    private object ParallelCreateBooleanDifference(IEnumerable<Rhino.Geometry.Brep> A, IEnumerable<Rhino.Geometry.Brep> B)\n    {\n        var result = new List<Rhino.Geometry.Brep>();\n\n        // Use Parallel.ForEach to run in parallel\n        System.Threading.Tasks.Parallel.ForEach(A, a =>\n        {\n            foreach (var b in B)\n            {\n                // Compute the difference for each pair of A and B\n                var diff = Brep.CreateBooleanDifference(a, b, tol);\n                lock (result)\n                {\n                    result.AddRange(diff);\n                }\n            }\n        });\n\n        return result;\n    }\n\n    public bool Parallel;\n}",
+      "language": "csharp",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 31,
+  "views": 2221
+}

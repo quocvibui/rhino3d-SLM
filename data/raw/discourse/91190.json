@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino3dm-archivabledictionary-decodedict-behaves-differently-in-python-vs-javascript/91190",
+  "topic_id": 91190,
+  "title": "rhino3dm.ArchivableDictionary.decodeDict() behaves differently in python vs javascript",
+  "question": "Hi I’m trying to recreate a python code in Javascript and I’m running into some issues. I’m basically trying to recreate Rhino Compute’s EvaluatePython() function in javascript.\n\n\nHere’s the source code for Python client \nPythonEvaluate\n function which comes with rhino compute for python:\n\n\ndef PythonEvaluate(script, inputs, output_names):\n    encodedInput = rhino3dm.ArchivableDictionary.EncodeDict(inputs)\n    url = 'rhino/python/evaluate'\n    args = [script, json.dumps(encodedInput), output_names]\n    response = ComputeFetch(url, args)\n    output = rhino3dm.ArchivableDictionary.DecodeDict(json.loads(response))\n    return output\n\n\n\nNow my implementation in javascript is like:\n\n\nfunction pythonEvaluate(script, input, output) {\n      var inputEncoded = rhino3dm.ArchivableDictionary.encodeDict(input);\n      var url = \"rhino/python/evaluate\";\n      var args = [script, JSON.stringify(inputEncoded), output];\n      var result = await compute.computeFetch(url, args);\n      var objects = rhino3dm.ArchivableDictionary.decodeDict(\n        JSON.parse(result)\n      );\n      return objects;\n}\n\n\n\nThis works fine in cases that the script in PythonEvaluate is a single Geometry.\n\nlike below:\n\n\nscript=\"\"\"\nimport Rhino\nplane = Rhino.Geometry.Plane.WorldXY\ncircle = Rhino.Geometry.Circle(plane,3).ToNurbsCurve()\next = Rhino.Geometry.Extrusion.Create(circle, 10, True).ToBrep()\nOUT_result = ext\n\"\"\"\n\n\n\nOUT_result in this case is what I’m interested in returning. This works both in python and javascript using code above.\n\nBut if I try to return a list like \nOUT_result = [ext]\n, it works in python and fails in javascript. The part of the javascript code that breaks is this line:\n\n\nvar objects = rhino3dm.ArchivableDictionary.decodeDict(JSON.parse(result));\n\n\n\nAnd gives the following error:\n\n\nUnhandled Rejection (BindingError): _emval_take_value has unknown type NSt3__26vectorIP16BND_CommonObjectNS_9allocatorIS2_EEEE\n\n\n\nFor reference here is what the python results look like before and after \nde...",
+  "code_blocks": [
+    {
+      "code": "script=\"\"\"\nimport Rhino\nplane = Rhino.Geometry.Plane.WorldXY\ncircle = Rhino.Geometry.Circle(plane,3).ToNurbsCurve()\next = Rhino.Geometry.Extrusion.Create(circle, 10, True).ToBrep()\nOUT_result = ext\n\"\"\"",
+      "language": "python",
+      "author": "mkarimi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 1,
+  "views": 602
+}

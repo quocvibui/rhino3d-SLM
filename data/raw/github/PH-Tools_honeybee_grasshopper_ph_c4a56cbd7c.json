@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/PH-Tools/honeybee_grasshopper_ph/blob/c433bc8e66f3a51fd05ee4c485f4c54c03d2a569/honeybee_grasshopper_ph/src/HBPH%20-%20Set%20Window%20Install%20Depth.py",
+  "repo": "PH-Tools/honeybee_grasshopper_ph",
+  "repo_stars": 6,
+  "repo_description": "Honeybe-PH plugin for Rhino / Grasshopper ",
+  "license": "GPL-3.0",
+  "filepath": "honeybee_grasshopper_ph/src/HBPH - Set Window Install Depth.py",
+  "instruction": "Set the install depth of a Honeybee-Aperture. This attribute is passed on to the \n\"HBPH - Create Building Shading\" tool, and is output directly for WUFI-Passive. \nThe input value describes the...",
+  "code": "#\n# Honeybee-PH: A Plugin for adding Passive-House data to LadybugTools Honeybee-Energy Models\n# \n# This component is part of the PH-Tools toolkit <https://github.com/PH-Tools>.\n# \n# Copyright (c) 2022, PH-Tools and bldgtyp, llc <phtools@bldgtyp.com> \n# Honeybee-PH is free software; you can redistribute it and/or modify \n# it under the terms of the GNU General Public License as published \n# by the Free Software Foundation; either version 3 of the License, \n# or (at your option) any later version. \n# \n# Honeybee-PH is distributed in the hope that it will be useful,\n# but WITHOUT ANY WARRANTY; without even the implied warranty of \n# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the \n# GNU General Public License for more details.\n# \n# For a copy of the GNU General Public License\n# see <https://github.com/PH-Tools/honeybee_ph/blob/main/LICENSE>.\n# \n# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>\n#\n\"\"\"\nSet the install depth of a Honeybee-Aperture. This attribute is passed on to the \n\"HBPH - Create Building Shading\" tool, and is output directly for WUFI-Passive. \nThe input value describes the distance 'back' in the host surface (wall, roof, etc) \nwhere the aperture is installed. This is relevant in Passive House buildings due to \nthe typically very thick assemblies and the shading this causes on the glazing.\n-\nEM March 8, 2023\n    Args:\n        _install_depth: (float) The distance 'back' from the wall outer surface \n            where the aperture is installed.\n    \n        _hb_apertures: (list[Aperture]) A List of the Honeybee Apertures to set\n            the attribute values on.\n            \n    Returns:\n        hb_apertures_: The Honeybee Apertures with their attribute values set.\n\"\"\"\n\nimport scriptcontext as sc\nimport Rhino as rh\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\nimport Grasshopper as gh\n\nfrom honeybee_ph_rhino import gh_compo_io, gh_io\n\n# ------------------------------------------------------------------------------\nimport honeybee_ph_rhino._component_info_\nreload(honeybee_ph_rhino._component_info_)\nghenv.Component.Name = \"HBPH - Set Window Install Depth\"\nDEV = honeybee_ph_rhino._component_info_.set_component_params(ghenv, dev=False)\nif DEV:\n    from honeybee_ph_rhino.gh_compo_io import win_set_inst_depth as gh_compo_io\n    reload(gh_compo_io)\n    reload(gh_io)\n\n# ------------------------------------------------------------------------------\n# -- GH Interface\nIGH = gh_io.IGH( ghdoc, ghenv, sc, rh, rs, ghc, gh )\n\n# ------------------------------------------------------------------------------\ngh_compo_interface = gh_compo_io.GHCompo_SetApertureInstallDepth(\n    IGH,\n    _hb_apertures,\n    _install_depth,\n    )\nhb_apertures_ = gh_compo_interface.run()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

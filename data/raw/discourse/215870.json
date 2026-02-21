@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-best-to-trim-a-surface-curve-according-to-the-trims-of-a-brepface/215870",
+  "topic_id": 215870,
+  "title": "How best to trim a surface curve according to the trims of a BrepFace",
+  "question": "Hi there,\n\n\nI’m working on a plugin that includes functionality for algorithmically generating curves on the surface of an arbitrary Brep. In the process of generating these curves, I tend to first use the \nUnderlyingSurface\n of a \nBrepFace\n. But then I need to trim a generated curve according to the \nBrepFace\n, so that none of the curve spans a “hole” in the brep or go off the edge. I’ve managed to cobble something together to do this, but I feel it has some numerical issues, e.g. when dealing with very small \nBrepFaces\n with correspondingly small trim curve, sometimes my trimming function leaves segments of the curve that go off the surface, or span holes in the \nBrepFace\n. Additionally, I’ve found this to be rather slow when there are many holes/trims in the \nBrepFace\n.\n\n\nHere is the function, which relies mainly on \nIntersection.CurveBrep\n to get curve parameters that intersect with the brep. Note the snippet contains some library functions for map/filter and Option (some/none), but hopefully it should still be understandable:\n\n\n/// <summary>\n/// Returns all the curve segments that rest on the brep in order of the curve's parameterization direction.\n/// </summary>\npublic static Interval[] CookieCutCurveByBrep(Curve curve, Brep brep, double tolerance)\n{\n    Rhino.Geometry.Intersect.Intersection.CurveBrep(curve, brep, tolerance,\n        tolerance, out var intersectionParams);\n\n    var parameters = intersectionParams\n        // Always append the start and end parameters of the curve, just in case those\n        // points are slightly away from the surface causing them not to be in the \n        // `interesectionParams` array\n        .Prepend(curve.Domain.T0).Append(curve.Domain.T1);\n\n    var segments = OverlappedSegments(curve, brep, parameters.OrderBy(a => a).ToList(), tolerance);\n\n    if (!segments.Any())\n    {\n        return [];\n    }\n\n    return segments;\n\n    // Using the intersection points, figure out which intervals are on the surface and which are off\n    st...",
+  "code_blocks": [
+    {
+      "code": "/// <summary>\n/// Returns all the curve segments that rest on the brep in order of the curve's parameterization direction.\n/// </summary>\npublic static Interval[] CookieCutCurveByBrep(Curve curve, Brep brep, double tolerance)\n{\n    Rhino.Geometry.Intersect.Intersection.CurveBrep(curve, brep, tolerance,\n        tolerance, out var intersectionParams);\n\n    var parameters = intersectionParams\n        // Always append the start and end parameters of the curve, just in case those\n        // points are slightly away from the surface causing them not to be in the \n        // `interesectionParams` array\n        .Prepend(curve.Domain.T0).Append(curve.Domain.T1);\n\n    var segments = OverlappedSegments(curve, brep, parameters.OrderBy(a => a).ToList(), tolerance);\n\n    if (!segments.Any())\n    {\n        return [];\n    }\n\n    return segments;\n\n    // Using the intersection points, figure out which intervals are on the surface and which are off\n    static Interval[] OverlappedSegments(Curve curve, Brep brep, IEnumerable<double> intersectionPts, double distanceTolerance)\n    {\n        // works like rust's `Windows(2)`, returning adjacent entry pairs in the collection\n        return intersectionPts.Windows()\n            .FilterMap(pair =>\n        {\n            var (prev, next) = pair;\n\n            //------------------------------------------------\n            // The Intersection.CurveBrep(...) function can\n            // return noisy domain points--multiple points\n            // very close to each other which can create very\n            // small segments. We ignore those segments here\n            // ...............................................\n            var interval = new Interval(prev, next);\n            var segmentLength = curve.GetLength(interval);\n            if (segmentLength < distanceTolerance)\n            {\n                return Option.None;\n            }\n\n            var mid = (next + prev) / 2.0;\n            var midPt = curve.PointAt(mid);\n            var isPointOnSurface = brep.ClosestPoint(midPt, out _, out _, out _, out _, distanceTolerance, out _);\n\n            return isPointOnSurface \n                ? Option<Interval>.Some(new Interval(prev, next)) \n                : Option<Interval>.None();\n        }).ToArray();\n    }\n}",
+      "language": "csharp",
+      "author": "Dustin_Condon",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 31
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/dtbinh/T1_python-exercises/blob/f4710c3dc2ba8ddb3e3e9069ab8d65df674463ab/07_ur_online/shifted_frames_setup/compas/src/compas_rhino/conduits/mesh.py",
+  "repo": "dtbinh/T1_python-exercises",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "07_ur_online/shifted_frames_setup/compas/src/compas_rhino/conduits/mesh.py",
+  "instruction": null,
+  "code": "from compas_rhino.conduits import Conduit\n\ntry:\n    from Rhino.Geometry import Point3d\n    from Rhino.Geometry import Line\n\n    from System.Collections.Generic import List\n    from System.Drawing.Color import FromArgb\n\nexcept ImportError:\n    import platform\n    if platform.python_implementation() == 'IronPython':\n        raise\n\n\n__author__     = ['Tom Van Mele', ]\n__copyright__  = 'Copyright 2014, BLOCK Research Group - ETH Zurich'\n__license__    = 'MIT License'\n__email__      = 'vanmelet@ethz.ch'\n\n\n__all__ = ['MeshConduit', ]\n\n\nclass MeshConduit(Conduit):\n    \"\"\"A Rhino display conduit for meshes.\n\n    Parameters:\n        mesh (compas.datastructures.mesh.Mesh): The mesh object.\n        color (tuple): Optional.\n            The conduit color.\n            Default is ``(255, 0, 0)``.\n\n    Example:\n\n        .. code-block:: python\n\n            import compas\n            import compas_rhino as compas_rhino\n\n            from compas.datastructures.mesh import Mesh\n            from compas.datastructures.mesh.algorithms import smooth_mesh_centroid\n\n            mesh = Mesh.from_obj(compas.get_data('faces.obj'))\n\n            conduit = MeshConduit(mesh)\n            conduit.enable()\n\n            def update_conduit(mesh, k):\n                if k % 10 == 0:\n                    conduit.redraw()\n\n            try:\n                smooth_mesh_centroid(mesh, callback=update_conduit)\n            except:\n                raise\n\n            finally:\n                conduit.disable()\n                del conduit\n\n    \"\"\"\n    def __init__(self, mesh, color=None, **kwargs):\n        super(MeshConduit, self).__init__(**kwargs)\n        self.mesh = mesh\n        color = color or (255, 0, 0)\n        self.color = FromArgb(*color)\n\n    def DrawForeground(self, e):\n        edges = self.mesh.wireframe()\n        lines = List[Line](len(edges))\n        for u, v in edges:\n            sp = self.mesh.vertex_coordinates(u)\n            ep = self.mesh.vertex_coordinates(v)\n            lines.Add(Line(Point3d(*sp), Point3d(*ep)))\n        e.Display.DrawLines(lines, self.color)\n\n\n# ==============================================================================\n# Debugging\n# ==============================================================================\n\nif __name__ == \"__main__\":\n\n    pass\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,52 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/drag-knife-toolpath-generation/25779",
+  "topic_id": 25779,
+  "title": "Drag knife toolpath generation",
+  "question": "Hi,\n\n\nI’d like to generate a drag knife toolpath using python/grasshopper.\n\n\nIt basically comes down to this:\n\n\nFor each point on a line (with the distance of the points approaching 0), IF continuous, offset this point in the direction of the tangent by the distance the drag knife is from the centre. With all these points combined, you should get a new curve.\n\n\nHowever, if it isn’t continuous, it should make a circle segment, with the radius being the distance the drag knife is from the centre.\n\n\nHere is an illustration of what i mean:\n\n\nScreenshot 2015-10-17 17.03.45.png\n1107×836 306 KB\n\n\nFurther down the road i’d also like to export this to gcode.\n\n\nThis is what i’ve written so far (or well, found it in a video) :\n\n\nimport rhinoscriptsyntax as rs\n\n\nclass TanLines:\n\ndef \ninit\n (self, INcurve, INnumOfDivs):\n\nself.curve = INcurve\n\nself.numOfDivs = INnumOfDivs\n\n\ndef tanPoints(self):\n    doms = rs.CurveDomain(self.curve)\n    minDom = doms[0]\n    maxDom = doms[1]\n\n\n    for i in range(0, 30):\n        param = (maxDom-minDom)/30 * i\n\n        pt = rs.EvaluateCurve(self.curve,  param)\n        tan = rs.CurveTangent(self.curve, param)\n        tanPt = rs.VectorAdd(tan, pt)\n        rs.AddLine(pt, tanPt)\n curve = rs.GetObject(\"Select a curve\")\n obj = TanLines(curve, rs.GetReal(\"number\", 30, 0, 100))\n obj.tanPoints();\n\n\n\nKind regards,\n\nThomas",
+  "code_blocks": [
+    {
+      "code": "def tanPoints(self):\n    doms = rs.CurveDomain(self.curve)\n    minDom = doms[0]\n    maxDom = doms[1]\n    points = Rhino.Collections.Point3dList(30)",
+      "language": "python",
+      "author": "Thomaxo",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "pt = rs.EvaluateCurve(self.curve,  param)\n        tan = rs.CurveTangent(self.curve, param)\n        tanPt = rs.PointAdd(tan, pt)\n        rs.AddLine(pt, tanPt,)\n        points.Add(tanPt)\n    print \"Before sort ...\"\n    for point in points:\n        print \"point: {0}\".format(point)\n    nc = Rhino.Geometry.NurbsCurve.Create(False, 2, points)\n    rc = Rhino.Commands.Result.Failure\n    if nc and nc.IsValid:\n        if scriptcontext.doc.Objects.AddCurve(nc)!=System.Guid.Empty:\n            scriptcontext.doc.Views.Redraw()\n            rc = Rhino.Commands.Result.Success\n    return rc",
+      "language": "python",
+      "author": "Thomaxo",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport System.Guid\n\nclass TanLines:\n    def __init__ (self, INcurve, INdivideBy, INradius):\n        self.curve = INcurve\n        self.divideBy = float(INdivideBy)\n        self.radius = int(INradius)\n\n    def tanPoints(self):\n        doms = rs.CurveDomain(self.curve)\n        minDom = doms[0]\n        maxDom = doms[1]\n        points = Rhino.Collections.Point3dList(30)\n        lengthCurve = rs.CurveLength(self.curve)\n        self.numOfDivs = lengthCurve/self.divideBy\n\n        for i in range(0, int(self.numOfDivs)):\n            param = (maxDom-minDom)/self.numOfDivs * i\n\n            pt = rs.EvaluateCurve(self.curve,  param)\n            tan = rs.CurveTangent(self.curve, param)\n            if i < 1:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), -self.radius*2)\n            elif i == self.numOfDivs-1:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), self.radius*2)\n            else:\n                tan = rs.VectorScale(rs.CurveTangent(self.curve, param), self.radius)\n\n            tanPt = rs.PointAdd(tan, pt)\n            #rs.AddLine(pt, tanPt)\n            points.Add(tanPt)\n        print \"Before sort ...\"\n        for point in points:\n            print \"point: {0}\".format(point)\n        nc = Rhino.Geometry.NurbsCurve.Create(False, 1, points)\n        rc = Rhino.Commands.Result.Failure\n        if nc and nc.IsValid:\n            if scriptcontext.doc.Objects.AddCurve(nc)!=System.Guid.Empty:\n                scriptcontext.doc.Views.Redraw()\n                rc = Rhino.Commands.Result.Success\n        return rc\n\ncurve = rs.GetObject(\"Select a curve\")\nobj = TanLines(curve, rs.GetReal(\"length\", 200, 0, 10000), rs.GetReal(\"Radius\", 200, 0, 10000))\nobj.tanPoints()",
+      "language": "python",
+      "author": "Thomaxo",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def tanPoints(self):\n    doms = rs.CurveDomain(self.curve)\n    minDom = doms[0]\n    maxDom = doms[1]\n\n\n    for i in range(0, 30):\n        param = (maxDom-minDom)/30 * i\n\n        pt = rs.EvaluateCurve(self.curve,  param)\n        tan = rs.CurveTangent(self.curve, param)\n        tanPt = rs.VectorAdd(tan, pt)\n        rs.AddLine(pt, tanPt)\n curve = rs.GetObject(\"Select a curve\")\n obj = TanLines(curve, rs.GetReal(\"number\", 30, 0, 100))\n obj.tanPoints();",
+      "language": "python",
+      "author": "Thomaxo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 3353
+}

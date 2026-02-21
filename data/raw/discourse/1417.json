@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/questions-other-new-rhino-python-users-might-have-like-me/1417",
+  "topic_id": 1417,
+  "title": "Questions Other New Rhino.Python Users Might Have Like Me",
+  "question": "NOTE: This is a repost from the old python forum originally posted by\n\n\n@piac\n. It was very useful for people getting started, so placing the\n\ncontent here on discourse\n\n\n\n\nHi all,\n\n\nlike most of the people on this forum, I’m new to Rhino.Python and I’m posting some of the questions (with some answers I found so far) that were puzzling me when transitioning from RhinoScript to Rhino.Python.\n\n\n0. What’s the RhinoScript package and where is it?\n\n\nIt’s a series of Python functions that mimic the procedural programming style found in RhinoScript, the scripting language that is available in Rhino v4 and previous&future Windows versions of Rhino and is based on vbScript. I could find the Python source code of the RhinoScript package in\n\nC:\\Documents and Settings#my-name#\\Application Data\\McNeel\\Rhinoceros\\5.0\\IronPython\\lib\\rhinoscr ipt (on winXP)\n\n/Library/Application Support/McNeel/Rhinoceros/MacPlugIns/IronPython/settings/rhinoscript/lib/ (on Mac)\n\nC:\\Users#my-name#\\AppData\\Roaming\\McNeel\\Rhinoceros\\5.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript (on Vista/7)\n\n\n1. How do I reference a Rhino point with the RhinoScript package?\n\n\nThe point entity in the Rhino document is linked with a Guid (a globally unique identifier of the point inside the document) in the RhinoScript package. Similarly as its precursor, generally RhinoScript uses Guids (in this case, System.Guid and not text any longer as in vbScript) all the time to reference all geometric entities in the document.\n\n\nimport rhinoscriptsyntax as rs\n \nptId = rs.GetObject(\"Please select point\", rs.filter.point)\nif ptId:\n    coords = rs.PointCoordinates(ptId)\n    print(coords)\n\n\n\n2. Ok, then what does coords in the example above contain now?\n\n\ncoords above is a RhinoCommon object, a Point3d. It’s a Rhino.Geometry.Point3d type to be precise. The same happens to almost every type: for a line RhinoCommon uses the Rhino.Geometry.Line type, and RhinoScript simply normally uses Guids to...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n \nptId = rs.GetObject(\"Please select point\", rs.filter.point)\nif ptId:\n    coords = rs.PointCoordinates(ptId)\n    print(coords)",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Input import GetResult\nfrom Rhino.Input.Custom import GetPoint\n \ngetter = GetPoint() #calls the constructor of GetPoint\ntry:\n    getter.SetCommandPrompt(\"Please select a point\")\n    if getter.Get() == GetResult.Point: #we wait for the result here\n        pt = getter.Point()\n        print(\"x coordinate: %.5f\" % (pt[0], ) ) #float formatting 5 digits\n \nfinally:\n    getter.Dispose() #this will be called in all cases",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 2588
+}

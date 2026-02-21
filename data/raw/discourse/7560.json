@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-equivalent-for-vbs-private-to-store-variables-for-a-session/7560",
+  "topic_id": 7560,
+  "title": "Python equivalent for VBS Private to store variables for a session",
+  "question": "Hi,\n\n\nIn RS I used the Private variable a lot outside a sub to store values for the duration of a session.\n\nHow would I go about doing this in Python.\n\n\nPrivate oldRadius\nIf IsEmpty(oldRadius) Then oldRadius = 1\n\n\n\n\nThanks\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef storevariable():\n    #check for absence of stored previous/old key-value pair\n    if \"oldradius\" not in sc.sticky:\n        #set default value\n        sc.sticky[\"oldradius\"]=1\n    \n    # ask user input for real number set the default to oldradius from sticky\n    real = rs.GetReal(\"set real\",sc.sticky[\"oldradius\"])\n    # return when probably cancelled out\n    if (real == None) : return\n    # set new value to key in sticky\n    sc.sticky[\"oldradius\"]=real\n    print sc.sticky.get(\"oldradius\")\n\nstorevariable()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "# The scriptcontext module contains a standard python dictionary called\n# sticky which \"sticks\" around during the running of Rhino. This dictionary\n# can be used to save settings between execution of your scripts and then\n# get at those saved settings the next time you run your script -OR- from\n# a completely different script.\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\n\nstickyval = 0\n# restore stickyval if it has been saved\nif scriptcontext.sticky.has_key(\"my_key\"):\n    stickyval = scriptcontext.sticky[\"my_key\"]\nnonstickyval = 12\n\nprint \"sticky =\", stickyval\nprint \"nonsticky =\", nonstickyval\n\nval = rs.GetInteger(\"give me an integer\")\nif val:\n    stickyval = val\n    nonstickyval = val\n\n# save the value for use in the future\nscriptcontext.sticky[\"my_key\"] = stickyval",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\n\n#Get\nif sc.sticky.has_key(\"key\"): value = sc.sticky[\"key\"]\nelse: value = defaultValue\n\n#Set\nsc.sticky[\"key\"] = newValue",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1762
+}

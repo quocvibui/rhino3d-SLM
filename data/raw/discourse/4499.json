@@ -1,0 +1,72 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/new-ghpython-with-node-in-code-and-multi-threading/4499",
+  "topic_id": 4499,
+  "title": "New ghPython with Node-in-Code and Multi-threading",
+  "question": "Thanks to Steve and Giulio, a new version (0.6.0.3) of the ghPython scripting component for Grasshopper is available on \nfood4Rhino\n\n\n\n\nMajor new features:.\n\n\n\n\n\n\nNode-in-Code™: almost every Grasshopper component is now callable in ghPython\n\n\n\n\n\n\nMulti-threading: now easy for ghPython scripts to execute on multiple threads\n\n\n\n\n\n\nDownload here…\n\n\n\n\nPosted Dec 10, 2013 by \nBob McNeel\n on \nRhino News, etc.",
+  "code_blocks": [
+    {
+      "code": "import ghpythonlib.components as ghcomp\n\n#points is an input to this script\ncurves = ghcomp.Voronoi(points)\ncentroids = ghcomp.Area(curves).centroid",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghcomp\nimport scriptcontext\n\npoints = rs.GetPoints(True)\ncurves = ghcomp.Voronoi(points)\n\nfor curve in curves:\n    scriptcontext.doc.Objects.AddCurve(curve)\nrs.AddPoints(points)",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import ghpythonlib.components as ghcomp\nimport ghpythonlib.parallel\n\n# True == use component function in parallel code\n# False == just use RhinoCommon in the parallel code\nuseghcomp = False\n\n#custom function that is executed by parallel.run\ndef curveCP(curve):\n    if useghcomp:\n        result = ghcomp.CurveClosestPoint(pt, curve).point\n    else:\n        result = []\n        for point in pt:\n            rc, t = curve.ClosestPoint(point)\n            result.append(curve.PointAt(t))\n    return result\n\nif parallel:\n    pt = ghpythonlib.parallel.run(curveCP, crv, True)\nelse:\n    results = []\n    for curve in crv:\n        results.extend(ghcomp.CurveClosestPoint(pt, curve).point)\n    pt = results",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghcomp\nimport scriptcontext, Rhino, System\n\ndef MakeVoronoi():\n    points = []\n    curves = []\n    color = System.Drawing.Color.Red\n\n    def GetPointDynamicDrawFunc( sender, args ):\n        if curves:\n            for curve in curves:\n                args.Display.DrawCurve(curve, color, 1)\n        if points:\n            args.Display.DrawPoints(points, Rhino.Display.PointStyle.ControlPoint, 2, color)\n\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    gp.AcceptNothing(True)\n    while True:\n        getresult = gp.Get()\n        if getresult != Rhino.Input.GetResult.Point:\n            if getresult == Rhino.Input.GetResult.Cancel:\n                curves = None\n                points = None\n            break\n        points.append(gp.Point())\n        curves = ghcomp.Voronoi(points)\n\n    if curves:\n        for curve in curves:\n            scriptcontext.doc.Objects.AddCurve(curve)\n    if points:\n        for point in points:\n            scriptcontext.doc.Objects.AddPoint(point)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    MakeVoronoi()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 26,
+      "is_solution": false
+    },
+    {
+      "code": "import ghpythonlib.components as ghc\n\n# first output\nlistOfKeys = ghc.SortList(k,v).keys \n\n# what is the second output??\nlistOfKeys = ghc.SortList(k,v).?",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 34,
+      "is_solution": false
+    },
+    {
+      "code": "Help on function SortList in module ghpythonlib.components:\n\n |  SortList(*args, **kwargs) |      \n |      Sort a list of numeric keys.\n |      Input:\n |      \tkeys [Number] - List of sortable keys\n |      \tvalues a (in, optional) [Generic Data] - Optional list of values to sort synchronously\n |      Returns:\n |      \tkeys [Number] - Sorted keys\n |      \tvalues a [Generic Data] - Synchronous values in A",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 34,
+      "is_solution": false
+    },
+    {
+      "code": "import ghpythonlib.components as ghcomp\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\npoints = rs.GetPoints(True)\n\nbreps= ghcomp.Voronoi3D(points)[0]\n\nmeshes = [ghcomp.MeshBrep(brep) for brep in breps]\n\nfor i in range(len(breps)):\n    brepId = sc.doc.Objects.AddBrep(breps[i])\n    #meshId = sc.doc.Objects.AddMesh(meshes[i])",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 54,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 13,
+  "posts_count": 54,
+  "views": 14636
+}

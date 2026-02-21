@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/bayasshii/RhinoPython/blob/eb792408c1d5f3f8864ba4c23fc7ed0187ab8095/RhinoPython/rain_.py",
+  "repo": "bayasshii/RhinoPython",
+  "repo_stars": 1,
+  "repo_description": "to study Python",
+  "license": "unknown",
+  "filepath": "RhinoPython/rain_.py",
+  "instruction": null,
+  "code": "import rhinoscriptsyntax as rs\nimport math as ma\nimport random as rd\n\ndef delete_all():\n    all_objects = rs.ObjectsByType(0)\n    rs.DeleteObjects(all_objects)\n\ndef delete_something(n):\n    something = rs.ObjectsByType(n)\n    rs.DeleteObjects(something)\n\ndef polar_to_rectangular(r,theta):\n    x = r * ma.cos(theta)\n    y = r * ma.sin(theta)\n    return (x, y, 0)\n\ndef draw_tree():\n    x_coordinate = []\n    y_coordinate = []\n    r = 2\n    ran = 10\n    n = 100\n    for a in range(0, n):\n        if a == 0 :\n            x = rd.uniform(-1, 1) * ran\n            rs.AddCircle((x, r, 0), r)\n            x_coordinate.append(x)\n            y_coordinate.append(r)\n            \n        else:\n            maxx = max(x_coordinate)\n            minn = min(x_coordinate)\n            x = rd.uniform(minn, maxx) + rd.uniform(-1, 1) * ran \n            \n            y_contact = []\n            x_contact = []\n            y_contacted = []\n            x_contacted = []\n            \n            b = len(x_coordinate) -1\n            \n            while (b != -1):\n                if x_coordinate[b] - r*3 <= x <= x_coordinate[b] + r*3:\n                    y = ma.sqrt((r*3)**2 - (x_coordinate[b] - x)**2) + y_coordinate[b] \n                    \n                    y_contact.append(y)\n                    x_contact.append(x)\n                    y_contacted.append(y_coordinate[b])\n                    x_contacted.append(x_coordinate[b])\n                    b -= 1\n                    \n                else:\n                    b -= 1\n            else :\n                if 1 <= len(y_contact) :\n                    y_real = max(y_contact)\n                    number = y_contact.index(y_real)\n                    x_real = x_contact[number]\n                    \n                    y_coordinate.append(y_real)\n                    x_coordinate.append(x_real)\n                    \n                    d =( (x_real - x_contacted[number])*1/3 + x_contacted[number], (y_real - y_contacted[number])*1/3 + y_contacted[number], 0)\n                    e =( (x_real - x_contacted[number])*2/3 + x_contacted[number], (y_real - y_contacted[number])*2/3 + y_contacted[number], 0)\n                    rs.AddLine(d, e)\n                    rs.AddCircle((x_real, y_real, 0), r)\n                else:\n                    rs.AddCircle((x, r, 0), r)\n                    x_coordinate.append(x)\n                    y_coordinate.append(r)\n\ndelete_all()\ndraw_tree()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

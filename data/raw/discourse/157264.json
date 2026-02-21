@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-component-cant-interpret-rhino-geometry-curve/157264",
+  "topic_id": 157264,
+  "title": "GHPython component can't interpret Rhino.Geometry.Curve[]?",
+  "question": "Hi,\n\n\nSay I have a \nRhino.Geometry.Polyline\n \npline\n and a couple of \nRhino.Geometry.Arc\ns \na1\n, \na2\n, and \na3\n.\n\n\nWhen I do the following to join them into a single curve, I get a \nRhino.Geometry.Curve[]\n, as specified in the \ndocumentation\n.\n\n\nimport Rhino.Geometry as rg\n\na = rg.Curve.JoinCurves(\n    [a1.ToNurbsCurve(), pline.ToPolylineCurve(), a2.ToNurbsCurve(), a3.ToNurbsCurve()], 0.01\n)\n\n\n\nWhen piping it through \noutput a\n of a \nGHPython\n component, the latter seems unable to cast the curve array to a curve type that Grasshopper can interpret, and thus no geometry is previewed in Rhino, nor available to work on further.\n\n\n\n\nHow do I get a joined curve that I can continue processing in Grasshopper?",
+  "code_blocks": [
+    {
+      "code": "circ = Rhino.Geometry.Circle(Rhino.Geometry.Plane.WorldXY,5)\narc = Rhino.Geometry.Arc(circ,1)\np_1 = Rhino.Geometry.Point3d(5,0,0)\np_2 = Rhino.Geometry.Point3d(5,-5,0)\np_line = Rhino.Geometry.Polyline([p_1, p_2])\nobjs = [arc.ToNurbsCurve(), p_line.ToPolylineCurve()]\n\njoined = Rhino.Geometry.Curve.JoinCurves(objs)\n\na = joined",
+      "language": "unknown",
+      "author": "James_Parrott",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport math\n\np0=Rhino.Geometry.Point3d(0,0,0)\np1=Rhino.Geometry.Point3d(10,10,0)\np2=Rhino.Geometry.Point3d(20,10,0)\np3=Rhino.Geometry.Point3d(20,0,0)\np4=Rhino.Geometry.Point3d(10,0,0)\np5=Rhino.Geometry.Point3d(5,0,0)\n\npline=Rhino.Geometry.Polyline([p1,p2,p3,p4])\narc1=Rhino.Geometry.Arc(p5,5.0,-math.pi)\narc2=Rhino.Geometry.Arc(p0,Rhino.Geometry.Vector3d.YAxis,p1)\n\nplc=Rhino.Geometry.PolylineCurve(pline)\narc_crv1=Rhino.Geometry.ArcCurve(arc1)\narc_crv2=Rhino.Geometry.ArcCurve(arc2)\na=Rhino.Geometry.Curve.JoinCurves([plc,arc_crv1,arc_crv2])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport math\n\np0=Rhino.Geometry.Point3d(0,0,0)\np1=Rhino.Geometry.Point3d(10,10,0)\np2=Rhino.Geometry.Point3d(20,10,0)\np3=Rhino.Geometry.Point3d(20,0,0)\np4=Rhino.Geometry.Point3d(10,0,0)\np5=Rhino.Geometry.Point3d(5,0,0)\n\npline=Rhino.Geometry.Polyline([p1,p2,p3,p4])\narc1=Rhino.Geometry.Arc(p5,5.0,-math.pi)\narc2=Rhino.Geometry.Arc(p0,Rhino.Geometry.Vector3d.YAxis,p1)\n\na=Rhino.Geometry.Curve.JoinCurves([pline.ToPolylineCurve(),arc1.ToNurbsCurve(),arc2.ToNurbsCurve()])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 14,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport math\n\n\ndef foo():\n    p0 = Rhino.Geometry.Point3d(0,0,0)\n    p1 = Rhino.Geometry.Point3d(10,10,0)\n    p2 = Rhino.Geometry.Point3d(20,10,0)\n    p3 = Rhino.Geometry.Point3d(20,0,0)\n    p4 = Rhino.Geometry.Point3d(10,0,0)\n    p5 = Rhino.Geometry.Point3d(5,0,0)\n\n    pline = Rhino.Geometry.Polyline([p1,p2,p3,p4])\n    arc1 = Rhino.Geometry.Arc(p5,5.0,-math.pi)\n    arc2 = Rhino.Geometry.Arc(p0,Rhino.Geometry.Vector3d.YAxis,p1)\n    \n    crv = Rhino.Geometry.Curve.JoinCurves([pline.ToPolylineCurve(),arc1.ToNurbsCurve(),arc2.ToNurbsCurve()])\n    \n    return arc1, pline, arc2, crv\n\n\nif __name__ == \"__main__\":\n    a = foo()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 19,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\na = rg.Curve.JoinCurves(\n    [a1.ToNurbsCurve(), pline.ToPolylineCurve(), a2.ToNurbsCurve(), a3.ToNurbsCurve()], 0.01\n)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 22,
+  "views": 1075
+}

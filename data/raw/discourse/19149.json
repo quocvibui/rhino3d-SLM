@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-managing-detail-views-via-physcript/19149",
+  "topic_id": 19149,
+  "title": "Help managing Detail views via Physcript",
+  "question": "Hi all, \n@stevebaer\n\nCould one of you help me in making this part of my code more elegant?\n\n\nLooks like the \nViewDisplayMode\n doesn’t works with \ndetail views\n.\n\nLooks, also, like the \nZoom Selected\n doesnt’ work with \ndetail views\n.\n\n\ndef CambiaModo(self):\n    rs.UnselectAllObjects()\n    rs.SelectObject(self.DetId)\n    rs.Command (\"_detail _enable\", False)\n    rs.Command(\"_SetDisplayMode _Mode=\"+ self.DetStyle, False)\n    rs.Command (\"!_detail _enablepage\", False)\n    rs.UnselectAllObjects()\n\n\n\n\n\ndef CambiaZoom(self,arrObjects):\n    rs.UnselectAllObjects()\n    rs.SelectObject(self.DetId)\n    rs.Command (\"_detail _enable\", False)\n    rs.SelectObjects(arrObjects)\n    rs.Command (\"_zoom _selected \")\n    rs.UnselectAllObjects()\n    rs.Command (\"!_detail _enablepage\", False)\n    rs.DetailScale(self.DetId,1,self.DetScale)\n\n\n\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nstrDetail = rs.GetObject(\"Select detail\", 32768, True, True)\nif strDetail:\n    rs.Command(\"_Detail _Enable\", False)\n    rs.UnselectAllObjects()\n    rs.Command(\"_SetDisplayMode _Mode=_Shaded\", False)\n    rs.Command(\"!_Detail _EnablePage\", False)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nstrDetail = rs.GetObject(\"Select detail\", 32768, True, True)\nif strDetail:\n    rs.Command (\"_Detail _Enable\", False)\n    rs.Command(\"_SelAll\", False)\n    rs.Command(\"_Zoom _Selected \")\n    rs.UnselectAllObjects()\n    rs.Command(\"!_Detail _EnablePage\", False)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def CambiaModo(self):\n    rs.UnselectAllObjects()\n    rs.SelectObject(self.DetId)\n    rs.Command (\"_detail _enable\", False)\n    rs.Command(\"_SetDisplayMode _Mode=\"+ self.DetStyle, False)\n    rs.Command (\"!_detail _enablepage\", False)\n    rs.UnselectAllObjects()",
+      "language": "python",
+      "author": "skysurfer",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "def CambiaZoom(self,arrObjects):\n    rs.UnselectAllObjects()\n    rs.SelectObject(self.DetId)\n    rs.Command (\"_detail _enable\", False)\n    rs.SelectObjects(arrObjects)\n    rs.Command (\"_zoom _selected \")\n    rs.UnselectAllObjects()\n    rs.Command (\"!_detail _enablepage\", False)\n    rs.DetailScale(self.DetId,1,self.DetScale)",
+      "language": "python",
+      "author": "skysurfer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1193
+}

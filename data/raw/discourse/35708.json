@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-raw-input-or-rs-getobject-prompt/35708",
+  "topic_id": 35708,
+  "title": "Python raw_input OR rs.GetObject prompt",
+  "question": "Hello everyone,\n\n\nI’m working on a script to find and replace text throughout a document (we do all of our shop drawings in Rhino, so if a material spec changes, that could mean sifting through 40+ pages of layouts to make the revisions.)\n\n\nI have the base functionality sorted out, and am now trying to make the script a little more robust.  Part of that is allowing the user to enter a String in the command line, or simply selecting the text object they’d like to replace.\n\nI know how to do each of these individually, but is there any way to combine these into a single command prompt? i.e.\n\n\n“Enter text, or select text object?”\n\n\ni know i could do this with an additional prompt level (“1 to enter text, or 2 to select text object.”), but wondering if it could be more streamlined for the user.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ndef main():\n  gob = Rhino.Input.Custom.GetObject()\n  gob.AcceptNothing( True )\n  gob.AcceptString( True )\n  gob.GeometryFilter = Rhino.DocObjects.ObjectType.Annotation\n  gob.SetCommandPrompt( 'Pick text object or enter text' )\n  gob.Get()\n  result = gob.Result()\n  if result == Rhino.Input.GetResult.Cancel:\n    return\n  if result == Rhino.Input.GetResult.Nothing:\n    return\n  elif result == Rhino.Input.GetResult.String:\n    tex = gob.StringResult()\n    print( 'Text has been written: %s' % tex )\n  elif result == Rhino.Input.GetResult.Object:\n    obref = gob.Object( 0 )\n    texent = obref.TextEntity()\n    tex = texent.Text\n    print( 'Text object has been picked: %s' % tex )\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1975
+}

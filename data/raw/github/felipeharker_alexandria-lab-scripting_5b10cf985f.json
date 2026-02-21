@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_elevation.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/rhinocommon/snippets/from_rhinocommon/py/ex_elevation.py",
+  "instruction": "Ex elevation",
+  "code": "import rhinoscriptsyntax as rs\nfrom Rhino.Geometry import Intersect, Point3d, Vector3d\nfrom scriptcontext import doc\n\ndef RunCommand():\n  # select a surface\n  srfid = rs.GetObject(\"select serface\", rs.filter.surface | rs.filter.polysurface)\n  if not srfid: return\n  # get the brep\n  brep = rs.coercebrep(srfid)\n  if not brep: return\n\n  x = rs.GetReal(\"value of x\", 0)\n  y = rs.GetReal(\"value of y\", 0)\n\n  pts = [(abs(point.Z), point.Z) for point in Intersect.Intersection.ProjectPointsToBreps(\n           [brep], [Point3d(x, y, 0)], Vector3d(0, 0, 1), doc.ModelAbsoluteTolerance)]\n           \n  pts.sort(reverse=True)\n  \n  if pts == []:\n    print \"no Z for given X, Y\"\n  else:\n    rs.AddPoint(Point3d(x, y, pts[0][1]))\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

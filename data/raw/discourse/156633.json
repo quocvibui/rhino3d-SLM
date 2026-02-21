@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-curvecurveintersection-on-list-finds-less-than-collisionmanymany/156633",
+  "topic_id": 156633,
+  "title": "Python CurveCurveIntersection on list finds less than CollisionManyMany",
+  "question": "I need to test a list of many co-planar curves to see if any of them intersect with any other curve in the same list and return True/False values that I am feeding into a Python Script. I was using CollisionMany|Many for this but it is already slow with my sample set of only 399 curves. My final project will be using many more curves so I would like to go ahead and see if I can get around this bottleneck. I thought since I was already using Python I could try to integrate this intersect test in Python as well (also attached as a cluster with internalized data):\n\n\nimport rhinoscriptsyntax as rs\n\n# Define the input parameter\ncurves = x\n\n# Initialize the result list\nresults = []\n\n# Loop through each curve in the list\nfor i, curve_i in enumerate(curves):\n    # Loop through each subsequent curve in the list\n    for j, curve_j in enumerate(curves[i+1:], start=i+1):\n        # Check for intersection between the two curves\n        intersection = rs.CurveCurveIntersection(curve_i, curve_j)\n        \n        # If the curves intersect, add True to the result list and break out of the loop\n        if intersection:\n            results.append(True)\n            break\n    else:\n        # If the inner loop completed without finding an intersection, add False to the result list\n        results.append(False)\n\n# Output the result list\na = results\n\n\n\n\nWhen I run this on my curves, it returns 334 True values but CollisionMany|Many returns 388. Looking at the outputs, it seems like my code is sometimes assigning True to one curve that is intersecting and assigning False to the other curve. But not all the time.\n\nIn this picture I’m selecting the curves that my script says have intersections but a couple that are intersecting are not selected:\n\n\n\n\nMissedIntersections\n634×537 32 KB\n\n\n\n\nThose red curves are in the list my script assigns False to. But they all are in the results from CollissionMany|Many.\n\n\nI think it might have something to do with how I am enumerating through the list, but I’m...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry.Intersect as RGI\n\ntol=sc.doc.ModelAbsoluteTolerance\nindices=set()\nfor i in range(len(crvs)-1):\n    for j in range(i+1,len(crvs)):\n        insec=RGI.Intersection.CurveCurve(crvs[i],crvs[j],tol,tol)\n        if insec and insec[0]:\n            indices.add(i)\n            indices.add(j)\nif indices:\n    a=[crvs[n] for n in indices]",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry.Intersect as RGI\n\ndef SelIntersectingCurves():\n    crv_ids=rs.ObjectsByType(4, state=1)\n    if not crv_ids: return\n    \n    crvs=[rs.coercecurve(crv_id) for crv_id in crv_ids]\n    tol=sc.doc.ModelAbsoluteTolerance\n    indices=set()\n    for i in range(len(crvs)-1):\n        for j in range(i+1,len(crvs)):\n            insec=RGI.Intersection.CurveCurve(crvs[i],crvs[j],tol,tol)\n            if insec and insec[0]:\n                indices.add(i)\n                indices.add(j)\n    if indices:\n        rs.EnableRedraw(False)\n        rs.UnselectAllObjects()\n        [rs.SelectObject(crv_ids[n]) for n in indices]\n    print \"{} intersecting curves selected\".format(len(indices))\nSelIntersectingCurves()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry.Intersect as RGI\n\ntol=sc.doc.ModelAbsoluteTolerance\nintersect=set()\nfor i, crvs_i in enumerate(crvs[0:]):\n    for j, crvs_j in enumerate(crvs[i+1:]):\n        insec=RGI.Intersection.CurveCurve(crvs_i,crvs_j,tol,tol)\n        if insec and insec[0]:\n            intersect.add(crvs_i)\n            intersect.add(crvs_j)\nif intersect:\n    a= [n in intersect for n in crvs]",
+      "language": "python",
+      "author": "user463",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# Define the input parameter\ncurves = x\n\n# Initialize the result list\nresults = []\n\n# Loop through each curve in the list\nfor i, curve_i in enumerate(curves):\n    # Loop through each subsequent curve in the list\n    for j, curve_j in enumerate(curves[i+1:], start=i+1):\n        # Check for intersection between the two curves\n        intersection = rs.CurveCurveIntersection(curve_i, curve_j)\n        \n        # If the curves intersect, add True to the result list and break out of the loop\n        if intersection:\n            results.append(True)\n            break\n    else:\n        # If the inner loop completed without finding an intersection, add False to the result list\n        results.append(False)\n\n# Output the result list\na = results",
+      "language": "python",
+      "author": "user463",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 752
+}

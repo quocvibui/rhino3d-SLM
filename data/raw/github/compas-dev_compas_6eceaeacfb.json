@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/compas-dev/compas/blob/HEAD/src/compas_rhino/scene/helpers.py",
+  "repo": "compas-dev/compas",
+  "repo_stars": 352,
+  "repo_description": "Main library of the COMPAS framework and CAD integrations for Rhino/GH and Blender.",
+  "license": "MIT",
+  "filepath": "src/compas_rhino/scene/helpers.py",
+  "instruction": "Helpers",
+  "code": "from __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport rhinoscriptsyntax as rs  # type: ignore\nimport scriptcontext as sc  # type: ignore\n\nfrom compas_rhino.layers import create_layers_from_path\n\ntry:\n    find_layer_by_fullpath = sc.doc.Layers.FindByFullPath\nexcept SystemError:\n    find_layer_by_fullpath = None\n\n\ndef ensure_layer(layerpath):\n    if not rs.IsLayer(layerpath):\n        create_layers_from_path(layerpath)\n    if find_layer_by_fullpath:\n        index = find_layer_by_fullpath(layerpath, True)\n    else:\n        index = 0\n    return index\n\n\ndef ngon(v):\n    if v < 3:\n        return\n    if v == 3:\n        return [0, 1, 2]\n    if v == 4:\n        return [0, 1, 2, 3]\n    return list(range(v))\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

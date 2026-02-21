@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-moveobject-rs-copyobject-methods-usage-issue/2098",
+  "topic_id": 2098,
+  "title": "Rs.MoveObject() + rs.CopyObject() methods usage issue",
+  "question": "Hi,\n\n\nI have been puzzled for the last few days, why my GH Python code is not working.\n\n\nWhat I want to do is to copy a row of curves between two points. Like this:\n\n\n \n\n\nHere is the code that does not work (“a” and “b” are input points, “N” is the number of curves between those two points, “curve” is the initial input curve):\n\n\nimport rhinoscriptsyntax as rs\n\nvect = rs.VectorSubtract(b,a)\nvect1 = rs.VectorDivide(vect,N)\n\na = []\nfor i in range(0,N):\n    vect = rs.VectorScale(vect1,i)\n    movedCurve = rs.MoveObject(curve,vect)\n    a.append(movedCurve)\n\n\n\nFor some reason it works only when I add the rs.CopyObject method inside of rs.MoveObject, like so: (line 9):\n\n\nimport rhinoscriptsyntax as rs\n\nvect = rs.VectorSubtract(b,a)\nvect1 = rs.VectorDivide(vect,N)\n\na = []\nfor i in range(0,N):\n    vect = rs.VectorScale(vect1,i)\n    movedCurve = rs.MoveObject(rs.CopyObject(curve),vect)\n    a.append(movedCurve)\n\n\n\nWhy is that so?\n\nBasically in the first code, I am moving the initial curve, iteratively one by one vector and in each iteration I am appending that moved curve into the export “a” list. So why do I have to use the rs.CopyObject method too?\n\n\nI attached the .gh file with both upper code present in it, and the .3dm with just two points and a curve.\n\n\nThank you.\n\n\ncopy curve between 2 points.gh\n(4.2 KB)\n\n\ncopy curve between 2 points.3dm\n(49.5 KB)",
+  "code_blocks": [
+    {
+      "code": "a = []\nfor i in range(0,N):\n    vect = rs.VectorScale(vect1,i)\n    copiedCurve = rs.CopyObject(curve,vect)\n    a.append(copiedCurve)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nvect = rs.VectorSubtract(b,a)\nvect1 = rs.VectorDivide(vect,N)\n\na = []\nfor i in range(0,N):\n    vect = rs.VectorScale(vect1,i)\n    movedCurve = rs.MoveObject(curve,vect)\n    a.append(movedCurve)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nvect = rs.VectorSubtract(b,a)\nvect1 = rs.VectorDivide(vect,N)\n\na = []\nfor i in range(0,N):\n    vect = rs.VectorScale(vect1,i)\n    movedCurve = rs.MoveObject(rs.CopyObject(curve),vect)\n    a.append(movedCurve)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 2429
+}

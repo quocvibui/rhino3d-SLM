@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-an-exported-list-of-ids-of-selected-objects/158240",
+  "topic_id": 158240,
+  "title": "Get an exported list of ID's of selected objects",
+  "question": "Hello,\n\n\nAs a bit of a continuation of my last post, I’m trying to make a script work that based on a selection of objects gives me a list (either CSV or txt) that I can later use to read with another script to re select these objects again.\n\n\nIt is similar to the function “export selected - Object properties” with only Object ID selected.\n\n\nI tried the following in python but that did not seem to work:\n\n\nimport rhinoscriptsyntax as rs\n\ndef main():\n    # Prompt the user to select objects\n    objects = rs.GetObjects(\"Select objects\")\n    \n    if objects:\n        # Create a new file to write the object IDs to\n        file_path = rs.SaveFileName(\"Save object IDs as\", \"*.txt\")\n        \n        if file_path:\n            # Write the object IDs to the file\n            with open(file_path, \"w\") as f:\n                for obj in objects:\n                    f.write(str(obj) + \"\\n\")\n\n\n\nThen I also tried this:\n\n\nimport rhinoscriptsyntax as rs\n\ndef main():\n    # Prompt the user to select objects\n    objects = rs.GetObjects(\"Select objects\")\n    \n    if objects:\n        # Get the IDs of the selected objects as a list\n        object_ids = [rs.ObjectName(obj) for obj in objects]\n\n        # Export the selected objects to a CSV file\n        file_path = rs.SaveFileName(\"Export selected to CSV\", \"*.csv\")\n        rs.Command(\"_-Export {} _Enter _Objects {} _Enter\".format(file_path, \",\".join(object_ids)))\n\n\n\nAlso did not work.\n\n\nAny help is greatly appreciated.\n\n\nBest regards,\n\nBastiaan van Oudheusden",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DoSomething():\n    obj_ids = rs.GetObjects(\"Select objects\", 0, False, True, False)\n    if not obj_ids: return\n    \n    file_path = rs.SaveFileName (\"Save\", \"Text Files (*.txt)|*.txt||\", None, \"ObjIds.txt\")\n    if not file_path: return\n    \n    with open(file_path, \"w\") as f:\n        for obj_id in obj_ids:\n            f.write(\"{}\\n\".format(obj_id))\n\nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef main():\n    # Prompt the user to select objects\n    objects = rs.GetObjects(\"Select objects\")\n    \n    if objects:\n        # Create a new file to write the object IDs to\n        file_path = rs.SaveFileName(\"Save object IDs as\", \"*.txt\")\n        \n        if file_path:\n            # Write the object IDs to the file\n            with open(file_path, \"w\") as f:\n                for obj in objects:\n                    f.write(str(obj) + \"\\n\")",
+      "language": "python",
+      "author": "Bastiaan_van_Oudheus",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef main():\n    # Prompt the user to select objects\n    objects = rs.GetObjects(\"Select objects\")\n    \n    if objects:\n        # Get the IDs of the selected objects as a list\n        object_ids = [rs.ObjectName(obj) for obj in objects]\n\n        # Export the selected objects to a CSV file\n        file_path = rs.SaveFileName(\"Export selected to CSV\", \"*.csv\")\n        rs.Command(\"_-Export {} _Enter _Objects {} _Enter\".format(file_path, \",\".join(object_ids)))",
+      "language": "python",
+      "author": "Bastiaan_van_Oudheus",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 585
+}

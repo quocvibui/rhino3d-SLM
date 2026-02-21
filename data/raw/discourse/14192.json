@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wish-rs-duplicatevertices-function/14192",
+  "topic_id": 14192,
+  "title": "Wish: rs.DuplicateVertices function",
+  "question": "DuplicateVertices function is missing from rhinoscriptsyntax.\n\n\nCan we implement it to the next release?\n\n\ndef DuplicateVertices(object_id, select=False):\n    \"\"\"Duplicates the corner vertices of a surface or polysurface.\n    Parameters:\n      object_id = The identifier of the surface or polysurface object.\n      select [opt] = Select the duplicated corner vertices. The default is not\n      to select (False).\n    Returns:\n      A list of Guids identifying the newly created point objects if successful.\n      None if not successful, or on error.\n    \"\"\"\n    brep = rhutil.coercebrep(object_id, True)\n    corner_vertices = brep.DuplicateVertices()\n    vertices = []\n    for vertex in corner_vertices:\n        if vertex.IsValid:\n            rc = scriptcontext.doc.Objects.AddPoint(vertex)\n            if rc==System.Guid.Empty: return None\n            vertices.append(rc)\n            if select: rhobject.SelectObject(rc)\n    if vertices: scriptcontext.doc.Views.Redraw()\n    return vertices",
+  "code_blocks": [
+    {
+      "code": "def DuplicateVertices(object_id, select=False):\n    \"\"\"Duplicates the corner vertices of a surface or polysurface.\n    Parameters:\n      object_id = The identifier of the surface or polysurface object.\n      select [opt] = Select the duplicated corner vertices. The default is not\n      to select (False).\n    Returns:\n      A list of Guids identifying the newly created point objects if successful.\n      None if not successful, or on error.\n    \"\"\"\n    brep = rhutil.coercebrep(object_id, True)\n    corner_vertices = brep.DuplicateVertices()\n    vertices = []\n    for vertex in corner_vertices:\n        if vertex.IsValid:\n            rc = scriptcontext.doc.Objects.AddPoint(vertex)\n            if rc==System.Guid.Empty: return None\n            vertices.append(rc)\n            if select: rhobject.SelectObject(rc)\n    if vertices: scriptcontext.doc.Views.Redraw()\n    return vertices",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 1,
+  "views": 496
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/splitbrep-feature-request/11104",
+  "topic_id": 11104,
+  "title": "SplitBrep feature request",
+  "question": "I’d like to put a request on the future functionality heap. As with several other rhinoscript functions (e.g. filletsurface) the splitbrep/split functions dont work nearly as well as the rhino split command. In particular, it would be really nice to be able to maintain the texture info of the surface to be split. With the regular command, everything works intuitively when I, for instance, split a picture frame surface using a curve or another plane. i.e. the resulting surface is just the trimmed version of the image. This isn’t the case with the scripting function, it basically makes a brand new trimmed surface.\n\n\nI’ve been able to work around some of these differences using rs.command() and prompting the user to take appropriate actions, but it would be a huge value-add for the scripting in V6 to be more tightly integrated with the core functionality.\n\n\nOn a side note, I’d like to thank you McNeelers for being so awesomely responsive to this community and its many desires!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rh\nimport scriptcontext as sc\n\nid0 = rs.GetObject(\"First surface\")\npt0 = rs.GetPointOnSurface(id0, \"Point on first surface\")\nuv0 = rs.SurfaceClosestPoint(id0, pt0)\n\nid1 = rs.GetObject(\"Second surface\")\npt1 = rs.GetPointOnSurface(id1, \"Point on second surface\")\nuv1 = rs.SurfaceClosestPoint(id1, pt1)\n\nsrf0 = rs.coercesurface(id0, True)\nsrf1 = rs.coercesurface(id1, True)\ntol = rs.UnitAbsoluteTolerance()\n\nresults = rh.Geometry.Surface.CreateRollingBallFillet(srf0, uv0, srf1, uv1, 1.0, tol)\nfor rc in results:\n    sc.doc.Objects.AddSurface(rc)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 1860
+}

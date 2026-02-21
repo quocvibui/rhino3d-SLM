@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-ghcomp-rhinoinside-in-python-to-pass-elements-to-revit/181254",
+  "topic_id": 181254,
+  "title": "Using .ghcomp.RhinoInside in Python to pass elements to Revit",
+  "question": "Hello,\n\n\n@Japhy\n\n\nI’m trying to use GH components via Python to send geometry to Revit.\n\n\nWhen I pass a list of GUIDs through the .AddDirectShapeGeometry() I’m only getting the last item on the list in Revit.  How can get the full list of objects through this method?\n\n\nAlso, I can’t seem to get in any objects of Structural Columns.\n\n\nPlease see .3dm attached.\n\n\nThanks,\n\n\nDan\n\n\ntester.3dm\n (3.4 MB)\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.DocObjects as rd\nimport Rhino.Geometry as rg\nimport System.Drawing as sd\nimport Rhino\nimport ghpythonlib.components as ghcomp\n\n\nx = rs.GetObjects()\n\nfor i in x:\n    name = rs.ObjectName(i)\n    catString = rs.GetUserText(i,\"RV-Category\")\n    print catString\n    if catString is None:\n        print \"This object needs a RV-Category assignment\"\n    catValue = ghcomp.RhinoInside.QueryCategories(\"Model\",catString)\n    print catValue.Name\n    if catValue is not None:\n        DS = ghcomp.RhinoInside.AddDirectShapeGeometry(name,catValue,i)\n        print DS",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.DocObjects as rd\nimport Rhino.Geometry as rg\nimport System.Drawing as sd\nimport Rhino\nimport ghpythonlib.components as ghcomp\n\n\nx = rs.GetObjects()\n\nfor i in x:\n    name = rs.ObjectName(i)\n    catString = rs.GetUserText(i,\"RV-Category\")\n    print catString\n    if catString is None:\n        print \"This object needs a RV-Category assignment\"\n    catValue = ghcomp.RhinoInside.QueryCategories(\"Model\",catString)\n    print catValue.Name\n    if catValue is not None:\n        DS = ghcomp.RhinoInside.AddDirectShapeGeometry(name,catValue,i)\n        print DS",
+      "language": "python",
+      "author": "lignindes",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 111,
+  "posts_count": 4,
+  "views": 186
+}

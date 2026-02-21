@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/andrewili/shape-grammar-engine/blob/2859d8021442542561bdd1387deebc85e26f2d03/package_package/package/scripts/labeled_arrow.py",
+  "repo": "andrewili/shape-grammar-engine",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "package_package/package/scripts/labeled_arrow.py",
+  "instruction": "Labeled arrow",
+  "code": "from package.scripts import arrow as a\nimport rhinoscriptsyntax as rs\nfrom package.scripts import settings as s\n\nclass LabeledArrow(object):\n    def __init__(self):\n        pass\n\n    @classmethod\n    def new(cls, layer, position):\n        \"\"\"Receives:\n            layer           str. The name of the layer\n            position        point3d. The position of the arrow\n        Creates an arrow-name group with the name <name>-labeled-arrow. \n        Inserts it at the arrow position. Returns:\n            group_out       str. The name of the new group, if successful. \n                            None otherwise.\n        \"\"\"\n        group = '%s-labeled-arrow' % layer\n        arrow_instance = a.Arrow.new_instance(layer, position)\n        text_position = rs.PointAdd(\n            position,\n            s.Settings.arrow_label_offset_from_arrow)\n        rs.CurrentLayer(layer)\n        arrow_text = rs.AddText(\n            layer, text_position, height=2, justification=2)\n        rs.CurrentLayer(s.Settings.default_layer_name)\n        group_out = rs.AddGroup(group)\n        n_objects_added = rs.AddObjectsToGroup(\n            [arrow_instance, arrow_text], \n            group)\n        if n_objects_added:\n            return_value = group_out\n        else:\n            return_value = None\n        return return_value\n\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

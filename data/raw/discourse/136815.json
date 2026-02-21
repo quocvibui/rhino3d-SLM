@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-7-python-boolean-difference-of-boxes/136815",
+  "topic_id": 136815,
+  "title": "Rhino 7 Python | Boolean difference of boxes",
+  "question": "Hi, I have a building with a parapet enclosed by a larger box\n\n\nAll elements are boxes. How can I first do the Boolean difference of the building and the parapet. Then do the Boolean difference of the building with parapet and enclosure. The following code is written in Rhino Python Editor. Code is added as an attachment!\n\n\naddboxes.py\n (1.3 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom math import *\n\nl = 40 # building length in m\nw = 30 # building width in m\npH = 0.4 # parapet height in m\npW = 0.3 # parapet width in m\nh = 10 + pH # roof height in m\n\n#Addbox building\np1 = (-l/2,-w/2,0)\np2 = (l/2, -w/2,0)\np3 = (l/2, w/2,0)\np4 = (-l/2, w/2,0)\np5 = (-l/2,-w/2,h)\np6 = (l/2, -w/2,h)\np7 = (l/2, w/2,h)\np8 = (-l/2, w/2,h)\n\nbuilding = rs.AddBox([p1,p2,p3,p4,p5,p6,p7,p8])\n\n#Addbox parapet\npp1 = (-l/2 + pW/2,-w/2 + pW/2,h)\npp2 = (l/2 - pW/2, -w/2 + pW/2,h)\npp3 = (l/2 - pW/2, w/2 - pW/2,h)\npp4 = (-l/2 + pW/2, w/2 - pW/2,h)\npp5 = (-l/2 + pW/2,-w/2 + pW/2,h-pH)\npp6 = (l/2 - pW/2, -w/2 + pW/2,h-pH)\npp7 = (l/2 - pW/2, w/2 - pW/2,h-pH)\npp8 = (-l/2 + pW/2, w/2 - pW/2,h-pH)\n\nparapet = rs.AddBox([pp1,pp2,pp3,pp4,pp5,pp6,pp7,pp8])\n\n#Addbox enclosure\n\npe1 = (-l/2 - 5*h, -w/2 - 5*h,0)\npe2 = (l/2 + 10*h, -w/2 - 5*h,0)\npe3 = (l/2 + 10*h, w/2 + 5*h,0)\npe4 = (-l/2 - 5*h, w/2 + 5*h,0)\npe5 = (-l/2 - 5*h, -w/2 - 5*h,6*h)\npe6 = (l/2 + 10*h, -w/2 - 5*h,6*h)\npe7 = (l/2 + 10*h, w/2 + 5*h,6*h)\npe8 = (-l/2 - 5*h, w/2 + 5*h,6*h)\n\nenclosure = rs.AddBox([pe1,pe2,pe3,pe4,pe5,pe6,pe7,pe8])\n\n# b = rs.GetObject(\"building\")\n# enc =  rs.GetObject(\"enclosure\")\n# par =rs.GetObject(\"parapet\")\n\nbool_1 = rs.BooleanDifference(building, parapet)\nbool_2 = rs.BooleanDifference(enclosure, bool_1)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1004
+}

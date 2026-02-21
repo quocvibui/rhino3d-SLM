@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/sub-object-vbscript/1434",
+  "topic_id": 1434,
+  "title": "Sub-object vbscript",
+  "question": "Hi,\n\nin Vbscript\n\nhow to use GetObject to select the surface from polysurface, or other sub-object",
+  "code_blocks": [
+    {
+      "code": "import Rhino, scriptcontext\nimport rhinoscriptsyntax as rs\n#Example adapted from Python forum post, thanks to Vittorio and Emilio\n\ndef DuplicateBRepSrfs():\n    prompt=\"Select BRep surface(s) to duplicate\"\n    srf_type=Rhino.DocObjects.ObjectType.Surface\n    \n    rc, subsurf_refs = Rhino.Input.RhinoGet.GetMultipleObjects(prompt, True, srf_type)\n    if rc != Rhino.Commands.Result.Success: return\n    if subsurf_refs:\n        breps=[]\n        #breps will contain the duplicate surface *geometry*\n        for srf in subsurf_refs:\n            face=srf.Face()\n            brep=face.DuplicateFace(False)\n            breps.append(brep)\n            \n    #if you actually want to add the objects to the document:\n    dupsrf_IDs=[scriptcontext.doc.Objects.AddBrep(brep) for brep in breps]\n    scriptcontext.doc.Views.Redraw()\n    \nDuplicateBRepSrfs()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1235
+}

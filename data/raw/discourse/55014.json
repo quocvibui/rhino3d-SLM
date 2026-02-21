@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/question-on-expiresolution-in-ghpython/55014",
+  "topic_id": 55014,
+  "title": "Question on ExpireSolution in GhPython",
+  "question": "Hi everybody\n\n\nI have faced a simple problem and as I am new to this field I could not solve it. I want to write a simple code in GHPython that could change the value of a slider until it reaches to a certain point that the area of a circle with the radius of that slider passes 12. I have attached the files and the photos. Any help is very well appreciated.\n\n\n\n\nQ2.JPG\n1430×649 40.5 KB\n\n\n\n\n\n\nQuestion.JPG\n1478×449 53.9 KB\n\n\n\n\nquestion.gh\n (6.6 KB)",
+  "code_blocks": [
+    {
+      "code": "from scriptcontext import sticky\n\nthisDoc = ghenv.Component.OnPingDocument()\nslider = ghenv.Component.Params.Input[0].Sources[0]\n\nif click_me:\n    # reset values to starting position\n    sticky['running'] = True\n    slider.TickValue = 30 \n\ndesired_area = 12\nif sticky['running']:\n    if area > desired_area or slider.TickValue >= slider.TickCount:\n        sticky['running'] = False # break the loop\n    else:\n        def sln_delegate(doc):\n            slider.TickValue +=1 \n        thisDoc.ScheduleSolution(1, sln_delegate) # call the delegate function and schedule a solution in 1 millisecond",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Geometry import *\n\nnum_steps = 10000\nmin_radius, max_radius = 0.030, 10.00\n\nfor i in range(num_steps):\n    radius = min_radius + i * (max_radius - min_radius) / num_steps\n    circle = Circle(Plane.WorldXY, radius).ToNurbsCurve()\n    area = AreaMassProperties.Compute(circle).Area\n    if area > 12:\n        break",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import random\n\nthisDoc = ghenv.Component.OnPingDocument()\nslider = ghenv.Component.Params.Input[0].Sources\n\ndef Allocate(x):\n    for i in range(len(slider)):\n        slider[i].TickValue = x[i]\n    return y\n\nfunc = Allocate\n\nfor i in range(100):\n    numbers = []\n    for i in slider:\n        numbers.append(int(random.uniform(0, 10000)))\n    answer = func(numbers)\n    print answer",
+      "language": "python",
+      "author": "alexholden18",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import sticky\nimport random\n\nthisDoc = ghenv.Component.OnPingDocument()\nslider = ghenv.Component.Params.Input[0].Sources\n\n\ni = 0\nif click_me:\n    if i > 10:\n        sticky['running'] = False # break the loop\n    else:\n        def sln_delegate(doc):\n            numbers = []\n            for i in slider:\n               slider[i].TickValue = int(random.uniform(0, 10000)\n            i = i + 1\n            print y\n        thisDoc.ScheduleSolution(1, sln_delegate)",
+      "language": "python",
+      "author": "alexholden18",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import random\nfrom scriptcontext import sticky\nthisDoc = ghenv.Component.OnPingDocument()\nsliders = ghenv.Component.Params.Input[0].Sources\n\nif click_me:  # reset\n    sticky['counter'] = 0\n    sticky['results'] = []\n\nif sticky['counter'] < 100:\n    sticky['counter'] += 1\n    sticky['results'].append(y)  # result from previous iteration\n    values = [random.randint(0, 10000) for _ in sliders]\n\n    def Allocate(doc):\n        for slider, value in zip(sliders, values):\n            slider.TickValue = value\n    thisDoc.ScheduleSolution(1, Allocate)\n\nfor res in sticky['results']:\n    print res",
+      "language": "python",
+      "author": "qythium",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 17,
+  "views": 4507
+}

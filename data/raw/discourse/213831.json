@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/drawbrepshaded-rendering-artifacts-in-displayconduit/213831",
+  "topic_id": 213831,
+  "title": "DrawBrepShaded rendering artifacts in DisplayConduit",
+  "question": "DrawBrepShaded rendering artifacts in DisplayConduit\n\n\nDescription\n\n\nI’m experiencing a rendering issue with \nDisplayPipeline.DrawBrepShaded()\n in a custom DisplayConduit. When I render a Brep in the conduit’s preview, the rendered result appears incorrect - some parts are missing while other parts seem duplicated or misplaced. However, the same Brep renders perfectly fine when added to the Rhino document using \ndoc.Objects.AddBrep()\n.\n\n\nExpected Behavior\n\n\nThe Brep should render correctly in the DisplayConduit preview, matching how it appears when added to the document.\n\n\nActual Behavior\n\n\nThe Brep renders with visual artifacts:\n\n\n\n\nSome surfaces are missing\n\n\nSome areas appear duplicated or rendered in wrong positions\n\n\nThe overall geometry looks corrupted in the preview\n\n\n\n\nSteps to Reproduce\n\n\n\n\nCreate a Brep (in my case, a flanging/offset geometry from Brep edges)\n\n\nEnable a custom DisplayConduit that renders the Brep using \nDrawBrepShaded()\n\n\nObserve the incorrect rendering in the conduit preview\n\n\nAdd the same Brep to document - it displays correctly\n\n\n\n\nCode Sample\n\n\nDisplayConduit Implementation\n\n\npublic class FlangingDisplayer : DisplayConduit\n{\n    public List<FlangingItem> Items { get; set; } = [];\n    \n    protected override void CalculateBoundingBox(CalculateBoundingBoxEventArgs e)\n    {\n        if (Items.Count == 0)\n        {\n            return;\n        }\n        foreach (var item in Items)\n        {\n            if (item.Parent != null)\n            {\n                e.IncludeBoundingBox(item.Parent.GetBoundingBox(false));\n            }\n        }\n    }\n    \n    protected override void DrawForeground(DrawEventArgs e)\n    {\n        if (Items.Count == 0)\n        {\n            return;\n        }\n        foreach (var item in Items)\n        {\n            item.Preview(e.Display);\n        }\n    }\n}\n\n\n\nPreview Method\n\n\npublic void Preview(DisplayPipeline pipeline)\n{\n    if (Flangings.Count > 0)\n    {\n        foreach (var brep in Flangings)\n        {\n            ...",
+  "code_blocks": [
+    {
+      "code": "brep.Repair(scriptcontext.doc.ModelAbsoluteTolerance)\nbrep.SetTolerancesBoxesAndFlags(True, True, True, True, True, True, True, True)\nbrep.Faces.SplitKinkyFaces(radians(1.0), True)\nbrep.Compact()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 11,
+      "is_solution": true
+    },
+    {
+      "code": "brep.Repair(scriptcontext.doc.ModelAbsoluteTolerance)\nbrep.SetTolerancesBoxesAndFlags(True, True, True, True, True, True, True, True)\nbrep.Faces.SplitKinkyFaces(radians(1.0), True)\nbrep.Compact()",
+      "language": "python",
+      "author": "yangf85",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "layers",
+    "materials",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 75
+}

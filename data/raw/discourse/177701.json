@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-rhino-geometry-hiddenlinedrawing-compute-viewport-question/177701",
+  "topic_id": 177701,
+  "title": "Help: Rhino.Geometry.HiddenLineDrawing.Compute viewport question",
+  "question": "Hi \n@stevebaer\n or \n@GregArden\n\nI am working on a script to automate some make2d stuff of blocks and I don’t understand how viewports work in this regard.\n\n\nIn ordinary Make2D we can choose Cplane and this is what I am after, but in Rhino Common it seems to me that I have to define what viewport to use, but the resulting geometry doesn’t end up in a predictable place. (if I move my camera a bit then the 2D lines moves to another location, and this just seems very strange to me, so I presume I do something wrong)\n\n\nThis is part of the code I am working on now cleaning up now (as a version 1.2 of what I have working)\n\n\nJust make a block of a box or something with insertpoint = w(0,0,0), then use top view and run the script.\n\nI would expect the 2D result to end up underneath the geometry of the block, but it ends up somewhere unpredicable. Now pan the view a bit and run the script again, now the result ends up somewhere else… Why is that?\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef make2D_of_objects(object_ids):\n    tolerance_for_2d = 0.002\n    # Get the active view\n    rs.CurrentView(\"Top\")\n    view = sc.doc.Views.ActiveView\n    viewport = view.ActiveViewport\n    \n    ###########################################################################\n    # Process all of the objects\n    ###########################################################################\n    object_geometries = []\n    for obj in object_ids:\n        object_geometry = obj.Geometry\n        # Check meshes and repair if it is\n        if rs.IsMesh(object_geometry):\n            object_geometry.Faces.RemoveZeroAreaFaces(0)\n            object_geometry.Weld(0.0524) # = 35 degrees\n        \n        object_geometries.append(object_geometry)\n    \n    ###########################################################################\n    # Create and define hidden line drawing parameters\n    ###########################################################################\n    parameters = Rhino.Ge...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef make2D_of_objects(object_ids):\n    tolerance_for_2d = 0.002\n    # Get the active view\n    rs.CurrentView(\"Top\")\n    view = sc.doc.Views.ActiveView\n    viewport = view.ActiveViewport\n    \n    ###########################################################################\n    # Process all of the objects\n    ###########################################################################\n    object_geometries = []\n    for obj in object_ids:\n        object_geometry = obj.Geometry\n        # Check meshes and repair if it is\n        if rs.IsMesh(object_geometry):\n            object_geometry.Faces.RemoveZeroAreaFaces(0)\n            object_geometry.Weld(0.0524) # = 35 degrees\n        \n        object_geometries.append(object_geometry)\n    \n    ###########################################################################\n    # Create and define hidden line drawing parameters\n    ###########################################################################\n    parameters = Rhino.Geometry.HiddenLineDrawingParameters()\n    parameters.AbsoluteTolerance = tolerance_for_2d\n    parameters.Flatten = True\n    parameters.IncludeHiddenCurves = False\n    parameters.IncludeTangentEdges = False\n    parameters.IncludeTangentSeams = False\n    parameters.SetViewport(viewport)\n    # Add geometry to parameters\n    for object_geometry in object_geometries:\n        parameters.AddGeometry(object_geometry, None)\n    \n    ###########################################################################\n    # Create the hidden line drawing geometry\n    ###########################################################################\n    hld = Rhino.Geometry.HiddenLineDrawing.Compute(parameters, True)\n    if not hld:\n        return False\n    \n    ###########################################################################\n    # Process the result\n    ###########################################################################\n    lines=[]\n    for hld_curve in hld.Segments:\n            if hld_curve.SegmentVisibility == Rhino.Geometry.HiddenLineDrawingSegment.Visibility.Visible: \n                # Copy the curve, transform and add to document\n                curve = hld_curve.CurveGeometry.DuplicateCurve()\n                if not curve.IsShort(0.01):\n                    lines.append(curve)\n        \n    # Join curves\n    joined_curves = Rhino.Geometry.Curve.JoinCurves(lines)\n    result = []\n    for joined_curve in joined_curves:\n        result.append(sc.doc.Objects.AddCurve(joined_curve))\n    if len(result) == 0:\n        return False\n    \n    return result\n\nobject_id = rs.GetObject()\nblock_objects = rs.BlockObjects(rs.BlockInstanceName(object_id))\n\nobjects=[]\nfor object in block_objects:\n    objects.append(sc.doc.Objects.Find(object))\n\n#print objects\n\nmake2D_of_objects(objects)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 265
+}

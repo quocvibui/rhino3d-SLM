@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-pugins-used-in-grasshopper-canvas/198313",
+  "topic_id": 198313,
+  "title": "Get Pugins used in Grasshopper canvas",
+  "question": "Hello everyone,\n\n\nI wrote a C# code (R8) in order to find the plugins used in a canvas. It works quite well although to make it update from time to time I have to attached a trigger. I wonder if there is a way to do the same but using events as \n@sonderskovmathias\n did for the grouping template.\n\n\nGitHub - Sonderwoods/GrasshopperScribbles: A few cool grasshopper scripts such as template and eventhandlers\n\n\n// Grasshopper Script Instance\nusing System;\nusing System.IO;\nusing System.Collections.Generic;\nusing Grasshopper.Kernel;\nusing Rhino;\nusing Rhino.Geometry;\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    private void RunScript(ref object Disallowed_Plugins)\n    {\n        \n        // --- Plugin Checking ---\n        var plugins = new Dictionary<string, string>();\n        var Allowed_Plugins = new List<string> { \"MetaHopper\", \"Grasshopper-Tekla Link 2024.1.17\" };\n        var Different_Plugins = new List<string>();\n\n        // Access the Grasshopper document from the script context\n        var components = this.Component.OnPingDocument().Objects;\n\n        foreach (var obj in components)\n        {\n            if (obj is IGH_Component component)\n            {\n                var plugin = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(component.ComponentGuid);\n\n                if (plugin?.IsCoreLibrary == false && \n                    !string.IsNullOrEmpty(plugin.Name) && \n                    plugin.Version != null && \n                    !plugin.Name.StartsWith(\"Rhino\"))\n                {\n                    plugins[plugin.Name] = plugin.Version.ToString();\n                }\n            }\n        }\n\n        // If no plugins found, set Disallowed_Plugins to \"No plugins used\"\n        if (plugins.Count == 0)\n        {\n            Disallowed_Plugins = \"No plugins used\";\n        }\n        else\n        {\n            foreach (var plugin in plugins)\n            {\n                if (!Allowed_Plugins.Contains(plugin.Key))\n                {\n                  ...",
+  "code_blocks": [
+    {
+      "code": "// Grasshopper Script Instance\nusing System;\nusing System.IO;\nusing System.Collections.Generic;\nusing Grasshopper.Kernel;\nusing Rhino;\nusing Rhino.Geometry;\n\npublic class Script_Instance : GH_ScriptInstance\n{\n    private void RunScript(ref object Disallowed_Plugins)\n    {\n        \n        // --- Plugin Checking ---\n        var plugins = new Dictionary<string, string>();\n        var Allowed_Plugins = new List<string> { \"MetaHopper\", \"Grasshopper-Tekla Link 2024.1.17\" };\n        var Different_Plugins = new List<string>();\n\n        // Access the Grasshopper document from the script context\n        var components = this.Component.OnPingDocument().Objects;\n\n        foreach (var obj in components)\n        {\n            if (obj is IGH_Component component)\n            {\n                var plugin = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(component.ComponentGuid);\n\n                if (plugin?.IsCoreLibrary == false && \n                    !string.IsNullOrEmpty(plugin.Name) && \n                    plugin.Version != null && \n                    !plugin.Name.StartsWith(\"Rhino\"))\n                {\n                    plugins[plugin.Name] = plugin.Version.ToString();\n                }\n            }\n        }\n\n        // If no plugins found, set Disallowed_Plugins to \"No plugins used\"\n        if (plugins.Count == 0)\n        {\n            Disallowed_Plugins = \"No plugins used\";\n        }\n        else\n        {\n            foreach (var plugin in plugins)\n            {\n                if (!Allowed_Plugins.Contains(plugin.Key))\n                {\n                    Different_Plugins.Add(plugin.Key);\n                }\n            }\n\n            Disallowed_Plugins = Different_Plugins.Count == 0 ? \"No disallowed plugins used\" : Different_Plugins;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "bbalbastre",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 172
+}

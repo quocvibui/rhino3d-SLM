@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-detailview-to-namedview/125611",
+  "topic_id": 125611,
+  "title": "Set DetailView to NamedView",
+  "question": "Hello,\n\nI have created a Layout with a DetailView. I would like to change the Detailview to the NamedView (“Profil_view”) I created before. I have no idea how to proceed (I have marked the position in code with ###). I thankful for any tips. Here is my code:\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nfrom Rhino.Geometry import PolylineCurve, Point3d\nimport scriptcontext\nimport System\n\n\n\n\ndef AddLayout(pagename):\n    scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    pageview = scriptcontext.doc.Views.AddPageView(pagename,210, 297)\n    pageview.SetPageAsActive()\n    scriptcontext.doc.Views.ActiveView = pageview\n    scriptcontext.doc.Views.Redraw()\n    return pageview\ndef AddDetailView(page):\n    top_left = Rhino.Geometry.Point2d(10,287) #defines the frame size of detail view in new layout\n    bottom_right = Rhino.Geometry.Point2d(200,10) #defines the frame size of detail view in new layout\n    detail = page.AddDetailView(\"Top_view\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Bottom)\n    page.SetActiveDetail(detail.Id)\n    ###set view to Named View (\"Profil_view\")###\n    detail.Viewport.ZoomExtents()\n    detail.DetailGeometry.IsProjectionLocked = False \n    detail.DetailGeometry.SetScale(400, scriptcontext.doc.ModelUnitSystem, 10, scriptcontext.doc.PageUnitSystem) \n    page.SetPageAsActive()\n\ndef AddNamedView():\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"Profil_view\", Rhino.Display.DefinedViewportProjection.Bottom, System.Drawing.Rectangle(0, 0, 200, 600), True) \n    scriptcontext.doc.Views.ActiveView = newView\n    rs.RotateView(None,1,90)\n    vp = newView.ActiveViewport\n    newView.Redraw()\n    scriptcontext.doc.NamedViews.Add(vp.Name, vp.Id)\n\nAddNamedView()\npage = AddLayout(\"NewLayout\")\nAddDetailView(page)\n\n\n\nThank you in advance.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom Rhino.Geometry import PolylineCurve, Point3d\nimport scriptcontext\nimport System\n\n\n\n\ndef AddLayout(pagename):\n    scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    pageview = scriptcontext.doc.Views.AddPageView(pagename,210, 297)\n    pageview.SetPageAsActive()\n    scriptcontext.doc.Views.ActiveView = pageview\n    scriptcontext.doc.Views.Redraw()\n    return pageview\ndef AddDetailView(page):\n    top_left = Rhino.Geometry.Point2d(10,287) #defines the frame size of detail view in new layout\n    bottom_right = Rhino.Geometry.Point2d(200,10) #defines the frame size of detail view in new layout\n    detail = page.AddDetailView(\"Top_view\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Bottom)\n    page.SetActiveDetail(detail.Id)\n    \n    ###set view to Named View (\"Profil_view\")###\n    named_views = scriptcontext.doc.NamedViews\n    restore_view = named_views.FindByName(\"Profil_view\")\n    named_views.Restore(restore_view, detail.Viewport)\n    #CommitViewportChanges\n    detail.CommitViewportChanges()\n    \n    detail.Viewport.ZoomExtents()\n    detail.DetailGeometry.IsProjectionLocked = False \n    detail.DetailGeometry.SetScale(400, scriptcontext.doc.ModelUnitSystem, 10, scriptcontext.doc.PageUnitSystem) \n    page.SetPageAsActive()\n\ndef AddNamedView():\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"Profil_view\", Rhino.Display.DefinedViewportProjection.Bottom, System.Drawing.Rectangle(0, 0, 200, 600), True) \n    scriptcontext.doc.Views.ActiveView = newView\n    rs.RotateView(None,1,45)\n    vp = newView.ActiveViewport\n    newView.Redraw()\n    scriptcontext.doc.NamedViews.Add(vp.Name, vp.Id)\n\nAddNamedView()\npage = AddLayout(\"NewLayout\")\nAddDetailView(page)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom Rhino.Geometry import PolylineCurve, Point3d\nimport scriptcontext\nimport System\n\n\n\n\ndef AddLayout(pagename):\n    scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    pageview = scriptcontext.doc.Views.AddPageView(pagename,210, 297)\n    pageview.SetPageAsActive()\n    scriptcontext.doc.Views.ActiveView = pageview\n    scriptcontext.doc.Views.Redraw()\n    return pageview\ndef AddDetailView(page):\n    top_left = Rhino.Geometry.Point2d(10,287) #defines the frame size of detail view in new layout\n    bottom_right = Rhino.Geometry.Point2d(200,10) #defines the frame size of detail view in new layout\n    detail = page.AddDetailView(\"Top_view\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Bottom)\n    page.SetActiveDetail(detail.Id)\n    ###set view to Named View (\"Profil_view\")###\n    detail.Viewport.ZoomExtents()\n    detail.DetailGeometry.IsProjectionLocked = False \n    detail.DetailGeometry.SetScale(400, scriptcontext.doc.ModelUnitSystem, 10, scriptcontext.doc.PageUnitSystem) \n    page.SetPageAsActive()\n\ndef AddNamedView():\n    newView = Rhino.RhinoDoc.ActiveDoc.Views.Add(\"Profil_view\", Rhino.Display.DefinedViewportProjection.Bottom, System.Drawing.Rectangle(0, 0, 200, 600), True) \n    scriptcontext.doc.Views.ActiveView = newView\n    rs.RotateView(None,1,90)\n    vp = newView.ActiveViewport\n    newView.Redraw()\n    scriptcontext.doc.NamedViews.Add(vp.Name, vp.Id)\n\nAddNamedView()\npage = AddLayout(\"NewLayout\")\nAddDetailView(page)",
+      "language": "python",
+      "author": "s.thomas",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 3,
+  "views": 664
+}

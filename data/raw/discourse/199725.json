@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/offset-curve-on-surface/199725",
+  "topic_id": 199725,
+  "title": "Offset Curve on Surface",
+  "question": "Hi all,\n\nI wonder if we can achieve the same result like the Rhino command “OffsetCrvOnSrf”?\n\nBy default, the Grasshopper component “Offset on Srf” can only offset the Crv but without extending it. I try to find another GH component like “ExtendCrvOnSrf” but there is no such thing…\n\n![14809d99b08781c4378571b7101010d|690x386]\n\n\nimage\n1592×785 136 KB\n\n\nOffsetCrvOnSrf.3dm\n (206.6 KB)\n\n\nOffsetCrvOnSrf.gh\n (34.9 KB)\n\nThe common extend doesn’t work because it is not a flat surface, it is a free form surface.\n\nI wonder if there is plugins or python script can achieve it? Many thanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\na = crv.ExtendOnSurface(rg.CurveEnd.Both,srf)",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino\n\ntol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\n\noffstCrv = crv.OffsetOnSurface(srf,offset,tol)[0]\n\na = offstCrv.ExtendOnSurface(rg.CurveEnd.Both,srf)",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 6,
+  "views": 196
+}

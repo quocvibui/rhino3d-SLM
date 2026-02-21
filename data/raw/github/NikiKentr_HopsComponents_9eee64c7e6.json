@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/NikiKentr/HopsComponents/blob/3bec5be394e0286a6e6434fe948acaa83112f88b/csv_reader6.py",
+  "repo": "NikiKentr/HopsComponents",
+  "repo_stars": 0,
+  "repo_description": "Hops components for grasshopper/ Rhino 3d",
+  "license": "MIT",
+  "filepath": "csv_reader6.py",
+  "instruction": "Csv reader6",
+  "code": "import ghhops_server as hs\nimport rhino3dm\nimport pandas as pd\nfrom flask import Flask\nimport os\n\napp = Flask(__name__)\nhops = hs.Hops(app)\n\nFILENAME = 'dynamixel-motor-positions.csv'\n\n@hops.component(\n    \"/read_csv\",\n    name=\"Read CSV to Tree\",\n    description=\"Reads a CSV file and returns data as a tree structure\",\n    inputs=[\n        hs.HopsBoolean(\"Refresh\", \"R\", \"Set to True to refresh data from CSV\")\n    ],\n    outputs=[\n        hs.HopsString(\"ColumnNames\", \"CN\", \"Names of all columns\", hs.HopsParamAccess.LIST),\n        hs.HopsNumber(\"DataTree\", \"DT\", \"Data from all columns as a tree\", hs.HopsParamAccess.TREE)\n    ]\n)\ndef read_csv_to_tree(refresh=False):\n    try:\n        file_path = os.path.abspath(FILENAME)\n        if not os.path.exists(file_path):\n            return [\"Error\"], {0: [0.0]}\n\n        df = pd.read_csv(file_path)\n        column_names = df.columns.tolist()\n\n        # dictionary to tree structure\n        tree_dict = {}\n        \n        for i, col in enumerate(column_names):\n            tree_dict[i] = df[col].astype(float).tolist()\n\n        return column_names, tree_dict\n\n    except Exception as e:\n        print(f\"An error occurred: {str(e)}\")\n        return [\"Error\"], {0: [0.0]}\n\nif __name__ == \"__main__\":\n    app.run(debug=True)",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

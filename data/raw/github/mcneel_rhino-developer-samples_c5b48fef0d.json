@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/object-display-mode.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/object-display-mode.py",
+  "instruction": "Object display mode",
+  "code": "import Rhino\nimport scriptcontext\n\ndef ObjectDisplayMode():\n    filter = Rhino.DocObjects.ObjectType.Brep | Rhino.DocObjects.ObjectType.Mesh\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select mesh or surface\", True, filter)\n    if rc != Rhino.Commands.Result.Success: return rc;\n    viewportId = scriptcontext.doc.Views.ActiveView.ActiveViewportID\n\n    attr = objref.Object().Attributes\n    if attr.HasDisplayModeOverride(viewportId):\n        print \"Removing display mode override from object\"\n        attr.RemoveDisplayModeOverride(viewportId)\n    else:\n        modes = Rhino.Display.DisplayModeDescription.GetDisplayModes()\n        mode = None\n        if len(modes) == 1:\n            mode = modes[0]\n        else:\n            go = Rhino.Input.Custom.GetOption()\n            go.SetCommandPrompt(\"Select display mode\")\n            str_modes = []\n            for m in modes:\n                s = m.EnglishName.replace(\" \",\"\").replace(\"-\",\"\")\n                str_modes.append(s)\n            go.AddOptionList(\"DisplayMode\", str_modes, 0)\n            if go.Get()==Rhino.Input.GetResult.Option:\n                mode = modes[go.Option().CurrentListOptionIndex]\n        if not mode: return Rhino.Commands.Result.Cancel\n        attr.SetDisplayModeOverride(mode, viewportId)\n    scriptcontext.doc.Objects.ModifyAttributes(objref, attr, False)\n    scriptcontext.doc.Views.Redraw()\n\n\nif __name__==\"__main__\":\n    ObjectDisplayMode()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

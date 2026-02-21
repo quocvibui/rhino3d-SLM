@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-prevent-randomly-generated-points-from-overlapping-each-other/77593",
+  "topic_id": 77593,
+  "title": "Python - Prevent randomly generated points from overlapping each other",
+  "question": "Hi, I am new with python and I am still learning so my problem might be very trivial but I just cannot get the right solution for this problem.\n\nSo, I have randomly generated points inside a square. Each point has a radius. But the problem with generated points is that they are overlapping each other. How can I resolve this?\n\nThank you for your help in advance.\n\n\nroof with holes.gh\n (22.9 KB)\n\n\n\n\n1.png\n817×591 143 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\n\nfrom math import sin, cos, pi\n\nimport random\n\n\n#square\n\na = 50\n\nb = 50\n\n\nV1 = 0, 0, 0\n\nV2 = 0, b, 0\n\nV3 = a, b, 0\n\nV4 = a, 0, 0\n\nvogali = [V1,V2,V3,V4]\n\n\n#\ndraw\n edges\n\nedges = \n\nfor i in range(4):\n\nedges.append(rs.AddLine(vogali[i-1],vogali[i],))\n\n\n#randomly\n generated points\n\npoints_d = \n\npoints_u = \n\nx = 0\n\ny = 0\n\n\nfor i in range(n_points):\n\ndelta_x = 0.025 * a\n\ndelta_y = 0.025 * b\n\nradius = min(delta_x, delta_y)\n\n\nx = random.random() * a      \ny = random.random() * b      \nz = 0\n\n#check for each point if it ovelapps the other\nif  x != y  and y * delta_y  != x * delta_x   :\n    points_u.append(rs.AddPoint(x,y,z))\n    points_d.append(rs.AddPoint(x,y,max(a,b)))",
+  "code_blocks": [
+    {
+      "code": "too_close = True\nwhile too_close:\n    x = random...\n    ....\n    for pt in points_u:\n        x1, y1, z1 = rs.PointCoordinates(pt)\n        distance = math.sqrt((x1-x)**2 + (y1-y)**2)\n        if distance < radius * 2:\n            too_close = True\n            break\n    else:\n        too_close = False",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom math import sin, cos, pi, sqrt\nimport random\n\n#square\na = 50\nb = 50\n\nV1 = 0, 0, 0\nV2 = 0, b, 0\nV3 = a, b, 0\nV4 = a, 0, 0\nvogali = [V1,V2,V3,V4]\n\n#draw edges\nedges = []\nfor i in range(4):\n    edges.append(rs.AddLine(vogali[i-1],vogali[i],))\n\n#randomly generated points\npoints_d = []\npoints_u = []\nx = 0\ny = 0\n\nfor i in range(10):\n    delta_x = 0.025 * a\n    delta_y = 0.025 * b\n    radius = min(delta_x, delta_y)\n\n    too_close = True\n    while too_close:\n        x = random.random() * a      \n        y = random.random() * b      \n        z = 0\n        for pt in points_u:\n            x1, y1, z1 = rs.PointCoordinates(pt)\n            distance = sqrt((x1-x)**2 + (y1-y)**2)\n            if distance < radius * 2:\n                too_close = True\n                break\n        else:\n            too_close = False\n    \n    points_u.append(rs.AddPoint(x,y,z))\n    points_d.append(rs.AddPoint(x,y,max(a,b)))",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "x = random.random() * a      \ny = random.random() * b      \nz = 0\n\n#check for each point if it ovelapps the other\nif  x != y  and y * delta_y  != x * delta_x   :\n    points_u.append(rs.AddPoint(x,y,z))\n    points_d.append(rs.AddPoint(x,y,max(a,b)))",
+      "language": "python",
+      "author": "spela.kranjec21",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1131
+}

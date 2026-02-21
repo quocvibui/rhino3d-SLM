@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TeamSPWK/rhino-shapely-converter/blob/8a82d4e0d0d6c6dd3a8aa29ed495549512113f56/src/rhino_shapely_converter/from_rhino_to_shapely.py",
+  "repo": "TeamSPWK/rhino-shapely-converter",
+  "repo_stars": 0,
+  "repo_description": "This package is to convert rhino geometry to shapely geometry and vice versa.",
+  "license": "MIT",
+  "filepath": "src/rhino_shapely_converter/from_rhino_to_shapely.py",
+  "instruction": "From rhino to shapely",
+  "code": "import shapely.geometry as sgeom\n\ntry:\n    # For Rhino\n    import Rhino.Geometry as r3d\nexcept ImportError:\n    import rhino3dm as r3d\n\n\ndef convert_rhino_geometry_to_shapely_geometry(\n    geometry: r3d.GeometryBase,\n) -> sgeom.base.BaseGeometry:\n    # Point\n    if isinstance(geometry, r3d.Point):\n        return sgeom.Point(\n            geometry.Location.X, geometry.Location.Y, geometry.Location.Z\n        )\n    elif isinstance(geometry, r3d.Point2d):\n        return sgeom.Point(geometry.X, geometry.Y)\n    elif isinstance(geometry, r3d.Point3d):\n        return sgeom.Point(geometry.X, geometry.Y, geometry.Z)\n    # PointCloud\n    elif isinstance(geometry, r3d.PointCloud):\n        return sgeom.MultiPoint(\n            list(map(lambda point: (point.X, point.Y, point.Z), geometry.GetPoints()))\n        )\n    # Line\n    elif isinstance(geometry, r3d.Line):\n        return sgeom.LineString(\n            [\n                (geometry.PointAt(0).X, geometry.PointAt(0).Y, geometry.PointAt(0).Z),\n                (geometry.PointAt(1).X, geometry.PointAt(1).Y, geometry.PointAt(1).Z),\n            ]\n        )\n    # Polyline\n    elif isinstance(geometry, r3d.Polyline):\n        points = [geometry.PointAt(i) for i in range(geometry.Count)]\n        return sgeom.LineString(\n            list(map(lambda point: (point.X, point.Y, point.Z), points))\n        )\n    elif isinstance(geometry, r3d.PolylineCurve):\n        points = [geometry.PointAt(i) for i in range(geometry.PointCount)]\n        return sgeom.LineString(\n            list(map(lambda point: (point.X, point.Y, point.Z), points))\n        )\n\n    else:\n        raise ValueError(\n            f\"\"\"Supported geometry types:\n            - Point\n            - Point2d\n            - Point3d\n            - PointCloud\n            - Line\n            - Polyline\n            - PolylineCurve\n            Unsupported geometry type: {type(geometry)}.\n            \"\"\"\n        )\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

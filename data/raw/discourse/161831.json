@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-code-loft/161831",
+  "topic_id": 161831,
+  "title": "Python code - loft",
+  "question": "Hi,\n\n\nI’m trying to create a simple code that creates a loft between 2 selected curves but I keep getting the following error:\n\n\n\"Message: expected float, got Guid\n\n\nTraceback:\n\nline 2492, in EvaluateCurve, “C:\\Users\\rneto\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\curve.py”\n\n\nCan someone tell me what’s wrong with my code? For the life of me I just can’t figure it out:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nfrom Rhino.Geometry import *\n\ncurve01 = rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\ncurve02 = rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\n\nclosestPoints = rs.CurveClosestObject(curve01, curve02)\nstart = rs.EvaluateCurve(curve01, closestPoints[0])\nend = rs.EvaluateCurve(curve02, closestPoints[1])\n\nloft = Rhino.Geometry.Brep.CreateFromLoft([curve01, curve02], start, end, 3, True, 0)\nif loft:\n    for brep in loft:\n        sc.doc.Objects.AddBrep(brep)\n    sc.doc.Views.Redraw()\n\n\n\nThank you",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncurve01 = rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\ncurve02 = rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\nif (curve01 and curve02):\n    loft_id=rs.AddLoftSrf([curve01,curve02])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncurve01=rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\ncurve02=rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\nif curve01 and curve02:\n    if rs.IsCurveClosed(curve01) and rs.IsCurveClosed(curve02):\n        \n        #check curve directions (CW/CCW)\n        if not rs.CurveDirectionsMatch(curve01,curve02):\n            #flip (reverse) second curve if directions don't match\n            rs.ReverseCurve(curve02)\n            \n        #match seam on curve02 to curve01\n        start01=rs.CurveStartPoint(curve01)\n        #get the *parameter* on curve02 of the closest point to start01\n        param=rs.CurveClosestPoint(curve02,start01)\n        #change the seam of curve02\n        rs.CurveSeam(curve02,param)\n        \n        #create and add the loft to the document\n        loft_id=rs.AddLoftSrf([curve01,curve02])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nfrom Rhino.Geometry import *\n\ncurve01 = rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\ncurve02 = rs.GetObject(\"Select a closed curve\", rs.filter.curve, True, False)\n\nclosestPoints = rs.CurveClosestObject(curve01, curve02)\nstart = rs.EvaluateCurve(curve01, closestPoints[0])\nend = rs.EvaluateCurve(curve02, closestPoints[1])\n\nloft = Rhino.Geometry.Brep.CreateFromLoft([curve01, curve02], start, end, 3, True, 0)\nif loft:\n    for brep in loft:\n        sc.doc.Objects.AddBrep(brep)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "robneto.eng",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 601
+}

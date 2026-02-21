@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-in-custom-filter-with-extrusion-objects/20805",
+  "topic_id": 20805,
+  "title": "Bug in custom_filter with extrusion objects",
+  "question": "If I am using a custom filter for a solid object, accepting extrusion objects must be explicitly programmed.  Open a new file and make a box or other extrusion object. Do not preselect the object at first.  Then run:\n\n\nimport rhinoscriptsyntax as rs\ndef solid_filt(rhino_object, geometry, component_index):\n    return geometry.IsSolid\n    \nmsg=\"Select a solid object\"\nobj=rs.GetObject(msg, 8+16, preselect=True, custom_filter=solid_filt)\nif obj: print \"Object selected\"\nelse: print \"Nothing selected\"\n\n\n\nYou will not be able to post-select the extrusion based box.  If you convert it to a polysurface, you can.  Also, paradoxically, if you preselect the extrusion, it passes!\n\n\nNow, if you add the extrusion object explicitly to the main selection filter, it works.\n\n\nimport rhinoscriptsyntax as rs\ndef solid_filt(rhino_object, geometry, component_index):\n    return geometry.IsSolid\n    \nmsg=\"Select a solid object\"\nobj=rs.GetObject(msg, 8+16+1073741824, preselect=True, custom_filter=solid_filt)\nif obj: print \"Object selected\"\nelse: print \"Nothing selected\"\n\n\n\nPre- or post- selecting an extrusion object with just the basic surface+polysurface filter (8+16) also works if there is no custom_filter…\n\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input.Custom import *\n\ndef test():\n    go = GetObject()\n    go.SetCommandPrompt(\"Select solids\")\n    go.GeometryFilter = ObjectType.Surface | ObjectType.PolysrfFilter\n    go.GeometryAttributeFilter = GeometryAttributeFilter.ClosedSurface | GeometryAttributeFilter.ClosedPolysrf\n    go.GetMultiple(1, 0)\n    if go.CommandResult() == Result.Success:\n        print \"Objects selected\"",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef solid_filt(rhino_object, geometry, component_index):\n    return geometry.IsSolid\n    \nmsg=\"Select a solid object\"\nobj=rs.GetObject(msg, 8+16, preselect=True, custom_filter=solid_filt)\nif obj: print \"Object selected\"\nelse: print \"Nothing selected\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef solid_filt(rhino_object, geometry, component_index):\n    return geometry.IsSolid\n    \nmsg=\"Select a solid object\"\nobj=rs.GetObject(msg, 8+16+1073741824, preselect=True, custom_filter=solid_filt)\nif obj: print \"Object selected\"\nelse: print \"Nothing selected\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 667
+}

@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-remove-self-intersections-on-non-planar-curve-using-rhinoscript/142465",
+  "topic_id": 142465,
+  "title": "How to remove self-intersections on non-planar curve using Rhinoscript",
+  "question": "Hi everyone\n\n\nI am quite new to Rhino and I am trying to create a surface from a non-planar curve. The problem is that I need the surface to be bigger than the curve by a certain offset (I’ve been using 2mm), so I cannot just use \nPatch\n with Trim.\n\nI have used the command \nOffsetCrvOnSrf\n to make a curve slightly bigger than the original one on my surface, however since the curve is quite complex the larger curve has many self-intersections.\n\n\nIs there an easy way to create the surface without removing the self-intersections by e.g. using the boundary of the curve, if there is such a thing? Or does anyone know how to remove the self intersections automatically using python and rhinoscriptsyntax? I need to repeat the same procedure on many curves so it would be cool to have it automatic and independent of size.\n\n\nI have attached an example rhino file as well as the code I use to create the curves. The example layer in the Rhino file has a surface that I made by hand of how I need it to look.\n\n\nI am also new to these forums so if I have not provided all the required information I apologize.\n\nI would appreciate any help! \n  Thanks!\n\n\nexample_surface.3dm\n (4.0 MB)\n\n\nexample_script.py\n (4.3 KB)",
+  "code_blocks": [
+    {
+      "code": "rs.SelectObject(patchId) # patchId is the guid of the surface\nrs.Command('_-CreateUVCrv')\nrs.SelectObject(curveId) # curveId is the guid of the curve",
+      "language": "python",
+      "author": "Lara_Zamboni",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "rs.Command(etc etc)\nif rs.LastCommandResult() == 0:\n    newIds = rs.LastCreatedObjects()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def test():\n    \n    srfId = rs.GetObject('Select a  surface', filter = 8, preselect=True)\n    if not srfId: return\n    \n    crvId = rs.GetObject('Select a  curve', filter = 4, select=False)\n    if not crvId: return\n\n    rs.SelectObject(srfId)\n    rs.Command ('CreateUVCrv SelId ' + str(crvId) +  ' Enter')\n    \n\ntest()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 691
+}

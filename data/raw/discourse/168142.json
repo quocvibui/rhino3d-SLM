@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/open-an-rmtl-file-and-apply-it-to-a-layer/168142",
+  "topic_id": 168142,
+  "title": "Open an .rmtl file and apply it to a layer?",
+  "question": "Is it possible in python to open an .rmtl file and apply it to a layer? And, if so, how?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    rmtl_file = rs.OpenFileName(\"Open\", \"RMTL Files (*.rmtl)|*.rmtl||\")\n    if not rmtl_file: return\n    \n    layer_path = rs.GetLayer(\"Layer to apply material to\", None, False)\n    if not layer_path: return\n    \n    material = Rhino.Render.RenderContent.LoadFromFile(rmtl_file)\n    layer_index = scriptcontext.doc.Layers.FindByFullPath(layer_path, -1)\n    layer = scriptcontext.doc.Layers[layer_index]\n    layer.RenderMaterial = material\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nlayer_index = sc.doc.Layers.FindByFullPath(\"LayerName\", Rhino.RhinoMath.UnsetIntIndex)\nlayer = sc.doc.Layers[layer_index]\nmaterial_path = \"..\\\\PathRelativeToThisScript\\\\MyCoolMaterial.rmtl\"\nmaterial = Rhino.Render.RenderContent.LoadFromFile(material_path)\nlayer.RenderMaterial = material",
+      "language": "python",
+      "author": "webdunce",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 337
+}

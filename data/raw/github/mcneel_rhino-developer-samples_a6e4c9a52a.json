@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_selectgroupobject.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_selectgroupobject.py",
+  "instruction": "Ex selectgroupobject",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  rs, obj_ref = RhinoGet.GetOneObject(\n    \"Select object\", False, ObjectType.AnyObject)\n  if rs <> Result.Success:\n    return rs\n  rhino_object = obj_ref.Object()\n  if rhino_object == None:\n    return Result.Failure\n\n  rhino_object_groups = [\n    group for group in rhino_object.Attributes.GetGroupList()]\n\n  selectable_objects= [\n    obj for obj in doc.Objects.GetObjectList(ObjectType.AnyObject)\n    if obj.IsSelectable(True, False, False, False)]\n\n  for selectable_object in selectable_objects:\n    for group in selectable_object.Attributes.GetGroupList():\n      if rhino_object_groups.Contains(group):\n          selectable_object.Select(True)\n          continue\n\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

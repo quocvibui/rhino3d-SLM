@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/q-gh-python-trimmed-surface-in-untrimmed-surface-out/42659",
+  "topic_id": 42659,
+  "title": "Q : GH Python, Trimmed Surface in, Untrimmed Surface out",
+  "question": "Hi there,\n\n\nI tried to sort surfaces order and append those to a new list of surfaces.\n\nOriginal surfaces are trimmed, but once appended, turned to be untrimmed surfaces.\n\nI guess it is because of object type. I dont try yet but brep objects might not make any problem in same operation. I still wonder if there is a way to get trimmed surface without changing object type.\n\nPlease find attached files and give me some help.\n\n\nThanks,\n\nPJ\n\n\ntest.gh\n (6.7 KB)\n\n\ntest_00.3dm\n (204.1 KB)",
+  "code_blocks": [
+    {
+      "code": "class fingerEDGE :\n    \n    def __init__(self, srf, srfID, thick, fSIZE, counterSrfList, counterSrfs):\n        \n        ##crvSelf = item\n        ##crvOthers = list\n        \n        self.srf = srf\n        self.srfID = srfID\n        self.thick = thick\n        self.fSIZE = fSIZE\n        self.counterSrfList = counterSrfList\n        self.counterSrfs = counterSrfs\n        \n        self.fingerIN = []\n        self.fingerOUT = []\n        \n        \n        #self.midpt = gh.Area(srf)[1]\n        #uv = rs.SurfaceClosestPoint(srf, self.midpt)\n        #self.nVec = rs.SurfaceNormal(srf, uv)\n        #self.cpln = rs.PlaneFromNormal(self.midpt, self.nVec)\n                        \n        \n    def fingerIN (self, srf, srfID):\n        mid = rs.SurfaceAreaCentroid(srf)[0]\n        #mid = gh.Area(srf)[1]\n        print mid\n        uv = rs.SurfaceClosestPoint(srf, mid)\n        srfVec = rs.SurfaceNormal(srf, uv)\n        srfCpln = rs.PlaneFromNormal(mid, srfVec)\n        secLine = rs.IntersectBreps(self.srf,srf,0.001)[0]\n        #secLine = gh.BrepXBrep(self.srf, srf)[0]\n        pts = rs.DivideCurveLength(secLine, self.fSIZE)\n        \n        spt = pts[2]\n        ept = pts[len(pts)-3]\n        \n        \n\nclassList = []\n\n\nfor i in range(len(srfs)):\n    srfListNum = []\n    counterSrfList = []\n    interSecLine = []\n    for j in range(len(srfs)):\n        if i != j :\n            test = rs.IntersectBreps(srfs[i], srfs[j],0.001)\n            if test :\n                srfListNum.append(j)\n                counterSrfList.append(srfs[j])\n    \n    classList.append(fingerEDGE(srfs[i], i, thick, fSIZE, srfListNum, counterSrfList))\n    \n\na = classList\n\nb = srfs",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1830
+}

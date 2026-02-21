@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/deswaks/space-invader/blob/94e00bff3b5371cfa6999f381461af9af6e0b0ba/ghpython%20component%20source%20code/naked_edges.py",
+  "repo": "deswaks/space-invader",
+  "repo_stars": 0,
+  "repo_description": "Tools for locating and reconstructing analytical building spaces with Rhino Grasshopper",
+  "license": "MIT",
+  "filepath": "ghpython component source code/naked_edges.py",
+  "instruction": "Naked edges",
+  "code": "import ghpythonlib.components as ghComp\nimport ghpythonlib.parallel as par\nimport rhinoscriptsyntax as rs\n\n\n# DelaunayMesh and get vertices and faces\nmesh = ghComp.DelaunayMesh(points,rs.WorldXYPlane())\nvertices,faces,_,_ = ghComp.DeconstructMesh(mesh)\n\n# uses faces if max distance of edges are shorter than or equal to the given threshold(cell size ^2 + 2*cell size^2)\nnewMesh=[]\ndef face_distance(face):\n    dist1=rs.Distance(points[face.A],points[face.B])\n    dist2=rs.Distance(points[face.B],points[face.C])\n    dist3=rs.Distance(points[face.C],points[face.A])\n    maxDist=max(dist1,dist2,dist3)\n    if(maxDist<=threshold):\n        newMesh.append(face)\npar.run(face_distance,faces)\n\n# create final meshes and use naked edges for boundary\nfinalMesh=ghComp.ConstructMesh(vertices,newMesh)\nnakedEdges = finalMesh.GetNakedEdges()",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-point-cloud-data-from-mesh/215379",
+  "topic_id": 215379,
+  "title": "How to create point cloud data from mesh?",
+  "question": "Hello everyone,\n\n\nI am opening step file and getting its mesh. Now that I have mesh object I want to write/create point cloud from the mesh. How can I achieve this\n\n\nprotected override Result RunCommand(RhinoDoc doc, RunMode mode)\n  {\n      string stepFilePath = @\"C:\\Users\\d\\Downloads\\cube.step\";\n     \n      RhinoDoc.Open(stepFilePath, out bool t5);\n\n      var activeDoc = RhinoDoc.ActiveDoc;\n\n      IEnumerable<RhinoObject> brepObjects = activeDoc.Objects.GetObjectList(ObjectType.Brep).ToList();\n\n      List<RhinoObject> brepObjectsList = brepObjects.ToList();\n\n      foreach (var obj in brepObjectsList)\n      {\n          obj.Geometry.GetBoundingBox(true);\n          RhinoApp.WriteLine($\"Brep Object Id: {obj.Geometry.GetBoundingBox(true)}\");\n      }\n\n      Mesh mesh = Mesh.CreateFromBrep(brepObjectsList[0].Geometry as Brep)[0];\n      \n      RhinoApp.WriteLine($\"vertices count: { mesh.Vertices.Count()}\");\n      \n      return Result.Success;\n  }",
+  "code_blocks": [
+    {
+      "code": "public Guid AddPointCloud(\nIEnumerable<Point3d> points\n)",
+      "language": "csharp",
+      "author": "Tom_P",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n  {\n      string stepFilePath = @\"C:\\Users\\d\\Downloads\\cube.step\";\n     \n      RhinoDoc.Open(stepFilePath, out bool t5);\n\n      var activeDoc = RhinoDoc.ActiveDoc;\n\n      IEnumerable<RhinoObject> brepObjects = activeDoc.Objects.GetObjectList(ObjectType.Brep).ToList();\n\n      List<RhinoObject> brepObjectsList = brepObjects.ToList();\n\n      foreach (var obj in brepObjectsList)\n      {\n          obj.Geometry.GetBoundingBox(true);\n          RhinoApp.WriteLine($\"Brep Object Id: {obj.Geometry.GetBoundingBox(true)}\");\n      }\n\n      Mesh mesh = Mesh.CreateFromBrep(brepObjectsList[0].Geometry as Brep)[0];\n      \n      RhinoApp.WriteLine($\"vertices count: { mesh.Vertices.Count()}\");\n      \n      return Result.Success;\n  }",
+      "language": "csharp",
+      "author": "shivu",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 55
+}

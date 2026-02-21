@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/angulardimension-randomly-choses-reflex-angle/19697",
+  "topic_id": 19697,
+  "title": "AngularDimension randomly choses reflex angle",
+  "question": "When creating angular dimensions from an arc with RhinoCommon, the location for the dimension and text seem to be randomly chosen between the angle given by the arc and its reflex angle.\n\n\nThe constructor of Rhino.Geometry.AngularDimension takes an arc to define the angle and an offset value to place the dimension. After adding the dimension to the model with scriptcontext.doc.Objects.AddAngularDimension the grip that is controlling the placement of the dimension is sitting directly at the start point of the arc or at the given offset from this point - which leaves the decision as to which side of the line the dimension will appear to numerical uncertainty…\n\n\nCould be more stable to use the CENTER of the given arc for placing the respective grip?\n\n\nFabian",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\nimport System.Drawing\n\ndef main():\n    \n    while True:\n        pt1 = rs.GetPoint(\"start\")\n        if pt1 == None: break\n        pt2 = rs.GetPoint(\"interior\", pt1)\n        if pt2 == None: break\n        pt3 = rs.GetPoint(\"end\", pt2)\n        if pt3 == None: break\n    \n        arc = Rhino.Geometry.Arc(pt1, pt2, pt3)\n        \n        dim = Rhino.Geometry.AngularDimension(arc, 10.0) \n        \n        idDim = scriptcontext.doc.Objects.AddAngularDimension(dim)\n        idArc = scriptcontext.doc.Objects.AddArc(arc)\n        rs.ObjectColor(idArc, System.Drawing.Color.Red)\n     \nmain()",
+      "language": "python",
+      "author": "fabian",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1434
+}

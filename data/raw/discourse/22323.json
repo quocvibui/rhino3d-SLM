@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/transform-from-curves-from-world-xyz-to-a-surface-space-uvn/22323",
+  "topic_id": 22323,
+  "title": "Transform from curves from world XYZ to a surface space UVN",
+  "question": "Hi,\n\n\nI’m looking for a way to transform curves from WorldXYZ to a Surface’s UVN\n\ni.e. script the \nApplyCrv\n command\n\n\nI’m scripting in Python and have not found anything yet in RhinoCommon. I try and dig deeper while waiting for someone to chime in here.\n\n\nI have found a solution that seems to be what ApplyCrv does:\n\n\n    # bbox is boundingbox from all iso_curves (these need to be morphed)\n    Uplane_interval = Rhino.Geometry.Interval(bbox.Min[0], bbox.Max[0])\n    Vplane_interval = Rhino.Geometry.Interval(bbox.Min[1], bbox.Max[1])\n    # create a planar surface on XY plane around geometry to be morphed\n    from_surface = Rhino.Geometry.PlaneSurface(Rhino.Geometry.Plane.WorldXY, Uplane_interval, Vplane_interval)\n    \n    # create SporphSpaceMorph instance (who's been drinking while making up these names?)\n    # to_surface is NurbsSurface to 'Apply the curves to'\n    Morph = Rhino.Geometry.Morphs.SporphSpaceMorph(from_surface,to_surface)\n\n    # Morph the geometry one by one\n    for crv in iso_curves:\n        Morph.Morph(crv)\n\n\n\nThanks\n\n-Willem",
+  "code_blocks": [
+    {
+      "code": "# bbox is boundingbox from all iso_curves (these need to be morphed)\n    Uplane_interval = Rhino.Geometry.Interval(bbox.Min[0], bbox.Max[0])\n    Vplane_interval = Rhino.Geometry.Interval(bbox.Min[1], bbox.Max[1])\n    # create a planar surface on XY plane around geometry to be morphed\n    from_surface = Rhino.Geometry.PlaneSurface(Rhino.Geometry.Plane.WorldXY, Uplane_interval, Vplane_interval)\n    \n    # create SporphSpaceMorph instance (who's been drinking while making up these names?)\n    # to_surface is NurbsSurface to 'Apply the curves to'\n    Morph = Rhino.Geometry.Morphs.SporphSpaceMorph(from_surface,to_surface)\n\n    # Morph the geometry one by one\n    for crv in iso_curves:\n        Morph.Morph(crv)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 3236
+}

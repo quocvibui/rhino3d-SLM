@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-understanding-the-use-of-runscript-in-plugin-context/213664",
+  "topic_id": 213664,
+  "title": "Help understanding the use of RunScript in plugin context",
+  "question": "Hi,\n\n\nAs a learning exercise I’m attempting to turn some of the scripted tools that my company have developed into a plugin (in C#). One of the tools we have for dimensioning our drawings makes use of Rhino’s built in ‘Offset’ command to get the user to select where they want a particular offset to go. I’ve managed to get it to run in the plugin (as a scriptrunner) however the issue I’m running into is retrieving the created offset curve. Is there good and/or supported way to do this if at all possible? My current understanding is that there isn’t.\n\n\nRhinoApp.RunScript(“_Offset Cap=None InCPlane=Yes T”, false);\n\n\nNew to C#/plugin development so any help or suggestions will be appreciated",
+  "code_blocks": [
+    {
+      "code": "/// <summary>\n/// Runs a Rhino command script.\n/// </summary>\n/// <param name=\"doc\">The active document.</param>\n/// <param name=\"script\">The script to run.</param>\n/// <param name=\"echo\">Echo prompts to the command window.</param>\n/// <returns>\n/// The identifiers of the objects that were most recently created or changed\n/// by the scripted command. Retreive this objects using ObjectTable.FindId.\n/// </returns>\npublic static Guid[] RunCommandScript(RhinoDoc doc, string script, bool echo)\n{\n  Guid[] rc = Array.Empty<Guid>();\n  try\n  {\n    uint start_sn = RhinoObject.NextRuntimeSerialNumber;\n    RhinoApp.RunScript(script, echo);\n    uint end_sn = RhinoObject.NextRuntimeSerialNumber;\n    if (start_sn < end_sn)\n    {\n      List<Guid> object_ids = new List<Guid>();\n      for (uint sn = start_sn; sn < end_sn; sn++)\n      {\n        RhinoObject obj = doc.Objects.Find(sn);\n        if (null != obj)\n          object_ids.Add(obj.Id);\n      }\n      rc = object_ids.Distinct().ToArray();\n    }\n  }\n  catch\n  {\n    // ignored\n  }\n  return rc;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 43
+}

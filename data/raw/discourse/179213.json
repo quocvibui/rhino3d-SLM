@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/settexturecoordinates-rhinocommon-py-script/179213",
+  "topic_id": 179213,
+  "title": "SetTextureCoordinates - RhinoCommon + PY Script",
+  "question": "Hi there,\n\n\nSeems I’m stuck on the following topic. It looks like mesh is imported properly (vertices, normals, poly) though when I hit UVs nothing seems to work here:\n\n\nmesh = Rhino.Geometry.Mesh();\n\nfor pt in extMData.points:\n    mesh.Vertices.Add(pt[0],pt[1],pt[2])\n\nfor nrm in extMData.normals:\n    mesh.Normals.Add(nrm[0],nrm[1],nrm[2])\n\nfor poly in extMData.polygons:\n    if len(poly) == 3:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2])\n    elif len(poly) == 4:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2],poly[3])\n    else:\n        print(\"Other poly not supported\")\n\nmesh.Normals.UnitizeNormals();\n\n# Create a list to store UV coordinates for each vertex\nuv_coordinates = []\n\n# Populate the UV coordinates list\nfor uv in extMData.uvs:\n    uv_coordinates.append(Rhino.Geometry.Point2f(uv[0], uv[1]))\n\n# Set UV coordinates for each face of the mesh\nfor i in range(mesh.Faces.Count):\n    # Get the vertex indices of the current face\n    face = mesh.Faces[i]\n\n    # Create a list to hold the vertex indices\n    vertex_indices = []\n    \n    # Append the vertex indices of the current face to the list\n    vertex_indices.append(face.A)\n    vertex_indices.append(face.B)\n    vertex_indices.append(face.C)\n    \n    if face.IsQuad:\n        vertex_indices.append(face.D)\n\n    # Assign UV coordinates to each vertex of the face\n    for j, vertex_index in enumerate(vertex_indices):\n        mesh.TextureCoordinates.Add(uv_coordinates[vertex_index])\n\nprint(\"Now there are \" + str(mesh.TextureCoordinates.Count) + \" texcoords\")\n\n#SORRY FOR CHANGE BUT THIS SEEMS TO BE CORRECT THAT IT MATCHES NOW INITIAL UVs PAIRS COUNT - BUT STILL only color on object\n#OR simpler aproach - though UVs has 200k pairs while mesh only 64k verts - ANYWAY this isn't working as after aplying material seems it jsut changes color/texture is not recognizable\n#mesh.TextureCoordinates.SetTextureCoordinates(uv_coordinates)\n\nmesh.TextureCoordinates.NormalizeTextureCoordinates();\nmesh.Compact()\n\n#Change Y-Up to Z-Up\nm...",
+  "code_blocks": [
+    {
+      "code": "extMData = ....\n\nmesh = Rhino.Geometry.Mesh();\n\nfor pt in extMData.points:\n    mesh.Vertices.Add(pt[0],pt[1],pt[2])\n\nfor nrm in extMData.normals:\n    mesh.Normals.Add(nrm[0],nrm[1],nrm[2])\n\nfor poly in extMData.polygons:\n    if len(poly) == 3:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2])\n    elif len(poly) == 4:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2],poly[3])\n    else:\n        print(\"Other poly not supported\")\n\n# Create a list to store UV coordinates for each vertex\nuv_coordinates = []\n# Populate the UV coordinates list\nfor uv in extMData.uvs:\n    mesh.TextureCoordinates.Add(Rhino.Geometry.Point2f(uv[0], uv[1]))\n\nsc.doc.Objects.AddMesh(mesh)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\nimport System\nimport System.Collections.Generic\nimport Rhino\n\n# import the laubwerk module\nimport laubwerk\n\ntry:\n# load a laubwerk plant file\n    lbw_plant = laubwerk.load(\"C:\\path\\to\\Laubwerk\\Plants\\Acer_campestre\\Acer_campestre.lbw.gz\")\nexcept IOError:\n    #print (\"Plant file is missing\")\n    Rhino.RhinoApp.WriteLine(\"Plant file is missing\")\nelse:\n# pick a specific model from the plant file\n    lbw_model = lbw_plant.models[0]\n\n# generate the actual tree geometry\nlbw_mesh = lbw_model.get_mesh(qualifier=\"summer\", max_branch_level=1, min_thickness=0.3, leaf_amount=0.1, leaf_density=0.1, max_subdiv_level=1)\n\nprint(\"Created LBW_MESH. It has poly: \" + str(len(lbw_mesh.polygons)) + \" and verts: \" + str(len(lbw_mesh.points)) + \" and normals: \" + str(len(lbw_mesh.normals)) + \" and uvs: \" + str(len(lbw_mesh.uvs)) + \" and texverts: \" + str(len(lbw_mesh.texverts)))\n\nmesh = Rhino.Geometry.Mesh();\n\nfor pt in lbw_mesh.points:\n    mesh.Vertices.Add(pt[0],pt[1],pt[2])\n\nfor poly in lbw_mesh.polygons:\n    if len(poly) == 3:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2])\n    elif len(poly) == 4:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2],poly[3])\n    else:\n        print(\"Other poly not supported\")\n\nfor nrm in lbw_mesh.normals:\n    mesh.Normals.Add(nrm[0],nrm[1],nrm[2])\n\n#Unweld to match uvs Count\nmesh.Unweld(0, False)\n\n# Clear existing texture coordinates if any\nmesh.TextureCoordinates.Clear()\n\nfor uv in lbw_mesh.uvs:\n    mesh.TextureCoordinates.Add(Rhino.Geometry.Point2f(uv[0], uv[1]))\n\n#Change Y-Up to Z-Up\nmesh.Rotate(math.radians(90),Rhino.Geometry.Vector3d(1,0,0),Rhino.Geometry.Point3d.Origin)\n\ny, l = mesh.IsValidWithLog()\nprint(y, l)\n\nprint(\"Script executed sucessfully.\")\nprint(sc.doc.Objects.AddMesh(mesh))\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "D-W",
+      "post_number": 26,
+      "is_solution": false
+    },
+    {
+      "code": "mesh = Rhino.Geometry.Mesh();\n\nfor pt in extMData.points:\n    mesh.Vertices.Add(pt[0],pt[1],pt[2])\n\nfor nrm in extMData.normals:\n    mesh.Normals.Add(nrm[0],nrm[1],nrm[2])\n\nfor poly in extMData.polygons:\n    if len(poly) == 3:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2])\n    elif len(poly) == 4:\n        mesh.Faces.AddFace(poly[0],poly[1],poly[2],poly[3])\n    else:\n        print(\"Other poly not supported\")\n\nmesh.Normals.UnitizeNormals();\n\n# Create a list to store UV coordinates for each vertex\nuv_coordinates = []\n\n# Populate the UV coordinates list\nfor uv in extMData.uvs:\n    uv_coordinates.append(Rhino.Geometry.Point2f(uv[0], uv[1]))\n\n# Set UV coordinates for each face of the mesh\nfor i in range(mesh.Faces.Count):\n    # Get the vertex indices of the current face\n    face = mesh.Faces[i]\n\n    # Create a list to hold the vertex indices\n    vertex_indices = []\n    \n    # Append the vertex indices of the current face to the list\n    vertex_indices.append(face.A)\n    vertex_indices.append(face.B)\n    vertex_indices.append(face.C)\n    \n    if face.IsQuad:\n        vertex_indices.append(face.D)\n\n    # Assign UV coordinates to each vertex of the face\n    for j, vertex_index in enumerate(vertex_indices):\n        mesh.TextureCoordinates.Add(uv_coordinates[vertex_index])\n\nprint(\"Now there are \" + str(mesh.TextureCoordinates.Count) + \" texcoords\")\n\n#SORRY FOR CHANGE BUT THIS SEEMS TO BE CORRECT THAT IT MATCHES NOW INITIAL UVs PAIRS COUNT - BUT STILL only color on object\n#OR simpler aproach - though UVs has 200k pairs while mesh only 64k verts - ANYWAY this isn't working as after aplying material seems it jsut changes color/texture is not recognizable\n#mesh.TextureCoordinates.SetTextureCoordinates(uv_coordinates)\n\nmesh.TextureCoordinates.NormalizeTextureCoordinates();\nmesh.Compact()\n\n#Change Y-Up to Z-Up\nmesh.Rotate(math.radians(90),Rhino.Geometry.Vector3d(1,0,0),Rhino.Geometry.Point3d.Origin)\n\nsc.doc.Objects.AddMesh(mesh)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "D-W",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 32,
+  "views": 626
+}

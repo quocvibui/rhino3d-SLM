@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/use-rhino-python-to-manipulate-the-gumball/114156",
+  "topic_id": 114156,
+  "title": "Use Rhino.Python to manipulate the Gumball?",
+  "question": "Is it possible to use Rhino.Python to manipulate the Gumball location? The reason for this question is that I am generating some geometry from a Python script, however the Gumball is not located at the centroid of the geometry when I select the object. I would like to calculate the centroid and then place the Gumball at the centroid. Otherwise, I have the extra steps of manually relocating the Gumball from within Rhino.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef RelocateObjsGumballToPoint():\n    obj_ids=rs.GetObjects(\"Select objects to relocate gumball\",preselect=True)\n    if not obj_ids: return\n    pick_pt=rs.GetPoint(\"Pick point to relocate object gumball centers\")\n    if not pick_pt: return\n    x_pt=pick_pt+Rhino.Geometry.Vector3d(1,0,0)\n    y_pt=pick_pt+Rhino.Geometry.Vector3d(0,1,0)\n    comm_str=\"_GumballRelocate {} {} {}\".format(pick_pt,x_pt,y_pt)\n    rs.EnableRedraw(False)\n    rs.UnselectAllObjects()\n    for obj_id in obj_ids:\n        rs.SelectObject(obj_id)\n        rs.Command(comm_str,False)\n        rs.Redraw()\n        rs.UnselectObject(obj_id)\nRelocateObjsGumballToPoint()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 735
+}

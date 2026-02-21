@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-eto-opacity-does-not-work-correctly-rhino-8-20-25133-14001/204588",
+  "topic_id": 204588,
+  "title": "Error: Eto.Opacity does not work correctly. Rhino 8.20.25133.14001",
+  "question": "Test.gh\n (6.2 KB)\n\nEto.Opacity does not work correctly. Rhino 8.20.25133.14001\n\n\n@brian\n \n@dale\n \n@curtisw",
+  "code_blocks": [
+    {
+      "code": "self.BackgroundColor = Eto.Drawing.Colors.Transparent (did not work 8.19 and prev but worked great in 8.20, no longer works in 8.21)\n\nself.BackgrondColor = Eto.Drawing.Color.FromArgb(0, 0, 0, 0) does not work in 8.21\n\nself.Opacity = 0 (this will make all controls invisible as well, not just the background color) which I could see being useful for certain cases of course",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\n\nimport Rhino\nimport scriptcontext\nimport System\n\nimport Eto\n\nclass SampleTransparentEtoForm(Eto.Forms.Form):\n    def __init__(self):\n        super().__init__()\n        \n        self.WindowStyle = Eto.Forms.WindowStyle.NONE\n        \n        # Styling the form has worked 8.19 and prior, 8.20, and 8.21 still but this is more of a workaround...\n        self.Styles.Add[Eto.Forms.Panel](\"transparent\", self.MyFormStyler)\n        self.Style = \"transparent\"\n\n        # self.Opacity = 0  # This will make controls invisible as well\n        # self.BackgroundColor = Eto.Drawing.Colors.Transparent  # This worked great in 8.20 but did not work in 8.19 or older and does not work in 8.21\n        # self.BackgroundColor = Eto.Drawing.Color.FromArgb(0, 0, 0, 0)  # This worked great in 8.20 but did not work in 8.19 or older and does not work in 8.21\n\n        self.AutoSize = False\n        self.Resizable = True\n        self.TopMost = True\n        self.ShowActivated = False\n        self.Size = Eto.Drawing.Size(300,300)\n        self.Padding = Eto.Drawing.Padding(80)\n        self.MovableByWindowBackground = True\n        self.Location = Eto.Drawing.Point(100,100)\n\n\n        \n        \n        self.Button = Eto.Forms.Button()\n        self.Button.Text = \"Close\"\n        self.Button.Click += self.OnButtonClick\n        \n        self.layout = Eto.Forms.DynamicLayout()\n        self.layout.AddRow(self.Button)\n        \n        self.Content = self.layout\n    \n    def MyFormStyler(self, control):\n        self.BackgroundColor = Eto.Drawing.Colors.Transparent\n        window = control.ControlObject\n        if hasattr(window, \"AllowsTransparency\"):\n            window.AllowsTransparency = True\n        if hasattr(window, \"Background\"):\n            brush = window.Background.Clone()\n            brush.Opacity = 0.1\n            window.Background = brush\n        else:\n            color = window.BackgroundColor\n            window.BackgroundColor = color.FromRgba(0,0,0,25)\n\n    def OnButtonClick(self, sender, e):\n        self.Close()\n\ndef DoSomething():\n    \n    form = SampleTransparentEtoForm()\n    form.Owner = Rhino.UI.RhinoEtoApp.MainWindow\n    form.Show()\n\nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 282
+}

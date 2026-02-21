@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/script-for-import-multiple-file/77150",
+  "topic_id": 77150,
+  "title": "Script for import multiple file",
+  "question": "Hello!\n\nI have a folder full of contour dxf, to open in rhino, but when I drope them in rhino, they are all in the same place: on the origin.\n\nI would like to make a script that allows me to select the starting folder, and the script import all files one by one, I just have to move the files the width of the last between each import.\n\nare they the commands to import a file, or list the files of a folder?\n\nthank you!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nfrom os import listdir\nfrom os.path import isfile, join\n\npath = \"C:\\\\temp\\\\pyExport\\\\\" #your file path (mind the double backslashes)\nfiles = [f for f in listdir(path) if isfile(join(path, f))]\nvec = rg.Vector3d(0,0,0)\n\nif len(files)>0:\n    for f in files:\n        filename = path + f\n        rs.Command(\"! _-Import \" + filename + \" _Enter\" + \" _Enter\")\n        g = rs.LastCreatedObjects()\n        rs.MoveObject(g, vec)\n        geo = rs.coercegeometry(g)\n        bbox = geo.GetBoundingBox(True)\n        vec =  vec + (bbox.PointAt(1,0,0) - bbox.PointAt(0,0,0))",
+      "language": "python",
+      "author": "DavidLeon",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 1082
+}

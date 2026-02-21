@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-component-icon/126801",
+  "topic_id": 126801,
+  "title": "C# component icon",
+  "question": "This will tell you how stupid I am with C# plugins : I can’t even assign an icon to a component.\n\nI’m trying to be a good boy and do exactly what the template file tells me, but even that will throw an error in my face !\n\n\nComponent Icon\n1758×568 145 KB\n\n\nSo what’s the deal here ?",
+  "code_blocks": [
+    {
+      "code": "fragment_color = vec4(c, diffuse.a);\n          }\n          \";\n                  }\n          \n          \n        protected override Bitmap Icon\n                  {\n                      get\n                      {\n                          var assembly = System.Reflection.Assembly.GetExecutingAssembly();\n                          var stream = assembly.GetManifestResourceStream(\"ghgl.resources.GLSL_MeshComponent_24x24.png\");\n                          return new Bitmap(stream);\n                      }\n                  }\n          \n          \n        protected override void RegisterInputParams(GH_InputParamManager pManager)\n                  {\n                      pManager.AddMeshParameter(\"Mesh\", \"M\", \"Input Mesh\", GH_ParamAccess.list);\n                  }\n          \n          \n        public override bool CanInsertParameter(GH_ParameterSide side, int index)",
+      "language": "csharp",
+      "author": "stevebaer",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "using System;\nusing System.Collections.Generic;\nusing System.ComponentModel;\nusing System.Drawing;\nusing System.Linq;\nusing System.Reflection;\nusing System.Runtime.Versioning;\nusing Grasshopper;\nusing Grasshopper.Kernel;\nusing Rhino.Geometry;\n\nnamespace Plugin_1_Day_3\n{\n  public class Averages : GH_Component\n  {\n    /// <summary>\n    /// Each implementation of GH_Component must provide a public \n    /// constructor without any arguments.\n    /// Category represents the Tab in which the component will appear, \n    /// Subcategory the panel. If you use non-existing tab or panel names, \n    /// new tabs/panels will automatically be created.\n    /// </summary>\n    public Averages()\n      : base(\"Averages\", \"Computes Averages\",\n        \"Workshop Test Component - Averages\",\n        \"Workshop\", \"Utilities\")\n    {\n    }\n\n    /// <summary>\n    /// Registers all the input parameters for this component.\n    /// </summary>\n    protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)\n    {\n      pManager.AddNumberParameter(\"first num\", \"first\", \"the first num\", GH_ParamAccess.item, 0.0);\n      pManager.AddNumberParameter(\"second num\", \"second\", \"the second num\", GH_ParamAccess.item, 0.0);\n    }\n\n    /// <summary>\n    /// Registers all the output parameters for this component.\n    /// </summary>\n    protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)\n    {\n      pManager.AddNumberParameter(\"Average\", \"Average\", \"average of inputs\", GH_ParamAccess.item);\n    }\n\n    /// <summary>\n    /// This is the method that actually does the work.\n    /// </summary>\n    /// <param name=\"DA\">The DA object can be used to retrieve data from input parameters and \n    /// to store data in output parameters.</param>\n    protected override void SolveInstance(IGH_DataAccess DA)\n    {\n      var nums = new List<double>();\n      double a = double.NaN;\n      double b = double.NaN;\n      nums.Add(a);\n      nums.Add(b);\n      DA.GetData(0, ref a);\n      DA.GetData(1, ref b);\n\n      double average = 0.5 * (a + b);\n      DA.SetData(0, average);\n    }\n\n    /// <summary>\n    /// Provides an Icon for every component that will be visible in the User Interface.\n    /// Icons need to be 24x24 pixels.\n    /// You can add image files to your project resources and access them like this:\n    /// return Resources.IconForThisComponent;\n    /// </summary>\n    //protected override System.Drawing.Bitmap Icon => null;\n    protected override System.Drawing.Bitmap Icon\n    {\n      get\n      {\n        var assembly = System.Reflection.Assembly.GetExecutingAssembly();\n        {\n          var resourceName = assembly.GetManifestResourceNames().Single(n => n.EndsWith(\"icon.png\"));\n          var stream = assembly.GetManifestResourceStream(resourceName);\n          if (stream != null) return new Bitmap(stream);\n        }\n        return null;\n      }\n    }\n\n    /// <summary>\n    /// Each component must have a unique Guid to identify it. \n    /// It is vital this Guid doesn't change otherwise old ghx files \n    /// that use the old ID will partially fail during loading.\n    /// </summary>\n    public override Guid ComponentGuid => new Guid(\"6CBE441F-4367-4146-9755-BF7296D4BFE1\");\n  }\n}",
+      "language": "csharp",
+      "author": "RD3",
+      "post_number": 28,
+      "is_solution": false
+    },
+    {
+      "code": "<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>\n\n            </PropertyGroup>\n\n            <ItemGroup Condition=\"$(TargetFramework) == 'net48'\">\n\n              <Reference Include=\"System\" />\n\n              <Reference Include=\"System.Core\" />\n\n              <Reference Include=\"System.Drawing\" />\n\n              <Reference Include=\"System.Windows.Forms\" />\n\n              <Reference Include=\"System.Net.Http\" />\n\n            </ItemGroup>\n\n            <ItemGroup>\n\n              <EmbeddedResource Include=\"resources\\*.png\" />\n\n              <EmbeddedResource Include=\"resources\\*.html\" />\n\n            </ItemGroup>\n\n            <ItemGroup>\n\n              <PackageReference Include=\"Grasshopper\" Version=\"8.6.24101.5001\" />\n\n              <PackageReference Include=\"System.Text.Json\" Version=\"7.0.0\" ExcludeAssets=\"runtime\" />\n\n            </ItemGroup>\n\n          </Project>",
+      "language": "csharp",
+      "author": "stevebaer",
+      "post_number": 36,
+      "is_solution": false
+    },
+    {
+      "code": "fragment_color = vec4(c, diffuse.a);\n          }\n          \";\n                  }\n          \n                  protected override Bitmap Icon\n                  {\n                      get\n                      {\n                          var assembly = System.Reflection.Assembly.GetExecutingAssembly();\n                          var stream = assembly.GetManifestResourceStream(\"ghgl.resources.GLSL_MeshComponent_24x24.png\");\n                          return new Bitmap(stream);\n                      }\n                  }\n          \n                  protected override void RegisterInputParams(GH_InputParamManager pManager)\n                  {\n                      pManager.AddMeshParameter(\"Mesh\", \"M\", \"Input Mesh\", GH_ParamAccess.list);\n                  }\n          \n                  public override bool CanInsertParameter(GH_ParameterSide side, int index)",
+      "language": "csharp",
+      "author": "stevebaer",
+      "post_number": 36,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 37,
+  "views": 4483
+}

@@ -1,0 +1,111 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hops-error/120525",
+  "topic_id": 120525,
+  "title": "Hops error",
+  "question": "Hello , why this the error in this example? i set the path to the gh file (test.gh)\n\n\nimage\n804×444 27.2 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoinside\n\nimport ghhops_server as hs\n\nimport math\n\nrhinoinside.load()\n\n# System and Rhino can only be loaded after rhinoinside is initialized\n\nimport Rhino  \n\nhops = hs.Hops(app=rhinoinside)\n\n@hops.component(\n\n    \"/wave\",\n\n    name=\"wave\",\n\n    description=\"create a wave\",\n\n    # icon=\"examples/pointat.png\",\n\n    inputs=[\n\n        hs.HopsInteger(\"X\", \"x\", \"number of points in X axis\"),\n\n        hs.HopsInteger(\"Y\", \"y\", \"number of points in Y axis\"),\n\n        hs.HopsNumber(\"Height\",\"h\",\"height of waves\"),\n\n        hs.HopsNumber(\"amplitude\",\"a\",\"amplitude of the waves\")\n\n    ],\n\n    outputs=[hs.HopsSurface(\"Wave\",\"w\",\"A mesh made up of a list of points\")]\n\n)\n\ndef surface(x,y,height,amplitude):\n\n    pts=[]\n\n    for i in range(x):\n\n        for j in range(y):\n\n           \n\n            pt=Rhino.Geometry.Point3d(float(i), float(j), math.sin(i*height) * math.sin(j*height) * amplitude)\n\n            pts.append(pt)\n\n    return Rhino.Geometry.NurbsSurface.CreateFromPoints(pts,int(x),int(y),int(x),int(y))\n\nif __name__ == \"__main__\":\n\n    hops.start(debug=True)",
+      "language": "python",
+      "author": "mohammedbehjooarchic",
+      "post_number": 42,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\nimport ghhops_server as hs\nimport math\nrhinoinside.load()\nimport System\nimport Rhino\n\nhops = hs.Hops(app=rhinoinside)\n\n@hops.component(\n\n    \"/wave\",\n    name=\"wave\",\n    description=\"create a wave\",\n    inputs=[\n        hs.HopsInteger(\"X\", \"x\", \"number of points in X axis\"),\n        hs.HopsInteger(\"Y\", \"y\", \"number of points in Y axis\"),\n        hs.HopsNumber(\"Height\", \"h\", \"height of waves\"),\n        hs.HopsNumber(\"amplitude\", \"a\", \"amplitude of the waves\")\n    ],\n    outputs=[\n        hs.HopsPoint(\"Points\", \"P\", \"List of points\"),\n        hs.HopsSurface(\"Surface\", \"S\", \"A surface made up of a list of points\")\n    ]\n)\n\ndef wave(x, y, height, amplitude):\n    points = System.Collections.Generic.List[Rhino.Geometry.Point3d]()\n    pts = []\n    for i in range(x):\n        for j in range(y):\n            pt = Rhino.Geometry.Point3d(float(i), float(j), math.sin(i * height) * math.sin(j * height) * amplitude)\n            points.Add(pt)\n            pts.append(pt)\n    surface = Rhino.Geometry.NurbsSurface.CreateFromPoints(pts, int(x), int(y), int(x), int(y))\n    return pts, surface\n\n\nif __name__ == \"__main__\":\n    hops.start(debug=True)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 51,
+      "is_solution": false
+    },
+    {
+      "code": "points = System.Collections.Generic.List[Rhino.Geometry.Point3d]()\nsurface = Rhino.Geometry.NurbsSurface.CreateFromPoints(points, int(x), int(y), int(x), int(y))\nreturn points, surface",
+      "language": "unknown",
+      "author": "anon39580149",
+      "post_number": 51,
+      "is_solution": false
+    },
+    {
+      "code": "1. Solution exception:Cannot deserialize the current JSON array (e.g. [1,2,3]) into type 'Rhino.Geometry.Point3d' because the type requires a JSON object (e.g. {\"name\":\"value\"}) to deserialize correctly.\nTo fix this error either change the JSON to a JSON object (e.g. {\"name\":\"value\"}) or change the deserialized type to an array or a type that implements a collection interface (e.g. ICollection, IList) like List<T> that can be deserialized from a JSON array. JsonArrayAttribute can also be added to the type to force it to deserialize from a JSON array.\nPath '', line 1, position 1.",
+      "language": "csharp",
+      "author": "anon39580149",
+      "post_number": 51,
+      "is_solution": false
+    },
+    {
+      "code": "pts = []\nsurface = Rhino.Geometry.NurbsSurface.CreateFromPoints(points, int(x), int(y), int(x), int(y))\nreturn pts, surface",
+      "language": "unknown",
+      "author": "anon39580149",
+      "post_number": 51,
+      "is_solution": false
+    },
+    {
+      "code": "pts = []\nsurface = Rhino.Geometry.NurbsSurface.CreateFromPoints(pts, int(x), int(y), int(x), int(y))\nreturn pts, surface",
+      "language": "unknown",
+      "author": "anon39580149",
+      "post_number": 51,
+      "is_solution": false
+    },
+    {
+      "code": "1. Exception occured in handler:\nNo method matches given arguments for CreateFromPoints: (<class 'list'>, <class 'int'>, <class 'int'>, <class 'int'>, <class 'int'>)\nsurface = Rhino.Geometry.NurbsSurface.CreateFromPoints(pts, int(x), int(y), int(x), int(y))",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 51,
+      "is_solution": false
+    },
+    {
+      "code": "@hops.component(\n    \"/wave\",\n    name=\"wave\",\n    description=\"create a wave\",\n    inputs=[\n        hs.HopsInteger(\"X\", \"x\", \"number of points in X axis\"),\n        hs.HopsInteger(\"Y\", \"y\", \"number of points in Y axis\"),\n        hs.HopsNumber(\"Height\", \"h\", \"height of waves\"),\n        hs.HopsNumber(\"amplitude\", \"a\", \"amplitude of the waves\")\n    ],\n    outputs=[\n        hs.HopsSurface(\"Surface\", \"S\", \"A surface made up of a list of points\")\n    ]\n)\ndef wave(x, y, height, amplitude):\n    points = System.Collections.Generic.List[Rhino.Geometry.Point3d]()\n    for i in range(x):\n        for j in range(y):\n            pt = Rhino.Geometry.Point3d(float(i), float(j), math.sin(i * height) * math.sin(j * height) * amplitude)\n            points.Add(pt)\n    surface = Rhino.Geometry.NurbsSurface.CreateFromPoints(points, x, y, x, y)\n    return surface",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 59,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoinside\n\nimport ghhops_server as hs\n\nimport math\n\nrhinoinside.load()\n\n# System and Rhino can only be loaded after rhinoinside is initialized\n\nimport System\n\nimport Rhino  \n\nhops = hs.Hops(app=rhinoinside)\n\n@hops.component(\n\n    \"/wave\",\n\n    name=\"wave\",\n\n    description=\"create a wave\",\n\n    # icon=\"examples/pointat.png\",\n\n    inputs=[hs.HopsInteger(\"X\", \"x\", \"number of points in X axis\")],\n\n    outputs=[hs.HopsInteger(\"Wave\",\"w\",\"A mesh made up of a list of points\")]\n\n)\n\ndef surface(x):\n\n    numbers=[]\n\n    for i in range(x):\n\n        numbers.append(i)\n\n    return numbers\n\nif __name__ == \"__main__\":\n\n    hops.start(debug=True)",
+      "language": "python",
+      "author": "mohammedbehjooarchic",
+      "post_number": 49,
+      "is_solution": false
+    },
+    {
+      "code": "def surface(x):\n    numbers=[]\n    for i in range(x):\n        numbers.append(i)\n    return numbers\na=surface(x)",
+      "language": "python",
+      "author": "mohammedbehjooarchic",
+      "post_number": 49,
+      "is_solution": false
+    },
+    {
+      "code": "from flask import Flask\nimport ghhops_server as hs\nimport math\nimport rhino3dm as rh\n\napp = Flask(__name__)\nhops = hs.Hops(app)\n\n@hops.component(\n\n    \"/surface\",\n    name=\"wave\",\n    description=\"create a wave\",\n    inputs=[\n        hs.HopsInteger(\"X\", \"x\", \"number of points in X axis\"),\n        hs.HopsInteger(\"Y\", \"y\", \"number of points in Y axis\"),\n        hs.HopsNumber(\"Height\", \"h\", \"height of waves\"),\n        hs.HopsNumber(\"amplitude\", \"a\", \"amplitude of the waves\")\n    ],\n    outputs=[\n        hs.HopsPoint(\"Points\",\"P\",\"list of points\"),\n    ]\n)\n\ndef surface(x,y,height,amplitude):\n    pts = []\n    for i in range(x):\n        for j in range(y):\n            pt = rh.Point3d(float(i), float(j), math.sin(i * height) * math.sin(j * height) * amplitude)\n            pts.append(pt)\n    return pts\n\nif __name__ == \"__main__\":\n    app.run()",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 50,
+      "is_solution": false
+    },
+    {
+      "code": "@hops.component(\n    \"/wave\",\n    name=\"wave\",\n    description=\"create a wave\",\n    inputs=[\n        hs.HopsInteger(\"X\", \"x\", \"number of points in X axis\"),\n        hs.HopsInteger(\"Y\", \"y\", \"number of points in Y axis\"),\n        hs.HopsNumber(\"Height\", \"h\", \"height of waves\"),\n        hs.HopsNumber(\"amplitude\", \"a\", \"amplitude of the waves\")\n    ],\n    outputs=[\n        hs.HopsSurface(\"Surface\", \"S\", \"A surface made up of a list of points\")\n    ]\n)\ndef wave(x, y, height, amplitude):\n    points = System.Collections.Generic.List[Rhino.Geometry.Point3d]()\n    for i in range(x):\n        for j in range(y):\n            pt = Rhino.Geometry.Point3d(float(i), float(j), math.sin(i * height) * math.sin(j * height) * amplitude)\n            points.Add(pt)\n    surface = Rhino.Geometry.NurbsSurface.CreateFromPoints(points, x, y, x, y)\n    return surface",
+      "language": "python",
+      "author": "mohammedbehjooarchic",
+      "post_number": 60,
+      "is_solution": false
+    },
+    {
+      "code": "def foo(mesh,dist,depth,iter):\n\n    second_mesh=Rhino.Geometry.Mesh()\n\n    vec_normal=System.Collections.Generic.List[Rhino.Geometry.Vector3d]()\n\n    re_pts=System.Collections.Generic.List[Rhino.Geometry.Point3d]()\n\n   \n\n    for i in mesh.vec_normal:\n\n        vec_normal.Add(Rhino.Geometry.Vector3d(i))\n\n    for i in range(len(mesh.Vertices)):\n\n        temp_point=Rhino.Geometry.Point3d.Add(Rhino.Geometry.Point3d(mesh.Vertices[i]),vec_normal[i])\n\n        re_pts.Add(temp_point)\n\n        second_mesh.Vertices.Add(temp_point)\n\n    print(type(mesh.Facevec_normal))\n\n    for i in range(len(mesh.Faces)):\n\n        if mesh.Faces[i].IsQuad:\n\n            ve1 = mesh.Faces[i].A\n\n            ve2 = mesh.Faces[i].B\n\n            pt_1 = re_pts[ve1]\n\n            pt_2 = re_pts[ve2]\n\n            mid_1 = Rhino.Geometry.Point3d.Divide(Rhino.Geometry.Point3d.Add(pt_1,pt_2),2)\n\n            mid_1= Rhino.Geometry.Point3d.Add(mid_1,Rhino.Geometry.Vector3d(mesh.Facevec_normal[i]))",
+      "language": "python",
+      "author": "user675",
+      "post_number": 61,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 152,
+  "posts_count": 61,
+  "views": 4410
+}

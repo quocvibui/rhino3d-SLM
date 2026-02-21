@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/showcolordialog-gh-python-script-loses-output-when-mouse-over-canvas/163473",
+  "topic_id": 163473,
+  "title": "ShowColorDialog GH Python script loses output when mouse over canvas",
+  "question": "Hi Guys,\n\n\nI’ve try a couple of different code samples for this, latest one attached.\n\n\nThe allows the Rhino Colour Picker window to open and collect the selected color - which outputs fine to the panel.\n\n\nThen after a second or two the component ‘times out’ for the want of a better description and outputs a NULL - which then loses the selected color.\n\n\nThis is not the way any other GH Python I’ve written behaves - these retain there output until the script is run again.\n\n\nHave I missed something? Or is there something different with the ShowColorDialog that requires this behavior?\n\n\nCheers\n\n\nDK\n\n\n230731_GH Python Color picker.gh\n (5.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# Check if the sticky dictionary already exists, and create it if not\nif \"sticky_dict\" not in globals():\n    sticky_dict = {}\n\n# Check if the 'x' button is set to true\nif x:\n    new_color = rs.GetColor(y)\n    if new_color:\n        sticky_dict['a'] = new_color\n\n# Retrieve the color from the sticky dictionary or use the default value\ncolor = sticky_dict.get('a', y)\n\na = color",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System.Drawing\n\n# Check if the sticky dictionary already exists, and create it if not\nif \"sticky_dict\" not in globals():\n    sticky_dict = {}\n\n# Check if the 'S' button is set to true\nif S:\n    new_color = rs.GetColor(Dc)\n    if new_color:\n        sticky_dict['C'] = new_color\n\n# Retrieve the color from the sticky dictionary or use the default value\nC = sticky_dict.get('C', Dc)\n\n# Combine R, G, and B values into a single RGB color or return RGB string if using default color\nif len(C)>1:\n    combined_color = System.Drawing.Color.FromArgb(C[0], C[1], C[2])\nelse:\n    combined_color = C\n\nC = combined_color",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport System.Drawing\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\n# Check if the 'S' button is set to true\nif S:\n    new_color = rs.GetColor(Dc)\n    print(new_color)\n    if new_color:\n        # Store new_color as document data\n        color_rgb_str = str(new_color)\n        rs.SetDocumentData(\"MyColorData\", \"ColorRGB\", color_rgb_str)\n\n# Retrieve the color from the document data or use the default value\nstored_rgb_string = rs.GetDocumentData(\"MyColorData\", \"ColorRGB\")\nif stored_rgb_string:\n    C = stored_rgb_string\nelse:\n    C = Dc\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport json\n\n# Check if the 'S' button is set to true\nif S:\n    # Pick New Color With Rhino Color Picker\n    new_color = rs.GetColor(Dc)\n\n    if new_color:\n        # Serialize color to JSON and store it\n        new_color_json = json.dumps(str(new_color))\n        ghenv.Component.OnPingDocument().ValueTable.SetValue(\"MyColorData\", new_color_json)\n\n# Read data from persistent Grasshopper document value table\nstored_color_json = ghenv.Component.OnPingDocument().ValueTable.GetValue(\"MyColorData\", \"\")\n\n# Deserialize JSON string back to output\nC = json.loads(stored_color_json)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 8,
+  "views": 499
+}

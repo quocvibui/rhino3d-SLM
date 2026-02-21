@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/box-and-bounding-box-have-different-normals/81659",
+  "topic_id": 81659,
+  "title": "Box and Bounding box have different normals",
+  "question": "I’m talking about when box is created using \nRhino.Input.RhinoGet.GetBox()\n command compared with box created from \nrs.AddBox(rs.BoundingBox(some_object_id))\n\n\nhere’s example code:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport time\n\ndef test_func():\n    box = Rhino.Input.RhinoGet.GetBox()[1]\n    box_id = sc.doc.Objects.AddBox(box)\n    bbox = rs.BoundingBox(box_id)\n    bbox_id = rs.AddBox(bbox)\n\ntest_func()\n\n\n\nThe two objects (boxes) that result from the script have different normal direction on the top face.\n\n\nUpdate:\n\nActually it could be the bottom face.\n\n\nIs there a way to differentiate between polysurface and extrusion so I can adjust my scripts?\n\nI got it \nrs.filter.extrusion",
+  "code_blocks": [
+    {
+      "code": "box = rhutil.coerce3dpointlist(corners, True)\n    brep = Rhino.Geometry.Brep.CreateFromBox(box)\n    rc = scriptcontext.doc.Objects.AddBrep(brep)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport time\n\ndef test_func():\n    box = Rhino.Input.RhinoGet.GetBox()[1]\n    box_id = sc.doc.Objects.AddBox(box)\n    corners=box.GetCorners()\n    bbox_id = rs.AddBox(corners)\n\ntest_func()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport time\n\ntol=sc.doc.ModelAbsoluteTolerance\n\ndef test_func():\n    box = Rhino.Input.RhinoGet.GetBox()[1]\n    box_id = sc.doc.Objects.AddBox(box)\n    bbox = rs.BoundingBox(box_id)\n    bbox_id = rs.AddBox(bbox)\n    \n    box_brep = box.ToBrep()\n    bbox_brep = rs.coercebrep(bbox_id)\n    #\n    return box_brep, bbox_brep\n\ndef get_planes(brep):\n    bbox_brep_faces_list = brep.Faces\n    \n    # getting all surfaces from the list as separate objects\n    s1,s2,s3,s4,s5,s6 = bbox_brep_faces_list\n    \n    # get plane from the face\n    pl1 = s1.TryGetPlane(tol)[1]\n    pl2 = s2.TryGetPlane(tol)[1]\n    pl3 = s3.TryGetPlane(tol)[1]\n    pl4 = s4.TryGetPlane(tol)[1]\n    pl5 = s5.TryGetPlane(tol)[1]\n    pl6 = s6.TryGetPlane(tol)[1]\n    \n    list_of_planes = [pl1,pl2,pl3,pl4,pl5,pl6]\n    \n    return list_of_planes\n\nif __name__ == \"__main__\":\n    ts = time.time()\n    \n    list_breps = test_func()\n    for brep in list_breps:\n        print get_planes(brep)\n    \n    te = time.time()\n    print \"Elapsed time is {:.2f}\".format(te-ts)",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport time\n\ndef test_func():\n    box = Rhino.Input.RhinoGet.GetBox()[1]\n    box_id = sc.doc.Objects.AddBox(box)\n    bbox = rs.BoundingBox(box_id)\n    bbox_id = rs.AddBox(bbox)\n\ntest_func()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 822
+}

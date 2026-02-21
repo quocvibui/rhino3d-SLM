@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/irw-udel/dev-lattice-generation/blob/6f71e27d2ac6638d6d12643e0040cd4c26a21b29/sdk-scripts/populate_segment_lattice.py",
+  "repo": "irw-udel/dev-lattice-generation",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "sdk-scripts/populate_segment_lattice.py",
+  "instruction": "Convert lattice to points for meshing\n    Inputs:\n        curves: Curves that make up the lattice\n        radius: Minimum radius value for generating mesh\n    Output:\n        points: Points to input...",
+  "code": "\"\"\"Convert lattice to points for meshing\n    Inputs:\n        curves: Curves that make up the lattice\n        radius: Minimum radius value for generating mesh\n    Output:\n        points: Points to input to lattice meshing component\"\"\"\n\n__author__ = \"irw\"\n__version__ = \"2022.03.23\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghcomp\nimport ghpythonlib.parallel\nimport ghpythonlib.treehelpers as th\n\ndef segment_curves_parallel(curve):\n    params = curve.DivideByLength(segment_length, False)\n    points = []\n    points.append(curve.PointAtStart)\n    try:\n        for t in params:\n            points.append(curve.PointAt(t))\n    except:\n        pass\n    points.append(curve.PointAtEnd)\n    return points\n\nclass SegmentLattice(component):\n    def RunScript(self, curves, radius):\n        global segment_length \n        segment_length = float(radius)/5\n        \n        if curves:\n            points = ghpythonlib.parallel.run(segment_curves_parallel, curves, True)\n\n        return points",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

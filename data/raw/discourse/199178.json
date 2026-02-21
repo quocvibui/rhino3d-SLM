@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/clipping-box-does-not-work-in-custom-preview-component-with-python-3/199178",
+  "topic_id": 199178,
+  "title": "Clipping box does not work in custom preview component with python 3?",
+  "question": "Hello,\n\n\nBeen trying to get this to work. So the python component has no input or output and draws a custom mesh. It needs to set a ClippingBox, but it has no affect with python 3 script.\n\nThe same thing works fine with C#.\n\nIn the image the mesh is visible as the C# providing the clippingbox like a a crutch. As soon as the Py3 is alone or the C# preview off, the mesh is not drawn.\n\nSame problem on mac and windows.\n\n\nWould be grateful for any help. Even confirming if it works or not elsewhere.\n\n\nimage\n1794×1214 142 KB\n\n\nHere is the python code:\n\n\n\"\"\"Grasshopper Script\"\"\"\nimport System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        b = 100\n        self.bb = Rhino.Geometry.BoundingBox(-b,-b,-b, b, b, b)\n\n        return #self.ClippingBox.GetCorners()\n\n    # Preview overrides\n    @property\n    def ClippingBox(self):\n        return self.bb\n\n    def DrawViewportWires(self, args):\n        pass\n\n    def DrawViewportMeshes(self, args: Grasshopper.Kernel.IGH_PreviewArgs):\n        box = Rhino.Geometry.BoundingBox(-10,-10,-10,10,10,10)\n        mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 2, 2, 2)\n        color = System.Drawing.Color.AliceBlue\n\n        args.Display.DrawMeshWires(mesh, color, 6)",
+  "code_blocks": [
+    {
+      "code": "@property\ndef ClippingBox (self):\n        return Rhino.Geometry.BoundingBox(-10,-10,-10,10,10,10)",
+      "language": "python",
+      "author": "Kaiko",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import clr\n\n# ...\n\n    @clr.clrproperty(type(Rhino.Geometry.BoundingBox))\n    def ClippingBox(self):\n        return self.mesh.GetBoundingBox(False)",
+      "language": "python",
+      "author": "eirannejad",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Grasshopper Script\"\"\"\nimport System\nimport Rhino\nimport Grasshopper\n\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, x, y):\n        b = 100\n        self.bb = Rhino.Geometry.BoundingBox(-b,-b,-b, b, b, b)\n\n        return #self.ClippingBox.GetCorners()\n\n    # Preview overrides\n    @property\n    def ClippingBox(self):\n        return self.bb\n\n    def DrawViewportWires(self, args):\n        pass\n\n    def DrawViewportMeshes(self, args: Grasshopper.Kernel.IGH_PreviewArgs):\n        box = Rhino.Geometry.BoundingBox(-10,-10,-10,10,10,10)\n        mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 2, 2, 2)\n        color = System.Drawing.Color.AliceBlue\n\n        args.Display.DrawMeshWires(mesh, color, 6)",
+      "language": "python",
+      "author": "Kaiko",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 11,
+  "views": 199
+}

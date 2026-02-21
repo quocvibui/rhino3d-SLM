@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_issurfaceinplane.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_issurfaceinplane.py",
+  "instruction": "Ex issurfaceinplane",
+  "code": "import Rhino\nfrom Rhino.Geometry import *\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nimport math\n\ndef RunCommand():\n  surface_id = rs.GetSurfaceObject()[0]\n  if surface_id == None:\n    return\n  surface = rs.coercesurface(surface_id)\n\n  corners = rs.GetRectangle()\n  if corners == None:\n    return\n    \n  plane = Plane(corners[0], corners[1], corners[2])\n\n  is_or_isnt = \"\" if IsSurfaceInPlane(surface, plane, doc.ModelAbsoluteTolerance) else \" not \"\n  print \"Surface is{0} in plane.\".format(is_or_isnt)\n\ndef IsSurfaceInPlane(surface, plane, tolerance):\n  if not surface.IsPlanar(tolerance):\n    return False\n \n  bbox = surface.GetBoundingBox(True)\n  rc = True\n  for corner in bbox.GetCorners():\n      if math.fabs(plane.DistanceTo(corner)) > tolerance:\n          rc = False\n          break\n          \n  return rc\n\nif __name__ == \"__main__\":\n    RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

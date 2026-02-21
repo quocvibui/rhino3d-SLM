@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Ennead-Architects-LLP/EA_Dist/blob/635520d89b8308b78eabf5b60bb80121d0fa3838/Apps/_rhino/EnneadTab.menu/extract_preview_images.button/extract_preview_images_left.py",
+  "repo": "Ennead-Architects-LLP/EA_Dist",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Apps/_rhino/EnneadTab.menu/extract_preview_images.button/extract_preview_images_left.py",
+  "instruction": "Extract preview images left",
+  "code": "__title__ = \"ExtractPreviewImages\"\r\n__doc__ = \"\"\"Extract preview images from Rhino files.\r\n\r\nKey Features:\r\n- Batch image extraction\r\n- Multiple file support\r\n- Automatic naming convention\r\n- Progress tracking\"\"\"\r\n\r\nimport rhinoscriptsyntax as rs\r\nimport scriptcontext as sc\r\nimport os.path as op\r\nimport os\r\nimport System # pyright: ignore\r\n\r\n\r\ndef extract_preview_images():\r\n\r\n    \r\n\r\n    main_folder = os.path.join(ENVIRONMENT.L_DRIVE_HOST_FOLDER, \"00_Asset Library\")\r\n    file_paths = [\"{}\\{}\".format(main_folder,x) for x in os.listdir(main_folder) if \".3dm\" in x[-4:].lower()]\r\n   \r\n    target_folder = os.path.join(ENVIRONMENT.L_DRIVE_HOST_FOLDER, \"00_Asset Library\", \"Database\", \"data\")\r\n\r\n    total_count = len(file_paths)\r\n    LOG = \"\"\r\n    for i, file_path in enumerate(file_paths):\r\n        #print file_path\r\n        i += 1\r\n        try:\r\n            head, tail = op.split(file_path)\r\n            jpg_name = tail.replace(\".3dm\", \".png\")\r\n            jpg_name = \"{}\\{}\".format(target_folder, jpg_name)\r\n\r\n            image = sc.doc.ExtractPreviewImage (file_path)\r\n\r\n            image.Save(jpg_name, System.Drawing.Imaging.ImageFormat.Png)\r\n            print(\"Getting {}/{} png as {}\".format(i + 1, total_count, jpg_name))\r\n        except Exception as e:\r\n            note = \"Failed {}/{} png as {} becasue {}\".format(i + 1, total_count, file_path, e)\r\n            print(note)\r\n            LOG += \"\\n{}\".format(note)\r\n\r\n    if len(LOG) != 0:\r\n        rs.TextOut(LOG)\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

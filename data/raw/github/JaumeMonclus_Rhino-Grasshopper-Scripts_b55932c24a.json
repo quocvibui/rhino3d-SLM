@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/JaumeMonclus/Rhino-Grasshopper-Scripts/blob/ca6be60d1f0266c805ce4d76dfc277bd05070c87/AT-AP-Sessions/Session-2/MPDA25-Assignment2/graphs/graphs-04-dual-graph.py",
+  "repo": "JaumeMonclus/Rhino-Grasshopper-Scripts",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "AT-AP-Sessions/Session-2/MPDA25-Assignment2/graphs/graphs-04-dual-graph.py",
+  "instruction": "r: networkx r: matplotlib",
+  "code": "#r: networkx\n#r: matplotlib\n\nfrom typing import cast, Any\nimport networkx as nx # type: ignore\nimport matplotlib.pyplot as plt # type: ignore\nimport Rhino.Geometry as rg # type: ignore\n\n# DECLARE INPUT VARIABLES\nm = cast(rg.Mesh, m)  # type: ignore\n\ndef PlotGraph(G,filepath):\n    # add position\n    pos = nx.spring_layout(G)\n\n    #draw serttings\n    fig = plt.figure(figsize=(10,10))\n    ax = plt.subplot()\n    ax.set_title('Graph', fontsize=12)\n    nx.draw(G, pos, node_size=1500, with_labels=True, node_color='pink', font_size=12)\n\n    #draw the graph\n    plt.tight_layout()\n\n    # plt.show()\n    plt.savefig(filepath, format=\"PNG\")\n\ndef GetMeshFaceCentroid(mesh, mfi):\n\n    mf = mesh.Faces[mfi]\n    if mf.IsTriangle:\n        v1 = m.Vertices[mf.A]\n        v2 = m.Vertices[mf.B]\n        v3 = m.Vertices[mf.C]\n\n        return (v1 + v2 +v3) * (1/3)\n\n    if mf.IsQuad:\n        v1 = m.Vertices[mf.A]\n        v2 = m.Vertices[mf.B]\n        v3 = m.Vertices[mf.C]\n        v4 = m.Vertices[mf.D]\n\n        return (v1 + v2 +v3+ v4) * (1/4)\n\n\ndef DualGraphFromMesh(mesh):\n    G=nx.Graph()\n\n    dual_vertices = []\n    dual_edges = []\n\n    for i,mf in enumerate(mesh.Faces):\n\n        faceCentroid = GetMeshFaceCentroid(mesh, i)\n        dual_vertices.append(faceCentroid)\n        \n        G.add_node(i, pos = faceCentroid)\n\n        neighbours =   mesh.Faces.AdjacentFaces(i)\n\n        # Add edges to graph\n        for n in neighbours:\n\n            if n > i:\n                p1= faceCentroid\n\n                p2= GetMeshFaceCentroid(m, n)\n\n                line = rg.Line(p1,p2)\n                dual_edges.append(line)\n\n                G.add_edge(i,n, w = line.Length)\n\n    return G, dual_vertices, dual_edges\n    \n\nG, dv,de = DualGraphFromMesh(m)\n\na= dv\nb = de\n\n\n#plot\n# path= r\"C:\\Users\\david\\Desktop\\Session02\\session02\\images\\MDPA_plot4.png\"\n# PlotGraph(G, path)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

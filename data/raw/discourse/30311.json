@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-that-behaves-strangely/30311",
+  "topic_id": 30311,
+  "title": "Python script that behaves strangely",
+  "question": "Below is attached a Python script that behaves strangely. The script puts the odds (long long X or Y) of the sides of a polylinea as in the attached image or any other.\n\n\nIf I click the side close to the edge (red circle) puts me exactly share if I click on side in center position (green circle) puts the proportion between one end and the point where I clicked like in the attached image.\n\n\nFurther strange thing is that: I close and then open the item again, drawing a Rhino polylinea, launch the script and I click on a side away from the edge puts the first precise altitude and then returns the first casino.\n\n\nI wish someone would try to see what happens on other computers.\n\n\nCiao Vittorio\n\n\n\n\nQuotePython.jpg\n742×575 21.8 KB\n\n\n\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\n\ndef GetCurvesAndEdges():\n    \"\"\"\n    Return segmento di polylinea , linea, edge\n    \"\"\"\n    filter= Rhino.DocObjects.ObjectType.Curve    \n    rc, objrefs = Rhino.Input.RhinoGet.GetOneObject(\"Seleziona segmento o edge da quotare\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc \n    pp=Rhino.DocObjects.ObjRef.CurveParameter(objrefs)    \n    print \"c\",objrefs.Curve()    \n    pt=objrefs.SelectionPoint()   \n    #rs.AddPoint(pt)\n    a=Rhino.Geometry.Curve.DuplicateSegments(objrefs.Curve())    \n    if len(a)==0:\n        segmento=scriptcontext.doc.Objects.AddCurve(objrefs.Curve())\n        return segmento\n    cc=[]    \n    for i in a:\n        seg=scriptcontext.doc.Objects.AddCurve(i)        \n        param=rs.CurveClosestPoint(seg,pt)\n        cp=rs.EvaluateCurve(seg,param)\n        if rs.PointCompare(pt,cp,0.0001):\n            segmento=seg             \n        else:\n            cc.append(seg)    \n    rs.DeleteObjects(cc)\n    return segmento\n    \ncc=GetCurvesAndEdges()\n\nif rs.IsLine(cc):\n    ps=rs.CurveStartPoint(cc)\n    pe=rs.CurveEndPoint(cc)\n    #rs.AddPoints((ps,pe))\n    p1=rs.coerce3dpoint(ps)      \n    p2=rs.coerce3dpoint(pe)\n    rs.AddPoints((p1,p2))    \n    ...",
+  "code_blocks": [
+    {
+      "code": "#rs.MessageBox(segmento)\nrs.UnselectAllObjects()\n#if rs.IsLine(segmento):\nrs.SelectObject(segmento)\n\nrs.Command(\"_Dim _Object\")\nrs.DeleteObject(segmento) \nrs.DeleteObjects(cc)",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\n\ndef GetCurvesAndEdges():\n    \"\"\"\n    Return segmento di polylinea , linea, edge\n    \"\"\"\n    filter= Rhino.DocObjects.ObjectType.Curve    \n    rc, objrefs = Rhino.Input.RhinoGet.GetOneObject(\"Seleziona segmento o edge da quotare\", False, filter)\n    if rc != Rhino.Commands.Result.Success: return rc \n    pp=Rhino.DocObjects.ObjRef.CurveParameter(objrefs)    \n    print \"c\",objrefs.Curve()    \n    pt=objrefs.SelectionPoint()   \n    #rs.AddPoint(pt)\n    a=Rhino.Geometry.Curve.DuplicateSegments(objrefs.Curve())    \n    if len(a)==0:\n        segmento=scriptcontext.doc.Objects.AddCurve(objrefs.Curve())\n        return segmento\n    cc=[]    \n    for i in a:\n        seg=scriptcontext.doc.Objects.AddCurve(i)        \n        param=rs.CurveClosestPoint(seg,pt)\n        cp=rs.EvaluateCurve(seg,param)\n        if rs.PointCompare(pt,cp,0.0001):\n            segmento=seg             \n        else:\n            cc.append(seg)    \n    rs.DeleteObjects(cc)\n    return segmento\n    \ncc=GetCurvesAndEdges()\n\nif rs.IsLine(cc):\n    ps=rs.CurveStartPoint(cc)\n    pe=rs.CurveEndPoint(cc)\n    #rs.AddPoints((ps,pe))\n    p1=rs.coerce3dpoint(ps)      \n    p2=rs.coerce3dpoint(pe)\n    rs.AddPoints((p1,p2))    \n    rs.DeleteObject(cc)       \n    rs.Command(\"Dim W\"+str(p1)+\" W\"+str(p2))\n    ```\n<a class=\"attachment\" href=\"https://global.discourse-cdn.com/mcneel/uploads/default/original/3X/8/6/865e55131a9f8168d939d6572e133975d08bfefe.py\">QuotaToccandoSegmentoPolylinea.py</a> (1.4 KB)",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1589
+}

@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/pointcloud-analysis/14788",
+  "topic_id": 14788,
+  "title": "PointCloud Analysis",
+  "question": "Greetings,\n\nI am attempting to do some analysis of PointCloud objects within Rhino.\n\nI have a pretty simple script in which I am attempting to build a best fit plane from a subset of points within a point cloud.  The inputs are a cubic polysurface volume, which is used to limit the points used to create a best fit plane and a point cloud.\n\n\ndef PointTest(Brep,Cloud):\n    if rs.IsPolysurfaceClosed(Brep)!=True: return\n    brep=rs.coercebrep(Brep)\n    Cloud=rs.coercegeometry(Cloud)\n    Result=[]\n    tol=scriptcontext.doc.ModelAbsoluteTolerance\n    for pt in Cloud.GetEnumerator():\n        point=rs.coerce3dpoint(pt.Location)\n        if brep.IsPointInside(point,tol,True)==True:\n            Result.append(point)\n    Plane=rs.PlaneFitFromPoints(Result)   \n    Plane=rs.coerceplane(Plane)\n    rc,Curves,points=Rhino.Geometry.Intersect.Intersection.BrepPlane(brep,Plane,tol)\n    if rc==True:\n        PlanarSrf=rs.AddPlanarSrf(Curves)\n    return PlanarSrf\n\n\n\nCurrently I am dealing with a point cloud that is around half a million points.  Processing a cloud this size takes around 3.2 seconds. The lower limit for size of point cloud that I am dealing with is around 20 million points.  With this in mind I attempted to create a multi-threaded solution for parsing through the enumerated point cloud, code below.  I have not been able to get past the “The type arguments for method ‘ForEach’ cannot be inferred from the usage. Try specifying the type arguments explicitly.” error message.  Should it possible to parse through a single point cloud using multipul threads?  If so what is the proper syntax for doing so?\n\n\ndef Threaded_PointTest(Brep,Cloud):\n    ## Make Sure Test Polysurface is Closed ##\n    if rs.IsPolysurfaceClosed(Brep)!=True:\n        print \"Test brep is Not Closed\"\n        return\n    \n    ## Get a Private Copy for Multi-Threading ##\n    brep=rs.coercebrep(Brep)\n    brep.EnsurePrivateCopy()\n    \n    ## Turn Object into a PointCloud ##\n    Cloud=rs.coercegeometry(Cloud)\n    \n   ...",
+  "code_blocks": [
+    {
+      "code": "def Threaded_PointTest(Brep,Cloud):\n    ## Make Sure Test Polysurface is Closed ##\n    if rs.IsPolysurfaceClosed(Brep)!=True:\n        print \"Test brep is Not Closed\"\n        return\n    \n    ## Get a Private Copy for Multi-Threading ##\n    brep=rs.coercebrep(Brep)\n    brep.EnsurePrivateCopy()\n    \n    ## Turn Object into a PointCloud ##\n    Cloud=rs.coercegeometry(Cloud)\n    \n    ## Holder for Points inside Surface ##\n    Result=[]\n    tol=scriptcontext.doc.ModelAbsoluteTolerance\n    \n    def TestPoints(Pt):\n        try:\n            point=rs.coerce3dpoint(Pt.Location)\n            if brep.IsPointInside(point,tol,True)==True:\n                Result.append(point)\n        except:\n            pass\n    \n    CloudPts=Cloud.GetEnumerator()\n    ghpythonlib.parallel.run(TestPoints,CloudPts)\n\n    Plane=rs.PlaneFitFromPoints(Result)\n    Plane=rs.coerceplane(Plane)\n    r,Curves,points=Rhino.Geometry.Intersect.Intersection.BrepPlane(brep,Plane,tol)\n    if r==True:\n        PlanarSrf=rs.AddPlanarSrf(Curves)",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def PointTest(Brep,Cloud):\n    if rs.IsPolysurfaceClosed(Brep)!=True: return\n    brep=rs.coercebrep(Brep)\n    Cloud=rs.coercegeometry(Cloud)\n    Result=[]\n    tol=scriptcontext.doc.ModelAbsoluteTolerance\n    for pt in Cloud.GetEnumerator():\n        point=rs.coerce3dpoint(pt.Location)\n        if brep.IsPointInside(point,tol,True)==True:\n            Result.append(point)\n    Plane=rs.PlaneFitFromPoints(Result)   \n    Plane=rs.coerceplane(Plane)\n    rc,Curves,points=Rhino.Geometry.Intersect.Intersection.BrepPlane(brep,Plane,tol)\n    if rc==True:\n        PlanarSrf=rs.AddPlanarSrf(Curves)\n    return PlanarSrf",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "def Threaded_PointTest(Brep,Cloud):\n    ## Make Sure Test Polysurface is Closed ##\n    if rs.IsPolysurfaceClosed(Brep)!=True:\n        print \"Test brep is Not Closed\"\n        return\n    \n    ## Get a Private Copy for Multi-Threading ##\n    brep=rs.coercebrep(Brep)\n    brep.EnsurePrivateCopy()\n    \n    ## Turn Object into a PointCloud ##\n    Cloud=rs.coercegeometry(Cloud)\n    \n    ## Holder for Points inside Surface ##\n    Result=[]\n    tol=scriptcontext.doc.ModelAbsoluteTolerance\n    \n    def TestPoints(Pt):\n        try:\n            print Pt\n        except:\n            pass\n    \n    CloudPts=Cloud.GetEnumerator()\n    tasks.Parallel.ForEach(CloudPts,TestPoints)",
+      "language": "python",
+      "author": "5chmidt",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 22,
+  "views": 6340
+}

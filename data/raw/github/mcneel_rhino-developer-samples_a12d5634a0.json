@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_getedgefaces.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_getedgefaces.py",
+  "instruction": "Ex getedgefaces",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  rc, obj_ref = RhinoGet.GetOneObject(\n    \"Select edge curve\", False, ObjectType.EdgeFilter)\n  if rc <> Result.Success:\n    return rc\n  edge = obj_ref.Edge()\n\n  face_idxs = edge.AdjacentFaces()\n  edge_owning_brep = edge.Brep\n\n  for idx in face_idxs:\n    face = edge_owning_brep.Faces[idx]\n    face_copy = face.DuplicateFace(True)\n    id = doc.Objects.AddBrep(face_copy)\n    doc.Objects.Find(id).Select(True)\n\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-equivalent-of-cut-plane-command/28998",
+  "topic_id": 28998,
+  "title": "Python Equivalent of Cut Plane Command",
+  "question": "Does anyone know a quick, reiterable way to generate a surface at the intersection of a plane and lofted surface?\n\n\nEssentially i’m looking to determine the cross-sectional area along an airplane at various stations which I would define the location of.\n\n\nAny help would be appreciated, Thanks!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n    \ndef DoSomething():\n    id = rs.GetObject(\"Select surface or polysurface\", 8+16, True, False)\n    if not id: return\n    \n    tol = scriptcontext.doc.ModelAbsoluteTolerance\n    brep = rs.coercebrep(id, True)\n    plane = Rhino.Geometry.Plane.WorldXY\n    \n    rc, crvs, pts = Rhino.Geometry.Intersect.Intersection.BrepPlane(brep, plane, tol)\n    if not rc: return \n    \n    breps = Rhino.Geometry.Brep.CreatePlanarBreps(crvs)\n    if not breps: return \n    \n    ids = [scriptcontext.doc.Objects.AddBrep(b) for b in breps if b.IsValid]\n    if len(ids) != 0: \n        rs.SelectObjects(ids)\n    else:\n        print \"No surface(s) built\"\n    \nif __name__==\"__main__\":\n    DoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1440
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/hiddenlinedrawing-compute-part-of-the-contour-line-is-missing/165365",
+  "topic_id": 165365,
+  "title": "HiddenLineDrawing.Compute Part of the contour line is missing",
+  "question": "When I use HiddenLineDrawing.Compute to calculate contour lines for complex surfaces in Rhinoceros, I find that there are some missing lines, how can I solve this problem?\n\nThis is the original model.\n\n\n微信截图_20230911095700\n1559×700 37.7 KB\n\nHere are the calculations.\n\n\n微信截图_20230911095635\n1559×700 11.4 KB",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing Rhino.Input.Custom;\n\nnamespace PythonToCSharp.PythonToCSharp\n{\n    public class FMake2D : Command\n    {\n        public FMake2D()\n        {\n            Instance = this;\n        }\n\n        ///<summary>The only instance of the MyCommand command.</summary>\n        public static FMake2D Instance { get; private set; }\n\n        public override string EnglishName => \"FMake2D\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n\n            var go = new GetObject();\n            go.SetCommandPrompt(\"Select objects to test Make2D Points\");\n            go.GeometryFilter = ObjectType.Point | ObjectType.Surface | ObjectType.PolysrfFilter;\n            go.GroupSelect = true;\n            go.GetMultiple(1, 0);\n            if (go.CommandResult() != Result.Success)\n                return go.CommandResult();\n\n\n\n            var obj_refs = go.Objects();\n\n\n            var view = doc.Views.ActiveView;\n            if (null == view)\n                return Result.Failure;\n\n\n\n\n\n            var hld_params = new HiddenLineDrawingParameters\n            {\n                AbsoluteTolerance = doc.ModelAbsoluteTolerance,             \n\n                IncludeTangentEdges = false,\n\n\n                IncludeHiddenCurves = true\n            };\n\n\n            hld_params.SetViewport(view.ActiveViewport);\n\n\n            foreach (var obj_ref in obj_refs)\n            {\n                var obj = obj_ref?.Object();\n                if (obj != null)\n\n\n\n\n\n                    hld_params.AddGeometry(obj.Geometry, Transform.Identity, obj.Id);\n\n\n\n\n\n            }\n\n\n            var hld = HiddenLineDrawing.Compute(hld_params, true);\n\n\n            if (hld != null)\n            {\n\n                var flatten = Transform.PlanarProjection(Plane.WorldXY);\n\n\n                BoundingBox page_box = hld.BoundingBox(true);\n                var delta_2d = new Vector2d(0, 0);\n                delta_2d = delta_2d - new Vector2d(page_box.Min.X, page_box.Min.Y);\n                var delta_3d = Transform.Translation(new Vector3d(delta_2d.X, delta_2d.Y, 0.0));\n                flatten = delta_3d * flatten;\n\n\n\n\n                var h_attribs = new ObjectAttributes { Name = \"H\" };\n\n                h_attribs.Visible = false ;\n\n\n                var v_attribs = new ObjectAttributes { Name = \"V\" };\n\n\n\n                foreach (var hld_curve in hld.Segments)\n                {\n                    \n\n\n\n\n                    if (hld_curve?.ParentCurve == null || hld_curve.ParentCurve.SilhouetteType == SilhouetteType.None)\n                        continue;\n\n                    var crv = hld_curve.CurveGeometry.DuplicateCurve();\n\n\n                    if (crv != null)\n                    {\n                        crv.Transform(flatten);\n                        switch (hld_curve.SegmentVisibility)\n                        {\n                            case HiddenLineDrawingSegment.Visibility.Visible:\n                                doc.Objects.AddCurve(crv, v_attribs);\n                                break;\n                            case HiddenLineDrawingSegment.Visibility.Hidden:\n                                doc.Objects.AddCurve(crv, h_attribs);\n                                break;\n                        }\n                    }\n                }\n\n\n                foreach (var hld_pt in hld.Points)\n                {\n\n                    if (hld_pt == null)\n                        continue;\n\n                    var pt = hld_pt.Location;\n\n\n                    if (pt.IsValid)\n                    {\n                        pt.Transform(flatten);\n                        switch (hld_pt.PointVisibility)\n                        {\n                            case HiddenLineDrawingPoint.Visibility.Visible:\n                                doc.Objects.AddPoint(pt, v_attribs);\n                                break;\n                            case HiddenLineDrawingPoint.Visibility.Hidden:\n\n                                doc.Objects.AddPoint(pt, h_attribs);\n                                break;\n                        }\n                    }\n                }\n            }\n\n            doc.Views.Redraw();\n            return Result.Success;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "Fan",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 13,
+  "views": 646
+}

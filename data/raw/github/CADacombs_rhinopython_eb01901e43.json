@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/CADacombs/rhinopython/blob/541b4ade49f1dda6a3861d12b9e2613405182082/spb_BrepEdge_tolerance.py",
+  "repo": "CADacombs/rhinopython",
+  "repo_stars": 37,
+  "repo_description": "Python scripts for Rhinoceros (Rhino, Rhino3D).",
+  "license": "LGPL-3.0",
+  "filepath": "spb_BrepEdge_tolerance.py",
+  "instruction": "Spb brep edge tolerance",
+  "code": "\"\"\"\r\n\"\"\"\r\n\r\n#! python 2  Must be on a line less than 32.\r\nfrom __future__ import absolute_import, division, print_function, unicode_literals\r\n\r\n\"\"\"\r\n221104: Created.\r\n250105: Modified number formatting of printed output.\r\n250223: Added the edge index to the printed output.\r\n\"\"\"\r\n\r\nimport Rhino\r\nimport Rhino.Input as ri\r\nimport scriptcontext as sc\r\n\r\n\r\ndef formatDistance(fDistance, iPrecision=None):\r\n    if iPrecision is None: iPrecision = sc.doc.ModelDistanceDisplayPrecision\r\n    if fDistance is None: return \"(No value provided)\"\r\n    if fDistance == 0.0: return \"0\"\r\n    if fDistance < 10**-iPrecision: return \"{:.2e}\".format(fDistance)\r\n    return \"{:.{}g}\".format(fDistance, iPrecision)\r\n\r\n\r\ndef main():\r\n    \r\n    go = ri.Custom.GetObject()\r\n\r\n    go.SetCommandPrompt(\"Select edge\")\r\n\r\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\r\n    go.GeometryAttributeFilter = ri.Custom.GeometryAttributeFilter.EdgeCurve\r\n\r\n    res = go.Get()\r\n\r\n    if res == ri.GetResult.Cancel:\r\n        go.Dispose()\r\n        return\r\n\r\n    objref = go.Object(0)\r\n\r\n    go.Dispose()\r\n\r\n    edge = objref.Edge()\r\n\r\n    print(\"Edge[{}] tolerance: {}\".format(edge.EdgeIndex, formatDistance(edge.Tolerance)))\r\n\r\n\r\nif __name__ == '__main__': main()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

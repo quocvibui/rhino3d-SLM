@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ilouha/rhinoPython/blob/4194fbd3f384073a9a648e1a52490737a4509e1d/shapeArea.py",
+  "repo": "ilouha/rhinoPython",
+  "repo_stars": 1,
+  "repo_description": "general scripting repository for quick hacks in Rhino using Python",
+  "license": "unknown",
+  "filepath": "shapeArea.py",
+  "instruction": "Shape area",
+  "code": "import rhinoscriptsyntax as rs\n\ndef add_area_text():\n    # Select the shape\n    shape = rs.GetObject(\"Select a shape to calculate the area\", rs.filter.curve | rs.filter.surface | rs.filter.polysurface)\n    if not shape:\n        print(\"No shape selected.\")\n        return\n    \n    # Calculate the area\n    if rs.IsCurve(shape):\n        area = rs.CurveArea(shape)\n    elif rs.IsSurface(shape):\n        area = rs.SurfaceArea(shape)[0]\n    elif rs.IsPolysurface(shape):\n        area = rs.SurfaceArea(shape)[0]\n    else:\n        print(\"Selected object is not a valid shape.\")\n        return\n    \n    if area is None:\n        print(\"Could not calculate the area.\")\n        return\n    \n    # Find the centroid of the shape\n    if rs.IsSurface(shape) or rs.IsPolysurface(shape):\n        centroid = rs.SurfaceAreaCentroid(shape)\n    else:\n        centroid = rs.CurveAreaCentroid(shape)\n        \n    if not centroid:\n        print(\"Could not determine the centroid.\")\n        return\n    \n    # Create the text with the area\n    print(area[0])\n    area_text = \"AREA: {}SF\".format(round(area[0],2))\n    text_height = 0.25  # Adjust the text height as needed\n    text_point = centroid[0]  # Extracting the point from the centroid result\n    \n    # Add text to the document\n    rs.AddText(area_text, text_point, height=text_height)\n \n\n# Run the function\nif __name__ == \"__main__\":\n    add_area_text()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

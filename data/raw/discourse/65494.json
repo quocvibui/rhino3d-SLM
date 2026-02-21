@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/weird-plane-aligned-bounding-box-inaccuracy/65494",
+  "topic_id": 65494,
+  "title": "Weird plane-aligned bounding box inaccuracy...!",
+  "question": "So, in messing around with a script here, I discovered something pretty bizarre…\n\n\nIn the file below, you will find a simple perfect sphere of radius 10.\n\n\nNow, run the script below, which simply makes first a world-aligned bounding box, then changes the CPlane to some odd angle (in the file) and makes a CPlane-aligned bounding box.  Then it compares the volume of the two boxes…\n\n\nNow, in theory, the bounding box should measure exactly (within tolerance limits) 20 x 20 x 20 no matter what the orientation, and thus have a volume of 8000.  Which the world-aligned bounding box does…  But the CPlane aligned bounding box does not - it’s only 7981.31404 (+/- 1e-06) …  OK, that’s only a difference of about 1/4 of one percent, but to me it’s quite significant…\n\n\nBBPlaneCalc.3dm\n (279.7 KB)\n\n\nimport rhinoscriptsyntax as rs\n\nobjID=rs.ObjectsByType(8)[0]\nbb=rs.BoundingBox(objID)\nvolume=bb[1].DistanceTo(bb[0])*bb[3].DistanceTo(bb[0])*bb[4].DistanceTo(bb[0])\nrs.AddBox(bb)\nrs.RestoreNamedCPlane(\"Tilted\")\nbb2=rs.BoundingBox(objID,rs.CurrentView())\nvolume2=bb2[1].DistanceTo(bb2[0])*bb2[3].DistanceTo(bb2[0])*bb2[4].DistanceTo(bb2[0])\nrs.AddBox(bb2)\nprint \"World-aligned volume: {}\".format(volume)\nprint \"CPlane-aligned volume: {}\".format(volume2)\n\n\n\nIf you use the Rhino Volume command to measure the volume of the boxes, you find the same thing; you can also measure the sides of the second box to see they are too small.\n\n\nCan someone enlighten me on why this happens?  I was under the impression that the functions call an “accurate” bounding box…  The Rhino file above is a V6 file, but the results are quasi-identical in V5.\n\n\nThanks, --Mitch",
+  "code_blocks": [
+    {
+      "code": "def BoundingBoxPlane(objs,plane,ret_pts=False):\n    \"\"\"returns a plane-aligned bounding box in world coordinates\n       - input geometry must be RhinoCommon geometry (not IDs)\n       - adapted from python rhinoscriptsyntax rs.BoundingBox() code.\"\"\"\n    wxy_plane=Rhino.Geometry.Plane.WorldXY\n    def __objectbbox(geom,xform):\n        if isinstance(geom,Rhino.Geometry.Point):\n            pt=geom.Location\n            if xform: pt = xform * pt\n            return Rhino.Geometry.BoundingBox(pt,pt)\n        if xform: return geom.GetBoundingBox(xform)\n        return geom.GetBoundingBox(True)\n    \n    xform = Rhino.Geometry.Transform.ChangeBasis(wxy_plane, plane)\n    bbox = Rhino.Geometry.BoundingBox.Empty\n    if type(objs) is list or type(objs) is tuple:\n        for obj in objs:\n            objectbbox = __objectbbox(obj, xform)\n            bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    else:\n        objectbbox = __objectbbox(objs, xform)\n        bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)\n    if not bbox.IsValid: return\n    plane_to_world = Rhino.Geometry.Transform.ChangeBasis(plane,wxy_plane)\n    if ret_pts:\n        corners = list(bbox.GetCorners())\n        for pt in corners: pt.Transform(plane_to_world)\n        return corners\n    else:\n        box=Rhino.Geometry.Box(bbox)\n        box.Transform(plane_to_world)\n        return box",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjID=rs.ObjectsByType(8)[0]\nbb=rs.BoundingBox(objID)\nvolume=bb[1].DistanceTo(bb[0])*bb[3].DistanceTo(bb[0])*bb[4].DistanceTo(bb[0])\nrs.AddBox(bb)\nrs.RestoreNamedCPlane(\"Tilted\")\nbb2=rs.BoundingBox(objID,rs.CurrentView())\nvolume2=bb2[1].DistanceTo(bb2[0])*bb2[3].DistanceTo(bb2[0])*bb2[4].DistanceTo(bb2[0])\nrs.AddBox(bb2)\nprint \"World-aligned volume: {}\".format(volume)\nprint \"CPlane-aligned volume: {}\".format(volume2)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 4,
+  "views": 775
+}

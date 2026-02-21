@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-8-python-grasshopper-component-code-property/180653",
+  "topic_id": 180653,
+  "title": "Rhino 8 Python Grasshopper Component.Code Property",
+  "question": "It seems like we are unable to access the code inside of a component using the new python components:\n\n\nRhinoCodePluginGH.Components.Python3Component\n\n\nRhinoCodePluginGH.Components.IronPython2Component\n\nWhereas it was previously a property in the old Python component:\n\n\nGhPython.Component.ZuiPythonComponent\n\n\nimage\n963×878 47.7 KB\n\n\nIs there another way to currently to access the component code? It would be awesome to have the Code property again",
+  "code_blocks": [
+    {
+      "code": "def replaceGHPythonString(oldStr,newStr,ghDocument):\n    \n    \"\"\" Find and replace substrings for all GHPython code in the grasshopper doc \"\"\"\n    \n    # Make GH component warning handler\n    wh = gh.Kernel.GH_RuntimeMessageLevel.Warning\n    \n    # Iterate the gh canvas and get to ghpython source code\n    guids = []\n    for obj in ghDocument.Objects:\n        if type(obj) is type(ghenv.Component):\n            if oldStr in obj.Code:\n                obj.Code = obj.Code.replace(oldStr,newStr)\n                obj.AddRuntimeMessage(wh,\"GHPython code was updated, stuff might have changed!\")\n                guids.append(str(obj.InstanceGuid))\n                    \n    return guids",
+      "language": "python",
+      "author": "bfrederick",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 17,
+  "views": 1569
+}

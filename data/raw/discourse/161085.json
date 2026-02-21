@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/lineardimension-distancescale-issue/161085",
+  "topic_id": 161085,
+  "title": "LinearDimension DistanceScale issue?",
+  "question": "Hi,\n\n\nI try to update linear dimension distance scale.\n\nI want to update linear dimensions over a detail (layout) which its scale have been changed.\n\nWhen I use RhinoObject.CommitChanges(), visually it seems ok but as soon as I move the linear dimension (drag), the old value comes back.\n\nThe change doesn’t seem to stick.\n\n\nDid I miss something ?\n\nHere is my short python code.\n\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\ndef DimSetDistanceScale():\n\tlst_id = rs.GetObjects(\"Select objects\", rs.filter.annotation, True, True, True)\n\tscale = rs.RealBox(\"Enter a scale: \", 1.0)\n\t\n\tfor id in lst_id:\n\t\tro = rs.coercerhinoobject(id)\n\t\tif isinstance(ro.Geometry, rg.LinearDimension):\n\t\t\tprint(\"{0} -> {1}\".format(ro.Geometry.DistanceScale, scale))\n\t\t\tro.Geometry.DistanceScale = scale\n\t\t\tro.CommitChanges()\n\t\t\t\n\trs.Redraw()\n\nDimSetDistanceScale()\n\n\n\nRegards",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\ndef DimSetDistanceScale():\n\tlst_id = rs.GetObjects(\"Select objects\", rs.filter.annotation, True, True, True)\n\tscale = rs.RealBox(\"Enter a scale: \", 1.0)\n\t\n\tfor id in lst_id:\n\t\tro = rs.coercerhinoobject(id)\n\t\tif isinstance(ro.Geometry, rg.LinearDimension):\n\t\t\tprint(\"{0} -> {1}\".format(ro.Geometry.LengthFactor, scale))\n\t\t\tro.Geometry.LengthFactor = scale\n\t\t\tro.CommitChanges()\n\t\t\t\n\trs.Redraw()\n\nDimSetDistanceScale()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\ndef DimSetDistanceScale():\n\tlst_id = rs.GetObjects(\"Select objects\", rs.filter.annotation, True, True, True)\n\tscale = rs.RealBox(\"Enter a scale: \", 1.0)\n\t\n\tfor id in lst_id:\n\t\tro = rs.coercerhinoobject(id)\n\t\tif isinstance(ro.Geometry, rg.LinearDimension):\n\t\t\tprint(\"{0} -> {1}\".format(ro.Geometry.DistanceScale, scale))\n\t\t\tro.Geometry.DistanceScale = scale\n\t\t\tro.CommitChanges()\n\t\t\t\n\trs.Redraw()\n\nDimSetDistanceScale()",
+      "language": "python",
+      "author": "lahos",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 324
+}

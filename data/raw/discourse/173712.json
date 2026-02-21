@@ -1,0 +1,61 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-distance-python-3-cant-compute-distance-between-points/173712",
+  "topic_id": 173712,
+  "title": "rs.Distance() Python 3 can't compute distance between points",
+  "question": "Hi,\n\n\nI recently upgraded to the latest Rhino. I get a bug with a script which worked fine on previous versions.\n\n\nI can’t get Python to compute distances between 3D Points. This test script for example\n\n\n#! python3\n\nimport rhinoscriptsyntax as rs\nimport rhinoscript.utility as rhutil\n\npt1 = rs.CreatePoint(1.0, 2.0, 3.0)\npt2 = rs.CreatePoint(4.0, 2.0, 3.0)\n\nprint(rs.Distance(pt1,pt2))\n\n\n\noutputs : \nAttributeError: 'Point3d' object has no attribute 'Length'\n\n\nI have also tried feeding rs.Distance() with an array of doubles or Point3D objects created via \ncoerce3dpoint\n and got similar results.\n\n\nAny idea why ?\n\n\nEdit: the bug happens only with Python 3",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport rhinoscript.utility as rhutil\n\npt1 = rs.CreatePoint(1.0, 2.0, 3.0)\npt2 = rs.CreatePoint(4.0, 2.0, 3.0)\n\nprint(rs.Distance(pt1,pt2))",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def Distance(point1, point2):\n    \"\"\"Measures distance between two 3D points, or between a 3D point and\n    an array of 3D points.\n    Parameters:\n      point1 (point): The first 3D point.\n      point2 (point): The second 3D point or list of 3-D points.\n    Returns:\n      point: If point2 is a 3D point then the distance if successful.\n      point: If point2 is a list of points, then an list of distances if successful.\n      None: if not successful\n    Example:\n      import rhinoscriptsyntax as rs\n      point1 = rs.GetPoint(\"First point\")\n      if point1:\n          point2 = rs.GetPoint(\"Second point\")\n          if point2:\n              print \"Distance: \", rs.Distance(point1, point2)\n    See Also:\n      Angle\n      Angle2\n    \"\"\"\n    from_pt = coerce3dpoint(point1, True)\n    to_pt = coerce3dpoint(point2)\n    if to_pt: return (to_pt - from_pt).Length\n    # check if we have a list of points\n    to_pt = coerce3dpointlist(point2, True)\n    distances = [(point - from_pt).Length for point in to_pt]\n    if distances: return distances",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\n\nimport Rhino\n\npt1 = Rhino.Geometry.Point3d(1.0, 2.0, 3.0)\npt2 = Rhino.Geometry.Point3d(4.0, 2.0, 3.0)\n\nprint(type(pt2-pt1))\n\n<class 'Rhino.Geometry.Point3d'>",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\n\nimport Rhino\n\npt1 = Rhino.Geometry.Point3d(1.0, 2.0, 3.0)\npt2 = Rhino.Geometry.Point3d(4.0, 2.0, 3.0)\n\nprint(type(pt2-pt1))\n\n<type 'Vector3d'>",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "from __future__ import print_function\nimport Rhino.Geometry as rg\n\nimport sys\nprint(sys.version, \"\\n\")\n\ndef pet(s):\n    \"\"\"Print eval type\"\"\"\n    try:\n        print(\"{:<9}: {}\".format(s, eval(s).GetType().Name))\n    except Exception as e:\n        print(\"{:<9}: {}\".format(s, e))\n\np1 = rg.Point3d(1.0, 2.0, 3.0)\np2 = rg.Point3d(4.0, 2.0, 3.0)\n\nv1 = rg.Vector3d(7.0, 11.0, 13.0)\nv2 = rg.Vector3d(23.0, 19.0, 17.0)\n\npet(\"p2 - p1\")\npet(\"rg.Point3d.Subtract(p2, p1)\")\nprint('\\n')\npet(\"v2 - p1\")\npet(\"rg.Point3d.Subtract(v2, p1)\")\nprint('\\n')\npet(\"v2 + p1\")",
+      "language": "python",
+      "author": "spb",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "#! python3\n\nimport rhinoscriptsyntax as rs\nimport rhinoscript.utility as rhutil\n\npt1 = rs.CreatePoint(1.0, 2.0, 3.0)\npt2 = rs.CreatePoint(4.0, 2.0, 3.0)\n\nprint(rs.Distance(pt1,pt2))",
+      "language": "python",
+      "author": "crtn-hrd",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 805
+}

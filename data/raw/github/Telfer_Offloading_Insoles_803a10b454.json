@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Telfer/Offloading_Insoles/blob/6bd5c05346698b2914d9683befe9f9d5074a6267/DI_SOLIDSCAN.py",
+  "repo": "Telfer/Offloading_Insoles",
+  "repo_stars": 1,
+  "repo_description": "Tools to produce offloading insole designs in Rhino CAD",
+  "license": "unknown",
+  "filepath": "DI_SOLIDSCAN.py",
+  "instruction": "Di solidscan",
+  "code": "import rhinoscriptsyntax as rs\n\nscan = rs.GetObject(\"Select scan\")\nplate = rs.GetObject(\"Select plate\")\n\n# split each\nscan1 = rs.CopyObject(scan)\nscan2 = rs.CopyObject(scan)\nplate1 = rs.CopyObject(plate)\nplate2 = rs.CopyObject(plate)\nrs.Command(\"-_MeshSplit Selid \" + str(scan1) + \" _Enter selid \" + str(plate1) + \" _Enter \")\nsplitscan = rs.LastCreatedObjects()\nrs.Command(\"-_MeshSplit Selid \" + str(plate2) + \" _Enter selid \" + str(scan2) + \" _Enter \")\nsplitplate = rs.LastCreatedObjects()\nplate1_area = rs.MeshArea(splitplate[0])\nplate2_area = rs.MeshArea(splitplate[1])\nif plate1_area > plate2_area:\n    top = splitplate[1]\n    rs.DeleteObject(splitplate[0])\nelse:\n    top = splitplate[0]\n    rs.DeleteObject(splitplate[1])\nscan1_centroid = rs.MeshAreaCentroid(splitscan[0])\nscan2_centroid = rs.MeshAreaCentroid(splitscan[1])\nif scan1_centroid[2] > scan2_centroid[2]:\n    bottom = splitscan[1]\n    rs.DeleteObject(splitscan[0])\nelse:\n    bottom = splitscan[0]\n    rs.DeleteObject(splitscan[1])\nrs.JoinMeshes([top, bottom], delete_input = True)\nrs.DeleteObjects([scan, scan1, scan2, plate, plate1, plate2])\n\n\n#def soft_tissue_cut(scan, plate",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ibois-epfl/rw-joint-calculator/blob/05de748bbdf2abff9f820ceacedeaf8e6b0290ca/src/components/RWJC_moment_stress_computer/code.py",
+  "repo": "ibois-epfl/rw-joint-calculator",
+  "repo_stars": 0,
+  "repo_description": "This repo contains experimental code to calculate the stresses in a roundwood joint. It is not experimentally validated and should not be used for real building purposes",
+  "license": "GPL-3.0",
+  "filepath": "src/components/RWJC_moment_stress_computer/code.py",
+  "instruction": null,
+  "code": "import System\n\nimport Rhino\n\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom joint_calc import face, joint, stress_field, geometry\n\n\nclass RWJCMomentCalculator(component):\n    def RunScript(\n        self,\n        brep_faces: System.Collections.Generic.List[Rhino.Geometry.BrepFace],\n        moment_vector: Rhino.Geometry.Vector3d,\n        rotation_center: Rhino.Geometry.Point3d,\n    ):\n        vectors = []\n        anchors = []\n\n        joint_faces = []\n        for i, brep_face in enumerate(brep_faces):\n            face_area = Rhino.Geometry.AreaMassProperties.Compute(brep_face).Area\n            joint_face = face.JointFace(\n                id=i,\n                parent_joint_id=0,\n                area=face_area,\n                normal=geometry.Vector.from_vector_3d(\n                    brep_face.Faces[0].NormalAt(0.5, 0.5)\n                ),\n                brep_surface=brep_face,\n            )\n            joint_faces.append(joint_face)\n\n            vectors.append(\n                Rhino.Geometry.Vector3d(\n                    joint_face.normal.x / 10,\n                    joint_face.normal.y / 10,\n                    joint_face.normal.z / 10,\n                )\n            )\n\n        my_joint = joint.Joint(name=\"Joint1\", faces=joint_faces, moment_weights=None)\n\n        stress_computer = stress_field.StressFieldComputer(\n            moment=geometry.Vector(\n                moment_vector.X,\n                moment_vector.Y,\n                moment_vector.Z,\n            ),\n            rotation_point=geometry.Point(\n                rotation_center.X,\n                rotation_center.Y,\n                rotation_center.Z,\n            ),\n            joint=my_joint,\n        )\n        stress_computer.compute_stress_field()\n        print(\n            f\"Total tensile component: {round(stress_computer.total_tensile_component) / 1000} kN\"\n        )\n\n        for joint_face in my_joint.faces:\n            anchors.append(\n                Rhino.Geometry.Point3d(\n                    joint_face.resultant_location.x,\n                    joint_face.resultant_location.y,\n                    joint_face.resultant_location.z,\n                )\n            )\n        stress_distributions = [\n            joint_face.stress_distribution for joint_face in my_joint.faces\n        ]\n        sigma_maxs = [\n            f\"sigma_max = {round(joint_face.max_stress / 1e6, 2)} MPa\"\n            for joint_face in my_joint.faces\n        ]\n\n        return [vectors, anchors, stress_distributions, sigma_maxs]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/and-yet-another-fun-annotation-style-trap/121753",
+  "topic_id": 121753,
+  "title": "And yet another fun annotation style trap",
+  "question": "Every time I open a certain file, I get a missing font message, despite the fact that my annotation styles have been repeatedly cleaned and purged and this font is not referenced by any of them…  or so I thought.\n\nI sent in a largish file to tech with this problem.  I already spent a number of hours trying to track it down, writing some diagnostic scripts and individually going through the 200+ texts in the file to see which ones might be causing this.\n\n\nI actually found a few texts that had an annotation style that uses Arial, but the individual text referenced a different, non-installed font (Helvetica Light), so I went in and fixed them all, one by one by re-assigning Arial to the individual text objects. Saved the file with that nice feeling that comes from thinking I had finally vanquished the problem.  Yeah, right.\n\n\nRe-opened the file and got the missing font message…  \n#%$%@$!!\n\n\nSo now I finally am able to repeat the bug.  Below is a file with one of these objects.  Open it and select the text, in Properties you will see that the annotation style is Standard 02 (font: Arial), but the text actually references Helvetica Light (not installed)\n\n\n\n\n\n\nimage\n734×394 16.5 KB\n\n\n\n\nOK, attempt to fix by changing the font to Arial via the dropdown:\n\n\n\n\nimage\n729×391 15.9 KB\n\n\n\n\nCool, it seems to have worked.  Yeah, right.\n\n\nUnselect the text.  Reselect the text.  In Properties it shows Arial for half a second, then reverts to Helvetica Light (not installed).\n\n\nSheesh.\n\n\nCantChangeFont2.3dm\n (1.8 MB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\na_objs=rs.ObjectsByType(512)\nfor obj in a_objs:\n    if rs.IsText(obj): print rs.TextObjectFont(obj)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\na_objs=rs.ObjectsByType(512)\nfor obj in a_objs:\n    if rs.IsText(obj):\n        rhobj=rs.coercerhinoobject(obj)\n        txt_formula=rhobj.Geometry.TextFormula\n        print txt_formula",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\na_objs=rs.ObjectsByType(512)\nfor obj in a_objs:\n    if rs.IsText(obj):\n        rhobj=rs.coercerhinoobject(obj)\n        txt_formula=rhobj.Geometry.TextFormula\n        if r\"\\f1\" in txt_formula:\n            print \"Contains multiple fonts\"\n        else:\n            print \"Single font\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 147,
+  "posts_count": 8,
+  "views": 1187
+}

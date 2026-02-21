@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/delete-all-breps-that-are-below-a-surface-level/122100",
+  "topic_id": 122100,
+  "title": "Delete All Breps that are below a surface level",
+  "question": "Hi All,\n\n\nI m trying to figure out how to manage and delete the surfaces that are under a plane\n\n\nSo far i have managed to do with a constant height but comparing the Z value of the Area Centroid with a specific Z - value\n\nHowever I dont know how to modify the script that it finds the corresponding Z value of the plane\n\n\nTo illustrate:\n\nI have this plane which is actually an extruded polyline\n\n\n\n\nThe forward part has a Z = 1300 so with the script below all forward part that is below 1300 are removed\n\n\n\n\nimage\n739×251 30.1 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\n\ndef extrude_crv(B):\n    # Select Curve\n    crv = rs.GetObject(\"Select Curve to Extrude\")\n    rs.EnableRedraw(False)\n    # Extrude Curve\n    start_point = rs.CurveStartPoint(crv)\n    end_point = start_point + rs.coerce3dpoint((0,B,0))\n    path = rs.AddLine(start_point,end_point)\n    extruded_plane = rs.ExtrudeCurve(crv, path)\n    return extruded_plane\n\n\nB=10000 \nx_min = 0\nx_max = 100000\nlength = 1000\n\ny_min = 0\nbreadth = 5000\n\nz_min = 0\nheight = 15000\n\n\nbreps = []\nextrude_plane = extrude_crv(B)\n\n\nfor x in range(x_min,x_max,1000):\n    rectangle = rs.AddRectangle( rs.WorldYZPlane(), breadth, height)\n    obj = rs.MoveObject(rectangle, (x, y_min, z_min) )\n    obj = rs.AddPlanarSrf(obj)\n    rs.DeleteObject(rectangle)\n    breps.append(obj)\n\n\n\nfor brep in breps:\n    if rs.IsSurface(brep):\n        splits = rs.SplitBrep ( brep, extrude_plane )\n        if splits:\n            for obj in splits:\n                if obj:\n                    cog = rs.SurfaceAreaCentroid(obj)\n                    if cog[0].Z < 1300:\n                        rs.DeleteObject(obj)\n                    rs.DeleteObject(brep)\n\n\n\nAny ideas on how to approach this would be really helpful!\n\n\nFor convenience i also attach the rhinofile with the polyline\n\n\nsplit_brep.3dm\n (27.3 KB)",
+  "code_blocks": [
+    {
+      "code": "def TrimBelowSurface(obj_ids, extrude_plane):\n    for brep in obj_ids:\n        if rs.IsSurface(brep):\n            intersection = rs.IntersectBreps(brep, extrude_plane)\n            if intersection:\n                if rs.IsCurve(intersection):\n                    local_plane_height = rs.CurveStartPoint(intersection)\n            else:\n                local_plane_height = rs.BoundingBox(extrude_plane)\n                min_height = 10**6\n                for i in range(4):\n                    min_height_tmp = local_plane_height[i].Z\n                    if min_height_tmp < min_height:\n                        min_height = min_height_tmp\n            splits = rs.SplitBrep ( brep, extrude_plane )\n            if splits:\n                for obj in splits:\n                    if obj:\n                        cog = rs.SurfaceAreaCentroid(obj)\n                        if cog[0].Z < local_plane_height.Z:\n                            rs.DeleteObject(obj)\n                        rs.DeleteObject(brep)",
+      "language": "python",
+      "author": "g.synetos",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef extrude_crv(B):\n    # Select Curve\n    crv = rs.GetObject(\"Select Curve to Extrude\")\n    rs.EnableRedraw(False)\n    # Extrude Curve\n    start_point = rs.CurveStartPoint(crv)\n    end_point = start_point + rs.coerce3dpoint((0,B,0))\n    path = rs.AddLine(start_point,end_point)\n    extruded_plane = rs.ExtrudeCurve(crv, path)\n    return extruded_plane\n\n\nB=10000 \nx_min = 0\nx_max = 100000\nlength = 1000\n\ny_min = 0\nbreadth = 5000\n\nz_min = 0\nheight = 15000\n\n\nbreps = []\nextrude_plane = extrude_crv(B)\n\n\nfor x in range(x_min,x_max,1000):\n    rectangle = rs.AddRectangle( rs.WorldYZPlane(), breadth, height)\n    obj = rs.MoveObject(rectangle, (x, y_min, z_min) )\n    obj = rs.AddPlanarSrf(obj)\n    rs.DeleteObject(rectangle)\n    breps.append(obj)\n\n\n\nfor brep in breps:\n    if rs.IsSurface(brep):\n        splits = rs.SplitBrep ( brep, extrude_plane )\n        if splits:\n            for obj in splits:\n                if obj:\n                    cog = rs.SurfaceAreaCentroid(obj)\n                    if cog[0].Z < 1300:\n                        rs.DeleteObject(obj)\n                    rs.DeleteObject(brep)",
+      "language": "python",
+      "author": "g.synetos",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 432
+}

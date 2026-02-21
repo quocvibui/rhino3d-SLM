@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/points-on-sphere/85020",
+  "topic_id": 85020,
+  "title": "Points On Sphere",
+  "question": "Hi,\n\n\nDoes anyone have experience with creating points on sphere with Fibonacci order in Grashopper, similar to the attached image?\n\n\nI would appreciate any help\n\n\n5bdb13ff8ecf5\n1000×1000 316 KB",
+  "code_blocks": [
+    {
+      "code": "# reference: https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere/26127012#26127012\n\n\"\"\"Phyllotaxis 3D: Sphere.  This method is a reasonable approximation for evenly distributing\npoints in a spherical fasion, resembling phyllotaxis. I honestly don't know what you would use this for....\n    Inputs:\n        num_pts: number of points to generate\n        cap: experimental...\n    Output:\n        a: points arranged in a mathematically approximate even distribution on a sphere\n            output can be used with 3D Convex Hull and WB Mesh Dual for strip creation\n        lines: collection of lines that can be used to generate Meshes using WB mesh from lines\"\"\"\n\n__author__ = \"chanley\"\n__version__ = \"2018.03.29\"\n\nghenv.Component.Name = \"OTools_PyhlloSphere3D_Even\" \nghenv.Component.NickName = 'O_PSphere3D_Even' \nghenv.Component.Category = \"OTools\"\nghenv.Component.SubCategory = \"7 | Phyllotaxish\"\ntry: ghenv.Component.AdditionalHelpFromDocStrings = \"1\"\nexcept: pass\n\nimport math\nimport Rhino\nimport rhinoscriptsyntax as rs\n\na = []\nlines = []\n\n# evenly distribute points on a sphere, analogous to phyllotaxis\ntry:\n    for i in range(0, num_pts):\n        phi = math.acos(1 - 2*i/num_pts)\n        theta = math.pi * (1 + 5**0.5) * i\n        a.append(Rhino.Geometry.Point3d(math.cos(theta) * math.sin(phi), math.sin(theta) * math.sin(phi), math.cos(phi)))\nexcept:\n    pass\n\n# use lines to connect points to create cells\ntry:\n    for i in range(1, len(a)-8):\n        lines.append(rs.coercegeometry(rs.AddLine(a[i], a[i+5])))\n        lines.append(rs.coercegeometry(rs.AddLine(a[i], a[i+8])))\nexcept:\n    pass\n    \n# due to the nature of spherical coordinates and the meshing algorithm being used, the meshing gets a litte\n# dicey at the polar caps....this might be an approach to manually creating the cells at the polar caps.\ntry:\n    if len(a) > 5 and cap == True:\n        print \"cap face order is not quite right yet, not sure if this even is possible.....\"\n        # cap top...not sure of order\n        lines.append(rs.AddLine(a[1], a[3]))\n        lines.append(rs.AddLine(a[1], a[4]))\n        lines.append(rs.AddLine(a[2], a[3]))\n        lines.append(rs.AddLine(a[2], a[4]))\n        lines.append(rs.AddLine(a[2], a[5]))\n        lines.append(rs.AddLine(a[3], a[5]))\nexcept:\n    pass\ntry:\n    #cap bottom...not sure of order\n    if len(a) > 8:\n        print (len(a)-5)\n        lines.append(rs.AddLine(a[len(a)-1], a[len(a)-2]))\n        lines.append(rs.AddLine(a[len(a)-1], a[len(a)-3]))\n        lines.append(rs.AddLine(a[len(a)-1], a[len(a)-4]))\n        lines.append(rs.AddLine(a[len(a)-1], a[len(a)-6]))\n        lines.append(rs.AddLine(a[len(a)-2], a[len(a)-4]))\n        lines.append(rs.AddLine(a[len(a)-2], a[len(a)-5]))\n        lines.append(rs.AddLine(a[len(a)-2], a[len(a)-7]))\n        lines.append(rs.AddLine(a[len(a)-3], a[len(a)-5]))\n        lines.append(rs.AddLine(a[len(a)-3], a[len(a)-8]))\n        \nexcept:\n    pass",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 9,
+  "views": 5628
+}

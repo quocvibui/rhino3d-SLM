@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/convert-g3-dmesh3-created-with-jellyfish-in-python-to-rhino-geometry-mesh/159913",
+  "topic_id": 159913,
+  "title": "Convert g3.DMesh3 created with Jellyfish in Python to Rhino.Geometry.Mesh",
+  "question": "Dear community,\n\n\nWhen using Jellyfish within Grasshopper, DMesh3 geometry is automatically converted to Rhino.Geometry.Mesh. Hence, it is compatible with all other mesh tools.\n\nHowever, this does not seem to be the case when using Jellyfish in python with ghpythonlib.components. The function DMesh3Param which would do the trick is missing.\n\nI probably overlook something trivial but I simply cannot find the solution.\n\n\nHere is a minimal example of the code:\n\n\nimport Rhino\nfrom Rhino.Geometry import *\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\n\ndom = ghc.ConstructDomain(0,1)\nbbox = Box(rs.WorldXYPlane(), dom, dom, dom)\ngyr = ghc.Jellyfish.IsoSurface(ghc.Jellyfish.Gyroid(bbox, 1, 1, 1), 20, 0.00, True, 0)\nmesh_box = ghc.Jellyfish.IsoSurface(ghc.Jellyfish.ImplicitBox(bbox), 20, 0, True, 0)\nM = ghc.Jellyfish.MeshMeshCut(gyr[0], mesh_box[0], False)\nmesh_out = ghc.DeconstructMesh(M)\n\n\n\nHow can I convert DMesh3 to Rhino.Geometry.Mesh?\n\n\nThank you for your help!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nfrom Rhino.Geometry import *\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\n\ndom = ghc.ConstructDomain(0,1)\nbbox = Box(rs.WorldXYPlane(), dom, dom, dom)\ngyr = ghc.Jellyfish.IsoSurface(ghc.Jellyfish.Gyroid(bbox, 1, 1, 1), 20, 0.00, True, 0)\nmesh_box = ghc.Jellyfish.IsoSurface(ghc.Jellyfish.ImplicitBox(bbox), 20, 0, True, 0)\nM = ghc.Jellyfish.MeshMeshCut(gyr[0], mesh_box[0], False)\nmesh_out = ghc.DeconstructMesh(M)",
+      "language": "python",
+      "author": "Marcel_Gort",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 1,
+  "views": 392
+}

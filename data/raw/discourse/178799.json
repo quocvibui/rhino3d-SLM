@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-editor-question/178799",
+  "topic_id": 178799,
+  "title": "Rhino Python Editor Question",
+  "question": "Slowly picking up RhinoPython, like again…Really appreciate for the help!\n\nit is a basic question while trying to read the McNeel tutorial, about the “Conditional Evaluation - if”:\n\n\nimport rhinoscriptsyntax as rs\n\nsomenumber = rs.GetReal(“Line length”)\n\nline = rs.AddLine( (0,0,0), (somenumber,0,0) )\n\nif line is None:\n\nprint(“Something went wrong”)\n\nelse:\n\nprint(“Line curve inserted with id”, line)\n\n\nQuestion: if I type in “0”, it will stop immediately after line 3 with the traceback “Unable to add line to document”,\n\n\nASK:\n\nIs there a way for me to bypass this “null” data, and keep going to the “if” statement.\n\n\nThank you very much!\n\nCheers,\n\nRan",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsomenumber = rs.GetReal(\"Line length\")\n\np0 = rs.Rhino.Geometry.Point3d (0,0,0)\np1 = rs.Rhino.Geometry.Point3d (somenumber,0,0)\nline_temp = rs.Rhino.Geometry.Line(p0, p1)\n#line = rs.AddLine( (0,0,0), (somenumber,0,0) )\n\n\nif line_temp.IsValid:\n    line = rs.Rhino.RhinoDoc.ActiveDoc.Objects.AddLine(line_temp)\n    print(\"Line curve inserted with id\", line)\nelse:\n    print(\"Something went wrong\")",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsomenumber = rs.GetReal(\"Line length\")\n\nif somenumber !=  0:\n    line = rs.AddLine( (0,0,0), (somenumber,0,0) )\n    print(\"Line curve inserted with id\", line)\nelse:    \n    print(\"Something went wrong\")",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 2\n\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    tolerance = rs.UnitAbsoluteTolerance()\n    somenumber = rs.GetReal(\"Line length\", 10, minimum=tolerance)\n    \n    if somenumber is not None:\n        print \"You entered: {}\".format(somenumber)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 226
+}

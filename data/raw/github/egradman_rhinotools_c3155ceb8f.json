@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/egradman/rhinotools/blob/db6e79170674b887c00ad096eba3ba834382a98d/getsubsurface.py",
+  "repo": "egradman/rhinotools",
+  "repo_stars": 23,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "getsubsurface.py",
+  "instruction": "Getsubsurface",
+  "code": "import Rhino\nimport System.Guid\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef GetSubSurface(prompt=\"select subsurface\"):\n  # get a surface of an object\n  go=Rhino.Input.Custom.GetObject()\n  go.GeometryFilter=Rhino.DocObjects.ObjectType.Surface\n  go.SetCommandPrompt(prompt)\n  go.Get()\n  objref = go.Object(0)\n  polysurface = objref.ObjectId\n  go.Dispose()\n\n  brep = objref.Face().DuplicateFace(True)\n  guid = scriptcontext.doc.Objects.AddBrep(brep)\n\n  if (guid != System.Guid.Empty):\n    rc = Rhino.Commands.Result.Success\n    scriptcontext.doc.Views.Redraw()\n  return polysurface, guid\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

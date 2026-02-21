@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/deswaks/space-invader/blob/94e00bff3b5371cfa6999f381461af9af6e0b0ba/ghpython%20component%20source%20code/extend_curve_to_curve.py",
+  "repo": "deswaks/space-invader",
+  "repo_stars": 0,
+  "repo_description": "Tools for locating and reconstructing analytical building spaces with Rhino Grasshopper",
+  "license": "MIT",
+  "filepath": "ghpython component source code/extend_curve_to_curve.py",
+  "instruction": "Extends curves until they hit another curve if there is one within\nthe distance threshold\nInputs:\n    C   Wall curves\n    t   Distance threshold\nOutputs:\n    C  Wall curves",
+  "code": "\"\"\" Extends curves until they hit another curve if there is one within\nthe distance threshold\nInputs:\n    C   Wall curves\n    t   Distance threshold\nOutputs:\n    C  Wall curves\n\"\"\"\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as gh\nimport ghpythonlib.treehelpers as ght\nfrom Grasshopper import DataTree\nfrom Grasshopper.Kernel.Data import GH_Path\n\nEPS = 1e-1\n\n\ndef extend_to_collision(curve, obstacles):\n    extensions = []\n    if curve.IsPolyline():\n        #Start point ray\n        pnt0 = curve.PointAtStart\n        tan0 = curve.TangentAtStart\n        tan0.Reverse()\n        ray0 = rg.Line(pnt0, tan0, 1)\n        _, dist0, i0 = gh.IsoVistRay(ray0, t, obstacles)\n        if i0 != -1:\n#            print(pnt0, tan0, ray0, dist0)\n            extensions.append(rg.LineCurve(rg.Line(pnt0, tan0, dist0)))\n        \n        #End Point ray\n        pnt1 = curve.PointAtEnd\n        tan1 = curve.TangentAtEnd\n        ray1 = rg.Line(pnt1, tan1, 1)\n        _, dist1, i1 = gh.IsoVistRay(ray1, t, obstacles)\n        if i1 != -1:\n            print(pnt1, tan1, ray1, dist1)\n            print(obstacles)\n            extensions.append(rg.LineCurve(rg.Line(pnt1, tan1, dist1)))\n    return extensions\n\n\ndef clean_obstacles(curve, other_curves):\n    oc = []\n    for other_curve in other_curves:\n        distances = [gh.Distance(curve.PointAtStart, other_curve.PointAtStart),\n                     gh.Distance(curve.PointAtStart, other_curve.PointAtEnd),\n                     gh.Distance(curve.PointAtEnd, other_curve.PointAtStart),\n                     gh.Distance(curve.PointAtEnd, other_curve.PointAtEnd)]\n        close = [True if d<=EPS else False for d in distances]\n        if not any(close):\n            oc.append(other_curve)\n    return oc\n\nC.Flatten()\ncurves = ght.tree_to_list(C)\nall_extensions = []\nfor i, curve in enumerate(curves):\n    obstacles = clean_obstacles(curve, curves)\n    print(i, len(obstacles),\"/\",len(curves))\n    curve_extensions = extend_to_collision(curve, obstacles)\n    all_extensions.extend(curve_extensions)\ncurves.extend(all_extensions)\n\nC = ght.list_to_tree(curves)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

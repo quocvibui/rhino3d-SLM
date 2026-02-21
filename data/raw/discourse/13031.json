@@ -1,0 +1,58 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/solidpton-edit-weird-results/13031",
+  "topic_id": 13031,
+  "title": "SolidPtOn edit weird results",
+  "question": "If I edit the left shape using solidpton, I get a very weird shape like the one on the right, or sometimes something else crazy.\ndirect edit weird.3dm\n (450.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax \n\nrectangle_pt = rhinoscriptsyntax.GetRectangle (mode=2, base_point=0, prompt1=None, prompt2=None, prompt3=None)\nrectangle_open = rhinoscriptsyntax.AddPolyline (rectangle_pt, replace_id=None)\n\nsegment1 = rhinoscriptsyntax.AddPolyline (rectangle_pt, replace_id=None)\nsegment_pt = [rhinoscriptsyntax.CurveStartPoint (segment1), rhinoscriptsyntax.CurveEndPoint (segment1)]\nsegment2 = rhinoscriptsyntax.AddPolyline (segment_pt, replace_id=None)\nrectangle = rhinoscriptsyntax.JoinCurves ( [segment1,segment2], delete_input=False, tolerance=None )\ncentroid = rhinoscriptsyntax.CurveAreaCentroid (rectangle)\n\n#pt=rhinoscriptsyntax.AddPoint(centroid[0])\ndistance = rhinoscriptsyntax.GetReal(message='Thickness', number=50, minimum=None, maximum=None)\n\n#rhinoscriptsyntax.GetReal ( message=\"Offset Distance\", number=0.03, minimum=None, maximum=None )\n\n\n\n#rectangle_offset = rhinoscriptsyntax.OffsetCurve ( rectangle, pt, distance) # problem is with offset curve\nplane = rhinoscriptsyntax.CurvePlane(rectangle)\npoint = rhinoscriptsyntax.XformCPlaneToWorld([10000,10000,0], plane)\ncrv_1 = rhinoscriptsyntax.OffsetCurve(rectangle, point, distance, plane.ZAxis)\nac = rhinoscriptsyntax.CurveAreaCentroid(rectangle)\ncrv_2 = rhinoscriptsyntax.OffsetCurve(rectangle, ac[0], distance, plane.ZAxis)\n\n\n\ncurves = [rectangle, crv_2]\nplanar_surface = rhinoscriptsyntax.AddPlanarSrf (curves)\n\n\n\n\n#rhinoscriptsyntax.GetReal ( message=\"Offset Distance\", number=0.06, minimum=None, maximum=None )\nprint planar_surface\n\nOffsetsurface = rhinoscriptsyntax.OffsetSurface (planar_surface, distance, tolerance=0.0, both_sides=False, create_solid=True)\n\nprint Offsetsurface\n\ndelete_objects = [rectangle_open, segment1, segment2, rectangle, crv_1, crv_2, planar_surface]\n\nrhinoscriptsyntax.DeleteObjects (delete_objects)",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs \n\n#encapsulate the script as a definition to allow graceful exit if aborted\ndef MakeFrame():\n    r_pts=rs.GetRectangle(2)\n    if not r_pts: return\n    #create polyline - to close, the last point has to be same as first point\n    rectangle=rs.AddPolyline([r_pts[0],r_pts[1],r_pts[2],r_pts[3],r_pts[0]])\n    #tolerance is just to define a minumum input >0 in this case\n    tol=rs.UnitAbsoluteTolerance()\n    #get thickness value\n    thk=rs.GetReal('Thickness',50,minimum=tol)\n    if thk is None: return\n    #get depth value\n    depth=rs.GetReal('Depth',50,minimum=tol)\n    if depth is None: return\n    \n    #create list of stuff to delete - put rectangle in list already\n    to_delete=[rectangle]\n    #cut the redraw\n    \n    rs.EnableRedraw(False)\n    centroid=rs.CurveAreaCentroid(rectangle)[0]\n    plane=rs.CurvePlane(rectangle)\n    \n    #make the offset curve\n    offsets=rs.OffsetCurve(rectangle,centroid,thk,plane.ZAxis)\n    #offsets is a list because it could contain multiple curves\n    #in this case we know there will be only one so offsets[0] is what we want\n    to_delete.append(offsets[0])\n    \n    #make planar surface from orignal frame and offset\n    p_srfs=rs.AddPlanarSrf([rectangle,offsets[0]])\n    #p_srfs is a list, as the function could return multiple surfaces\n    #in this case, there will be only one, so p_srfs[0] will be what we need\n    to_delete.append(p_srfs[0])\n    \n    #we need a line for the extrusion\n    #trick: multiplying a unit vector by a value makes its lenth that value\n    #trick: adding a vector to a point creates a new point,\n    # located at the vector's length and direction from the orig point.\n    # it's minus because we want to extrude in the -Z direction\n    depth_crv=rs.AddLine(r_pts[0],r_pts[0]-plane.ZAxis*depth)\n    to_delete.append(depth_crv)\n    \n    #extrude the surface to make the 3D frame\n    frame=rs.ExtrudeSurface(p_srfs[0],depth_crv,True)\n    #delete unneeded objects\n    rs.DeleteObjects(to_delete)\nMakeFrame()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Going to use some RhinoCommon to avoid adding the construction elements\nto the document during the process ad then having to delete them after.\"\"\"\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n#encapsulate the script as a definition to allow graceful exit if aborted\ndef MakeFrame():\n    rpts=rs.GetRectangle(2)\n    if not rpts: return\n    #create polyline - to close last point has to be same as first point\n    rect=Rhino.Geometry.PolylineCurve([rpts[0],rpts[1],rpts[2],rpts[3],rpts[0]])\n    #note - this defines the polyline curve, but does not add it to the document\n    \n    tol=rs.UnitAbsoluteTolerance()\n    #get thickness value\n    thk=rs.GetReal('Thickness',50,minimum=tol)\n    if thk is None: return\n    #get depth value\n    depth=rs.GetReal('Depth',50,minimum=tol)\n    if depth is None: return\n    \n    #trick - you can add, subtract, multiply and divide points\n    #trick - averaging 2 opposite corner points of a rectangle gets its centroid\n    centroid=(rpts[0]+rpts[2])/2\n    \n    plane=rs.CurvePlane(rect)\n    #define the offset corner style\n    cs=Rhino.Geometry.CurveOffsetCornerStyle.Sharp\n    #make the offset curve\n    offsets=rect.Offset(centroid,plane.ZAxis,thk,tol,cs)\n    #offsets is a list because it could contain multiple curves\n    #in this case we know there will be only one so offsets[0] is what we want\n    \n    #make planar surface from orignal frame and offset\n    p_srfs=Rhino.Geometry.Brep.CreatePlanarBreps([rect,offsets[0]])\n    #p_srfs is a list, as the function could return multiple surfaces\n    #in this case, there will be only one, so p_srfs[0] will be what we need\n\n    #we need a line curve object for the extrusion\n    #trick: multiplying a unit vector by a value makes its lenth that value\n    #trick: adding a vector to a point creates a new point,\n    # located at the vector's length and direction from the orig point.\n    # it's minus because we want to extrude in the -Z direction\n    depth_crv=Rhino.Geometry.LineCurve(rpts[0],rpts[0]-plane.ZAxis*depth)\n\n    #extrude the surface to make the 3D frame\n    frame=p_srfs[0].Faces[0].CreateExtrusion(depth_crv,True)\n    \n    #finally, just need to add the frame to the document\n    #don't need to delete anything because nothing was created in the process\n    \n    sc.doc.Objects.AddBrep(frame)\n    #redraw the scene to see what was done\n    sc.doc.Views.Redraw()\n\nMakeFrame()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "#Replace all Z coordinates of a polyline with the Z of start point)\nimport rhinoscriptsyntax as rs\n\ncurves = rs.GetObjects(message=None, filter=4, group=True, preselect=True, select=False, objects=None, minimum_count=1, maximum_count=0, custom_filter=None) \n\nfor curve in curves:\n    points = rs.CurvePoints(curve)\n    startpoint = points[0]\n    startpointZ = startpoint[2]\n    curves_explode = rs.ExplodeCurves (curve)\n    newsegments =[]\n    \n    for curve_explode in curves_explode:\n        \n        points = rs.CurveEditPoints(curve_explode)\n        new_crv_points=[]\n        \n\n        for point in points:\n            newpoint = point[0],point[1],startpoint[2]\n            new_crv_points.append(newpoint) \n            \n        if rs.IsArc(curve_explode):\n            arcmidpoint = rs.ArcMidPoint(curve_explode)\n            arcstart = rs.CurveStartPoint(curve_explode)\n            arcend = rs.CurveEndPoint(curve_explode)\n            \n            newarc = rs.AddArc3Pt(arcstart, arcend, arcmidpoint)\n            newsegments.append(newarc)\n        else:\n            newpoly = rs.AddPolyline(new_crv_points)\n            newsegments.append(newpoly)\n            \n    rs.JoinCurves(newsegments,delete_input=True)\n    rs.DeleteObjects(curves_explode)\n    \n    \n    #print startpointZ\nrs.DeleteObjects(curves)",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 24,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Flatten curves to  a plane parallel to World XY going thru the Z coordinate\nof the curves' start point\"\"\"\nimport rhinoscriptsyntax as rs\n\ndef PlanarizeCrvsInZ():\n    msg=\"Select curves to planarize in Z\"\n    crvs = rs.GetObjects(msg,4,True,True)\n    if not crvs: return\n    rs.EnableRedraw(False)\n    for crv in crvs:\n        plane=rs.WorldXYPlane()\n        plane.Origin=rs.CurveStartPoint(crv)\n        xform=rs.XformPlanarProjection(plane)\n        rs.TransformObject(crv,xform)\nPlanarizeCrvsInZ()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 25,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 32,
+  "views": 1624
+}

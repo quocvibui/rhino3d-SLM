@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Gaspard-Bourgeois/rhino-picksoul/blob/9431b8335b62d43ec3539852d1a1af603f0ce1c5/dev/selection/selectPrev.py",
+  "repo": "Gaspard-Bourgeois/rhino-picksoul",
+  "repo_stars": 1,
+  "repo_description": "Generic plugin to manage blocs, materials and trajectories in rhino.",
+  "license": "Apache-2.0",
+  "filepath": "dev/selection/selectPrev.py",
+  "instruction": "Author: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 05/01/26",
+  "code": "\"\"\"\nAuthor: Gaspard BOURGEOIS <gaspard.github.io@free.fr>\nVersion: 1.0\nDate: 05/01/26\n\"\"\"\nimport rhinoscriptsyntax as rs\nimport re\n\ndef select_previous_elements():\n    # Récupérer les objets actuellement sélectionnés\n    selected_objects = rs.GetObjects(\"Sélectionnez les éléments actuels\", preselect=True)\n    \n    if not selected_objects:\n        print(\"Aucune sélection active.\")\n        return\n\n    prev_objects_to_select = []\n    \n    rs.UnselectAllObjects()\n\n    for obj_id in selected_objects:\n        obj_name = rs.ObjectName(obj_id)\n        obj_layer = rs.ObjectLayer(obj_id)\n        \n        if not obj_name:\n            continue\n\n        # --- CAS 1 : POSE (Nommé \"3\", \"4\"...) ---\n        if obj_name.isdigit():\n            target_idx = \"{:04d}\".format(int(obj_name) - 1)\n            target_name = str(target_idx)\n            \n            layer_objs = rs.ObjectsByLayer(obj_layer)\n            if layer_objs:\n                for cand_id in layer_objs:\n                    if rs.ObjectName(cand_id) == target_name:\n                        prev_objects_to_select.append(cand_id)\n\n        # --- CAS 2 : COURBE (Nommé \"... X-Y\") ---\n        else:\n            match = re.search(r\"(\\d+)-(\\d+)$\", obj_name)\n            if match:\n                current_start = int(match.group(1))\n                \n                layer_objs = rs.ObjectsByLayer(obj_layer)\n                if layer_objs:\n                    for cand_id in layer_objs:\n                        cand_name = rs.ObjectName(cand_id)\n                        if cand_name and cand_name != obj_name:\n                            cand_match = re.search(r\"(\\d+)-(\\d+)$\", cand_name)\n                            if cand_match:\n                                # La fin du précédent doit être le début de l'actuel\n                                if int(cand_match.group(2)) == current_start:\n                                    prev_objects_to_select.append(cand_id)\n\n    if prev_objects_to_select:\n        rs.SelectObjects(prev_objects_to_select)\n        print(\"{} éléments précédents sélectionnés.\".format(len(prev_objects_to_select)))\n    else:\n        print(\"Aucun élément précédent trouvé.\")\n\nif __name__ == \"__main__\":\n    select_previous_elements()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

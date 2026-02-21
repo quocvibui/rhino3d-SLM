@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/access-texture-mappings-from-objects-inside-block-definitions/212982",
+  "topic_id": 212982,
+  "title": "Access Texture Mappings from Objects Inside Block Definitions",
+  "question": "Question:\n\n\nI’m developing a Rhino C++ plugin that saves and restores texture mappings for objects. The save/restore works perfectly for regular objects in the document, but I’m struggling to access texture mappings from objects inside block definitions.\n\n\nWhat Works:\n\n\n\n\n\n\nSaving/restoring texture mappings for regular objects using \nobj->Attributes().m_rendering_attributes.m_mappings\n\n\n\n\n\n\nFinding block instances that have an \nelementId\n user attribute\n\n\n\n\n\n\nGetting the block definition from the instance\n\n\n\n\n\n\nWhat Doesn’t Work:\n\n\n\n\nAccessing texture mapping data from objects inside block definitions\n\n\n\n\nApproaches Tried:\n\n\n1. Direct Access (Causes Crashes):\n\n\nconst CRhinoInstanceDefinition* idef = // ... get definition\nint obj_count = idef->ObjectCount();\n\nfor (int i = 0; i < obj_count; i++)\n{\n    const CRhinoObject* obj = idef->Object(i);\n    const ON_3dmObjectAttributes& attribs = obj->Attributes();\n    // Access violation when trying to read:\n    int mapping_count = attribs.m_rendering_attributes.m_mappings.Count();\n}\n\n\n\n\nThis crashes with an access violation at \nopennurbs_array_defs.h:1074\n - the internal \nm_mappings\n array appears to be in a corrupted/invalid state for objects inside block definitions.\n\n\n2. Block Edit Mode via Script (Commands Don’t Exist):\n\n\n// Select block instance\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"_SelId <uuid>\", 0);\n\n// Try to enter block edit mode - ALL FAIL with \"Unknown command\"\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"BlockEdit\", 0);\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"-BlockEdit\", 0); \nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"_BlockEdit\", 0);\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"EditBlockInPlace\", 0);\n\n\n\n\nAll variations return “Unknown command” in the Rhino command line.\n\n\nQuestion:\n What is the correct way to programmatically access texture mapping information from objects inside block definitions in the C++ SDK?\n\n\nSpecifically:\n\n\n\n\n\n\nIs there a C++ API method to ente...",
+  "code_blocks": [
+    {
+      "code": "// Select block instance\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"_SelId <uuid>\", 0);\n\n// Try to enter block edit mode - ALL FAIL with \"Unknown command\"\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"BlockEdit\", 0);\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"-BlockEdit\", 0); \nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"_BlockEdit\", 0);\nRhinoApp().RunScript(doc->RuntimeSerialNumber(), L\"EditBlockInPlace\", 0);",
+      "language": "csharp",
+      "author": "Alexis3",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "nurbs"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 79
+}

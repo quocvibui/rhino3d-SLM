@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/variable-offset-for-each-segment-of-a-polyline-curve/74648",
+  "topic_id": 74648,
+  "title": "Variable Offset for each segment of a polyline-curve",
+  "question": "Hey people,\n\n\nI have some troubles getting my mind around an offset-thing.\n\nI want to offset a polyline-curve with various distances for each segment.\n\nI came up with 2 methods which work in different cases, but none of them works in all of the tested inputs.\n\n\nIf anybody has an advice how to go on, I would pretty happy to hear from u \n\n\nvariableOffset.gh\n (16.6 KB)\n\n\ngreets\n\nMark",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(List<Curve> crv, List<double> offsets, ref object A)   {\n    List<Curve> res = new List<Curve>();\n\n    int i = 0;\n    int ofN = offsets.Count;\n\n    foreach (var c in crv){\n      var of = offsets[i % ofN];\n      var r = c.Offset(Plane.WorldXY, of, RhinoDoc.ActiveDoc.ModelAbsoluteTolerance, CurveOffsetCornerStyle.None);\n\n      var extend = Math.Abs(of * 10);\n      foreach (var cr in r){\n        var rr = cr.Extend(CurveEnd.Both, extend, CurveExtensionStyle.Arc);\n        res.Add(rr);\n      }\n      i++;\n    }\n\n    const double intersection_tolerance = 0.001;\n    const double overlap_tolerance = 0.0;\n\n    var resN = res.Count;\n    var resTrimA = new Interval[resN];\n    var resTrimB = new Interval[resN];\n\n    for (int k = 0; k < resN; k++){\n      var events = Rhino.Geometry.Intersect.Intersection.CurveCurve(res[k], res[(k + 1) % resN], intersection_tolerance, overlap_tolerance);\n\n      if (events.Count > 1){\n        Print(\"I don't know what to do here\");\n        return;\n      }\n      else {\n        var ccx_event = events[0];\n        var aI = new Interval(res[k].Domain.T1, ccx_event.ParameterA);\n        //aI.MakeIncreasing();\n        resTrimA[k] = aI;\n\n        var bI = new Interval(ccx_event.ParameterB, res[(k + 1) % resN].Domain.T0);\n        //bI.MakeIncreasing();\n        resTrimB[(k + 1) % resN] = bI;\n      }\n    }\n\n    for (int k = 0; k < resN; k++){\n      var aT = res[k].Trim(resTrimA[k]);\n      aT = aT.Trim(resTrimB[k]);\n      res[k] = aT;\n    }\n    A = res;\n  }",
+      "language": "csharp",
+      "author": "mark_ortler",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 16,
+  "views": 3552
+}

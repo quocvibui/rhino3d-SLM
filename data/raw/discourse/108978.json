@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-pointinplanarclosedcurve-vs-rg-curve-contains/108978",
+  "topic_id": 108978,
+  "title": "rs.PointInPlanarClosedCurve() vs rg.Curve.Contains()",
+  "question": "How can I get this script to run in Rhino common vs rhinoscriptsyntax?\n\n\nrs.PointInPlanarClosedCurve(pts[i],Curve)  returns True and False\n\n\nbut\n\n\nrg.Curve.Contains(curve, pts[i], plane, 0.001) returns “Inside” and “Outside”\n\n\nHow do I change the logic in this to make the Rhino.Geometry work?\n\nif boolean[i] == True:\n\nptIn.append(pts[i])\n\nif boolean[i] == False:\n\nptIn.append(pts[i])\n\n\nShould I be checking if “Inside” or “Outside” are in boolean first?\n\n\nI am using the ghPython node in grasshopper.\n\n\nimport Rhino\n\nimport random\n\n\npts = \n\nfor i in range(0,4):\n\npt = Rhino.Geometry.Point3d(random.uniform(0,10), random.uniform(0,10), 0)\n\npts.append(pt)\n\n\nboolean = \n\nptIn = \n\nptOut = \n\n\nfor i in range(len(pts)):\n\npt_in_or_not = Rhino.Geometry.Curve.Contains(curve, pts[i], plane, 0.001)\n\nboolean.append(pt_in_or_not)\n\n\n#Contains function returns \"Inside\" and \"Outside\" NOT True and False\n\nif boolean[i] == True:\n    ptIn.append(pts[i])\nif boolean[i] == False:\n    ptIn.append(pts[i])\n\n\n\nptIn_Out = ptIn\n\nptOut_Out = ptOut",
+  "code_blocks": [
+    {
+      "code": "def PointInPlanarClosedCurve(point, curve, plane=None, tolerance=None):\n    \"\"\"Determines if a point is inside of a closed curve, on a closed curve, or\n    outside of a closed curve\n    Parameters:\n      point (point|guid): text point\n      curve (guid): identifier of a curve object\n      plane (plane, optional): plane containing the closed curve and point. If omitted,\n          the currently active construction plane is used\n      tolerance (number, optional) it omitted, the document abosulte tolerance is used\n    Returns:\n      number: number identifying the result if successful\n              0 = point is outside of the curve\n              1 = point is inside of the curve\n              2 = point in on the curve\n    Example:\n      import rhinoscriptsyntax as rs\n      curve = rs.GetObject(\"Select a planar, closed curve\", rs.filter.curve)\n      if rs.IsCurveClosed(curve) and rs.IsCurvePlanar(curve):\n          point = rs.GetPoint(\"Pick a point\")\n          if point:\n              result = rs.PointInPlanarClosedCurve(point, curve)\n              if result==0: print \"The point is outside of the closed curve.\"\n              elif result==1: print \"The point is inside of the closed curve.\"\n              else: print \"The point is on the closed curve.\"\n    See Also:\n      PlanarClosedCurveContainment\n      PlanarCurveCollision\n    \"\"\"\n    point = rhutil.coerce3dpoint(point, True)\n    curve = rhutil.coercecurve(curve, -1, True)\n    if tolerance is None or tolerance<=0:\n        tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    if plane:\n        plane = rhutil.coerceplane(plane)\n    else:\n        plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    rc = curve.Contains(point, plane, tolerance)\n    if rc==Rhino.Geometry.PointContainment.Unset: raise Exception(\"Curve.Contains returned Unset\")\n    if rc==Rhino.Geometry.PointContainment.Outside: return 0\n    if rc==Rhino.Geometry.PointContainment.Inside: return 1\n    return 2",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "point = rhutil.coerce3dpoint(point, True)\n    curve = rhutil.coercecurve(curve, -1, True)\n    if tolerance is None or tolerance<=0:\n        tolerance = scriptcontext.doc.ModelAbsoluteTolerance\n    if plane:\n        plane = rhutil.coerceplane(plane)\n    else:\n        plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()\n    rc = curve.Contains(point, plane, tolerance)\n    if rc==Rhino.Geometry.PointContainment.Unset: raise Exception(\"Curve.Contains returned Unset\")\n    if rc==Rhino.Geometry.PointContainment.Outside: return 0\n    if rc==Rhino.Geometry.PointContainment.Inside: return 1\n    return 2",
+      "language": "python",
+      "author": "mwickerson",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport random\n\npts = []\nfor i in range(0,4):\n    pt = Rhino.Geometry.Point3d(random.uniform(0,10), random.uniform(0,10), 0)\n    pts.append(pt)\n    \nboolean = []\nptIn = []\nptOut = []",
+      "language": "python",
+      "author": "mwickerson",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 1266
+}

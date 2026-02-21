@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TheoArchi/EsquisSons/blob/00d1b02f7ce3e190b5c4c3429d3e84756c29bfdb/Components_Uncompiled_for%20ghpython/Built-in-Sound.py",
+  "repo": "TheoArchi/EsquisSons",
+  "repo_stars": 3,
+  "repo_description": "Esquissons is a grasshopper plugin which help you to design with sound ;)",
+  "license": "NOASSERTION",
+  "filepath": "Components_Uncompiled_for ghpython/Built-in-Sound.py",
+  "instruction": "EsquisSons Built-in Sounds provides some basic sounds to start your sketch\nUse a value list to visualize sound names\n-\nAAU / Theo Marchal / BETA VERSION / AVRIL2020",
+  "code": "\n\"\"\"EsquisSons Built-in Sounds provides some basic sounds to start your sketch\nUse a value list to visualize sound names\n-\nAAU / Theo Marchal / BETA VERSION / AVRIL2020\"\"\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n    \n    def RunScript(self, ValueList_gh):\n        \n        __author__ = \"theomarchal\"\n        self.Params.Input[0].Description = \"Connect here a ValueList component (from Grasshopper) and then select the sound you want to use\"\n        self.Params.Output[0].Description = \"Connect to the Source_Path input from the Source Component (EsquisSons)\"\n        self.Name = \"Built-in Sounds\"\n        self.NickName = \"Sounds\" \n        self.Message = \"EsquisSons V3\"\n        self.Category = \"EsquisSons\"\n        self.SubCategory = \"2/ Options\"\n        \n        \n        \n        import rhinoscriptsyntax as rs\n        import Grasshopper\n        import Grasshopper.Kernel as gh\n        \n        rem = gh.GH_RuntimeMessageLevel.Remark\n        ero = gh.GH_RuntimeMessageLevel.Error\n        war = gh.GH_RuntimeMessageLevel.Warning\n        \n        Source_Path = ValueList_gh\n        \n        Sourcelist = ['Bells','Birds','Fountain','Playground','Urban','talk','cherokee','FemVoice','BusyAvenue','rainstick','duduk','anton','vibes-a1']\n        ghdoc2 = self.OnPingDocument()\n        if ValueList_gh is None :\n            self.AddRuntimeMessage(war, 'You must connect a value list to choose from the built-in sounds')\n        \n        vallistitems = []\n        valuelist = None\n        for obj in ghdoc2.ActiveObjects():\n        \tif self.DependsOn(obj):\n        \t\ttry:\n        \t\t\tvallistitems = obj.ListItems\n        \t\t\tvaluelist = obj\n        \t\texcept:\n        \t\t\tpass\n        \n        if valuelist is not None:\n        \tlistnames = []\n        \tfor vitem in vallistitems:\n        \t\tlistnames.append(vitem.Name)\n        \tif set(listnames) != set(Sourcelist):\n        \t\tvallistitems.Clear()\n        \t\tfor n in Sourcelist:\n        \t\t\ttry: \n        \t\t\t\tint(n)\n        \t\t\t\trhs = n\n        \t\t\texcept ValueError:\n        \t\t\t\trhs = '\"{}\"'.format(n)\n        \t\t\tvallistitems.Add(Grasshopper.Kernel.Special.GH_ValueListItem(n, rhs))\n        \t\tvaluelist.SelectItem(1)\n        \t\tvaluelist.Attributes.ExpireLayout()\n        \t\tvaluelist.Attributes.PerformLayout()\n        return Source_Path\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

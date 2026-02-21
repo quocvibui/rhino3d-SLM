@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ESteelEx/gcode2cutsim/blob/95aa5678ec3848954cd855838198d3c5a8802a51/RhinoInterface/importSTL.py",
+  "repo": "ESteelEx/gcode2cutsim",
+  "repo_stars": 2,
+  "repo_description": "- gcode 2 cutsim code for 3D Simulation with Verifier Engine",
+  "license": "unknown",
+  "filepath": "RhinoInterface/importSTL.py",
+  "instruction": "Import stl",
+  "code": "try:\n    import rhinoscriptsyntax as rs\nexcept:\n    pass\n\n_BEDCENTER = [125, 110, 0]\n\nrs.UnselectAllObjects()\nobjects = rs.OpenFileNames(title='Enter or select STL', filter='STL|*.stl', extension='stl')\n\nfor objSTL in objects:\n    print objSTL\n    if objSTL is not None:\n        objSTL = '\"' + objSTL + '\"'\n        rs.Command(r'-_Import ' + objSTL + ' _Enter')\n        meshName = objSTL.split('\\\\')\n        obj = rs.SelectedObjects()\n\n        if len(obj) != 0:\n            centroid = rs.MeshVolumeCentroid(obj)\n            rs.AddLayer(name=meshName[-1].split('.')[0])\n            rs.ObjectLayer(obj, layer=meshName[-1].split('.')[0])\n            if centroid:\n                vector = rs.VectorCreate(_BEDCENTER, centroid)\n                rs.MoveObject(obj, vector)\n                BB = rs.BoundingBox(obj)\n                rs.MoveObject(obj, [0, 0, -BB[0][2]])\n                rs.UnselectAllObjects()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

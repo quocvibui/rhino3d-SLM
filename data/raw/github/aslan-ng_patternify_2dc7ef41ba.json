@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/aslan-ng/patternify/blob/1e08b60f915b1bed01f9f7e0e1c1f6a4de008b75/external%20support/rhinoceros/script_linear.py",
+  "repo": "aslan-ng/patternify",
+  "repo_stars": 4,
+  "repo_description": "Converting images to beautiful vector-based patterns, useful for 2D and 3D design",
+  "license": "MIT",
+  "filepath": "external support/rhinoceros/script_linear.py",
+  "instruction": "Import points from a text file",
+  "code": "# Import points from a text file\nimport rhinoscriptsyntax as rs\n\ndef ImportPoints():\n    #prompt the user for a file to import\n    filter = \"Text file (*.txt)|*.txt|All Files (*.*)|*.*||\"\n    filename = rs.OpenFileName(\"Open Point File\", filter)\n    if not filename: return\n\n    #read each line from the file\n    file = open(filename, \"r\")\n    contents = file.readlines()\n    file.close()\n\n    # local helper function    \n    def __point_from_string(text):\n        items = text.strip(\"()\\n\").split(\",\")\n        x = float(items[0])\n        y = float(items[1])\n        z = float(items[2])\n        return x, y, z\n    \n    row_contents = list()\n    for line in contents:\n        if line != \"&\\n\":\n            row_contents.append(__point_from_string(line))\n        else:\n            #rs.AddInterpCurve(row_contents)\n            rs.AddCurve(row_contents)\n            row_contents = list()\n\n\n##########################################################################\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    ImportPoints()",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

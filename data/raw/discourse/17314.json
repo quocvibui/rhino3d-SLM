@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/events-vs-classes-to-be-overridden-your-preference-in-rhinocommon/17314",
+  "topic_id": 17314,
+  "title": "Events vs Classes to be overridden: your preference in RhinoCommon?",
+  "question": "Hi all\n\n\n@stevebaer\n recently had a go at adding new virtual methods to Rhino.UI.MouseCallback (\nmore info\n).\n\n\nHe considered adding this as .Net events and we ended up having a conversation about pros and cons of exposing an event-based SDK. In RhinoCommon, we already have some places that expose an event-based pattern, and some other places that show derived classes.\n\n\nExamples are, for the \nevents\n side:\n\n\n\n\nRhinoApp.Idle, RhinoApp.Initialized\n\n\nDisplayPipeline.CalculateBoundingBox, DisplayPipeline.DrawXXX\n\n\n\n\nOn the \noverride\n side, today we have at least these two classes:\n\n\n\n\nRhino.UI.MouseCallback\n\n\nRhino.Display.DisplayConduit\n\n\n\n\nSo, do you, as a user of these classes, have preferences for a pattern over the other? Do you think McNeel should standardize on a specific pattern, maybe for consistency or for usability?\n\n\nThanks for your opinion,\n\n\nGiulio\n\n\nGiulio Piacentino\n\nfor Robert McNeel & Associates\n\n\ngiulio@mcneel.com",
+  "code_blocks": [
+    {
+      "code": "Imports Rhino.Display\nImports Rhino.Geometry\nImports System.Drawing\nImports Rhino\n\nPublic Class PatchConduitLeft\n\n    Inherits DisplayConduit\n\n    Private _bbox As BoundingBox\n\n    Protected Overrides Sub CalculateBoundingBox(ByVal e As CalculateBoundingBoxEventArgs)\n        MyBase.CalculateBoundingBox(e)\n        e.BoundingBox.Union(_bbox)\n    End Sub\n\n    Public Sub New()\n                _bbox = Brep.GetBoundingBox(True)\n    End Sub\n\n    Protected Overrides Sub PostDrawObjects(ByVal e As DrawEventArgs)\n            e.Display.PushCullFaceMode(CullFaceMode.DrawFrontAndBack)\n            MyBase.PostDrawObjects(e)\n            Dim vp = e.Display.Viewport\n            e.Display.EnableLighting(True)\n            e.Display.DrawBrepShaded(Brep, Mat)\n        End If\n    End Sub\n\nEnd Class",
+      "language": "csharp",
+      "author": "jordy1989",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "AddHandler Rhino.Commands.Command.BeginCommand, AddressOf StartOfCommand\nAddHandler Rhino.Commands.Command.EndCommand, AddressOf EndOfCommand\nAddHandler Rhino.RhinoDoc.CloseDocument, AddressOf InterceptRhinoClose\nAddHandler Rhino.RhinoDoc.BeginSaveDocument, AddressOf BeforeRhinoCloses\nAddHandler Rhino.Commands.Command.UndoRedo, AddressOf UndoRedoCommand",
+      "language": "unknown",
+      "author": "jordy1989",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 7,
+  "views": 1482
+}

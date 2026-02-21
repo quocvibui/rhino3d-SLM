@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/transferring-namedview-to-a-different-model-with-a-different-unit-system/211367",
+  "topic_id": 211367,
+  "title": "Transferring NamedView to a different model with a different unit system",
+  "question": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef scale_named_views(scale_factor=0.001):\n    \"\"\"\n    Scale all named view parameters by a given factor.\n    Used when converting model units (e.g., mm to meters).\n    \n    Args:\n        scale_factor: Factor to scale view parameters (default: 0.001 for mm to m)\n    \"\"\"\n    \n    # Get all named views from the document\n    named_views = sc.doc.NamedViews\n    \n    if named_views.Count == 0:\n        print(\"No named views found in the document.\")\n        return\n    \n    print(\"Scaling {} named views by factor {}...\".format(named_views.Count, scale_factor))\n    \n    # Store view info before modifying\n    views_to_update = []\n    \n    # Collect all views first\n    for i in range(named_views.Count):\n        view = named_views[i]\n        old_viewport = view.Viewport\n        \n        print(\"  Processing: {}\".format(view.Name))\n        \n        # Get current camera location and target\n        camera_location = old_viewport.CameraLocation\n        camera_target = old_viewport.TargetPoint\n        camera_up = old_viewport.CameraUp\n        \n        # Scale location and target\n        scaled_location = camera_location * scale_factor\n        scaled_target = camera_target * scale_factor\n        \n        # Create new viewport with scaled values\n        new_viewport = Rhino.DocObjects.ViewportInfo(old_viewport)\n        new_viewport.SetCameraLocation(scaled_location)\n        new_viewport.TargetPoint = scaled_target\n        new_viewport.SetCameraUp(Rhino.Geometry.Vector3d.ZAxis)\n        \n        views_to_update.append((view.Name, new_viewport, camera_location, scaled_location, camera_target, scaled_target))\n    \n    # Now delete old views and add new ones\n    for name, new_viewport, old_loc, new_loc, old_target, new_target in views_to_update:\n        # Delete the old named view\n#        named_views.Delete(name)\n        \n        # Add the new one with the same name\n        named_views.Add(name+\"_revised\", new_viewport...",
+  "code_blocks": [
+    {
+      "code": "#! python3\nimport Rhino\nimport scriptcontext as sc\n\ndef Test():\n    for named_view in sc.doc.NamedViews:\n        named_view.Name = named_view.Name + \"_Copy\"\n        sc.doc.NamedViews.Add(named_view)\n    \nif __name__ == '__main__':\n    Test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef scale_named_views(scale_factor=0.001):\n    \n    for named_view in sc.doc.NamedViews:\n        old_viewport = named_view.Viewport\n        camera_location = old_viewport.CameraLocation\n        camera_target = old_viewport.TargetPoint\n        camera_up = old_viewport.CameraUp\n        \n        scaled_location = camera_location * scale_factor\n        scaled_target = camera_target * scale_factor\n        \n        named_view.Name = named_view.Name + \"_Copy\"\n        \n        named_view.Viewport.SetCameraLocation(scaled_location)\n        named_view.Viewport.TargetPoint = scaled_target\n        named_view.Viewport.SetCameraUp(Rhino.Geometry.Vector3d.ZAxis)\n        named_view.Viewport.SetCameraLocation(scaled_location)\n\n        sc.doc.NamedViews.Add(named_view)\n\n# Run the function\nif __name__ == \"__main__\":\n    scale_named_views(0.001)",
+      "language": "python",
+      "author": "Wiley",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef scale_named_views(scale_factor=0.001):\n    \"\"\"\n    Scale all named view parameters by a given factor.\n    Used when converting model units (e.g., mm to meters).\n    \n    Args:\n        scale_factor: Factor to scale view parameters (default: 0.001 for mm to m)\n    \"\"\"\n    \n    # Get all named views from the document\n    named_views = sc.doc.NamedViews\n    \n    if named_views.Count == 0:\n        print(\"No named views found in the document.\")\n        return\n    \n    print(\"Scaling {} named views by factor {}...\".format(named_views.Count, scale_factor))\n    \n    # Store view info before modifying\n    views_to_update = []\n    \n    # Collect all views first\n    for i in range(named_views.Count):\n        view = named_views[i]\n        old_viewport = view.Viewport\n        \n        print(\"  Processing: {}\".format(view.Name))\n        \n        # Get current camera location and target\n        camera_location = old_viewport.CameraLocation\n        camera_target = old_viewport.TargetPoint\n        camera_up = old_viewport.CameraUp\n        \n        # Scale location and target\n        scaled_location = camera_location * scale_factor\n        scaled_target = camera_target * scale_factor\n        \n        # Create new viewport with scaled values\n        new_viewport = Rhino.DocObjects.ViewportInfo(old_viewport)\n        new_viewport.SetCameraLocation(scaled_location)\n        new_viewport.TargetPoint = scaled_target\n        new_viewport.SetCameraUp(Rhino.Geometry.Vector3d.ZAxis)\n        \n        views_to_update.append((view.Name, new_viewport, camera_location, scaled_location, camera_target, scaled_target))\n    \n    # Now delete old views and add new ones\n    for name, new_viewport, old_loc, new_loc, old_target, new_target in views_to_update:\n        # Delete the old named view\n#        named_views.Delete(name)\n        \n        # Add the new one with the same name\n        named_views.Add(name+\"_revised\", new_viewport.Id)\n        \n        print(\"    Updated: {}\".format(name))\n        print(\"    Camera location: {} -> {}\".format(old_loc, new_loc))\n        print(\"    Camera target: {} -> {}\".format(old_target, new_target))\n    \n    print(\"\\nDone! Scaled {} named views.\".format(len(views_to_update)))\n    sc.doc.Views.Redraw()\n\n# Run the function\nif __name__ == \"__main__\":\n    scale_named_views(0.001)",
+      "language": "python",
+      "author": "Wiley",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 79
+}

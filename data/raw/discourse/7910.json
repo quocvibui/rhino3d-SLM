@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-rhinoscriptsyntax-layer-sublayer-related-issues/7910",
+  "topic_id": 7910,
+  "title": "Python/Rhinoscriptsyntax layer/sublayer-related \"issues\"",
+  "question": "Issue \n#1:\n\n\nWith a new blank file containing just one layer “Default”…\n\n\nIn vb Rhinoscript, run the following code:\n\n\nOption Explicit\nCall TestAddSubLayer()\nSub TestAddSubLayer()\n    Call Rhino.AddLayer(\"Default::NewLayer\")\nEnd Sub\n\n\n\nThe layer NewLayer is added as a sublayer of Default.\n\n\nNow, do the same thing with Python rhinoscriptsyntax (start with a new file):\n\n\nimport rhinoscriptsyntax as rs\nrs.AddLayer(\"Default::NewLayer\")\n\n\n\nA new top-level layer is added with the name Default::NewLayer…  \nNot\n how it’s supposed to work IMO…\n\n\nIssue \n#2:\n\n\nIn the file created in the first step above - with a Top layer “Default” and a sublayer “NewLayer” - put one object (anything) on the sublayer “NewLayer”\n\n\nIn vb rhinoscript run the following and choose the object:\n\n\nOption Explicit\nCall TestGetObjectLayer()\nSub TestGetObjectLayer()\n    Dim obj : obj = Rhino.GetObject()\n    Call Rhino.Print(Rhino.ObjectLayer(obj))\nEnd Sub\n\n\n\nReturns:  Default::NewLayer\n\n\nNow, run the Python equivalent and do the same:\n\n\nimport rhinoscriptsyntax as rs\nobj = rs.GetObject()\nprint rs.ObjectLayer(obj)\n\n\n\nReturns:  NewLayer\n\n\nThese sublayer issues are driving me nuts - making it very hard to script layer operations with sublayers in python rhinoscript syntax…\n\n\nIMO, all rhinoscriptsyntax methods need to return the full layer path.  Also, for both vb and python, optional arguments to return the layer ID instead of the name would be good.\n\n\nThanks,\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef TurnSubLayersOff():\n    layers = rs.LayerNames()\n    if layers:\n        for layer in layers:\n            parent = rs.ParentLayer(layer)\n            if parent:\n                if rs.IsLayerChildOf(parent, layer):\n                    if not rs.IsLayerCurrent(layer):\n                        rs.LayerVisible(layer, False)\n\nif __name__ == \"__main__\":     \n    TurnSubLayersOff()",
+      "language": "python",
+      "author": "DanBayn",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\nCall TestGetObjectLayer()\nSub TestGetObjectLayer()\n    Dim obj : obj = Rhino.GetObject()\n    Call Rhino.Print(Rhino.ObjectLayer(obj))\nEnd Sub",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nobj = rs.GetObject()\nprint rs.ObjectLayer(obj)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 3530
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/overloading-beziercurve-constructor-in-ghpython/169052",
+  "topic_id": 169052,
+  "title": "Overloading BezierCurve constructor in ghpython?",
+  "question": "I’m new to Rhino and Grasshopper, and exploring to see what I’ll run into if I try to use grasshopper to create a garment pattern draft.\n\n\nI’m using the rhinocommon python api, and hit the ambiguous .NET overloading behavior when I try to create a Bezier curve. The bezier constructor signatures seem to have only the Point2d/3d/4d enumerables, and no further type info. But I get an error\n\n\nexpected type, got <whatever list type I insert for point params>\n\n\nThe constructor doc says it takes controlPoints, so I went fishing for other likely data types, but if I add another descriptor to the signature, it won’t match.\n\n\nTest case code below, normal call commented out, error messages included as comments. I tried a few list flavors, just for grins, but it knows what list type I’m feeding it, so that’s not the problem.\n\n\nPretty sure I’m missing something obvious. Hints?\n\n\nThanks!\n\n\nimport Rhino\nimport System.Collections.Generic.IEnumerable as IEnumerable\nfrom System.Collections.Generic import List\n\n# hard-coded test points\npoint_1 = Rhino.Geometry.Point3d(3.25,19.25,0)\npoint_2 = Rhino.Geometry.Point3d(2.01256313292354,17.2374368670765,0)\npoint_3 = Rhino.Geometry.Point3d(0,16,0)\n\n# list\nvanilla_python_list = [point_1, point_2, point_3]\n\n# Point3dList\nrhino_point3dlist = Rhino.Collections.Point3dList(point_1, point_2, point_3)\n\n# List[Point3d]\nyet_another_list = List[Rhino.Geometry.Point3d]([point_1, point_2, point_3])\n\n# plain_test_bezier = Rhino.Geometry.BezierCurve(vanilla_python_list)\n# Error: Runtime error (ArgumentTypeException): Multiple targets could match: BezierCurve(IEnumerable[Point2d]), BezierCurve(IEnumerable[Point3d]), BezierCurve(IEnumerable[Point4d])\n\noverload_test_bezier = Rhino.Geometry.BezierCurve.__new__.Overloads[IEnumerable[Rhino.Geometry.Point3d]](vanilla_python_list)\n#  Error: Runtime error (ArgumentTypeException): expected type, got list",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport System.Collections.Generic.IEnumerable as IEnumerable\nfrom System.Collections.Generic import List\n\n# hard-coded test points\npoint_1 = Rhino.Geometry.Point3d(3.25,19.25,0)\npoint_2 = Rhino.Geometry.Point3d(2.01256313292354,17.2374368670765,0)\npoint_3 = Rhino.Geometry.Point3d(0,16,0)\n\n# list\nvanilla_python_list = [point_1, point_2, point_3]\n\n# Point3dList\nrhino_point3dlist = Rhino.Collections.Point3dList(point_1, point_2, point_3)\n\n# List[Point3d]\nyet_another_list = List[Rhino.Geometry.Point3d]([point_1, point_2, point_3])\n\n# plain_test_bezier = Rhino.Geometry.BezierCurve(vanilla_python_list)\n# Error: Runtime error (ArgumentTypeException): Multiple targets could match: BezierCurve(IEnumerable[Point2d]), BezierCurve(IEnumerable[Point3d]), BezierCurve(IEnumerable[Point4d])\n\noverload_test_bezier = Rhino.Geometry.BezierCurve.__new__.Overloads[IEnumerable[Rhino.Geometry.Point3d]](vanilla_python_list)\n#  Error: Runtime error (ArgumentTypeException): expected type, got list",
+      "language": "python",
+      "author": "rlevine",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 268
+}

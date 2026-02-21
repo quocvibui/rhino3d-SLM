@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/run-grasshopper-file-in-rhinocommon/199593",
+  "topic_id": 199593,
+  "title": "Run Grasshopper file in Rhinocommon,",
+  "question": "I have a sample grasshopper file witch is attached\n\n\ntest1.gh\n (9.6 KB)\n\nI wrote this to load the file in the background, give it inputs and add the output to the RhinoDoc Or get the geometrybase.\n\n\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\nusing Grasshopper.Kernel;\nusing GH_IO.Serialization;\nusing Grasshopper.Kernel.Special;\nusing Grasshopper.Kernel.Types;\nusing System.Linq;\n\nnamespace GHP_test1\n{\n    public class GHP_testCommand : Command\n    {\n        public GHP_testCommand()\n        {\n            Instance = this;\n        }\n\n        public static GHP_testCommand Instance { get; private set; }\n        public override string EnglishName => \"GHP_testCommand\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            var ghDoc = new GH_Document();\n            string path = @\"D:\\BOND\\test\\GHP_test1\\test1.gh\";\n\n            GH_Archive archive = new GH_Archive();\n            if (!archive.ReadFromFile(path))\n            {\n                RhinoApp.WriteLine(\"Failed to load Grasshopper file.\");\n                return Result.Failure;\n            }\n\n            if (!archive.ExtractObject(ghDoc, \"Definition\"))\n            {\n                RhinoApp.WriteLine(\"Failed to extract Grasshopper definition.\");\n                return Result.Failure;\n            }\n\n            // Modify input values\n            foreach (var input in ghDoc.Objects.OfType<GH_ClusterInputHook>())\n            {\n                if (input.Name == \"Length\")\n                {\n                    input.ClearData(); // Clear existing data\n                    input.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), 0, new GH_Number(5.0));\n                }\n                else if (input.Name == \"Width\")\n                {\n                    input.ClearData(); // Clear existing data\n                    input.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), 0, new GH_Number(10.0));\n                }\n            }\n\n            // Solve the Grasshopper ...",
+  "code_blocks": [
+    {
+      "code": "using Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\nusing Grasshopper.Kernel;\nusing GH_IO.Serialization;\nusing Grasshopper.Kernel.Special;\nusing Grasshopper.Kernel.Types;\nusing System.Linq;\n\nnamespace GHP_test1\n{\n    public class GHP_testCommand : Command\n    {\n        public GHP_testCommand()\n        {\n            Instance = this;\n        }\n\n        public static GHP_testCommand Instance { get; private set; }\n        public override string EnglishName => \"GHP_testCommand\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            var ghDoc = new GH_Document();\n            string path = @\"D:\\BOND\\test\\GHP_test1\\test1.gh\";\n\n            GH_Archive archive = new GH_Archive();\n            if (!archive.ReadFromFile(path))\n            {\n                RhinoApp.WriteLine(\"Failed to load Grasshopper file.\");\n                return Result.Failure;\n            }\n\n            if (!archive.ExtractObject(ghDoc, \"Definition\"))\n            {\n                RhinoApp.WriteLine(\"Failed to extract Grasshopper definition.\");\n                return Result.Failure;\n            }\n\n            // Modify input values\n            foreach (var input in ghDoc.Objects.OfType<GH_ClusterInputHook>())\n            {\n                if (input.Name == \"Length\")\n                {\n                    input.ClearData(); // Clear existing data\n                    input.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), 0, new GH_Number(5.0));\n                }\n                else if (input.Name == \"Width\")\n                {\n                    input.ClearData(); // Clear existing data\n                    input.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), 0, new GH_Number(10.0));\n                }\n            }\n\n            // Solve the Grasshopper definition\n            ghDoc.NewSolution(true); // true means the solution will be recomputed\n\n            // Check output values\n            foreach (var output in ghDoc.Objects.OfType<GH_ClusterOutputHook>())\n            {\n                if (output.Name == \"Rec\")\n                {\n                    var dataTree = output.VolatileData;\n                    RhinoApp.WriteLine(\"tree: \" + dataTree.DataCount);\n                }\n            }\n\n            doc.Views.Redraw();\n            return Result.Success;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "arc.feizbahr",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 198
+}

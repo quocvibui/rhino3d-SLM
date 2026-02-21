@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curveboolean-combineregions-yes-allregions-programmatically/214248",
+  "topic_id": 214248,
+  "title": "CurveBoolean CombineRegions=Yes, AllRegions - programmatically?",
+  "question": "As you see in the video, for a bunch of curves, if I select an outer point I get combined regions combining all curves closed or open.\n\n\nHow do I do this programatically ?\n\nRhinoCommon does not expose CurveBoolean’s region-picking as one call.\n\nI also cannot specify a Point3D for the outside point.",
+  "code_blocks": [
+    {
+      "code": "#CurveBooleanRegions\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef create_boolean_region_curves():\n    # Select curves\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select intersecting curves\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(2, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return\n\n    crvs = []\n    for i in range(go.ObjectCount):\n        c = go.Object(i).Curve()\n        if c: crvs.append(c.DuplicateCurve())\n\n    if not crvs:\n        return\n\n    # Determine plane (try from first planar curve, else WorldXY)\n    plane = Rhino.Geometry.Plane.WorldXY\n    ok, pln = crvs[0].TryGetPlane()\n    if ok:\n        plane = pln\n\n    # Options\n    tol = sc.doc.ModelAbsoluteTolerance\n    combine = True\n\n    # Compute boolean regions\n    regs = Rhino.Geometry.Curve.CreateBooleanRegions(crvs, plane, combine, tol)\n    if not regs or regs.RegionCount == 0:\n        print(\"No regions found (check curve intersections / planarity / tolerance).\")\n        return\n\n    # Add resulting region boundary curves to document\n    new_ids = []\n    for i in range(regs.RegionCount):\n        region_crvs = regs.RegionCurves(i)  # boundary curves for this region\n        for rc in region_crvs:\n            if rc:\n                new_ids.append(sc.doc.Objects.AddCurve(rc))\n\n    sc.doc.Views.Redraw()\n    print(\"Created {} region boundary curves (from {} regions).\".format(len(new_ids), regs.RegionCount))\n\nif __name__ == \"__main__\":\n    create_boolean_region_curves()",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 123
+}

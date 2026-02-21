@@ -1,0 +1,38 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-runheadless-doesnt-work/189690",
+  "topic_id": 189690,
+  "title": "GH.RunHeadless() Doesn't Work?",
+  "question": "Hello \n,\n\n\nI have a .gh script I want to open and run in the background without loading the GUI.\n\nI’m aware of GrasshopperPlayer but that isn’t quite what I’m looking for here.\n\n\nAll inputs/outputs are handled outside of the gh canvas via Eto.Forms interactions and.\n\n\nI thought the following RhinoScript code should work:\n\n\nOption Explicit\nCall Main()\n\nSub Main()\n    Dim GH\n    Set GH = Rhino.GetPlugInObject(\"Grasshopper\")\n    \n    ' Disable the startup banner\n    Call GH.DisableBanner()\n    \n    ' Open the Grasshopper document\n    Call GH.OpenDocument(\"path_to_my_grasshopper_script_i_want_to_run\")\nEnd Sub\n\n\n\n\nRunHeadless seems to do nothing and I don’t see any additional information on it in the SDK docs here:\n\n\n\n\n\n\nmcneel.github.io\n\n\n\n\n\n\nGH_RhinoScriptInterface Class\n\n\nPlugin Interface object that is exposed via the RhinoScript layer.\n\n\n\n\n\n\n\n\n\n\n\n\nhttps://mcneel.github.io/grasshopper-api-docs/api/grasshopper/html/M_Grasshopper_Plugin_GH_RhinoScriptInterface_RunHeadless.htm\n\n\nA workaround is closing the window after it’s loaded like so:\n\n\nOption Explicit\nCall Main()\nSub Main()\n\tDim GH\n\tSet GH = Rhino.GetPlugInObject(\"Grasshopper\")\n    \n\t' Disable the startup banner\n\tCall GH.DisableBanner()\n\t\n\t' Open the Grasshopper document\n\tCall GH.OpenDocument(\"path_to_my_grasshopper_script_i_want_to_run\")\n\n\t' Hide the editor\n\tCall GH.HideEditor()\n\nEnd Sub\n\n\n\n\nOr like this:\n\n\nOption Explicit\nCall Main()\nSub Main()\n\tDim GH\n\tSet GH = Rhino.GetPlugInObject(\"Grasshopper\")\n    \n\t' Disable the startup banner\n\tCall GH.DisableBanner()\n\t\n\t' Run Grasshopper Headless\n\tCall GH.RunHeadless()\n\n\t' Open the Grasshopper document\n\tCall GH.OpenDocument(\"path_to_my_grasshopper_script_i_want_to_run\")\n    \n\t' Ensure Grasshopper starts minimized (or hidden)\n    'If GH.IsEditorLoaded() Then\n        'Call Rhino.Command(\"NoEcho ! _-Grasshopper _Window _Hide _EnterEnd\", False)\n\t'End If\nEnd Sub\n\n\n\n\nBut I would much prefer to never see the GUI at all.\n\n\nAny ideas how to achieve that or is there something I’m d...",
+  "code_blocks": [
+    {
+      "code": "Option Explicit\nCall Main()\n\nSub Main()\n    Dim GH\n    Set GH = Rhino.GetPlugInObject(\"Grasshopper\")\n    \n    ' Disable the startup banner\n    Call GH.DisableBanner()\n    \n    ' Open the Grasshopper document\n    Call GH.OpenDocument(\"path_to_my_grasshopper_script_i_want_to_run\")\nEnd Sub",
+      "language": "unknown",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\nCall Main()\nSub Main()\n\tDim GH\n\tSet GH = Rhino.GetPlugInObject(\"Grasshopper\")\n    \n\t' Disable the startup banner\n\tCall GH.DisableBanner()\n\t\n\t' Open the Grasshopper document\n\tCall GH.OpenDocument(\"path_to_my_grasshopper_script_i_want_to_run\")\n\n\t' Hide the editor\n\tCall GH.HideEditor()\n\nEnd Sub",
+      "language": "unknown",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\nCall Main()\nSub Main()\n\tDim GH\n\tSet GH = Rhino.GetPlugInObject(\"Grasshopper\")\n    \n\t' Disable the startup banner\n\tCall GH.DisableBanner()\n\t\n\t' Run Grasshopper Headless\n\tCall GH.RunHeadless()\n\n\t' Open the Grasshopper document\n\tCall GH.OpenDocument(\"path_to_my_grasshopper_script_i_want_to_run\")\n    \n\t' Ensure Grasshopper starts minimized (or hidden)\n    'If GH.IsEditorLoaded() Then\n        'Call Rhino.Command(\"NoEcho ! _-Grasshopper _Window _Hide _EnterEnd\", False)\n\t'End If\nEnd Sub",
+      "language": "unknown",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "layers"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 172
+}

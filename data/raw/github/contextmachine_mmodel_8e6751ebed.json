@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/contextmachine/mmodel/blob/0545e5c2a11c641fc54e91f603e709d3dea549f3/plugins/compute/blobs/l2mask.py",
+  "repo": "contextmachine/mmodel",
+  "repo_stars": 0,
+  "repo_description": "Deployment branch",
+  "license": "Apache-2.0",
+  "filepath": "plugins/compute/blobs/l2mask.py",
+  "instruction": "L2mask",
+  "code": "from compute_rhino3d import Util\n\n\nclass CalcMaskL2:\n    __blob__ = \"\"\"\n    import Rhino.Geometry as rg\n    import Rhino.Collections as rhc\n\n    from ghpythonlib import parallel\n    from ghpythonlib.treehelpers import list_to_tree\n    import time\n    pnls = rhc.CurveList(x)\n    from collections import Callable\n\n    class Solver(Callable):\n        def __init__(self, f):\n            self._data = None\n            self._f = f\n            self.interior = None\n            self.exterior = None\n\n        @property\n        def func(self):\n            return self._f\n\n        @func.setter\n        def func(self, value):\n            self._f = value\n\n        @property\n        def data(self):\n            return self._data\n\n        @data.setter\n        def data(self, value):\n            self._data = value\n\n        def method(self, d):\n            return list(self.func(d, *self.args, **self.kwargs))\n\n        def __call__(self, *args, **kwargs):\n            self.start = time.time()\n            self.args = args\n            self.kwargs = kwargs\n            p = parallel.run(self.method, zip(self.data, [i < len(interior) for i in range(len(interior) + len(exterior))]))\n            self.end = time.time()\n            self.t = self.end - self.start\n            print(\"{} min. {} sec.\".format(*divmod(self.t, 60)))\n            return p\n\n\n    @Solver\n    def search((crv, predicate), panels):\n        for i in panels:\n            res = rg.Intersect.Intersection.CurveCurve(i, crv, 1.0, overlapTolerance=10)\n            rr = []\n            if res.Count == 0:\n                continue\n            else:\n\n                if predicate:\n                    r = rg.Curve.CreateBooleanDifference(i, crv, 1.0)\n\n                else:\n                    r = rg.Curve.CreateBooleanIntersection(i, crv, 1.0)\n                yield list(r)\n\n\n    search.data = interior+exterior\n    ans = list(search(pnls))\"\"\"\n\n    def __init__(self):\n        object.__init__(self)\n\n    def __get__(self, inst, own):\n        def wrp(interior=[], exterior=[]):\n            inp = {\"x\": inst[\"polycurve\"], \"interior\": interior, \"exterior\": exterior}\n            out = [\"ans\"]\n            result = Util.PythonEvaluate(self.__blob__, inp, out)\n            return result\n\n        return wrp\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/parallel-computing-too-many-values-to-unpack/188954",
+  "topic_id": 188954,
+  "title": "Parallel computing : too many values to unpack",
+  "question": "Hi everyone, I need to speed up a code and am trying \nparallel\n computing to solve Mesh Plane intersections. Nevertheless \nI get the error “too many values to unpack”\n when using \nparallel\n. I fear the error pops out because my function has more than one arguement, and I´ve packed all inputs in a tuple to handle the parallel computing. The function works perfectly fine without \nparallel\n.\n\n\nWhat am I doing wrong?\n\n\nimport Rhino.Geometry.Intersect as rgIntersect\nfrom ghpythonlib import parallel\n\ndef MeshPlaneSections(args):\n    # packing function arguments in a tuple to enable parallel computing\n    meshes,plane = args\n    \n    result =[]\n    for mesh in meshes:\n        intersections = rgIntersect.Intersection.MeshPlane(mesh,plane)\n        if intersections is not None:\n            for poly in intersections:\n                result.append(poly)\n    return result\n\ninput = (M,P) #argument tuple\n\nsections = MeshPlaneSections(input) #no parallel computing, working fine\n\n#sections = parallel.run(MeshPlaneSections,input) #parallel computing, not working\n\n\n\nAnother question, another approach : would this code run faster in \ncsharp\n instead of \npython\n ?\n\n\nThanks for the help!",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry.Intersect as rgIntersect\nfrom ghpythonlib import parallel\n\n#https://discourse.mcneel.com/t/gh-python-intersect-list-of-surfaces-in-rhino-geometry/134676\n\ndef MeshPlaneSections(args):\n    #packing function arguments in a tuple to enable parallel computing\n    meshes,plane = args\n    \n    result =[]\n    for mesh in meshes:\n        intersections = rgIntersect.Intersection.MeshPlane(mesh,plane)\n        if intersections is not None:\n            for poly in intersections:\n                result.append(poly)\n    return result\n\ninput = [(M,P)] #argument tuple\n\nsections = parallel.run(MeshPlaneSections,input)[0] #parallel computing",
+      "language": "python",
+      "author": "Marco_Mondello1",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry.Intersect as rgIntersect\nfrom ghpythonlib import parallel\n\ndef MeshPlaneSections(args):\n    # packing function arguments in a tuple to enable parallel computing\n    meshes,plane = args\n    \n    result =[]\n    for mesh in meshes:\n        intersections = rgIntersect.Intersection.MeshPlane(mesh,plane)\n        if intersections is not None:\n            for poly in intersections:\n                result.append(poly)\n    return result\n\ninput = (M,P) #argument tuple\n\nsections = MeshPlaneSections(input) #no parallel computing, working fine\n\n#sections = parallel.run(MeshPlaneSections,input) #parallel computing, not working",
+      "language": "python",
+      "author": "Marco_Mondello1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 122
+}

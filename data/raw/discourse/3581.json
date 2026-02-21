@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/shifting-a-list/3581",
+  "topic_id": 3581,
+  "title": "Shifting a list",
+  "question": "Hello,\n\n\nI am struggling with shifting a list inside a class.\n\n\nI made a random walker path with a list a lines. Now I would like to connect each of these lines, two by two, by dividing them by a number of points and linking them with these same points (pt1 to pt1, pt2 to pt2, etc.)\n\nYou can see what I am trying to achieve with the picture below (I made it with grasshopper)\n\n\n\n\nscreen1.jpg\n1068×486 115 KB\n\n\n \n\n\nBasically, I wanted to create two lists of lines, one of them shifted by one.\n\nThen it is easy to connect the first point to the first point, the second to the second one, etc.\n\nI tried to shift the list with the function .pop(0) but it doesn’t work.\n\n\nHere is the code :\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport random as r\nr.seed(5)\n\ntime = 50\n\nclass Walker:\n    \n    def __init__(self):\n        self.x = 50\n        self.y = 50\n        self.z = 0\n        rs.AddPoint(self.x,self.y,self.z)\n        sph1 = rs.AddSphere((self.x, self.y, self.z),0.1)\n        \n    def point(self):\n        self.shape1 = (self.x, self.y, self.z)\n        \n        \n    def step(self):\n        stepX = r.uniform(-1,1)\n        stepY = r.uniform(-1,1)\n        stepZ = r.uniform(-1,1)\n        \n        self.x += stepX\n        self.y += stepY\n        self.z += stepZ\n        self.shape2 = rs.AddPoint(self.x, self.y, self.z)\n        sph2 = rs.AddSphere(self.shape2,0.1)\n        \n        \n        \n    def lines(self):\n        self.line1 = rs.AddLine(self.shape1, self.shape2)\n        self.line2 = rs.AddLine(self.shape1, self.shape2)\n\n    def divLines(self):\n        self.divPts1 = rs.DivideCurve(self.line1,5,True,True)\n        self.divPts2 = rs.DivideCurve(self.line2,5,True,True)\n        self.divPts2.pop(0)\n\n\n    def linkPts(self):\n        self.lineBetPts = rs.AddLine(self.divPts1[0], self.divPts2[3])\n\n\nw = Walker()\n\npList = []\nfor t in range(time): \n    pList.append(w.point())\n    w.step()\n    pList.append(w.lines())\n    pList.append(w.divLines())\n    pList.append(w.linkPts())\n\n\n\n\n\nAs you can see, it...",
+  "code_blocks": [
+    {
+      "code": "for i, pt1 in enumerate(self.divPts1):\n    j = i + 1\n    if j == len(self.divPts2):\n        j = 0\n    pt2 = self.divPts2[j]\n    rs.AddLine(pt1, pt2)",
+      "language": "python",
+      "author": "bengolder",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random as r\nr.seed(5)\n\ntime = 50\n\nclass Walker:\n    \n    def __init__(self):\n        self.x = 50\n        self.y = 50\n        self.z = 0\n        rs.AddPoint(self.x,self.y,self.z)\n        sph1 = rs.AddSphere((self.x, self.y, self.z),0.1)\n        \n    def point(self):\n        self.shape1 = (self.x, self.y, self.z)\n        \n    def step(self):\n        stepX = r.uniform(-1,1)\n        stepY = r.uniform(-1,1)\n        stepZ = r.uniform(-1,1)\n        \n        self.x += stepX\n        self.y += stepY\n        self.z += stepZ\n        self.shape2 = rs.AddPoint(self.x, self.y, self.z)\n        sph2 = rs.AddSphere(self.shape2,0.1)\n        \n    def lines(self):\n        self.line1 = rs.AddLine(self.shape1, self.shape2)\n        self.line2 = rs.AddLine(self.shape1, self.shape2)\n        self.line2.append( self.line2.pop(0) )\n\n    def divLines(self):\n        self.divPts1 = rs.DivideCurve(self.line1,5,True,True)\n        self.divPts2 = rs.DivideCurve(self.line2,5,True,True)\n        \n        \n    def linkPts(self):\n        self.lineBetPts = rs.AddLine(self.divPts1[0], self.divPts2[3])\n        \"\"\"for i, pt1 in enumerate(self.divPts1):\n            j = i + 1\n            if j == len(self.divPts2):\n                j = 0\n            pt2 = self.divPts2[j]\n            rs.AddLine(pt1, pt2)\"\"\"\n\n\nw = Walker()\n\npList = []\nfor t in range(time): \n    pList.append(w.point())\n    w.step()\n    pList.append(w.lines())\n    pList.append(w.divLines())\n    pList.append(w.linkPts())\n    #print w.x",
+      "language": "python",
+      "author": "PPoinet",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random as r\nr.seed(5)\n\ntime = 50\n\nclass Walker:\n    \n    def __init__(self):\n        self.x = 50\n        self.y = 50\n        self.z = 0\n        rs.AddPoint(self.x,self.y,self.z)\n        sph1 = rs.AddSphere((self.x, self.y, self.z),0.1)\n        \n    def point(self):\n        self.shape1 = (self.x, self.y, self.z)\n        \n        \n    def step(self):\n        stepX = r.uniform(-1,1)\n        stepY = r.uniform(-1,1)\n        stepZ = r.uniform(-1,1)\n        \n        self.x += stepX\n        self.y += stepY\n        self.z += stepZ\n        self.shape2 = rs.AddPoint(self.x, self.y, self.z)\n        sph2 = rs.AddSphere(self.shape2,0.1)\n        \n        \n        \n    def lines(self):\n        self.line1 = rs.AddLine(self.shape1, self.shape2)\n        self.line2 = rs.AddLine(self.shape1, self.shape2)\n\n    def divLines(self):\n        self.divPts1 = rs.DivideCurve(self.line1,5,True,True)\n        self.divPts2 = rs.DivideCurve(self.line2,5,True,True)\n        self.divPts2.pop(0)\n\n\n    def linkPts(self):\n        self.lineBetPts = rs.AddLine(self.divPts1[0], self.divPts2[3])\n\n\nw = Walker()\n\npList = []\nfor t in range(time): \n    pList.append(w.point())\n    w.step()\n    pList.append(w.lines())\n    pList.append(w.divLines())\n    pList.append(w.linkPts())",
+      "language": "python",
+      "author": "PPoinet",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1650
+}

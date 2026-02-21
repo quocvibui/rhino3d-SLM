@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-sweep1/134913",
+  "topic_id": 134913,
+  "title": "Rhinocommon Sweep1",
+  "question": "Hi there,\n\nI’m struggling try to sweep the red curve through the blue one using Rhinocommon\n\n\n\n\nimage\n1471×838 4.11 KB\n\n\n\n\nusing rhino command “sweep1” is working fine\n\n\n\n\nimage\n1834×769 30.8 KB\n\n\n\n\nbut when using rhinocommon, the result is this:\n\n\n\n\nimage\n1477×676 41.6 KB\n\n\n\n\n        brep = rg.Brep.CreateFromSweep(c.ToNurbsCurve(),arrCrv,\n        rg.Point3d.Unset,\n        rg.Point3d.Unset,\n        rg.SweepFrame.Freeform,\n        rg.Vector3d.Unset,\n        False,\n        Rhino.Geometry.SweepBlend.Local,\n        Rhino.Geometry.SweepMiter.Untrimmed,\n        Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance*1,\n        Rhino.Geometry.SweepRebuild.None,\n        0,0)\n\n\n\nif passing SweepMiter as “Trimmed”, instead of “Untrimmed”, the result for that particular case works fine, but then other problem arises with other curves I need to sweep, wich by the way is the same problematic  behaviour I have found in an example share by \n@dale\n  in \nother place in the forum\n.\n\n\n\n\nimage\n1744×736 21.7 KB\n\n\n\n\nAs shown in the image above, now the corner is neatly solved, but as shown below new problems arises sweeping other curves, that before were solved fine\n\n\n\n\nimage\n1169×604 72.3 KB\n\n\n\n\nSo basically, for some conditions sweepMiter.Untrimmed is the way to go, while in other conditions sweppMiter.Trimed is the solution, and I definitely don’t understand the logic behind.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino\nsweep = rg.SweepOneRail()\nsweep.ClosedSweep = rail.IsClosed\nsweep.SweepTolerance = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance\nsweep.AngleToleranceRadians = Rhino.RhinoDoc.ActiveDoc.ModelAngleToleranceRadians\nsweep.MiterType = miter\nbreps = sweep.PerformSweep(rail, sections)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "brep = rg.Brep.CreateFromSweep(c.ToNurbsCurve(),arrCrv,\n        rg.Point3d.Unset,\n        rg.Point3d.Unset,\n        rg.SweepFrame.Freeform,\n        rg.Vector3d.Unset,\n        False,\n        Rhino.Geometry.SweepBlend.Local,\n        Rhino.Geometry.SweepMiter.Untrimmed,\n        Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance*1,\n        Rhino.Geometry.SweepRebuild.None,\n        0,0)",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 1643
+}

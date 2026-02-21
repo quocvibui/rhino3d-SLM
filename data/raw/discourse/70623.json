@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/findbycrossingwindowregion-bug/70623",
+  "topic_id": 70623,
+  "title": "FindByCrossingWindowRegion bug",
+  "question": "Hi \n@dale\n,\n\n\nthere seems to be a bug in the \nFindByCrossingWindowRegion\n method in V5 and V6. If the region contains a group, objects are found multiple times. To reproduce, please run below code with the file attached:\n\n\nimport Rhino\nimport scriptcontext\n\ndef DoSomething():\n    \n    p = Rhino.Geometry.Plane.WorldXY\n    r = Rhino.Geometry.Rectangle3d(p, 20, 20).ToPolyline()\n    v = scriptcontext.doc.Views.ActiveView.ActiveViewport\n    f = Rhino.DocObjects.ObjectType.Curve\n    \n    rc = scriptcontext.doc.Objects.FindByCrossingWindowRegion(v, r, True, f)\n    print \"Found {} curves\".format(rc.Count)\n    \nDoSomething()\n\n\n\nIf finds 5 curves, but only 4 are in the file. If the 4 curves are ungrouped, it works OK. Additionally please select the objects (grouped or ungrouped) and then run the code snipped again. It does not find any curve.\n\n\nFindByCrossingWindowRegion.3dm\n (45.8 KB)\n\n\n_\n\nc,",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef DoSomething():\n    \n    p = Rhino.Geometry.Plane.WorldXY\n    r = Rhino.Geometry.Rectangle3d(p, 20, 20).ToPolyline()\n    v = scriptcontext.doc.Views.ActiveView.ActiveViewport\n    f = Rhino.DocObjects.ObjectType.Curve\n    \n    rc = scriptcontext.doc.Objects.FindByCrossingWindowRegion(v, r, True, f)\n    print \"Found {} curves\".format(rc.Count)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 341
+}

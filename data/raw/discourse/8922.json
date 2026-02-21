@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-handling-pressing-esc-using-rhino-script-syntax-in-python/8922",
+  "topic_id": 8922,
+  "title": "Error Handling (Pressing Esc) using Rhino Script Syntax in Python",
+  "question": "Been learning Python though automating some of the tasks we do in the office on the project I am on, and would like to give the tools to the rest of the team.\n\n\nWorked how how to write a simple script for moving Geometry up and down the shift vector but if Esc is pressed part way though the process it runs to the end and returns an Error. I have read up on Event Handling/Checking if escape been pressed but can’t get it to notice this when I run the code.\n\nCurrent Code is below I someone could give me some pointers.\n\n\nimport rhinoscriptsyntax as rs\nimport RhinoPython.Host as __host\n\n#Shift Model from Acad Origin to Rhino Origin or visa versa.\n\nacadOrigin = (5100,55370,0)\nrhOrigin = (0,0,0)\n\n#check for esc press\ndef escape_test( throw_exception=True, reset=False ):\n    \"Tests to see if the user has pressed the escape key\"\n    rc = __host.EscapePressed(reset)\n    if rc and throw_exception:\n        raise Exception('escape key pressed')\n        return rc\n\ndef moveMTC ():\n    objs = rs.GetObjects('Select Objects to Move',0,True,True)\n    strDir = rs.GetString('Select Direction','Import',['Import', 'Export'])\n    if strDir == 'Import': shiftVec = rs.VectorCreate(rhOrigin,acadOrigin)\n    else: shiftVec = rs.VectorCreate(acadOrigin,rhOrigin)\n    m_objs = rs.MoveObjects(objs,shiftVec)\n    rs.SelectObject(m_objs)\n    if m_objs: rs.ZoomSelected(None,True)\n    rs.UnselectObjects(m_objs)\n\nif __name__==\"__main__\":\n    moveMTC()\n\n\n\nThanks Matt",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport RhinoPython.Host as __host\n\n#Shift Model from Acad Origin to Rhino Origin or visa versa.\n\nacadOrigin = (5100,55370,0)\nrhOrigin = (0,0,0)\n\n#check for esc press\ndef escape_test( throw_exception=True, reset=False ):\n    \"Tests to see if the user has pressed the escape key\"\n    rc = __host.EscapePressed(reset)\n    if rc and throw_exception:\n        raise Exception('escape key pressed')\n        return rc\n\ndef moveMTC ():\n    objs = rs.GetObjects('Select Objects to Move',0,True,True)\n    strDir = rs.GetString('Select Direction','Import',['Import', 'Export'])\n    if strDir == 'Import': shiftVec = rs.VectorCreate(rhOrigin,acadOrigin)\n    else: shiftVec = rs.VectorCreate(acadOrigin,rhOrigin)\n    m_objs = rs.MoveObjects(objs,shiftVec)\n    rs.SelectObject(m_objs)\n    if m_objs: rs.ZoomSelected(None,True)\n    rs.UnselectObjects(m_objs)\n\nif __name__==\"__main__\":\n    moveMTC()",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 3323
+}

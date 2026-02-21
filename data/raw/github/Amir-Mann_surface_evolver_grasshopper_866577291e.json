@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Amir-Mann/surface_evolver_grasshopper/blob/cbd92913fa0034cc77a917a3550cef208ec6c699/gh_setup/interface.py",
+  "repo": "Amir-Mann/surface_evolver_grasshopper",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "gh_setup/interface.py",
+  "instruction": "Interface",
+  "code": "\r\nimport sys\r\nimport os\r\nimport datetime\r\nimport rhinoscriptsyntax as rs\r\nif not base_path:\r\n    base_path = r\"C:\\Evolver\"\r\nsys.path.append(os.path.join(base_path,\"surface_evolver_grasshopper\"))\r\nsys.path.append(os.path.join(base_path,\"surface_evolver_grasshopper\", \"py_lib\"))\r\nimport se_grasshopper_entery\r\nse_grasshopper_entery.reload_all_modules()\r\n\r\nif run_on_change and input_mesh:\r\n\r\n\r\n    if not volume_factor:\r\n        volume_factor = 0.5\r\n    if not interactive:\r\n        interactive = False\r\n    if not g_input:\r\n        g_input = 20\r\n    if not r_input:\r\n        r_input = 2\r\n    if not input_boundary_conditions:\r\n        input_boundary_conditions = []\r\n\r\n    arguments = {\r\n        \"VOLUME_FACTOR\": volume_factor,\r\n        \"INTER_ACTIVE\": interactive,\r\n        \"G_INPUT\": g_input,\r\n        \"R_INPUT\": r_input,\r\n        \"BASE_PATH\": base_path,\r\n        \"input_mesh\": input_mesh,\r\n        \"input_boundary_conditions\": input_boundary_conditions,\r\n        \"result_mesh\": {\"verts\":[], \"faces\":[]},\r\n        \"result_fixed\": {\"verts\":[], \"faces\":[]}\r\n    }\r\n    \r\n    se_grasshopper_entery.run_SE(arguments)\r\n    result_mesh = rs.AddMesh(arguments[\"result_mesh\"][\"verts\"], arguments[\"result_mesh\"][\"faces\"])\r\n    if arguments[\"result_fixed\"][\"verts\"] and arguments[\"result_fixed\"][\"faces\"] :\r\n        result_fixed = rs.AddMesh(arguments[\"result_fixed\"][\"verts\"], arguments[\"result_fixed\"][\"faces\"])\r\nelse:\r\n    print(\"Not running script until 'RUN_ON_CHANGE' is true and 'input_mesh' is set\")\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

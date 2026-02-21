@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-unable-to-add-mesh/74908",
+  "topic_id": 74908,
+  "title": "Python, unable to add mesh",
+  "question": "Hello,\n\nI am trying to apply this code to generate the pasta form, unfortunately I am getting an error : unable to add mesh\n\n\nHere is the code :\n\nimport rhinoscriptsyntax as rs\n\nimport math\n\nn_u = 128\n\nn_v = 128\n\npoint_list = \n\npolygon_list = \n\n\nfor i in range(0,n_v+1):\n\nv = i / n_v\n\nfor j in range(0,n_u+1):\n\nu = j / n_u\n\n\n#Agnolotti\n page 016\n\nx = 10.0\nmath.sqrt(math.sin(u/2.0\nmath.pi)+u\n0.15\nmath.sin(v\n30.0\nmath.pi))\nmath.cos(v\n0.95\nmath.pi+0.03\nmath.pi)\n\ny = 10.0* math.sin(u/2.0\nmath.pi)+u\n0.15\nmath.cos(v\n30.0\nmath.pi) \nmath.sin(v\n0.95\nmath.pi+0.03)\n\nz = 5.0\nmath.pow(math.cos(u/2.0\nmath.pi),5)\nmath.sin(v\nmath.pi)-5.0\nmath.sin(v\nmath.pi)\nmath.pow(math.cos(u/2.0\nmath.pi),200)\n\npoint_list.append ([x,y,z])\n\n\n\n\nproblem1.jpg\n843×503 73.8 KB\n\n\n \nangolotti.py\n (837 Bytes)\n\n\nfor i in range(0,n_v):\n\nfor j in range(0,n_u):\n\np0 = i*(n_u+1)+j\n\np1 = i*(n_u+1)+j+1\n\np2 = (i+1)\n(n_u+1)+j+1\n\np3 = (i+1)\n(n_u+1)+j\n\npolygon_list.append ([p0,p1,p2,p3])\n\nrs.AddMesh(point_list,polygon_list)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\nimport Rhino\n\nn_u = 128\nn_v = 128\n\npoint_list = []\npolygon_list = []\nnewMesh = Rhino.Geometry.Mesh()\n\nfor i in range(0,n_v+1):\n  v = i / n_v\n  for j in range(0,n_u+1):\n    u = j / n_u\n    x = 10.0*math.sqrt(math.sin(u/2.0*math.pi)+u*0.15*math.sin(v*30.0*math.pi))*math.cos(v*0.95*math.pi+0.03*math.pi)\n    y = 10.0* math.sin(u/2.0*math.pi)+u*0.15*math.cos(v*30.0*math.pi) *math.sin(v*0.95*math.pi+0.03)\n    z = 5.0*math.pow(math.cos(u/2.0*math.pi),5)*math.sin(v*math.pi)-5.0*math.sin(v*math.pi)*math.pow(math.cos(u/2.0*math.pi),200)\n    #point_list.append ([x,y,z])\n    newMesh.Vertices.Add(x, y, z)\n\nfor i in range(0,n_v):\n  for j in range(0,n_u):\n    p0 = i*(n_u+1)+j\n    p1 = i*(n_u+1)+j+1\n    p2 = (i+1)*(n_u+1)+j+1\n    p3 = (i+1)*(n_u+1)+j\n    #polygon_list.append ([p0,p1,p2,p3])\n    newMesh.Faces.AddFace(p0,p1,p2,p3)\n    \nprint newMesh.IsValidWithLog()\nnewMesh.Faces.CullDegenerateFaces()\nnewMesh.Vertices.CullUnused()\nnewMesh.Vertices.CombineIdentical(True, True)\nnewMesh.Weld(math.pi)\nnewMesh.Normals.ComputeNormals()\nnewMesh.FaceNormals.ComputeFaceNormals()\nnewMesh.Compact()\nprint newMesh.IsValidWithLog()",
+      "language": "python",
+      "author": "chanley",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\nimport Rhino\n\nn_u = 128\nn_v = 128\n\npoint_list = []\npolygon_list = []\n\nfor i in range(0,n_v+1):\n  v = i / n_v\n\n  for j in range(0,n_u+1):\n    u = j / n_u\n    x = 10.0*math.sqrt(math.sin(u/2.0*math.pi)+u*0.15*math.sin(v*30.0*math.pi))*math.cos(v*0.95*math.pi+0.03*math.pi)\n    y = 10.0* math.sin(u/2.0*math.pi)+u*0.15*math.cos(v*30.0*math.pi) *math.sin(v*0.95*math.pi+0.03)\n    z = 5.0*math.pow(math.cos(u/2.0*math.pi),5)*math.sin(v*math.pi)-5.0*math.sin(v*math.pi)*math.pow(math.cos(u/2.0*math.pi),200)\n    point_list.append ([x,y,z])\n\nfor i in range(0,n_v):\n  for j in range(0,n_u):\n    p0 = i*(n_u+1)+j\n    p1 = i*(n_u+1)+j+1\n    p2 = (i+1)*(n_u+1)+j+1\n    p3 = (i+1)*(n_u+1)+j\n    \n    curr = [p0,p1,p2,p3]\n    \n    #rescue collapsed quads\n    if point_list[curr[3]] == point_list[curr[0]]: curr.remove(curr[3])\n    elif point_list[curr[2]] == point_list[curr[3]]: curr.remove(curr[3])\n    if point_list[curr[1]] == point_list[curr[2]]: curr.remove(curr[2])\n    if point_list[curr[0]] == point_list[curr[1]]: curr.remove(curr[1])\n    \n    if len (curr) >= 3: polygon_list.append(curr)\n\nPastaMesh = rs.AddMesh(point_list,polygon_list)",
+      "language": "python",
+      "author": "piac",
+      "post_number": 14,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 13,
+  "views": 1897
+}

@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-a-nurbs-surface/195112",
+  "topic_id": 195112,
+  "title": "Create a NURBS surface",
+  "question": "I try to model a NURBS surface with Grasshopper.\n\n\nunnamed\n1138×285 56.5 KB\n\n\nFor that, I wrote a Python script but I don’t see how to modify the knot vectors (I can insert values but not remove them, the function rs.RemoveSurfaceKnot returns “False”, maybe because I don’t give the right values).\n\n\n\nimport copy\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nfor i in range(len(points)):\n    points[i] = rs.coerce3dpoint(points[i])\n\nsurface = rg.NurbsSurface.CreateFromPoints(points, uCount, vCount, uDegree, vDegree)\n\nfor k in surface.KnotsU:\n    rs.RemoveSurfaceKnot(surface, (k, 0), False)\n\nfor k in surface.KnotsV:\n    rs.RemoveSurfaceKnot(surface, (0, k), True)\n\nfor k in knotsU:\n    surface.KnotsU.InsertKnot(k)\n\nfor k in knotsV:\n    surface.KnotsV.InsertKnot(k)\n\nfor k in surface.KnotsU:\n    print(k)\n\n\n\nThe “print” display the new inserted values with previous values that I can’t remove.\n\n\nIs there any way to do what I want?\n\n\nThanks and regards,\n\n\nJulien",
+  "code_blocks": [
+    {
+      "code": "import copy\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\nfor i in range(len(points)):\n    points[i] = rs.coerce3dpoint(points[i])\n\nsurface = rg.NurbsSurface.CreateFromPoints(points, uCount, vCount, uDegree, vDegree)\n\nfor k in surface.KnotsU:\n    rs.RemoveSurfaceKnot(surface, (k, 0), False)\n\nfor k in surface.KnotsV:\n    rs.RemoveSurfaceKnot(surface, (0, k), True)\n\nfor k in knotsU:\n    surface.KnotsU.InsertKnot(k)\n\nfor k in knotsV:\n    surface.KnotsV.InsertKnot(k)\n\nfor k in surface.KnotsU:\n    print(k)",
+      "language": "python",
+      "author": "Julien_Livet",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 11,
+  "views": 296
+}

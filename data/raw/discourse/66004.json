@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-mesh-deconstruction/66004",
+  "topic_id": 66004,
+  "title": "GHPython mesh deconstruction",
+  "question": "Hi,\n\n\nI’m using ghpython to extract the faces of a mesh, where each face becomes its own mesh.  I found a component that did this in c#, but wanted to see if I could write the same thing in python.  here is the resulting script, which works, but seems like it could be done much more efficiently.  Any pointers much appreciated.  I’ve done a lot of coding, but I’m new to coding within rhino/grasshopper.\n\n\ninput M : single Mesh\n\noutput FaceMeshes : list of Meshes representing the faces of the input mesh\n\n\nimport rhinoscriptsyntax as rs\n\ndef dePoint( p ):\n  xyz = []\n  xyz.append(p.X)\n  xyz.append(p.Y)\n  xyz.append(p.Z)\n  return xyz\n\ndef meshExplode( m ):\n  exploded = []\n  for mf in m.Faces:\n    v = []\n    fv = []\n    v.append(dePoint(m.Vertices[mf.A]))\n    v.append(dePoint(m.Vertices[mf.B]))\n    v.append(dePoint(m.Vertices[mf.C]))\n    if mf.IsQuad: \n      v.append(dePoint(m.Vertices[mf.D]))\n      fv.append( (0,1,2,3) )\n    else:\n      fv.append( (0,1,2) )\n    exploded.append( rs.AddMesh( v, fv ) )\n  return exploded\n\nFaceMeshes = meshExplode( M )\n\n\n\nin particular it seems odd that I had to write a function to extract the XYZ coords of the original mesh vertices, but if I dont and just try:\n\n\nv.append(m.Vertices[mf.A])\n\n\n\nWhen I then call rs.AddMesh, I get the error:\n\nRuntime error (TypeErrorException): ‘Point3f’ object is not iterable\n\n\nAlso, the python script as I’ve written it seems to take about 10 times as long to execute as the C# script it was based on, which didnt seem have issues just passing the vertexes from the existing mesh to the new ones.  The original C# script was written by Andrew Heumann.  I’ve posted it below for reference:\n\n\nList<Mesh> meshesOut = new List<Mesh>();\nforeach(MeshFace mf in M.Faces){\n  Mesh meshToAdd = new Mesh();\n  meshToAdd.Vertices.Add(M.Vertices[mf.A]);\n  meshToAdd.Vertices.Add(M.Vertices[mf.B]);\n  meshToAdd.Vertices.Add(M.Vertices[mf.C]);\n  if(mf.IsQuad){\n    meshToAdd.Vertices.Add(M.Vertices[mf.D]);\n    meshToAdd.Faces.AddFace(new ...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef dePoint( p ):\n  xyz = []\n  xyz.append(p.X)\n  xyz.append(p.Y)\n  xyz.append(p.Z)\n  return xyz\n\ndef meshExplode( m ):\n  exploded = []\n  for mf in m.Faces:\n    v = []\n    fv = []\n    v.append(dePoint(m.Vertices[mf.A]))\n    v.append(dePoint(m.Vertices[mf.B]))\n    v.append(dePoint(m.Vertices[mf.C]))\n    if mf.IsQuad: \n      v.append(dePoint(m.Vertices[mf.D]))\n      fv.append( (0,1,2,3) )\n    else:\n      fv.append( (0,1,2) )\n    exploded.append( rs.AddMesh( v, fv ) )\n  return exploded\n\nFaceMeshes = meshExplode( M )",
+      "language": "python",
+      "author": "Ben4",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1696
+}

@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/meshoutline-via-python-rhino-5/145787",
+  "topic_id": 145787,
+  "title": "Meshoutline via Python (Rhino 5)",
+  "question": "I’ve used Rhino for years however new to Python Scripting in Rhino 5. I’d like to use MeshOutline for batch jobs. The command works perfect with my hands on. However, it refused to corperate viaPython script. (either polysurface or mesh).  I extracted partial code and error message I got below:\n\n\nrs.CurrentView('Top')\nobjs = rs.AllObjects(select=True)\nfor obj in objs: \n    print \"Object identifier: \", objs\n\nrs.MeshOutline(objs)\n\n\n\nI appreciate any input!\n\n\n\n\nimage\n1155×859 184 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.CurrentView('Top')\nmeshes = rs.ObjectsByType(32)\nif meshes:\n    curves = rs.MeshOutline(meshes)\n    if curves:\n        rs.SelectObjects(curves)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    msg = \"Select surfaces, polysurfaces and meshes to outline\"\n    obj_ids = rs.GetObjects(msg, 8+16+32, True, True, True)\n    if not obj_ids: return\n    \n    rc = rs.Command(\"_MeshOutline\", False)\n    if not rc: return\n    \n    outline_ids = rs.LastCreatedObjects(True)\n    print \"{} outlines created\".format(outline_ids.Count)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "rs.CurrentView('Top')\nobjs = rs.AllObjects(select=True)\nfor obj in objs: \n    print \"Object identifier: \", objs\n\nrs.MeshOutline(objs)",
+      "language": "python",
+      "author": "Kenny2",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 659
+}

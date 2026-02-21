@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/radialdimention-rhino6/70098",
+  "topic_id": 70098,
+  "title": "RadialDimention Rhino6",
+  "question": "Hello,\n\nSince Rhino6 i keep getting errors when trying to use radial dimension from rhino common.\n\n\nThis code results in an error:\n\n\n\n\n\n\n\n\ndeveloper.rhino3d.com\n\n\n\n\n\n\n\n\nAdd Radial Dimension\n\n\nDemonstrates how to add radial dimensions to a selected curve.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIn Grasshopper:\n\nFabTools, “Diameter Dimention” component doesn’t work anymore\n\nElefront, “Define Radial Dimension” older component version doesn’t work anymore, but updated version for Rhino6 works\n\n\nmy Code:\n\n\nradial_dimension = RadialDimension(center, point_on_curve, plane.XAxis, plane.Normal, 500) \nradial_dimension.Text = \"R {}\".format(radial_dimension.NumericValue*0.5) \nmyDim=doc.Objects.AddRadialDimension(radial_dimension)\n\n\nI get this error:\n\nRadialDimension() takes no arguments (5 given)\n\n\nWhat has changed in Rhino6?\n\n\nBest regards,",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino import *\nfrom Rhino.DocObjects import *\nimport scriptcontext\n\n\nstyle = scriptcontext.doc.DimStyles.Current\nprint style\nalign = Rhino.Geometry.AnnotationType.Aligned\nprint align\nplane = rs.WorldXYPlane()\nprint plane\n\n\nradial_dimension = Rhino.Geometry.RadialDimension.Create(style,align,plane,Point3d(0,0,0), Point3d(10,0,0), Point3d(5,0,0))\nprint radial_dimension\n\n\nmyDim=scriptcontext.doc.Objects.AddRadialDimension(radial_dimension)",
+      "language": "python",
+      "author": "mfg",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nplane = Rhino.Geometry.Plane.WorldXY\ncp = Rhino.Geometry.Point3d(2.0, 2.0, 0.0)\np1 = Rhino.Geometry.Point3d(4.0, 4.0, 0.0)\np2 = Rhino.Geometry.Point3d(8.0, 6.0, 0.0)\n\nstyle = sc.doc.DimStyles.Current\nif (style.LeaderContentAngleType == Rhino.DocObjects.DimensionStyle.LeaderContentAngleStyle.Aligned):\n    p2.Y = 8.0\n\ndim = Rhino.Geometry.RadialDimension.Create(style, Rhino.Geometry.AnnotationType.Radius, plane, cp, p1, p2)\nif dim:\n    sc.doc.Objects.Add(dim)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 767
+}

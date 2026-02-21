@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/joosepvi/renokratt/blob/6f18f1cd4bc6db00bca0bc6c62a98bc61d7e8209/grasshopper/run_grasshopper.py",
+  "repo": "joosepvi/renokratt",
+  "repo_stars": 0,
+  "repo_description": "Eesti tehiskivi korterelamute konfiguraatori prototüüp",
+  "license": "unknown",
+  "filepath": "grasshopper/run_grasshopper.py",
+  "instruction": "Run grasshopper",
+  "code": "import os\nimport json\nimport compute_rhino3d.Grasshopper as gh\nimport compute_rhino3d.Util\nimport rhino3dm\n\n# Set the compute_rhino3d.Util.url, default URL is http://localhost:6500/\ncompute_rhino3d.Util.url = 'http://localhost:6500/'\n\n# Define path to local working directory\nworkdir = os.getcwd() + '\\\\'\n\n# Read input parameters from JSON file\nwith open(workdir + 'input.json') as f:\n    input_params = json.load(f)\n\n\n# Create the input DataTree\ninput_trees = []\nfor key, value in input_params.items():\n    print(key)\n    tree = gh.DataTree(key)\n    tree.Append([{0}], [str(value)])\n    input_trees.append(tree)\n\n\n# Evaluate the Grasshopper definition\noutput = gh.EvaluateDefinition(\n    workdir + 'konfiguraator.gh',\n    input_trees\n)\n\n# Create a new rhino3dm file\nfile = rhino3dm.File3dm()\n\n# Iterate over each output node's result stored in 'output['values']'\nfor output_value in output['values']:\n    # Iterate over all items in the InnerTree of each output value\n    for key, items in output_value['InnerTree'].items():\n        for item in items:\n            # Decode the mesh object from each item's data\n            obj = rhino3dm.CommonObject.Decode(json.loads(item['data']))\n            # Add the decoded object to the file if it's a Mesh\n            if isinstance(obj, rhino3dm.Mesh):\n                file.Objects.AddMesh(obj)\n\n# Save the rhino3dm file to your working directory\nfile.Write(workdir + 'geometry.3dm', 7)\n\n\n\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

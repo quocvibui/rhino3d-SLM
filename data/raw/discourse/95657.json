@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/selecting-all-meshes-and-flipping-only-those-with-inward-facing-normals/95657",
+  "topic_id": 95657,
+  "title": "Selecting all meshes and flipping only those with inward facing normals",
+  "question": "I am trying to figure out how to use the Mesh.SolidOrientation method in order to script something that will allow me to select all of the separate mesh objects in a window, recognize the solid mesh objects with inward facing normals, and flip them.\n\n\nMy real question is if there is a way to isolate mesh objects by which direction their normals are facing?",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino as R\n\nguids = rs.GetObjects('select objects')\nfor guid in guids:\n    mesh = rs.coercemesh(guid)\n    if mesh:\n        # print check\n        print guid, mesh.SolidOrientation()\n        if mesh.SolidOrientation() < 0:\n            # select the inverted normal meshes\n            sc.doc.Objects.Select(guid, True, True)",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobjects = rs.GetObjects(\"Mesh\", 32, True, True) \n\nfor object in objects: \nif not object: continue\n\nmesh = rs.coercemesh(object) \n\nif (mesh.SolidOrientation() == -1): \n   rs.SelectObject(object)",
+      "language": "python",
+      "author": "mprice",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino as R\n\nguids = rs.GetObjects('select objects')\nfor guid in guids:\n    mesh = rs.coercemesh(guid)\n    if mesh:\n        # print check\n        print guid, mesh.SolidOrientation()\n        if mesh.SolidOrientation() < 0:\n            # make a new mesh\n            new_mesh = R.Geometry.Mesh()\n            # copy over all the verts from inverted mesh\n            for v in mesh.Vertices:\n                new_mesh.Vertices.Add(v)\n            # copy over every face but flipped\n            for f in mesh.Faces:\n                new_mesh.Faces.AddFace(f.Flip())\n            # in case of UV mapping, didn't test extensively\n            for uvp in mesh.TextureCoordinates:\n                new_mesh.TextureCoordinates.Add(uvp)\n            # not sure if this is needed\n            new_mesh.RebuildNormals()\n            # replace \n            sc.doc.Objects.Replace(guid, new_mesh)",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 2026
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/localsoftware/localsoftware_rhino-grasshopper/blob/4aafec57e33b9f09cce6fd73dcda12b17cf794a5/python/DeleteAll.py",
+  "repo": "localsoftware/localsoftware_rhino-grasshopper",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "BSD-2-Clause",
+  "filepath": "python/DeleteAll.py",
+  "instruction": "Deletes all geometries of Rhino document.",
+  "code": "\"\"\"Deletes all geometries of Rhino document.\n\nDeletes the Rhino geometry created by GH components.\nThis is useful for batch processing multiple files.\n\n    Typical usage:\n        Toggle a boolean in the 'Delete' input to erase the all the objects.\n\n\n    Inputs:\n        Delete: boolean delete\n\n    Outputs:\n        None\"\"\"\n\n__author__ = \"palomagr\"\n__version__ = \"2020.07.09\"\n\n#ghenv.Component.Name = \"Delete all\"\n#ghenv.Component.NickName = \"Delete all\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\nclass MyComponent(component):\n\n    def RunScript(self, geom, Delete):\n        bake = None\n        def rcmd(commandstring, echo=True, mask=True):\n            if mask:\n                premask = '-_%s '\n                try:\n                    cmd = premask % commandstring\n                except:\n                    print commandstring, 'failed to mask'\n            else:\n                cmd = commandstring\n            result = Rhino.RhinoApp.RunScript(cmd, echo)\n            if not result:\n                print 'The following command failed:'\n                print ' ',cmd\n            return result\n\n        def rcmds(commands, echo=True, mask=True):\n            for cmd in commands:\n                rcmd( cmd, echo, mask )\n\n        if Delete:\n            rcmds(['SelAll','Delete'])\n            #time.sleep(.5)\n            delete = True\n\n\n        else:\n            bake = False\n\n        # return outputs if you have them; here I try it for you:\n        return\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

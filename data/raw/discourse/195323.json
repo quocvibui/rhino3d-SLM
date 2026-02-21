@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-island-groups-of-polyline-offset-curves/195323",
+  "topic_id": 195323,
+  "title": "Get \"Island-Groups\" of Polyline Offset Curves",
+  "question": "I am using the Clipper Plugin to get internal offsets of a polyline.\n\n\nThe Polyline creates “islands”. You can see them in the following image highlighted by different colors.  I want to get these Islands as individual list of curves (one list for Red, one for Blue, one for Black)\n\n\nScreenshot 2024-11-21 at 19.49.53\n1136×1122 215 KB\n\n\nIs this possible within the clipper plugin?\n\nIs there a good way of querying the output of the offset polyline component to get these islands as individual lists.\n\n\nI am guessing that the code that the clipper plugin is based on knows the individual islands but they are not grouped in that way in the output (probably for good reason).\n\n\nAny help or Ideas would be appreciated.\n\n\nOffsetIslands01.gh\n (11.4 KB)",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper as gh\nfrom Grasshopper.Kernel.Data import GH_Path\nfrom Grasshopper import DataTree\nimport Rhino.Geometry as rg\n\n# Step 1: Find containment relationships\ncurve_containment = [\n    (i, [\n        j for j, curve_inner in enumerate(curves) \n        if i != j and curves[i].Contains(curve_inner.PointAt(0), rg.Plane.WorldXY, 0.01) == rg.PointContainment.Inside\n    ]) \n    for i in range(len(curves))\n]\n\n# Step 2: Sort curves by the number of contained curves\nsorted_curves = sorted(curve_containment, key=lambda x: len(x[1]))\n\n# Step 3: Create groups\nused_curves = set()\ncurve_groups = []\n\nfor index, contained_indices in sorted_curves:\n    if index in used_curves:\n        continue\n    current_group = [index]\n    used_curves.add(index)\n    for next_index, next_contained_indices in sorted_curves:\n        if next_index not in used_curves and all(i in next_contained_indices for i in current_group):\n            current_group.append(next_index)\n            used_curves.add(next_index)\n    curve_groups.append(current_group)\n\n# Step 4: Determine group containment using the outermost curve of each group\ngroup_containment = [\n    (i, [\n        j for j, group_inner in enumerate(curve_groups) \n        if i != j and group_inner[0] in curve_containment[curve_groups[i][0]][1]\n    ])\n    for i in range(len(curve_groups))\n]\n\n# Step 5: Sort groups from innermost to outermost\nsorted_groups = sorted(group_containment, key=lambda x: len(x[1]))\nsorted_actual_groups = [curve_groups[group[0]] for group in sorted_groups]\n\n# Convert indices to actual curve objects\nsorted_actual_curve_groups = [[curves[idx] for idx in group] for group in sorted_actual_groups]\n\n# Step 6: Add sorted groups to DataTree\nCurveGroups = DataTree[object]()\nfor i, sublist in enumerate(sorted_actual_curve_groups):\n    CurveGroups.AddRange(sublist, GH_Path(i))",
+      "language": "python",
+      "author": "rodwyll",
+      "post_number": 16,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport ghpythonlib.treehelpers as th\n\ndef offset_curve_recursive(curve, offset_distance, plane):\n    \n    curve_groups = []\n    finished_groups = []\n    curve_groups.append([curve])\n    offset_possible = True\n\n    while offset_possible:\n        for i, curve_group in enumerate(curve_groups):\n            print(i)\n            if i in finished_groups:\n                continue\n            \n            curve = curve_group[-1]\n            offset_curves = curve.Offset(plane, offset_distance, 0.01, Rhino.Geometry.CurveOffsetCornerStyle.Round)\n            if offset_curves:\n                if len(offset_curves) > 0:\n                    for j, crv in enumerate(offset_curves):\n                        if j == 0:\n                            curve_groups[i].append(crv)\n                        else:\n                            curve_groups.append([crv])\n                    continue\n            else:\n                finished_groups.append(i)\n                if len(finished_groups) == len(curve_groups):\n                    offset_possible = False\n    \n    print(curve_groups)\n    return curve_groups\n\n# Example Usage in Grasshopper\n\ninput_curves = curves  # Input as a list of curves from Grasshopper\noffset_distance = distance  # Offset distance as a float from Grasshopper\nplane = Rhino.Geometry.Plane.WorldXY  # Example: Use WorldXY plane for offsetting\n\n# Call the function\nresult = offset_curve_recursive(input_curves, offset_distance, plane)\n\n# Flatten and prepare the output for Grasshopper\noutput_curves = th.list_to_tree(result)\nCurveGroups = output_curves",
+      "language": "python",
+      "author": "rodwyll",
+      "post_number": 16,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 16,
+  "views": 247
+}

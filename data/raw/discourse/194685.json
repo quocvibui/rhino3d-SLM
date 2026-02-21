@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issue-rs-planetransform-workinf-different-than-expected/194685",
+  "topic_id": 194685,
+  "title": "Issue rs.PlaneTransform() workinf different than expected",
+  "question": "Hi,\n\n\nI’ve encountered an unexpected result when I use rs.PlaneTransform.\n\n\nI have a  \nmodel with 2 blockinstances\n (77.3 KB); a normal one and a mirrored instance of the same definition.\n\n\nI use the script below to align a copy of the world xy plane to the transformed instances, and construct an axes helper based on that transformed plane.\n\n\nI expected to see a normal and a mirrored version of the same axes helper. However, checking with the left-hand rule, the axis helpers (and thus the transformed planes) seem to be rotated around the y-axis instead\n\n\nimage\n1131×602 52.8 KB\n\n\n#! python3\nimport rhinoscriptsyntax as rs\n\ndef main():\n    objs = rs.GetObjects(preselect = True, filter= rs.filter.instance)\n    if not objs:\n        return\n\n    for instance in objs:\n        xform = rs.BlockInstanceXform(instance)\n        xy = rs.WorldXYPlane()\n\n        plane = rs.PlaneTransform(xy, xform)\n\n        z_helper = rs.AddLine(plane.Origin, plane.Origin + plane.Normal * 100)\n        x_helper = rs.AddLine(plane.Origin, plane.Origin + plane.XAxis * 100)\n        y_helper = rs.AddLine(plane.Origin, plane.Origin + plane.YAxis * 100)\n\n        rs.ObjectColor(z_helper, (0, 0, 255))\n        rs.ObjectColor(y_helper, (0, 255, 0))\n        rs.ObjectColor(x_helper, (255, 0, 0))\n\n\n\nif __name__ =='__main__':\n    main()",
+  "code_blocks": [
+    {
+      "code": "#! python3\nimport rhinoscriptsyntax as rs\n\ndef main():\n    objs = rs.GetObjects(preselect = True, filter= rs.filter.instance)\n    if not objs:\n        return\n\n    for instance in objs:\n        xform = rs.BlockInstanceXform(instance)\n        xy = rs.WorldXYPlane()\n\n        plane = rs.PlaneTransform(xy, xform)\n\n        z_helper = rs.AddLine(plane.Origin, plane.Origin + plane.Normal * 100)\n        x_helper = rs.AddLine(plane.Origin, plane.Origin + plane.XAxis * 100)\n        y_helper = rs.AddLine(plane.Origin, plane.Origin + plane.YAxis * 100)\n\n        rs.ObjectColor(z_helper, (0, 0, 255))\n        rs.ObjectColor(y_helper, (0, 255, 0))\n        rs.ObjectColor(x_helper, (255, 0, 0))\n\n\n\nif __name__ =='__main__':\n    main()",
+      "language": "python",
+      "author": "timcastelijn",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 58
+}

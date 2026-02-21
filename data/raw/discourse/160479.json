@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-compute-coloring-surfaces-and-baking/160479",
+  "topic_id": 160479,
+  "title": "Rhino Compute, Coloring Surfaces and baking",
+  "question": "Hi all,\n\n\nI have a rhino compute ghx script where I try to take curves and turn them into surfaces and color them. The way I have done it so far is turning them into meshes and using ‘mesh colors’ which has been working fine however meshes are too large and I want to try and bake surfaces with colors instead. There is no gh component I am aware of that will do that so I am using a custom python component from the Rhino website, however this uses active doc and guids to colorise the surfaces and compute runs headless so this doesnt work. Any way around this or another method so I can color surfaces in?\n\n\nAttached here is the ghx compute script.\n\n\nzoning.ghx\n (130.8 KB)\n\n\nHere is the code for the python component.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\n\nif B:\n\n    print(type(G))  # debug message to Python output\n\n    # we obtain the reference in the Rhino doc\n    doc_object = scriptcontext.doc.Objects.Find(G)\n\n    if doc_object is not None:\n        print(type(doc_object))\n\n        attributes = doc_object.Attributes\n        print('the type of attributes is: ' + str(type(attributes)))  # debug message to Python output\n\n        geometry = doc_object.Geometry\n        print('the type of geometry is: ' + str(type(doc_object)))  # debug message to Python output\n\n        # we change the scriptcontext\n        scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n\n        # we add both the geometry and the attributes to the Rhino doc\n        rhino_brep = scriptcontext.doc.Objects.Add(geometry, attributes)\n        print('the Rhino doc ID is: ' + str(rhino_brep))  # debug message to Python output\n\n        # set print color if provided\n        if C:\n            rs.ObjectColor(rhino_brep, color=C)\n\n    # we put back the original Grasshopper document as default\n    scriptcontext.doc = ghdoc\n    a = G\n\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\n\nif B:\n\n    print(type(G))  # debug message to Python output\n\n    # we obtain the reference in the Rhino doc\n    doc_object = scriptcontext.doc.Objects.Find(G)\n\n    if doc_object is not None:\n        print(type(doc_object))\n\n        attributes = doc_object.Attributes\n        print('the type of attributes is: ' + str(type(attributes)))  # debug message to Python output\n\n        geometry = doc_object.Geometry\n        print('the type of geometry is: ' + str(type(doc_object)))  # debug message to Python output\n\n        # we change the scriptcontext\n        scriptcontext.doc = Rhino.RhinoDoc.ActiveDoc\n\n        # we add both the geometry and the attributes to the Rhino doc\n        rhino_brep = scriptcontext.doc.Objects.Add(geometry, attributes)\n        print('the Rhino doc ID is: ' + str(rhino_brep))  # debug message to Python output\n\n        # set print color if provided\n        if C:\n            rs.ObjectColor(rhino_brep, color=C)\n\n    # we put back the original Grasshopper document as default\n    scriptcontext.doc = ghdoc\n    a = G",
+      "language": "python",
+      "author": "Rivindu_Bandara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 14,
+  "views": 826
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/access-linear-dimension-length-scale-in-layouts/130271",
+  "topic_id": 130271,
+  "title": "Access linear dimension length scale in layouts",
+  "question": "Hi\n\n\nI am trying to write a script that bakes linear dimensions directly to a layout.\n\n\nI’ve managed to get it working so far as when the layout is active the dimension appears. But, I can’t figure out a way to get the length value of the dimension to scale according to the drawing. The linear dimension class does not seem to allow access to this? Or maybe I am missing something or I need a different strategy?\n\n\nAttaching the work so far in the hope someone here can help.\n\n\nlayoutScriptRhFile.3dm\n (37.2 KB)\n\n\nMake-dimensions-in-layout_rev1.gh\n (9.0 KB)\n\n\nBest regards,\n\nJacob",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\nif bake:\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    \n    layoutBoundary = rs.coercerhinoobject(layoutBoundaryID)\n    wtpTransf = layoutBoundary.WorldToPageTransform\n    \n    detailView = layoutBoundary.DetailGeometry\n    ratio = detailView.PageToModelRatio \n    \n    vec = Rhino.Geometry.Vector3d(dimPtB.X - dimPtA.X, dimPtB.Y - dimPtA.Y, 0)\n    vecPerp = Rhino.Geometry.Vector3d(-(dimPtB.Y - dimPtA.Y), dimPtB.X - dimPtA.X, 0)\n    vecPerp.Unitize()\n    vecPerp *= -dimOffset\n    \n    ptOnDim = Rhino.Geometry.Point3d((dimPtA+dimPtB)*.5)\n    ptOnDim += vecPerp\n    \n    dimPlane = Rhino.Geometry.Plane(dimPtA, vec, vecPerp)\n    \n    rc, uA, vA = dimPlane.ClosestParameter(dimPtA)\n    rc, uB, vB = dimPlane.ClosestParameter(dimPtB)\n    rc, uM, vM = dimPlane.ClosestParameter(ptOnDim)    \n    \n    linearDim = Rhino.Geometry.LinearDimension(dimPlane, Rhino.Geometry.Point2d(uA, vA), Rhino.Geometry.Point2d(uB, vB), Rhino.Geometry.Point2d(uM, vM))\n    linearDim.Transform(wtpTransf)\n    linearDim.DistanceScale = 1/ratio\n\n    Rhino.Geometry.LinearDimension.SetUserString\n    rhino_obj = sc.doc.Objects.Add(linearDim)\n    \n    sc.doc = ghdoc",
+      "language": "python",
+      "author": "Jacob_Riiber1",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 326
+}

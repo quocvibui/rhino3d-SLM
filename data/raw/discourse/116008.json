@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-geometry-brep-createbooleandifference-not-creating-difference/116008",
+  "topic_id": 116008,
+  "title": "Rhino.Geometry.Brep.CreateBooleanDifference not creating difference (",
+  "question": "Hi there,\n\n\nI am trying to cut texts into solids.\n\nThe result I am getting is an empty array/list.\n\n\nI know that all the breps created face to the outside, but that should not be a problem I suppose.\n\n\n\n\n\n\n\n\nBoolean Failure in RhinoCommon\n \nRhino Developer\n\n\n\n\n\n\n[ccw_profile]\n \n[cw_profile]\n \nI think that I have found the source of the problem. In this example the plates are built out of a closed profile \nand extruded along a path. The boolean operation becomes a union or a subtraction  if the polyline orientation is flipped from ccw to cw.  So it seems  that I have to check orientation of the profile based on the extrusion direction to get a valid oriented brep ? \nany hint  ? \nGerry\n  \n\n\n\n\nfor n in annotations:\n\n    vector = n.Plane.ZAxis\n    vector = vector * (-1)\n\n    dim_style = Rhino.RhinoDoc.ActiveDoc.DimStyles.Current\n\n    polysrfs = n.CreatePolySurfaces(dim_style, 10)\n\n    for polysrf in polysrfs:\n        if polysrf != None:\n\n            polysrf.Translate(vector)\n            #polysrf.Flip()\n            #Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(polysrf)\n\n#Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(panel)\n\ntolerance = scriptcontext.doc.ModelAbsoluteTolerance\n\nnewbreps = Rhino.Geometry.Brep.CreateBooleanDifference([panel], polysrfs, tolerance)\nprint (newbreps)\nprint (Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(newbreps[0]))\n\n\n\npanel and annotations are variables from the rest of the code.\n\nThe model itself looks like this\n\n\ngrafik\n1197×701 95.5 KB\n\nand the texts and everything is created perfectly fine.\n\n\nAny idea what I am missing?\n\n\nThanks,\n\nT.",
+  "code_blocks": [
+    {
+      "code": "for brep in out_breps:\n    \n    # new and improved!\n    brep.Faces.SplitKinkyFaces(Rhino.RhinoMath.DefaultAngleTolerance, True)\n    if Rhino.Geometry.BrepSolidOrientation.Inward == brep.SolidOrientation:\n        brep.Flip()",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "for n in annotations:\n\n    vector = n.Plane.ZAxis\n    vector = vector * (-1)\n\n    dim_style = Rhino.RhinoDoc.ActiveDoc.DimStyles.Current\n\n    polysrfs = n.CreatePolySurfaces(dim_style, 10)\n\n    for polysrf in polysrfs:\n        if polysrf != None:\n\n            polysrf.Translate(vector)\n            #polysrf.Flip()\n            #Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(polysrf)\n\n#Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(panel)\n\ntolerance = scriptcontext.doc.ModelAbsoluteTolerance\n\nnewbreps = Rhino.Geometry.Brep.CreateBooleanDifference([panel], polysrfs, tolerance)\nprint (newbreps)\nprint (Rhino.RhinoDoc.ActiveDoc.Objects.AddBrep(newbreps[0]))",
+      "language": "python",
+      "author": "tobias.stoltmann",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1203
+}

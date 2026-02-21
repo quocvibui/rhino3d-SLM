@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/TeamSPWK/rhino-shapely-converter/blob/8a82d4e0d0d6c6dd3a8aa29ed495549512113f56/src/rhino_shapely_converter/from_shapely_to_rhino.py",
+  "repo": "TeamSPWK/rhino-shapely-converter",
+  "repo_stars": 0,
+  "repo_description": "This package is to convert rhino geometry to shapely geometry and vice versa.",
+  "license": "MIT",
+  "filepath": "src/rhino_shapely_converter/from_shapely_to_rhino.py",
+  "instruction": "From shapely to rhino",
+  "code": "import shapely.geometry as sgeom\n\ntry:\n    # For Rhino\n    import Rhino.Geometry as r3d\nexcept ImportError:\n    import rhino3dm as r3d\n\n\ndef shapely_point_to_rhino_point3d(shapely_point: sgeom.Point) -> r3d.Point3d:\n    if shapely_point.has_z:\n        return r3d.Point3d(shapely_point.x, shapely_point.y, shapely_point.z)\n    else:\n        return r3d.Point3d(shapely_point.x, shapely_point.y, 0)\n\n\ndef shapely_multi_point_to_rhino_point_cloud(\n    shapely_multi_point: sgeom.MultiPoint,\n) -> r3d.PointCloud:\n    return r3d.PointCloud(\n        list(map(shapely_point_to_rhino_point3d, shapely_multi_point.geoms))\n    )\n\n\ndef shapely_line_to_rhino_polyline(shapely_line: sgeom.LineString) -> r3d.Polyline:\n    points = [sgeom.Point(coord) for coord in shapely_line.coords]\n    return r3d.Polyline(list(map(shapely_point_to_rhino_point3d, points)))\n\n\ndef convert_shapely_geometry_to_rhino_geometry(\n    shapely_geometry: sgeom.base.BaseGeometry,\n):\n    if isinstance(shapely_geometry, sgeom.Point):\n        return shapely_point_to_rhino_point3d(shapely_geometry)\n    elif isinstance(shapely_geometry, sgeom.MultiPoint):\n        return shapely_multi_point_to_rhino_point_cloud(shapely_geometry)\n    elif isinstance(shapely_geometry, sgeom.LineString):\n        return shapely_line_to_rhino_polyline(shapely_geometry)\n    else:\n        raise ValueError(\n            f\"\"\"Supported shapely geometry types:\n            - Point\n            - MultiPoint\n            - LineString\n            Unsupported shapely geometry type: {type(shapely_geometry)}.\n            \"\"\"\n        )\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

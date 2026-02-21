@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/mcericson/arch_441_repo_fall_22/blob/51976acc603fbc68cdef1edff124885fe3d917b0/09_week/linear_color.py",
+  "repo": "mcericson/arch_441_repo_fall_22",
+  "repo_stars": 1,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "09_week/linear_color.py",
+  "instruction": "equation: (x3, y3, z3)  = (x1, y1, z1) + (x2-x1, y2-y1, z2-z1)*t https://mathworld.wolfram.com/Line.html",
+  "code": "\n#equation: (x3, y3, z3)  = (x1, y1, z1) + (x2-x1, y2-y1, z2-z1)*t\n#https://mathworld.wolfram.com/Line.html\n\nimport rhinoscriptsyntax as rs\n\ndef linear_color(color_1, color_2,scalar):\n    r1, g1, b1 = color_1\n    r2, g2, b2 = color_2\n    \n    t = float(scalar)\n    \n    r3 = float(r1 + (r2-r1)*t)\n    g3 = float(g1 + (g2-g1)*t)\n    b3 = float(b1 + (b2-b1)*t)\n    point = rs.AddPoint(r3, g3, b3)\n    color = rs.CreateColor(r3, g3, b3)\n    return color, point\n\n\n\ndef main():\n    point_1  = (255,100,10)\n    point_2 = (10,100,255)\n\n    line = rs.AddLine(point_1, point_2)\n\n    for i in range(11):\n        scalar = .1 * i\n        print (scalar)\n        lin_col = linear_color(point_1, point_2, scalar)\n        color = lin_col[0]\n        point = lin_col[1]\n        rs.ObjectColor(point, color)\n        rs.ObjectColor(line, color)\n\n\nmain()\n\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

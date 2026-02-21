@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trouble-importing-csv-data/46058",
+  "topic_id": 46058,
+  "title": "Trouble importing csv data",
+  "question": "Here is my python code (which runs in python fine);\n\n\nimport math as ma\nimport csv\n\nbrand ='phillips'\nfilename = 'C:\\Users\\gornall72\\Desktop\\import.csv'\n\nwith open(filename,'r') as file:\n    reader = csv.DictReader(file)\n    for row in reader:\n        if(brand in row['Brand Name']):\n            I = (float(row['dB']))\n\nD= 3/ma.sqrt(30/I)\n\nD2= D+3\n\n\nprint D2\n\n\n\nWhen I try to bring it into Rhino I am getting a message saying “No module named csv”. The half of my Rhino code is:\n\n\nimport rhinoscriptsyntax as rs\n\nimport scriptcontext as sc\n\nimport math as ma\n\n\ndef main():\n\n\nresponse=rs.MessageBox( \"Evaluate Classroom?\",  4)\nif response !=7:\n        \n    layer = rs.GetLayer(\"Please select a layer\")\n    if layer:\n        \n        obj = rs.ObjectsByLayer(layer)\n\n       \n        rs.SelectObjects(obj)\n        \n        ObjId=rs.SelectedObjects(include_lights=False, include_grips=False)\n        \n        for obj in ObjId:\n            cent=rs.SurfaceAreaCentroid(obj)\n            print cent[0]\n            rs.AddPoint(cent[0])\n            \n            Radius = 5\n            \n            rs.AddSphere(cent[0],Radius)\n\nelse:\n    rs.MessageBox(\"Evaluation Aborted\")\n\n\n\nmain()\n\n\nRight now where radius is equal to 5 ( in the rhino python script) I am trying to get that equal to the value D2 found in my python formula(the first script) using the csv file. long term id like to automatically apply the information to the layers by a naming convention, maybe by making the brand = to the layer name, but solving this step first would help.\n\n\nThanks\n\n–Chris",
+  "code_blocks": [
+    {
+      "code": "import math as ma\nimport csv\nimport rhinoscriptsyntax as rs\n\ndef CSVbrand():\n    brand ='phillips'\n    #prompt the user for a file to import\n    filter = \"CSV file (*.csv)|*.csv|All Files (*.*)|*.*||\"\n    filename = rs.OpenFileName(\"Open Point File\", filter)\n    if not filename: return\n\n    with open(filename,'r') as file:\n        reader = csv.DictReader(file)\n        for row in reader:\n            if(brand in row['Brand Name']):\n                I = (float(row['dB']))\n\n    D= 3/ma.sqrt(30/I)\n\n    D2= D+3\n\n\n    print D2\n\n##########################################################################\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    CSVbrand()",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport clr\nclr.AddReference(\"System\")\nfrom System.IO import *\n\nlines = File.ReadLines(\"C:\\Python\\data4.csv\")\nfor line in lines:\n...",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import math as ma\nimport csv\nimport rhinoscriptsyntax as rs\n\n\ndef CSVbuilding():\n    #prompt the user for a file to import\n    filter = \"CSV file (*.csv)|*.csv|*.txt|All Files (*.*)|*.*||\"\n    filename = rs.OpenFileName(\"Open Point File\", filter)\n    if not filename: return\n\n    with open(filename) as csvfile:\n        reader = csv.DictReader(csvfile)\n        for row in reader:\n            print(row['Use'], row['Square Footage'])\n\n##########################################################################\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    CSVbuilding()",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import math as ma\nimport csv\nimport rhinoscriptsyntax as rs\n\n\ndef CSVlist():\n    #prompt the user for a file to import\n    filter = \"CSV file (*.csv)|*.csv|*.txt|All Files (*.*)|*.*||\"\n    filename = rs.OpenFileName(\"Open Point File\", filter)\n    if not filename: return\n\n    with open(filename) as csvfile:\n        reader = csv.reader(csvfile)\n        for row in reader:\n            print row\n\n##########################################################################\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    CSVlist()",
+      "language": "python",
+      "author": "scottd",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "response=rs.MessageBox( \"Evaluate Classroom?\",  4)\nif response !=7:\n        \n    layer = rs.GetLayer(\"Please select a layer\")\n    if layer:\n        \n        obj = rs.ObjectsByLayer(layer)\n\n       \n        rs.SelectObjects(obj)\n        \n        ObjId=rs.SelectedObjects(include_lights=False, include_grips=False)\n        \n        for obj in ObjId:\n            cent=rs.SurfaceAreaCentroid(obj)\n            print cent[0]\n            rs.AddPoint(cent[0])\n            \n            Radius = 5\n            \n            rs.AddSphere(cent[0],Radius)\n\nelse:\n    rs.MessageBox(\"Evaluation Aborted\")",
+      "language": "python",
+      "author": "Christopher_Gornall",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 3543
+}

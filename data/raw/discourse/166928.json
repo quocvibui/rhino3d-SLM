@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-shrink-wrap-with-python/166928",
+  "topic_id": 166928,
+  "title": "Using Shrink Wrap with Python",
+  "question": "Hi, I’m fairly new to Python but I’m trying to put something together that will cycle through layers/objects in a rhino project and run the shrink wrap function, As far as I can wrap function is being applied on the input meshes but nothing is being created or output.\n\n\nThe printed layers shows all layers in the model, and you can see each mesh being selected as part of the last few lines added for debugging.\n\n\nHas anyone had any success using Mesh.ShrinkWrap ?\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino as r\n\noptions = (\"Layer Based\", \"Object Based\")\n\nWrapMethod = rs.ListBox(options, \"Pick Wrap Method\")\n\nWrapRes = rs.GetReal(\"Wrap Resolution in meters\", 2, 0.0)\nWrapOffset = rs.GetReal(\"Wrap Offset (expansion) in meters\", 0.0, 0.0)\n\nlayers_with_shrinkwrap = []  # Create an empty list to store layer names\n\nif WrapMethod == \"Object Based\":\n    arrLayers = rs.LayerNames()\n    props = r.Geometry.ShrinkWrapParameters()\n    props.FillHolesInInputObjects = True\n    props.PolygonOptimization = 0\n    props.Offset = WrapOffset\n    props.TargetEdgeLength = WrapRes \n    for strLayer in arrLayers:\n        if not rs.IsLayerEmpty(strLayer):\n            rs.UnselectAllObjects()\n            objs = rs.ObjectsByLayer(strLayer)\n            if objs:\n                for obj in objs:\n                    mesh = rs.coercemesh(obj)\n                    if mesh:\n                        result = r.Geometry.Mesh.ShrinkWrap(mesh, props)\n                        if result:\n                            layers_with_shrinkwrap.append(strLayer)  # Add the layer name to the list\n                            rs.SelectObject(obj)  # Select the wrapped object for visualization\n                            rs.Redraw()  # Redraw the viewport to visualize the wrapped object\n                rs.UnselectAllObjects()\n\n# Print the list of layers where ShrinkWrap was applied\nprint(\"Layers with ShrinkWrap applied:\", layers_with_shrinkwrap)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as r\n\noptions = (\"Layer Based\", \"Object Based\")\n\nWrapMethod = rs.ListBox(options, \"Pick Wrap Method\")\n\nWrapRes = rs.GetReal(\"Wrap Resolution in meters\", 2, 0.0)\nWrapOffset = rs.GetReal(\"Wrap Offset (expansion) in meters\", 0.0, 0.0)\n\nlayers_with_shrinkwrap = []  # Create an empty list to store layer names\n\nif WrapMethod == \"Object Based\":\n    arrLayers = rs.LayerNames()\n    props = r.Geometry.ShrinkWrapParameters()\n    props.FillHolesInInputObjects = True\n    props.PolygonOptimization = 0\n    props.Offset = WrapOffset\n    props.TargetEdgeLength = WrapRes \n    for strLayer in arrLayers:\n        if not rs.IsLayerEmpty(strLayer):\n            rs.UnselectAllObjects()\n            objs = rs.ObjectsByLayer(strLayer)\n            if objs:\n                for obj in objs:\n                    mesh = rs.coercemesh(obj)\n                    if mesh:\n                        result = r.Geometry.Mesh.ShrinkWrap(mesh, props)\n                        if result:\n                            layers_with_shrinkwrap.append(strLayer)  # Add the layer name to the list\n                            rs.SelectObject(obj)  # Select the wrapped object for visualization\n                            rs.Redraw()  # Redraw the viewport to visualize the wrapped object\n                rs.UnselectAllObjects()\n\n# Print the list of layers where ShrinkWrap was applied\nprint(\"Layers with ShrinkWrap applied:\", layers_with_shrinkwrap)",
+      "language": "python",
+      "author": "Simon_J2",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1076
+}

@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-there-a-command-to-select-all-scaled-blocks-in-a-rhino-file/206767",
+  "topic_id": 206767,
+  "title": "Is there a command to select all Scaled Blocks in a Rhino file?",
+  "question": "Hi,\n\n\nDo any users know of a command which can select all Scaled Blocks and/or non-uniformly scaled blocks?\n\n\nI can see there is are options for SelMirroredBlocks and also SelBlockInstanceNamed, however nothing which can select ‘Non-uniformly scaled blocks’\n\n\nIt would be a nice ‘quality of life’ tool to help clean a facade model.\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\ndef has_non_unit_scale(xform, tolerance=1e-6):\n    # Create basis vectors using proper Transform component access\n    x_vector = rs.VectorCreate([xform.M00, xform.M01, xform.M02], [0, 0, 0])\n    y_vector = rs.VectorCreate([xform.M10, xform.M11, xform.M12], [0, 0, 0])\n    z_vector = rs.VectorCreate([xform.M20, xform.M21, xform.M22], [0, 0, 0])\n\n    # Calculate scale as vector lengths\n    scale_x = rs.VectorLength(x_vector)\n    scale_y = rs.VectorLength(y_vector)\n    scale_z = rs.VectorLength(z_vector)\n\n    return (\n        math.fabs(scale_x - 1) > tolerance or\n        math.fabs(scale_y - 1) > tolerance or\n        math.fabs(scale_z - 1) > tolerance\n    )\n\n# Loop through all block instances in the model\nguids = rs.AllObjects()\nfor guid in guids:\n    if rs.IsBlockInstance(guid):\n        xform = rs.BlockInstanceXform(guid)\n        if has_non_unit_scale(xform):\n            rs.SelectObject(guid)\n            print(f\"Scaled block detected: {guid}\")",
+      "language": "python",
+      "author": "martinsiegrist",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 147,
+  "posts_count": 4,
+  "views": 74
+}

@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-for-mac-users-can-also-write-and-execute-python-scripts/18150",
+  "topic_id": 18150,
+  "title": "Rhino for Mac users can also write and execute Python scripts",
+  "question": "Rhino for Mac users who are familiar with the Windows version may suffer from scripting envy not being aware that there are ways to write and execute Python scripts in Rhino for Mac.  \nAtom\n is an open source text editor that’s becoming very popular for good reason.  Not only is it very powerful out of the box but it’s also very extensible and that’s why we created \nrhino-python\n: an Atom package that assists in writting and executing Python scripts in Rhino.\n\n\n\n\nmain.gif\n942×462\n\n\n\n\nYou might even find the rhino-python package usefull if all you need is a central location from which to launch your scripts.  Here’s a \none minute preview\n of a possible workflow.\n\n\nIf you’re interested please read the \ndocumentation\n and give it a try.  This is an early release and we’re just getting started so please let us know what you like, what you don’t like, and what you’d like to see in the future.\n\n\nAlain",
+  "code_blocks": [
+    {
+      "code": "import math\nimport rhinoscriptsyntax as rs\n\nscale_length = 25.5\nnumber_of_frets = 24\n\n#calculate\nf = lambda n: scale_length - (scale_length / math.pow(2, (n/12)))\nfret_x = [f(n) for n in range(0,number_of_frets)]\n\n#draw\nrs.AddLine((0,0,0),(0,3,0)) #nut\nfor x in fret_x:\n  rs.AddLine((x,0,0),(x,3,0)) #frets",
+      "language": "python",
+      "author": "Alain",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport os\n\ndef scripts_symlinker():\n\n    target = \" ~/Library/Application\\ Support/McNeel/Rhinoceros/Scripts \"\n    source = rs.BrowseForFolder()\n    if not source: return\n    source = source.replace(\" \", \"\\ \")\n\n    # merge Scripts folder with source folder\n    os.system (\"ditto\" + target + source)\n\n    # remove Scripts folder\n    os.system (\"rm -rf\" + target)\n\n    # create symlink\n    os.system(\"ln -s \" + source + target)\n\n    print \"The folder: \" + source + \" ...is now linked to your Scripts folder\"\n\nscripts_symlinker()",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 50,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npath = rs.OpenFileName(\"Choose python file\")\nalias = rs.GetString(\"Alias name\")\n\nrs.AddAlias(alias, \"-RunPythonScript \" + path)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 49,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport rhinoscriptsyntax as rs\nSystem.Diagnostics.Process.Start(\"/Applications/Atom.app/Contents/MacOS/Atom\")\nrs.Command(\"_StartAtomEditorListener\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 23,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\nrs.EnableRedraw(True)\n\nuserPt = rs.GetPoint(\"create a point\")\npt = rs.AddPoint(userPt)\n\npts = []\npts.append(pt)\n\nfor i in range(0,100):\n    xDir = random.uniform(-10.0, 10.0)\n    yDir = random.uniform(-10.0, 10.0)\n    zDir = 0.0\n    vect = (xDir, yDir, zDir)\n    newPt = rs.CopyObject(pts[-1],vect)\n    pts.append(newPt)\n\nmyPolyline = rs.AddPolyline(pts)",
+      "language": "python",
+      "author": "Charles_design",
+      "post_number": 64,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 5,
+  "posts_count": 77,
+  "views": 15376
+}

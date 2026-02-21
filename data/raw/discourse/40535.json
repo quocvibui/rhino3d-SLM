@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-insert-objects-and-move-iteration-over-non-sequence-of-type-function/40535",
+  "topic_id": 40535,
+  "title": "Python insert objects and move: iteration over non-sequence of type function",
+  "question": "Hi, I have this problem when I try to use python script to read and insert 3dm object through a csv file and move them to the correct position, also read from a csv file.\n\n\n\n\nPasted image\n1049×123 4.83 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\nimport scriptcontext\nimport System.Guid\nimport scriptcontext as sc\nimport os\n#############################################\n#Select a file to open\nfilename = rs.OpenFileName(\"Open CSV file\",\"*.csv|\", None, None, None)\n \n#open the file for reading\nfile = open(filename, 'r')\nlines = file.readlines() \nfile.close()\ndel lines[0]\n\n#Read the lines in excel sheet and define the values needed\nfor line in lines:\n    line = line.rstrip()\n    ptInfo = line.split(',')\n \n    ## Start to Insert objects\n    #Read the position coordinates of the object\n    x = 1000*float(ptInfo[4])\n    y = 1000*float(ptInfo[5])\n    z = 1000*float(ptInfo[6])  \n    arrPoint = x,y,z\n\n    #Read the path and insert the object\n    file = ptInfo[7]\n    rs.Command('_-Import ' + file + ' _Enter')\n\n    #Try to move it to the correct position\n    arrObjects = rs.LastCreatedObjects\n    rs.MoveObjects(obj, arrPoint)",
+  "code_blocks": [
+    {
+      "code": "# create the vector\n    arrPoint = Rhino.Geometry.Vector3d(x,y,z)\n\n    #Read the path and insert the object\n    file = ptInfo[7]\n    rs.Command('_-Import ' + chr(34) + file + chr(34) + ' _Enter')\n\n    #Try to move it to the correct position\n    arrObjects = rs.LastCreatedObjects()\n    rs.MoveObjects(arrObjects, arrPoint)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\nimport scriptcontext\nimport System.Guid\nimport scriptcontext as sc\nimport os\n#############################################\n#Select a file to open\nfilename = rs.OpenFileName(\"Open CSV file\",\"*.csv|\", None, None, None)\n \n#open the file for reading\nfile = open(filename, 'r')\nlines = file.readlines() \nfile.close()\ndel lines[0]\n\n#Read the lines in excel sheet and define the values needed\nfor line in lines:\n    line = line.rstrip()\n    ptInfo = line.split(',')\n \n    ## Start to Insert objects\n    #Read the position coordinates of the object\n    x = 1000*float(ptInfo[4])\n    y = 1000*float(ptInfo[5])\n    z = 1000*float(ptInfo[6])  \n    arrPoint = x,y,z\n\n    #Read the path and insert the object\n    file = ptInfo[7]\n    rs.Command('_-Import ' + file + ' _Enter')\n\n    #Try to move it to the correct position\n    arrObjects = rs.LastCreatedObjects\n    rs.MoveObjects(obj, arrPoint)",
+      "language": "python",
+      "author": "Yang_Cao",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1414
+}

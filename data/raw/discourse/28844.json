@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/find-polysurface-guid-from-sub-surface-selection/28844",
+  "topic_id": 28844,
+  "title": "Find polysurface guid from sub-surface selection?",
+  "question": "Using Rhino.Common, I can prompt the user to select a sub-surface of a polysurface (which I’m adding to the document for further manipulation).  How can I obtain a reference to the polysurface that contains this subsurface?\n\n\nHere’s my code for sub-surface selection.\n\n\nimport Rhino\nimport System.Guid\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef GetSubSurface(prompt=\"select subsurface\"):\n  # get a surface of an object\n  go=Rhino.Input.Custom.GetObject()\n  go.GeometryFilter=Rhino.DocObjects.ObjectType.Surface\n  go.SetCommandPrompt(prompt)\n  go.Get()\n  print go\n  objref = go.Object(0)\n  go.Dispose()\n\n  brep = objref.Face().DuplicateFace(True)\n  guid = scriptcontext.doc.Objects.AddBrep(brep)\n\n  if (guid != System.Guid.Empty):\n    rc = Rhino.Commands.Result.Success\n    scriptcontext.doc.Views.Redraw()\n  return guid",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n    \ndef GetSubSurface(prompt=\"select subsurface\"):\n    # get a surface of an object\n    go = Rhino.Input.Custom.GetObject()\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    go.SetCommandPrompt(prompt)\n    go.Get()\n    objref = go.Object(0)\n    print \"ObjectId:\", objref.ObjectId\n    go.Dispose()\n    \nGetSubSurface()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport System.Guid\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef GetSubSurface(prompt=\"select subsurface\"):\n  # get a surface of an object\n  go=Rhino.Input.Custom.GetObject()\n  go.GeometryFilter=Rhino.DocObjects.ObjectType.Surface\n  go.SetCommandPrompt(prompt)\n  go.Get()\n  print go\n  objref = go.Object(0)\n  go.Dispose()\n\n  brep = objref.Face().DuplicateFace(True)\n  guid = scriptcontext.doc.Objects.AddBrep(brep)\n\n  if (guid != System.Guid.Empty):\n    rc = Rhino.Commands.Result.Success\n    scriptcontext.doc.Views.Redraw()\n  return guid",
+      "language": "python",
+      "author": "egradman",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1059
+}

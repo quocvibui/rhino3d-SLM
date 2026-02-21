@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/gh-python-script-execution-time-increases-on-each-successive-run/190737",
+  "topic_id": 190737,
+  "title": "GH Python Script Execution Time Increases On Each Successive Run",
+  "question": "I have a script that works on individual planar curves and creates hundreds of offset curves with Rhino.Geometry. This is done in an ghpython component, that imports custom python classes. Results are great.\n\n\nOn one curve the script has an acceptable runtime of approx. 10-12 s depending on the inputs.\n\n\nHowever this has to be applied to 100 - 200 curves, thus I would like to batch run it for 1 hour and be done with it.\n\n\nUnfortunately the execution time increases from 10s on the first run, to 20s on the 2nd and so forth. So I can only process really small batches in an acceptable time frame. If I loop over too many curves Rhino becomes unresponsive and the risk of crashing is increased.\n\n\nIt does not matter whether:\n\n\n\n\nI feed the curves as a list access / array and loop over the curves within the python component\n\n\nI design the component for a single curve and then use implicit looping via “item access” and feed the curves as array.\n\n\n\n\nRuntime/behaviour is almost identical.\n\n\nI looked for bottlenecks or growing arrays in the code, but just the smallest operations take longer and longer on each subsequent run. e.g. 50 ms to 100 ms to 150 ms.\n\n\nThe heavy lifting is done in Rhino.Geometry with Offsets of NurbsCurves, PolyCurves, Trimming and Joining results etc.\n\n\nIs there any way to reset and free rhino python ressources within the loop to avoid this behaviour?\n\n\nThe topic has been brought up here, but that is from 2014 and I am not sure that is still an issue:\n\n\n\n\n\n\ngrasshopper3d.com\n\n\n\n\n\n\nghPython slows down on subsequent runs – Grasshopper\n\n\n\n\n\n\n\n\n\n\n\n\nBR Conrad",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nfrom timeit import default_timer as time\n\nMAX_ITERATIONS = 500\n\ni = 0\nwhile i < MAX_ITERATIONS:\n    start_time = time()\n    i += 1\n    for point in points:\n        point.DistanceTo(rg.Point3d(0,0,0))\n    print(time() - start_time)",
+      "language": "python",
+      "author": "Bendiko",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport Rhino\nfrom timeit import default_timer as time\n\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nsc.doc = ghdoc #Rhino.RhinoDoc.ActiveDoc\n\nMAX_ITERATIONS = 500\n\n# points = rs.ObjectsByType(1)\n\ni = 0\nwhile i < MAX_ITERATIONS:\n    start_time = time()\n    i += 1\n    for point in x:\n        geom = sc.doc.Objects.FindGeometry(point)\n        geom.Location.DistanceTo(rg.Point3d(0,0,0))\n    print(time() - start_time)",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 18,
+  "views": 344
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-getsettings-alternative-in-rhinopython/93283",
+  "topic_id": 93283,
+  "title": "Rhino.GetSettings alternative in RhinoPython?",
+  "question": "Hi,\n\nCould anyone help me with something?\n\n\nWhat is the alternative of \nRhino.GetSettings()\n in Python?\n\n\nAnd Rhino6, in case it is old thing?\n\n\nThanks in advance.",
+  "code_blocks": [
+    {
+      "code": "def GetSettings(filename, section=None, entry=None):\n    \"\"\"Returns string from a specified section in a initialization file.\n    Parameters:\n      filename (str): name of the initialization file\n      section (str, optional): section containing the entry\n      entry (str, optional): entry whose associated string is to be returned\n    Returns:\n      list(str, ...): If section is not specified, a list containing all section names\n      list:(str, ...): If entry is not specified, a list containing all entry names for a given section\n      str: If section and entry are specified, a value for entry\n      None: if not successful\n    Example:\n      import rhinoscriptsyntax as rs\n      filename = rs.OpenFileName(\"Open\", \"Initialization Files (*.ini)|*.ini||\")\n      if filename:\n          sections = rs.GetSettings(filename)\n          if sections:\n              section = rs.ListBox(sections, \"Select a section\", filename)\n              if section:\n                  entries = rs.GetSettings(filename, section)\n                  if entries:\n                      entry = rs.ListBox(entries, \"Select an entry\", section)\n                      if entry:\n                          value = rs.GetSettings(filename, section, entry)\n                          if value: rs.MessageBox( value, 0, entry )\n    See Also:\n      \n    \"\"\"\n    import ConfigParser\n    try:\n        cp = ConfigParser.ConfigParser()\n        cp.read(filename)\n        if not section: return cp.sections()\n        section = string.lower(section)\n        if not entry: return cp.options(section)\n        entry = string.lower(entry)\n        return cp.get(section, entry)\n    except IOError:\n        return scriptcontext.errorhander()\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "def SetSettings(filename, section=None, entry=None, value=None):\n    import ConfigParser\n    try:\n        cp = ConfigParser.ConfigParser()\n        cp.read(filename)\n        \n        if not section: return\n        if not entry:return\n        cp[section][entry] = value\n        with open(filename, 'w') as ini_file:\n            cp.write(ini_file)\n    except IOError:\n        return scriptcontext.errorhandler()\n    return scriptcontext.errorhandler()",
+      "language": "python",
+      "author": "ivelin.peychev",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 427
+}

@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/wip7-material-texture-not-showing-on-viewport-bug/103498",
+  "topic_id": 103498,
+  "title": "WIP7. Material texture not showing on viewport. BUG?",
+  "question": "Hi, I’m trying to assign a renderMaterial to a programatically added object using Python. Strange thing happening here:\n\n\nOnce object added to the document, I check in object properties the correct material was assigned.\n\n\nIf material color is defined by a bitmap, the texture is not displaying in Rendered mode.\n\nIf material color is defined with a color, the color is displayed correctly in Rendered mode.\n\n\nIn Raytraced mode material texture is correctly displayed IF when I baked the object display mode was NOT Raytraced. Otherwise, if rendermode was Raytraced, material texture wont appear correctly (burned out, incorrecty scaled)\n\n\nif I manually change the textured material to diffuse material, and then reassign the textured material, then it will correctly show up in rendered mode.\n\n\nI recorded a video to show this behaviour:\n\n\n\n\n\n\n\n\n\n\n\nSeems a bug, but maybe I’m not correctly making things with my code…\n\n\nimport Rhino\nimport Rhino.Geometry as rg\nfrom Rhino.RhinoDoc import ActiveDoc as doc\n\n#create two boxes\ninterval = rg.Interval(0,100)\nbox = rg.Box(rg.Plane.WorldXY,interval,interval,interval)\nbox01 = box.ToBrep()\nbox02 = box01.Duplicate()\nbox02.Translate(150,0,0)\n\n#retrieve renderMaterials by name\nbox01MatName = 'mat_textured'\nbox02MatName = 'mat_noTexture'\nfor mat in doc.RenderMaterials:\n    if mat.Name == box01MatName:\n        renderMat01 = mat\n    elif mat.Name == box02MatName:\n        renderMat02 = mat\n\n#bake objects and get the RhinoObject\nattr = doc.CreateDefaultAttributes()\nid01 = doc.Objects.Add(box01,attr)\nrhinoObject01 = doc.Objects.FindId(id01)\nid02 = doc.Objects.Add(box02,attr)\nrhinoObject02 = doc.Objects.FindId(id02)\n\n#assign renderMaterials to RhinoObject\nrhinoObject01.RenderMaterial = renderMat01\nrhinoObject02.RenderMaterial = renderMat02\n\n#commit changes\nrhinoObject01.CommitChanges()\nrhinoObject02.CommitChanges()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nfrom Rhino.RhinoDoc import ActiveDoc as doc\n\n#create two boxes\ninterval = rg.Interval(0,100)\nbox = rg.Box(rg.Plane.WorldXY,interval,interval,interval)\nbox01 = box.ToBrep()\nbox02 = box01.Duplicate()\nbox02.Translate(150,0,0)\n\n#retrieve renderMaterials by name\nbox01MatName = 'mat_textured'\nbox02MatName = 'mat_noTexture'\nfor mat in doc.RenderMaterials:\n    if mat.Name == box01MatName:\n        renderMat01 = mat\n    elif mat.Name == box02MatName:\n        renderMat02 = mat\n\n#bake objects and get the RhinoObject\nattr = doc.CreateDefaultAttributes()\nid01 = doc.Objects.Add(box01,attr)\nrhinoObject01 = doc.Objects.FindId(id01)\nid02 = doc.Objects.Add(box02,attr)\nrhinoObject02 = doc.Objects.FindId(id02)\n\n#assign renderMaterials to RhinoObject\nrhinoObject01.RenderMaterial = renderMat01\nrhinoObject02.RenderMaterial = renderMat02\n\n#commit changes\nrhinoObject01.CommitChanges()\nrhinoObject02.CommitChanges()",
+      "language": "python",
+      "author": "aitorleceta",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 492
+}

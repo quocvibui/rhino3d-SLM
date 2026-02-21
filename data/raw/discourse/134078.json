@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getpoint-double-option-and-keyboardevent/134078",
+  "topic_id": 134078,
+  "title": "GetPoint, Double Option and KeyboardEvent",
+  "question": "Hi,\n\n\nI’m using a GetPoint with multiple DoubleOptions, and I would like to change values using shortcuts.\n\n\nI was checking KeyboardEvent, and I can catch the keys, but is there a way to don’t propagate it? If not, I can create my own keyboard hook.\n\n\nAnother question, is there a way to change the value of a Double option by code while is in execution? I change the value, but the command prompt still shows the original value.\n\n\nThanks,\n\n\nRafa",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Guid\nfrom System.Drawing import *\n\ndef OrientOnSrf():\n    # Select objects to orient\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select objects to orient\")\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n\n    # Point to orient from\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"Point to orient from\")\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n    \n    # Define source plane\n    view = gp.View()\n    if not view:\n        view = doc.Views.ActiveView\n        if not view: return Rhino.Commands.Result.Failure\n\n    source_plane = view.ActiveViewport.ConstructionPlane()\n    source_plane.Origin = gp.Point()\n\n    # Surface to orient on\n    gs = Rhino.Input.Custom.GetObject()\n    gs.SetCommandPrompt(\"Surface to orient on\")\n    gs.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    gs.SubObjectSelect = True\n    gs.DeselectAllBeforePostSelect = False\n    gs.OneByOnePostSelect = True\n    gs.Get()\n    if gs.CommandResult()!=Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    objref = gs.Object(0)\n    # get selected surface object\n    obj = objref.Object()\n    if not obj: return Rhino.Commands.Result.Failure\n    # get selected surface (face)\n    surface = objref.Surface()\n    if not surface: return Rhino.Commands.Result.Failure\n    # Unselect surface\n    obj.Select(False)\n    \n    def GetPointDynamicDrawFunc( sender, args ):\n        rhobjref = go.Object(0)\n        rhobj = rhobjref.Object()\n        getrc, u, v = surface.ClosestPoint(args.CurrentPoint)\n        getrc, target_plane = surface.FrameAt(u,v)\n        xf = Rhino.Geometry.Transform.PlaneToPlane(source_plane, target_plane)\n        delete_original = False\n        #scriptcontext.doc.Objects.Transform(rhobj, xf, delete_original)\n        args.Display.DrawObject(rhobj , xf)\n        #scriptcontext.doc.Views.Redraw()\n        \n    # Point on surface to orient to\n    gp.SetCommandPrompt(\"Point on surface to orient to\")\n    gp.Constrain(surface, False)\n    gp.AddOptionInteger +=\n    gp.DynamicDraw += GetPointDynamicDrawFunc\n    gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n\n    # Do transformation\n    rc = Rhino.Commands.Result.Failure\n    getrc, u, v = surface.ClosestPoint(gp.Point())\n    if getrc:\n        getrc, target_plane = surface.FrameAt(u,v)\n        if getrc:\n            # Build transformation\n            xform = Rhino.Geometry.Transform.PlaneToPlane(source_plane, target_plane)\n            # Do the transformation. In this example, we will copy the original objects\n            delete_original = False\n            for i in range(go.ObjectCount):\n                rhobj = go.Object(0)\n                scriptcontext.doc.Objects.Transform(rhobj, xform, delete_original)\n            scriptcontext.doc.Views.Redraw()\n            rc = Rhino.Commands.Result.Success\n    return rc\n\nOrientOnSrf()",
+      "language": "python",
+      "author": "benedict",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Call TestGetKey()\n\nSub TestGetKey\n\t\n\tDim key\n\tDim strUpSrf\n\tDim arrPtOnSrf\n\t\n\tstrUpSrf = rhino.GetObject(\"select UpSrf\", 8)\n\tWhile Not IsNull(key)\n\t\tkey = Rhino.GetKey(\"Press a key\")\n\t\tIf Not isNull(key) Then \n\t\t\t\n\t\t\tIf key(0) = \"81\" Then '---Q---\n\t\t\t\tmsgbox(\"-SIZE/---Q---\")\n\t\t\tEnd If\n\t\t\t\n\t\t\tIf key(0) = \"87\" Then '---W---\n\t\t\t\tmsgbox(\"MOVE UP/---W---\")\n\t\t\tEnd If\n\t\t\t\n\t\t\tIf key(0) = \"69\" Then '---E---\n\t\t\t\tmsgbox(\"+SIZE/---E---\")\n\t\t\tEnd If\n\t\t\t\n\t\t\tIf key(0) = \"65\" Then '---A---\n\t\t\t\tmsgbox(\"TURN LEFT/ ---A---\")\n\t\t\tEnd If\n\t\t\t\n\t\t\tIf key(0) = \"83\" Then '---S---\n\t\t\t\tmsgbox(\"MOVE DOWN/---S---\")\n\t\t\tEnd If\n\t\t\t\n\t\t\tIf key(0) = \"68\" Then '---D---\n\t\t\t\tmsgbox(\"TURN RIGHT/---D---\")\n\t\t\tEnd If\n\t\t\t\n\t\t\t'\t\t\tIf key(0) = \"13\" Then '---Enter---\n\t\t\t'\t\t\tmsgbox(\"Enter\")\n\t\t\t'\t\t\tEnd If\n\t\t\t'\t\t\t\n\t\tElse\n\t\t\tDim arrCursor\n\t\t\tarrCursor = Rhino.GetCursorPos\n\t\t\tRhino.AddPoint(arrCursor(0))\n\t\t\tmsgbox(\"---LMC---\")\n\t\tEnd If\n\tWend\nEnd Sub",
+      "language": "unknown",
+      "author": "benedict",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 901
+}

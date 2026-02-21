@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/math-geometry-help/45612",
+  "topic_id": 45612,
+  "title": "Math / geometry help",
+  "question": "I am trying to find the size / angle of an inset rectangle, and I can’t seem to figure out how I can do it:\n\n\n\n\nI have a bounding quadrilateral, who’s size is known. I want to place a rectangle with one known dimension (width) in the bounding quadrilateral so that one corner of the inset rectangle hits each edge of the bounding quadrilateral. The angle and length of the inset rectangle can change as required.\n\n\nAnyone have any suggestions on how to solve this?\n\n\nThanks,\n\nSam",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport math\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef betavecs( p0, p1, p2 ):\n  be = abs( Rhino.Geometry.Vector3d.VectorAngle( ( p0 - p1 ), ( p2 - p0 ) ) )\n  if be > math.pi:\n    be = math.pi * 2 - be\n  be *= 0.5 \n  v1 = p1 - p0\n  v1.Unitize()\n  v2 = p2 - p0\n  v2.Unitize()\n  return ( be, v1, v2 )\n\ndef line( p0, be, v1, v2, wd, al ):\n  la = wd * math.sin( be - al ) / math.sin( be * 2.0 )\n  lb = wd * math.sin( be + al ) / math.sin( be * 2.0 )\n  aa = p0 + v1 * la\n  bb = p0 + v2 * lb\n  cc = ( aa + bb ) * 0.5\n  ve = v1 + v2\n  ve.Unitize()\n  ve.Rotate( - al, Rhino.Geometry.Vector3d.ZAxis )\n  lin = Rhino.Geometry.Line( cc, ve )\n  return lin\n\ndef guessalpha( p0, v1, v2, pt ):\n  bi = v1 + v2\n  ve = pt - p0\n  al = Rhino.Geometry.Vector3d.VectorAngle( ve, bi )\n  if al < 0.0:\n    al += math.pi * 2.0\n  cp = Rhino.Geometry.Vector3d.CrossProduct( ve, bi )\n  if cp.Z < 0.0:\n    al = -al\n  return al\n\ndef main():\n  p0a = rs.GetPoint( 'First vertex ?' )\n  if not p0a:\n    return\n  p1a = rs.GetPoint( '(First vertex) Point on one side ?' )\n  if not p1a:\n    return\n  p2a = rs.GetPoint( '(First vertex) Point on the other side ?' )\n  if not p2a:\n    return\n  p0b = rs.GetPoint( 'Second vertex ?' )\n  if not p0b:\n    return\n  p1b = rs.GetPoint( '(Second vertex) Point on one side ?' )\n  if not p1b:\n    return\n  p2b = rs.GetPoint( '(Second vertex) Point on the other side ?' )\n  if not p2b:\n    return\n  wd = rs.GetReal( 'Rectangle fixed width ?' )\n  if not wd:\n    return\n# tol = rs.GetReal( 'Tolerance ?' )\n  tol = scriptcontext.doc.ModelAbsoluteTolerance\n\n  cp = Rhino.Geometry.Vector3d.CrossProduct( ( p0a - p1a ), ( p2a - p0a ) )\n  if cp.Z > 0.0:\n    p1a, p2a = p2a, p1a\n  \n  cp = Rhino.Geometry.Vector3d.CrossProduct( ( p0b - p1b ), ( p2b - p0b ) )\n  if cp.Z > 0.0:\n    p1b, p2b = p2b, p1b\n\n  bea, v1a, v2a = betavecs( p0a, p1a, p2a )\n  beb, v1b, v2b = betavecs( p0b, p1b, p2b )\n\n  ala = guessalpha( p0a, v1a, v2a, p0b )\n  alb = guessalpha( p0b, v1b, v2b, p0a )\n  while True:\n    scriptcontext.escape_test()\n    lina = line( p0a, bea, v1a, v2a, wd, ala ) \n    linb = line( p0b, beb, v1b, v2b, wd, alb ) \n    dis = lina.DistanceTo( linb.From, False )\n    print( '%.3f' % dis )\n    if dis < tol:\n      break\n    nala = guessalpha( lina.From, v1a, v2a, linb.From )\n    nalb = guessalpha( linb.From, v1b, v2b, lina.From )\n    ala = ( ala + nala ) * 0.5\n    alb = ( alb + nalb ) * 0.5\n\n  lin = Rhino.Geometry.Line( lina.From, linb.From )\n  tan = lin.UnitTangent\n  ve = Rhino.Geometry.Vector3d( -tan.Y, tan.X, 0.0 )\n  pli = []\n  pli.append( lin.From + ve * wd * 0.5 )\n  pli.append( lin.From - ve * wd * 0.5 )\n  pli.append( lin.To - ve * wd * 0.5 )\n  pli.append( lin.To + ve * wd * 0.5 )\n  pli.append( lin.From + ve * wd * 0.5 )\n  print( 'Rectangle is long %.3f' % lin.Length )\n\n  scriptcontext.doc.Objects.AddPolyline( pli )\n  scriptcontext.doc.Views.Redraw()\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 10,
+  "posts_count": 13,
+  "views": 1946
+}

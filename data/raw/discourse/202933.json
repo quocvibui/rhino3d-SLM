@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/automatically-create-multiple-layout-from-rectangle/202933",
+  "topic_id": 202933,
+  "title": "Automatically create multiple layout from rectangle",
+  "question": "Create multiple layouts automatically from selecting multiple rectangles.\n\n\ngood to knows:\n\n\n1- All the layouts has to be one size (for example A3) but they can vary in scale depending on the size of the selected rectangle (for example if you use A3 and select a rectangle that’s 42000 x 29700 then a layout will be made with a detail and sets it’s scale to 100, you could have varying rectangles for varying scales but not varying layout sizes)\n\n\n2- works best when model space and layout space units are set to the same unit (tbh I’ve only tried mm and it works, idk if it works for other units but lmk I’ll fix it for you)\n\n\n3- You should never run this script more than once, so you should prepare everything then run the command, however if you wanted to-- you have to delete all the layouts then re run the script otherwise it doesn’t work right\n\n\n4- in the 5th line you can change the layout size (this is the only adjustment you need to make) the number before the comma is the width of the layout and the number after is the height, in my example I’ve used millimetre\n\n\nA3\n\n\n\n\nx, y = 420, 297\n\n\n\n\nA4\n\n\n\n\nx,y = 297, 210\n\n\n\n\n5- by default all the detail views will be locked, if you don’t want that change True from line 7 to False (or you can just copy the single line below and paste it in line 7 of the script)\n\n\n\n\nLOCK = False\n\n\n\n\n6- order of creating the layouts is based on the rectangle’s center point, the order is from left top to right bottom\n\n\n7- if you want to change vertical to horizontal or vise versa, switch the numbers places seen 4th point\n\n\nbigger number first = horizontal / landscape\n\n\n\n\nx, y = 420, 297\n\n\n\n\nsmaller number first = vertical / portrait\n\n\n\n\nx, y = 297, 420\n\n\n\n\nhope you find it useful and save precious time with it\n\n\nif you’d like to improve the script you’re very welcome and please start with fixing bug in 3rd point\n\n\n#! python3\nimport Rhino as rh\nfrom math import sqrt\n\n#page size\nx, y = 420, 297\n#lock detail view?\nLOCK = True\n\ndef get_objects():\n    ...",
+  "code_blocks": [
+    {
+      "code": "#! python3\nimport Rhino as rh\nfrom math import sqrt\n\n#page size\nx, y = 420, 297\n#lock detail view?\nLOCK = True\n\ndef get_objects():\n    a = rh.Input.Custom.GetObject()\n    a.SetCommandPrompt(\"Select Page Bounding Rectangles\")\n    a.SubObjectSelect = False\n    a.GroupSelect = True\n    a.AcceptNothing(False)\n    a.EnablePostSelect(True)\n    res = a.GetMultiple(1, 0)\n    \n    if res == rh.Input.GetResult.Object:\n        res = [a.Object(i).Object() for i in range(a.ObjectCount)]\n        return res\n    else:\n        print(\"No objects selected\")\n\ndef check_rectangle(list_of_objects):\n    rec_list = []\n    for i in list_of_objects:\n        try:\n            crv = i.CurveGeometry\n            crv = crv.ToPolyline()\n            rec = rh.Geometry.Rectangle3d.CreateFromPolyline(crv)\n            rec_list.append(rec)\n        except Exception:\n            print(\"Can't turn selected objects into rectangle\")\n    return rec_list\n\ndef sort_list(points, items):\n    return [item for _, item in sorted(zip(points, items), key=lambda pair: (-pair[0][1], pair[0][0]))]\n\nobjects = get_objects()\nrectangles = check_rectangle(objects)\ncenter_points = [i.Center for i in rectangles]\n\ncp = []\nfor i in center_points:\n    cp.append((i.X,i.Y,i.Z))\nrectangles = sort_list(cp, rectangles)\n\nb = len(rectangles)\ncr1, cr2 = rh.Geometry.Point2d(0,0), rh.Geometry.Point2d(x,y) \nA1 = sqrt(x*y)\nA2 = [i.Area for i in rectangles]\nscale_factor = [round(sqrt(i)/A1, 0) for i in A2]\ndoc = rh.RhinoDoc.ActiveDoc\nlayers = doc.Layers\nblack = rh.Display.Color4f(0,0,0,1)\nblack = black.AsSystemColor()\nnew_layer = layers.Add(\"LN_DetailViews\", black)\nlayers.SetCurrentLayerIndex(new_layer, True)\nNUM = len(doc.Views.GetPageViews())\n\nfor i in range(b):\n    L = doc.Views.AddPageView(\"page {}\".format(i+1+NUM),x,y)\n    D = L.AddDetailView(\"D_{}\".format(i+1+NUM), cr1, cr2, rh.Display.DefinedViewportProjection.Top)\n    D.IsActive = True\n    VP = D.Viewport\n    dd = VP.ZoomBoundingBox(rectangles[i].BoundingBox)\n    DV = D.DetailGeometry\n    DV.SetScale(scale_factor[i], doc.ModelUnitSystem, 1, doc.PageUnitSystem)\n    VP.LockedProjection = True\n    DV.IsProjectionLocked = LOCK\n    D.CommitChanges()\n    D.IsActive = False\n\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "Lawand_Noa_man",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 168
+}

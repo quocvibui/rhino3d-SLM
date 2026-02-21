@@ -1,0 +1,76 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/detect-triangles-on-the-subd-wish/175493",
+  "topic_id": 175493,
+  "title": "Detect triangles on the Subd. Wish",
+  "question": "Hello.\n\nIs there any way to analysis subd object for the presence of triangles/pentagons?\n\nJust like it was in T-Splines оr another method.\n\n\n\n\n\n\nThis is \n!_tsLayout\n in T-Splines.\n\n\nDetect triangles\n1815×830 72.3 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef mark_subd():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select SubD\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.SubD\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.DeselectAllBeforePostSelect = False\n    go.OneByOnePostSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n        guids = []\n        for face in subd.Faces:\n            if face.EdgeCount not in [3, 5]: continue\n            guid = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint)\n            guids.append(guid)\n        index = scriptcontext.doc.Groups.Add(guids)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    mark_subd()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript\n(\nimport Rhino\nimport scriptcontext\n\ndef mark_subd():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select SubD\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.SubD\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.DeselectAllBeforePostSelect = False\n    go.OneByOnePostSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n        guids = []\n        for face in subd.Faces:\n            if face.EdgeCount not in [3, 5]: continue\n            guid = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint)\n            guids.append(guid)\n        index = scriptcontext.doc.Groups.Add(guids)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    mark_subd()\n\n)",
+      "language": "python",
+      "author": "leex",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\n\ndef mark_subd():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select SubD\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.SubD\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    \n    \n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult() \n        rs.UnselectAllObjects()\n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n        guids = []\n        for face in subd.Faces:\n            if face.EdgeCount not in [3, 5]: continue\n            guid = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint)\n            guids.append(guid)\n        index = scriptcontext.doc.Groups.Add(guids)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    mark_subd()",
+      "language": "python",
+      "author": "leex",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n\n\ndef mark_subd():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select SubD\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.SubD\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    \n    \n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult() \n        rs.UnselectAllObjects()\n    \n    \n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n        guids = []\n        for face in subd.Faces:\n            if face.EdgeCount not in [3, 5,]: continue\n            guid = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint)\n            guids.append(guid)\n        index = scriptcontext.doc.Groups.Add(guids)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    mark_subd()\n\n\n    rs.Command('_SelNone _SelLast -Properties _Pause _Object _Color _Object 255,0,0 _EnterEnd')  \n    rs.Command('_SelNone')",
+      "language": "python",
+      "author": "leex",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef mark_subd():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select SubD\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.SubD\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        obj.Select(False)\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n        ids = []\n        for face in subd.Faces:\n            if face.EdgeCount not in [3, 5]: continue\n            id = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint)\n            ids.append(id)\n        index = scriptcontext.doc.Groups.Add(ids)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    mark_subd()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "attributes = ObjectAttributes()\n  attributes.ObjectColor = Color.FromArgb(255, 127, 0)\n  attributes.ColorSource = ObjectColorSource.ColorFromObject",
+      "language": "unknown",
+      "author": "leex",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nfrom System.Drawing import Color\n\ndef mark_subd():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select SubD\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.SubD\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    att = Rhino.DocObjects.ObjectAttributes()\n    att.ObjectColor = Color.FromArgb(255, 127, 0)\n    att.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        obj.Select(False)\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n        ids = []\n        for face in subd.Faces:\n            if face.EdgeCount not in [3, 5]: continue\n            id = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint, att)\n            ids.append(id)\n        index = scriptcontext.doc.Groups.Add(ids)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    mark_subd()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 12,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nfrom System.Drawing import Color\n\ndef mark_subd():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select SubD\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.SubD\n    go.SubObjectSelect = False\n    go.GroupSelect = True\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    att3 = Rhino.DocObjects.ObjectAttributes()\n    att3.ObjectColor = Color.GreenYellow\n    att3.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n    \n    att5 = Rhino.DocObjects.ObjectAttributes()\n    att5.ObjectColor = Color.OrangeRed\n    att5.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject\n    \n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        obj.Select(False)\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n        ids = []\n        for face in subd.Faces:\n            if face.EdgeCount not in [3]: continue\n            id = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint, att3)\n            ids.append(id)\n            \n    for i in range(go.ObjectCount):\n        objref = go.Object(i)\n        obj = objref.Object()\n        obj.Select(False)\n        if not obj: continue\n        subd = objref.SubD()\n        if not subd: continue\n\n        for face in subd.Faces:\n            if face.EdgeCount not in [5]: continue\n            id = scriptcontext.doc.Objects.AddTextDot(str(face.EdgeCount), face.LimitSurfaceCenterPoint, att5)\n            ids.append(id)\n\n        index = scriptcontext.doc.Groups.Add(ids)\n    scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    mark_subd()",
+      "language": "python",
+      "author": "leex",
+      "post_number": 13,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 55,
+  "posts_count": 11,
+  "views": 573
+}

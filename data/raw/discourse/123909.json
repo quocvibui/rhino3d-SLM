@@ -1,0 +1,55 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-shrinktrimmedsurface-broken-for-certain-input-cases/123909",
+  "topic_id": 123909,
+  "title": "rs.ShrinkTrimmedSurface() broken for certain input cases",
+  "question": "Was just testing something this morning and ran across this.  The help for rs.ShrinkTrimmedSurface() implies that it should accept either surfaces or polysurfaces.\n\n\n\n\nimage\n826×428 10.6 KB\n\n\n\n\nHowever if I feed it a polysurface it fails.  If I feed it a single surface it works.  I used this to test:\n\n\nimport rhinoscriptsyntax as rs\n\nmsg=\"Select surfaces or polysurfaces to shrink\"\nobjs=rs.GetObjects(msg,8+16,preselect=True)\nif objs:\n    for obj in objs:\n        result=rs.ShrinkTrimmedSurface(obj,False)\n        print result\n\n\n\nIf you select the two closed polysurfaces in the file below, it fails and prints “None, None”\n\nIf you explode one or the other of the polysurfaces and select say the unshrunk horizontal surfaces of the result, it succeeds.\n\n\nShrinkTest.3dm\n (2.0 MB)\n\n\nUpon further investigation and testing:\n\nThe underlying RC code for rs.ShrinkTrimmedSurface() is as follows:\n\n\n    brep = rhutil.coercebrep(object_id, True)\n    if not brep.Faces.ShrinkFaces(): return scriptcontext.errorhandler()  #fails here if input is a multiface brep\n    rc = None\n    object_id = rhutil.coerceguid(object_id)\n    if create_copy:\n        oldobj = scriptcontext.doc.Objects.Find(object_id)\n        attr = oldobj.Attributes\n        rc = scriptcontext.doc.Objects.AddBrep(brep, attr)\n    else:\n        rc = scriptcontext.doc.Objects.Replace(object_id, brep)\n    scriptcontext.doc.Views.Redraw()\n    return rc\n\n\n\nIf I step into that function I see it is failing because \nbrep.Faces.ShrinkFaces()\n reports \nFalse\n if a polysurface is input \nthat has at least one UNSHRUNK (i.e. natural) face\n.  If all the faces are unshrunk, it succeeds and reports true.\n\n\nI used this as a simplified test with the file below:\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nmsg=\"Select surfaces or polysurfaces to shrink\"\nobjs=rs.GetObjects(msg,8+16,preselect=True)\nif objs:\n    for obj in objs:\n        brep = rs.coercebrep(obj,True)\n        shrink=brep.Faces.ShrinkFaces()\n        if no...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef ShrinkTrimmedSurfaceEx(object_id, create_copy=False):\n    \"\"\"Shrinks the underlying untrimmed surfaces near to the trimming\n    boundaries. See the ShrinkTrimmedSrf command in the Rhino help.\n    \n    ############################################################################\n    Temporary remedy for bug/limitation in the native rhinoscriptsyntax method.\n    This version also works on breps that contain  at least one unshrunk face,\n    the native version will fail to do anyting in this case.\n    Script by Mitch Heynick 13.05.21\n    ############################################################################\n    \n    Parameters:\n      object_id (guid): the surface's identifier\n      create_copy (bool, optional): If True, the original surface is not deleted\n    Returns:\n      bool: If create_copy is False, True or False indicating success or failure\n      bool: If create_copy is True, the identifier of the new surface\n      None: on error\n    Example:\n      import rhinoscriptsyntax as rs\n      filter = rs.filter.surface | rs.filter.polysurface\n      surface = rs.GetObject(\"Select surface or polysurface to shrink\", filter )\n      if surface: rs.ShrinkTrimmedSurface( surface )\n    See Also:\n      IsSurfaceTrimmed\n    \"\"\"\n\n    brep = rs.coercebrep(object_id, True)\n    chk_brep=brep.Duplicate()\n    brep.Faces.ShrinkFaces()\n    #if result is not valid, return\n    if not brep.IsValid: return sc.errorhandler()\n    #if nothing was shrunk, brep and chk_brep are the same - return False\n    if Rhino.Geometry.GeometryBase.GeometryEquals(brep,chk_brep): return False\n    rc = None\n    object_id = rs.coerceguid(object_id)\n    if create_copy:\n        oldobj = sc.doc.Objects.Find(object_id)\n        attr = oldobj.Attributes\n        rc = sc.doc.Objects.AddBrep(brep, attr)\n    else:\n        rc = sc.doc.Objects.Replace(object_id, brep)\n    sc.doc.Views.Redraw()\n    return rc\n\nobj_id=rs.GetObject(\"Select a polysurface to shrink\",16,preselect=True)\nif obj_id:\n    #test_result=rs.ShrinkTrimmedSurface(obj_id)\n    test_result=ShrinkTrimmedSurfaceEx(obj_id)\n    print test_result",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmsg=\"Select surfaces or polysurfaces to shrink\"\nobjs=rs.GetObjects(msg,8+16,preselect=True)\nif objs:\n    for obj in objs:\n        result=rs.ShrinkTrimmedSurface(obj,False)\n        print result",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "brep = rhutil.coercebrep(object_id, True)\n    if not brep.Faces.ShrinkFaces(): return scriptcontext.errorhandler()  #fails here if input is a multiface brep\n    rc = None\n    object_id = rhutil.coerceguid(object_id)\n    if create_copy:\n        oldobj = scriptcontext.doc.Objects.Find(object_id)\n        attr = oldobj.Attributes\n        rc = scriptcontext.doc.Objects.AddBrep(brep, attr)\n    else:\n        rc = scriptcontext.doc.Objects.Replace(object_id, brep)\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nmsg=\"Select surfaces or polysurfaces to shrink\"\nobjs=rs.GetObjects(msg,8+16,preselect=True)\nif objs:\n    for obj in objs:\n        brep = rs.coercebrep(obj,True)\n        shrink=brep.Faces.ShrinkFaces()\n        if not shrink:\n            print \"Shrink failed!\"\n        else:\n            print \"Shrink succeeded.\"",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nmsg=\"Select surfaces or polysurfaces to shrink\"\nobjs=rs.GetObjects(msg,8+16,preselect=True)\nif objs:\n    for obj in objs:\n        brep = rs.coercebrep(obj,True)\n        shrink=brep.Faces.ShrinkFaces()\n        if not shrink:\n            print \"Shrink failed!\"\n        else:\n            print \"Shrink succeeded.\"\n        if brep:\n            sc.doc.Objects.Replace(obj,brep)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 614
+}

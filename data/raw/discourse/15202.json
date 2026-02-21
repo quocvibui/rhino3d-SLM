@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/marking-foci-fails-for-ellipse-created-by-intersection-plane-cone/15202",
+  "topic_id": 15202,
+  "title": "Marking foci fails for ellipse created by intersection plane/cone",
+  "question": "I am trying to mark the foci of an ellipse created by intersecting a plane and a cone.  It fails when I do this.  Is this a bug?  It feels like a bug.  It works correctly when I intersect a plane with a cylinder.    I am running the latest Wenatchee for MAC. thanks, david",
+  "code_blocks": [
+    {
+      "code": "# Script for mark Ellipse foci\n#write by ing. Vittorio Carlotto 24-12-2014  vittoriocarlotto@gmail.com\nimport rhinoscriptsyntax as rs\ndef fuochiEllisse():       \n    \n    oldplane=rs.ViewCPlane() # CPlane attuale\n    currentview=rs.CurrentView()  # vista corrente\n    strObject = rs.GetObject(\"Select a curve\") \n    if strObject==None:return\n    rs.EnableRedraw(False)\n    if rs.IsCurve(strObject) :        \n        arrpc=rs.CurveAreaCentroid(strObject)\n        pc=arrpc[0]         # centro ellisse        \n        param=rs.CurveClosestPoint(strObject,pc)\n        pcl=rs.EvaluateCurve(strObject,param)\n        result=rs.CurveSeam(strObject,param)\n        if result==True:            \n            arrPoints=rs.DivideCurve(strObject,4)               \n        if arrPoints :        \n               pb=arrPoints[0]  # punto sul quadrante X\n               pa=arrPoints[3]  # punto sul quadrante opposto               \n               arrplane=rs.PlaneFromPoints(pc,pa,pb)\n               rs.ViewCPlane(currentview,arrplane)    # metto il CPlane sull'ellisse                \n               distA=rs.Distance(pc,pa)  # semiasse X               \n               distB=rs.Distance(pc,pb)  #semiasse   Y              \n             \n        la=rs.AddLine (pc,pa)   # line semiasse X     \n        lb=rs.AddLine (pc,pb)    #line semiasse Y\n        lac=rs.CopyObject(la,pb-pc)  # per copiare uso il vettore di traslazione        \n        idcir=rs.AddCircle(arrplane,distA)        \n        lint=rs.CurveCurveIntersection(lac,idcir)\n        pInt=lint[0][1]        \n        rs.UnselectAllObjects()\n        lbc=rs.CopyObject (lb,pInt-pb)        \n        pfuoco=rs.CurveStartPoint(lbc)\n        idFuoco=rs.AddPoint (pfuoco)        \n        rs.MirrorObject (idFuoco, pc, pb, True )\n        rs.DeleteObjects((la,lbc,lb,lac))        \n        rs.DeleteObject(idcir)        \n        rs.ViewCPlane(currentview,oldplane)\n        rs.EnableRedraw(True)\nfuochiEllisse()",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 5,
+  "posts_count": 13,
+  "views": 2677
+}

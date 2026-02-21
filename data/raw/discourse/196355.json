@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/mismatch-between-python-and-rhinoscript-copyobjects-in-group/196355",
+  "topic_id": 196355,
+  "title": "Mismatch between python and rhinoscript: copyobjects in group",
+  "question": "Heyhello. I’m new to rhino and these forums so please do correct any mistakes.\n\n\nI’ve been trying my hand at scripting to lighten a part of my workload and found an odd mismatch between the output of RhinoScript and Python.\n\n\nWhen I try to copy objects inside a group using CopyObjects, Python adds all the copies into the existing group while RhinoScript creates new groups for the copies.\n\n\nI would prefer it if Python followed the output of RhinoScript since grouping groups seems easier to do than splitting them as well as it just working better in my usecase.\n\n\nMy question is whether the mismatch is unintentional and/or whether it would be worth bringing them in line.\n\n\nHere, a snippet of Python code to illustrate:\n\n\ndef CopyGroup():\n    objects=rs.GetObjects(\"Select objects\",preselect=True)\n    group = rs.AddGroup()\n    rs. AddObjectsToGroup(objects,group)\n    rs.CopyObjects(objects,[-10,0,0])\nCopyGroup()\n\n\n\nthanks in advance.",
+  "code_blocks": [
+    {
+      "code": "def CopyGroup(name):\n    ...\n    group = rs.AddGroup(name)\n    ...",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nobj_ids=rs.GetObjects()\ncopy_ids=rs.CopyObjects(obj_ids, [100,0,0])\nfor copy_id in copy_ids: rs.RemoveObjectFromAllGroups(copy_id)\nnew_group=rs.AddGroup()\nrs.AddObjectsToGroup(copy_ids,new_group)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def ObjectsInGroup(objects):\n    for object in objects:\n        if rs.ObjectGroups(object):\n            return True\n    return False\n\nimport rhinoscriptsyntax as rs\nobj_ids=rs.GetObjects()\ncopy_ids=rs.CopyObjects(obj_ids, [100,0,0])\nif ObjectsInGroup(obj_ids):\n    for copy_id in copy_ids: rs.RemoveObjectFromAllGroups(copy_id)\n    new_group=rs.AddGroup()\n    rs.AddObjectsToGroup(copy_ids,new_group)",
+      "language": "python",
+      "author": "DeVuurtoren",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "def CopyGroup():\n    objects=rs.GetObjects(\"Select objects\",preselect=True)\n    group = rs.AddGroup()\n    rs. AddObjectsToGroup(objects,group)\n    rs.CopyObjects(objects,[-10,0,0])\nCopyGroup()",
+      "language": "python",
+      "author": "DeVuurtoren",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 99
+}

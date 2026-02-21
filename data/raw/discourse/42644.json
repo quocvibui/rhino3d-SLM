@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-how-to-assign-attributes-to-existing-objects/42644",
+  "topic_id": 42644,
+  "title": "Python: How to assign attributes to existing objects?",
+  "question": "Hi…,\n\n\nsorry, me again. \n Can someone show me the way to assign attributes(with material) to existing objects in Python?\n\n\n# materials are stored in the document's material table\nindex = scriptcontext.doc.Materials.Add()\nmat = scriptcontext.doc.Materials[index]\nmat.DiffuseColor = System.Drawing.Color.Chocolate\nmat.CommitChanges()\n\n# set up object attributes to say they use a specific material\nattr = Rhino.DocObjects.ObjectAttributes()\nattr.MaterialIndex = index\nattr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n\nobjects = rhinoscriptsyntax.LastCreatedObjects();\n# how to assign attr to objects?\n\n\n\nThanks\n\n\nMichael\n\n\nwww.flexiCAD.com",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nobj = rs.GetObject(\"Select object\")\nif obj:\n    index = rs.ObjectMaterialIndex(obj)\n    if index == -1:\n        index = rs.AddMaterialToObject(obj)\n    rs.MaterialColor(index, (127, 255, 191))",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "# works\nrs.Command('_Plane 0 100 50')\n\n# doesn't work\nrs.Command('_PictureFrame \"C:\\\\tmp\\\\picture.png\" _AutoName=_No _AlphaTransparency=_Yes 0 100 100,0')\n\nobject = rs.LastCreatedObjects()[0];\n\nif object:\n    index = rs.ObjectMaterialIndex(object)\n    if index == -1:\n        index = rs.AddMaterialToObject(object)\n    rs.MaterialColor(index, (255, 0, 0))",
+      "language": "python",
+      "author": "Michael_Meyer",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "# materials are stored in the document's material table\nindex = scriptcontext.doc.Materials.Add()\nmat = scriptcontext.doc.Materials[index]\nmat.DiffuseColor = System.Drawing.Color.Chocolate\nmat.CommitChanges()\n\n# set up object attributes to say they use a specific material\nattr = Rhino.DocObjects.ObjectAttributes()\nattr.MaterialIndex = index\nattr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n\nobjects = rhinoscriptsyntax.LastCreatedObjects();\n# how to assign attr to objects?",
+      "language": "python",
+      "author": "Michael_Meyer",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 4347
+}

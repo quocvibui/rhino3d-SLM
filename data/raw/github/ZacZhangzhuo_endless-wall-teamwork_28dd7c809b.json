@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/ZacZhangzhuo/endless-wall-teamwork/blob/7257f5f0a1ce359894a3dcd68962fbe23ae19ae7/design/design_form_rotation.py",
+  "repo": "ZacZhangzhuo/endless-wall-teamwork",
+  "repo_stars": 2,
+  "repo_description": "This is the brick pick and place of UR5 robot group practice, ETH Zurich MAS dfab 2022-23",
+  "license": "MIT",
+  "filepath": "design/design_form_rotation.py",
+  "instruction": "Design form rotation",
+  "code": "﻿__author__ = \"jiang\"\n__version__ = \"2022.11.03\"\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\nimport math\nimport copy\n#make and reparameterize circle to crv\ncircle = rg.Circle.ToNurbsCurve(rg.Circle(rg.Point3d(0,0,0),r))\ncircle.Domain = rg.Interval(0,1)\n\n# make the a point on circle as end point\nid_pt = rg.Curve.ChangeClosedCurveSeam(circle,t)\n\n#t value on circle\npara = rg.Curve.DivideByCount(circle, div, True)\n\ndef remap(value,low1,high1, low2, high2):\n    \"\"\"\n    value : original value\n    low1 : original value's lower bound\n    high1 : original value's upper bound\n    low2 : remapped value's lower bound\n    high2 : remapped value's upper bound\n    \"\"\"\n    remapped_value = low2 + (value - low1) * (high2 - low2) / (high1 - low1)\n    return remapped_value\n\n#base points for curv\nbase_pts = []\nfor p in para:\n    base_pts.append(circle.PointAt(p))\n\n# z_value of upper points\nz_value=[]\nfor i in range(len(base_pts)):\n    z_value.append(math.sin(((4*math.pi/len(base_pts))*i)+math.pi*0.5)*r/5)\n\n#upper points for crv\nup_pts = copy.deepcopy(base_pts)\nfor i, pt in enumerate(up_pts):\n    tranMatrix = rg.Transform.Translation(rg.Vector3d(0,0,z_value[i]+h))\n    pt.Transform(tranMatrix)\n    \n#add end_pt to close the curve\nend_pt= copy.copy(up_pts[0])\nup_pts.append(end_pt)\nup_crv = rg.Curve.CreateInterpolatedCurve(up_pts, 3,rg.CurveKnotStyle(3))\n\n\n\n\n\n\n\n\n\n\n#def rotate(l, n):\n#    return l[n:] + l[:n]\n#\n#\n#... \n#>>> l = [1,2,3,4]\n#>>> rotate(l,1)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

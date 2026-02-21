@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/969flash/LausLecture/blob/004c0a8938bf805b8d70c744ddf5eb911fd4277f/Lecture3/01_visibility_analysis.py",
+  "repo": "969flash/LausLecture",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Lecture3/01_visibility_analysis.py",
+  "instruction": "01 visibility analysis",
+  "code": "import ghpythonlib.components as ghcomp\nimport Rhino.Geometry as geo\nimport time\nimport utils\nimport importlib\n\nimportlib.reload(utils)\n\n# ## input = path_crv, obstacles,\n# terrain_mesh = None  # geo.Mesh\n# path_crv = None  # geo.Curve\n# obstacles = None  # List[geo.Brep]\n\nprint(\"Start processing...\")\nstart_time = time.time()\nprint(\"Processing time: {:.2f} seconds\".format(time.time() - start_time))\n\npoints_on_path = ghcomp.DivideLength(path_crv, 50.0).points\n\n\ndef get_nearby_breps(obstacles, point, radius=50.0, tol=1.0):\n    \"\"\"\n    Returns obstacles within (radius + tol) distance from the path curve.\n    \"\"\"\n    obstacles_nearby = []\n    for brep in obstacles:\n        brep_closest_pt = brep.ClosestPoint(point)\n        if brep_closest_pt:\n            dist = point.DistanceTo(brep_closest_pt)\n            if dist <= radius + tol:\n                obstacles_nearby.append(brep)\n    return obstacles_nearby\n\n\n# 2. Generate IsoVist for each point\nisovist_regions = []\nfor pt in points_on_path:\n    # 지형에 분석 점 투영\n    pt_on_mesh = utils.get_projected_pt_on_mesh(pt, terrain_mesh)\n    # 투영된 점을 사람 눈높이 만큼 올리기\n    pt_on_mesh.Z += 1.6  # Assuming eye level is 1.6 meters above the terrain\n\n    nearby_obstacles = get_nearby_breps(obstacles, pt_on_mesh, radius=50.0)\n    plane = geo.Plane(pt_on_mesh, geo.Vector3d.ZAxis)\n    isovist = ghcomp.IsoVist(\n        plane,\n        100,  # count\n        50.0,  # radius\n        nearby_obstacles,  # obstacles: list of Breps and/or Meshes\n    )\n\n    iso_points = list(isovist.points)\n    iso_region = geo.PolylineCurve(iso_points + [iso_points[0]])  # Close the polyline\n    isovist_regions.append(iso_region)\n\nprint(\n    \"Finished processing. Total time: {:.2f} seconds\".format(time.time() - start_time)\n)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

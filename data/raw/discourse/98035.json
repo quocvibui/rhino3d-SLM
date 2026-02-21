@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/turning-on-and-off-layers-with-python-grasshopper-laggy/98035",
+  "topic_id": 98035,
+  "title": "Turning On and Off layers with Python Grasshopper Laggy",
+  "question": "I am trying to control Layer Visibility from Human UI though Python in grasshopper, I have been able to create a python code that works but is very laggy (2 Seconds+) in a larger file with lots of layers. So tried to rewrite it so it did not search all layers, but just the ones that where children of the parent layer but this option is still laggy and breaks if the Layer to turn on is none.\n\n\nWorking but Laggy\n\n\nimport Rhino.RhinoDoc as rhDoc\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# Turn select layers on and off with Switch\nsc.doc = rhDoc.ActiveDoc\n\nfor l in rhDoc.ActiveDoc.Layers:\n    if LayerOn is not None and l.Name == LayerOn:\n        pLayer = rs.ParentLayer(LayerOn)\n        rs.LayerVisible(pLayer,True)\n        rs.LayerVisible(LayerOn,True)\n    elif l.Name == LayerOff:\n        rs.LayerVisible(LayerOff,False)\n\nsc.doc = ghdoc\n\n\n\nBroken and Also Laggy\n\nAs wants a string for  pLayer = rs.ParentLayer(LayerOn)  even if LayerOn is none.\n\n\n# Turn Selected layers on and off with Grasshoper\nimport Rhino.RhinoDoc as rhDoc\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nsc.doc = rhDoc.ActiveDoc\n\nif LayerOn is not None:\n    pLayer = rs.ParentLayer(LayerOn)\n    rs.LayerVisible(pLayer,True)\n    rs.LayerVisible(LayerOn,True)\nelse:\n    rs.LayerVisible(LayerOff,False)\n\nsc.doc = ghdoc\n\n\n\nDemo Files\n\n\nLayer Control GH.3dm\n (271.9 KB)\n\n\nControl Layer Visabilty with GH.gh\n (9.4 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\ncurrentLayer = Rhino.RhinoDoc.ActiveDoc.Layers.CurrentLayer\nparentLayer = Rhino.RhinoDoc.ActiveDoc.Layers.FindName(ParentLayerName)\nfor subLayer in parentLayer.GetChildren():\n    if subLayer.Name in LayerNames:\n        parentLayer.IsVisible = True\n        subLayer.IsVisible = True\n    elif subLayer != currentLaye:\n        subLayer.IsVisible = False\n        subLayer.SetPersistentVisibility(False)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.RhinoDoc as rhDoc\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# Turn select layers on and off with Switch\nsc.doc = rhDoc.ActiveDoc\n\nfor l in rhDoc.ActiveDoc.Layers:\n    if LayerOn is not None and l.Name == LayerOn:\n        pLayer = rs.ParentLayer(LayerOn)\n        rs.LayerVisible(pLayer,True)\n        rs.LayerVisible(LayerOn,True)\n    elif l.Name == LayerOff:\n        rs.LayerVisible(LayerOff,False)\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "# Turn Selected layers on and off with Grasshoper\nimport Rhino.RhinoDoc as rhDoc\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nsc.doc = rhDoc.ActiveDoc\n\nif LayerOn is not None:\n    pLayer = rs.ParentLayer(LayerOn)\n    rs.LayerVisible(pLayer,True)\n    rs.LayerVisible(LayerOn,True)\nelse:\n    rs.LayerVisible(LayerOff,False)\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "mattgaydon",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 1785
+}

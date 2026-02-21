@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-use-rhino-geometry-mesh-quadremesh/124896",
+  "topic_id": 124896,
+  "title": "How to use Rhino.Geometry.Mesh.QuadRemesh?",
+  "question": "Hi all,\n\n\nI’m new to Rhino and I would like to run QuadRemesh from python instead of the UI.\n\n\nI am struggling with running the following code:\n\n\nimport Rhino\nfrom pprint import pprint\nimport rhinoscriptsyntax as rs\n\n# Define parameters\n\nparameters = {\n    'AdaptiveQuadCount': True, \n    'AdaptiveSize': 50.0, \n    'DetectHardEdges': True, \n    'GuideCurveInfluence': 0, \n    'PreserveMeshArrayEdgesMode': 0, \n    'SymmetryAxis': Rhino.Geometry.QuadRemeshSymmetryAxis.None, \n    'TargetQuadCount': 2000,\n}\n\nquad_mesh_parameters = Rhino.Geometry.QuadRemeshParameters()\n\nfor param_name, value in sorted(parameters.items()):\n    setattr(quad_mesh_parameters, param_name, value)\n    print(\"{}: {}\".format(param_name, getattr(quad_mesh_parameters, param_name)))\nprint()\n\n# Run QuadRemesh with parameters\n\nrs.EnableRedraw(False)\nfor obj in Rhino.RhinoDoc.ActiveDoc.Objects:\n    if obj.IsNormal:\n        \n        Rhino.RhinoDoc.ActiveDoc.Objects.Select(obj.Id, True)\n        print('Select Object ID', obj.Id)\n        print(\"Selected Status\", obj.IsSelected(obj))\n        \n        print('start remesh')\n        new_mesh = obj.Geometry.QuadRemesh(quad_mesh_parameters)\n        print('end remesh')\n        \nrs.EnableRedraw(True)\n\n\n\nI see no change in the model after running this.\n\n\nBesides, another weird prompt appears",
+  "code_blocks": [
+    {
+      "code": "################################################################################\n# SampleQuadRemesh.py\n# Copyright (c) 2020 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport scriptcontext\n\n\ndef SampleQuadRemesh():\n    \n    go = Rhino.Input.Custom.GetObject()\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh\n    go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.ClosedCurve\n    go.SetCommandPrompt(\"Select Mesh to QuadRemesh\")\n    go.Get()\n    if(go.CommandResult() != Rhino.Commands.Result.Success):\n        return go.CommandResult()\n\n    mesh = go.Object(0).Mesh()",
+      "language": "python",
+      "author": "Trav",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\nparameters = {\n    'AdaptiveQuadCount': True, \n    'AdaptiveSize': 50.0, \n    'DetectHardEdges': True, \n    'GuideCurveInfluence': 0, \n    'PreserveMeshArrayEdgesMode': 0, \n    'SymmetryAxis': Rhino.Geometry.QuadRemeshSymmetryAxis.X | Rhino.Geometry.QuadRemeshSymmetryAxis.Y | Rhino.Geometry.QuadRemeshSymmetryAxis.Z, \n    'TargetQuadCount': 2000,\n}\n\ndef QuadRemesh(parameters):\n    \n    go = Rhino.Input.Custom.GetObject()\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh\n    go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.ClosedCurve\n    go.SetCommandPrompt(\"Select Mesh to QuadRemesh\")\n    go.Get()\n    if(go.CommandResult() != Rhino.Commands.Result.Success):\n        return go.CommandResult()\n\n    mesh = go.Object(0).Mesh()\n\n    qr_params = Rhino.Geometry.QuadRemeshParameters()\n    \n    if parameters:\n        for param_name, value in sorted(parameters.items()):\n            setattr(qr_params, param_name, value)\n            print(\"{}: {}\".format(param_name, getattr(qr_params, param_name)))\n        print\n    \n    remeshed = mesh.QuadRemesh(qr_params)\n    \n    scriptcontext.doc.ActiveDoc.Objects.Add(remeshed)\n    scriptcontext.doc.ActiveDoc.Views.Redraw\n\n    return Rhino.Commands.Result.Success\n\nfor obj in Rhino.RhinoDoc.ActiveDoc.Objects:\n    if obj.IsNormal:\n        \n        Rhino.RhinoDoc.ActiveDoc.Objects.Select(obj.Id, True)\n        print 'Select Object ID', obj.Id\n        \n        QuadRemesh(parameters)",
+      "language": "python",
+      "author": "clem1",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nfrom pprint import pprint\nimport rhinoscriptsyntax as rs\n\n# Define parameters\n\nparameters = {\n    'AdaptiveQuadCount': True, \n    'AdaptiveSize': 50.0, \n    'DetectHardEdges': True, \n    'GuideCurveInfluence': 0, \n    'PreserveMeshArrayEdgesMode': 0, \n    'SymmetryAxis': Rhino.Geometry.QuadRemeshSymmetryAxis.None, \n    'TargetQuadCount': 2000,\n}\n\nquad_mesh_parameters = Rhino.Geometry.QuadRemeshParameters()\n\nfor param_name, value in sorted(parameters.items()):\n    setattr(quad_mesh_parameters, param_name, value)\n    print(\"{}: {}\".format(param_name, getattr(quad_mesh_parameters, param_name)))\nprint()\n\n# Run QuadRemesh with parameters\n\nrs.EnableRedraw(False)\nfor obj in Rhino.RhinoDoc.ActiveDoc.Objects:\n    if obj.IsNormal:\n        \n        Rhino.RhinoDoc.ActiveDoc.Objects.Select(obj.Id, True)\n        print('Select Object ID', obj.Id)\n        print(\"Selected Status\", obj.IsSelected(obj))\n        \n        print('start remesh')\n        new_mesh = obj.Geometry.QuadRemesh(quad_mesh_parameters)\n        print('end remesh')\n        \nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "clem1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 1096
+}

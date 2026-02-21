@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-crashes-with-brep-createoffsetbrep/47789",
+  "topic_id": 47789,
+  "title": "Rhino crashes with Brep.CreateOffsetBrep",
+  "question": "The code below sometimes crashes Rhino for me.  It seems that with a small enough quantity of breps to process or a large enough time between each call to CreateOffsetBrep, the crashing can be prevented.  I sent in an error report for this last weekend.\n\n\nThank you,\n\nSteve\n\n\n6.0.17269.9391, 9/26/2017\n\nWindows 7 Professional SP1\n\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\ndef main():\n    \n    c = xrange(6)\n    \n    breps0 = [rg.Sphere(rg.Point3d(10.0*i, 10.0*j, 10.0*k), 1.0).ToBrep()\n            for i in c for j in c for k in c]\n    \n    print \"{} breps to be offset.\".format(len(breps0))\n    \n    breps1 = []\n    tolerance = rs.UnitAbsoluteTolerance()\n    \n    for i, brep0 in enumerate(breps0):\n        rc = rg.Brep.CreateOffsetBrep(\n                brep0, distance=1.0, solid=False, extend=False,\n                tolerance=tolerance)\n        rs.Sleep(5)\n        for brep1 in rc[0]:\n            if brep1.IsValid: breps1.append(brep1)\n    \n    print \"{} valid breps from Brep.CreateOffsetBrep.\".format(len(breps1))\n\nif __name__ == '__main__': main()",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\n\ndef main():\n    \n    c = xrange(6)\n    \n    breps0 = [rg.Sphere(rg.Point3d(10.0*i, 10.0*j, 10.0*k), 1.0).ToBrep()\n            for i in c for j in c for k in c]\n    \n    print \"{} breps to be offset.\".format(len(breps0))\n    \n    breps1 = []\n    tolerance = rs.UnitAbsoluteTolerance()\n    \n    for i, brep0 in enumerate(breps0):\n        rc = rg.Brep.CreateOffsetBrep(\n                brep0, distance=1.0, solid=False, extend=False,\n                tolerance=tolerance)\n        rs.Sleep(5)\n        for brep1 in rc[0]:\n            if brep1.IsValid: breps1.append(brep1)\n    \n    print \"{} valid breps from Brep.CreateOffsetBrep.\".format(len(breps1))\n\nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 59,
+  "posts_count": 5,
+  "views": 834
+}

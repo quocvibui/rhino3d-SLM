@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/bflatau/RhinoPython/blob/035aa866cb2c9042f60df2d7810269bd25b70f7c/samples/CreateShortcut.py",
+  "repo": "bflatau/RhinoPython",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "samples/CreateShortcut.py",
+  "instruction": "Create shortcut",
+  "code": "import rhinoscriptsyntax as rs\nimport System\nfrom System.IO import Path\n\ndef CreateShortcut():\n    \"\"\"\n    Create a shortcut to the current document\n    NOTE!! This function only runs on Windows\n    \"\"\"\n    if( not rs.IsRunningOnWindows() ):\n        rs.MessageBox(\"CreateShortcut.py only runs on Windows\", 48, \"Script Error\")\n        return\n    \n    # Get the document name and path\n    name = rs.DocumentName()\n    path = rs.DocumentPath()\n\n    # Get the Windows Scripting Host's Shell object\n    objShell = System.Activator.CreateInstance(System.Type.GetTypeFromProgID(\"WScript.Shell\"))\n    # Get the desktop folder\n    desktop = objShell.SpecialFolders(\"Desktop\")\n    # Make a new shortcut\n    ShellLink = objShell.CreateShortcut(desktop + \"\\\\\" + name + \".lnk\")\n    ShellLink.TargetPath = Path.Combine(path, name)\n    ShellLink.WindowStyle = 1\n    ShellLink.IconLocation = rs.ExeFolder() + \"Rhino4.exe, 0\"\n    ShellLink.Description = \"Shortcut to \" + name\n    ShellLink.WorkingDirectory = path\n    ShellLink.Save()\n\n##########################################################################\n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == '__main__' ):\n    #call function defined above\n    CreateShortcut()\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

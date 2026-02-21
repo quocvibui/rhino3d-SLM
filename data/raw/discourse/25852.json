@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-crashing-rhino-5-1-wip/25852",
+  "topic_id": 25852,
+  "title": "Python script crashing Rhino 5.1 & WIP",
+  "question": "I have a script I have been running for a while, like months at least. Yesterday it crashed Rhino at least 3 times, while working at home. I tried the script here at work and it crashed Rhino again. The script lets me go through most of the steps, it was only when I tried to “place” the text output, that Rhino crashed.\n\n\nI commented out 2 lines at the end of the script that was adding the text to Notes in Rhino. It runs now, so something about adding to Notes?\n\n\nRhino script for finding weight of object and adding File information, mostly by Mitch Heynick\n# -*- coding: utf-8 -*-\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport datetime, time;  # This is required to include time module.\nimport Rhino\n\ndef CalculateObjectPrice():\n#constants\nunitsFactor = .001\n\n'''Change Text Height\n\n1.25 for pendants & rings\n0.75 for pops'''\n\ntHt=1.25\n\nobjs=rs.GetObjects(\"Select Objects for volume\", filter=16, group=True, preselect=False, select=True)\nif not objs: return\ntotalV=0\nfor obj in objs:\n\tif rs.IsObjectSolid(obj):\n\t\tvol=rs.SurfaceVolume(obj)\n\t\tif vol:\n\t\t\ttotalV+=vol[0]\n#bail if there is 0 volume\nif totalV==0: return\n\n#create an empty dictionary\ndensDict={}\n#fill the dictionary with entries\n#NO SPACES in material names for GetString!\ndensDict['Gold_24K']=19.3\ndensDict['Gold_18K']=15.5\ndensDict['Gold_14K']=13.5\ndensDict['Silver']=10.3\ndensDict['Platinum']=21.45\ndensDict['Plutonium']=19.8\ndensDict['Cubic_Zirconia']=5.8\ndensDict['White_Bronze']=8.166\ndensDict['Diamond']=3.52\n\n#can add as many more as you want\n\n#gets a list of all the dictionary keys (not ordered!)\nmetaList=densDict.keys()\n#sorts the list for easier reading in next step\nmetaList.sort()\n\n#Get a string from the command line\nmType=rs.GetString(\"Select Metal Type\",strings=metaList)\nif not mType: return\nif not densDict.has_key(mType):\n\tprint \"Invalid material type!\"\n\treturn\n\n#price = rs.GetReal('Price of '+mType+', per gram')\n#if not price: return\n\n#get the density corresponding to chosen metal from dic...",
+  "code_blocks": [
+    {
+      "code": "Rhino script for finding weight of object and adding File information, mostly by Mitch Heynick\n# -*- coding: utf-8 -*-\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport datetime, time;  # This is required to include time module.\nimport Rhino\n\ndef CalculateObjectPrice():\n#constants\nunitsFactor = .001\n\n'''Change Text Height\n\n1.25 for pendants & rings\n0.75 for pops'''\n\ntHt=1.25\n\nobjs=rs.GetObjects(\"Select Objects for volume\", filter=16, group=True, preselect=False, select=True)\nif not objs: return\ntotalV=0\nfor obj in objs:\n\tif rs.IsObjectSolid(obj):\n\t\tvol=rs.SurfaceVolume(obj)\n\t\tif vol:\n\t\t\ttotalV+=vol[0]\n#bail if there is 0 volume\nif totalV==0: return\n\n#create an empty dictionary\ndensDict={}\n#fill the dictionary with entries\n#NO SPACES in material names for GetString!\ndensDict['Gold_24K']=19.3\ndensDict['Gold_18K']=15.5\ndensDict['Gold_14K']=13.5\ndensDict['Silver']=10.3\ndensDict['Platinum']=21.45\ndensDict['Plutonium']=19.8\ndensDict['Cubic_Zirconia']=5.8\ndensDict['White_Bronze']=8.166\ndensDict['Diamond']=3.52\n\n#can add as many more as you want\n\n#gets a list of all the dictionary keys (not ordered!)\nmetaList=densDict.keys()\n#sorts the list for easier reading in next step\nmetaList.sort()\n\n#Get a string from the command line\nmType=rs.GetString(\"Select Metal Type\",strings=metaList)\nif not mType: return\nif not densDict.has_key(mType):\n\tprint \"Invalid material type!\"\n\treturn\n\n#price = rs.GetReal('Price of '+mType+', per gram')\n#if not price: return\n\n#get the density corresponding to chosen metal from dictionary\ndensity=densDict[mType]\n#Calculate total weight of object(s)\ngrams = totalV * unitsFactor * density\n\n# you are removing 15%?\nfinished = round((grams - (grams * .15)), 3)\namount = round((finished), 2)\ngrams=round(grams, 3)\n\ntext = rs.EditBox(message=\"Enter Gem, Enamel & or Clay info\")\n\ndesigner = raw_input('Enter Designers Initials: ')\nfileBy = raw_input('Enter Rhino Done By Initials: ')\nbuild_for = raw_input('Enter Factory Name: ')\n\nnow = datetime.date.today().strftime(\"(%d %B %Y)\")\n\npoint = rs.GetPoint(\"Point for text insertion\")\nif point:\n    tObjs=[]\n    #create your text string\ntextString='''Calculated {mType} Weight:\n{grams} grams in Rhino\n{finished} grams finished\n\n{text}\nDesigner: {designer}\nRhino: {fileBy}\nFactory: {build_for}\n© JewelPop Inc. {now}\n'''\ncontext = {\n        \"mType\":mType,\n        \"grams\":grams,\n\t\t\"finished\":finished,\n\t\t\"text\":text,\n\t\t\"designer\":designer,\n\t\t\"fileBy\":fileBy,\n\t\t\"build_for\":build_for,\n\t\t\"now\":now,\n}\n\ntObjs.append(rs.AddText(textString.format(**context),point,tHt))\n\n#notes=textString.format(**context)\n#sc.doc.Notes=notes\n\nCalculateObjectPrice()",
+      "language": "python",
+      "author": "rhinorudi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 5,
+  "posts_count": 5,
+  "views": 1597
+}

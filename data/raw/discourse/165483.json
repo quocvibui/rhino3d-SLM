@@ -1,0 +1,44 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ignorehighlight/165483",
+  "topic_id": 165483,
+  "title": "IgnoreHighlight",
+  "question": "Hey all,\n\n\nI’m trying to program a command to switch off all object highlighting. At the moment I’ve two possible solutions, both not working as intended.\n\n\n{\n            Guid displayModeGuid = \n            RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport.DisplayMode.Id;\n            Rhino.Display.DisplayModeDescription displayModeDescription = \n            Rhino.Display.DisplayModeDescription.GetDisplayMode(displayModeGuid);\n            displayModeDescription.DisplayAttributes.IgnoreHighlights = true;\n            RhinoDoc.ActiveDoc.Views.ActiveView.Redraw();\n            return Result.Success;\n }\n\n\n\nWhile debugging I can see that the setting is being changed. But in the display nothing is changing.\n\n\n2:\n\n\n{\n            foreach(RhinoObject rhinoObject in RhinoDoc.ActiveDoc.Objects)\n            {\n                rhinoObject.Highlight(false);\n            }\n            return Result.Success;\n}\n\n\n\nUsing this option toggles the highlights, but as soon as I reselect something. Highlights are switched on again.\n\n\nAny ideas on how to make either or another option work?\n\n\nregards Reinder",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef test_toggle_highlight():\n    id = Rhino.Display.DisplayModeDescription.WireframeId\n    desc = Rhino.Display.DisplayModeDescription.GetDisplayMode(id)\n    desc.DisplayAttributes.IgnoreHighlights = not desc.DisplayAttributes.IgnoreHighlights\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(desc)\n    scriptcontext.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    test_toggle_highlight()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "{            \n            Guid displayModeGuid = \n            RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport.DisplayMode.Id;\n            Rhino.Display.DisplayModeDescription displayModeDescription = \n            Rhino.Display.DisplayModeDescription.GetDisplayMode(displayModeGuid);\n            bool isOn = displayModeDescription.DisplayAttributes.IgnoreHighlights;\n            if(isOn == true)\n            {\n                displayModeDescription.DisplayAttributes.IgnoreHighlights = false;\n            }\n            if (isOn == false)\n            {\n                displayModeDescription.DisplayAttributes.IgnoreHighlights = true;\n            }\n            Rhino.Display.DisplayModeDescription.UpdateDisplayMode(displayModeDescription);\n            RhinoDoc.ActiveDoc.Views.ActiveView.Redraw();\n            return Result.Success;\n}",
+      "language": "csharp",
+      "author": "r.weenink",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "{\n            Guid displayModeGuid = \n            RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport.DisplayMode.Id;\n            Rhino.Display.DisplayModeDescription displayModeDescription = \n            Rhino.Display.DisplayModeDescription.GetDisplayMode(displayModeGuid);\n            displayModeDescription.DisplayAttributes.IgnoreHighlights = true;\n            RhinoDoc.ActiveDoc.Views.ActiveView.Redraw();\n            return Result.Success;\n }",
+      "language": "csharp",
+      "author": "r.weenink",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "{\n            foreach(RhinoObject rhinoObject in RhinoDoc.ActiveDoc.Objects)\n            {\n                rhinoObject.Highlight(false);\n            }\n            return Result.Success;\n}",
+      "language": "csharp",
+      "author": "r.weenink",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 219
+}

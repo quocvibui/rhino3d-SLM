@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-only-the-true-intersection-points-of-lines-in-python-3/200035",
+  "topic_id": 200035,
+  "title": "How to get only the true intersection points of lines in Python 3?",
+  "question": "Hi,\n\n\nI am new to Python. I am trying to get some points of line intersections with rhynoscriptsyntax. Therefore, I simply used LineLineIntersection(), but the result is actually a bunch of other points generated without line intersections (it is shown in the help tab about the LineLineIntersection() process, but I do not get the idea…):\n\n\nimport rhinoscriptsyntax as rs\nimport math as mt\nimport numpy as np\nimport itertools as it\n\ncenter=rs.CreatePoint(xaxis,yaxis)\ndef elp1(t):\n    x = a * mt.cos(t)+xaxis\n    y = b * mt.sin(t)+yaxis\n    return [x,y]\n\ndef elp2(t):\n    x = b * mt.cos(t)+xaxis\n    y = a * mt.sin(t)+yaxis\n    return [x,y]\n\ndomain=np.linspace(0, mt.pi*2, n, False).tolist()\n\nellipse1=[]\nfor i in domain:\n    ellipse1.append(rs.CreatePoint(elp1(i)[0],elp1(i)[1]))\n\nellipse2=[]\nfor i in domain:\n    ellipse2.append(rs.CreatePoint(elp2(i)[0],elp2(i)[1],h))\n\nellipse2r=rs.RotateObjects(ellipse2,center, 180, None, False)\n\nlines=[]\nfor i in ellipse1:\n    lines.append(rs.AddLine(i,ellipse2[ellipse1.index(i)]))\n\niterator=list(it.combinations(lines,2))\n\nintersections=[]\nfor i in iterator:\n        intersections.append(rs.LineLineIntersection(i[0],i[1]))\n\nchaininter=[]\nfor i in intersections:\n    for j in i:\n        chaininter.append(j)\n\ncullpts=rs.CullDuplicatePoints(chaininter)\n\n\n\n\n(the script is trying to generate a type of hyperboloid of revolution, and there are some intersecting lines in this ruled surface type, \nas you can see in this video, at minute 41:15.\n\n\nCanvas at 01;47;56\n1916×785 109 KB\n\n(as you can see in the image, there is points generated not from intersections, actually)\n\n\nIn other words, how does the LineLineIntersection() function work and how to get only the true intersection points of lines?\n\n\nkind of a hyperboloid of revolution.gh\n (13.6 KB)\n\n\nThanks in advance!",
+  "code_blocks": [
+    {
+      "code": "private void ClearTextDots(){\n    RhinoObject[] objsPrev = RhinoDocument.Objects.FindByUserString(\"TextDot\", Component.ComponentGuid.ToString(), false, false, true, ObjectType.TextDot);\n    if (objsPrev != null){\n      foreach (RhinoObject obj in objsPrev)RhinoDocument.Objects.Delete(obj, true);\n    }\n  }\n\n  public DataTree<Curve> cTree;\n  public DataTree<Point3d> pTree;\n  public DataTree<double> tTree;\n  public List<Curve> isolatedCrvs;\n\n  static double tol = RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;\n\n  public void Init(){\n    cTree = new DataTree<Curve>();\n    pTree = new DataTree<Point3d>();\n    tTree = new DataTree<double>();\n    isolatedCrvs = new List<Curve>();\n  }\n\n  public void ShatterCurvesCommon(List < Curve > cList, bool respectTol, bool report){\n\n    bool[] isolated = new bool[cList.Count];\n    for (int i = 0; i < cList.Count; i++) {\n\n      List<double> T = new List<double>();\n      List<Point3d> P = new List<Point3d>();\n\n      Curve curr = cList[i];\n      for (int j = 0; j <= cList.Count - 1; j++) {\n        if (i == j || isolated[j]) continue;\n        Curve other = cList[j];\n        var events = Rhino.Geometry.Intersect.Intersection.CurveCurve(curr, other, tol, tol);\n        if (events != null){\n          for (int ev = 0; ev < events.Count; ev++){\n            var ccx_event = events[ev];\n            if(respectTol){\n              if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon){\n                T.Add(ccx_event.ParameterA);\n                P.Add(ccx_event.PointA);\n              }\n              else if(report)Print(\"Skipped ccx at: {0,-2}, {1}\", i, j);\n            }\n            else{\n              T.Add(ccx_event.ParameterA);\n              P.Add(ccx_event.PointA);\n            }\n          }\n        }\n      }\n\n      if(T.Any()){\n        double[] TA = T.ToArray(); Point3d[] PA = P.ToArray();\n        Array.Sort(TA, PA);\n\n        Curve[] pieces = curr.Split(TA);\n        cTree.AddRange(pieces, new GH_Path(i));\n        tTree.AddRange(TA, new GH_Path(i));\n        pTree.AddRange(PA, new GH_Path(i));\n      }\n      else{\n        isolated[i] = true;\n        isolatedCrvs.Add(curr);\n        Print(\"Crv: {0,-2} is isolated\", i);\n\n        cTree.Add(curr, new GH_Path(i));\n        tTree.EnsurePath(new GH_Path(i));\n        pTree.EnsurePath(new GH_Path(i));\n      }\n    }\n  }\n\n  public void GetDots(Color C, int H){\n    List<TextDot> dots = new List<TextDot>();\n    foreach(GH_Path path in tTree.Paths){\n      List<double> tv = tTree.Branch(path);\n      if(tv.Any()) continue;\n      Curve crv = cTree.Branch(path)[0];\n      Point3d p = crv.PointAtNormalizedLength(0.5);\n      TextDot dot = new TextDot(path.ToString(false), p); dot.FontHeight = H;\n      dots.Add(dot);\n    }\n\n    Rhino.DocObjects.ObjectAttributes attr = new Rhino.DocObjects.ObjectAttributes();\n    attr.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromObject;\n    attr.ObjectColor = C;\n    attr.SetUserString(\"TextDot\", Component.ComponentGuid.ToString());\n\n    for(int i = 0;i < dots.Count;i++){\n      doc.Objects.AddTextDot(dots[i], attr);\n    }\n  }",
+      "language": "csharp",
+      "author": "PeterFotiadis",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math as mt\nimport numpy as np\nimport itertools as it\n\ncenter=rs.CreatePoint(xaxis,yaxis)\ndef elp1(t):\n    x = a * mt.cos(t)+xaxis\n    y = b * mt.sin(t)+yaxis\n    return [x,y]\n\ndef elp2(t):\n    x = b * mt.cos(t)+xaxis\n    y = a * mt.sin(t)+yaxis\n    return [x,y]\n\ndomain=np.linspace(0, mt.pi*2, n, False).tolist()\n\nellipse1=[]\nfor i in domain:\n    ellipse1.append(rs.CreatePoint(elp1(i)[0],elp1(i)[1]))\n\nellipse2=[]\nfor i in domain:\n    ellipse2.append(rs.CreatePoint(elp2(i)[0],elp2(i)[1],h))\n\nellipse2r=rs.RotateObjects(ellipse2,center, 180, None, False)\n\nlines=[]\nfor i in ellipse1:\n    lines.append(rs.AddLine(i,ellipse2[ellipse1.index(i)]))\n\niterator=list(it.combinations(lines,2))\n\nintersections=[]\nfor i in iterator:\n        intersections.append(rs.LineLineIntersection(i[0],i[1]))\n\nchaininter=[]\nfor i in intersections:\n    for j in i:\n        chaininter.append(j)\n\ncullpts=rs.CullDuplicatePoints(chaininter)",
+      "language": "python",
+      "author": "vin.iab",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 266
+}

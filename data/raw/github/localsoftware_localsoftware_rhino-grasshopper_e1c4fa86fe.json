@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/localsoftware/localsoftware_rhino-grasshopper/blob/4aafec57e33b9f09cce6fd73dcda12b17cf794a5/python/CreateView.py",
+  "repo": "localsoftware/localsoftware_rhino-grasshopper",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "BSD-2-Clause",
+  "filepath": "python/CreateView.py",
+  "instruction": "Creates view target and vector from seleted objects.",
+  "code": "\"\"\"Creates view target and vector from seleted objects.\n\nTransforms view data into a Rhino view.\nCreating a view is the first step to set a view in Rhino’s viewport.\nTo select a view, you need a geometry to point to. You can define view angles.\nBased on the work of Jackie Berry.\n\n    Typical usage:\n        Input the curve to point to, so you should never input a surface, brep or mesh as geometry to create a view.\n        Select an Azimuth and Altitude angle. The angles go between 0 and 360, and represent the position of a “camera” around the base object.\n\n    Inputs:\n        geometry: curve geometry to focus on in view\n        azimuth: Camera rotation in XY. 0 to 360.\n        altitude: Camera z-position. -90 to 90.\n\n    Output:\n        view_geom: geometry in view\n        view_target: 3D point for camera target.\n        view_vector: 3D vector defining camera direction.\"\"\"\n\n__author__ = \"palomagr\"\n__version__ = \"2020.07.09\"\n\n#ghenv.Component.Name = \"Create View\"\n#ghenv.Component.NickName = \"Create View\"\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython, System, Rhino, os, math\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nrcdoc = Rhino.RhinoDoc.ActiveDoc\nghdoc = sc.doc\n\nclass MyComponent(component):\n    view_geom, view_target, view_vector = None, None, None\n\n    def RunScript(self, geometry, azimuth, altitude):\n        view_geom, view_target, view_vector = None, None, None\n        if geometry!=None and azimuth!=None and altitude!=None:\n            #given geometry get centroid (bounding box)\n            bbox = rs.BoundingBox(geometry)\n            #cam target is centroid\n            centroid = [0,0,0]\n            for pt in bbox:\n                centroid = [centroid[0]+pt[0]/8, centroid[1]+pt[1]/8, centroid[2]+pt[2]/8]\n\n            target = rs.AddPoint(centroid)\n            view_dist = rs.Distance(bbox[0], bbox[6])\n\n            # convert angles to radians\n            azimuth = azimuth*2*math.pi/360\n            altitude = altitude*2*math.pi/360\n            X = centroid[0] + view_dist*math.cos(azimuth)\n            Y = centroid[1] + view_dist*math.sin(azimuth)\n            Z = centroid[2] + view_dist*math.sin(altitude)\n            cam_pos = [X, Y, Z]\n\n            view_geom = geometry\n            view_target = target\n            view_vector = rs.VectorCreate(centroid, cam_pos)\n\n        # return outputs if you have them; here I try it for you:\n        return (view_geom, view_target, view_vector)\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

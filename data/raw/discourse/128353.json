@@ -1,0 +1,117 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-8-feature-scripteditor-cpython-csharp/128353",
+  "topic_id": 128353,
+  "title": "Rhino 8 Feature: ScriptEditor (CPython, CSharp)",
+  "question": "Hello \n\n\nHere is another quick update on the newly-called \nScriptEditor\n in Rhino 8.\n\n\nTHIS WILL BE AVAILABLE IN NEXT WIP BUILD\n (Some of it is there already but might be different from the video and be buggy)\n\n\n\n\n\n\n\n\n\n\n\n\nWe will be creating better tutorial videos soon.\n\n\nP.S.\n\nI just listened to this and I will really try to stop saying “sort of like”",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ncurrent_doc: Rhino.RhinoDoc = sc.doc\nrs.MessageBox(\"Hello\")",
+      "language": "python",
+      "author": "jgillmanjr",
+      "post_number": 105,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n# ...\n\ncrv = GetYourCurve()\npts = crv.Points\ndummy_pt = rg.Point3d()\nsuccess, pt = pts.GetPoint(0, dummy_pt)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 122,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Geometry import Point3d\n\na = [Point3d(i, 0, 0) for i in range(10)]",
+      "language": "python",
+      "author": "kaivnd",
+      "post_number": 309,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import sticky\n\nthisDoc = ghenv.Component.OnPingDocument()\nslider = ghenv.Component.Params.Input[0].Sources[0]\n\nif click_me:\n    # reset values to starting position\n    sticky['running'] = True\n    slider.TickValue = 30 \n\ndesired_area = 12\nif sticky['running']:\n    if area > desired_area or slider.TickValue >= slider.TickCount:\n        sticky['running'] = False # break the loop\n    else:\n        def sln_delegate(doc):\n            slider.TickValue +=1 \n        thisDoc.ScheduleSolution(1, sln_delegate) # call the delegate function and schedule a solution in 1 millisecond",
+      "language": "python",
+      "author": "tan1",
+      "post_number": 335,
+      "is_solution": false
+    },
+    {
+      "code": "def RealBox(message=\"\", default_number=None, title=\"\", minimum=None, maximum=None):\n    \"\"\"Display a dialog box prompting the user to enter a number\n    Parameters:\n      message (str, optional): a prompt message.\n      default_number (number, optional):  a default number.\n      title (str, optional):  a dialog box title.\n      minimum (number, optional):  a minimum allowable value.\n      maximum (number, optional):  a maximum allowable value.\n    Returns:\n      number: The newly entered number on success\n      None: on error\n    Example:\n      import rhinoscriptsyntax as rs\n      radius = rs.RealBox(\"Enter a radius value\", 5.0 )\n      if radius:\n          point = (0,0,0)\n          rs.AddCircle( point, radius )\n    See Also:\n      GetReal\n    \"\"\"\n    if default_number is None:\n        default_number = Rhino.RhinoMath.UnsetValue\n    if minimum is None:\n        minimum = Rhino.RhinoMath.UnsetValue\n    if maximum is None:\n        maximum = Rhino.RhinoMath.UnsetValue\n    rc, number = Rhino.UI.Dialogs.ShowNumberBox(\n        title, message, default_number, minimum, maximum\n    )\n    if rc:\n        return number",
+      "language": "python",
+      "author": "jgillmanjr",
+      "post_number": 109,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nimport Rhino\nimport System\nimport System.Drawing\n\nclass DrawBlueMeshConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, mesh):\n        self.mesh = mesh\n        self.color = System.Drawing.Color.Blue\n        self.material = Rhino.Display.DisplayMaterial()\n        self.material.Diffuse = self.color\n        if mesh != None and mesh.IsValid:\n            self.bbox = mesh.GetBoundingBox(True)\n\n    def CalculateBoundingBox(self, calculateBoundingBoxEventArgs):\n        #super.CalculateBoundingBox(calculateBoundingBoxEventArgs)\n        calculateBoundingBoxEventArgs.BoundingBox.Union(self.bbox)\n\n    def PreDrawObjects(self, drawEventArgs):\n        #base.PreDrawObjects(rawEventArgs)\n        gvp = drawEventArgs.Display.Viewport\n        if gvp.DisplayMode.EnglishName.ToLower() == \"wireframe\":\n            drawEventArgs.Display.DrawMeshWires(self.mesh, self.color)\n        else:\n            drawEventArgs.Display.DrawMeshShaded(self.mesh, self.material)\n\ndef RunCommand():\n    gs = Rhino.Input.Custom.GetObject()\n    gs.SetCommandPrompt(\"select sphere\")\n    gs.GeometryFilter = Rhino.DocObjects.ObjectType.Surface\n    gs.DisablePreSelect()\n    gs.SubObjectSelect = False\n    gs.Get()\n    if gs.CommandResult() != Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    b, sphere = gs.Object(0).Surface().TryGetSphere()\n    if sphere.IsValid:\n        mesh = Rhino.Geometry.Mesh.CreateFromSphere(sphere, 10, 10)\n        if mesh == None:\n            return Rhino.Commands.Result.Failure\n\n        conduit = DrawBlueMeshConduit(mesh)\n        conduit.Enabled = True\n        doc.Views.Redraw()\n\n        inStr = rs.GetString(\"press <Enter> to continue\")\n\n        conduit.Enabled = False\n        doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n    else:\n        return Rhino.Commands.Result.Failure\n\nif __name__ == \"__main__\":\n    RunCommand()",
+      "language": "python",
+      "author": "tristanryerparke1",
+      "post_number": 264,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino.Input.Custom import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import Point3d, PolylineCurve\nimport Rhino\n\ndef get_curve():\n    gc = GetObject()\n    gc.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    gc.Get()\n    if gc.CommandResult()!=Rhino.Commands.Result.Success: return\n    crv = gc.Object(0).Curve()\n    return crv\n\ncrv = get_curve()\n\ndummy_ply = PolylineCurve()\n\nprint( crv.ToPolyline(0.1, 0.0, 0.0, 0.0, dummy_ply) )",
+      "language": "python",
+      "author": "tristanryerparke1",
+      "post_number": 125,
+      "is_solution": false
+    },
+    {
+      "code": "TypeError : No method matches given arguments for ToPolyline: (<class 'float'>, <class 'float'>, <class 'float'>, <class 'float'>, <class 'Rhino.Geometry.PolylineCurve'>)\n  File \"/Users/tristanryerparke/Dropbox (Personal)/Mac (2)/Desktop/RhinoCode Test/curve_test.py\", line 18, in <module>\n    print( crv.ToPolyline(0.1, 0.0, 0.0, 0.0, dummy_ply) )\n   at Python.Runtime.Runtime.CheckExceptionOccurred() in /Users/bozo/TeamCity/buildAgent/work/96e64af5b81c6f85/src4/rhino4/Plug-ins/RhinoCodePlugins/src/lib/McNeel.PythonNet/src/runtime/runtime.cs:line 527\n   at Python.Runtime.PyScope.Execute(PyObject script, PyDict locals) in /Users/bozo/TeamCity/buildAgent/work/96e64af5b81c6f85/src4/rhino4/Plug-ins/RhinoCodePlugins/src/lib/McNeel.PythonNet/src/runtime/pyscope.cs:line 240\n   at Python.Runtime.RhinoCPythonEngine.RunScope(String scopeName, String pythonFile, Boolean tempFile, Boolean useCache) in /Users/bozo/TeamCity/buildAgent/work/96e64af5b81c6f85/src4/rhino4/Plug-ins/RhinoCodePlugins/src/lib/McNeel.PythonNet/src/runtime/RhinoCPythonEngine.cs:line 319",
+      "language": "python",
+      "author": "tristanryerparke1",
+      "post_number": 125,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import doc\n......\n...... calls C++ DLL here which returns the RunTimeSerialNumber\n...... of the point cloud created in the C++ code.\n......\nprint(cpc_serial_number.value)\npcObj = doc.Objects.Find(cpc_serial_number.value)",
+      "language": "python",
+      "author": "Terry_Chappell",
+      "post_number": 45,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n...\npcObj = Rhino.DocObjects.RhinoObject.FromRuntimeSerialNumber(cpc_serial_number.value)",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 46,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\npoint1 = rs.GetPoint(\"First point\")\nif point1:\n    rs.AddPoint(point1)\npoint2 = rs.GetPoint(\"Next point\")\nif point2:\n    rs.AddPoint(point2)\npoint3 = rs.GetPoint(\"Third point\")\nif point3:\n    rs.AddPoint(point3)\nvector12 = rs.VectorUnitize(rs.VectorCreate(point2, point1))\nvector23 = rs.VectorUnitize(rs.VectorCreate(point3, point2))\nvector13 = rs.VectorUnitize(rs.VectorCreate(point3, point1))\nN=rs.GetInteger(\"Number Of Circle?\")\n\nfor i in range(1,N+1):\n    rs.AddCircle(rs.CopyObject(point1,vector12*(i)),i)\n    rs.AddCircle(rs.CopyObject(point2,vector12*(-i)),i)\n    \n    rs.AddCircle(rs.CopyObject(point2,vector23*(i)),i)\n    rs.AddCircle(rs.CopyObject(point3,vector23*(-i)),i)\n    \n    rs.AddCircle(rs.CopyObject(point1,vector13*(i)),i)\n    rs.AddCircle(rs.CopyObject(point3,vector13*(-i)),i)",
+      "language": "python",
+      "author": "Rh-3d-p",
+      "post_number": 54,
+      "is_solution": false
+    },
+    {
+      "code": "// r \"Grasshopper\"\n\nusing System;\nusing System.Linq;\nusing Grasshopper;\n\nvar dt = new DataTree<int>();\n\nConsole.WriteLine(dt.Branches.Count());",
+      "language": "csharp",
+      "author": "eirannejad",
+      "post_number": 405,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Grasshopper Script\"\"\"\n#! python 3\na = \"Welcome to Wickerson Studios!\"\nprint(a)\n\n# r: numpy\n\nimport numpy\n\narr = numpy.random.rand(rows, columns)\n\nprint(arr)\nprint(type(arr))\narr = arr.tolist()\nprint(arr)\n\narr_OUT = [arr[i] if i < rows else False for i in range(4)]\narr0_OUT, arr1_OUT, arr2_OUT, arr3_OUT = arr_OUT",
+      "language": "python",
+      "author": "mwickerson",
+      "post_number": 461,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 25,
+  "posts_count": 492,
+  "views": 50464
+}

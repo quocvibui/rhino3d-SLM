@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Fablab-Sevilla/ghPython101/blob/176caf1c854234051661b0d3bbdf458b39447cc6/D%C3%ADa_002/02_TAREAS/Walker%20mas%20organico.py",
+  "repo": "Fablab-Sevilla/ghPython101",
+  "repo_stars": 9,
+  "repo_description": "Documentation and exercises from ghPython101 course",
+  "license": "MIT",
+  "filepath": "Día_002/02_TAREAS/Walker mas organico.py",
+  "instruction": "Walker mas organico",
+  "code": "﻿import rhinoscriptsyntax as rs\nimport random as rd\nimport Rhino.Geometry as rg\n\nptNew = Pt0\nptList = [Pt0]\nrd.seed(S)\nlinesList = []\nmid = []\nCircles = []\n#Se genera el bucle que ira creando los puntos\nfor i in range(It):\n    #Los puntos se crean por coordenadas polares y valores aleatorios\n    #de angulo y radio\n    Angle = rd.randint(Amin,Amax)\n    R = rd.randint(Rmin,Rmax)\n    \n    ptNew = rs.Polar(ptNew, Angle, R)\n    \n    ptList.append(ptNew)\n    #Como primero adjunto el nuevo punto a la lista, se debe colocar\n    #el valor [-2]\n    dist = rs.Distance(ptNew, ptList[-2])/2\n    #evito el error de la distancia 0 que luego sera el radio de\n    #las circunferencias\n    if dist == 0:\n        dist = 0.01\n    else:\n        dist = dist    \n    #Se crean las lineas\n    lines = rs.AddLine(ptNew,ptList[-2])\n    \n    linesList.append(lines)\n    #Se crean los puntos medios de las mismas\n    midPt = rs.CurveMidPoint(lines)\n    mid.append(midPt)\n    #Se crean las circunferencias y se transforman a NURBS para operar con ellas    \n    Circle = rg.Circle(midPt,dist)\n    Circle = Circle.ToNurbsCurve()\n    \n    Circles.append(Circle)\n    \n    #Se crean los breps desde los circulos, se fusionan y se extrae\n    #la curva del perimetro\n    brep = rg.Brep.CreatePlanarBreps(Circles)\n    merge = rg.Brep.MergeBreps(brep,5)\n    edges = rg.Brep.DuplicateNakedEdgeCurves(merge,True,False)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

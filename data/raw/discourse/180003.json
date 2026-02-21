@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/failed-surface/180003",
+  "topic_id": 180003,
+  "title": "Failed surface",
+  "question": "Buenas, estoy usando el python de Grasshopper para intentar crear una superficie donde se genere una trama de rectángulos. Esta trama debe cambiar de tamaño sus rectángulos a medida que se acerque a un punto dado, modificando su escala. Para ello tengo ya un codigo generado pero el error me surge con que me detecta una superficie como un guid, y eso lleva a error. Alguien sabe como solucionar eso? lo he puesto tambien como brep y no funciona, y modificando el cosigo para que sea directamente un guid tampoco puedo, ya que no me deja dividir en partes un guid.\n\nOs dejo el codigo y los componentes.\n\n\nimport Rhino.Geometry as rg\nimport math\n\n# Función para generar la trama de rectángulos\ndef generate_rectangles(surface, rows, cols):\n    print(surface)  # Imprimir el valor de la variable surface\n    u_div, v_div = surface.Divide(rows, cols)\n    rectangles = []\n    for u in range(rows):\n        for v in range(cols):\n            rectangle = rg.Rectangle3d(u_div[u][v], u_div[u + 1][v], u_div[u + 1][v + 1], u_div[u][v + 1])\n            rectangles.append(rectangle)\n    return rectangles\n\n# Función para cambiar el tamaño de los rectángulos según la cercanía a un punto dado\ndef resize_rectangles(rectangles, point, max_distance):\n    resized_rectangles = []\n    for rectangle in rectangles:\n        center = rectangle.Center\n        distance = center.DistanceTo(point)\n        factor = min(distance / max_distance, 1.0) + 1.0\n        scaled_rectangle = rg.ScaleTransform(factor, factor, factor).Scale(rectangle)\n        resized_rectangles.append(scaled_rectangle)\n    return resized_rectangles\n\n# Entradas\nsurface = Surface # Asigna la superficie deseada desde Grasshopper\npoint = Point # Asigna el punto de referencia deseado desde Grasshopper\nrows = Rows # Número de filas de rectángulos desde Grasshopper\ncols = Cols # Número de columnas de rectángulos desde Grasshopper\nmax_distance = MaxDistance # Valor máximo de distancia desde Grasshopper\n\n# Generar la trama de rectángulos\nrectangles ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport math\n\n# Función para generar la trama de rectángulos\ndef generate_rectangles(surface, rows, cols):\n    print(surface)  # Imprimir el valor de la variable surface\n    u_div, v_div = surface.Divide(rows, cols)\n    rectangles = []\n    for u in range(rows):\n        for v in range(cols):\n            rectangle = rg.Rectangle3d(u_div[u][v], u_div[u + 1][v], u_div[u + 1][v + 1], u_div[u][v + 1])\n            rectangles.append(rectangle)\n    return rectangles\n\n# Función para cambiar el tamaño de los rectángulos según la cercanía a un punto dado\ndef resize_rectangles(rectangles, point, max_distance):\n    resized_rectangles = []\n    for rectangle in rectangles:\n        center = rectangle.Center\n        distance = center.DistanceTo(point)\n        factor = min(distance / max_distance, 1.0) + 1.0\n        scaled_rectangle = rg.ScaleTransform(factor, factor, factor).Scale(rectangle)\n        resized_rectangles.append(scaled_rectangle)\n    return resized_rectangles\n\n# Entradas\nsurface = Surface # Asigna la superficie deseada desde Grasshopper\npoint = Point # Asigna el punto de referencia deseado desde Grasshopper\nrows = Rows # Número de filas de rectángulos desde Grasshopper\ncols = Cols # Número de columnas de rectángulos desde Grasshopper\nmax_distance = MaxDistance # Valor máximo de distancia desde Grasshopper\n\n# Generar la trama de rectángulos\nrectangles = generate_rectangles(surface, rows, cols)\n\n# Cambiar el tamaño de los rectángulos según la cercanía al punto dado\nresized_rectangles = resize_rectangles(rectangles, point, max_distance)\n\n# Salida de datos\nRectangles = resized_rectangles",
+      "language": "python",
+      "author": "Jose_Moreno1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 115,
+  "posts_count": 1,
+  "views": 139
+}

@@ -1,0 +1,59 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/custom-history-plugin-possible/47123",
+  "topic_id": 47123,
+  "title": "Custom History plugin, Possible?",
+  "question": "Hi, is it possible to make a custom command/plugin that utilizes the history setting so it autoupdates on adjustments?",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing Rhino;\nusing Rhino.Commands;\n\nnamespace SampleCsCommands\n{\n  [System.Runtime.InteropServices.Guid(\"a40dadbc-276f-470e-bb09-4bd4ca065707\")]\n  public class SampleCsHistory : Command\n  {\n    /// <summary>\n    /// The only instance of the SampleCsHistory command.\n    /// </summary>\n    static SampleCsHistory g_command_instance;\n\n    /// <summary>\n    /// History recording version.\n    /// This field is used to ensure the version of the replay function matches\n    /// the version that originally created the geometry.\n    /// </summary>\n    private const int HISTORY_VERSION = 20131107;",
+      "language": "csharp",
+      "author": "mnewberg",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "﻿using System;\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\n\nnamespace EventWatcherMeshUpdate\n{\n    [System.Runtime.InteropServices.Guid(\"4281794f-0918-45da-b0a8-ad8550bb4e73\")]\n    public class MeshLineThroughPtsCommand : Command\n    {\n        static MeshLineThroughPtsCommand _instance;\n        public MeshLineThroughPtsCommand()\n        {\n            _instance = this;\n        }\n\n        ///<summary>The only instance of the MeshLineThroughPtsCommand command.</summary>\n        public static MeshLineThroughPtsCommand Instance\n        {\n            get { return _instance; }",
+      "language": "csharp",
+      "author": "mnewberg",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "﻿using System;\nusing System.Collections.Generic;\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\nusing Rhino.DocObjects;\n\n\nnamespace EventWatcherMeshUpdate\n{\n    [System.Runtime.InteropServices.Guid(\"84299824-d683-4468-b1de-1385f4e23637\")]\n    public class miniMeshFaceCenters : Command\n    {\n        bool Enabled = false;\n        bool inReplace = false;\n\n        Dictionary<Guid, List<Guid>> objectLookup = new Dictionary<Guid, List<Guid>>();\n\n        static miniMeshFaceCenters _instance;\n        public miniMeshFaceCenters()",
+      "language": "csharp",
+      "author": "mnewberg",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "﻿using System;\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.Geometry;\n\nnamespace EventWatcherMeshUpdate\n{\n    [System.Runtime.InteropServices.Guid(\"f38fae3b-b71e-4799-86b9-e373ec4e222f\")]\n    public class MeshBoundingBox : Command\n    {\n        static MeshBoundingBox _instance;\n        public MeshBoundingBox()\n        {\n            _instance = this;\n        }\n\n        ///<summary>The only instance of the MeshBoundingBox command.</summary>\n        public static MeshBoundingBox Instance\n        {\n            get { return _instance; }",
+      "language": "csharp",
+      "author": "mnewberg",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "# mesh vertex manipulation WIP\n# by Holo 2017\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndblLINE=10 # variable for the XYZ lines\n\n# get mesh for manipulation\nmesh_id=rs.GetObject(\"Select mesh to vertex edit\",32,preselect=True)\nif mesh_id:\n    # make a virtual mesh\n    mesh_obj = rs.coercemesh(mesh_id)\n    vertices = mesh_obj.Vertices\n    \n    #turn on grips (controlpoints) if they are off\n    if not rs.ObjectGripsOn (mesh_id)==True:\n        rs.EnableObjectGrips( mesh_id )\n    \n    # Continue to SELCT point for manipulation until enter is pressed\n    while True:\n        grip = rs.GetObjectGrip(\"Select a vertex to move\", select=True)\n        if grip:\n            \n            #Continue to manipulate THAT POINT until enter is pressed\n            while True:\n                \n                # the \"grip-list\" contains the vertex identifier as list item nr2\n                index=grip[1]\n                startPt=vertices[ index ]\n                \n                # Add X Y Z Lines for snapping\n                # as gumball replacement\n                def addLines(startPt):\n                    #Add XYZ lines\n                    lines=[]\n                    lines.append( rs.AddLine([startPt.X-dblLINE,startPt.Y,startPt.Z] , [startPt.X+dblLINE,startPt.Y,startPt.Z] ) )\n                    rs.ObjectColor(lines[0], (0,255,0) )\n                    lines.append( rs.AddLine([startPt.X,startPt.Y-dblLINE,startPt.Z] , [startPt.X,startPt.Y+dblLINE,startPt.Z] ) )\n                    rs.ObjectColor(lines[1], (255,0,0) )\n                    lines.append( rs.AddLine([startPt.X,startPt.Y,startPt.Z-dblLINE] , [startPt.X,startPt.Y,startPt.Z+dblLINE] ) )\n                    rs.ObjectColor(lines[2], (0,0,255) )\n                    return lines\n                lines=addLines(startPt)\n                \n                # get new position for the vertex\n                newVertex=rs.GetPoint(\"New position\", base_point=startPt, in_plane=True)\n                #delete the XYZ lines\n                rs.DeleteObjects(lines)\n                \n                #update mesh or go back to select point\n                if newVertex:\n                    vertices = mesh_obj.Vertices\n                    vertices.SetVertex(index,newVertex)\n                    # clear up vertex normals\n                    mesh_obj.Normals.Clear()\n                    mesh_obj.FaceNormals.Clear()\n                    \n                    #replace mesh\n                    sc.doc.Objects.Replace(mesh_id,mesh_obj)\n                \n                else:\n                    # no new destination so user is done manipulating that point\n                    # so break while-True loop\n                    break\n        \n        else:\n            # user is done manipulating the mesh \n            # so turn off controlpoints and break while-True loop\n            rs.EnableObjectGrips (mesh_id, enable=False)\n            break",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 16,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 24,
+  "views": 2387
+}

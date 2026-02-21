@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/blockinstancename-not-working/167812",
+  "topic_id": 167812,
+  "title": "BlockInstanceName not working",
+  "question": "Learning to use RhinoCommon, I’m trying to use Rhino.RunTime.TextFields.BlockInstanceName(). Haven’t found a way to make it work. This is the simplest version of what I’m trying to get:\n\n\nimport Rhino\n\ngetCommand = Rhino.Input.Custom.GetObject()\ngetCommand.SetCommandPrompt(\"Select block instances\")\ngetCommand.GeometryFilter = Rhino.DocObjects.ObjectType.InstanceReference\ngetCommand.SubObjectSelect = False\nget_rc = getCommand.GetMultiple(1, 0)\n\nif __name__ == \"__main__\":\n    if getCommand.CommandResult()==Rhino.Commands.Result.Success: # If user doesn't cancel command\n        for i in range(getCommand.ObjectCount):\n            obj = getCommand.Object(i).Object()\n            block_name = Rhino.Runtime.TextFields.BlockInstanceName(str(obj.Id))\n            print block_name\n    else:\n        print \"No block instances selected.\"\n\n\n\nReturns: “####”\n\n\nRhinoCommon documentation says I should be using “BlockName” method instead, but I don’t see it in the module. Am I doing something wrong?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\n\ngetCommand = Rhino.Input.Custom.GetObject()\ngetCommand.SetCommandPrompt(\"Select block instances\")\ngetCommand.GeometryFilter = Rhino.DocObjects.ObjectType.InstanceReference\ngetCommand.SubObjectSelect = False\nget_rc = getCommand.GetMultiple(1, 0)\n\nif __name__ == \"__main__\":\n    if getCommand.CommandResult()==Rhino.Commands.Result.Success: # If user doesn't cancel command\n        for i in range(getCommand.ObjectCount):\n            obj = getCommand.Object(i).Object()\n            block_name = Rhino.Runtime.TextFields.BlockInstanceName(str(obj.Id))\n            print block_name\n    else:\n        print \"No block instances selected.\"",
+      "language": "python",
+      "author": "Daniel_Díaz",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 314
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-precompute-grasshopper-python-script/114713",
+  "topic_id": 114713,
+  "title": "Rhino- Precompute grasshopper python script",
+  "question": "Hi all,\n\nI am trying to create a button in Rhino that will recompute whatever grasshopper script I may have open.\n\n\nI know could just click f5 in Grasshopper, but I am trying to set this up so that I am disconnecting the users from the script.  We have a human UI that we load, and if it is closed, I want the user to be able to click a button in rhino to recompute the script while not actually having to interact with GH.\n\n\nLooking into this, I thought something along the lines of the following should work as a python script:\n\n\nimport Grasshopper as gh\n\ngh.Kernel.GH_Document.ExpireSolution(gh.Instances.ActiveCanvas.Document)\n\n\nThis doesnt give me any errors, but also doesnt seem to work…  I’ve tried a number of variations, but think im missing something.\n\n\nas I am running this in Rhino, do I need to set the context somehow?  sc.doc=ghdoc ?\n\n\nThanks,",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Grasshopper as gh\n\ncomponents = gh.Instances.ActiveCanvas.Document.Attributes\n\nfor comp in components:\n    if comp.PathName == \"Recomp\":\n        sliderComp = comp.DocObject\n        slider = comp.DocObject.InstanceGuid\n\nGH = rs.GetPlugInObject(\"Grasshopper\")\nGH.SetSliderValue(str(slider),1)\nsliderComp.ExpireSolution(True)\n\nGH.EnableSolver()\nGH = None",
+      "language": "python",
+      "author": "JoshD",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 6,
+  "views": 1945
+}

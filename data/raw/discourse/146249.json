@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/error-parameter-must-be-a-guid-or-string-representing-a-guid/146249",
+  "topic_id": 146249,
+  "title": "Error: Parameter must be a Guid or string representing a Guid",
+  "question": "I was trying to compile a simple component for my grasshopper, to make a subcurve and move the subcurve,the code was successful but  when I change the crv input type hint to curve, the error below appears, I can only make the type hint as “ghdoc object when geometry”, but that will lead to the component in grasshopper show the name as  “marshalling signal parameter” after compile, anyone know how to resolve the issue?\n\nThanks!\n\n\nimport rhinoscriptsyntax as rs\n\n\ndef msb(curve, domain0, domain1, xaxis, yaxis, zaxis, reverse):\n    if reverse:\n        rs.ReverseCurve(curve)\n    newcurve = rs.FitCurve(curve)\n    subcurve = rs.AddSubCrv(newcurve, float(domain0), float(domain1))\n    movecurve = rs.MoveObject(subcurve, [float(xaxis), float(yaxis), float(zaxis)])\n    return movecurve\n\n\ntrimcrv = msb(crv, t0, t1, xdr, ydr, zdr, reverse)\n\n\n\n\nError: Runtime error (TypeErrorException): Parameter must be a Guid or string representing a Guid\n\n\nTraceback:\n\nline 890, in coerceguid, “C:\\Users\\Administrator\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py”\n\nline 3717, in ReverseCurve, “C:\\Users\\Administrator\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\curve.py”\n\nline 6, in msb, “”\n\nline 13, in script\n\n\n\n\n01\n1065×670 60.7 KB\n\n\n\n\n\n\n02\n936×598 42.5 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\n# inputs for curve fitting (curve degree and tolerances)\ndegree = 3 \nfitTolerance = 0.0001 \nangleTolerance = 0.0001\n\nif reverse:\n    curve.Reverse()\n\n\n# Duplicating curve\nsubCurve = curve.DuplicateCurve()\n\n# Fitting curve\nsubCurve = subCurve.Fit(degree, fitTolerance, angleTolerance)\n\n# Createting subcurve from duplicated curve\nsubCurve = curve.Trim(domain0,domain1)\n# Subcurve translation (xaxis, yaxis, zaxis) are vectors \n# if floats use \n# rg.Transform.Translation(xaxis, yaxis, zaxis)\nX_Move = rg.Transform.Translation(xaxis, yaxis, zaxis)\nsubCurve.Transform(X_Move)",
+      "language": "python",
+      "author": "janotaondrej91",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nsc.doc = ghdoc\n\ndef msb(curve, domain0, domain1, xaxis, yaxis, zaxis, reverse):\n    if reverse:\n        rs.ReverseCurve(curve)\n    newcurve = rs.FitCurve(curve)\n    subcurve = rs.AddSubCrv(newcurve, float(domain0), float(domain1))\n    movecurve = rs.MoveObject(subcurve, [float(xaxis), float(yaxis), float(zaxis)])\n    return movecurve\n\ncrv = rs.coercecurve(crv)\ntrimcrv = msb(crv, t0, t1, xdr, ydr, zdr, reverse)",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\ndef msb(curve, domain0, domain1, xaxis, yaxis, zaxis, reverse):\n    if reverse:\n        rg.Curve.Reverse(curve)\n    newcurve = rs.FitCurve(curve)\n    subcurve = rs.AddSubCrv(newcurve, float(domain0), float(domain1))\n    movecurve = rs.MoveObject(subcurve, [float(xaxis), float(yaxis), float(zaxis)])\n    return movecurve\n\ntrimcrv = msb(crv, t0, t1, xdr, ydr, zdr, reverse)",
+      "language": "python",
+      "author": "Caesar",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef msb(curve, domain0, domain1, xaxis, yaxis, zaxis, reverse):\n    if reverse:\n        rs.ReverseCurve(curve)\n    newcurve = rs.FitCurve(curve)\n    subcurve = rs.AddSubCrv(newcurve, float(domain0), float(domain1))\n    rs.MoveObject(subcurve, [float(xaxis), float(yaxis), float(zaxis)])\n    return subcurve\n\ntrimcrv = msb(crv, t0, t1, xdr, ydr, zdr, reverse)",
+      "language": "python",
+      "author": "Adam_M",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\ndef msb(curve, domain0, domain1, xaxis, yaxis, zaxis, reverse):\n    if reverse:\n        rs.ReverseCurve(curve)\n    newcurve = rs.FitCurve(curve)\n    subcurve = rs.AddSubCrv(newcurve, float(domain0), float(domain1))\n    movecurve = rs.MoveObject(subcurve, [float(xaxis), float(yaxis), float(zaxis)])\n    return movecurve\n\n\ntrimcrv = msb(crv, t0, t1, xdr, ydr, zdr, reverse)",
+      "language": "python",
+      "author": "Caesar",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 12,
+  "views": 1294
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/script-issue-with-getting-guid/171783",
+  "topic_id": 171783,
+  "title": "Script issue with getting GUID",
+  "question": "I have this script that I’ve hacked together. The scirpt creates a planar surface from either open or closed shapes, including surface edges and curves. It even works on multiple open or closed shapes at once. It works great, unless I try to use it on what seems like the simplest case - a single closed planar polyline (or polycurve.) This is because I’m having trouble getting the GUID if there’s only one object selected by the user. If there is more than one object selected, then when I use rs.joincurves, the output is GUID, but I can’t use rs.JoinCurves on a single item without getting an error\n\n\nsingle closed planar polyline.3dm\n (33.8 KB)\n\n. How to fix? See the line where I comment ‘Problem is here’.\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n\ndef GetCurvesAndEdges():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select planar curves and edges to build surface.\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.EnablePreSelect(False, True)\n    go.SubObjectSelect = True\n    rc = go.GetMultiple(1, 0)\n    if rc != Rhino.Input.GetResult.Object: return \n    \n    results = [obj_ref.Curve().ToNurbsCurve() for obj_ref in go.Objects()]\n\n    curves = []\n    objcount = 0\n    Cap = 0\n\n    for obj in results:\n        objcount = objcount + 1\n        curve = rs.coercecurve(obj)\n        if curve:\n            curves.append(curve)\n\n    # If there are no curves, return\n    if not curves:\n        print(\"No valid curves selected.\")\n        return\n\n    # Create a joined polyline from the selected curves\n    if (objcount > 1):\n        polyline = rs.JoinCurves(curves)\n        rs.SelectObjects(polyline)\n    else:\n        # problem is here. If only one closed polyline or polycurve is selected, then I can't get the guid and future steps fail.\n        polyline = curves\n        \n\n    rs.EnableRedraw(False)\n\n    for strNewCurve in polyline:\n        if rs.IsCurvePlanar(strNewCurve) and not(rs.IsLine(strNewCurve)):\n            if rs.Is...",
+  "code_blocks": [
+    {
+      "code": "results = [obj_ref.Curve().ToNurbsCurve() for obj_ref in go.Objects()]\nif not results: return\n    \n# add results to the document so they can be used with rs methods\ncrv_ids = [scriptcontext.doc.Objects.AddCurve(crv) for crv in results]\n\nprint crv_ids",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\n\ndef GetCurvesAndEdges():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select planar curves and edges to build surface.\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.EnablePreSelect(False, True)\n    go.SubObjectSelect = True\n    rc = go.GetMultiple(1, 0)\n    if rc != Rhino.Input.GetResult.Object: return \n    \n    results = [obj_ref.Curve().ToNurbsCurve() for obj_ref in go.Objects()]\n\n    curves = []\n    objcount = 0\n    Cap = 0\n\n    for obj in results:\n        objcount = objcount + 1\n        curve = rs.coercecurve(obj)\n        if curve:\n            curves.append(curve)\n\n    # If there are no curves, return\n    if not curves:\n        print(\"No valid curves selected.\")\n        return\n\n    # Create a joined polyline from the selected curves\n    if (objcount > 1):\n        polyline = rs.JoinCurves(curves)\n        rs.SelectObjects(polyline)\n    else:\n        # problem is here. If only one closed polyline or polycurve is selected, then I can't get the guid and future steps fail.\n        polyline = curves\n        \n\n    rs.EnableRedraw(False)\n\n    for strNewCurve in polyline:\n        if rs.IsCurvePlanar(strNewCurve) and not(rs.IsLine(strNewCurve)):\n            if rs.IsCurveClosed(strNewCurve):\n                arrToCap=strNewCurve\n                rs.AddPlanarSrf (arrToCap)\n                Cap = Cap + 1\n                rs.DeleteObject (strNewCurve)\n            else:\n                arrObjectsToJoin=[]\n                arrStartPoint = rs.CurveStartPoint(strNewCurve)\n                arrEndPoint = rs.CurveEndPoint(strNewCurve)\n                LineR = rs.AddLine(arrStartPoint, arrEndPoint)\n                arrObjectsToJoin.append(LineR)\n                arrObjectsToJoin.append(strNewCurve)\n                arrJoinedCurves = rs.JoinCurves(arrObjectsToJoin)\n                rs.AddPlanarSrf(arrJoinedCurves)\n                Cap = Cap + 1\n                rs.DeleteObjects (arrJoinedCurves)\t\n                rs.DeleteObject (LineR)\n                if (objcount > 1): rs.DeleteObject (strNewCurve)\n        else:\n            if (objcount > 1): rs.DeleteObject (strNewCurve)\n\n    rs.EnableRedraw(True)\n\n    if Cap == 0:\n        print ('No surfaces created.')\n    elif Cap == 1:\n        print ('One surface created.')\t\n    else:\n        print (str(Cap) + ' planar surfaces were created.')\n\n\nGetCurvesAndEdges()",
+      "language": "python",
+      "author": "phcreates",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 284
+}

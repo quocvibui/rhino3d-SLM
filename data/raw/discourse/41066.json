@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/planarsrf-using-rhinocommon/41066",
+  "topic_id": 41066,
+  "title": "PlanarSrf using Rhinocommon",
+  "question": "I’m trying to do the equivalent of PlanarSrf using RhinoCommon, and I’ve come across an issue.\n\n\nSo far I’m using Brep.CreatePatch() to do it, and it works - EXCEPT if the closed curve in question self intersects (like an inward loop).\n\n\nThe Patch result looks fine in Wireframe, but when I go to any other view I get a weird polygon of some sort that doesn’t fit the border I see in the Wireframe view.\n\n\nIf I extract the border from this failed Patch, and use PlanarSrf, the desired result appears.\n\n\nHow can I duplicate that result using Rhinocommon?",
+  "code_blocks": [
+    {
+      "code": "protected Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n    ObjRef cRef;\n    Result res = RhinoGet.GetOneObject(\"crv\", false, ObjectType.Curve, out cRef);\n    if (res != Result.Success)\n        return res;\n\n    Curve crv = cRef.Curve();\n    if (!crv.IsClosed)\n    {\n        RhinoApp.WriteLine(\"Curve is not closed\");\n        return Result.Success;\n    }\n\n    var x = Intersection.CurveSelf(crv, doc.ModelAbsoluteTolerance);\n    if (x == null || x.Count == 0)\n    {\n        Brep[] noIntersect = Brep.CreatePlanarBreps(crv);\n        foreach (var p in noIntersect)\n            doc.Objects.AddBrep(p);\n        return Result.Success;\n    }\n    // the self-intersection parameters are stored in ParameterA and ParameterB\n    // this is where to split the curve.\n    Curve[] split = crv.Split(new[] {x[0].ParameterA, x[0].ParameterB});\n\n    // the split will probably not be exactly on the curve start or end, so \n    // look for one closed curve and join the rest.\n    if (split.Length != 2)\n    {\n        Curve closed = split.FirstOrDefault(t => t.IsClosed);\n        if (null == closed)\n        {\n            RhinoApp.WriteLine(\"No closed curve found after split at self-intersection.\");\n            return Result.Success;\n        }\n        Curve[] other = Curve.JoinCurves(split.Except(new[] {closed}));\n        if (null == other || other.Length != 1 || !other[0].IsClosed)\n        {\n            RhinoApp.WriteLine(\"Unable to join other parts into one closed curve.\");\n            return Result.Success;\n        }\n        split[0] = closed;\n        split[1] = other[0];\n    }\n\n    Brep[] planar = Brep.CreatePlanarBreps(new[] {split[0], split[1]});\n    if (null != planar)\n    {\n        foreach (Brep p in planar)\n            doc.Objects.Add(p);\n    }\n            \n    return Result.Success;\n}",
+      "language": "csharp",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 1226
+}

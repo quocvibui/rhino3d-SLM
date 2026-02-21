@@ -1,0 +1,19 @@
+{
+  "source_url": "https://github.com/DarrelRonald/RhinoPythonScripts/blob/dd4c706fc38cd8512282e296609c112172eef92d/Learning/Add-Delete-Circle.py",
+  "repo": "DarrelRonald/RhinoPythonScripts",
+  "repo_stars": 11,
+  "repo_description": "Scripts for learning and for use in Rhino3D and Grasshopper3D",
+  "license": "MIT",
+  "filepath": "Learning/Add-Delete-Circle.py",
+  "instruction": "This script aims to show the different styles of deleting objects in Rhino.",
+  "code": "\"\"\"\nThis script aims to show the different styles of deleting objects in Rhino. \n\"\"\"\nimport Rhino\nimport scriptcontext as sc\nimport System.Guid\nimport rhinoscriptsyntax as rs\n\n# addCircle written by McNeel\ndef AddCircle():  \n    center = Rhino.Geometry.Point3d(0, 0, 0)\n    radius = 10.0\n    c = Rhino.Geometry.Circle(center, radius)\n   \n    if sc.doc.Objects.AddCircle(c)!=System.Guid.Empty:\n        sc.doc.Views.Redraw()\n        return Rhino.Commands.Result.Success\n    return Rhino.Commands.Result.Failure\n\n # addCircle rewritten to see what is necessary\ndef AddCircle2(): \n    center = Rhino.Geometry.Point3d(5, 5, 5)\n    radius = 20.0\n    c = Rhino.Geometry.Circle(center, radius)\n    sc.doc.Objects.AddCircle(c)\n    sc.doc.Objects.AddPoint(center)\n    sc.doc.Views.Redraw()\n\n\nif __name__==\"__main__\":\n\n    # Add geometry to delete\n    AddCircle2()\n    \n    #----Option \"Delete\" using Rhinoscriptsyntax\n    id = rs.AllObjects(select=True)\n    rs.DeleteObjects(id)\n    \n    # Add geometry to delete\n    AddCircle()\n    \n    #---- Option \"Delete\" using Scriptcontext\n    sc.doc.Objects.Clear()\n    \n    # Add geometry to delete\n    AddCircle()\n    AddCircle2()\n    \n\n    #--- Option \"Delete\" using RhinoCommon\n    ot = rs.AllObjects(select=True) #Rhino.RhinoDoc.ActiveDoc.Objects\n    ot_id = []\n    \n    def idMaker(objects):\n        for i in ot:\n           Rhino.DocObjects.RhinoObject.Id\n           ot_id.append(i)\n    idMaker(ot)\n    Rhino.RhinoDoc.ActiveDoc.Objects.Delete(ot_id, True)\n\n\n    # Add geometry to delete\n    AddCircle2()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "RhinoCommon",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

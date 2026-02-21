@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extrusion-create-failled/106177",
+  "topic_id": 106177,
+  "title": "extrusion.Create failled",
+  "question": "hi, m trying to using ghpython to extrude a curve to a closed brep, using extrusion.Create, but failed. then i use trygetPlane() to check the curve , returned False, while using trygetPlane(0.0001), it returned True.\n\nmaybe i dont make myself chear, please have a look at the attached file. \nextrusionFail.3dm\n (39.9 KB) \nextrusionFail.gh\n (7.2 KB) \n\n\nX}QRP{AFM_K`CN9\n1258×794 63.7 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nif rs.IsCurvePlanar(x):\n    normal = rs.CurvePlane(x)[3]\n    a = rs.ExtrudeCurve(x, rs.AddLine([0,0,0], 100 * normal))\n    rs.CapPlanarHoles(a)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nfrom scriptcontext import doc\nisplanar, plane = x.TryGetPlane(doc.ModelAbsoluteTolerance)\nif isplanar:\n    x = rg.Curve.ProjectToPlane(x, plane)\n    a = rg.Extrusion.Create(x, 100, True)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 607
+}

@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/setting-working-directory-on-file-opening/138638",
+  "topic_id": 138638,
+  "title": "Setting working directory on file opening",
+  "question": "I want to set the working folder to the current document folder on startup, as I am constantly bouncing from project to project. I made a simple python script and called it on startup using a command script in Tools–>Options–>General, but it looks like that gets activated “too early” to work. So what’s the best way to do this, and to have it get set every time a document is opened instead of just on startup?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\nimport os\n\ndef MySetupWorkingFolderEvent(sender, e):\n    try:\n        if e.FileName:\n            folder, filename= os.path.split(e.FileName)\n            rs.WorkingFolder(folder)\n    except Exception as ex:\n        print ex\n\ndef RunCommand():\n    key = \"MySetupWorkingFolderEvent\"\n    if not scriptcontext.sticky.has_key(key):\n        scriptcontext.sticky[key] = MySetupWorkingFolderEvent\n        scriptcontext.doc.EndOpenDocument += MySetupWorkingFolderEvent\n        \nif __name__==\"__main__\":\n    RunCommand()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 439
+}

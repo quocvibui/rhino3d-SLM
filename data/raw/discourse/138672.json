@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/document-user-text-into-grasshopper/138672",
+  "topic_id": 138672,
+  "title": "Document User Text into Grasshopper",
+  "question": "Is there a way to pull Document User Text from the active file into Grasshopper? Alternatively, is there a way to write from Grasshopper into the active file?\n\n\nI’m trying to set up a parametric design of a simple display case as a challenge, so that everything is done by Grasshopper parameters. Length, width, height, material, etc. I’d also like to automate all the drafting/annotation, so that all I have to do is specify the parameters, and the job is basically done.\n\n\nOne thing in our workflow is that I’ve used Document User Text for things like project name, project number, item number, etc, so that they only have to be set once across multiple layouts. Our title blocks automatically pull from the user text.\n\n\nI can pull item user text in with something like Elefront; but is there a way to do it with the overarching Document text?\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nrs.SetDocumentUserText(K, V)\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nrs.SetDocumentUserText(K, V)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\n#read document key values\n#if key does not exists, then value is 'None'\ndut_values = []\nfor key in K:\n    dut_values.append(rs.GetDocumentUserText(key))\n\n\nfor i, (key, value) in enumerate(zip(K, V)):\n    # if value does not exist -> write\n    # if value exists and update=False -> do nothing\n    # if value exists and update=True -> overwrite\n\n    if dut_values[i] is None:\n        rs.SetDocumentUserText(key, value)\n        dut_values[i] = value\n    elif update:\n        rs.SetDocumentUserText(key, value)\n        dut_values[i] = value\nsc.doc = ghdoc\nvalues = dut_values",
+      "language": "python",
+      "author": "Toni_Osterlund",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 9,
+  "views": 1493
+}

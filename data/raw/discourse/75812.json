@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/access-component-values-from-external-python-script/75812",
+  "topic_id": 75812,
+  "title": "Access Component values from external Python script",
+  "question": "Hello Scripters,\n\n\ni am trying to access a components values with a python script which is not running in the GHPython component but from the Python Script editor. The component i try to access is a \nGuid\n component which is holding some Rhino Object Ids.\n\n\nI can get the opened Grasshopper document and find the component using:\n\n\nfound_items = document.FindObjects(search_list, 1)\nif found_items:\n     component_obj = found_items[0]\n\n\n\nand i can read the object ids properly using this:\n\n\nprint \"Assigned ObjectIds to '{}'\".format(component_obj.NickName)\nfor obj_id in component_obj.VolatileData:\n    print obj_id\n\n\n\nBut how can i change the ids, or set my own to the component ? With some help from \n@djordje\n i’ve been able to perform this:\n\n\ngh_path = Grasshopper.Kernel.Data.GH_Path(0)\ngh_guids = [ Grasshopper.Kernel.Types.GH_Guid(obj_id) for obj_id in obj_ids]\nsuccess = component_obj.AddVolatileDataList(gh_path, gh_guids)\nprint \"Success:\", success\nmydoc.NewSolution(True) \n\n\n\nwhich prints \nTrue\n, and i can also list that my object ids got assigned. But i do not see that in the Grasshopper GUI. What is the save way to do it right ?\n\n\nthank you\n\nc.",
+  "code_blocks": [
+    {
+      "code": "for obj_id in obj_ids:\n    gh_guid = Grasshopper.Kernel.Types.GH_Guid(obj_id) \n    component_obj.PersistentData.Append(gh_guid)\n    \ncomponent_obj.ExpireSolution(True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "gh_path = Grasshopper.Kernel.Data.GH_Path(0)\ngh_guids = [ Grasshopper.Kernel.Types.GH_Guid(obj_id) for obj_id in obj_ids]\nsuccess = component_obj.AddVolatileDataList(gh_path, gh_guids)\nprint \"Success:\", success\nmydoc.NewSolution(True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 5,
+  "views": 989
+}

@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/jonashaldemann/jh_ghp_tools/blob/3f6fad9b1d6b94b1382000d2d9bd27952269a19d/src/jh_ghp_tools/rhinopython/delete_hatch_edges.py",
+  "repo": "jonashaldemann/jh_ghp_tools",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/jh_ghp_tools/rhinopython/delete_hatch_edges.py",
+  "instruction": "Delete hatch edges",
+  "code": "# -*- coding: utf-8 -*-\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\n\ndef sample_curve_points(curve, num=20):\n    if not isinstance(curve, Rhino.Geometry.NurbsCurve):\n        curve = curve.ToNurbsCurve()\n    if not curve:\n        return []\n    t_vals = [curve.Domain.ParameterAt(i / float(num - 1)) for i in range(num)]\n    return [curve.PointAt(t) for t in t_vals]\n\n\ndef move_curves_if_fully_on_hatch_edge(tol=0.01, num_points=20):\n    deleted_layer = \"_deleted_\"\n    if not rs.IsLayer(deleted_layer):\n        rs.AddLayer(deleted_layer)\n\n    C = rs.GetObjects(\"Waehle Kurven (C)\", rs.filter.curve)\n    H = rs.GetObjects(\"Waehle Hatches (H)\", rs.filter.hatch)\n    if not C or not H:\n        return\n\n    hatch_edges = []\n    for hid in H:\n        h_obj = sc.doc.Objects.Find(hid)\n        hatch = h_obj.Geometry\n        if isinstance(hatch, Rhino.Geometry.Hatch):\n            loops = hatch.Get3dCurves(True) + hatch.Get3dCurves(False)\n            for loop in loops:\n                nurbs = loop.ToNurbsCurve()\n                if nurbs:\n                    hatch_edges.append(nurbs)\n\n    moved_ids = []\n    for cid in C:\n        c_obj = sc.doc.Objects.Find(cid)\n        if not c_obj:\n            continue\n        c_geom = c_obj.Geometry\n        points = sample_curve_points(c_geom, num_points)\n\n        for edge in hatch_edges:\n            edge_domain = edge.Domain\n            all_on_edge = True\n            for pt in points:\n                # ClosestPoint gibt (found, t)\n                found, t = edge.ClosestPoint(pt)\n                if not found:\n                    all_on_edge = False\n                    break\n                closest_pt = edge.PointAt(t)\n                if closest_pt.DistanceTo(pt) > tol:\n                    all_on_edge = False\n                    break\n                if t < edge_domain.T0 - tol or t > edge_domain.T1 + tol:\n                    all_on_edge = False\n                    break\n\n            if all_on_edge:\n                rs.ObjectLayer(cid, deleted_layer)\n                moved_ids.append(cid)\n                break\n\n    print(\"Verschoben:\", len(moved_ids), \"Kurven auf Layer\", deleted_layer)\n\n\nmove_curves_if_fully_on_hatch_edge()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

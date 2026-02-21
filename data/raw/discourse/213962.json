@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-parse-relative-coordinates-without-using-crhinogetpoint/213962",
+  "topic_id": 213962,
+  "title": "C++ Parse relative coordinates without using CRhinoGetPoint",
+  "question": "I am creating a custom Move command which asks for a \nCRhinoGetObjet\n using the \npoint_object\n filter.\n\n\nThen I want to ask the user for a new point position, which has to be inputted as x,y,z coordinates.\n\n\nI don’t want to accept mouse click as input.\n\nI don’t want the mouse crosshair to be transformed to a cross, like it does with the \nCRhinoGetPoint::GetPoint\n(and which can handle relative coordinates and other formats).\n\n\nBasically I want what the \nCRhinoGetNumber::GetNumber\n does. However this only accepts numbers and I want to accept all the coordinate formats listed on this page \nEntering Numbers | Rhino 3-D modeling\n\n\nMy current code:\n\n\nCRhinoCommand::result RunCommand(const CRhinoCommandContext &context) {\n\tCRhinoGetObject point{};\n\tpoint.SetCommandPrompt(L\"Select a point\");\n\tpoint.SetGeometryFilter(CRhinoGetObject::point_object);\n\n\tconst CRhinoGet::result result = point.GetObjects(1, 1);\n\tconst CRhinoCommand::result command_result = point.CommandResult();\n\n\tif (command_result != CRhinoCommand::result::success) {\n\t\tRhinoApp().Print(L\"Command failed. Bad selection?\\n\");\n\t}\n\n\tif (result != CRhinoGet::object) {\n\t\tRhinoApp().Print(L\"This was not a point.\\n\");\n\t}\n\n\n\tCRhinoGetNumber try_new_pos {};\n\ttry_new_pos.SetCommandPrompt(L\"Input new coordinates\");\n\t// This will fail because x,y,z format from user is not CRhinoGet::number\n\tif (not (try_new_pos.GetNumber() == CRhinoGet::number)) {\n\t\tRhinoApp().Print(\"Not a number, exiting.\\n\");\n\t\treturn CRhinoCommand::result::failure;\n\t}\n\n\tdouble new_pos = try_new_pos.Number();\n\tconst CRhinoObject *old_point = point.Object(0).Object();\n\tCRhinoPointObject *new_point = new CRhinoPointObject();\n\n\tif (new_point == nullptr) {\n\t\tRhinoApp().Print(\"Memory allocation failed\\n\");\n\t\treturn CRhinoCommand::result::failure;\n\t}\n\n\tON_3dPoint p {new_pos}; // This fails of course. new_pos typed as @5,0,0\n\t*new_point = p;\n\n\tif (!context.m_doc.ReplaceObject(CRhinoObjRef {old_point}, new_point, true)) {\n\t\tRhinoApp().Print(\"Rhino failed to modify...",
+  "code_blocks": [
+    {
+      "code": "CRhinoCommand::result RunCommand(const CRhinoCommandContext &context) {\n\tCRhinoGetObject point{};\n\tpoint.SetCommandPrompt(L\"Select a point\");\n\tpoint.SetGeometryFilter(CRhinoGetObject::point_object);\n\n\tconst CRhinoGet::result result = point.GetObjects(1, 1);\n\tconst CRhinoCommand::result command_result = point.CommandResult();\n\n\tif (command_result != CRhinoCommand::result::success) {\n\t\tRhinoApp().Print(L\"Command failed. Bad selection?\\n\");\n\t}\n\n\tif (result != CRhinoGet::object) {\n\t\tRhinoApp().Print(L\"This was not a point.\\n\");\n\t}\n\n\n\tCRhinoGetNumber try_new_pos {};\n\ttry_new_pos.SetCommandPrompt(L\"Input new coordinates\");\n\t// This will fail because x,y,z format from user is not CRhinoGet::number\n\tif (not (try_new_pos.GetNumber() == CRhinoGet::number)) {\n\t\tRhinoApp().Print(\"Not a number, exiting.\\n\");\n\t\treturn CRhinoCommand::result::failure;\n\t}\n\n\tdouble new_pos = try_new_pos.Number();\n\tconst CRhinoObject *old_point = point.Object(0).Object();\n\tCRhinoPointObject *new_point = new CRhinoPointObject();\n\n\tif (new_point == nullptr) {\n\t\tRhinoApp().Print(\"Memory allocation failed\\n\");\n\t\treturn CRhinoCommand::result::failure;\n\t}\n\n\tON_3dPoint p {new_pos}; // This fails of course. new_pos typed as @5,0,0\n\t*new_point = p;\n\n\tif (!context.m_doc.ReplaceObject(CRhinoObjRef {old_point}, new_point, true)) {\n\t\tRhinoApp().Print(\"Rhino failed to modify the point\\n\");\n\t\tdelete new_point;\n\t\treturn CRhinoCommand::result::failure;\n\t}\n\n\tcontext.Document()->Redraw();\n\treturn CRhinoCommand::success;\n}",
+      "language": "csharp",
+      "author": "John_Dough",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 100
+}

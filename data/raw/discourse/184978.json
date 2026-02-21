@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-unable-to-get-rendermaterial-of-object/184978",
+  "topic_id": 184978,
+  "title": "RhinoCommon: unable to get RenderMaterial of object",
+  "question": "Hi all,\n\n\nIn a python script I’m trying to retrieve the renderMaterial of an object, but it seems I’m not doing it right. This returns an error:\n\n\nimport Rhino\n\nobjTypesFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Mesh\nrc, objRef = Rhino.Input.RhinoGet.GetOneObject( \"Select object\", False, objTypesFilter )\n\nobj = objRef.Object()\n\nrenderMaterial = obj.Attributes.RenderMaterial\n\n\n\nIn my defense the error is not super helpful:\n\n\nimage\n769×156 3.5 KB\n\n\nI’m testing this script on the most simple object possible:\n\n\nsample.3dm\n (65.6 KB)\n\n\nMy Rhino version:\n\n\nRhino 8 SR8 2024-6-11 (Rhino 8, 8.8.24163.12481, Git hash:master @ ded4d86ca901dbeaf13ee84f79b3e91b22da4880)\n\n\nWhat is the right way to get the renderMaterial of a RhinoObject in RhinoCommon ?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\nobjTypesFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Mesh\nrc, objRef = Rhino.Input.RhinoGet.GetOneObject( \"Select object\", False, objTypesFilter )\nmats = sc.doc.Materials\n\nobj = objRef.Object()\nattrs = obj.Attributes\nidx = attrs.MaterialIndex\n\nif idx != -1:\n    renderMaterial = mats[idx]\n    print renderMaterial.Name",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nobjTypesFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Mesh\nrc, objRef = Rhino.Input.RhinoGet.GetOneObject( \"Select object\", False, objTypesFilter )\n\nobj = objRef.Object()\n\nrenderMaterial = obj.RenderMaterial\nprint(renderMaterial)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 7,
+      "is_solution": true
+    },
+    {
+      "code": "#! python3\n\nimport Rhino\nimport Rhino.Render\n\ndefaultRenderMaterial = Rhino.Render.RenderContentType.NewContentFromTypeId(Rhino.Render.ContentUuids.PlasterMaterialType)\n\nobjTypesFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Mesh\nrc, objRef = Rhino.Input.RhinoGet.GetOneObject( \"Select object\", False, objTypesFilter )\n\nobj = objRef.Object()\n\nrenderMaterial = obj.RenderMaterial\n\nif not renderMaterial:\n    renderMaterial = defaultRenderMaterial\n\nprint(renderMaterial)",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nobjTypesFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Mesh\nrc, objRef = Rhino.Input.RhinoGet.GetOneObject( \"Select object\", False, objTypesFilter )\n\nobj = objRef.Object()\n\nrenderMaterial = obj.Attributes.RenderMaterial",
+      "language": "python",
+      "author": "felix.mariotto",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 192
+}

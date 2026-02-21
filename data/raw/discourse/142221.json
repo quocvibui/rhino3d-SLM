@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cannot-set-displaypipelineattributes-showcurves-property/142221",
+  "topic_id": 142221,
+  "title": "Cannot set DisplayPipelineAttributes.ShowCurves Property",
+  "question": "Hi \n@dale\n,\n\n\ni am trying to enable \nShowCurves\n in the \nDisplayPipelineAttributes\n of the current displaymode (Rendered) using below code:\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DisplayModeShowCurves(new_state=True):\n    \n    dmd = scriptcontext.doc.Views.ActiveView.ActiveViewport.DisplayMode\n    dmd.DisplayAttributes.ShowCurves = new_state\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(dmd)\n    scriptcontext.doc.Views.Redraw()\n\nDisplayModeShowCurves(True)\n\n\n\nI can see the checkbox in the display tab gets checked, however curves are not shown. If i switch the active view to a different display mode and then back to rendered, curves are displayed. It seems to fail in Rhino 6 and 7. Is there anything wrong with my code ?\n\n\nthanks,\n\nc.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef GetShowCurves():\n    dm = sc.doc.Views.ActiveView.ActiveViewport.DisplayMode\n    return dm.DisplayAttributes.ShowCurves\n\ndef SetShowCurves(show):\n    view = sc.doc.Views.ActiveView\n    active_dm = view.ActiveViewport.DisplayMode\n    id = Rhino.Display.DisplayModeDescription.WireframeId\n    wireframe_dm = Rhino.Display.DisplayModeDescription.GetDisplayMode(id)\n    view.ActiveViewport.DisplayMode = wireframe_dm\n    view.Redraw()\n    Rhino.RhinoApp.Wait()\n    active_dm.DisplayAttributes.ShowCurves = show\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(active_dm)\n    view.ActiveViewport.DisplayMode = active_dm\n    view.Redraw()\n\nSetShowCurves(not GetShowCurves())",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DisplayModeShowCurves(new_state=True):\n    dmd = scriptcontext.doc.Views.ActiveView.ActiveViewport.DisplayMode\n    dmd.DisplayAttributes.ShowCurves = new_state\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(dmd)\n\n    # hack\n    pt_id = scriptcontext.doc.Objects.AddPoint(Rhino.Geometry.Point3d.Origin)\n    scriptcontext.doc.Objects.Delete(pt_id, True)    \n\n    scriptcontext.doc.Views.Redraw()\n\nDisplayModeShowCurves(True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DisplayModeShowCurves(new_state=True):\n    \n    dmd = scriptcontext.doc.Views.ActiveView.ActiveViewport.DisplayMode\n    dmd.DisplayAttributes.ShowCurves = new_state\n    Rhino.Display.DisplayModeDescription.UpdateDisplayMode(dmd)\n    scriptcontext.doc.Views.Redraw()\n\nDisplayModeShowCurves(True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 494
+}

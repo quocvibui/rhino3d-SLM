@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-python-replace-geometry-while-keeping-guid/206312",
+  "topic_id": 206312,
+  "title": "Grasshopper/Python - Replace geometry while keeping GUID",
+  "question": "Hello everyone,\n\n\nI am trying to write my own version of “Replace” component, which could be found in LegoPod for Rhino 7. Now I want to have my own python-based component, that would do the same thing, in Rhino 8.\n\n\nThe idea is that I would like to replace geometry in an object, while keeping its GUID and attributes etc.\n\n\nHere is how far I have got, but it doesn’t work:\n\n\nimport Rhino as rc\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nsc.doc = rc.RhinoDoc.ActiveDoc\nrs.EnableRedraw(False)\nobjecttable = sc.doc.Objects\n\nif a==1:\n    for object_id in IDs:\n        objecttable.Replace(object_id,Geo)      \n\nrs. EnableRedraw(True)\nsc.doc = ghdoc\n\n\n\nimage\n1877×667 46.7 KB\n\n\nBoth \nIDs\n and \nGeo\n are List Access. I would like to be able to connect tree structure of both IDs and Geometry.\n\n\nCould someone please help?\n\n\nBest,\n\nP\n\n\nPS: Greasshopper file for Rhino 8:\n\n\nReplace in Python.gh\n (6.4 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rc\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport System\n\nsc.doc = rc.RhinoDoc.ActiveDoc\nrs.EnableRedraw(False)\n\n# Create a persistent variable to track execution\nif 'executed_state' not in globals():\n    executed_state = False\n\nif Replace == 1 and not executed_state:\n    executed_state = True\n    \n    for i, object_id in enumerate(IDs):\n        # Convert string ID to System.Guid if needed\n        if isinstance(object_id, str):\n            guid_id = System.Guid(object_id)\n        else:\n            guid_id = object_id\n        \n        # Get the geometry for this iteration\n        if isinstance(Geo, list):\n            geometry = Geo[i] if i < len(Geo) else Geo[0]\n        else:\n            geometry = Geo\n        \n        # Replace the object's geometry\n        sc.doc.Objects.Replace(guid_id, geometry)\n\nelif Replace == 0:\n    executed_state = False\n\nrs.EnableRedraw(True)\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "pawel",
+      "post_number": 17,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino as rc\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nsc.doc = rc.RhinoDoc.ActiveDoc\nrs.EnableRedraw(False)\nobjecttable = sc.doc.Objects\n\nif a==1:\n    for object_id in IDs:\n        objecttable.Replace(object_id,Geo)      \n\nrs. EnableRedraw(True)\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "pawel",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 17,
+  "views": 295
+}

@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/split-sphere-problem-is-there-better-way/102141",
+  "topic_id": 102141,
+  "title": "Split sphere problem - is there better way?",
+  "question": "Hello. I am dealing with unpleasant problem and I would like to ask people for help.\n\n\nI work on script that makes joints without boolean operations (because of computational time). The outcome consists of cylinders and sphere. The joint looks like this:\n\n\njoints\n1213×653 94.4 KB\n\n\nI calculate arcs, where cylinder cuts sphere. And the goal is to cut spere to get only residual surface, which is not affected by any cylinder. I was not able to find computationaly fast solution to achieve that.\n\nMy approach so far:\n\n\n\n\nsplit sphere with curves\n\n\nmeasure distance of each cylinder centroid and all fragments\n\n\nget distances equal or larger than cylinder radius\n\n\nget rid of all fragments that are located closer than radius\n\n\n\n\njoints2\n1213×653 83.2 KB\n\n\nMy problem is rounding. Borders of fragments are somehow approximated and I am not able to set the threshold properly, so I sometimes filter out wrong frafments (on both sides). I try to use \"similarity\"component to get any closer to good result, but sometimes there are little fragments that ruin this approach completely (in uploaded code, it’s branch {32}.\n\n\njoints3\n1213×653 95.4 KB\n\n\nI found out that the biggest issue is “stitch” of sphere surface.\n\n\nSo I politely ask for help or some hints that would help me solve this problem. I bet there is a way how to do this better. Would you be so glad to look at my script, please?\n\n\nsplitting spheres problem.gh\n (74.2 KB)",
+  "code_blocks": [
+    {
+      "code": "// set data tree for resulting fragments\nDataTree<Brep> fragmentsTree = new DataTree<Brep>();\n\nint branchIndex = 0;\ndouble tolerance = 0.01;\n\n// loop for each sphere (one sphere per each node)\nforeach (List<Surface> spheres in S.Branches)\n{\n  Surface sphere = spheres[0];\n\n  // set list for fragments of each of spheres\n  List<Brep> fragments = new List<Brep>();\n  // convert surface to brep\n  Brep sphereBrep = Brep.CreateFromSurface(sphere);\n  // add brep to list for first iteration\n  fragments.Add(sphereBrep);\n\n  // now take every plane in each branch and perform splitting process for fragments in the list\n  foreach (Plane plane in P.Branch(branchIndex))\n  {\n\n    foreach(Brep fragment in fragments)\n    {\n      Curve[] intCurve = {};\n      Point3d[] intPt = {};\n\n      // intersect plane and brep to get splitting curve\n      bool result = Rhino.Geometry.Intersect.Intersection.BrepPlane(fragment, plane, tolerance, out intCurve, out intPt);\n      if (result) // some planes might not cut any fragment\n      {\n\n        // split fragment with curve\n        Brep[] split = fragment.Split(intCurve, tolerance);\n        // set temporary storage for fragments to pass to next iteration\n        List<Brep> tempFragments = new List<Brep>();\n\n        foreach (Brep testedFragment in split)\n        {\n          // get bounding box of tested fragment\n          BoundingBox bBox = testedFragment.GetBoundingBox(plane);\n          // get center point of that bbox\n          Point3d center = bBox.Center;\n          // evaluate if this center exists above or below the plane\n          if (center.Z < 0)\n          {\n            // is the fragment is below the plane, add it to temporary storage\n            tempFragments.Add(testedFragment);\n          }\n\n          // pass all \"valid\" fragments to the next nested iteration for further splitting\n          fragments = tempFragments;\n        }\n      }\n    }\n  }\n\n  // add residual portions of sphere to corresponding branch and iterate on next sphere\n  GH_Path path = new GH_Path(branchIndex);\n  fragmentsTree.AddRange(fragments, path);\n\n  branchIndex += 1;\n}\n\nF = fragmentsTree;",
+      "language": "csharp",
+      "author": "PetrVacek",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\n\ntol = 0.001\n\nresult = rs.TrimBrep(brep,cutter,tol)\n\nresult = rg.Brep.Trim(brep,cutter,tol)",
+      "language": "python",
+      "author": "anon39580149",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th\n\ntol = 0.001\nfragmentsTree = []\n\nfor i in range(S.BranchCount):\n\n    sphere = rg.Brep.CreateFromSurface(S.Branch(i)[0])\n    fragments = []\n    fragments.Add(sphere)\n\n    for plane in P.Branch(i):\n        newFragments = []\n        for fragment in fragments:\n            newFragment = rs.TrimBrep(fragment,plane,tol)\n            \n            if len(newFragment) != 0:\n                for f in newFragment:\n                    newFragments.Add(f)\n            else:\n                newFragments.Add(fragment)\n                \n        fragments = newFragments\n    \n    fragmentsTree.append(fragments)\n    \nfragmentsTree = th.list_to_tree(fragmentsTree,source=[])\nF = fragmentsTree",
+      "language": "python",
+      "author": "PetrVacek",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.treehelpers as th\nimport ghpythonlib.parallel as gp\n\n# define function that trim sphere with many places and return list of fragments\ndef getFragments(index):\n    \n    i = index\n    # convert surface to brep\n    sphere = rg.Brep.CreateFromSurface(S.Branch(i)[0])\n    # create empty list to store resulting fragments after each iteration\n    fragments = []\n    # add first fragment, which, for the first iteration, is actually full sphere \n    fragments.Add(sphere)\n\n    for plane in P.Branch(i):\n        # new list at the beginning of trimming with each new plane \n        newFragments = []\n        # try to trim each fragment by actual trimming plane\n        for fragment in fragments:\n            newFragment = rs.TrimBrep(fragment,plane,tol)            \n            # in case that there is intersection, add result of trimming\n            if len(newFragment) != 0:\n                for f in newFragment:\n                    newFragments.Add(f)\n            else:\n                # in case that tere is no intersection, add actual fragment \n                newFragments.Add(fragment)\n        # assing new fragments to the list to trim with next plane  \n        fragments = newFragments\n    \n    return fragments\n\n# check for inputs\nif S.BranchCount != 0 and P.BranchCount != 0:\n    \n    # tolerance for trimming\n    tol = 0.001\n    \n    # create empty list to be filled with fragments \n    fragmentsTree = []\n    \n    # create list of indexes that will serve as argument of .parallel method \n    index = []\n    for i in range(S.BranchCount):\n        index.append(i)\n    \n    # execute trim brep function using multithreading \n    result = gp.run(getFragments, index, False)\n    fragmentsTree.append(result)\n    \n    # convert list to data tree\n    fragmentsTree = th.list_to_tree(fragmentsTree,source=[])\n    F = fragmentsTree\nelse:\n    \n    # return empty list if no inputs are provided\n    F = []",
+      "language": "python",
+      "author": "PetrVacek",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 20,
+  "views": 2968
+}

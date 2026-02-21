@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/addsweep1-seam-point/96390",
+  "topic_id": 96390,
+  "title": "AddSweep1 seam point",
+  "question": "Hi, new to Rhino Script. When I create a sweep using Sweep1 command line, the surface is fine without changing any seam points etc. When I use AddSweep1, the surface twists as if the seam points are not aligned. \n\n\nAddSweep1_RS\n1252×798 237 KB\n\n\n\n\nCan you please point me to the solution? I have tried searching. I’m probably missing something trivial. Thank you\n\n\nrmin = 1; rmax = 3;\n\nobj = rs.GetObject(“Select a curve”, rs.filter.curve)\n\nif obj:\n\nspt=rs.CurveStartPoint(obj)\n\nparam = rs.CurveClosestPoint(obj, spt)\n\nnrm1 = rs.CurveTangent(obj, param)\n\npln1 = rs.PlaneFromNormal(spt, nrm1)\n\ncir1= rs.AddCircle(pln1, rmax)\n\n\n    ept=rs.CurveEndPoint(obj)\n    param1 = rs.CurveClosestPoint(obj, ept)\n    nrm2 = rs.CurveTangent(obj, param1)\n    pln2 = rs.PlaneFromNormal(ept, nrm2)\n    cir2 = rs.AddCircle(pln2, rmin)\n\n    rs.AddSweep1(obj, [cir1, cir2], False)",
+  "code_blocks": [
+    {
+      "code": "ept=rs.CurveEndPoint(obj)\n    param1 = rs.CurveClosestPoint(obj, ept)\n    nrm2 = rs.CurveTangent(obj, param1)\n    pln2 = rs.PlaneFromNormal(ept, nrm2)\n    cir2 = rs.AddCircle(pln2, rmin)\n\n    rs.AddSweep1(obj, [cir1, cir2], False)",
+      "language": "python",
+      "author": "csadasivan",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 6,
+  "views": 908
+}

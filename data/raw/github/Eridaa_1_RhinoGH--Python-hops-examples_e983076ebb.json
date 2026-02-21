@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Eridaa/1.RhinoGH--Python-hops-examples/blob/db30011918629b550eb1e26aa638723944303b9a/AS01/1.%20geometry/app.py",
+  "repo": "Eridaa/1.RhinoGH--Python-hops-examples",
+  "repo_stars": 2,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "AS01/1. geometry/app.py",
+  "instruction": null,
+  "code": "\nfrom flask import Flask\nimport ghhops_server as hs\n\n#finally we bring rhino3dm to create rhino geometry in python\nimport rhino3dm as rg\n\napp = Flask(__name__)\nhops = hs.Hops(app)\n\n\n@hops.component(\n    \"/createGeometry\",\n    name = \"Create Geometry\",\n    inputs=[\n\n        \n        hs.HopsNumber(\"X coordinate\", \"X\", \"X Coordinate of circle center\", hs.HopsParamAccess.ITEM, default=5),\n        hs.HopsNumber(\"Y coordinate\", \"Y\", \"Y Coordinate of circle center\", hs.HopsParamAccess.ITEM, default= 8),\n        hs.HopsNumber(\"Radius\", \"R\", \"Radius of Circle\", hs.HopsParamAccess.ITEM, default= 4),\n        hs.HopsPoint(\"Center Point\", \"P\", \"Center point of Geo\", hs.HopsParamAccess.ITEM )\n\n    ],\n    outputs=[\n       \n       hs.HopsCurve(\"WEB\",\"WEB\",\"Web geometry \", hs.HopsParamAccess.LIST)\n       \n    ]\n)\ndef createGeometry(rX, rY, radi, center):\n\n    point = rg.Point3d(rX,rY,0)\n    \n\n    circle = rg.Circle(point,radi)\n    circle1= circle.ToNurbsCurve()\n    \n    circle1.Domain= rg.Interval(0,1)\n    diag = []\n    pts=[]\n    for d in range(0,10):\n        pt = circle1.PointAt(d/10)\n        l = rg.LineCurve(center, pt)\n        l.ToNurbsCurve()\n        l.Domain= rg.Interval(0,1)\n\n        p= l.PointAt(0.5)\n        pts.append(p)\n\n        diag.append(l)\n       \n    conn = rg.Curve.CreateControlPointCurve(pts,1)\n    conn.SetEndPoint(pts[0])\n    diag.append(conn)\n   \n    return  diag,\n\nif __name__== \"__main__\":\n    app.run(debug=True)",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

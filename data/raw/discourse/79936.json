@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/confused-about-behavior-of-curve-closestpoint/79936",
+  "topic_id": 79936,
+  "title": "Confused about behavior of curve.ClosestPoint",
+  "question": "This is likely a dumb question, so my apologies in advance.\n\n\nInside some GHPython code I’m trying to test points for whether they are on a given curve. Unfortunately it seems that all points say they’re on the curve.\n\n\nIf anyone could kindly explain what I’m doing wrong, that would be splendid.\n\n\nI’ve attached a simple example showing my problem.\n\n\nThanks so much,\n\nMary\ntest_point.3dm\n (25.9 KB)\n\n\ntest_point.gh\n (3.9 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# Get the curve parameter\nt = rs.CurveClosestPoint(curve, point)\n# Get the closest point on the curve to your point \ncrv_pt = rs.EvaluateCurve(curve, t) \n# Measure the distance between both points\ndist = rs.Distance(point, crv_pt)\n\n# Compare the distance to your tolerance\nif dist <= tolerance:\n    print \"Point was indeed within %.2f distance.\" %(tolerance)\n    a = True\nelse:\n    print \"Point was not within %.2f distance.\" %(tolerance)\n    a = False",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n# Get the curve parameter\nsuccess, t = curve.ClosestPoint(point)\n# Get the closest point on the curve to your point \ncrv_pt = curve.PointAt(t)\n# Measure the distance between both points\ndist = point.DistanceTo(crv_pt)\n\n# Compare the distance to your tolerance\nif dist <= tolerance:\n    print \"Point was indeed within %.2f distance.\" %(tolerance)\n    a = True\nelse:\n    print \"Point was not within %.2f distance.\" %(tolerance)\n    a = False",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def CurveClosestPoint(curve_id, test_point, segment_index=-1 ):\n    \"\"\"Returns parameter of the point on a curve that is closest to a test point.\n    Parameters:\n      curve_id (guid): identifier of a curve object\n      point (point): sampling point\n      segment_index (number, optional): curve segment index if `curve_id` identifies a polycurve\n    Returns:\n      number: The parameter of the closest point on the curve\n    Example:\n      import rhinoscriptsyntax as rs\n      id = rs.GetObject(\"Select a curve\")\n      if id:\n          point = rs.GetPointOnCurve(id, \"Pick a test point\")\n          if point:\n              param = rs.CurveClosestPoint(id, point)\n              print \"Curve parameter:\", param\n    See Also:\n      EvaluateCurve\n      IsCurve\n    \"\"\"\n    curve = rhutil.coercecurve(curve_id, segment_index, True)\n    point = rhutil.coerce3dpoint(test_point, True)\n    rc, t = curve.ClosestPoint(point, 0.0)\n    if not rc: raise Exception(\"ClosestPoint failed\")\n    return t",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 11,
+  "views": 4154
+}

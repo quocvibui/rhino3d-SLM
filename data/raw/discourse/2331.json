@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/translating-rhino-script-to-python/2331",
+  "topic_id": 2331,
+  "title": "Translating rhino script to python",
+  "question": "Hi,\n\n\ni am completely new on this forum’s stuff and scripting…\n\ni am working on rhino osx and want to use this script found on the web (drop objects on surface) but it’s in format .rvb and i would like to translate it in python format to run it with pythonscript.\n\n\ncould anyone help me to translate it or does anyone have a .py with the same action?\n\n\nthank you very much!\n\n\nOption Explicit\n'Script written by Damon Sidel\n'Script copyrighted by Damon Sidel\n'Script version Monday, May 09, 2011\n\nCall DropOntoSurface()\nSub DropOntoSurface()\n\n\t'Get surface to populate\n\tDim strSrf : strSrf = Rhino.GetObject(\"Select the surface to be populated\")\n\tIf IsNull(strSrf) Then Exit Sub\n        \n\t'Get the points to drop\n\tDim arrObj : arrObj = Rhino.GetObjects(\"Select the objects to drop\")\n\tIf IsNull(arrObj) Then Exit Sub\n        \n\tCall Rhino.EnableRedraw(False)\n                \n\t'Create jittery grid\n\tDim obj, k, x, y, z, line, csX, BB, p1, p2\n\tFor Each obj In arrObj\n                \n\t\t'Object information\n\t\tBB = Rhino.BoundingBox(obj)\n\t\tp1 = Array((BB(0)(0) + BB(2)(0)) / 2, (BB(0)(1) + BB(2)(1)) / 2, (BB(0)(2) + BB(2)(2)) / 2)\n                                \n\t\t'Find point on surface to insert block\n\t\tline = Rhino.AddLine(p1, Array(p1(0), p1(1), 0))\n\t\tcsX = Rhino.CurveSurfaceIntersection(line, strSrf)\n                        \n\t\tIf IsArray(csX) Then\n\t\t\tFor k = 0 To UBound(csX)\n\t\t\t\tIf csX(k, 0) = 1 Then\n\t\t\t\t\tp2 = csX(k, 3)\n\t\t\t\t\tCall Rhino.MoveObject(obj, p1, p2)\n\t\t\t\tElse\n\t\t\t\t\tRhino.Print \"Intersection is not a point\"\n\t\t\t\tEnd If\n\t\t\tNext\n\t\tEnd If\n                        \n\t\tCall Rhino.DeleteObject(line)\n                        \n\tNext\n\n\tCall Rhino.EnableRedraw(True)\n        \nEnd Sub",
+  "code_blocks": [
+    {
+      "code": "Option Explicit\n'Script written by Damon Sidel\n'Script copyrighted by Damon Sidel\n'Script version Monday, May 09, 2011\n\nCall DropOntoSurface()\nSub DropOntoSurface()\n\n\t'Get surface to populate\n\tDim strSrf : strSrf = Rhino.GetObject(\"Select the surface to be populated\")\n\tIf IsNull(strSrf) Then Exit Sub\n        \n\t'Get the points to drop\n\tDim arrObj : arrObj = Rhino.GetObjects(\"Select the objects to drop\")\n\tIf IsNull(arrObj) Then Exit Sub\n        \n\tCall Rhino.EnableRedraw(False)\n                \n\t'Create jittery grid\n\tDim obj, k, x, y, z, line, csX, BB, p1, p2\n\tFor Each obj In arrObj\n                \n\t\t'Object information\n\t\tBB = Rhino.BoundingBox(obj)\n\t\tp1 = Array((BB(0)(0) + BB(2)(0)) / 2, (BB(0)(1) + BB(2)(1)) / 2, (BB(0)(2) + BB(2)(2)) / 2)\n                                \n\t\t'Find point on surface to insert block\n\t\tline = Rhino.AddLine(p1, Array(p1(0), p1(1), 0))\n\t\tcsX = Rhino.CurveSurfaceIntersection(line, strSrf)\n                        \n\t\tIf IsArray(csX) Then\n\t\t\tFor k = 0 To UBound(csX)\n\t\t\t\tIf csX(k, 0) = 1 Then\n\t\t\t\t\tp2 = csX(k, 3)\n\t\t\t\t\tCall Rhino.MoveObject(obj, p1, p2)\n\t\t\t\tElse\n\t\t\t\t\tRhino.Print \"Intersection is not a point\"\n\t\t\t\tEnd If\n\t\t\tNext\n\t\tEnd If\n                        \n\t\tCall Rhino.DeleteObject(line)\n                        \n\tNext\n\n\tCall Rhino.EnableRedraw(True)\n        \nEnd Sub",
+      "language": "python",
+      "author": "joacolnaco",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef DropOntoSurface():\n    strSrf=rs.GetObject(\"Select the surface to be populated\",8)\n    if strSrf==None:return\n    arrObj=rs.GetObjects(\"Select the objects to drop\")\n    if arrObj==None:return\n    for obj in arrObj:\n        bb=rs.BoundingBox(obj)\n        pm=(bb[0]+bb[2])/2        \n        lpi=rs.ProjectPointToSurface([pm],strSrf,(0,0,1))\n        pi=lpi[0]\n        rs.MoveObject(obj,rs.VectorCreate(pi,pm))\nDropOntoSurface()",
+      "language": "python",
+      "author": "vittorio",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "Option Explicit\n'Script written by Damon Sidel\n'Script copyrighted by Damon Sidel\n'Script version Monday, May 09, 2011\n\nCall DropOntoSurface()\nSub DropOntoSurface()\n\n\t'Get surface to populate\n\tDim strSrf : strSrf = Rhino.GetObject(\"Select the surface to be populated\")\n\tIf IsNull(strSrf) Then Exit Sub\n        \n\t'Get the points to drop\n\tDim arrObj : arrObj = Rhino.GetObjects(\"Select the objects to drop\")\n\tIf IsNull(arrObj) Then Exit Sub\n        \n\tCall Rhino.EnableRedraw(False)\n                \n\t'Create jittery grid\n\tDim obj, k, x, y, z, line, csX, BB, p1, p2\n\tFor Each obj In arrObj\n                \n\t\t'Object information\n\t\tBB = Rhino.BoundingBox(obj)\n\t\tp1 = Array((BB(0)(0) + BB(2)(0)) / 2, (BB(0)(1) + BB(2)(1)) / 2, (BB(0)(2) + BB(2)(2)) / 2)\n                                \n\t\t'Find point on surface to insert block\n\t\tline = Rhino.AddLine(p1, Array(p1(0), p1(1), 0))\n\t\tcsX = Rhino.CurveSurfaceIntersection(line, strSrf)\n                        \n\t\tIf IsArray(csX) Then\n\t\t\tFor k = 0 To UBound(csX)\n\t\t\t\tIf csX(k, 0) = 1 Then\n\t\t\t\t\tp2 = csX(k, 3)\n\t\t\t\t\tCall Rhino.MoveObject(obj, p1, p2)\n\t\t\t\tElse\n\t\t\t\t\tRhino.Print \"Intersection is not a point\"\n\t\t\t\tEnd If\n\t\t\tNext\n\t\tEnd If\n                        \n\t\tCall Rhino.DeleteObject(line)\n                        \n\tNext\n\n\tCall Rhino.EnableRedraw(True)\n        \nEnd Sub",
+      "language": "python",
+      "author": "joacolnaco",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 3775
+}

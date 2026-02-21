@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/SHLFab/shl-toolbox/blob/268349a38b254c507c73a5a12f81f05d8af3acfc/lib/layers.py",
+  "repo": "SHLFab/shl-toolbox",
+  "repo_stars": 1,
+  "repo_description": "SHL Fabrication tools",
+  "license": "AGPL-3.0",
+  "filepath": "lib/layers.py",
+  "instruction": "help docstring",
+  "code": "\"\"\"help docstring\"\"\"\n#workshop_lib\n#Layer Functions\n\n#SHL Architects\n#Sean Lamb 2018-09-26\n#TODO: define an __all__\n\nimport System.Drawing as sd\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef add_layer(name,color):\n\t\"\"\"add layer by name.\n\tparams: str name, System.Drawing.Color\n\treturns: int layer index\"\"\"\n\n\tmyLayer = name\n\tlayerInd = doc.Layers.Find(myLayer,False)\n\tif layerInd == -1:\n\t\tlayerInd= doc.Layers.Add(myLayer,color)\n\treturn layerInd\n\n\ndef set_layer_color(layerInd,color):\n\t\"\"\"params: int layer index, System.Drawing.Color\"\"\"\n\tlayer = doc.Layers[layerInd]\n\tlayer.Color = color\n\n\ndef set_layer_plot_weight(layerInd,weight):\n\t\"\"\"params: int layer index, float plotweight. -1 for NoPrint\"\"\"\n\tlayer = doc.Layers[layerInd]\n\tlayer.PlotWeight = weight\n\n\ndef change_object_layers(guids,layName,copy=False):\n\t\"\"\"change layer of objects.\n\tparams: [guids], str layName. bool copy\n\treturn: new objects on layer (or original objects with reassigned layer if copy==False)\"\"\"\n\n\tif (not rs.IsLayer(layName)): add_layer(layName,sd.Color.White)\n\n\tif copy == True: guids = rs.CopyObjects(guids)\n\n\t[rs.ObjectLayer(id,layName) for id in guids]\n\treturn guids\n\n\ndef get_layer_objects(*layers):\n\t\"\"\"Get all of the objects on the layer. If layer does not exist, will get an empty list back\n\tparams: *str layers\n\treturn: [docobjs]\n\tDev Notes: - raises exception is no objects in layer. should this be changed?\"\"\"\n\n\trhobjs = []\n\tfor layerName in layers:\n\t\trhobjs += doc.Objects.FindByLayer(layerName)\n\t\tif not rhobjs: raise Exception(\"No objects in this layer\")\n\t\t#if not rhobjs: rc.Result.Cancel\n\n\tfor obj in rhobjs: obj.Select(True)\n\treturn rhobjs\n\n\ndef ind_to_name(layer_indices):\n\t\"\"\"convert a list of layer indices to layer names for use in rhinoscriptsyntax.\"\"\"\n\tlayer_names = [doc.Layers[index].Name for index in layer_indices]\n\treturn layer_names\n\n\ndef get_lcut_layers():\n\t#Add layers\n\tl_index_guide = add_layer(\"XXX_LCUT_00-GUIDES\",sd.Color.Gray)\n\tl_index_cut = add_layer(\"XXX_LCUT_01-CUT\",sd.Color.Red)\n\tl_index_score = add_layer(\"XXX_LCUT_02-SCORE\",sd.Color.Blue)\n\tl_index_lscore = add_layer(\"XXX_LCUT_03-LSCORE\",sd.Color.Lime)\n\tl_index_raster = add_layer(\"XXX_LCUT_04-ENGRAVE\",sd.Color.Magenta)\n\n\t#reset colours\n\tdoc.Layers[l_index_guide].Color = sd.Color.Gray\n\tdoc.Layers[l_index_cut].Color = sd.Color.Red\n\tdoc.Layers[l_index_score].Color = sd.Color.Blue\n\tdoc.Layers[l_index_lscore].Color = sd.Color.Lime\n\tdoc.Layers[l_index_raster].Color = sd.Color.Magenta\n\n\tset_layer_plot_weight(l_index_guide,-1)\n\tset_layer_plot_weight(l_index_cut,0.0001)\n\tset_layer_plot_weight(l_index_score,0.0001)\n\tset_layer_plot_weight(l_index_lscore,0.0001)\n\tset_layer_plot_weight(l_index_raster,0.0001)\n\n\treturn [l_index_guide,l_index_cut,l_index_score,l_index_lscore,l_index_raster]",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

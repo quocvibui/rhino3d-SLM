@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/ibois-epfl/augmented-carpentry/blob/414eeb93984fad40a4e57daa60e1bb268cbd406c/mockups/ACP/timber_biller.py",
+  "repo": "ibois-epfl/augmented-carpentry",
+  "repo_stars": 15,
+  "repo_description": "Main repository hosting the main AR software developed for Augmented Carpentry rersearch at Ibois, Epfl.",
+  "license": "GPL-3.0",
+  "filepath": "mockups/ACP/timber_biller.py",
+  "instruction": "Timber biller",
+  "code": "#! python3\n\nimport Rhino\nimport Rhino.Geometry as rg\n\nimport Grasshopper as gh\nimport Grasshopper.Kernel as ghk\n\n\nif __name__ == \"__main__\":\n    # Grasshopper.DataTree >>> nested list\n    nested_ln_filar_model = [i_ln_filarmodel.Branch(i) for i in range(i_ln_filarmodel.BranchCount)]\n    nested_dims = [i_beams_dims.Branch(i) for i in range(i_beams_dims.BranchCount)]\n\n    # get total linear length per section\n    dict_timber_dims = {  # {[interval dim, [ref_number, total length]}\n        rg.Interval(0.2, 0.14): [61201420, 0],\n        rg.Interval(0.14, 0.08): [7925785, 0],\n        rg.Interval(0.14, 0.14): [61201414, 0],\n        rg.Interval(0.08, 0.06): [61130607, 0]\n    } \n\n    for i, ln_i in enumerate(nested_ln_filar_model):\n        total_linear_length = 0\n        for j, ln_j in enumerate(ln_i):\n            total_linear_length += ln_j.Length\n        dict_timber_dims[nested_dims[i][0]][1] += total_linear_length\n        \n    # add a 10% tolerance for each entry\n    for key in dict_timber_dims:\n        dict_timber_dims[key][1] *= 1.15\n\n    # output\n    # round the total length to 2 decimal places\n    for key in dict_timber_dims:\n        dict_timber_dims[key][1] = round(dict_timber_dims[key][1], 2)\n    log_timber_bill = \"Timber bill for AC prototype\\nCatalog: https://www.getaz-miauton.ch/fileadmin/CrhOneInternet/user_upload/2022-03-02_Massivholz_SR-FR_2022.pdf\\n\\n\"\n    for key in dict_timber_dims:\n        \n        log_timber_bill += f\"section: {key} m / serial number: {dict_timber_dims[key][0]} / Total linear length: {dict_timber_dims[key][1]} m\\n\"\n    o_log_timber_bill = log_timber_bill\n\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

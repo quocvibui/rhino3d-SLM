@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/using-kangaroo-outside-of-grasshopper/87362",
+  "topic_id": 87362,
+  "title": "Using Kangaroo outside of Grasshopper?",
+  "question": "Is it possible to use Kangaroo outside of Grasshopper i.e. in a Python script that’s opened from Rhino with \nEditPythonScript\n? I know you can use Grasshopper components with:\n\n\nimport ghpythonlib.components as ghcomp\n\n\nbut Kangaroo is a little different because it has state.",
+  "code_blocks": [
+    {
+      "code": "import ghpythonlib.components as ghc\nfrom Rhino.Geometry import Vector3d, Rectangle3d, Plane, Point3d\nfrom scriptcontext import doc\n\n# Mesh plane\nplane = Plane(Point3d(-10, -10, 0), Vector3d(0, 0, 1))\nboundary = Rectangle3d(plane, 20, 20)\nmesh, _ = ghc.MeshPlane(boundary, 10, 10)\n\n# Stretch resistance for edges\nnaked_edges, interior_edges, _ = ghc.MeshEdges(mesh)\nlength_goal = ghc.Kangaroo2Component.LengthLine(naked_edges + interior_edges, None, 10)\n\n# Fix corners in place\ncorners = ghc.Kangaroo2Component.MeshCorners(mesh, 2.356194)\nanchor_goal = ghc.Kangaroo2Component.Anchor(corners, None, 1000)\n\n# Apply loads to all vertices\nvertices, _, _, _ = ghc.DeconstructMesh(mesh)\nload_goal = ghc.Kangaroo2Component.Load(vertices, Vector3d(0, 0, 1), 1)\n\ngoals = length_goal + anchor_goal + load_goal\n_, _, output = ghc.Kangaroo2Component.Solver(goals, False, 1e-15, 0.01, True)\n\n# Output lines\nfor line in output:\n    doc.Objects.AddLine(line)\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "public",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 76,
+  "posts_count": 4,
+  "views": 1946
+}

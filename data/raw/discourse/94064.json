@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-typo-in-surface-py/94064",
+  "topic_id": 94064,
+  "title": "Bug/Typo in surface.py",
+  "question": "I think this typo appeared in the latest Rhino update.\n\n\nrhobject.Select(true)\n\n\nMessage: global name ‘true’ is not defined\n\n\ndef DuplicateEdgeCurves(object_id, select=False):\n    \"\"\"Duplicates the edge curves of a surface or polysurface. For more\n    information, see the Rhino help file for information on the DupEdge\n    command.\n    Parameters:\n      object_id (guid): The identifier of the surface or polysurface object.\n      select (bool, optional):  Select the duplicated edge curves. The default is not\n      to select (False).\n    Returns:\n      list(guid, ..): identifying the newly created curve objects if successful.\n      None: if not successful, or on error.\n    Example:\n      import rhinoscriptsyntax as rs\n      obj = rs.GetObject(\"Select surface or polysurface\", rs.filter.surface | rs.filter.polysurface)\n      if obj:\n          rs.DuplicateEdgeCurves( obj, True )\n          rs.DeleteObject( obj )\n    See Also:\n      IsPolysurface\n      IsSurface\n    \"\"\"\n    brep = rhutil.coercebrep(object_id, True)\n    out_curves = brep.DuplicateEdgeCurves()\n    curves = []\n    for curve in out_curves:\n        if curve.IsValid:\n            rc = scriptcontext.doc.Objects.AddCurve(curve)\n            curve.Dispose()\n            if rc==System.Guid.Empty: return None\n            curves.append(rc)\n            if select: \n                rhobject = rhutil.coercerhinoobject(rc)\n                rhobject.Select(true)\n    if curves: scriptcontext.doc.Views.Redraw()\n    return curves",
+  "code_blocks": [
+    {
+      "code": "def DuplicateEdgeCurves(object_id, select=False):\n    \"\"\"Duplicates the edge curves of a surface or polysurface. For more\n    information, see the Rhino help file for information on the DupEdge\n    command.\n    Parameters:\n      object_id (guid): The identifier of the surface or polysurface object.\n      select (bool, optional):  Select the duplicated edge curves. The default is not\n      to select (False).\n    Returns:\n      list(guid, ..): identifying the newly created curve objects if successful.\n      None: if not successful, or on error.\n    Example:\n      import rhinoscriptsyntax as rs\n      obj = rs.GetObject(\"Select surface or polysurface\", rs.filter.surface | rs.filter.polysurface)\n      if obj:\n          rs.DuplicateEdgeCurves( obj, True )\n          rs.DeleteObject( obj )\n    See Also:\n      IsPolysurface\n      IsSurface\n    \"\"\"\n    brep = rhutil.coercebrep(object_id, True)\n    out_curves = brep.DuplicateEdgeCurves()\n    curves = []\n    for curve in out_curves:\n        if curve.IsValid:\n            rc = scriptcontext.doc.Objects.AddCurve(curve)\n            curve.Dispose()\n            if rc==System.Guid.Empty: return None\n            curves.append(rc)\n            if select: \n                rhobject = rhutil.coercerhinoobject(rc)\n                rhobject.Select(true)\n    if curves: scriptcontext.doc.Views.Redraw()\n    return curves",
+      "language": "python",
+      "author": "spineribjoint1",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 435
+}

@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/find-the-perpendicular-point-on-other-curve-to-a-point-on-a-curve/81701",
+  "topic_id": 81701,
+  "title": "Find the perpendicular point (on other curve) to a point on a curve",
+  "question": "Hi,\n\nGreetings!\n\n\nI wanted to find a point on other curve which is perpendicular to the point of my interest\n\n\nExplanation:\n\nThe below image shows 3 curves, which has points on it\n\n\n\n\nimage.png\n1262×595 18.1 KB\n\n\n\n\n\n\nUntitled.png\n1914×875 63.9 KB\n\n\n\n\nfor example, if i select a point (pt_a) on line2/curve2, i should get a perpendicular point (pt_b) which is perpendicular to pt_a lying on line1/curve1.\n\nif there is no perpendicular point, then the point that is nearer to perpendicular should be chosen\n\n\nCan you suggest me, if there is any function in python that can achieve my task, or can you suggest me procedure i can follow to achieve this task\n\n\nThanks in advance\n\n-…\n\n\nfind_perpendicular_pt_on_othercurve.stp\n (250.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef perpendicular_distance_bw_curve_and_pt(curve, point):\n    rs.SelectObject(curve)\n    rs.Command(\"-_ClosestPt \" + str(rs.SelectObject(curve)) + \" _Enter \"+ str(rs.SelectObject(point)))\n    guid =rs.LastCreatedObjects()\n    return guid",
+      "language": "python",
+      "author": "sumuk",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nid = rs.GetObject(\"Select a curve\")\nif id:\n    point = rs.GetPoint(\"Pick a test point\")\n    if point:\n        param = rs.CurveClosestPoint(id, point)\n        closestPt = rs.EvaluateCurve(id, param)\n        rs.AddPoint(closestPt)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\ncrvA = rs.GetObject(\"Select a curve\")\npoint =rs.GetPointOnCurve(crvA, \"Pick a test point\")\nparam = rs.CurveClosestPoint(crvA, point)\nPtA = rs.EvaluateCurve(crvA, param)\ntanVec = rs.CurveTangent(crvA, param)\nnorVec = rs.VectorCrossProduct(tanVec, rs.CurveNormal(crvA))\ncrvB = rs.GetObject(\"Select a curve\")\nresult = rg.Intersect.Intersection.CurveLine(rs.coercecurve(crvB), rg.Line(PtA,norVec+PtA),0.1,0.1)\nfor pt in result:\n    rs.AddPoint(pt.PointA)",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 7,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 7,
+  "views": 1899
+}

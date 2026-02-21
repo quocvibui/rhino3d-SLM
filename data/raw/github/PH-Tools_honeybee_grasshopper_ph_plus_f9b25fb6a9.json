@@ -1,0 +1,19 @@
+{
+  "source_url": "https://github.com/PH-Tools/honeybee_grasshopper_ph_plus/blob/b89f9887488d9c10eb732ffafe910cec70be0752/honeybee_grasshopper_ph_plus/src/HBPH%2B%20-%20Sort%20Geom%20by%20Level.py",
+  "repo": "PH-Tools/honeybee_grasshopper_ph_plus",
+  "repo_stars": 2,
+  "repo_description": "Additional Honeybe-PH Grasshopper Components",
+  "license": "GPL-3.0",
+  "filepath": "honeybee_grasshopper_ph_plus/src/HBPH+ - Sort Geom by Level.py",
+  "instruction": "Sort a set of Geometry by that geometry's Z-Height. A new output branch will\nbe created for each set of geometry objects at that level. Use the '_tolernce' input \nto adjust if the groupings are not...",
+  "code": "#\n# Honeybee-PH: A Plugin for adding Passive-House data to LadybugTools Honeybee-Energy Models\n# \n# This component is part of the PH-Tools toolkit <https://github.com/PH-Tools>.\n# \n# Copyright (c) 2022, PH-Tools and bldgtyp, llc <phtools@bldgtyp.com> \n# Honeybee-PH is free software; you can redistribute it and/or modify \n# it under the terms of the GNU General Public License as published \n# by the Free Software Foundation; either version 3 of the License, \n# or (at your option) any later version. \n# \n# Honeybee-PH is distributed in the hope that it will be useful,\n# but WITHOUT ANY WARRANTY; without even the implied warranty of \n# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the \n# GNU General Public License for more details.\n# \n# For a copy of the GNU General Public License\n# see <https://github.com/PH-Tools/honeybee_ph/blob/main/LICENSE>.\n# \n# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>\n#\n\"\"\"\nSort a set of Geometry by that geometry's Z-Height. A new output branch will\nbe created for each set of geometry objects at that level. Use the '_tolernce' input \nto adjust if the groupings are not correct at first. This is useful if you are drawing\nthe floor plates for a multi-story building and want to organize them by level or\nsimilar operations.\n-\nEM January 25, 2024\n    Args:\n        _geom: (List[Guid]) A List of Geometry to sort by height.\n        \n        _tolerance: (float) Default=0.001\n        \n    Returns:\n        geom_: (DataTree[Rhino.Geometry]) The geometry objects, sorted by height.\n        \n        names_: (DataTree[str]) The names of all the geometry objects, sorted by height\n        \n        user_text_: (DataTree[dict]] The user-text dictionaries of all the geometry objects, \n            sorted by height\n\"\"\"\n\nimport scriptcontext as sc\nimport Rhino as rh\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as ghc\nimport Grasshopper as gh\n\nfrom honeybee_ph_rhino import gh_io\nfrom honeybee_ph_plus_rhino import gh_compo_io\n\n# ------------------------------------------------------------------------------\nimport honeybee_ph_plus_rhino._component_info_\nreload(honeybee_ph_plus_rhino._component_info_)\nghenv.Component.Name = \"HBPH+ - Sort Geom by Level\"\nDEV = honeybee_ph_plus_rhino._component_info_.set_component_params(ghenv, dev=False)\nif DEV:\n    from honeybee_ph_plus_rhino.gh_compo_io import util_sort_geom_objs_by_level as gh_compo_io\n    reload(gh_compo_io)\n\n# ------------------------------------------------------------------------------\n# -- GH Interface\nIGH = gh_io.IGH( ghdoc, ghenv, sc, rh, rs, ghc, gh )\n\n# ------------------------------------------------------------------------------\ngh_compo_interface = gh_compo_io.GHCompo_SortGeomObjectsByLevel(IGH, _geom, _tolerance)\ngeom_, names_, user_text_ = gh_compo_interface.run()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

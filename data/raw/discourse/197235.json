@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-compiling/197235",
+  "topic_id": 197235,
+  "title": "Ghpython compiling",
+  "question": "Hi, I was trying to use method two for compiling ghpython nodes as described here:\n\n\nTutorial: creating a Grasshopper component with the Python GHPY compiler - Serengeti (Rhino WIP) / Developer - McNeel Forum\n\n\nI want my package to contain a dropdown menu, and attempted to add the following code to replicate the setup I’ve used in c# before:\n\n\nclass DropdownMenu(Grasshopper.Kernel.GH_AssemblyPriority):\n    def PriorityLoad(): # override method        \n        Grasshopper.GH_DocumentEditor+=OnAggregateShortcutMenuItems\n        return Grasshopper.Kernel.GH_LoadingInstruction.Proceed\n\n    def OnAggregateShortcutMenuItems(self, e):\n        # Get a reference to the main Grasshopper canvas\n        ribbon = e.MainMenu # Get ribbon\n        _item = System.Windows.Forms.ToolStripMenuItem()\n        _item.Text = \"Button Name\"\n        _item.Click += ItemClick1 # Add a click event handlers\n        \n        _cowiMenu = System.Windows.Forms.ToolStripMenuItem()\n        _cowiMenu.Text = \"Menu Name\"\n        _cowiMenu.DropDownItems.Add(_item)\n\n        # Add the custom menu item to the Grasshopper canvas menu\n        ribbon.Items.Add(_cowiMenu);\n    \n    def ItemClick1(self, args):\n        System.Diagnostics.Process.Start(\"O:\\\\Applications\\\\Global\")\n\n\n\nBut it does not seem to run the “PriorityLoad” function when Rhino starts. I tested by adding a message box. Is it possible to add this type of functionality to a .ghpy assembly?\n\n\nThe compilation file and the code itself is attached.\n\n\nAssemblyNode.py\n (4.9 KB)\n\n\nMain.py\n (83 Bytes)\n\n\nBr\n\nAudun Mathias Øvstebø",
+  "code_blocks": [
+    {
+      "code": "class DropdownMenu(Grasshopper.Kernel.GH_AssemblyPriority):\n    def PriorityLoad(): # override method        \n        Grasshopper.GH_DocumentEditor+=OnAggregateShortcutMenuItems\n        return Grasshopper.Kernel.GH_LoadingInstruction.Proceed\n\n    def OnAggregateShortcutMenuItems(self, e):\n        # Get a reference to the main Grasshopper canvas\n        ribbon = e.MainMenu # Get ribbon\n        _item = System.Windows.Forms.ToolStripMenuItem()\n        _item.Text = \"Button Name\"\n        _item.Click += ItemClick1 # Add a click event handlers\n        \n        _cowiMenu = System.Windows.Forms.ToolStripMenuItem()\n        _cowiMenu.Text = \"Menu Name\"\n        _cowiMenu.DropDownItems.Add(_item)\n\n        # Add the custom menu item to the Grasshopper canvas menu\n        ribbon.Items.Add(_cowiMenu);\n    \n    def ItemClick1(self, args):\n        System.Diagnostics.Process.Start(\"O:\\\\Applications\\\\Global\")",
+      "language": "python",
+      "author": "amoe",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 151
+}

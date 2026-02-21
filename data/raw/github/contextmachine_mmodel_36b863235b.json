@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/contextmachine/mmodel/blob/0545e5c2a11c641fc54e91f603e709d3dea549f3/plugins/cadex/cdxfb.py",
+  "repo": "contextmachine/mmodel",
+  "repo_stars": 0,
+  "repo_description": "Deployment branch",
+  "license": "Apache-2.0",
+  "filepath": "plugins/cadex/cdxfb.py",
+  "instruction": null,
+  "code": "import json\n\nimport rhino3dm\nfrom rhino3dm import _rhino3dm as rh\nimport cadexchanger.CadExCore as cadex\nimport cadexchanger.CadExRhino as rhino\n\n\ndef readrhino(sorce_path):\n    aReader = rhino.Rhino_Reader()\n    aReader.ReadFile(cadex.Base_UTF16String(sorce_path))\n    return aReader\n\n\ndef to_cadex_viewer(reader,\n                          target_path=\"/home/sthv/cadexchanger-web-toolkit-examples/public/assets/models/native/PNL_all_Arc.cdxfb\"):\n    aModel = cadex.ModelData_Model()\n    reader.Transfer(aModel)\n    aWriter = cadex.ModelData_ModelWriter()\n    # params\n    aParams = cadex.ModelData_WriterParameters()\n    aParams.SetFileFormat(cadex.ModelData_WriterParameters.Cdxfb)\n    aParams.SetWriteBRepRepresentation(True)\n    aParams.SetWritePolyRepresentation(True)\n    aParams.SetPreferredLOD(cadex.ModelData_RM_FineLOD)\n    aParams.SetWriteTextures(False)\n    aParams.SetWritePMI(True)\n\n    aWriter.SetWriterParameters(aParams)\n    # wright model\n    res = aWriter.Write(aModel, cadex.Base_UTF16String(target_path))\n    if res:\n        return True\n    else:\n        print(res)\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

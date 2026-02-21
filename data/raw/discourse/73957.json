@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/construct-mesh-ghpython/73957",
+  "topic_id": 73957,
+  "title": "Construct Mesh GHPython",
+  "question": "Hello everyone,\n\n\nI have trouble constructing a mesh in Python.\n\n\nimport Rhino.Geometry as rg\nvertices = []\nfaces = []\nfor i in range(len(iMeshes)):\n    vertices.append(rg.Mesh.Vertices.GetValue(iMeshes[i]))\nfor i in range(len(iMeshes)):\n    faces.append(rg.Mesh.Faces.GetValue(iMeshes[i]))\n\n\n\nVar 1\n\n\nfor i in range(len(iMeshes)):\n    tempMesh = rg.Mesh()\n    tempMesh.Faces.AddFace(faces[i])\n\n\n\n=> Runtime error (ArgumentTypeException): expected MeshFace, got MeshFaceList\n\n\nVar2\n\n\nfor i in range(len(iMeshes)):\n    tempMesh = rg.Mesh()\n    for j in faces[i]:\n        tempMesh.Faces.AddFace(faces[i][j])\n\n\n\n=> Runtime error (ArgumentTypeException): expected int, got MeshFace\n\n\nIn Var1 I get an error that MeshFace is expected, but if I give him MeshFace in Var2 he wants an integer.\n\nCan someone tell me where the error is? Went threw all documentation I could found, but looks like I don’t see it.\n\n\n181028_python_help.gh\n (3.8 KB)\n\n\nThank you very much.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\ndef newMesh(iMesh):\n    tempMesh = rg.Mesh()\n    tempMesh.Faces.AddFaces(iMesh.Faces)\n    tempMesh.Vertices.AddVertices(iMesh.Vertices)\n    return tempMesh\n\nnewMeshesList = []\nfor i in range(0,len(iMeshes)):\n    newMeshesList.append(newMesh(iMeshes[i]))\n\na = newMeshesList",
+      "language": "python",
+      "author": "Antonio_Cersosimo",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nvertices = []\nfaces = []\nfor i in range(len(iMeshes)):\n    vertices.append(rg.Mesh.Vertices.GetValue(iMeshes[i]))\nfor i in range(len(iMeshes)):\n    faces.append(rg.Mesh.Faces.GetValue(iMeshes[i]))",
+      "language": "python",
+      "author": "tim.stark",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2450
+}

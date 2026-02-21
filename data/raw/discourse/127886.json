@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-force-a-linear-polyline-to-be-a-polyline/127886",
+  "topic_id": 127886,
+  "title": "How to force a linear polyline to be a polyline",
+  "question": "Hi there,\n\n\nI am trying to simulate a structure with kangaroo, for which I need polylines.\n\nI’ve got a ‘little’ cluster beforehand that projects straight lines onto a curved surface, intersects those lines on the surface and rebuilds them as polylines.\n\nNow, there is a spot that just happens to be perfectly straight, so the curve is represented as a Linear Curve. Not a problem I thought, I’ll just open up a script and have a look in the API, there has to be a curve method to force it into a polyline. But no matter what methods I tried, in whatever way I imported the curves into the script component, when I create a polyline with those points the output is always a linear curve.\n\n\nDid anyone stumble upon that, any ideas?",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\nif crv.IsLinear():\n    params = crv.DivideByCount(10, True)\n    pline = rg.Polyline()\n    for t in params:\n        pline.Add(crv.PointAt(t))",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as ghc\n\n\noutList = []\nfor i in range(len(x)):\n    if(x[i].IsLinear()):\n        points, junk, junk = ghc.ControlPoints(x[i])\n        newCrv = rg.Polyline()\n        for t in points:\n            newCrv.Add(t.X, t.Y, t.Z)\n        outList.append(newCrv)\n    else:\n        outList.append(x[i])\n    \na = outList",
+      "language": "python",
+      "author": "georg.blanke91",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport ghpythonlib.components as ghc\n\n\noutList = []\nfor i in range(len(x)):\n    if(x[i].IsLinear()):\n        points, junk, junk = ghc.ControlPoints(x[i])\n        newCrv = rg.Polyline()\n        newCrv.Add(points[0].X, points[0].Y, points[0].Z)\n        newCrv.Add(points[1].X, points[1].Y, points[1].Z)\n        points[2].Z *= 0.999\n        newCrv.Add(points[2].X, points[2].Y, points[2].Z)\n        outList.append(newCrv)\n    else:\n        outList.append(x[i])\n    \na = outList",
+      "language": "python",
+      "author": "georg.blanke91",
+      "post_number": 6,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 377
+}

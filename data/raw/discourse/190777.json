@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-8-python-script-error-opening-grasshopper/190777",
+  "topic_id": 190777,
+  "title": "Rhino 8 python script error opening Grasshopper",
+  "question": "Hi all,\n\n\nI have a simple python script that references the Grasshopper .dll in order to open a grasshopper file. It works in Rhino 7 and \n(I’m 98% sure)\n it was working in Rhino 8 until recently.\n\n\nNow, when Rhino 8 runs the script, it opens the referenced file in Grasshopper but it does recognise bulit-in GH components like XY plane. Here is an example GH file that loads in Rhino 8 when loaded manually in Grasshopper but fails to load via the script.\n\n\nCurveBoolean.gh\n (8.5 KB)\n\nHere are the errors it displays when it loads via the script:\n\n\nimage\n764×481 14.1 KB\n\nyou can see for example, that none of the curve components have loaded:\n\n\n\n\nHere is the script. Any help would be much appreciated - thanks!\n\n\n#! python 2\nimport clr\nimport os\nimport Rhino\nrv = major_version = int(str(Rhino.RhinoApp.Version).split('.')[0])\nif rv == 7:\n    clr.AddReferenceToFileAndPath(r\"C:\\Program Files\\Rhino 7\\Plug-ins\\Grasshopper\\Grasshopper.dll\")\nelif rv == 8:\n    clr.AddReferenceToFileAndPath(r\"C:\\Program Files\\Rhino 8\\Plug-ins\\Grasshopper\\Grasshopper.dll\")\n    #Previously the Rhino 8 Fix to get it working\n    #https://discourse.mcneel.com/t/system-uri-not-working/148206\n    clr.AddReference(\"System.Runtime\")\nimport Grasshopper as gh\n\nprint rv\ngh_scriptinterface = gh.Plugin.GH_RhinoScriptInterface()\ngh_scriptinterface.OpenDocument(r\"C:\\Users\\mho\\Downloads\\CurveBoolean.gh\")",
+  "code_blocks": [
+    {
+      "code": "#! python 2\nimport clr\nimport os\nimport Rhino\nrv = major_version = int(str(Rhino.RhinoApp.Version).split('.')[0])\nif rv == 7:\n    clr.AddReferenceToFileAndPath(r\"C:\\Program Files\\Rhino 7\\Plug-ins\\Grasshopper\\Grasshopper.dll\")\nelif rv == 8:\n    clr.AddReferenceToFileAndPath(r\"C:\\Program Files\\Rhino 8\\Plug-ins\\Grasshopper\\Grasshopper.dll\")\n    #Previously the Rhino 8 Fix to get it working\n    #https://discourse.mcneel.com/t/system-uri-not-working/148206\n    clr.AddReference(\"System.Runtime\")\nimport Grasshopper as gh\n\nprint rv\ngh_scriptinterface = gh.Plugin.GH_RhinoScriptInterface()\ngh_scriptinterface.OpenDocument(r\"C:\\Users\\mho\\Downloads\\CurveBoolean.gh\")",
+      "language": "unknown",
+      "author": "Michael_H",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 156
+}

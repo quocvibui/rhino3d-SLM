@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-the-resolution-of-view-capture/157398",
+  "topic_id": 157398,
+  "title": "Set the resolution of view capture",
+  "question": "Hi!\n\nI am using the code from here to capture the view:\n\n\n\n\ngithub.com\n\n\n\n\n\n\nmcneel/rhino-developer-samples/blob/7/rhinopython/SampleViewCaptureToFile.py\n\n\n################################################################################\n# SampleViewCaptureToFile.py\n# Copyright (c) 2018 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport System\nimport Rhino\nimport scriptcontext as sc\n\n# Demonstrates how to capture a view to a bitmap\ndef SampleViewCaptureToFile():\n    view = sc.doc.Views.ActiveView;\n    if view:\n        view_capture = Rhino.Display.ViewCapture()\n        view_capture.Width = view.ActiveViewport.Size.Width\n        view_capture.Height = view.ActiveViewport.Size.Height\n        view_capture.ScaleScreenItems = False\n        view_capture.DrawAxes = False\n        view_capture.DrawGrid = False\n        view_capture.DrawGridAxes = False\n\n\n\n\n\n  This file has been truncated. \nshow original\n\n\n\n\n\n\n\n\n\n\n\n\nHowever, the output pictures are very blurry. If I increase the “view_capture.Width” and “view_capture.Height” the image gets more pixels, but also becomes more zoomed out.\n\nSetting “view_capture.ScaleScreenItems = True” does not seem to help.\n\n\nI believe the “Resolution” property in the “ViewCaptureSettings()” can fix this, but my limited experience with these things stop me from properly implement it. Any pointers on how this is done would be greatly appreciated!",
+  "code_blocks": [
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\ndef SampleViewCaptureToFile(multiplier=1):\n    if not multiplier: return\n    view = sc.doc.Views.ActiveView\n    if view:\n        view_capture = Rhino.Display.ViewCapture()\n        view_capture.Width = view.ActiveViewport.Size.Width * multiplier\n        view_capture.Height = view.ActiveViewport.Size.Height * multiplier\n        view_capture.ScaleScreenItems = False\n        view_capture.DrawAxes = False\n        view_capture.DrawGrid = False\n        view_capture.DrawGridAxes = False\n        bitmap = view_capture.CaptureToBitmap(view)\n        if bitmap:\n            folder = System.Environment.SpecialFolder.Desktop\n            path = System.Environment.GetFolderPath(folder)\n            filename = System.IO.Path.Combine(path, \"SampleViewCaptureToFile.png\")\n            bitmap.Save(filename, System.Drawing.Imaging.ImageFormat.Png)\n\nSampleViewCaptureToFile(multiplier=4)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef CustomViewCapture(multiplier=1.0):\n    view = scriptcontext.doc.Views.ActiveView\n    width  = int(view.Size.Width * multiplier)\n    height = int(view.Size.Height * multiplier)\n    size = System.Drawing.Size(width, height)\n    settings = Rhino.Display.ViewCaptureSettings(view, size, 72)\n    settings.Document = scriptcontext.doc.ActiveDoc\n    settings.DrawAxis = False\n    settings.DrawGrid = False\n    settings.RasterMode = True\n    \n    bitmap = Rhino.Display.ViewCapture.CaptureToBitmap(settings)\n    if bitmap:\n        folder = System.Environment.SpecialFolder.Desktop\n        path = System.Environment.GetFolderPath(folder)\n        filename = System.IO.Path.Combine(path, \"CustomViewCapture.png\")\n        bitmap.Save(filename, System.Drawing.Imaging.ImageFormat.Png)\n\nCustomViewCapture(multiplier=1)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": true
+    },
+    {
+      "code": "################################################################################\n# SampleViewCaptureToFile.py\n# Copyright (c) 2018 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport System\nimport Rhino\nimport scriptcontext as sc\n\n# Demonstrates how to capture a view to a bitmap\ndef SampleViewCaptureToFile():\n    view = sc.doc.Views.ActiveView;\n    if view:\n        view_capture = Rhino.Display.ViewCapture()\n        view_capture.Width = view.ActiveViewport.Size.Width\n        view_capture.Height = view.ActiveViewport.Size.Height\n        view_capture.ScaleScreenItems = False\n        view_capture.DrawAxes = False\n        view_capture.DrawGrid = False\n        view_capture.DrawGridAxes = False",
+      "language": "python",
+      "author": "isak.wadso",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 1027
+}

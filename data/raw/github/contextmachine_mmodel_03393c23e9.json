@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/contextmachine/mmodel/blob/0545e5c2a11c641fc54e91f603e709d3dea549f3/plugins/compute/pyeval.py",
+  "repo": "contextmachine/mmodel",
+  "repo_stars": 0,
+  "repo_description": "Deployment branch",
+  "license": "Apache-2.0",
+  "filepath": "plugins/compute/pyeval.py",
+  "instruction": "Pyeval",
+  "code": "from compute_rhino3d import Util\n\n__all__ = [\"ComputeBinder\"]\n\nimport dill\nfrom typing import Callable, Type\n\n\ndef extract_out(lines):\n    return lines[-1].replace(\"    \", \"\").replace(\"\\n\", \"\").split(\" \")[1:]\n\n\ndef extract_inputs(func, method=False):\n    aa = list(func.__code__.co_varnames[:func.__code__.co_argcount])\n    if method:\n        del aa[0]\n    return aa\n\n\ndef sort_vars(func: Type[Callable]) -> tuple[set[str], set[str], set[str]]:\n    inputs = set(extract_out(dill.source.getsourcelines(func)))\n    out = set(extract_inputs(func))\n    intern = set(func.__code__.co_varnames) - inputs.union(out)\n    return inputs, intern, out\n\n\nclass ComputeBinder(Callable):\n    \"\"\"\n    result = Util.PythonEvaluate(\"import Rhino.Geometry as rg\\nres=rg.NurbsCurve.CreateControlPointCurve([rg.Point3d(xx,yy,zz) for xx,yy,zz in zip(eval(x),eval(y),eval(z))], 3)\",\n                                 {\n                                     \"x\": '[0.0,1.0,2.0,3.0,4.0,5.0,6.0]',\n                                     \"y\": '[0.0,1.0,2.0,3.0,4.0,5.0,6.0]',\n                                     \"z\": '[0.0,1.0,2.0,3.0,4.0,5.0,6.0]'\n                                 }, [\"res\"])\"\"\"\n\n    def __init__(self, meth: Type[Callable]):\n        self._method = meth\n        self._lines = dill.source.getsourcelines(self._method)[0]\n        print(self._lines)\n        self.inputs = set(extract_inputs(self._method, True))\n        self.out = set(extract_out(self._lines))\n        self.intern = set(self._method.__code__.co_varnames) - self.inputs.union(self.out)\n\n    def __call__(self, **kwargs):\n        inp = kwargs\n\n        out = list(self.out)\n        script = \"\"\n\n        for line in self._lines[2:-1]:\n            script += line.replace(\"        \", \"\")\n        print(script)\n        print(inp)\n        print(out)\n        return Util.PythonEvaluate(script, inp, out)\n",
+  "language": "python",
+  "imports": [
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/JobdeVogel/Solar-Irradiation-Prediction/blob/ce25b61727edaaaeb0e965bb821506de01cb0dcc/dataset/input_output/serialize.py",
+  "repo": "JobdeVogel/Solar-Irradiation-Prediction",
+  "repo_stars": 0,
+  "repo_description": "Graduation repository for Master Building Technology",
+  "license": "unknown",
+  "filepath": "dataset/input_output/serialize.py",
+  "instruction": "Serialize",
+  "code": "import Rhino.Geometry as rg\nimport System\nimport json\n\ndef polyline_to_points(polyline):\n    # Transform a polyline to points as tuples\n    return [(point.X, point.Y, point.Z) for point in polyline]\n\ndef points_to_polyline(points):\n    # Transform points as tuples to polylines\n    points = System.Array[rg.Point3d](points)\n    return rg.Polyline(points)\n\ndef serialize(data):\n    \"\"\"Serialize polyline data assuming the structure [[rg.Polyline], [...]]\n    Serializing can be used to make sure data is not changed in-place\n\n    Args:\n        data (list[list[rg.Polyline]]): polylines to serialize\n\n    Returns:\n        json string (str): serialized polylines in JSON format \n    \"\"\"\n    \n    # Iterate over all polylines in the data\n    for i, outlines in enumerate(data):\n        for j, polyline in enumerate(outlines):\n            # Transform the polyline data too points\n            data[i][j] = polyline_to_points(polyline)\n    \n    return json.dumps(data)\n\ndef deserialize(data):\n    \"\"\"Deserialize polyline data assuming the structure [[rg.Polyline], [...]]\n\n    Args:\n        data (JSON str): JSON string containing polyline data\n\n    Returns:\n        data (list[list[rg.Polyline]]): polylines to serializee\n    \"\"\"\n    \n    # Load the JSON data\n    data = json.loads(data)\n    for i, outlines in enumerate(data):\n        for j, polyline in enumerate(outlines):\n            # Extract the points for the outline\n            points = [rg.Point3d(point[0],point[1],point[2]) for point in polyline]\n            \n            # Transform the points to an outline\n            data[i][j] = points_to_polyline(points)\n\n    return data",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": false
+}

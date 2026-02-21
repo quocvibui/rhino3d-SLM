@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/compas-dev/compas/blob/HEAD/src/compas_rhino/scene/coneobject.py",
+  "repo": "compas-dev/compas",
+  "repo_stars": 352,
+  "repo_description": "Main library of the COMPAS framework and CAD integrations for Rhino/GH and Blender.",
+  "license": "MIT",
+  "filepath": "src/compas_rhino/scene/coneobject.py",
+  "instruction": "Coneobject",
+  "code": "from __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\n\nimport scriptcontext as sc  # type: ignore\n\nfrom compas.scene import GeometryObject\nfrom compas_rhino.conversions import cone_to_rhino_brep\nfrom compas_rhino.conversions import transformation_to_rhino\n\nfrom .sceneobject import RhinoSceneObject\n\n\nclass RhinoConeObject(RhinoSceneObject, GeometryObject):\n    \"\"\"Scene object for drawing cone shapes.\"\"\"\n\n    def draw(self):\n        \"\"\"Draw the cone associated with the scene object.\n\n        Returns\n        -------\n        System.Guid\n            The GUID of the object created in Rhino.\n\n        \"\"\"\n        attr = self.compile_attributes()\n        geometry = cone_to_rhino_brep(self.geometry)\n        geometry.Transform(transformation_to_rhino(self.worldtransformation))\n\n        self._guids = [sc.doc.Objects.AddBrep(geometry, attr)]\n        return self.guids\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

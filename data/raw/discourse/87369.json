@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-output-to-system-console/87369",
+  "topic_id": 87369,
+  "title": "Python output to System.Console",
+  "question": "Hi \n@TomTom\n,\n\n\nThis is regarding your proposal \nhere\n:\n\n\n\n\n\n\n\n\nAdditional Rhino 6 GhPython feedback\n\n\n\n\nHave you ever tried using a windows console to output?:\n\n\n\n\n\n\nWhen I run this code a few times in a row I get an error and can no longer run it.\n\n\n# output from Rhino Python to Command Prompt\n# by TomTom\nimport System\nimport System.IO as io\nfrom System import Console\nimport Microsoft.Win32.SafeHandles as sh\nimport ctypes as ct\n\nstdOutputHandle = ct.c_int(-11)\nct.windll.kernel32.AllocConsole()\nintPt = ct.windll.kernel32.GetStdHandle(stdOutputHandle)\nstdHandle = System.IntPtr(intPt)\nsafeFileHandle = sh.SafeFileHandle(stdHandle, True)\nfileStream = io.FileStream(safeFileHandle, io.FileAccess.Write)\nencoding = System.Text.Encoding.GetEncoding(437)\nstandardOutput = io.StreamWriter(fileStream, encoding)\nstandardOutput.AutoFlush = True\nConsole.SetOut(standardOutput)\nConsole.WriteLine(\"This is a console window\")\n\n\n\nAny idea what is the issue?\n\n\nAlso how can I close the console without closing Rhino?\n\n\nThanks in advance.",
+  "code_blocks": [
+    {
+      "code": "import System\nimport System.IO as io\nfrom System import Console\nimport Microsoft.Win32.SafeHandles as sh \nimport ctypes as ct\nimport scriptcontext\n\n\nclass ConsoleInvocator():\n    def __init__(self):\n        self.consoleHandle = None\n        self.fileStream = None\n        self.standardOutput = None\n        \n        # for primitive unittesting\n        self.triedToOpenMultipleTimes = False;\n        \n        if scriptcontext.sticky.has_key(\"console\"):\n            print (\"Console already running... Abort\")\n            self.triedToOpenMultipleTimes = True;\n            return\n            \n        print (\"A new console gets invocated...\")\n        self.__initConsole()\n        scriptcontext.sticky[\"console\"] = self\n\n    def __initConsole(self):\n        ct.windll.kernel32.AllocConsole() \n        intPt = ct.windll.kernel32.GetStdHandle(ct.c_int(-11))\n        \n        self.consoleHandle = sh.SafeFileHandle(System.IntPtr(intPt), True) \n        \n        self.fileStream = io.FileStream(\n            self.consoleHandle, io.FileAccess.Write)\n            \n        encoding = System.Text.Encoding.GetEncoding(437)\n        self.standardOutput = io.StreamWriter(self.fileStream, encoding) \n        self.standardOutput.AutoFlush = True  \n        \n        Console.SetOut(self.standardOutput) \n\nConsoleInvocator()",
+      "language": "python",
+      "author": "TomTom",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 1905
+}

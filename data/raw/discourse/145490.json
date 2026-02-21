@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/select-mesh-faces-with-naked-edges-select-vertices/145490",
+  "topic_id": 145490,
+  "title": "Select mesh faces with naked edges, select vertices",
+  "question": "My goal is to select all the vertices of each upper edge in a collection of meshes, so only the uppermost vertices that make up the top edge of a surface that is a mesh. My approach so far is to check which faces have naked edges. While trying to do this I ran into not being able to select them: this question is two-fold. How would I be able to select a mesh face from a mesh? A starter attempt below:\n\n\nimport Rhino as rh\n\nimport rhinoscriptsyntax as rs\n\n\ndef Selufaces():\n\n\narrObjs = rh.Input.RhinoGet.GetMultipleObjects(\"Select meshes\",False,rh.DocObjects.ObjectType.Mesh)\nfor x in arrObjs[1]:\n    rhino_object = x.Object()\n    cind = rhino_object.SubobjectMaterialComponents\n    faces = rhino_object.MeshGeometry.Faces\n    \n    for count,y in enumerate(faces):\n        nface = rhino_object.MeshGeometry.Faces.HasNakedEdges(count)\n        ftype = y.GetType\n        fguid = ftype.DeclaringType.GUID\n        rhino_object.SelectSubObject(cind, True, True)\n\n\n\nI tried using the GUID to select the face using rs.SelectObject(fguid), but this throws an error as the GUID is not found in the document object list. Using subobjects throws an error that states I fed it an array. I’m assuming I’m doing something very simple in a stupidly complex manner?\n\n\nSecond, is there an easy way of selecting all of the vertices that I’m after? The ultimate goal is to use SetPt to set all of the vertices to a single z coordinate.\n\n\n\n\nimage\n1920×1149 135 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelFirstMeshFace():\n    \n    mesh_id = rs.GetObject(\"Select a mesh\", rs.filter.mesh, True, False)\n    if not mesh_id: return\n    \n    # get the mesh as rhino object\n    mesh_obj = rs.coercerhinoobject(mesh_id, True, True)\n    \n    # define the component type and component index (0)\n    comp_type = Rhino.Geometry.ComponentIndexType.MeshFace\n    comp_index = Rhino.Geometry.ComponentIndex(comp_type, 0)\n    \n    # perform persistent subobject selection\n    mesh_obj.SelectSubObject(comp_index, True, True, True) \n    \n    scriptcontext.doc.Views.Redraw()\n    \nSelFirstMeshFace()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelNakedMeshEdgePt():\n    \n    message = \"Select polygon meshes for naked edge point search\"\n    mesh_ids = rs.GetObjects(message, rs.filter.mesh, True, True, False)\n    if not mesh_ids: return\n    \n    mesh_objs = [rs.coercerhinoobject(m, True, True) for m in mesh_ids]\n    comp_type = Rhino.Geometry.ComponentIndexType.MeshVertex\n    \n    for m_obj in mesh_objs:\n        rc = [i for i, n in enumerate(m_obj.Geometry.GetNakedEdgePointStatus()) if n]\n        for index in rc:\n            comp_index = Rhino.Geometry.ComponentIndex(comp_type, index)\n            m_obj.SelectSubObject(comp_index, True, True, True) \n        \n    scriptcontext.doc.Views.Redraw()\n    \nSelNakedMeshEdgePt()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1204
+}

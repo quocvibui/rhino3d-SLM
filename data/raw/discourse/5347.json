@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/controlling-undo-from-python/5347",
+  "topic_id": 5347,
+  "title": "Controlling Undo from Python",
+  "question": "I’m working on a script that launches a dialog via Rhino.UI.Dialogs.ShowSemiModal(). Buttons in the interface let the user manipulate the document geometry. For example trimming lines, adding circles, etc.\n\n\nI’d like to put an “Undo Last Operation” button in the UI to let the user undo the last change they made.\n\n\nI tried the obvious call to rs.Command(“Undo”) but Rhino reports “Nothing to undo.”. Rhino is of course accumulating my changes because when I exit the script I can undo the entire thing.\n\n\nIs there any way I can control the undo stack myself somehow? That is place begin and end points and jump back to previous begin points. Something like that?\n\n\nThanks,\n\nMark",
+  "code_blocks": [
+    {
+      "code": "def MyStuff():\n    sn = scriptcontext.doc.BeginUndoRecord(\"My Stuff\")\n    pt = Rhino.Geometry.Point3d(0,0,0)\n    scriptcontext.doc.Objects.AddPoint(pt)\n    scriptcontext.doc.Views.Redraw()\n    if (sn > 0):\n        scriptcontext.doc.EndUndoRecord(sn)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "class ScopeUndoRecord():\n    def __init__(self, undoName):\n        self.name = undoName\n    def __enter__(self):\n        self.undoRecord = scriptcontext.doc.BeginUndoRecord(self.name)\n    def __exit__(self,exctype,value,tb):\n        if (self.undoRecord > 0): \n            scriptcontext.doc.EndUndoRecord(self.undoRecord)\n        else:\n            print \"Operation could not be undone.\"",
+      "language": "python",
+      "author": "bmartin",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 4867
+}

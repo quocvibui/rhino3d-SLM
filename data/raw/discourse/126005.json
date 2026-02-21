@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/moving-rhino-cameras-using-rhino-python-editor-doesnt-move-enscape-views/126005",
+  "topic_id": 126005,
+  "title": "Moving Rhino cameras using Rhino Python editor doesn't move enscape views",
+  "question": "Hi,\n\nwhen trying to move the rhino origin (geometry and views) from the old origin to the new origin, it moves all views and geometry correctly except views created through enscape. Wondering if anybody else has dealt through this?\n\nThanks\n\nHere is the script\n\n\nimport rhinoscriptsyntax as rs \n\ndef move_named_views(vect):\n\n    named_views = rs.NamedViews()\n\n    for view in named_views:\n\n        rs.RestoreNamedView(view)\n\n        camera,target = rs.ViewCameraTarget(rs.CurrentView())\n\n        camera += vect\n\n        target += vect\n\n        rs.ViewCameraTarget(rs.CurrentView(),camera,target)\n\n        view = view.replace(\" \",\"\\r\")\n\n        view = \"MovedView_\" + view\n\n        print(view)\n\n        rs.Command('-_namedView S ' + view + ' ENTER',True)\n\ndef MoveEverythingInFile():\n\n    oPt=rs.GetPoint('Current \"origin\" - Point to move all geometry FROM')\n\n    if not oPt: return\n\n    nPt=rs.GetPoint('New \"origin\" - Point to move all geometry TO')\n\n    if not nPt: return\n\n    \n\n    objs=rs.AllObjects(include_lights=True,include_grips=True)\n\n    if objs==None: return\n\n    tVec=nPt-oPt\n\n    rs.EnableRedraw(False)\n\n    rs.MoveObjects(objs,tVec)\n\n    move_named_views(tVec)\n\nMoveEverythingInFile()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs \n\ndef move_named_views(vect):\n\n    named_views = rs.NamedViews()\n\n    for view in named_views:\n\n        rs.RestoreNamedView(view)\n\n        camera,target = rs.ViewCameraTarget(rs.CurrentView())\n\n        camera += vect\n\n        target += vect\n\n        rs.ViewCameraTarget(rs.CurrentView(),camera,target)\n\n        view = view.replace(\" \",\"\\r\")\n\n        view = \"MovedView_\" + view\n\n        print(view)\n\n        rs.Command('-_namedView S ' + view + ' ENTER',True)\n\ndef MoveEverythingInFile():\n\n    oPt=rs.GetPoint('Current \"origin\" - Point to move all geometry FROM')\n\n    if not oPt: return\n\n    nPt=rs.GetPoint('New \"origin\" - Point to move all geometry TO')\n\n    if not nPt: return\n\n    \n\n    objs=rs.AllObjects(include_lights=True,include_grips=True)\n\n    if objs==None: return\n\n    tVec=nPt-oPt\n\n    rs.EnableRedraw(False)\n\n    rs.MoveObjects(objs,tVec)\n\n    move_named_views(tVec)\n\nMoveEverythingInFile()",
+      "language": "python",
+      "author": "alphabeta",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 656
+}

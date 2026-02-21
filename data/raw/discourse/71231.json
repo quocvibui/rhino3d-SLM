@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/turning-off-layers-in-detail-with-rhinocommon/71231",
+  "topic_id": 71231,
+  "title": "Turning off layers in detail with Rhinocommon",
+  "question": "Hi, I am trying to turn off (hide) layers in a detail viewport using Rhinocommon. I though this would be simply a matter of activating the detail view, then setting Layer.IsVisible = False, then Layer.CommitChanges().\n\n\nThis does not seem to be the case. It seems Layer.IsVisible always refers to the layer’s main visibility settings, never its per-view visibility setting.\n\n\nHow does one do the equivalent of HideLayersInDetail using Rhinocommon?\n\n\nThank you!",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  var view = doc.Views.ActiveView;\n  if (null == view)\n    return Result.Failure;\n\n  if (!(view is RhinoPageView page_view))\n  {\n    RhinoApp.WriteLine(\"The active view is neither a layout nor a detail view.\");\n    return Result.Failure;\n  }\n\n  var layer_index = doc.Layers.FindByFullPath(\"Default\", -1);\n  if (layer_index >= 0 && layer_index < doc.Layers.Count && layer_index != doc.Layers.CurrentLayerIndex)\n  {\n    var layer = doc.Layers[layer_index];\n    if (null != layer && layer.IsVisible)\n    {\n      layer.SetPerViewportVisible(view.ActiveViewportID, false);\n      doc.Views.RedrawEnabled = true;\n      view.Redraw();\n    }\n  }\n\n  doc.Views.Redraw();\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Layer rlayer = doc.Layers.FindName(\"TO-DRAW\");\nLayer[] rlayers = rlayer.GetChildren();\nRhinoPageView pview = doc.Views.Find(\"PANEL_01\", true) as RhinoPageView;\nif(pview == null)\n  Print(\"Error: PageView not found.\");\n\nDetailViewObject[] dviews = pview.GetDetailViews();\nfor(int j = 0; j < dviews.Length; j++)\n{\n  DetailViewObject dview = dviews[j];\n  pview.SetActiveDetail(dview.Id);\n  var view = doc.Views.ActiveView;\n  Print(view.ActiveViewportID.ToString());\n\n  for(int i = 0; i < rlayers.Length; i++)\n  {\n    Layer panellayer = rlayers[i];\n    if(panellayer.Name == pview.PageName){\n      panellayer.SetPerViewportVisible(dview.Id, true);\n      doc.Views.RedrawEnabled = true;\n      view.Redraw();\n      Print(\"Show: \" + panellayer.Name + \": \" + panellayer.PerViewportIsVisible(dview.Id));\n    }\n    else\n    {\n      panellayer.SetPerViewportVisible(dview.Id, false);\n      doc.Views.RedrawEnabled = true;\n      view.Redraw();\n      Print(\"Hide: \" + panellayer.Name + \": \" + panellayer.PerViewportIsVisible(dview.Id));\n    }\n  }\n}",
+      "language": "unknown",
+      "author": "gcmartinb",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  // Find the layer index by full path name\n  var layer_index = doc.Layers.FindByFullPath(\"TO-DRAW\", -1);\n  if (-1 == layer_index)\n    return Result.Cancel;\n\n  // Get the layer object\n  var layer = doc.Layers[layer_index];\n  if (null == layer)\n    return Result.Failure;\n\n  // If the layer is off globally, then there is nothing to do\n  if (!layer.IsVisible)\n    return Result.Cancel;\n\n  // Find the page view\n  var page_view = doc.Views.GetPageViews().First(\n    item => item.PageName.Equals(\"PANEL_01\", System.StringComparison.OrdinalIgnoreCase)\n    );\n\n  if (null == page_view)\n    return Result.Cancel;\n\n  // Process each detail\n  foreach (var detail in page_view.GetDetailViews())\n  {\n    var viewport_id = detail.Viewport.Id;\n\n    // Re-acquire the layer object, as the underlying\n    // object may have been modified\n    layer = doc.Layers[layer_index];\n    if (null != layer)\n    {\n      // If the layer is visible on the detail, turn it off\n      if (layer.PerViewportIsVisible(viewport_id))\n      {\n        layer.SetPerViewportVisible(viewport_id, false);\n        layer.SetPerViewportPersistentVisibility(viewport_id, false);\n      }\n    }\n  }\n\n  // Redraw if needed\n  var view = doc.Views.ActiveView;\n  if (null != view && view.ActiveViewportID == page_view.ActiveViewportID)\n    doc.Views.Redraw();\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 10,
+  "views": 2690
+}

@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/trimming-a-mesh-in-python-rhinocommon/36230",
+  "topic_id": 36230,
+  "title": "Trimming a mesh in Python-Rhinocommon",
+  "question": "I am trying to create a script in python-Rhinocommon that trims an existing mesh. It seems to work for a small mesh, but when applying it to a large one it seems to trim more faces than necessary. I’ve nicked part of the code about topology vertices from another script, but I do not fully understand yet how it works.\ntest_grids.3dm\n (112.9 KB)\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport rhinoscript.utility as rhutil\n\nme=rs.GetObject(\"Select a mesh to trim \")\nmesh = rhutil.coercemesh(me, True)\n\ngo=Rhino.Input.Custom.GetObject()\ngo.GeometryFilter=Rhino.DocObjects.ObjectType.MeshVertex\ngo.SetCommandPrompt(\"Get mesh vertex\")\ngo.GetMultiple(0,1000)\nobjrefs = go.Objects()\ntopology_indices=[item.GeometryComponentIndex.Index for item in objrefs]\npoints = []\nfor index in topology_indices:\n    vertex_indices = mesh.TopologyVertices.MeshVertexIndices(index)\n    points.append(vertex_indices[0])\n\npoints = sorted(points)\nfor pt in reversed(points):\n    print pt\n    test = mesh.Vertices.Remove(pt,True)\n\nscriptcontext.doc.Objects.Replace(me,mesh)\nmesh.Dispose()\n\nscriptcontext.doc.Views.Redraw()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext\nimport rhinoscript.utility as rhutil\n\nme=rs.GetObject(\"Select a mesh to trim \")\nmesh = rhutil.coercemesh(me, True)\n\ngo=Rhino.Input.Custom.GetObject()\ngo.GeometryFilter=Rhino.DocObjects.ObjectType.MeshVertex\ngo.SetCommandPrompt(\"Get mesh vertex\")\ngo.GetMultiple(0,1000)\nobjrefs = go.Objects()\ntopology_indices=[item.GeometryComponentIndex.Index for item in objrefs]\npoints = []\nfor index in topology_indices:\n    vertex_indices = mesh.TopologyVertices.MeshVertexIndices(index)\n    points.append(vertex_indices[0])\n\npoints = sorted(points)\nfor pt in reversed(points):\n    print pt\n    test = mesh.Vertices.Remove(pt,True)\n\nscriptcontext.doc.Objects.Replace(me,mesh)\nmesh.Dispose()\n\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Goodriver",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1440
+}

@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/importing-the-planktongh-library-in-ghpython-possible/77271",
+  "topic_id": 77271,
+  "title": "Importing the PlanktonGh library in GHPython? Possible?",
+  "question": "Hi folks,\n\n\nI would like to use the Plankton Mesh library inside of GHPython. I know that you can use it in C# by  \nUsing PlanktonGH\n, however trying to \nimport PlanktonGH\n in Python unfortunately doesn’t work the same way.\n\n\nPlankton.dll\n and \nPlanktonGh.dll\n are both installed inside my components folder.\n\n\nIs this at all possible? I would be interested in some half edge mesh methods.\n\n\nThanks.",
+  "code_blocks": [
+    {
+      "code": "import sys\nimport Grasshopper as gh\n\nif gh.Folders.DefaultAssemblyFolder not in sys.path:\n    sys.path.append(gh.Folders.DefaultAssemblyFolder)",
+      "language": "python",
+      "author": "AndersDeleuran",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Grasshopper as gh\nimport sys\nimport clr\n\nif gh.Folders.DefaultAssemblyFolder not in sys.path:\n    sys.path.append(gh.Folders.DefaultAssemblyFolder)\n\nclr.AddReferenceToFile(\"Plankton.dll\")\n\nimport PlanktonGh\n\npm = PlanktonGh.PlanktonMesh() # initialise plankton mesh\npm.ToPlanktonMesh(mesh_plane) # mesh input from grasshopper to plankton mesh",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport clr\nfrom os import path\n\nplankton_dir = \"path/to/folder/with/plankton\"\n\nclr.AddReferenceToFileAndPath(path.join(plankton_dir, \"Plankton.dll\"))\nclr.AddReferenceToFileAndPath(path.join(plankton_dir, \"Plankton.gha\"))\n\nimport Plankton\nimport PlanktonGh\n\nclr.ImportExtensions(PlanktonGh.RhinoSupport)\n\nm1 = x.ToPlanktonMesh()\n\nprint len(x.Vertices)",
+      "language": "python",
+      "author": "will",
+      "post_number": 8,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 12,
+  "views": 2953
+}

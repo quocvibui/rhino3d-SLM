@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/GEL-Dev/RebarRIRToolkit/blob/677b93783a0288e5b411858c133cb7e04a6a0a06/Temp/get_rebar.py",
+  "repo": "GEL-Dev/RebarRIRToolkit",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Temp/get_rebar.py",
+  "instruction": "Get rebar",
+  "code": "__author__ = \"ykish\"\n__version__ = \"2023.05.08\"\n\nimport rhinoscriptsyntax as rs\n\nimport clr\nclr.AddReference('System.Core')\nclr.AddReference('RhinoInside.Revit')\nclr.AddReference('RevitAPI') \nclr.AddReference('RevitAPIUI')\nimport math\nimport Rhino\nimport RhinoInside\nimport Grasshopper\nimport ghpythonlib.treehelpers as th\nimport Grasshopper.Kernel.Data.GH_Path as GH_Path\nimport Grasshopper.DataTree as DataTree\nimport scriptcontext\nfrom RhinoInside.Revit import Revit, Convert\nfrom Autodesk.Revit import DB\nfrom Autodesk.Revit.DB.Structure import *\nfrom System.Collections.Generic import List, IList\nfrom System import Enum, Action\n\ndoc = Revit.ActiveDBDocument\n\ndef getRebarDiameter(rebar):\n\tbartypeId = rebar.GetTypeId()\n\ttype = doc.GetElement(bartypeId)\n\tdiameter = type.BarModelDiameter\n\tdiameter = Convert.Geometry.GeometryDecoder.ToModelLength(diameter)\n\treturn diameter, type\n\t\ndef getCenterLineCurves(rebar):\n    revit_Curves = element.GetCenterlineCurves(0,0,0,MultiplanarOption.IncludeAllMultiplanarCurves,0)\n    curves = []\n    for rc in revit_Curves:\n        if rc.GetType() == DB.Line:\n            c = Convert.Geometry.GeometryDecoder.ToCurve(rc)\n            curves.append(c)\n        if rc.GetType() == DB.Arc:\n            c = Convert.Geometry.GeometryDecoder.ToCurve(rc)\n            curves.append(c)\n    return curves\n\n    \ndef getSpacing(rebar):\n\n    layoutRule = rebar.LayoutRule\n    \n    if layoutRule == \"Single\":\n        return 0  # or whatever default value you want to return for single bars\n    \n    try:\n        s = rebar.MaxSpacing\n        return Convert.Geometry.GeometryDecoder.ToModelLength(s)\n    except Exception as e:\n        \n        return None\n    \n    \ncenterLine = getCenterLineCurves(element)\ndiameter = getRebarDiameter(element)[0]\n\nquantity = element.NumberOfBarPositions \nspacing = getSpacing(element)\n\n\nrebartype = getRebarDiameter(element)[1]\nparaIndex = DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS;\ncomment = element.get_Parameter(paraIndex).AsString()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

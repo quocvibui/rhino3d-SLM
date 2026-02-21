@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/intersect-lines.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/intersect-lines.py",
+  "instruction": "Intersect lines",
+  "code": "import Rhino\nimport scriptcontext\n\ndef IntersectLines():\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt( \"Select lines\" )\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve\n    go.GetMultiple( 2, 2)\n    if go.CommandResult()!=Rhino.Commands.Result.Success:\n        return go.CommandResult()\n    if go.ObjectCount!=2: return Rhino.Commands.Result.Failure\n\n    crv0 = go.Object(0).Geometry()\n    crv1 = go.Object(1).Geometry()\n    if not crv0 or not crv1: return Rhino.Commands.Result.Failure\n\n    line0 = crv0.Line\n    line1 = crv1.Line\n    v0 = line0.Direction\n    v0.Unitize()\n    v1 = line1.Direction\n    v1.Unitize()\n\n    if v0.IsParallelTo(v1)!=0:\n        print \"Selected lines are parallel.\"\n        return Rhino.Commands.Result.Nothing\n\n    rc, a, b = Rhino.Geometry.Intersect.Intersection.LineLine(line0, line1)\n    if not rc:\n        print \"No intersection found.\"\n        return Rhino.Commands.Result.Nothing\n\n    pt0 = line0.PointAt(a)\n    pt1 = line1.PointAt(b)\n    # pt0 and pt1 should be equal, so we will only add pt0 to the document\n    scriptcontext.doc.Objects.AddPoint(pt0)\n    scriptcontext.doc.Views.Redraw()\n    return Rhino.Commands.Result.Success\n\nif __name__==\"__main__\":\n    IntersectLines()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

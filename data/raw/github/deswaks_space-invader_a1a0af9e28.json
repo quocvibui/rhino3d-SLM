@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/deswaks/space-invader/blob/94e00bff3b5371cfa6999f381461af9af6e0b0ba/ghpython%20component%20source%20code/concave_hull.py",
+  "repo": "deswaks/space-invader",
+  "repo_stars": 0,
+  "repo_description": "Tools for locating and reconstructing analytical building spaces with Rhino Grasshopper",
+  "license": "MIT",
+  "filepath": "ghpython component source code/concave_hull.py",
+  "instruction": "Concave hull",
+  "code": "import ghpythonlib.components as ghComp\nimport rhinoscriptsyntax as rs\n\n# mesh and faces\nmesh = ghComp.DelaunayMesh(pts)\nvertices,faces,colours,normals = ghComp.DeconstructMesh(mesh)\n\n# max distance of edges of all faces\nmaxDists=[]\nfor face in faces:\n    dist1=rs.Distance(pts[face.A],pts[face.B])\n    dist2=rs.Distance(pts[face.B],pts[face.C])\n    dist3=rs.Distance(pts[face.C],pts[face.A])\n    maxDist=max(dist1,dist2,dist3)\n    maxDists.append(maxDist)\n\n# median \nsortedDists = sorted(maxDists)\nmedIndex = int(len(sortedDists)/2)\nmedian = sortedDists[medIndex]\n\n# keep faces with edges within treshold\ndistTreshold=median*(1.0+factor)\nnewMesh=[]\ni = 0\nfor face in faces:\n    if(maxDists[i]<distTreshold):\n        newMesh.append(face)\n    i+=1\n\n# create final meshes and outlines\nfinalMesh=ghComp.ConstructMesh(vertices,newMesh)\nconcaveHull = rs.MeshOutline(finalMesh)\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

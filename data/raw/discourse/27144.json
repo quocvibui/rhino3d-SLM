@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/vague-python-script-performance-question/27144",
+  "topic_id": 27144,
+  "title": "Vague Python script performance question",
+  "question": "I’m working on converting a VBscript into Python, to learn Python and hopefully leverage some RhinoCommon stuff to speed it up. The script is for fitting (very specific) curves to other curves, using a brute force randomly-try-anything-then-check-accuracy approach. I’ve left the VBscript version to run for a day, churning through millions of possibilities, only interacting with the document to draw in a new best-fit when found. The Python version right now doesn’t even draw every best-fit, just after completing a set of options, so I kinda presumed that even if it was still mostly using rhinoscript functions it would be faster, but it behaves kinda weird.\n\n\nLess than a minute into running the script Rhino stops displaying the debugging messages I’m printing to the command line and becomes unresponsive, to the point where if(as I would do with the VBScript version) I can’t open up a second session of the same file. Eventually it finishes running the script and spits out the rest of the command line messages and all the output at once, which is obviously not how it’s set up to work. Is there something known about quirks of this stuff that might explain that?",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\n\ndef DoSomething():\n    for i in xrange(10000):\n        if scriptcontext.escape_test(False): return\n        print i\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport random, math\n\ndef AddRandomLines():\n    for i in xrange(1000):\n        x = 10*math.cos(random.randint(1,360))\n        y = 10*math.sin(random.randint(1,360))\n    \n        pt = Rhino.Geometry.Point3d(x, y, 0)\n        origin = Rhino.Geometry.Point3d(0,0,0)\n    \n        line = Rhino.Geometry.Line(origin, pt)\n        scriptcontext.doc.Objects.AddLine(line)\n    scriptcontext.doc.Views.Redraw()\n    \nAddRandomLines()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2043
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cannot-delete-an-object-created-by-ghpythonlib/39170",
+  "topic_id": 39170,
+  "title": "Cannot delete an object created by ghpythonlib",
+  "question": "Hi all,\n\n\nWhat I am trying to do is to create a cutting brep to split a surface. After I succeed to create the brep I would like to delete the ‘edge1’. But for some reason I cannot delete edge1. I guess because it was created by a grasshopper method. When I use print to check its id it doesn’t the id (see attached).\n\n\n\n\nSplit Surface 01.PNG\n903×897 50.1 KB\n\n\n\nDoes it mean that the edge1 doesn’t exist in Rhino so I don’t need to delete it?\n\nIs it a polyline that only exists within grasshopper?\n\n\n\n\nSplit Surface 02.PNG\n905×896 56.6 KB\n\n\n\n\nSplit Surface.py\n (1.0 KB)\n\nCan anyone explain a little bit of it? Just want to have a better understand of use ghpythonlib in rhino python.\n\n\nThanks,\n\n\nJ",
+  "code_blocks": [
+    {
+      "code": "import Rhino, scriptcontext\n\n#obj=some RhinoCommon object you have created, say a curve or brep\nobjID=scriptcontext.doc.Objects.AddCurve(obj)\n\n#or \n\nobjID=scriptcontext.doc.Objects.AddBrep(obj)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef AddBox():\n    plane = Rhino.Geometry.Plane.WorldXY\n    size = Rhino.Geometry.Interval(-10, 10)\n    box = Rhino.Geometry.Box(plane, size, size, size)\n    brep = box.ToBrep()\n    scriptcontext.doc.Objects.AddBrep(brep)\n    scriptcontext.doc.Views.Redraw()\n    \nAddBox()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 23,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 24,
+  "views": 2829
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-print-window-size-to-pdf/196295",
+  "topic_id": 196295,
+  "title": "Rhinocommon Print Window Size to PDF",
+  "question": "Hi,\n\n\n\n\nI have rectangles on the 3d model top view.\n\n\nThese rectnagles are A4 paper size.\n\n\nI need to automatically print that A4 paper window using the corners from the rectangle.\n\n\n\n\nNow getting the corners isnt hard, nor identifying the rectangles.\n\nI am having trouble printing.\n\n\nI have :\n\n-coordinate p1,p2 where p(x) is (x,y,z)\n\n\nI need to :\n\n-Use rhinocommon to print the rectangle defined by the p1,p2 points\n\n\nHow can I print that area in ironpython rhinocommon? I can’t find anything useful, I find viewport to pdf/bmp but its not the proper print.\n\n\nUsing rhino7\n\n\n@dale\n \n@nathanletwory\n\n\nSorry If I am bothering you a bit these days but im approaching some deadlines, and thanks for the help as always to anyone who has any ideas\n\n\nCarletto",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.UI\nimport System.Drawing as sd\nimport Rhino.Geometry as rg\n\ndef capture_rectangle_to_a4_pdf():\n    # Prompt the user to select a rectangle in world coordinates\n    rc, corners = Rhino.Input.RhinoGet.GetRectangle()\n    if rc != Rhino.Commands.Result.Success or corners is None:\n        return\n\n    # Find the active viewport that the rectangle was selected in\n    view = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView\n    if not view:\n        return\n\n    # Convert from world to client coordinates\n    client_points = [view.ActiveViewport.WorldToClient(pt) for pt in corners]\n\n    # Create a bounding box from the client points\n    client_points_3d = [rg.Point3d(p.X, p.Y, 0) for p in client_points]\n    bb = rg.BoundingBox(client_points_3d)\n\n    # Create Point2d objects directly from the bounding box min and max\n    top_left = rg.Point2d(bb.Min.X, bb.Min.Y)\n    bottom_right = rg.Point2d(bb.Max.X, bb.Max.Y)\n\n    # Determine the rectangle size in pixels\n    rect_width = int(bb.Max.X - bb.Min.X)\n    rect_height = int(bb.Max.Y - bb.Min.Y)\n\n    # Create an A4 paper size in inches in landscape\n    a4_width = 11.69\n    a4_height = 8.27\n    dpi = 300\n\n    # Convert A4 inches to pixels\n    width_pixels = int(a4_width * dpi)\n    height_pixels = int(a4_height * dpi)\n\n    # Set up ViewCaptureSettings for A4 page size\n    vcs = Rhino.Display.ViewCaptureSettings(view, sd.Size(width_pixels, height_pixels), dpi)\n    vcs.RasterMode = True\n    vcs.ViewArea = Rhino.Display.ViewCaptureSettings.ViewAreaMapping.Window\n    vcs.SetWindowRect(top_left, bottom_right)\n\n    # Prompt for PDF save location\n    dlg = Rhino.UI.SaveFileDialog()\n    dlg.Filter = \"PDF Files (*.pdf)|*.pdf\"\n    if not dlg.ShowDialog():\n        return\n\n    filename = dlg.FileName\n    if not filename.endswith(\".pdf\"):\n        filename += \".pdf\"\n\n    # Create and write the PDF\n    pdf = Rhino.FileIO.FilePdf.Create()\n    # Using A4 page size in inches\n    if pdf.AddPage(vcs) >= 0:\n        pdf.Write(filename)\n        print(\"PDF saved to: \" + filename)\n\ncapture_rectangle_to_a4_pdf()",
+      "language": "python",
+      "author": "Trav",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "var pdf = Rhino.FileIO.FilePdf.Create();\n            var page = doc.Views.GetPageViews()[0]; // TODO get the proper page\n            var origin = page.ClientToScreen(new System.Drawing.Point());\n            ViewCaptureSettings settings = new ViewCaptureSettings(page, 96); \n            settings.SetWindowRect(new Rhino.Geometry.Point2d(origin.X, origin.Y), new Rhino.Geometry.Point2d(origin.X + 500, origin.Y + 500));\n\n            pdf.AddPage(settings);\n            pdf.Write(\"C:\\\\testPrint.pdf\");",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 172
+}

@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/connect-curves-in-rhino-common-iron-python/74184",
+  "topic_id": 74184,
+  "title": "Connect curves in Rhino Common (Iron Python)",
+  "question": "Hi,\n\n\nI have a python function that works well, however I cannot figure out how to assign variables for the both curves as result objects. It would be better to use the input curves however the method creates new curves.\n\n\ndef Connect(rc0,rc1):\n    c0 = rs.coercecurve(rc0, -1, True)\n    c1 = rs.coercecurve(rc1, -1, True)\n    p0 = rs.CurveStartPoint(rc0)\n    p1 = rs.CurveStartPoint(rc1)\n    t = scriptcontext.doc.ModelAbsoluteTolerance\n    a = scriptcontext.doc.ModelAngleToleranceDegrees\n    rc = Rhino.Geometry.Curve.CreateFilletCurves(c0, p0, c1, p1, 0, False, True, True, t, a)\n    if rc.Count != 0:\n        for crv in rc: \n            scriptcontext.doc.Objects.AddCurve(crv)\n        scriptcontext.doc.Objects.Delete(rc0, False)\n        scriptcontext.doc.Objects.Delete(rc1, False)\n        scriptcontext.doc.Views.Redraw()",
+  "code_blocks": [
+    {
+      "code": "newIds = []\nfor crv in crvs:\n    id = scriptcontext.doc.Objects.AddCurve(crv)\n    if id:\n        newIds.append(id)",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "def Connect(rc0,rc1):\n    c0 = rs.coercecurve(rc0, -1, True)\n    c1 = rs.coercecurve(rc1, -1, True)\n    p0 = rs.CurveStartPoint(rc0)\n    p1 = rs.CurveStartPoint(rc1)\n    t = scriptcontext.doc.ModelAbsoluteTolerance\n    a = scriptcontext.doc.ModelAngleToleranceDegrees\n    rc = Rhino.Geometry.Curve.CreateFilletCurves(c0, p0, c1, p1, 0, False, True, True, t, a)\n    if rc.Count != 0:\n        for crv in rc: \n            scriptcontext.doc.Objects.AddCurve(crv)\n        scriptcontext.doc.Objects.Delete(rc0, False)\n        scriptcontext.doc.Objects.Delete(rc1, False)\n        scriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 749
+}

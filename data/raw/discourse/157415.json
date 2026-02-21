@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dragging-curveeditpoints-to-change-the-shape-of-curve-using-python-script/157415",
+  "topic_id": 157415,
+  "title": "Dragging CurveEditPoints to change the shape of curve using Python Script",
+  "question": "Dynamically changing CurveEditPoints in viewport to update the shape of the curve using python script.\n\n\nI know how to change it’s shape using an attracter point. But It changes the curve completely. For minute change I want to drag a CurveEditPoint (using python script), unable to figure it out yet.\n\n\nto do:\n\nselecting a CurveEditPoint and dragging it to change the shape of the curve ‘n’ times.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef move_control_point():\n    # Prompt user to select a curve\n    curve_id = rs.GetObject(\"Select a curve\", rs.filter.curve)\n    if curve_id is None:\n        return\n\n    # Get the curve object from the document\n    curve_obj = sc.doc.Objects.Find(curve_id)\n    curve = curve_obj.Geometry\n\n    # Check if the curve is a NURBS curve\n    if not isinstance(curve, Rhino.Geometry.NurbsCurve):\n        print(\"The selected curve is not a NURBS curve.\")\n        return\n\n    # Prompt user to select a control point index\n    num_points = curve.Points.Count\n    point_index = rs.GetInteger(\"Enter the control point index (0-{})\".format(num_points - 1), 0, 0, num_points - 1)\n    if point_index is None:\n        return\n\n    # Get the original control point location\n    original_point = curve.Points[point_index].Location\n\n    # Prompt user to select a new location for the control point\n    new_point = rs.GetPoint(\"Select new location for control point\", original_point)\n    if new_point is None:\n        return\n\n    # Move the control point to the new location\n    curve.Points[point_index] = Rhino.Geometry.ControlPoint(new_point, curve.Points[point_index].Weight)\n\n    # Update the curve geometry in the document\n    sc.doc.Objects.Replace(curve_id, curve)\n    sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    move_control_point()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 518
+}

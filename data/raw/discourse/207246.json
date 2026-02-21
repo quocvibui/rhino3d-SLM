@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/value-list-auto-fill-in-python-rh7-with-transient-error-message-flash/207246",
+  "topic_id": 207246,
+  "title": "Value List Auto-Fill in Python (RH7) - with Transient Error Message Flash",
+  "question": "Hi,\n\n\nI’m working on a GHPython component that performs \nValue List auto-fill using stored data sets\n.\n\n\nHowever, during the process of \nclearing and replacing existing Value List items\n, there is always a \ntransient error message flash\n (as shown in the video below).\n\n\nBoth the Grasshopper file and the Python script are attached below.\n\nAny help would be greatly appreciated.\n\n\nValueList_py.gh\n (4.9 KB)\n\n\n\n\n\n\nimport Grasshopper\n\ndef valuelist_autofill(component):\n    # Define the ValueList auto-fill settings:\n    # (input_index, [options], quoted?, default_selected_index)\n    autofill_sets = [\n        (0, [\"a\", \"b\", \"c\", \"d\", \"e\", \"f\"], True, 2),\n        (1, [100, 200, 300, 400, 500, 600, 700], False, 4),\n        (2, [\"AAA\", \"BBB\", \"CCC\", \"DDD\"], True, 1),\n    ]\n\n    valuelist_registry = {}  # Prevent same ValueList from being used on multiple inputs\n\n    for index, options, quoted, default_index in autofill_sets:\n        param = ghenv.Component.Params.Input[index]\n        if param.SourceCount == 0:\n            continue  # Skip if no source connected to this input\n\n        for src in param.Sources:\n            if not isinstance(src, Grasshopper.Kernel.Special.GH_ValueList):\n                continue  # Only process GH_ValueList sources\n\n            if src in valuelist_registry:\n                other_index = valuelist_registry[src]\n                raise RuntimeError(\n                    \"The same Value List is connected to multiple inputs: %s and %s.\" % (other_index, index)\n                )\n            else:\n                valuelist_registry[src] = index\n\n            # Skip if the current list already matches the desired options\n            existing_items = [item.Name for item in src.ListItems]\n            expected_items = list(map(str, options))\n            if set(existing_items) == set(expected_items):\n                continue\n\n            # Clear and rebuild the ValueList options\n            src.ListItems.Clear()\n            for opt in options:\n                na...",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper\n\ndef valuelist_autofill(component):\n    # Define the ValueList auto-fill settings:\n    # (input_index, [options], quoted?, default_selected_index)\n    autofill_sets = [\n        (0, [\"a\", \"b\", \"c\", \"d\", \"e\", \"f\"], True, 2),\n        (1, [100, 200, 300, 400, 500, 600, 700], False, 4),\n        (2, [\"AAA\", \"BBB\", \"CCC\", \"DDD\"], True, 1),\n    ]\n\n    valuelist_registry = {}  # Prevent same ValueList from being used on multiple inputs\n\n    for index, options, quoted, default_index in autofill_sets:\n        param = ghenv.Component.Params.Input[index]\n        if param.SourceCount == 0:\n            continue  # Skip if no source connected to this input\n\n        for src in param.Sources:\n            if not isinstance(src, Grasshopper.Kernel.Special.GH_ValueList):\n                continue  # Only process GH_ValueList sources\n\n            if src in valuelist_registry:\n                other_index = valuelist_registry[src]\n                raise RuntimeError(\n                    \"The same Value List is connected to multiple inputs: %s and %s.\" % (other_index, index)\n                )\n            else:\n                valuelist_registry[src] = index\n\n            # Skip if the current list already matches the desired options\n            existing_items = [item.Name for item in src.ListItems]\n            expected_items = list(map(str, options))\n            if set(existing_items) == set(expected_items):\n                continue\n\n            # Clear and rebuild the ValueList options\n            src.ListItems.Clear()\n            for opt in options:\n                name = str(opt)\n                rhs = '\"{}\"'.format(name) if quoted else name  # Quote value if needed\n                src.ListItems.Add(Grasshopper.Kernel.Special.GH_ValueListItem(name, rhs))\n\n            # Select the default option\n            src.SelectItem(default_index)\n\n            # Trigger UI refresh for the ValueList\n            src.ExpireSolution(True)\n\n# Run auto-fill procedure\nvaluelist_autofill(ghenv.Component)",
+      "language": "python",
+      "author": "ctu6",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 30
+}

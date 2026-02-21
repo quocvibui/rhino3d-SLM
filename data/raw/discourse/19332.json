@@ -1,0 +1,54 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-the-selected-point/19332",
+  "topic_id": 19332,
+  "title": "How to get the selected Point",
+  "question": "Hello all,\n\n\nI want finde the selected point to know if it´s near start or end.\n\n\nI have this in Python but I want changed to c#\n\n\nmy Python code =>\n\n\ndef select():\n    scriptcontext.doc.Objects.UnselectAll()\n    getterc = GetObject()\n    try:\n        getterc.SetCommandPrompt(\"Please select Purlin on Start or end\")\n        if getterc.Get() == GetResult.Object: #we wait for the result here\n            \n            objref = getterc.Object(0)\n            id = objref.ObjectId\n            \n            point = objref.SelectionPoint()\n            point = rs.AddPoint(point)\n    finally:\n        getterc.Dispose() #this will be called in all cases \n    \n    scriptcontext.doc.Objects.UnselectAll()\n    return id, point\n\n\n\nThanks Robert",
+  "code_blocks": [
+    {
+      "code": "Rhino.Input.Custom.GetPoint gp = new Rhino.Input.Custom.GetPoint();\ngp.SetCommandPrompt(\"Start of line\");\ngp.Get();\nif (gp.CommandResult() != Rhino.Commands.Result.Success)\nreturn gp.CommandResult();\n \nRhino.Geometry.Point3d pt_start = gp.Point();\n\n//to add a point and get its guid.\nGuid pointGuid = doc.objects.addpoint(pt_start)",
+      "language": "csharp",
+      "author": "jordy1989",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "public static Guid SelectPolysurf(String command, RhinoDoc doc)\n        {\n            doc.Objects.UnselectAll();\n            doc.Views.Redraw();\n\n            GetObject go = new GetObject();\n\n            go.SetCommandPrompt(command);\n            go.SubObjectSelect = false;\n            go.GroupSelect = false;\n            go.GeometryFilter = Rhino.DocObjects.ObjectType.PolysrfFilter;\n            go.AcceptNothing(true);\n            go.GetMultiple(1, 1);\n            Point3d point;\n            point = go.Point();\n\n            doc.Objects.AddPoint(point);\n            if (go.GetMultiple(1, 0) != Rhino.Input.GetResult.Object)\n            {\n                go.Dispose();\n                RhinoApp.WriteLine(\"no Surf are selected !\");\n            }\n\n            Rhino.DocObjects.ObjRef[] objref = go.Objects();\n            go.Dispose();\n            \n            doc.Objects.UnselectAll();\n            doc.Views.Redraw();\n\n            Guid surf_id = new Guid();\n            surf_id = objref[0].ObjectId;\n            RhinoApp.WriteLine(\"point {0} \",point);\n            RhinoApp.WriteLine(\"guid {0} \", surf_id);\n            return surf_id;\n        }",
+      "language": "csharp",
+      "author": "Robert",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "Private Function GetSrf()\n\n            Dim pt0 As Point3d\n            Using getPointAction As New GetPoint()\n                getPointAction.SetCommandPrompt(\"Please select point position\")\n                If getPointAction.[Get]() <> GetResult.Point Then\n                    RhinoApp.WriteLine(\"No point was selected.\")\n                    Return getPointAction.CommandResult()\n                End If\n                pt0 = getPointAction.Point()\n            End Using\n\n            Dim go As GetObject = New GetObject()\n            go.SetCommandPrompt(\"Select PolySrf\")\n            go.SubObjectSelect = False\n            go.GroupSelect = False\n            go.GeometryFilter = Rhino.DocObjects.ObjectType.Brep\n            go.AcceptNothing(True)\n\n            If go.Get <> GetResult.Object Then\n                Return Result.Failure\n            End If\n\n            Dim surf_id As Guid = go.Object(0).ObjectId\n\n            RhinoApp.WriteLine(\"point {0} \", pt0)\n            RhinoApp.WriteLine(\"guid {0} \", surf_id)\n\n            Return surf_id\n\n        End Function",
+      "language": "csharp",
+      "author": "jordy1989",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "public static Guid SelectPolysurf(String command, RhinoDoc doc)\n        {\n            doc.Objects.UnselectAll();\n            doc.Views.Redraw();\n\n            GetObject go = new GetObject();\n\n            Point3d point;\n            go.SetCommandPrompt(command);\n            go.SubObjectSelect = false;\n            go.GroupSelect = false;\n            go.GeometryFilter = Rhino.DocObjects.ObjectType.PolysrfFilter;\n            go.AcceptNothing(true);\n            go.GetMultiple(1, 1);\n            \n            Rhino.DocObjects.ObjRef oref =   go.Object(0);\n            point  = oref.SelectionPoint();\n\n            if (go.GetMultiple(1, 0) != Rhino.Input.GetResult.Object)\n            {\n                go.Dispose();\n                RhinoApp.WriteLine(\"no Polysurface are selected !\");\n            }\n \n            go.Dispose();\n            \n            doc.Objects.UnselectAll();\n            doc.Views.Redraw();\n\n            Guid surf_id = new Guid();\n            surf_id = oref.ObjectId;\n            RhinoApp.WriteLine(\"point {0} \",point);\n            RhinoApp.WriteLine(\"guid {0} \", surf_id);\n            return surf_id;\n        }",
+      "language": "csharp",
+      "author": "Robert",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "def select():\n    scriptcontext.doc.Objects.UnselectAll()\n    getterc = GetObject()\n    try:\n        getterc.SetCommandPrompt(\"Please select Purlin on Start or end\")\n        if getterc.Get() == GetResult.Object: #we wait for the result here\n            \n            objref = getterc.Object(0)\n            id = objref.ObjectId\n            \n            point = objref.SelectionPoint()\n            point = rs.AddPoint(point)\n    finally:\n        getterc.Dispose() #this will be called in all cases \n    \n    scriptcontext.doc.Objects.UnselectAll()\n    return id, point",
+      "language": "python",
+      "author": "Robert",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 2650
+}

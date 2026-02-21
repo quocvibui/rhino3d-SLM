@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/increase-nurbs-curve-degree.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/increase-nurbs-curve-degree.py",
+  "instruction": "Increase nurbs curve degree",
+  "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select curve\", False, ObjectType.Curve)\n    if rc != Result.Success: return rc\n    if obj_ref == None: return Result.Failure\n    curve = obj_ref.Curve()\n    if curve == None: return Result.Failure\n    nurbs_curve = curve.ToNurbsCurve()\n\n    new_degree = -1\n    rc, new_degree = RhinoGet.GetInteger(\"New degree <{0}...11>\".format(nurbs_curve.Degree), True, new_degree, nurbs_curve.Degree, 11)\n    if rc != Result.Success: return rc\n\n    rc = Result.Failure\n    if nurbs_curve.IncreaseDegree(new_degree):\n        if doc.Objects.Replace(obj_ref.ObjectId, nurbs_curve):\n            rc = Result.Success\n\n    print \"Result: {0}\".format(rc)\n    doc.Views.Redraw()\n    return rc\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

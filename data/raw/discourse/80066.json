@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-extrude-polysurface-extrudes-only-one-sub-surface-rhinoscriptsyntax/80066",
+  "topic_id": 80066,
+  "title": "[Python] Extrude Polysurface extrudes only one sub-surface RhinoScriptSyntax",
+  "question": "Is this an issue?\n\nHow can I apply the extrude to all sub-surfaces in the polysurface without exploading?",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\na = []\nfor face in x.Faces:\n    normal = face.NormalAt(0,0)\n    centroid = rg.AreaMassProperties.Compute(face).Centroid\n    profile = rg.Line(centroid, centroid+normal*y).ToNurbsCurve()\n    a.append(face.CreateExtrusion(profile, False))",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\na = []\nfor face in x.Faces:\n    normal = face.NormalAt(0,0)\n    centroid = rg.AreaMassProperties.Compute(face).Centroid # path curve start point\n    vec = normal * y # scaled normal vector\n    end_pt = vec + centroid # path curve end point\n    path_crv = rg.Line(centroid, end_pt).ToNurbsCurve()\n    a.append(face.CreateExtrusion(path_crv, False)) # True for caps",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def ExtrudeSurface(surface, curve, cap=True):\n   \"\"\"Create surface by extruding along a path curve\n   Parameters:\n     surface (guid): identifier of the surface to extrude\n     curve (guid): identifier of the path curve\n     cap (bool, optional): extrusion is capped at both ends\n   Returns:\n     guid: identifier of new surface on success\n   Example:\n     import rhinoscriptsyntax as rs\n     surface = rs.AddSrfPt([(0,0,0), (5,0,0), (5,5,0), (0,5,0)])\n     curve = rs.AddLine((5,0,0), (10,0,10))\n     rs.ExtrudeSurface(surface, curve)\n   See Also:\n     ExtrudeCurve\n     ExtrudeCurvePoint\n     ExtrudeCurveStraight\n   \"\"\"\n   brep = rhutil.coercebrep(surface, True)\n   curve = rhutil.coercecurve(curve, -1, True)\n   newbrep = brep.Faces[0].CreateExtrusion(curve, cap)\n   if newbrep:\n       rc = scriptcontext.doc.Objects.AddBrep(newbrep)\n       scriptcontext.doc.Views.Redraw()\n       return rc",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 1538
+}

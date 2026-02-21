@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/changing-text-in-blocks/205395",
+  "topic_id": 205395,
+  "title": "Changing Text in Blocks",
+  "question": "Hi,\n\nFirst, when changing layer, font or even exploding text in a single text everthing works as expected, but in a block only layer is changed but font and exploding text is not changed. How to get this done?\n\nSecond, printing the font of the changed single text only responds correctly if changing the font of the object twice. Is this a bug?\n\n\n#python 3\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef main():\n    target_font_name = \"MecSoft_Font-1\"\n\n    #change of a Single Text\n    get_obj = rs.GetObject(\"Select Single Text\")\n    rs.TextObjectFont(get_obj, target_font_name)\n    print(\"Single Text Font:\", rs.TextObjectFont(get_obj, target_font_name))\n    rs.ObjectLayer(get_obj, 'help')\n    rs.ExplodeText(get_obj)\n\n    #change of Text in block\n    for name in rs.BlockNames(True):\n            objects = rs.BlockObjects(name)\n            if objects:\n                for obj in objects:\n                    obj_type = rs.ObjectType(obj)\n                    if obj_type == 512:                \n                        rs.TextObjectFont(obj, target_font_name)\n                        rs.ObjectLayer(obj, 'help')\n                        rs.ExplodeText(obj)\nif __name__ == \"__main__\":\n    main()\n\n\n\nTextTest_env.3dm\n (2.7 MB)",
+  "code_blocks": [
+    {
+      "code": "#python 3\nimport rhinoscriptsyntax as rs\nimport Rhino\n\ndef main():\n    target_font_name = \"MecSoft_Font-1\"\n\n    #change of a Single Text\n    get_obj = rs.GetObject(\"Select Single Text\")\n    rs.TextObjectFont(get_obj, target_font_name)\n    print(\"Single Text Font:\", rs.TextObjectFont(get_obj, target_font_name))\n    rs.ObjectLayer(get_obj, 'help')\n    rs.ExplodeText(get_obj)\n\n    #change of Text in block\n    for name in rs.BlockNames(True):\n            objects = rs.BlockObjects(name)\n            if objects:\n                for obj in objects:\n                    obj_type = rs.ObjectType(obj)\n                    if obj_type == 512:                \n                        rs.TextObjectFont(obj, target_font_name)\n                        rs.ObjectLayer(obj, 'help')\n                        rs.ExplodeText(obj)\nif __name__ == \"__main__\":\n    main()",
+      "language": "python",
+      "author": "WOFF3D",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 41
+}

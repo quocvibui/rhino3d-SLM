@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/saving-the-python-output-as-textfile/14987",
+  "topic_id": 14987,
+  "title": "Saving the Python output as textfile?",
+  "question": "Hi to all!\n\n\nI’m wondering if there is any possibility to save the output as a textfile. With output, I mean this:\n\n\n \n\n\nIt would be great, it I could save the file to a defined path; and it would be even better, when the file automatically opens after the script has come to an end …\n\n\nPerhaps, anybody knows how to do this?\n\n\nThanks a lot!\n\nPhil",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\npoint_list=rs.GetObjects(\"pick input points (24x)\", filter=1, maximum_count=24)\n\ncurveA = rs.GetCurveObject(\"Select servo A curve\")\n\nlinkA = rs.GetCurveObject(\"Select link A curve\")\nradiusA= rs.CurveLength(linkA[0])\n\ncurveB = rs.GetCurveObject(\"Select servo B curve\")\n\nlinkB = rs.GetCurveObject(\"Select link B curve\")\nradiusB= rs.CurveLength(linkB[0])\n\n#text=\" \\n\"\n\n\n\ndef Servo_Positions():\n\tfor point in point_list:\n\t\tcircle=rs.AddCircle(point, radiusA)\n\t\tintersect_list=rs.CurveCurveIntersection(curveA[0], circle)\n\t\tif not intersect_list:\n\t\t\trs.MessageBox( \"No intersection possible for curve A\")\n\t\t\trs.SelectObject(point)\n\t\t\tbreak\n\t\tfirst_intersect=intersect_list[0]\n\t\tnormparaA=rs.CurveNormalizedParameter(curveA[0],first_intersect[5])\n\t\trs.DeleteObject(circle)\n\t\trs.AddLine(point,first_intersect[2])\n\t\t\n\t\tcircle=rs.AddCircle(point, radiusB)\n\t\tintersect_list=rs.CurveCurveIntersection(curveB[0], circle)\n\t\tif not intersect_list:\n\t\t\trs.MessageBox( \"No intersection possible for curve B\")\n\t\t\trs.SelectObject(point)\n\t\t\tbreak\n\t\tfirst_intersect=intersect_list[0]\n\t\tnormparaB=rs.CurveNormalizedParameter(curveB[0],first_intersect[5])\n\t\trs.DeleteObject(circle)\n\t\trs.AddLine(point,first_intersect[2])\n\t\t\n\t\tname=rs.ObjectName(point)\n\t\t\n\t\ttextline=name+\" \"+str(normparaA)+\" \"+str(normparaB)+'\\n'\n#\t\ttext=text+textline\n\t\t\t\n\n\t\tprint \"Curve parameters: \",textline\n\t\t\n\n\t\nServo_Positions()\n#f=open(\"Servo_Positions.txt\",'w')\n#f.write(text)\n#f.close()",
+      "language": "python",
+      "author": "maxz",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef Servo_Positions(point,curveA,radiusA,curveB,radiusB):\n    #do a bunch of stuff with the input\n    #create some text\n    return your_text\n\ndef RunYourScript():\n    point_list=rs.GetObjects(\"pick input points (24x)\", filter=1, maximum_count=24)\n    curveA = rs.GetCurveObject(\"Select servo A curve\")\n    linkA = rs.GetCurveObject(\"Select link A curve\")\n    radiusA= rs.CurveLength(linkA[0])\n    curveB = rs.GetCurveObject(\"Select servo B curve\")\n    linkB = rs.GetCurveObject(\"Select link B curve\")\n    radiusB= rs.CurveLength(linkB[0])\n    \n    \n    f=open(\"Servo_Positions.txt\",'w')\n    for point in point_list:\n        text=Servo_Positions(point,curveA,radiusA,curveB,radiusB)\n        f.write(text)\n    f.close()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "def DoSomethingWithMyData(data0,data1,data2):\n    obj=MakeSomething(data0,data1)\n    transform=TransformObject(obj,data2)\n    return transform\n\ndef InputDataAndLaunch():\n    #get some user data\n    itemA=rs.GetSomething()\n    itemB=rs.GetSomethingElse()\n    itemC=rs.GetAThirdThing()\n    \n    #check for validity and run the function\n    if itemA and itemB and itemC:\n        result=DoSomethingWithMyData(itemA, itemB, itemC):\n    else:\n        #not valid, exit gracefully\n        return\n    if result:\n        print result\n    else:\n        print \"Something went wrong\"\n\n#you need to call the wrapper function here\nInputDataAndLaunch()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 60925
+}

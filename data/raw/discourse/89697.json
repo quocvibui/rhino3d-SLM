@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extend-lines-by-increment-iterative-stop-when-collision-true-python/89697",
+  "topic_id": 89697,
+  "title": "Extend lines by increment (iterative) stop when collision True [Python]",
+  "question": "Hi,\n\n\nI am trying to achieve a Gilbert Tessellation as an exercise. The idea is simple, lines from random points extend both sides in random directions, until they intersect.\n\n\nSo, the intention is to create a loop that extends each line by a factor, and constantly checks for intersections. The catch is that there is a loop for each line… when the intersection is true for one line, that line stops extending while the others continue.\n\n\nI am stuck… how can this simple algorithm be achieved?\n\n\nThis is my code so far.\n\n\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\n\nwhile bool == False:\n    bool = gh.CollisionManyXMany(curves)[0]\n    extended_curves = rs.ExtendCurveLength(curves, 0, 2, ext)\n    if bool == True:\n        break\n\na = extended_curves\n\n\n\nFor some reason the error reads:\n\n\n\n\nRuntime error (UnboundNameException): name ‘extended_curves’ is not defined\n\nTraceback:\n\nline 11, in script\n\n\n\n\nWhich is utterly useless, it tells me the variable “extended_curves” is not defined. It surely has to do with something regarding global and local variables, and the fact that the variable is being defined inside a loop… but how the f*** can I define extended_curves without extending them??\n\n\nOh I know: extended_curves = extended_curves. Pff easy.\n\n\nIntersect\n1580×632 67 KB\n\n\nI am about to destroy my pc. This cant be so hard. I already had a bad time dealing with GUIDs, GEOMETRY, and all that rhino crap.\n\n\nGILBERT TRY.gh\n (10.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\n\n\ncollided = False\nwhile collided == False:\n    collided = gh.CollisionManyXMany(curves)[0]\n    extended_curves = rs.ExtendCurveLength(curves, 0, 2, ext)\n    if collided == True:\n        break\n\na = extended_curves",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\nimport Rhino\n\nNmax = 1000 #prevent endless loop by setting max loops\nN = 0\ncollide = False\nwhile collide == False:\n    N+=1 \n    if N >= Nmax: break #max loops reached\n    \n    #printing for debug purposes to find the type returned\n    #print type(gh.CollisionManyXMany(curves))\n    #print gh.CollisionManyXMany(curves)\n    #print gh.CollisionManyXMany(curves).collision\n    \n    #gh.CollisionManyXMany returns a named tuple we need the property collision or index [0] like previously\n    #that is a list of booleans for witch we wat all to be True\n    collide = all( gh.CollisionManyXMany(curves).collision )\n    if collide == True:\n        break\n    extended_curves = []\n    for curve in curves : \n        extended_curves.append(curve.Extend(Rhino.Geometry.CurveEnd.Both,ext,Rhino.Geometry.CurveExtensionStyle.Line))\n        #print curve.GetLength()\n    curves = extended_curves\n\nprint N\na = curves",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\nimport Rhino\n\nNmax = 1000 #prevent endless loop by setting max loops\nN = 0\nwhile N < Nmax:\n    N+=1 \n    if all( gh.CollisionManyXMany(curves).collision ) : break\n    curves = [curve.Extend(Rhino.Geometry.CurveEnd.Both,ext,Rhino.Geometry.CurveExtensionStyle.Line) for curve in curves]\n    \nprint N\na = curves",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\n\nNmax = 1000 #prevent endless loop by setting max loops\nN = 0\nwhile N < Nmax:\n    N+=1 \n    if all( gh.CollisionManyXMany(curves).collision ) : break\n    curves = [gh.ExtendCurve(curve,0,ext,ext) for curve in curves]\n    \nprint N\na = curves",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ghpythonlib.components as gh\n\nwhile bool == False:\n    bool = gh.CollisionManyXMany(curves)[0]\n    extended_curves = rs.ExtendCurveLength(curves, 0, 2, ext)\n    if bool == True:\n        break\n\na = extended_curves",
+      "language": "python",
+      "author": "ShynnSup",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1322
+}

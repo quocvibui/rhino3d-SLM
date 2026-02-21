@@ -1,0 +1,75 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-enter-spacebar-into-a-command-in-python/76053",
+  "topic_id": 76053,
+  "title": "How to enter spacebar into a command in python",
+  "question": "I’m trying to automate the Text object command using python and am running into 2 issues which I think are related to the same problem. I don’t know how to enter a spacebar with the commandline options. In the example below I’m trying to enter “Hello font” as the text for the textobject and I want to set the font to “American typewriter” (a font with a spacebar in it). This is what I have which obviously doesn’t work. Is this not possible perhaps?\n\n\n\n\nimport rhinoscriptsyntax as rs\n\n\ntxt = “Hello font”\n\n\ncommStr=“-_TextObject \"\n\ncommStr+=”_Font “+“American_Typewriter”+” \"\n\ncommStr+=“”+txt+“”\n\n\nrs.Command(commStr, True)\n\n\n\n\nThis is what I’m in the above example am trying to get for positioning\n\n\nimage\n851×305 4.68 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ntxt = \"Hello font\"\n\ncommStr = \"-_TextObject \"\ncommStr += \"_Font \" + \"American_Typewriter \"\ncommStr += chr(34) + txt + chr(34)\n\nrs.Command(commStr, True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ntxt = 'Hello font'\n\ncommStr = '-_TextObject _Font \"American Typewriter\" \"{}\"'\n\nrs.Command(commStr.format(txt), True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino\npt=Rhino.Geometry.Point3d(1,2,3)\nprint \"I have {} point at location {}\".format(1,pt)\n>>> I have 1 point at location 1,2,3",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\npt=Rhino.Geometry.Point3d(1,2,3)\nn=1\nprint \"I have {} point{} at location {}\".format(n,\"\" if n==1 else \"s\",pt)\n>>> I have 1 point at location 1,2,3",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\npt=Rhino.Geometry.Point3d(1,2,3)\nn=2\nprint \"I have {} point{} at location {}\".format(n,\"\" if n==1 else \"s\",pt)\n>>> I have 2 points at location 1,2,3",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ntxt = \"Hello font\"\nfont_name = \"Times New Roman\"\n\ncommStr = \"-_TextObject \"\ncommStr += \"_Font \" \ncommStr += chr(34) + font_name + chr(34) + \" \"\ncommStr += chr(34) + txt + chr(34)\n\nrs.Command(commStr, True)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ntxt = 'Hello font'\ncommStr = '-_TextObject _Font \"Times New Roman\" \"{}\"'\nrs.Command(commStr.format(txt), True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ntxt = 'Hello font'\nfont='Times New Roman'\ncommStr = '-_TextObject _Font \"{}\" \"{}\"'\nrs.Command(commStr.format(font,txt), True)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 8584
+}

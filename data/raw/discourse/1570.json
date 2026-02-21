@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-booleanintersection-problem/1570",
+  "topic_id": 1570,
+  "title": "Python BooleanIntersection problem",
+  "question": "Can someone tell me why the results of the two scripts are different - especially why the result of ScriptTest2 is seemingly “wrong”?  Run “Test 1” on the two volumes in the file picking first “A” then “B”…  then run “Test 2” on the two surfaces doing the same…  Script Test 2 should just extrude the flat surfaces to the same boxes that are used for Script Test 1 before doing the Boolean Intersection…  What stupid thing am I overlooking here?  Thanks, --Mitch\n\n\nBooleanIntersectTest.3dm\n(105.1 KB)\n\n\nTest1.py\n(610 Bytes)\n\n\nTest2.py\n(873 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino, scriptcontext\n    \ndef Test2():\n    tol=scriptcontext.doc.ModelAbsoluteTolerance\n    msg=\"Select base surface, then difference surface\"\n    srfs=rs.GetObjects(msg,8,minimum_count=2,maximum_count=2)\n    if not srfs: return\n\n    #extrude both surfaces solid one unit in plane Z direction\n    plane=rs.WorldXYPlane()\n    line=Rhino.Geometry.Line(rs.coerce3dpoint((0,0,0)),rs.coerce3dpoint((0,0,1)))\n    # to extrude negative, uncomment line below, comment out line above\n    #line=Rhino.Geometry.Line(rs.coerce3dpoint((0,0,0)),rs.coerce3dpoint((0,0,-1)))\n    br0 = rs.coercebrep(srfs[0])\n    br1 = rs.coercebrep(srfs[1])\n\n    solid0 = br0.Faces[0].CreateExtrusion(line.ToNurbsCurve(), cap=True)\n    solid1 = br1.Faces[0].CreateExtrusion(line.ToNurbsCurve(), cap=True)\n\n    solDiff = Rhino.Geometry.Brep.CreateBooleanIntersection(solid0, solid1, tol)    \n    if solDiff:\n        for brep in solDiff:\n            scriptcontext.doc.Objects.AddBrep(brep)\n    rs.DeleteObjects(srfs)\n\nTest2()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "...\n    solid0 = br0.Faces[0].CreateExtrusion(line.ToNurbsCurve(), cap=True)\n    solid1 = br1.Faces[0].CreateExtrusion(line.ToNurbsCurve(), cap=True)\n    id0 = scriptcontext.doc.Objects.AddBrep(solid0)\n    id1 = scriptcontext.doc.Objects.AddBrep(solid1)\n    solid0=rs.coercebrep(id0)\n    solid1=rs.coercebrep(id1)\n    ...",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2158
+}

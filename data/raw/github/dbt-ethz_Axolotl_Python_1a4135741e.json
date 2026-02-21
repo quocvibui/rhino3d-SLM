@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/dbt-ethz/Axolotl_Python/blob/0938046ecc5e50645d241a330b57734767958b07/code/pTorus.py",
+  "repo": "dbt-ethz/Axolotl_Python",
+  "repo_stars": 59,
+  "repo_description": "Volumetric Modelling components for Rhino Grasshopper.",
+  "license": "unknown",
+  "filepath": "code/pTorus.py",
+  "instruction": "Creates a torus.\n    Inputs:\n        r1: radius of the donut\n        r2: radius of the pipe\n        p: plane of origin\n    Output:\n        d: the torus object (sdf)",
+  "code": "\"\"\"Creates a torus.\n    Inputs:\n        r1: radius of the donut\n        r2: radius of the pipe\n        p: plane of origin\n    Output:\n        d: the torus object (sdf)\"\"\"\n\n__author__     = ['Mathias Bernhard']\n__copyright__  = 'Copyright 2018 / Digital Building Technologies DBT'\n__license__    = 'MIT License'\n__email__      = ['<bernhard@arch.ethz.ch>']\n\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport math\n\nclass Torus(object):\n    \"\"\"\n    this is the torus class\n    \"\"\"\n    def __init__(self, r1=2, r2=1):\n        self.r1 = r1\n        self.r2 = r2\n        self.plane = None\n        self.transform = None\n\n    def set_plane(self, p):\n        self.plane = p\n        matrix = rg.Transform.PlaneToPlane(rg.Plane.WorldXY, self.plane)\n        success, self.transform = matrix.TryGetInverse()\n\n    def get_distance(self,x,y,z):\n        \"\"\"\n        distance function\n        \"\"\"\n        if self.transform is not None:\n            p = rg.Point3f(x,y,z)\n            p.Transform(self.transform)\n            dx = p.X\n            dy = p.Y\n            dz = abs(p.Z)\n        else:\n            dx, dy, dz = x, y, z\n\n        dxy = math.sqrt(dx**2 + dy**2)\n        d2 = math.sqrt((dxy-self.r1)**2 + dz**2)\n        d = d2-self.r2\n\n        return d\n\nif __name__==\"__main__\":\n    if r1 is None:\n        r1 = 1.5\n    if r2 is None:\n        r2 = 1.0\n    d = Torus(r1,r2)\n    if p is not None:\n        d.set_plane(p)\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

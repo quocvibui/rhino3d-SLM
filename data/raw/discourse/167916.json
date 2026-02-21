@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-a-new-layer-naming-issue-via-a-python-script/167916",
+  "topic_id": 167916,
+  "title": "Create a new layer naming issue via a python script",
+  "question": "I love how I can run the alias that calls this script and just type in the name…just so long as it is one word.\n\n\nIs there any way to modify this script so that pressing the tab key when entering a name longer than one word will not finalise the command?  BTW thank you to whoever created this script \n\n\ncheers,\n\nSochin\n\n\nimport Rhino\nimport scriptcontext \nimport System.Guid, System.Drawing.Color\n\ndef AddLayer():\n    # Cook up an unused layer name\n    unused_name = scriptcontext.doc.Layers.GetUnusedLayerName(False)\n\n    # Prompt the user to enter a layer name\n    gs = Rhino.Input.Custom.GetString()\n    gs.SetCommandPrompt(\"Name of layer to add\")\n    gs.SetDefaultString(unused_name)\n    gs.AcceptNothing(True)\n    gs.Get()\n    if gs.CommandResult()!=Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    # Was a layer named entered?\n    layer_name = gs.StringResult().Trim()\n    if not layer_name:\n        print \"Layer name cannot be blank.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Is the layer name valid?\n    if not Rhino.DocObjects.Layer.IsValidName(layer_name):\n        print layer_name, \"is not a valid layer name.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Does a layer with the same name already exist?\n    layer_index = scriptcontext.doc.Layers.Find(layer_name, True)\n    if layer_index>=0:\n        print \"A layer with the name\", layer_name, \"already exists.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Add a new layer to the document\n    layer_index = scriptcontext.doc.Layers.Add(layer_name, System.Drawing.Color.Black)\n    if layer_index<0:\n        print \"Unable to add\", layer_name, \"layer.\"\n        return Rhino.Commands.Result.Failure\n\n    return Rhino.Commands.Result.Success\n\n\nif __name__==\"__main__\":\n    AddLayer()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext \nimport System.Guid, System.Drawing.Color\n\ndef AddLayer():\n    # Cook up an unused layer name\n    unused_name = scriptcontext.doc.Layers.GetUnusedLayerName(False)\n\n    # Prompt the user to enter a layer name\n    gs = Rhino.Input.Custom.GetString()\n    gs.SetCommandPrompt(\"Name of layer to add\")\n    gs.SetDefaultString(unused_name)\n    gs.AcceptNothing(True)\n    gs.Get()\n    if gs.CommandResult()!=Rhino.Commands.Result.Success:\n        return gs.CommandResult()\n\n    # Was a layer named entered?\n    layer_name = gs.StringResult().Trim()\n    if not layer_name:\n        print \"Layer name cannot be blank.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Is the layer name valid?\n    if not Rhino.DocObjects.Layer.IsValidName(layer_name):\n        print layer_name, \"is not a valid layer name.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Does a layer with the same name already exist?\n    layer_index = scriptcontext.doc.Layers.Find(layer_name, True)\n    if layer_index>=0:\n        print \"A layer with the name\", layer_name, \"already exists.\"\n        return Rhino.Commands.Result.Cancel\n\n    # Add a new layer to the document\n    layer_index = scriptcontext.doc.Layers.Add(layer_name, System.Drawing.Color.Black)\n    if layer_index<0:\n        print \"Unable to add\", layer_name, \"layer.\"\n        return Rhino.Commands.Result.Failure\n\n    return Rhino.Commands.Result.Success\n\n\nif __name__==\"__main__\":\n    AddLayer()",
+      "language": "python",
+      "author": "sochin",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 213
+}

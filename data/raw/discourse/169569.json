@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/project-breps-on-closest-surfaces-chosen-from-a-group/169569",
+  "topic_id": 169569,
+  "title": "Project Breps on closest surfaces chosen from a group",
+  "question": "Hello,\n\nin an attempt to create a simple HoneyBee model for environmental analysis, and having exported \nRooms\n, \nWindows\n from Revit to GH/Rhino using Speckle, I obtain the following:\n\n\n\n\na group of objects/breps representing a building’s windows (say called “\nobj_list\n”) - \nin blue\n\n\na group of vertical surfaces (say called “\nsrf_list\n”) that represent the simplified walls for the environmental model - these are faces of closed breps that the \nhoneybee\n plugin correctly recognises as thermal zones - \nin yellow\n.\n\n\n\n\nimage\n579×558 9.23 KB\n\n\nI have asked ChatGPT (actually \nGrasshopperGPT\n) to create a python script to project each of these objects as flat surfaces onto the “srf_list”, perhaps fitting planes on those “srf_list” and looking for the closest planes to each of the center points from “obj_list”.\n\n\nGrasshopperGPT stated it created a script that:\n\n\n\n\nConverts GUIDs to Rhino Geometry objects.\n\n\nCalculates the center point of each object’s bounding box.\n\n\nExtracts planes from the vertical surfaces.\n\n\nFinds the closest plane to each center point.\n\n\nProjects the objects onto these planes.\n\n\n\n\nHowever, the script created randomly placed and oriented objects, as per following image:\n\n\nimage\n529×595 8.76 KB\n\n\nI am attaching the script GPT created, which I implemented using a \nGHPython\n component.\n\n\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef convert_guid_to_geometry(guid):\n    \"\"\" Convert a Guid to a Rhino Geometry object. \"\"\"\n    rhino_object = sc.doc.Objects.Find(guid)\n    return rhino_object.Geometry if rhino_object else None\n\ndef get_center_point(brep):\n    \"\"\" Get the center point of a brep's bounding box. \"\"\"\n    bbox = brep.GetBoundingBox(True)\n    return bbox.Center\n\ndef get_planes_from_surfaces(surfaces):\n    \"\"\" Extract planes from a list of surfaces. \"\"\"\n    planes = []\n    for surface in surfaces:\n        if isinstance(surface, rg.Surface) or isinstance(surface, rg.Brep):\n            surface_to_use = surface if isinstance(surface, rg.Su...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef convert_guid_to_geometry(guid):\n    \"\"\" Convert a Guid to a Rhino Geometry object. \"\"\"\n    rhino_object = sc.doc.Objects.Find(guid)\n    return rhino_object.Geometry if rhino_object else None\n\ndef get_center_point(brep):\n    \"\"\" Get the center point of a brep's bounding box. \"\"\"\n    bbox = brep.GetBoundingBox(True)\n    return bbox.Center\n\ndef get_planes_from_surfaces(surfaces):\n    \"\"\" Extract planes from a list of surfaces. \"\"\"\n    planes = []\n    for surface in surfaces:\n        if isinstance(surface, rg.Surface) or isinstance(surface, rg.Brep):\n            surface_to_use = surface if isinstance(surface, rg.Surface) else surface.Faces[0]\n            plane = surface_to_use.TryGetPlane()[1]\n            if plane:\n                planes.append(plane)\n    return planes\n\ndef find_closest_plane(point, planes):\n    \"\"\" Find the closest plane to a given point. \"\"\"\n    min_distance = float('inf')\n    closest_plane = None\n    for plane in planes:\n        distance = rg.Point3d.DistanceTo(plane.ClosestPoint(point), point)\n        if distance < min_distance:\n            min_distance = distance\n            closest_plane = plane\n    return closest_plane\n\ndef project_to_closest_plane(objects, planes):\n    projected_objects = []\n    for obj in objects:\n        center_point = get_center_point(obj)\n        closest_plane = find_closest_plane(center_point, planes)\n        if closest_plane:\n            # Project the object onto the plane\n            transform = rg.Transform.PlaneToPlane(rg.Plane.WorldXY, closest_plane)\n            projected_obj = obj.Duplicate()\n            projected_obj.Transform(transform)\n            projected_objects.append(projected_obj)\n    return projected_objects\n\n# Assuming 'obj_list' and 'srf_list' are your input lists of Guids\nobj_list = [convert_guid_to_geometry(obj) for obj in obj_list]\nsrf_list = [convert_guid_to_geometry(srf) for srf in srf_list]\n\nplanes = get_planes_from_surfaces(srf_list)\nprojected = project_to_closest_plane(obj_list, planes)",
+      "language": "python",
+      "author": "andrea.botti",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 422
+}

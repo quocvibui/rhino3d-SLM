@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/solution-exception-expected-document-got-document/129211",
+  "topic_id": 129211,
+  "title": "Solution exception:expected Document, got Document",
+  "question": "Hi,\n\n\nI have created a python code for creating rooms by point. But got the following error:\n\n\n\n\n\n\nSolution exception:expected Document, got Document\n\n\n\n\n\n\nDo you have any idea why I am getting this error. Here is the code I am trying:\n\n\nimport clr\nclr.AddReference('System.Core')\nclr.AddReference('RhinoInside.Revit')\nclr.AddReference('RevitAPI') \nclr.AddReference('RevitAPIUI')\n\nfrom System import Enum\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport RhinoInside\nimport Grasshopper\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\nfrom RhinoInside.Revit import Revit, Convert\nfrom Autodesk.Revit import DB\nfrom Autodesk.Revit import Creation\n\nclr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)\n\n# access the active document object\ndoc = Revit.ActiveDBDocument\n\ndef show_warning(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Warning, msg)\n\ndef show_error(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Error, msg)\n\ndef show_remark(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Remark, msg)\n\nif RUN:\n    with DB.Transaction(doc, \"Create Rooms by Point\") as t:\n        t.Start()\n        new_rooms = []\n        for l, p in zip(level, point):\n            new_room = Creation.Document.NewRoom(doc, l, p.ToXYZ())\n            new_rooms.append(new_room)\n        \n        t.Commit()```",
+  "code_blocks": [
+    {
+      "code": "import clr\nclr.AddReference('RevitAPI')\nclr.AddReference('RhinoInside.Revit')\n\nfrom Autodesk.Revit import DB\nfrom Rhino.Geometry import Point2d\n\nimport RhinoInside\nfrom RhinoInside.Revit import Revit\nclr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)\n\n# access the active document object\ndoc = Revit.ActiveDBDocument\n\nif RUN:\n    with DB.Transaction(doc, \"Create Rooms by Point\") as t:\n        t.Start()\n        new_rooms = []\n        for l, p in zip(level, point):\n            new_room = doc.Create.NewRoom(l, Point2d(p).ToUV())\n            new_rooms.append(new_room)\n        \n        t.Commit()",
+      "language": "python",
+      "author": "kike",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import clr\nclr.AddReference('System.Core')\nclr.AddReference('RhinoInside.Revit')\nclr.AddReference('RevitAPI') \nclr.AddReference('RevitAPIUI')\n\nfrom System import Enum\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport RhinoInside\nimport Grasshopper\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\nfrom RhinoInside.Revit import Revit, Convert\nfrom Autodesk.Revit import DB\nfrom Autodesk.Revit import Creation\n\nclr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)\n\n# access the active document object\ndoc = Revit.ActiveDBDocument\n\ndef show_warning(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Warning, msg)\n\ndef show_error(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Error, msg)\n\ndef show_remark(msg):\n    ghenv.Component.AddRuntimeMessage(RML.Remark, msg)\n\nif RUN:\n    with DB.Transaction(doc, \"Create Rooms by Point\") as t:\n        t.Start()\n        new_rooms = []\n        for l, p in zip(level, point):\n            new_room = Creation.Document.NewRoom(doc, l, p.ToXYZ())\n            new_rooms.append(new_room)\n        \n        t.Commit()```",
+      "language": "python",
+      "author": "mucahitbgoker",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 111,
+  "posts_count": 7,
+  "views": 679
+}

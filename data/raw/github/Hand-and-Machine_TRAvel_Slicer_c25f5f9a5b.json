@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/Hand-and-Machine/TRAvel_Slicer/blob/9e76041ef572288b290e12512c7bc7dfbcb0bbe4/src/Grid.py",
+  "repo": "Hand-and-Machine/TRAvel_Slicer",
+  "repo_stars": 6,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "src/Grid.py",
+  "instruction": null,
+  "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\n# Grid Class\nclass Grid:\n    def __init__(self, points, width):\n        bbox = rs.BoundingBox(points)\n        self.minX = bbox[0].X - width\n        self.minY = bbox[0].Y - width\n        self.width = float(width)\n\n        self.max_x_idx = int((bbox[2].X - self.minX) // self.width) + 1\n        self.max_y_idx = int((bbox[2].Y - self.minY) // self.width) + 1\n\n        self.grid = [[[] for _ in range(self.max_y_idx+1)] for _ in range(self.max_x_idx+1)]\n\n        for point in points:\n            x_idx = int((point.X - self.minX) // self.width)\n            y_idx = int((point.Y - self.minY) // self.width)\n\n            self.grid[x_idx][y_idx].append(point)\n\n    def get_neighbors(self, point, neighborhood=1):\n        x_idx = max(min(int((point.X - self.minX) // self.width), self.max_x_idx), 0)\n        y_idx = max(min(int((point.Y - self.minY) // self.width), self.max_y_idx), 0)\n\n        # start with center\n        points = self.grid[x_idx][y_idx]\n\n        # retrieve neighbors\n        for x in range(max(0, x_idx-neighborhood), min(self.max_x_idx, x_idx+neighborhood+1)):\n            for y in range(max(0, y_idx-neighborhood), min(self.max_y_idx, y_idx+neighborhood)+1):\n                if not (x==x_idx and y==y_idx):\n                    points = points + self.grid[x][y]\n        \n        return points\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

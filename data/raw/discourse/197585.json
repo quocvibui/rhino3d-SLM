@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-get-input-values-from-input-params-generated-in-python-script/197585",
+  "topic_id": 197585,
+  "title": "How to get input values from input params generated in python script",
+  "question": "Hello,\n\n\nI am trying to port IronPython scripts to Rhino8/python3. We have a bunch of Components that append input params dynamically. I can now add the input params, but they do not collect any data. I can see by printing \nparam.VolatileData\n that they are registering a connection to a source, but I don’t know how to get the values from the sources. Below is my code, which I have in a python3 component with a button connected to the first input. Clicking the button causes the additional params to instantiate, but they do not seem to collect any data.\n\n\nimport Grasshopper\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, *args):\n        if args[0]:\n            for name in [\"arg_1\", \"arg_2\", \"arg_3\"]:\n                add_gh_param(name, ghenv)\n        for param in ghenv.Component.Params:\n            print(param.VolatileData)\n        return [arg for arg in args]\n\n\ndef add_gh_param(name, ghenv): \n    params = [param.NickName for param in getattr(ghenv.Component.Params, \"Input\")]\n    if name not in params:\n        param = Grasshopper.Kernel.Parameters.Param_GenericObject()\n        param.NickName = name\n        param.Name = name\n        param.Description = name\n        param.Access = Grasshopper.Kernel.GH_ParamAccess.item\n        param.Optional = True\n        ghenv.Component.Params.RegisterInputParam(param)\n    print(\"number of input params\", len(ghenv.Component.Params.Input))\n    ghenv.Component.Params.OnParametersChanged()\n\n\n\nWhen I add more inputs via the ZUI buttons, I the code generated args then pass the data to the *args in RunScript(). I can see that \nghenv.Component.Params.Input\n contains the correct number of parameters, but the component seems to only read the number of inputs that are default with the component plus whatever is added manually with the ZUI.\n\n\nimage\n790×612 73 KB\n\n\nI assume this is still a work in progress, but It would be great to know if there is some sort of workaround.\n\n\nThanks!!",
+  "code_blocks": [
+    {
+      "code": "import Grasshopper\n\nclass MyComponent(Grasshopper.Kernel.GH_ScriptInstance):\n    def RunScript(self, *args):\n        if args[0]:\n            for name in [\"arg_1\", \"arg_2\", \"arg_3\"]:\n                add_gh_param(name, ghenv)\n        for param in ghenv.Component.Params:\n            print(param.VolatileData)\n        return [arg for arg in args]\n\n\ndef add_gh_param(name, ghenv): \n    params = [param.NickName for param in getattr(ghenv.Component.Params, \"Input\")]\n    if name not in params:\n        param = Grasshopper.Kernel.Parameters.Param_GenericObject()\n        param.NickName = name\n        param.Name = name\n        param.Description = name\n        param.Access = Grasshopper.Kernel.GH_ParamAccess.item\n        param.Optional = True\n        ghenv.Component.Params.RegisterInputParam(param)\n    print(\"number of input params\", len(ghenv.Component.Params.Input))\n    ghenv.Component.Params.OnParametersChanged()",
+      "language": "python",
+      "author": "OBucklin",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 159
+}

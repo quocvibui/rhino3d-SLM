@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/969flash/HeightLimitCalculation/blob/e793366dae588cbea91bc240d86dcce9cd52a2a1/src/shp_to_lot.py",
+  "repo": "969flash/HeightLimitCalculation",
+  "repo_stars": 0,
+  "repo_description": "가로구역별 높이제한 산정구역의 제한 높이 계산 자동화",
+  "license": "unknown",
+  "filepath": "src/shp_to_lot.py",
+  "instruction": "가로구역별 최고높이 산정을 위한 필지 필터링 스크립트\nInputs:\n    shp_path: str : SHP 파일 경로\n    pnu: str : 필지 PNU 코드\nOutputs:\n    target_lot_region: geo.Region : 선택된 PNU의 대지 영역\n    other_lot_regions: List[geo.Region] : 타...",
+  "code": "# r: pyshp\n\"\"\"\n가로구역별 최고높이 산정을 위한 필지 필터링 스크립트\nInputs:\n    shp_path: str : SHP 파일 경로\n    pnu: str : 필지 PNU 코드\nOutputs:\n    target_lot_region: geo.Region : 선택된 PNU의 대지 영역\n    other_lot_regions: List[geo.Region] : 타 필지들의 대지 영역 리스트\n\n1. SHP 파일에서 필지 데이터 읽기\n2. 필지 데이터를 대지(Lot)와 도로(Road)로 분류\n3. 입력된 PNU에 해당하는 필지와 타 필지 출력\n\"\"\"\n\nimport Rhino.Geometry as geo\nimport scriptcontext as sc\nimport shapefile\nimport os\nfrom typing import List, Tuple, Any, Optional\n\nimport utils\nimport importlib\n\nimportlib.reload(utils)\n\n\ndef print_lot_info(lot: utils.Lot):\n    \"\"\"필지 정보 출력\"\"\"\n    print(f\"PNU: {lot.pnu}\")\n    print(f\"지목: {lot.jimok}\")\n    print(f\"면적: {lot.area:.2f} ㎡\")\n\n\nif __name__ == \"__main__\":\n    ### 메인 실행 코드 ###\n    # 인풋 값 설정\n    # 파일 경로 읽기\n    shp_path = globals().get(\"shp_path\", None)\n    if not shp_path or not os.path.isfile(shp_path):\n        raise FileNotFoundError(f\"SHP 파일을 찾을 수 없습니다: {shp_path}\")\n    # PNU 읽기\n    pnu = globals().get(\"pnu\", None)\n    if not pnu:\n        raise ValueError(\"PNU 값이 제공되지 않았습니다.\")\n\n    # 1. SHP 파일에서 필지 데이터 읽기\n    # Shape, Record, Field 데이터 읽기\n    shapes, records, fields = utils.read_shp_file(shp_path)\n\n    # 2. 필지 데이터에서 lot과 road 분류\n    # 필지 데이터로부터 Parcel 객체 생성\n    parcels = utils.get_parcels_from_shapes(shapes, records, fields)\n    # 대지와 도로 분류\n    lots, roads = utils.classify_parcels(parcels)\n    # 데이터 확인\n    print(f\"대지: {len(lots)}개, 도로: {len(roads)}개\")\n\n    # 3. 입력된 PNU에 해당하는 필지 선택\n    selected_lot = next((lot for lot in lots if lot.pnu == pnu), None)\n    if not selected_lot:\n        raise ValueError(f\"PNU '{pnu}'에 해당하는 필지를 찾을 수 없습니다.\")\n    print(\"선택된 PNU의 필지 정보\")\n    print_lot_info(selected_lot)\n\n    target_lot_region = selected_lot.region\n    other_lot_regions = [lot.region for lot in lots if lot.pnu != selected_lot.pnu]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

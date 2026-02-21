@@ -1,0 +1,69 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/puzzled-by-iteration-in-gh-python-components/2538",
+  "topic_id": 2538,
+  "title": "Puzzled by iteration in GH Python components",
+  "question": "I have been puzzled with the way GH Python component work.\n\nBasically I was trying to recreate the grasshopper’s “Circle” component  - I wanted to have a couple of points as an input (that is more than one point) and then create a circle from those points, with defined radius.\n\nI tried this code:\n\n\nimport rhinoscriptsyntax as rs\n\na = []\nfor pt in x:\n    circ = rs.AddCircle(pt,y)\n    a.append(circ)\n\n\n\nAnd it worked. A list of points is plugged into the “x” GH Python input plug, and a slider float value into the “y” plug. I had to set the “x” input plug to “List Access” instead of “Item Access”, which is I guess obvious because “x” is a list of points.\n\n\nBut on the other side, this code seems to work too:\n\n\nimport rhinoscriptsyntax as rs\n\na = rs.AddCircle(x,y)\n\n\n\nAnd that is my reason for posting this topic - why does this second code work? There is no “for loop” in it, and we are dealing with a list of points here, not with a single list. I though grasshopper components work on a principle of a iteration, like presented in the first code?\n\n\nI attached the .gh file with both components.\n\n\nThanks you.\n\n\ncircles.gh\n(2.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmovedPts = rs.MoveObject(pts,[10,0,0])\na = movedPts\n\nprint movedPts",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nmovedPts = []\nfor pt in pts:\n    movedPt = rs.MoveObject(pt,[10,0,0])\n    movedPts.append(movedPt)\na = movedPts\n\nprint movedPts",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# create start points\nstPts = []\nfor crv in curves:\n    stPt = rs.CurveStartPoint(crv)\n    stPts.append(stPt)\n\n# create lines from those start points\nlines = []\nfor i in range(len(stPts)-1):\n    line = rs.AddLine(stPts[i],stPts[i+1])\n    lines.append(line)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# create start points\nstPts = rs.CurveStartPoint(curves)\n\n# create lines from those start points\nlines = []\nfor i in range(len(stPts)-1):\n    line = rs.AddLine(stPts[i],stPts[i+1])\n    lines.append(line)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# create start points\nstPts = rs.CurveStartPoint(curves)\n\n# create lines from those start points\npolyline = rs.AddPolyline(stPts)\nlines = rs.ExplodeCurves(polyline)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na = []\nfor pt in x:\n    circ = rs.AddCircle(pt,y)\n    a.append(circ)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\na = rs.AddCircle(x,y)",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 11,
+  "views": 10174
+}

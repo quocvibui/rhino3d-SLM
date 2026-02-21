@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/placing-text-onto-pageview-layout-from-python/180742",
+  "topic_id": 180742,
+  "title": "Placing text onto pageview (layout) from Python",
+  "question": "I am having a hard time navigating the nuances between viewports and pageviews. It seems that I cannot genereate text onto a layout unless it is the active view port. Is that the case ? I have been chipping away at the problem but fall just short of generating text onto a layout without it being the active view port.\n\n\nHere I have placed four points on a layout. Three are to establish a plane and the fourth is the planes new origin. Once the plane is created and its origin is updated I go along to make a TextEntity object and create an object attributes object and populate it whit what I think is important. This works fine, but again it only works when I have the first layout open on my screen as the active viewport or set it as the active view port. Is there a way to have it populate text while not switching to the page view / layout view.\n\n\nThanks !\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\nimport System\nimport System.Collections.Generic\nimport Rhino as R\n\n\ndoc = sc.doc\n\nobjs = sc.doc.Objects\n\nviews = sc.doc.Views.GetPageViews()\n\nfor vi in views:\n    if vi.PageName == 'Page 1':\n        sc.doc.Views.ActiveView = vi\n\n\n\nfor ob in objs:\n    if type(ob) == R.DocObjects.PointObject:\n        if ob.Name == \"t_len_a\":\n            text_origin_pt = rs.coerce3dpoint(ob.Id)\n            v_id = ob.Attributes.ViewportId\n\n        if ob.Name == \"pp_o\":\n            base_p_o = rs.coerce3dpoint(ob.Id)\n        if ob.Name == \"pp_x\":\n            base_p_x = rs.coerce3dpoint(ob.Id)\n        if ob.Name == \"pp_y\":\n            base_p_y = rs.coerce3dpoint(ob.Id)\n\n\nds = sc.doc.DimStyles.Current\n\nplane = R.Geometry.Plane(base_p_o,base_p_x,base_p_y)\n\nplane.Origin = text_origin_pt\n\nte = R.Geometry.TextEntity.Create(\"Hello\", plane, ds, False, 0, 0)\nte.TextHeight = 0.25\n\ntargh = R.DocObjects.ObjectAttributes()\ntargh.ViewportId = v_id\ntargh.SetObjectFrame = plane\n\nt_id = objs.AddText(te,targh)\n\nsc.doc.Views.Redraw()",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def DoSomething():\n    views = scriptcontext.doc.Views.GetPageViews()\n    if not views: return\n    \n    page_name = \"Page 1\"\n    page_view = next( (v for v in views if v.PageName == page_name), None)\n    if not page_view: return\n    \n    plane = Rhino.Geometry.Plane.WorldXY\n    plane.Origin = Rhino.Geometry.Point3d(10,20,0)\n    \n    te = Rhino.Geometry.TextEntity()\n    te.Plane = plane\n    te.Text = \"Hello World\"\n    te.TextHeight = 10.0\n    te.SetFacename(True, \"Arial\")\n    \n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.Space = Rhino.DocObjects.ActiveSpace.PageSpace\n    attr.ViewportId = page_view.ActiveViewportID\n    scriptcontext.doc.Objects.AddText(te, attr)\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport math\n\nimport System\nimport System.Collections.Generic\nimport Rhino as R\n\n\ndoc = sc.doc\n\nobjs = sc.doc.Objects\n\nviews = sc.doc.Views.GetPageViews()\n\nfor vi in views:\n    if vi.PageName == 'Page 1':\n        sc.doc.Views.ActiveView = vi\n\n\n\nfor ob in objs:\n    if type(ob) == R.DocObjects.PointObject:\n        if ob.Name == \"t_len_a\":\n            text_origin_pt = rs.coerce3dpoint(ob.Id)\n            v_id = ob.Attributes.ViewportId\n\n        if ob.Name == \"pp_o\":\n            base_p_o = rs.coerce3dpoint(ob.Id)\n        if ob.Name == \"pp_x\":\n            base_p_x = rs.coerce3dpoint(ob.Id)\n        if ob.Name == \"pp_y\":\n            base_p_y = rs.coerce3dpoint(ob.Id)\n\n\nds = sc.doc.DimStyles.Current\n\nplane = R.Geometry.Plane(base_p_o,base_p_x,base_p_y)\n\nplane.Origin = text_origin_pt\n\nte = R.Geometry.TextEntity.Create(\"Hello\", plane, ds, False, 0, 0)\nte.TextHeight = 0.25\n\ntargh = R.DocObjects.ObjectAttributes()\ntargh.ViewportId = v_id\ntargh.SetObjectFrame = plane\n\nt_id = objs.AddText(te,targh)\n\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "cncduck",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 202
+}

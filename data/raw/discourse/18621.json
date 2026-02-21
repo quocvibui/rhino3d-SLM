@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getstring-with-numeric-values-in-option-list-issues/18621",
+  "topic_id": 18621,
+  "title": "GetString with numeric values in Option List issues",
+  "question": "All,\n\n\nI am having issues understanding how to present to the user numeric values when my input list for GetString.AddOptionList contains numeric values. I have checked the types of all objects in my list and they are in fact strings, however any numeric values will not show up. If I have a mixed list with (1,2.0,Three,Four) the user is only presented with Three and Four as options.\n\n\nAny insight would be greatly appreciated.\n\n\nJoel",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef CommandLineOptions():\n    # For this example we will use a GetPoint class, but all of the custom\n    # \"Get\" classes support command line options.\n    gp = Rhino.Input.Custom.GetPoint()\n    gp.SetCommandPrompt(\"GetPoint with options\")\n\n    # set up the options\n    intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n    dblOption = Rhino.Input.Custom.OptionDouble(2.2, 0, 99.9)\n    boolOption = Rhino.Input.Custom.OptionToggle(True, \"Off\", \"On\")\n    listValues = \"Item0\", \"Item1\", \"Item2\", \"Item3\", \"Item4\"\n    list2Values = \"Bear\", \"Duck\", \"Zebra\"\n\n    gp.AddOptionInteger(\"Integer\", intOption)\n    gp.AddOptionDouble(\"Double\", dblOption)\n    gp.AddOptionToggle(\"Boolean\", boolOption)\n    listIndex = 3\n    opList = gp.AddOptionList(\"List\", listValues, listIndex)\n    list2Index = 1\n    opList2 = gp.AddOptionList(\"Animal\", list2Values, list2Index)\n    while True:\n        # perform the get operation. This will prompt the user to\n        # input a point, but also allow for command line options\n        # defined above\n        get_rc = gp.Get()\n        if gp.CommandResult()!=Rhino.Commands.Result.Success:\n            return gp.CommandResult()\n        if get_rc==Rhino.Input.GetResult.Point:\n            point = gp.Point()\n            scriptcontext.doc.Objects.AddPoint(point)\n            scriptcontext.doc.Views.Redraw()\n            print \"Command line option values are\"\n            print \" Integer =\", intOption.CurrentValue\n            print \" Double =\", dblOption.CurrentValue\n            print \" Boolean =\", boolOption.CurrentValue\n            print \" List =\", listValues[listIndex]\n            print \" Animal =\", list2Values[list2Index]\n        elif get_rc==Rhino.Input.GetResult.Option:\n            if gp.OptionIndex()==opList:\n              listIndex = gp.Option().CurrentListOptionIndex\n            if gp.OptionIndex()==opList2:\n              list2Index = gp.Option().CurrentListOptionIndex\n            continue\n        break\n    return Rhino.Commands.Result.Success\n\n\nif __name__ == \"__main__\":\n    CommandLineOptions()",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 2122
+}

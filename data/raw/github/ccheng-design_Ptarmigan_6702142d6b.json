@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/ccheng-design/Ptarmigan/blob/210535af589ef10aef38c78100aea1fcf96e9d6c/01_RHINO/_SOURCE%20CODE/VolumetoDot.py",
+  "repo": "ccheng-design/Ptarmigan",
+  "repo_stars": 3,
+  "repo_description": "Rhino, Grasshopper, Houdini Scripts",
+  "license": "MIT",
+  "filepath": "01_RHINO/_SOURCE CODE/VolumetoDot.py",
+  "instruction": "Volumeto dot",
+  "code": "\nimport rhinoscriptsyntax as rs\nfrom System.Drawing import Color\n\n\n#written by Clark Cheng\n#email: ccheng@clarkcheng.design\n\n\n#Surface Volume\n#Gets the volume of each object and adds a text dot\n\n#filter goemetry types\ngeo_types=rs.filter.polysurface | rs.filter.surface\n\nvolume=rs.GetObjects(\"Select PolySrf\",preselect=True, filter=geo_types)\nif not volume: print(\"None Selected\")\n\nelse:\n\n    #creating list of volumes and open_srfs\n    volume_list=[]\n    open_polysrf_list=[]\n\n    for obj in volume:\n        #measure volume\n        a=rs.SurfaceVolume(obj)\n\n        #mark objects red for all open polysrfs\n        if a==None:\n            bad=rs.ObjectColor(obj,Color.Red)\n            open_polysrf_list.append(bad)\n            \n        \n        else:\n            #centroid as a guid\n            centroid=rs.SurfaceVolumeCentroid(obj)\n\n            #add to list for counting\n            volume_list.append(a[0])\n\n\n            #define string; can also use a f-string as well\n            txt_dot_string=\"Volume: \"+str(round(a[0],3))+\" cubic \"+str(rs.UnitSystemName(False,False,False))\n            \n\n            #string vol_info=\"Volume\", round(a[0],3)\n            rs.AddTextDot(txt_dot_string,centroid[0])\n\n\n    #Output stats for what worked/didnt work\n    print(len(volume_list), \"objects were successfully calculated.\", len(open_polysrf_list), \"Are Marked in Red\")\n    print(\"Objects in Red are Not Closed Polysurfaces\")\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

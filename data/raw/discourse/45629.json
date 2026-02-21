@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-planecurveintersection-index-out-of-range-error/45629",
+  "topic_id": 45629,
+  "title": "Python \"PlaneCurveIntersection\" - index out of range\" Error",
+  "question": "Hello all,\n\n\nI’m writing a script where I need to find the intersection of a series of created section curves with the centreline (World XZ plane)… I’ve got the folllowing code, but get an error for “index out of range: 1”.\n\n\n\ndef curve_CL(curves):\n    points = []\n    plane = rs.WorldZXPlane()\n    for crv in curves:\n        int = rs.PlaneCurveIntersection(plane,crv)\n        if not int:\n            print \"Error with plane-curve intersection\"\n        points.append(int[1])\n    return points\n\n\n\nI can see why this is - because the resulting point that I’m after is hidden inside a tuple, which itself is inside a list (see below from debugging)… but I can’t understand why this is… the help file info for the PlaneCurveIntersection gives the return as just a list, where the point should be at index [1].\n\n\n\n\nimage.png\n902×360 23.1 KB\n\n\n\n\nI’m sure this is a really rookie error, but any help would be much appreciated - it’s driving me mad trying to find out where the problem lies.",
+  "code_blocks": [
+    {
+      "code": "def curve_CL(curves):\n    points = []\n    plane = rs.WorldZXPlane()\n    for crv in curves:\n        int = rs.PlaneCurveIntersection(plane,crv)\n        if int:\n            points.append(int[1])\n        else:            \n            print \"Error with plane-curve intersection\"\n    return points",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def curve_CL(curves):\n    points = []\n    plane = rs.WorldZXPlane()\n    for crv in curves:\n        int = rs.PlaneCurveIntersection(plane,crv)\n        if int:\n            for i in range(len(int)):\n                points.append(int[i][1])\n        else:            \n            print \"Error with plane-curve intersection\"\n    return points",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "def curve_CL(curves):\n    points = []\n    plane = rs.WorldZXPlane()\n    for crv in curves:\n        int = rs.PlaneCurveIntersection(plane,crv)\n        if not int:\n            print \"Error with plane-curve intersection\"\n        points.append(int[1])\n    return points",
+      "language": "python",
+      "author": "adams-m",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1106
+}

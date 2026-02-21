@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/scripting-help-split-curves-and-move/197203",
+  "topic_id": 197203,
+  "title": "Scripting help, Split curves and move",
+  "question": "I just starting to learn how to script, i think i’ve gotten as far as i can go on this with a little help from chatgpt. So far i’m getting a selection then splitting it with another selected curve. Id like help figuring out how to move part of my selection after its been split based off of the curve that was used to get the split points and its orientation.\n\n\nFlat\n716×921 14.9 KB\n\n\nFlatSeam.py\n (1.2 KB)\n\n\nSeamSplit.3dm\n (3.0 MB)",
+  "code_blocks": [
+    {
+      "code": "start = rs.CurveStartPoint(flat_seam_line)\nend = rs.CurveEndPoint(flat_seam_line)\nplane = rs.PlaneFromPoints(start, end, start + rs.WorldXYPlane().ZAxis)\ndistance = 10\nmove_vector = distance*plane.ZAxis",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "perimeter_curve = # whatever\nother_curves = # whatever\n\nsplit_pieces = rs.SplitCurve(perimeter_curve, splitting_curve)\n\nside1, side2 = split_pieces\nside1_pieces = []\nside2_pieces = []\n\nfor curve in other_curves:\n    id = rs.CurveClosestObject(curve, split_pieces)[0]\n    if id == side1:\n        side1_pieces.append(curve)\n    else: # id == side2\n        side2_pieces.append(curve)\n\nrs.MoveObjects([side1] + side1_pieces, move_vector)",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef FlatSeam():\n\n    # Select the panel and everything in it that needs a flat seam\n    inital_selection = rs.GetObjects(\"Select the panel you want to Flat Seam\", preselect=True)\n    if not inital_selection:\n        print(\"No curve selected.\")\n        \n        \n    # Select the curve where you want the flat seam to be made\n    flat_seam_line = rs.GetObject(\"Select the Flat Seam line\", filter=4)\n    if not flat_seam_line:\n        print(\"No curve selected\")\n        \n    split_param = []\n    for panelcrv in inital_selection:\n        if not rs.IsCurve(panelcrv):\n            continue\n            \n        intersection_list = rs.CurveCurveIntersection(panelcrv, flat_seam_line)\n        if not intersection_list:\n            continue\n            \n        for intersections in intersection_list:\n            if intersections[0] == 1:\n                split_param.append(intersections[5])\n                        \n        # Split the curves that touch the selected flat seam curve\n        if split_param:\n            split_param = sorted(set(split_param))\n            split_curves = rs.SplitCurve(panelcrv, split_param)\n            side1, side2 = split_curves\n            side1_pieces = []\n            side2_pieces = []\n            \n            other_curves = rs.GetObjects(\"Select other curves\")\n            \n            for curve in other_curves:\n                id = rs.CurveClosestObject(curve, split_curves[0])\n                if id == side1:\n                    side1_pieces.append(curve)\n                else: # id == side2\n                    side2_pieces.append(curve)\n            \n    # Plane referenced for moving objects \n    if rs.IsCurve(flat_seam_line):\n        start = rs.CurveStartPoint(flat_seam_line)\n        rs.AddPoint(start)\n        end = rs.CurveEndPoint(flat_seam_line)\n        rs.AddPoint(end)\n        \n        length = rs.Distance(start, end)\n        \n        #Add plane just for visualization  \n        plane = rs.PlaneFromPoints(start, end, start + rs.WorldXYPlane().ZAxis)\n        rs.AddPlaneSurface(plane, length, length)\n        \n    # Move the objects from inital_selection after getting split\n    distance = -5\n    move_vector = distance * plane.ZAxis\n\n    rs.MoveObjects([side1] + side1_pieces, move_vector)\n\nFlatSeam()",
+      "language": "python",
+      "author": "Tommy804",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 171
+}

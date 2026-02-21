@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/camera-setting-on-detail/74299",
+  "topic_id": 74299,
+  "title": "Camera Setting on Detail",
+  "question": "Hi\n\n\nI am trying to set up a camera with a Namedview on a detail using python.\n\nThe way I structured is\n\n\n\n\nsetup a camera location, up and target and save as a Named view\n\n\nCreate a layout,\n\n\nCreate a detail,\n\n\nChange the Camera location, up, target under the detail and then commit changes.\n\n\n\n\nso from task 3) the code looks like\n\n\ndetail = layout.AddDetailView(“dName_{0}”.format(page_number), top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n\nif detail:\n\nlayout.SetActiveDetail(detail.Id)\n\ndetail.Viewport.SetCameraLocation(NamedView.CameraLocation,False)\n\ndetail.Viewport.SetCameraDirection(NamedVIew.CameraDirection,False)\n\ndetail.Viewport.CameraUp = NamedView.CameraUp\n\ndetail.CommitChanges()\n\n\nThis is how I change the camera setting.(NamedVIew here is viewportinfo from the saved NamedView)\n\n\nHowever, even if the values such as cameraLocation, Direction, and target, are changed, the end layout with the detail is back to the top view.\n\n\nOr is there a way to move and set a camera under a detail? I am willing to take any suggestions on setting multiple layouts and multiple details with multiple views through scripting.\n\n\nThanks,",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\n\ndef AddLayout():\n    #scriptcontext.doc.PageUnitSystem = Rhino.UnitSystem.Millimeters\n    page_views = scriptcontext.doc.Views.GetPageViews()\n    page_number = 1\n    if page_views: page_number = len(page_views) + 1\n    pageview = scriptcontext.doc.Views.AddPageView(\"TF{0}\".format(page_number), 17, 11)\n    if pageview:\n        top_left = Rhino.Geometry.Point2d(.25,.25)\n        bottom_right = Rhino.Geometry.Point2d(16.75, 10.75)\n        detail = pageview.AddDetailView(\"ModelView\", top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n        \n        if detail:\n            pageview.SetActiveDetail(detail.Id)\n            #pt is Point3d input in GH    \n            detail.Viewport.SetCameraTarget(pt,False)\n            detail.Viewport.SetCameraLocation(pt,False)\n            \n            # Commit changes tells the document to replace the document's detail object\n            # with the modified one that we just adjusted\n            detail.CommitViewportChanges()\n            rs.DetailScale(detail.Id,1,1)\n            rs.DetailLock(detail.Id,True)\n            detail.CommitChanges()\n        \n        pageview.SetPageAsActive()\n        scriptcontext.doc.Views.ActiveView = pageview\n        scriptcontext.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    AddLayout()",
+      "language": "python",
+      "author": "lignindes",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 1079
+}

@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/anyway-to-edit-the-control-point-directly/37616",
+  "topic_id": 37616,
+  "title": "Anyway to edit the control point directly?",
+  "question": "Hi Guys!\n\nI’m trying to edit the control point of NURBS and T-spline directly by script.\n\nFor example, changing n th control point to a specific coordinate i want.\n\nIs there any way to do it?\n\n\nTHX",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n    \nsrf = rs.GetObject(\"Select surface\", rs.filter.surface)\nif srf:\n    rs.EnableObjectGrips(srf)\n    grip_index = 0\n    point = rs.ObjectGripLocation(srf, grip_index)\n    \n    point[0] = point[0] \n    point[1] = point[1]\n    point[2] = point[2] + 10.0\n    \n    rs.ObjectGripLocation(srf, grip_index, point)\n    rs.EnableObjectGrips(srf, False)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n...\n# convert surface to rhino object\nrhobj = rs.coercerhinoobject(srf, True, True)\n\n# get the grip objects\ngrips = rhobj.GetGrips()\n\n# change a grip location\ngrips[grip_index].CurrentLocation = point\n\n# update the object and redraw\nscriptcontext.doc.Objects.GripUpdate(rhobj, True)\nscriptcontext.doc.Views.Redraw()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "rs.EnableRedraw(False)\n\nfoo = runcodehere()\nbar = prosess(foo)\ncreate_geometry(bar)\n\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 12,
+  "views": 3387
+}

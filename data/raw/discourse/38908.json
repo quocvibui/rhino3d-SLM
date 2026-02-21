@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/understanding-performsweep-vs-createfromsweep-and-arrays/38908",
+  "topic_id": 38908,
+  "title": "Understanding PerformSweep vs CreateFromSweep and arrays",
+  "question": "I am trying to do a sweep 2 rails with python, and understand it \n\n\nThis is what I got so far cobbling together bits from various searches here and the RhinoCommon SDK docs. Code:\n\n\nimport Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef Sweep2():\n    rail1 = rs.GetObject(\"Select first rail curve\", rs.filter.curve)\n    rail_crv1 = rs.coercecurve(rail1)\n    if not rail_crv1: return\n\n    rail2 = rs.GetObject(\"Select second rail curve\", rs.filter.curve)\n    rail_crv2 = rs.coercecurve(rail2)\n    if not rail_crv2: return\n\n    cross_sections = rs.GetObjects(\"Select cross sections\", rs.filter.curve)\n    if not cross_sections: return\n    cross_sections = [rs.coercecurve(crv) for crv in cross_sections]\n\n    sweep = rg.SweepTwoRail()\n    sweep.AngleToleranceRadians = sc.doc.ModelAngleToleranceRadians\n    sweep.ClosedSweep = False\n    sweep.SweepTolerance = sc.doc.ModelAbsoluteTolerance\n    surface1 = sweep.PerformSweep(rail_crv1, rail_crv2, cross_sections)\n    sc.doc.Objects.AddBrep(surface1)\n    #sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    Sweep2()\n\n\n\nThe last error I was getting …\n\n\n\n\nCan someone guide me a bit? looking here & here … still confused.\n\n\n\n\nScreenshot 2016-11-19 17.29.07.png\n1155×533 78.4 KB\n\n\n\n\n\n\nScreenshot 2016-11-19 17.29.23.png\n1207×523 81.2 KB\n\n\n\n\n\n\nScreenshot 2016-11-19 17.29.56.png\n783×550 71 KB\n\n\n\n\nThanks, «Randy",
+  "code_blocks": [
+    {
+      "code": "sweep_result = sweep.PerformSweep(rail_crv1, rail_crv2, cross_sections)\nif sweep_result:\n   sweep_IDs= [sc.doc.Objects.AddBrep(srf) for srf in sweep_result]",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\ndef Sweep2():\n    rail1 = rs.GetObject(\"Select first rail curve\", rs.filter.curve)\n    rail_crv1 = rs.coercecurve(rail1)\n    if not rail_crv1: return\n\n    rail2 = rs.GetObject(\"Select second rail curve\", rs.filter.curve)\n    rail_crv2 = rs.coercecurve(rail2)\n    if not rail_crv2: return\n\n    cross_sections = rs.GetObjects(\"Select cross sections\", rs.filter.curve)\n    if not cross_sections: return\n    cross_sections = [rs.coercecurve(crv) for crv in cross_sections]\n\n    sweep = rg.SweepTwoRail()\n    sweep.AngleToleranceRadians = sc.doc.ModelAngleToleranceRadians\n    sweep.ClosedSweep = False\n    sweep.SweepTolerance = sc.doc.ModelAbsoluteTolerance\n    surface1 = sweep.PerformSweep(rail_crv1, rail_crv2, cross_sections)\n    sc.doc.Objects.AddBrep(surface1)\n    #sc.doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    Sweep2()",
+      "language": "python",
+      "author": "rhinorudi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 829
+}

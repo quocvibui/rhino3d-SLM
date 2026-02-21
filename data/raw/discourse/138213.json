@@ -1,0 +1,62 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/fastest-way-to-display-mesh-wires/138213",
+  "topic_id": 138213,
+  "title": "Fastest way to display Mesh Wires",
+  "question": "Hey,\n\n\nI’m interactively modifying a mesh which is drawn in a custom DisplayConduit. Visualizing mesh wires, helps in better understanding of the mesh geometry. Unfortunately, with denser meshes the \nDrawMeshWires\n part takes a significant amount of time and slows things down considerably.\n\n\n        protected override void PostDrawObjects(DrawEventArgs e)\n        {\n            e.Display.DrawMeshShaded(Mesh, Brush.displayMaterial);\n            e.Display.DrawMeshWires(Mesh, Brush.displayColor);\n        }\n\n\n\nIn  the below example, I’m working with a 450K quad mesh. A purely shaded display takes approx. 30 ms to complete, adding wires ups the total time to about 450 ms. That’s a 15x slowdown!\n\n\n\n\n\n\nAny hints on how to draw these more efficiently? Alternatively, maybe there are better suited display modes, which would aid users in perceiving changing mesh geometry without displaying any wires?",
+  "code_blocks": [
+    {
+      "code": "GLSLViewModel _model = new GLSLViewModel();\n\n_model.DrawMode = OpenGL.GL_TRIANGLES;\n_model.VertexShaderCode = \"\"; // code\n_model.FragmentShaderCode = \"\"; // code\n\n// is this how to add the mesh to the view model?\nvar uniformsAndAttributes = _model.GetUniformsAndAttributes(data.Iteration);\nuniformsAndAttributes.AddMesh(mesh);",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "ActivateGL();\n            if (_model.CompileProgram())\n            {\n                if (_model.ProgramId != 0)\n                {\n                    if (Rhino.Runtime.HostUtils.RunningOnWindows)\n                        WindowsMethods.RHC_UpdateShader(_resourceName, _defines, _model.ProgramId);\n                    else\n                        MacMethods.RHC_UpdateShader(_resourceName, _defines, _model.ProgramId);\n                    _model.RecycleCurrentProgram = false;\n            \n            \n        var doc = Rhino.RhinoDoc.ActiveDoc;\n                    if (doc != null)\n                        doc.Views.Redraw();\n                    GLShaderComponentBase.RedrawViewportControl();\n                }\n            }",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 17,
+      "is_solution": false
+    },
+    {
+      "code": "﻿using System;\nusing System.Collections.Generic;\nusing System.Drawing;\nusing GH_IO.Serialization;\nusing Grasshopper.GUI;\nusing Grasshopper.GUI.Canvas;\nusing Grasshopper.Kernel;\nusing Grasshopper.Kernel.Attributes;\nusing Grasshopper.Kernel.Parameters;\nusing Grasshopper.Kernel.Types;\nusing Rhino.Display;\nusing Rhino.Geometry;\n\nnamespace ghgl\n{\n    /// <summary>\n    /// Base class for GL Shader components. Most of the heavy lifting is done in this class\n    /// and the subclasses just specialize a little bit\n    /// </summary>\n    public abstract class GLShaderComponentBase : GH_Component, IGH_VariableParameterComponent",
+      "language": "csharp",
+      "author": "stevebaer",
+      "post_number": 18,
+      "is_solution": false
+    },
+    {
+      "code": "public static void UpdateMesh(Rhino.Geometry.Mesh mesh)\n        {\n            _model.ClearData();\n            _model.GetUniformsAndAttributes(1).AddMesh(mesh);\n        }",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 25,
+      "is_solution": false
+    },
+    {
+      "code": "public static void UpdateMesh(Rhino.Geometry.Mesh mesh)\n        {\n            var _m = new GLSLViewModel.MeshData(mesh);\n            _m.TriangleIndexBuffer = _model.GetUniformsAndAttributes(1)._meshes[0].TriangleIndexBuffer;\n            _model.GetUniformsAndAttributes(1)._meshes[0] = _m;\n        }",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 27,
+      "is_solution": false
+    },
+    {
+      "code": "public static void ReplaceVertex(int location, Rhino.Geometry.Point3f vertex)\n        {\n            IntPtr _location = new IntPtr(3 * sizeof(float) * location);\n            IntPtr _size = new IntPtr(3 * sizeof(float));\n\n            var handle = System.Runtime.InteropServices.GCHandle.Alloc(vertex, System.Runtime.InteropServices.GCHandleType.Pinned);\n            IntPtr _dataPointer = handle.AddrOfPinnedObject();\n\n            OpenGL.glBindBuffer(OpenGL.GL_ARRAY_BUFFER, _model.GetUniformsAndAttributes(0)._meshes[0].VertexVbo);\n            OpenGL.glBufferSubData(OpenGL.GL_ARRAY_BUFFER, _location, _size, _dataPointer);\n            handle.Free();\n        }",
+      "language": "csharp",
+      "author": "mrhe",
+      "post_number": 30,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 56,
+  "views": 3925
+}

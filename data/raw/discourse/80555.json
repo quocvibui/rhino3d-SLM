@@ -1,0 +1,68 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-closest-point-in-pointgrid-how-to-use-resulting-point-again-for-closest-point-loop/80555",
+  "topic_id": 80555,
+  "title": "Python Closest Point in Pointgrid, How to use resulting point again for Closest Point Loop",
+  "question": "Hi, you can see in my script that I defined the closest point from one starting point to all other points that are in the grid.\n\nNow I want to use the Closest Point again and search for the closest point … and again the result…\n\n\nHow to define this searching in a for loop? I am tried it for hours \n\n\nThanks a lot for your help!\n\n\nEDIT:\n\n\nMaybe this one is better:\n\n\npoolunused = sum_attractors[:]\nclosestattractor = []\ndist = 9999999\n\nfor n in poolunused:\n    ee = rs.Distance(start_point, n)\n    if ee <= dist:\n        dist = rs.Distance(start_point, n)\n        closestattractor = n",
+  "code_blocks": [
+    {
+      "code": "poolunused = sum_attractors[:]\npairs = [] \nwhile len(poolunused) > 0:\n       counter = 0\nfor pt in poolunused:\n    if counter == 0: start_point0 = start_point0\n        else: start_point0 = pairs[len(pairs)-1]\n        ClosestPt = rc.Collections.Point3dList.ClosestIndexInList(poolunused, start_point0)\n        pairs.append(poolunused[ClosestPt])\n        poolunused.pop(ClosestPt)\n        counter +=1\nprint start_point0",
+      "language": "python",
+      "author": "STUDENT_F",
+      "post_number": 23,
+      "is_solution": false
+    },
+    {
+      "code": "segments = []\nstart_pts = [i[0] for i in segments] \nend_pts = [i[1] for i in segments] \nprint start_pts[0]\nfor j in start_pts:\n    for d in end_pts:\n        line_start_to_attractor = rs.AddLine(j,d)",
+      "language": "python",
+      "author": "STUDENT_F",
+      "post_number": 40,
+      "is_solution": false
+    },
+    {
+      "code": "for tup in segments:\n    a,b = tup\n    rs.AddLine(a,b)",
+      "language": "python",
+      "author": "Dancergraham",
+      "post_number": 43,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n\ndef find_closest_points(start_point, point_cloud, max_recs=float(\"inf\"), _depth=0, _path=[]):\n    \"\"\"Recursively searches a point cloud for consecutive closest points.\n    \n    Args:\n      test_point: A point to search from.\n      point_cloud: A point cloud to search.\n      max_recs: An optional maximum number of recursions.\n      _depth: A current recursion depth.\n      _path: A current nested list of point pairs.\n    \n    Returns:\n      The nested list of consecutive point pairs.\n    \"\"\"\n    if point_cloud.Count > 0:\n        pt_cloud = point_cloud.Duplicate()\n        closest_idx = pt_cloud.ClosestPoint(start_point)\n        closest_pt = rg.Point3d(pt_cloud[closest_idx].X, \n                                pt_cloud[closest_idx].Y, \n                                pt_cloud[closest_idx].Z) \n        _path.append([start_point, closest_pt])\n        pt_cloud.RemoveAt(closest_idx)\n        if point_cloud.Count > 0 and _depth < max_recs:\n            _depth +=1\n            return find_closest_points(closest_pt, pt_cloud, max_recs, _depth, _path)\n    return _path\n    \n\n# Get the start point\nstart_pt = Points[iStartPoint]\n# Create the point cloud\nattractor_pts = rg.PointCloud(Points)\n\n# Get the consecutive point pairs\npairs = find_closest_points(start_pt, attractor_pts)\nprint pairs\n\n# NEW!!!\n# Create linear connections\nconnections = [rg.LineCurve(a, b) for a, b in pairs if a != b]\n\n# Outputs\na = connections\n# NEW!!!",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 44,
+      "is_solution": false
+    },
+    {
+      "code": "poolunused = sum_attractors[:]\nshortestpathfromattractors = [] \n\ncounter = 0\nwhile len(poolunused) > 0:\n    for pt in poolunused:\n        if counter == 0: start_point0 =  start_point0\n        else: start_point0 = shortestpathfromattractors[len(shortestpathfromattractors)-1]\n        ClosestPt = rc.Collections.Point3dList.ClosestIndexInList(poolunused, start_point0)\n        shortestpathfromattractors.append(poolunused[ClosestPt])\n        poolunused.pop(ClosestPt)\n        counter +=1",
+      "language": "python",
+      "author": "STUDENT_F",
+      "post_number": 32,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\n\n\ndef find_closest_points(start_point, point_cloud, max_recs=float(\"inf\"), _depth=0, _path=[]):\n    \"\"\"Recursively searches a point cloud for consecutive closest points.\n    \n    Args:\n      test_point: A point to search from.\n      point_cloud: A point cloud to search.\n      max_recs: An optional maximum number of recursions.\n      _depth: A current recursion depth.\n      _path: A current nested list of point pairs.\n    \n    Returns:\n      The nested list of consecutive point pairs.\n    \"\"\"\n    if point_cloud.Count > 0:\n        pt_cloud = point_cloud.Duplicate()\n        closest_idx = pt_cloud.ClosestPoint(start_point)\n        closest_pt = rg.Point3d(pt_cloud[closest_idx].X, \n                                pt_cloud[closest_idx].Y, \n                                pt_cloud[closest_idx].Z) \n        _path.append([start_point, closest_pt]) # Change this...\n        pt_cloud.RemoveAt(closest_idx)\n        if point_cloud.Count > 0 and _depth < max_recs:\n            _depth +=1\n            return find_closest_points(closest_pt, pt_cloud, max_recs, _depth, _path)\n    return _path\n    \n\n# Get the start point\nstart_pt = Points[iStartPoint]\n# Create the point cloud\nattractor_pts = rg.PointCloud(Points)\n\n# Get the consecutive point pairs\npairs = find_closest_points(start_pt, attractor_pts) # ... and this\nprint pairs\n\n# Flatten the point pairs list (for the polyline construction)\npath = [pair[1] for pair in pairs] # ... and this\n\n# Outputs\na = path # ... and finally this",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 36,
+      "is_solution": false
+    },
+    {
+      "code": "poolunused = sum_attractors[:]\nclosestattractor = []\ndist = 9999999\n\nfor n in poolunused:\n    ee = rs.Distance(start_point, n)\n    if ee <= dist:\n        dist = rs.Distance(start_point, n)\n        closestattractor = n",
+      "language": "python",
+      "author": "STUDENT_F",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 53,
+  "views": 3103
+}

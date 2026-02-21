@@ -1,0 +1,22 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/programmatically-instantiated-component-parameter-behaves-differently/214297",
+  "topic_id": 214297,
+  "title": "Programmatically instantiated component / parameter behaves differently",
+  "question": "Screenshot 2026-01-07 at 21.04.14\n1920×1086 174 KB\n\n\nA\n was created via python script, \nB\n manually.\n\n\nIt \nseems\n like s.th. about the 3rd parameter is different, as I have not seen this behavior with just the two default input parameters.\n\n\nLooking at the .ghx file there is no discernible difference (other than different labels and Guids) though.\n\n\nThe parameter is created with this code:\n\n\n def addInputParam(node):\n\tnextIdx = len(node.Params.Input)\n\tname = string.ascii_uppercase[nextIdx]\n\tp = node.CreateParameter(gh.Kernel.GH_ParameterSide.Input, nextIdx)\n\tnode.Params.RegisterInputParam(p)\n\n\tp.Name = name\n\tp.NickName = name\n\tp.Access = node.Params.Input[nextIdx - 1].Access\n\tp.Optional = True\n\n\tnode.Params.OnParametersChanged()\n\n\n\nI’m a bit at a loss here, so any clue is appreciated. Thanks a lot in advance!\n\n\nweird.ghx\n (35.5 KB)",
+  "code_blocks": [
+    {
+      "code": "syncObj = node.Params.EmitSyncObject()\np = ghk.Parameters.Param_GenericObject()\np.CopyFrom(node.Params.Input[0])\nnode.Params.RegisterInputParam(p)\nnode.Params.RepairParamAssociations()\nnode.Params.RepairProxyParams(doc)\nnode.Params.OnParametersChanged()\nnode.Params.Sync(syncObj)",
+      "language": "python",
+      "author": "component_confusion",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 7,
+  "views": 71
+}

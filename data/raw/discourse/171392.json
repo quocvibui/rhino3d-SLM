@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cannot-modify-the-arrow-style-of-the-leader-object/171392",
+  "topic_id": 171392,
+  "title": "Cannot modify the arrow style of the Leader object",
+  "question": "I can’t modify the arrow type of the Leader object in code, can anyone tell me why, I’m using Rhinoceros version 7, here’s the code snippet:\n\n\n        Point3d point1 = startPoint;\n        Point3d point2 = startPoint + new Point3d(500, 500, 500);\n        Point3d point3 = point2 + new Point3d(500, 0, 0);\n        DimensionStyle dimStyle = new DimensionStyle();\n        dimStyle.LeaderArrowType = DimensionStyle.ArrowType.Dot;\n\n        doc.DimStyles.Add(dimStyle, true);\n\n        Point3d[] points = { point1, point2, point3 };\n        Leader leader = Leader.Create(\"Label\", Plane.WorldXY, dimStyle, points);\n        doc.Objects.AddLeader(leader);\n        doc.Views.Redraw();",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    obj_id = rs.GetObject(\"Select leader\", rs.filter.annotation, True, False)\n    if not obj_id: return\n    \n    leader_obj = rs.coercerhinoobject(obj_id, True, True)\n    if not isinstance(leader_obj, Rhino.DocObjects.LeaderObject): return\n    \n    leader_obj.Geometry.LeaderArrowType = Rhino.DocObjects.DimensionStyle.ArrowType.Dot\n    leader_obj.CommitChanges()\n    \n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System\n\ndef DoSomething():\n    \n    dim_style = Rhino.DocObjects.DimensionStyle()\n    dim_style.LeaderArrowType = Rhino.DocObjects.DimensionStyle.ArrowType.Dot\n    \n    # get index and dim style by index \n    index = scriptcontext.doc.DimStyles.Add(dim_style, True)\n    ds = scriptcontext.doc.DimStyles[index]\n    \n    plane = Rhino.Geometry.Plane.WorldXY\n    pts = System.Array.CreateInstance(Rhino.Geometry.Point3d, 3)\n    pts[0] = Rhino.Geometry.Point3d(0,0,0)\n    pts[1] = Rhino.Geometry.Point3d(10,10,0)\n    pts[2] = Rhino.Geometry.Point3d(20,10,0)\n    leader = Rhino.Geometry.Leader.Create(\"Hello\", plane, ds, pts)\n    scriptcontext.doc.Objects.AddLeader(leader)\n    scriptcontext.doc.Views.Redraw()\n\nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 8,
+  "views": 408
+}

@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/create-grasshopper-component-from-autocad-lisp-routine/158035",
+  "topic_id": 158035,
+  "title": "Create Grasshopper Component from AutoCAD LISP Routine",
+  "question": "Given AutoCAD LISP Routine to generate a parabolic curve thru 3 points in the x-y plane with n segments of equal values of x dimensions along x axis → Create a Grasshopper component to accept given x-y plane, 3 points, and n number of segment of equal x values …generate a parabolic curve y=ax2+bx+c with the given number of segments n.\n\n\nThe AutoCAD LISP routine is written below. Please help me out here … Thank You,\n\n\npedro\n\n\n(defun C:par( / pt1 pt2 pt3 pt_a pt_b dx x y x_start x_end num_pts a b c\nret_list ocmd oblip sset ent1)\n\n(setq ocmd (getvar \"cmdecho\") oblip (getvar \"blipmode\"))\n(setvar \"cmdecho\" 0)\n(setvar \"blipmode\" 0)\n\n(initget 7)\n(setq pt1 (getpoint \"\\nSelect first point on parabola:\"))\n(setq pt2 (getpoint \"\\nSelect second point on parabola:\"))\n(setq pt3 (getpoint \"\\nSelect third point on parabola:\"))\n\n(setq num_pts (getint \"\\nNumber of points to use:\"))\n\n(setq ret_list (get_coeff pt1 pt2 pt3))\n\n(setq a (nth 0 ret_list)\nb (nth 1 ret_list)\nc (nth 2 ret_list)\nx_start (nth 3 ret_list)\nx_end (nth 4 ret_list)\n)\n\n(setq dx (/ (- x_end x_start) (float num_pts) ))\n\n(setq x x_start)\n(setq y (fpoly a b c x))\n(setq pt_a (list x y 0.0))\n(setq x (+ x_start dx))\n\n(setq sset(ssadd))\n\n(repeat num_pts\n(setq y (fpoly a b c x))\n(setq pt_b (list x y 0.0))\n(command \"_.pline\" pt_a pt_b \"\")\n(command \"_.point\" pt_a pt_b \"\")\n(setq sset (ssadd (entlast) sset))\n(setq pt_a pt_b x (+ x dx) )\n)\n\n(command \"_.point\" pt_a pt_b \"\")\n\n(command \"_.pedit\" \"L\" \"J\" sset \"\" \"\")\n\n(setvar \"cmdecho\" ocmd)\n(setvar \"blipmode\" oblip)\n\n)\n\n(defun get_coeff(pt1 pt2 pt3 / x1 x2 y1 y2 x3 y3 x1sq x2sq x3sq\na b c ret_list)\n\n(setq x1 (car pt1) y1 (cadr pt1) x1sq (* x1 x1) )\n(setq x2 (car pt2) y2 (cadr pt2) x2sq (* x2 x2) )\n(setq x3 (car pt3) y3 (cadr pt3) x3sq (* x3 x3) )\n\n(setq x_start (min x1 x2 x3) x_end (max x1 x2 x3))\n\n(setq det1 (det x1sq x2sq x3sq x1 x2 x3 1.0 1.0 1.0))\n\n(setq a(/ (det y1 y2 y3 x1 x2 x3 1.0 1.0 1.0) det1))\n(setq b(/ (det x1sq x2sq x3sq y1 y2 y3 1.0 1.0 1.0) det1))\n(setq c(/ (det x1sq x2sq...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef fpoly(a, b, c, x):\n    y = (a*x*x)+(b*x)+c\n    return y;\n\ndef det(a1, a2, a3, b1, b2, b3, c1, c2, c3):\n    ret_val = (a1*((b2*c3)-(b3*c2)))+(b1*((c2*a3)-(c3*a2)))+(c1*((a2*b3)-(a3*b2)))\n    return ret_val;\n\ndef get_coeff(pt1, pt2, pt3):\n    x1 = pt1[0]\n    y1 = pt1[1]\n    x1sq = x1*x1\n\n    x2 = pt2[0]\n    y2 = pt2[1]\n    x2sq = x2*x2\n\n    x3 = pt3[0]\n    y3 = pt3[1]\n    x3sq = x3*x3\n    \n    x_start = min(x1, x2, x3)\n    x_end = max(x1, x2, x3)\n\n    det1 = det(x1sq, x2sq, x3sq, x1, x2, x3, 1.0, 1.0, 1.0)\n    a = det(y1, y2, y3, x1, x2, x3, 1.0, 1.0, 1.0)/det1\n    b = det(x1sq, x2sq, x3sq, y1, y2, y3, 1.0, 1.0, 1.0)/det1\n    c = det(x1sq, x2sq, x3sq, x1, x2, x3, y1, y2, y3)/det1\n\n    return (a, b, c, x_start, x_end);\n\n#start of main routine\ndef par():\n    pt1 = rs.GetPoint(\"Select first point on parabola:\")\n    pt2 = rs.GetPoint(\"Select second point on parabola:\", pt1)\n    pt3 = rs.GetPoint(\"Select third point on parabola:\", pt1)\n\n    num_pts = rs.GetInteger(\"Number of Segments to use:\")\n\n    ret_list = get_coeff(pt1, pt2, pt3)\n\n    a = ret_list[0]\n    b = ret_list[1]\n    c = ret_list[2]\n    x_start = ret_list[3]\n    x_end = ret_list[4]\n\n    dx = (x_end - x_start)/num_pts\n    x = x_start\n    y = fpoly(a,b,c,x)\n    pt_a = [x, y, 0.0]\n    x= x_start + dx\n\n    for i in xrange(num_pts):\n        y = fpoly(a,b,c,x)\n        pt_b = [x, y, 0.0]\n        rs.AddLine(pt_a, pt_b)\n        rs.AddPoint(pt_a)\n        rs.AddPoint(pt_b)\n        pt_a = pt_b\n        x=x+dx\n\n# Check to see if this file is being executed as the \"Main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif __name__ == '__main__':\n    par()",
+      "language": "python",
+      "author": "Pedro_R_Munoz",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "(defun C:par( / pt1 pt2 pt3 pt_a pt_b dx x y x_start x_end num_pts a b c\nret_list ocmd oblip sset ent1)\n\n(setq ocmd (getvar \"cmdecho\") oblip (getvar \"blipmode\"))\n(setvar \"cmdecho\" 0)\n(setvar \"blipmode\" 0)\n\n(initget 7)\n(setq pt1 (getpoint \"\\nSelect first point on parabola:\"))\n(setq pt2 (getpoint \"\\nSelect second point on parabola:\"))\n(setq pt3 (getpoint \"\\nSelect third point on parabola:\"))\n\n(setq num_pts (getint \"\\nNumber of points to use:\"))\n\n(setq ret_list (get_coeff pt1 pt2 pt3))\n\n(setq a (nth 0 ret_list)\nb (nth 1 ret_list)\nc (nth 2 ret_list)\nx_start (nth 3 ret_list)\nx_end (nth 4 ret_list)\n)\n\n(setq dx (/ (- x_end x_start) (float num_pts) ))\n\n(setq x x_start)\n(setq y (fpoly a b c x))\n(setq pt_a (list x y 0.0))\n(setq x (+ x_start dx))\n\n(setq sset(ssadd))\n\n(repeat num_pts\n(setq y (fpoly a b c x))\n(setq pt_b (list x y 0.0))\n(command \"_.pline\" pt_a pt_b \"\")\n(command \"_.point\" pt_a pt_b \"\")\n(setq sset (ssadd (entlast) sset))\n(setq pt_a pt_b x (+ x dx) )\n)\n\n(command \"_.point\" pt_a pt_b \"\")\n\n(command \"_.pedit\" \"L\" \"J\" sset \"\" \"\")\n\n(setvar \"cmdecho\" ocmd)\n(setvar \"blipmode\" oblip)\n\n)\n\n(defun get_coeff(pt1 pt2 pt3 / x1 x2 y1 y2 x3 y3 x1sq x2sq x3sq\na b c ret_list)\n\n(setq x1 (car pt1) y1 (cadr pt1) x1sq (* x1 x1) )\n(setq x2 (car pt2) y2 (cadr pt2) x2sq (* x2 x2) )\n(setq x3 (car pt3) y3 (cadr pt3) x3sq (* x3 x3) )\n\n(setq x_start (min x1 x2 x3) x_end (max x1 x2 x3))\n\n(setq det1 (det x1sq x2sq x3sq x1 x2 x3 1.0 1.0 1.0))\n\n(setq a(/ (det y1 y2 y3 x1 x2 x3 1.0 1.0 1.0) det1))\n(setq b(/ (det x1sq x2sq x3sq y1 y2 y3 1.0 1.0 1.0) det1))\n(setq c(/ (det x1sq x2sq x3sq x1 x2 x3 y1 y2 y3 ) det1))\n\n(setq ret_list (list a b c x_start x_end))\n\n)\n\n(defun fpoly(a b c x / y)\n\n(setq y (+ (* a x x) (* b x) c) )\n)\n\n(defun det(a1 a2 a3 b1 b2 b3 c1 c2 c3 / ret_val)\n\n(setq ret_val (+\n(* a1 (- (* b2 c3) (* b3 c2) ))\n(* b1 (- (* c2 a3) (* c3 a2) ))\n(* c1 (- (* a2 b3) (* a3 b2) ))\n)\n)\n)",
+      "language": "csharp",
+      "author": "Pedro_R_Munoz",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 16,
+  "views": 1615
+}

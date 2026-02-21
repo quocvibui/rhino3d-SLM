@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-differences-between-rhino5-and-rhino7-on-rhino-geometry-intersect-intersection-curvecurve/127352",
+  "topic_id": 127352,
+  "title": "RhinoCommon differences between rhino5 and rhino7 on Rhino.Geometry.Intersect.Intersection.CurveCurve",
+  "question": "Hi,\n\n\nWith both the calls\n\n\nRhino.Geometry.Intersect.Intersection.CurveCurve(ent1, ent2, 0.0001, 0)\n\nRhino.Geometry.Intersect.Intersection.CurveCurve(ent1, ent2, 0.0001, 0.0001)\n\n\npassing as ent1 and ent2 a segment and a 90deg arc with similar length and radius of 100, tangent on the joint, I have different results on Rhinoceros 5.14 and Rhinoceros  7.5:\n\n\n\n\nRhinoceros 5 SR14 32-bit 5.14.522.8390, 5222017\n1822×298 29.1 KB\n\n\n\n\n\n\nRhinoceros 7 64bit 7.5.21100.3001 h1118\n1823×310 30.2 KB\n\n\n\n\non rhino5.14 I retrieve an IntersectionResult declared as point\n\non rhino7.5 I retrieve an IntersectionResult declared as overlap, but if I measure the overlap length I retrieve 10E-14.\n\nThe geometries are overlapping on the double precision, as reported in the attached images related to the same data structures on rhino5.14 and on rhino 7.5\n\n\nI have worked around in Rhino7.5 measuring the overlap and declaring it as a point intersection.\n\nShould this be done internally in the creation of the intersection events, given that I ask for a tolerance of 10E-4 ?\n\nWhat does this tolerance mean?",
+  "code_blocks": [
+    {
+      "code": "private static void Test_IntersectionResultPointR5_IntersectionResultOverlapR7_EvenIfAnalyticalOverlap10Eminus14AndInputTolerance10Eminus5()\n    {\n        var tol = 0.00001;\n        Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance = tol;\n        Rhino.RhinoDoc.ActiveDoc.ModelRelativeTolerance = tol;\n        var pointLineStart =\n            new Point3d(20.000000000000007, 500, 0);\n        var pointLineStop =\n            new Point3d(908, 500, 0);\n        var pointArcStart = \n            new Point3d(20.000000000000011, 500, 0);\n        var pointArcCenter = \n            new Point3d(20, 480, 0);\n        var pointArcStop = \n            new Point3d(0, 480, 0);\n        var radius = pointArcStart - pointArcCenter;\n        var angleStart = Math.Atan2(pointArcStart.Y - pointArcCenter.Y, pointArcStart.X - pointArcCenter.X);\n        var segmentStart = Transform.Rotation(Math.PI / 2, new Point3d(0, 0, 0)) * (pointArcStart - pointArcCenter);\n        var tangentStart = segmentStart;\n        tangentStart.Unitize();\n\n        var line = new LineCurve(new Line(pointLineStart, pointLineStop));\n        var arc = new ArcCurve(new Arc(pointArcStart, tangentStart, pointArcStop));\n        var ent1 = line;\n        var ent2 = arc;\n        var result = Rhino.Geometry.Intersect.Intersection.CurveCurve(ent1, ent2, tol, tol)?.ToList() ?? new List<Rhino.Geometry.Intersect.IntersectionEvent>();\n        string reportText = \"\";\n        foreach (var item in result)\n        {\n            if (reportText.Length > 0)\n                reportText += \";\";\n            reportText += string.Format(\"intersection isPoint='{0}' isOverlap='{1}'\", item.IsPoint, item.IsOverlap);\n        }\n        if (reportText.Length == 0)\n            reportText = \"no intersection found\";\n        reportText = \"R7TestPlugin001IntersectionOverlapCommand result: \" + System.DateTime.Now.ToLongTimeString() + \" \" + reportText;\n        Rhino.RhinoApp.WriteLine(reportText);\n    }",
+      "language": "csharp",
+      "author": "cavalli.stefano",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 970
+}

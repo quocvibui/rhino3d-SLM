@@ -1,0 +1,58 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/make-new-material-bug-python/80446",
+  "topic_id": 80446,
+  "title": "Make new material bug? (python)",
+  "question": "Hi guys, I am making a material with Python but I encounter a bug where Rhino removes the previous made material if I change the “NAME” in the script. It appears to make a new material OK, with a new index and all, but where is the old one?\n\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport random\n\n### --- Make Material\nnewMatIndex = scriptcontext.doc.Materials.Add()\nprint \"newMatIndex= \"+str(newMatIndex)\nrs.MaterialName(newMatIndex, str(int(100000*random.random() )))\ncolor =(int(random.random()*250),int(random.random()*250),int(random.random()*250) )\nrs.MaterialColor(newMatIndex,  color)\nprint \"MaterialName= \"+str(rs.MaterialName(newMatIndex))\nscriptcontext.doc.Materials.Add()\n\n\n\nThis is just a modified and simplified script to illustrate the problem.\n\nMy real big problem is that I generate a gradient PNG and assign this in a larger script, and when I run the script the second time the material turns black, I presume some bug is going on internally in Rhino’s material handling and I can not seem to find a workaround. Because IF I make a new material in Rhino’s material editor and name that “NAME” too, then that is fine, but if I do it one more time then I get an error message saying that the name is already in use. (But now I already have two materials named the same… odd)\n\n\nAlso if I delete the generated material in the material library then I can run the script again.\n\nBut if I autogeneate names with random then the old materials just disappear…",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Drawing\nimport random\n\ndef AddMaterial():\n    # materials are stored in the document's material table\n    index = scriptcontext.doc.Materials.Add()\n    mat = scriptcontext.doc.Materials[index]\n    color = System.Drawing.Color.FromArgb(int(random.random()*250),int(random.random()*250),int(random.random()*250) )\n    \n    mat.DiffuseColor = color\n    mat.Name = str(int(random.random()*1000000))\n    mat.CommitChanges()\n\n    # set up object attributes to say they use a specific material\n    sp = Rhino.Geometry.Sphere(Rhino.Geometry.Plane.WorldXY, 5)\n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.MaterialIndex = index\n    attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n    scriptcontext.doc.Objects.AddSphere(sp, attr)\n\n    scriptcontext.doc.Views.Redraw();\n\nif __name__==\"__main__\":\n    AddMaterial()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino as R\nimport System\n\n\ngenerate_red = rs.GetBoolean('Generate Material?', ('red', 'no', 'yes'), (False))\nprint(generate_red)\n\nif generate_red[0]:\n\n    # Create basic material\n    red_rhino_mat = R.DocObjects.Material()\n    red_rhino_mat.DiffuseColor = System.Drawing.Color.Red\n    red_rhino_mat.Name = \"Red\"\n    \n    # Generate a RenderMaterial from the rhino material\n    red_render = R.Render.RenderMaterial.CreateBasicMaterial(red_rhino_mat)\n    \n    # Add this to the Rhino.Render.RenderMaterialTable, but through the scriptcontex.doc\n    sc.doc.RenderMaterials.Add(red_render)\n    \n    # Get the doc object somehow, here by rs.GetObject\n    guid = rs.GetObject('select object')\n    \n    if guid:\n        # Use the guid to get the doc object\n        doc_obj = rs.coercerhinoobject(guid)\n        \n        # Set the material source to object\n        doc_obj.Attributes.MaterialSource = R.DocObjects.ObjectMaterialSource.MaterialFromObject\n        # Set the doc object render material to the RenderMaterial object from above\n        doc_obj.RenderMaterial = red_render\n        # Commit the change\n        doc_obj.CommitChanges()\n\n\n\n# Looks like the basic materials keep a reference to their RenderMaterial\n# in the .RenderMaterial property\nfor rhino_mat in sc.doc.Materials:\n    print(rhino_mat, rhino_mat.Name, rhino_mat.RenderMaterial.Id, rhino_mat.IsDeleted)\n\n\n\nfor mat in sc.doc.RenderMaterials:\n    print(mat, mat.Id, mat.Tags, mat.Name)",
+      "language": "python",
+      "author": "nathancoatney",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "oldmat = Rhino.DocObjects.Material()\noldmat.DiffuseColor = the_color_you_want\noldmat.Name = \"the material\"\n\nnewstylemat = Rhino.Render.RenderMaterial.CreateBasicMaterial(oldmat)\nsc.doc.RenderMaterials.Add(newstylemat)\n\nyourob = GetYourRhinoObjectFromDoc()\nyourob.Attributes.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\nyourob.RenderMaterial = newstylemat\nyourob.CommitChanges()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext \nimport rhinoscriptsyntax as rs\nimport random\n\nmatNAME = \"NewMaterial\"\ntexture = 'D:/temp/Test.JPG'\n\n\nmat = Rhino.DocObjects.Material()\nmat.Name = matNAME\ncolor = rs.CreateColor(int(255*(random.random())),int(255*(random.random())),int(255*(random.random())) )\nmat.DiffuseColor = color\n\nmat.SetBitmapTexture = texture\n\nrendmat = Rhino.Render.RenderMaterial.CreateBasicMaterial(mat)\nscriptcontext.doc.RenderMaterials.Add(rendmat)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 10,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport random\n\n### --- Make Material\nnewMatIndex = scriptcontext.doc.Materials.Add()\nprint \"newMatIndex= \"+str(newMatIndex)\nrs.MaterialName(newMatIndex, str(int(100000*random.random() )))\ncolor =(int(random.random()*250),int(random.random()*250),int(random.random()*250) )\nrs.MaterialColor(newMatIndex,  color)\nprint \"MaterialName= \"+str(rs.MaterialName(newMatIndex))\nscriptcontext.doc.Materials.Add()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 2228
+}

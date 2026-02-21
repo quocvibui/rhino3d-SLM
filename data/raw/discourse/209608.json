@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/inset-in-rhinoscriptsyntax-please/209608",
+  "topic_id": 209608,
+  "title": "Inset in rhinoscriptsyntax please",
+  "question": "There is \nno \nInset\n function\n in \nrhinoscriptsyntax\n. It doesn’t provide direct methods for insetting faces or insetting a Brep. Most of the functions there are wrappers around RhinoCommon, and this one simply isn’t exposed.\n\n\nThere \nis no direct \nInset\n method\n like \nInsetFace\n or \nInsetFaces\n in RhinoCommon either.\n\n\nThis is a very useful tool, should be available for scripting. Thank you!",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Inset faces with optional per-face distances (optimized).\n\nInputs:\n    G: Breps (surface or polysurface)\n    D: distance or list of distances (set D to list access for per-face values)\n    C: creaseCorners (True/False)\n\nOutputs:\n    BorderFaces  - joined border ring per face\n    InnerFaces   - inner inset faces\n    NoInset      - original faces for which inset failed\n\"\"\"\n\nimport Rhino\nimport scriptcontext as sc\n\n# Normalize G to list\nif G is None:\n    G_list = []\nelif isinstance(G, (list, tuple)):\n    G_list = list(G)\nelse:\n    G_list = [G]\n\n# Normalize D to list of floats\ndef to_float_list(x):\n    if x is None:\n        return []\n    try:\n        it = iter(x)\n        if isinstance(x, (str, bytes)):\n            return [float(x)]\n        return [float(v) for v in it]\n    except TypeError:\n        return [float(x)]\n\nD_list = to_float_list(D)\n\nBorderFaces = []\nInnerFaces = []\nNoInset = []\n\ntol = sc.doc.ModelAbsoluteTolerance\nangle_tol = sc.doc.ModelAngleToleranceRadians\n\nfor g in G_list:\n    if g is None or not isinstance(g, Rhino.Geometry.Brep):\n        continue\n\n    face_count = g.Faces.Count\n    if face_count == 0 or not D_list:\n        continue\n\n    # Per-face distance: reuse last value if fewer distances than faces\n    per_face_dist = [D_list[min(i, len(D_list) - 1)] for i in range(face_count)]\n\n    for i in range(face_count):\n\n        dist = per_face_dist[i]\n        face = g.Faces[i]\n\n        # Original face (for fallback)\n        original_face_brep = face.DuplicateFace(True)\n\n        # Build single-face brep\n        face_brep = face.DuplicateFace(True)\n        if not face_brep:\n            if original_face_brep:\n                NoInset.append(original_face_brep)\n            continue\n\n        # Attempt inset\n        inset = face_brep.InsetFaces(\n            [0],       # only face in this brep\n            dist,\n            False,     # loose\n            False,     # ignoreSeams\n            C,      # creaseCorners\n            tol,\n            angle_tol\n        )\n\n        # If inset failed → report original face\n        if not inset or inset.Faces.Count == 0:\n            if original_face_brep:\n                NoInset.append(original_face_brep)\n            continue\n\n        # ----------------------------------------\n        # Find inner face by topology:\n        # inner = face with NO boundary edges\n        # (all its edges are shared by 2+ faces)\n        # ----------------------------------------\n        inner_index = -1\n\n        for fi in range(inset.Faces.Count):\n            f = inset.Faces[fi]\n            edge_indices = f.AdjacentEdges()\n            is_inner = True\n\n            for ei in edge_indices:\n                edge = inset.Edges[ei]\n                # boundary edge if only one adjacent face\n                if len(edge.AdjacentFaces()) <= 1:\n                    is_inner = False\n                    break\n\n            if is_inner:\n                inner_index = fi\n                break\n\n        if inner_index < 0:\n            # no clear inner face → treat as fail\n            if original_face_brep:\n                NoInset.append(original_face_brep)\n            continue\n\n        # Inner face\n        inner_face_brep = inset.Faces[inner_index].DuplicateFace(True)\n        if inner_face_brep:\n            InnerFaces.append(inner_face_brep)\n        else:\n            if original_face_brep:\n                NoInset.append(original_face_brep)\n            continue\n\n        # Border ring = all other faces, joined\n        border_parts = []\n        for fi in range(inset.Faces.Count):\n            if fi == inner_index:\n                continue\n            bf = inset.Faces[fi].DuplicateFace(True)\n            if bf:\n                border_parts.append(bf)\n\n        if border_parts:\n            joined = Rhino.Geometry.Brep.JoinBreps(border_parts, tol)\n            if joined and len(joined) > 0:\n                BorderFaces.append(joined[0])\n            else:\n                # fallback: individual pieces\n                BorderFaces.extend(border_parts)\n        else:\n            # no border faces? treat as fail\n            if original_face_brep:\n                NoInset.append(original_face_brep)",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 192
+}

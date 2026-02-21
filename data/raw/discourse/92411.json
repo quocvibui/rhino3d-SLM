@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/what-is-the-right-method-to-convert-quaternion-to-plane-using-rhinocommon/92411",
+  "topic_id": 92411,
+  "title": "What is the right method to convert quaternion to plane using rhinocommon",
+  "question": "What would be the way to convert Quaternion to plane in Rhino?\n\n\nLets say I have Quaternion q.\n\nCan I write Plane plane = new Plane(q.A,q.B,q.C,q.D); ?",
+  "code_blocks": [
+    {
+      "code": "//! <summary>\n        //! Fonction pour reproduire la fonction de RhinoCommon Instance de Quaternion.GetRotation(out Plane)\n        //! </summary>\n        //! <param name=\"arg_quat\">Quaternion</param>\n        //! <returns></returns>\n        public static Plane GetPlaneFromQuaternion(Quaternion arg_quat)\n        {\n            //TODO ne doit pas être très fiable pour les valeurs proches de 0\n            double yaw=0;\n            double pitch=0;\n            double roll=0;\n\n            // arg_quat.Unitize();//Nécessaire // Rhinocommon\n            arg_quat = GUtil.Unitize(arg_quat);//Nécessaire //Rhino3dmIO\n            ToEulerAngles(arg_quat, out yaw, out pitch, out roll);\n\n            Plane plane = Plane.WorldXY;\n            Transform tf_yaw = Transform.Rotation(yaw, Vector3d.ZAxis, Point3d.Origin);\n            Transform tf_pitch = Transform.Rotation(pitch, Vector3d.YAxis, Point3d.Origin);\n            Transform tf_roll = Transform.Rotation(roll, Vector3d.XAxis, Point3d.Origin);\n            Transform tf = tf_yaw * tf_pitch * tf_roll;\n\n            plane.Transform(tf);\n            return plane;\n        }",
+      "language": "csharp",
+      "author": "laurent_delrieu",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 34,
+  "views": 4149
+}

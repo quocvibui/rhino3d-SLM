@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-c-how-to-load-materials-from-a-3dm-file-into-a-rhinodoc/207688",
+  "topic_id": 207688,
+  "title": "Rhinocommon C#: How to load materials from a 3DM file into a RhinoDoc?",
+  "question": "Hi,\n\nI have several \n.3dm\n files that I need to import into the current \nRhinoDoc\n. Each 3DM file contains both \nMaterials\n and \nRenderMaterials\n. How can I correctly load both types of materials?\n\n\nAs far as I understand, \nRenderMaterials\n should be synchronized with the regular \nMaterials",
+  "code_blocks": [
+    {
+      "code": "if (obj.Attributes.MaterialSource == ObjectMaterialSource.MaterialFromObject)\n{\n    int oldMaterialIndex = obj.Attributes.MaterialIndex;\n    if (oldMaterialIndex >= 0 && oldMaterialIndex < scene.Floorplan.Model.AllMaterials.Count)\n    {\n        var oldMaterial = scene.Floorplan.Model.AllMaterials.FindIndex(oldMaterialIndex);\n        if (oldMaterial != null)\n        {\n            int newMaterialIndex = doc.Materials.Add(oldMaterial);\n            attributes.MaterialIndex = newMaterialIndex;\n        }\n    }\n}\nelse if (obj.Attributes.MaterialSource == ObjectMaterialSource.MaterialFromLayer)\n{\n    int oldLayerIndex = obj.Attributes.LayerIndex;\n    if (oldLayerIndex >= 0 && oldLayerIndex < scene.Floorplan.Model.AllLayers.Count)\n    {\n        var oldLayer = scene.Floorplan.Model.AllLayers.FindIndex(oldLayerIndex);\n        if (oldLayer != null)\n        {\n            int newLayerIndex = doc.Layers.Add(oldLayer);\n            attributes.LayerIndex = newLayerIndex;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "Stepan_Radchenko",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino.FileIO.File3dm f = Rhino.FileIO.File3dm.Read(\"D:\\\\rhimport_test.3dm\");\n\nforeach( var rm in f.RenderMaterials)\n{\n    Rhino.Render.RenderMaterial _rm = (Rhino.Render.RenderMaterial)Rhino.Render.RenderContent.FromXml(rm.XML(true), Rhino.RhinoDoc.ActiveDoc);\n    Rhino.RhinoDoc.ActiveDoc.RenderMaterials.Add(_rm);\n}",
+      "language": "csharp",
+      "author": "nathanletwory",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "layers",
+    "materials",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 129
+}

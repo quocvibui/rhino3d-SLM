@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-to-select-sublayer-objects/173422",
+  "topic_id": 173422,
+  "title": "Python script to 'Select Sublayer Objects'",
+  "question": "Hi!\n\nI am trying to script the ‘Select Sublayer Objects’ command from Layers but so far I don’t even know where to start looking for this command. Is there someone willing to provide slight guidance or a head start on how I could approach this?!\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelectSublayerObjects(parent_layer_path):\n    \n    index = scriptcontext.doc.Layers.FindByFullPath(parent_layer_path, -1)\n    if index < 0: return\n    \n    sub_layers = scriptcontext.doc.Layers[index].GetChildren()\n    if not sub_layers: return\n    \n    sub_layer_objs = []\n    \n    for sub_layer in sub_layers: \n        rh_objs = scriptcontext.doc.Objects.FindByLayer(sub_layer)\n        if rh_objs: \n            sub_layer_objs.extend(rh_objs)\n        \n    rs.SelectObjects(sub_layer_objs)\n\n# call the function    \nSelectSublayerObjects(parent_layer_path=\"Default\")",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef SelectObjectsOnSelectedLayers():\n    \n    rc, indices = scriptcontext.doc.Layers.GetSelected()\n    if not rc: return\n    \n    rh_objs = []\n    \n    for index in indices:\n        layer = scriptcontext.doc.Layers[index]\n        layer_objs = scriptcontext.doc.Objects.FindByLayer(layer)\n        if layer_objs: \n            rh_objs.extend(layer_objs)\n        \n    rs.SelectObjects(rh_objs)\n\nSelectObjectsOnSelectedLayers()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 313
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_replacehatchpattern.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_replacehatchpattern.py",
+  "instruction": "Ex replacehatchpattern",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  rc, obj_refs = RhinoGet.GetMultipleObjects(\"Select hatches to replace\", False, ObjectType.Hatch)\n  if rc <> Result.Success or obj_refs == None:\n    return rc\n\n  gs = GetString()\n  gs.SetCommandPrompt(\"Name of replacement hatch pattern\")\n  gs.AcceptNothing(False)\n  gs.Get()\n  if gs.CommandResult() <> Result.Success:\n    return gs.CommandResult()\n  hatch_name = gs.StringResult()\n\n  pattern_index = doc.HatchPatterns.Find(hatch_name, True)\n\n  if pattern_index < 0:\n    RhinoApp.WriteLine(\"The hatch pattern \\\"{0}\\\" not found  in the document.\", hatch_name)\n    return Result.Nothing\n\n  for obj_ref in obj_refs:\n    hatch_object = obj_ref.Object()\n    if hatch_object.HatchGeometry.PatternIndex <> pattern_index:\n      hatch_object.HatchGeometry.PatternIndex = pattern_index\n      hatch_object.CommitChanges()\n\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

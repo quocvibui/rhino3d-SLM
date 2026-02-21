@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/please-expose-the-properties-of-the-object/139107",
+  "topic_id": 139107,
+  "title": "Please: Expose the properties of the object",
+  "question": "Hello,\n\n\nCan you expose C# APIs that relate to properties exposed to users (like piping properties, displacement properties, etc…)\n\n\nThank you,\n\njmv.",
+  "code_blocks": [
+    {
+      "code": "using System;\nusing System.Reflection;\nusing Rhino;\nusing Rhino.Geometry;\nusing Rhino.DocObjects;\n\nclass Proxy_CurvePipingObjectParameters\n{\n    static Type t_DisplacementDynamicAccess;\n    static MethodInfo t_DisplacementDynamicAccess_CurvePipingParameters;\n\n    static Type t_CurvePipingParameters;\n    static MethodInfo t_CurvePipingParameters_GetCurvePipingObjectParameters;\n\n    static PropertyInfo t_On;\n    static PropertyInfo t_Radius;\n    static PropertyInfo t_Segments;\n    static PropertyInfo t_Accuracy;\n    static PropertyInfo t_Weld;\n    static PropertyInfo t_CapType;\n\n    static Proxy_CurvePipingObjectParameters ()\n    {\n        var ass = typeof (Rhino.RhinoApp).Assembly;\n\n        t_DisplacementDynamicAccess = ass.GetType (\"DisplacementDynamicAccess\", throwOnError: true, ignoreCase: false);\n        t_DisplacementDynamicAccess_CurvePipingParameters = t_DisplacementDynamicAccess.GetMethod (\"CurvePipingParameters\");\n\n        t_CurvePipingParameters = ass.GetType (\"CurvePipingParameters\", throwOnError: true, ignoreCase: false);\n        t_CurvePipingParameters_GetCurvePipingObjectParameters = t_CurvePipingParameters.GetMethod (\"GetCurvePipingObjectParameters\");\n\n        var t_CurvePipingObjectParameters = ass.GetType (\"CurvePipingObjectParameters\", throwOnError: true, ignoreCase: false);\n        t_On       = t_CurvePipingObjectParameters.GetProperty (\"On\");\n        t_Radius   = t_CurvePipingObjectParameters.GetProperty (\"Radius\");\n        t_Segments = t_CurvePipingObjectParameters.GetProperty (\"Segments\");\n        t_Accuracy = t_CurvePipingObjectParameters.GetProperty (\"Accuracy\");\n        t_Weld     = t_CurvePipingObjectParameters.GetProperty (\"Weld\");\n        t_CapType  = t_CurvePipingObjectParameters.GetProperty (\"CapType\");\n    }\n\n    public static Proxy_CurvePipingObjectParameters From (Guid id)\n    {\n        var obj = RhinoDoc.ActiveDoc.Objects.FindId (id);\n        return From (obj);\n    }\n    public static Proxy_CurvePipingObjectParameters From (RhinoObject obj)\n    {\n        // var access = new DisplacementDynamicAccess ();\n        // var parameters = access.CurvePipingParameters (RhinoDoc.ActiveDoc.RuntimeSerialNumber)\n        // var piping = parameters.GetCurvePipingObjectParameters (obj)\n\n        var access = Activator.CreateInstance (t_DisplacementDynamicAccess);\n        var parameters = t_DisplacementDynamicAccess_CurvePipingParameters.Invoke (access, new object[] { RhinoDoc.ActiveDoc.RuntimeSerialNumber });\n        return new Proxy_CurvePipingObjectParameters (t_CurvePipingParameters_GetCurvePipingObjectParameters.Invoke (parameters, new object[] { obj }));\n    }\n\n\n    object m_instance;\n\n    Proxy_CurvePipingObjectParameters (object instance)\n    {\n        m_instance = instance;\n    }\n\n    public bool On\n    {\n        get {\n            return (bool)t_On.GetValue (m_instance);\n        }\n    }\n    public double Radius\n    {\n        get {\n            return (double)t_Radius.GetValue (m_instance);\n        }\n    }\n\n...\n}",
+      "language": "csharp",
+      "author": "kitjmv",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 438
+}

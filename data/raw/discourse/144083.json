@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-get-brepface-material/144083",
+  "topic_id": 144083,
+  "title": "GHPython Get BrepFace Material",
+  "question": "Hi, I am wondering if anyone knows how to get the Material information for a BrepFace in GHPython? If I have a scene like this:\n\n\n\n\nScreen Shot 2022-06-16 at 11.42.17 AM\n1920×1172 104 KB\n\n\n\n\nwith sub-object materials applied to a single Brep, can I access the Material information somehow? I tried using \nGetMaterial\n as suggested here \nlink\n, but I don’t think I understand how to get a ‘RhinoObject’ from the BrepFace in GH?\n\n\n\n\nScreen Shot 2022-06-16 at 12.18.33 PM\n1920×1011 94.9 KB\n\n\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nfor guid in _guids:\n    brep = rs.coercebrep(guid)\n    for face in brep.Faces:\n        compo_index = Rhino.Geometry.ComponentIndex(\n                Rhino.Geometry.ComponentIndexType.BrepFace,\n                face.FaceIndex\n            )\n        \n        # This doesn't work....\n        # 'face' needs to be a 'RhinoObject' ? \n        Rhino.DocObjects.RhinoObject.GetMaterial(face, compo_index) #<--\n\nsc.doc = ghdoc\n\n\n\nIf anyone has any thoughts I would appreciate it!\n\nthanks so much,\n\n\n@ed.p.may",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nfor i, guid in enumerate(_guids):\n    print '- '*10, 'Looking at Brep {}'.format(i), '- '*10\n    print 'Using Guid: \"{}\"'.format(guid)\n    \n    brep_obj = Rhino.RhinoDoc.ActiveDoc.Objects.FindId(guid)\n    print 'I found a \"{}\" with name=\"{}\"'.format(type(brep_obj), brep_obj.Name)\n    \n    brep_obj_mat_index = brep_obj.Attributes.MaterialIndex\n    print 'The BrepObject has a MaterialIndex of: {}'.format(brep_obj_mat_index)\n    \n    mat = Rhino.RhinoDoc.ActiveDoc.Materials[brep_obj_mat_index]\n    print 'and a Material of: {}'.format(mat)\n    \n    # This part can't be right? \n    for k in range(4):\n        mat_guid = mat.MaterialChannelIdFromIndex(k)\n        print '  The MaterialChannel: {} has a guid of: {}'.format(k, mat_guid)\n        \n        child_mat = Rhino.RhinoDoc.ActiveDoc.Materials.FindId(mat_guid)\n        print '    which yields a Material: {}'.format(child_mat)",
+      "language": "python",
+      "author": "ed.p.may",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nfor guid in _guids:\n    brep = rs.coercebrep(guid)\n    for face in brep.Faces:\n        compo_index = Rhino.Geometry.ComponentIndex(\n                Rhino.Geometry.ComponentIndexType.BrepFace,\n                face.FaceIndex\n            )\n        brep_obj = Rhino.RhinoDoc.ActiveDoc.Objects.FindId(guid)\n        print Rhino.DocObjects.RhinoObject.GetMaterial(brep_obj, compo_index).Name\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "ed.p.may",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\nsc.doc = Rhino.RhinoDoc.ActiveDoc\n\nfor guid in _guids:\n    brep = rs.coercebrep(guid)\n    for face in brep.Faces:\n        compo_index = Rhino.Geometry.ComponentIndex(\n                Rhino.Geometry.ComponentIndexType.BrepFace,\n                face.FaceIndex\n            )\n        \n        # This doesn't work....\n        # 'face' needs to be a 'RhinoObject' ? \n        Rhino.DocObjects.RhinoObject.GetMaterial(face, compo_index) #<--\n\nsc.doc = ghdoc",
+      "language": "python",
+      "author": "ed.p.may",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 1059
+}

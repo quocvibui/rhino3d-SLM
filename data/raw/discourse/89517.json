@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-send-a-class-to-another-component/89517",
+  "topic_id": 89517,
+  "title": "Python send a class to another component",
+  "question": "I am doing something wrong. I am trying to transport a class to another component (which worked when working with simple lists but now it is a tree within a class).\n\n\nDo you might know how to solve this puzzle?\n\nThank you for your response \n\n\n\n\nproblem%20send%20class%2000\n1251×798 70 KB\n\n\n \nproblem send class 00.gh\n (30.7 KB)",
+  "code_blocks": [
+    {
+      "code": "from scriptcontext import sticky\nimport Rhino.Geometry as rg\n\n# Put your data into the sticky dictionary\nsticky[\"test\"] = rg.Point3d(3, 2, 1)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "from scriptcontext import sticky\n\n# Fetch your data from the sticky dictionary and output it\na = sticky[\"test\"]",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\nimport random\n\nclass Ring:\n    \"\"\"A ring.\n    \n    Attributes:\n        base_curve (Rhino.Geometry.Curve): A ring base curve.\n        size (float): A ring radius.\n        num_diamonds (int): A number of diamonds.\n    \"\"\"\n    def __init__(self, base_curve, size, num_diamonds):\n        \"\"\"Inits a ring.\"\"\"\n        self.base_curve = base_curve\n        self.size = size\n        self.num_diamonds = num_diamonds\n        self.div_points = None # Get done when needed!\n    \n    def divide(self):\n        \"\"\"Equally divides the ring base curve.\"\"\"\n        # Save division points in self.div_points, previously initialised as empty variable\n        self.div_points = self.base_curve.DivideByCount(self.num_diamonds, True)\n        # And return the new division points, or don't! This is optional.\n        return self.div_points\n\nsc.sticky[\"my_rings\"] = [] # stores your ring objects (not the class, but the class objects)\n\n# base_curves provided through input\nfor i in xrange(len(base_curves)):\n    curve = base_curves[i]\n    size = random.uniform(1.7, 2.5)\n    num_diamonds = random.randint(1, 12)\n    # Instantiate a new ring\n    ri = Ring(curve, size, num_diamonds)\n    # Store your ring inside a list in sticky under \"my rings\"\n    sc.sticky[\"my_rings\"].append(ri)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport scriptcontext as sc\n\nif \"my_rings\" in sc.sticky.keys():\n    # Get the rings from sticky\n    rings = sc.sticky[\"my_rings\"]\n    \n    # Divide the rings\n    for ri in rings:\n        print \"Diamonds: {}\".format(ri.num_diamonds)\n        print ri.div_points\n        ri.divide()\n        print ri.div_points",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 20,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 21,
+  "views": 4095
+}

@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/fastest-way-to-check-if-two-closed-curves-overlap/202704",
+  "topic_id": 202704,
+  "title": "Fastest way to check if two closed curves overlap?",
+  "question": "Greetings,\n\n\nI use rs.CurveBooleanUnion and check the areas, but this method is very slow. Is there a faster way?\n\n\nHere’s my script. It takes first one curve, second a list of curves, and checks for overlaps between the first curve and the curves in the list. Returns those that overlap and the ones that don’t in separate lists.\n\n\ndef shape_filter_intersect(curve_bound,shapes):\n    area1 = rs.Area(curve_bound)\n    false_shapes = []\n    true_shapes = []\n\n    for shape in shapes:\n        area2 = rs.Area(shape)\n        areasum = area1 + area2\n        areasum=float('%.3f'%(areasum)) #ROUND TO 3 DECIMALS\n\n        crvbool = rs.CurveBooleanUnion([curve_bound,shape])\n\n        if len(crvbool) != 1:\n            rs.DeleteObjects(crvbool)\n            false_shapes.append(shape)\n            \n    \n        else:\n            areabool = rs.Area(crvbool)\n            areabool=float('%.3f'%(areabool)) #ROUND TO 3 DECIMALS\n\n            if areabool != areasum: # if not equal\n                rs.DeleteObjects(crvbool)\n                false_shapes.append(shape)\n                \n            else:\n                rs.DeleteObjects(crvbool)\n                true_shapes.append(shape)\n    return false_shapes, true_shapes",
+  "code_blocks": [
+    {
+      "code": "def shape_filter_intersect2(curve_bound,shapes):\n    tol = 1\n    plane = Rhino.Geometry.Plane.WorldXY\n\n    false_shapes = []\n    true_shapes = []\n\n    curve_bound = rs.coercecurve(curve_bound)\n\n    for shape in shapes:\n        shape = rs.coercecurve(shape)\n        events = Rhino.Geometry.Intersect.Intersection.CurveCurve(curve_bound, shape, tol, tol)\n\n        has_overlap = False\n\n        if events:\n            for event in events:\n                if event.IsOverlap:\n                    has_overlap = True\n                    break\n\n        if has_overlap:\n            result = shape.TryGetPolyline()\n\n            if result and result[0]:  # success\n                polyline = result[1]\n                has_strictly_inside_point = False\n\n                for pt in polyline:\n                    containment = curve_bound.Contains(pt, plane, tol)\n                    if containment == Rhino.Geometry.PointContainment.Inside:\n                        has_strictly_inside_point = True\n                        break\n\n                if has_strictly_inside_point:\n                    #print(\"✅ At least one point strictly inside \")\n                    false_shapes.append(shape)\n                else:\n                    #print(\"❌ All points outside or on edge\")\n                    true_shapes.append(shape)\n            else:\n                #print(\"⚠️ Shape is not a valid polyline\")\n                false_shapes.append(shape)\n\n        else:\n            #print(\"❌ No overlap\")\n            false_shapes.append(shape)\n\n    # Convert shapes to Rhino object IDs for further action\n    false_shapes_IDs = [sc.doc.Objects.AddCurve(shape) for shape in false_shapes]\n    true_shapes_IDs = [sc.doc.Objects.AddCurve(shape) for shape in true_shapes]\n\n    return false_shapes_IDs, true_shapes_IDs",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "def shape_filter_intersect(curve_bound,shapes):\n    area1 = rs.Area(curve_bound)\n    false_shapes = []\n    true_shapes = []\n\n    for shape in shapes:\n        area2 = rs.Area(shape)\n        areasum = area1 + area2\n        areasum=float('%.3f'%(areasum)) #ROUND TO 3 DECIMALS\n\n        crvbool = rs.CurveBooleanUnion([curve_bound,shape])\n\n        if len(crvbool) != 1:\n            rs.DeleteObjects(crvbool)\n            false_shapes.append(shape)\n            \n    \n        else:\n            areabool = rs.Area(crvbool)\n            areabool=float('%.3f'%(areabool)) #ROUND TO 3 DECIMALS\n\n            if areabool != areasum: # if not equal\n                rs.DeleteObjects(crvbool)\n                false_shapes.append(shape)\n                \n            else:\n                rs.DeleteObjects(crvbool)\n                true_shapes.append(shape)\n    return false_shapes, true_shapes",
+      "language": "python",
+      "author": "Bogdan_Chipara",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 252
+}

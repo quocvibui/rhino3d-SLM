@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-the-center-point-of-a-rectangular-plane-in-python/124048",
+  "topic_id": 124048,
+  "title": "Creating the center point of a rectangular plane in python",
+  "question": "Hello everyone,\n\n\nI am running through an issue using RhinoScriptSyntax. I want to create planes along a curve and I want them to be centered on the curve. I am using the rs.PlaneFromNormal() function and it creates a plane with the origin being the point on the curve. The planes aren’t parallel to any global C-plane or global axis.\n\nNow I want the plane to be centered on that point. For that I can use both rs.MovePlane() or rs.Move Object() but I need in both cases (new origin or translation vector) I need the center of the plane.\n\nI didn’t find how to create the contour of my plane to use rs.CurveAreaCentroid(). And neither how to create a diagonal to get its center point.\n\n\nIf any of you has already faced the problem, I’d be very glad to hear how you solved it.\n\n\nThanks,\n\nLéon",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ncrv = rs.GetObject(\"Pick the curve\", 4)\norig_point = rs.GetObject(\"Pick the origin\", 1)\n\npt_param = rs.CurveClosestPoint(crv, orig_point)\ntan_vec = rs.CurveTangent(crv, pt_param)\ngeom_plane = rs.PlaneFromNormal(orig_point, tan_vec)\npsurface = rs.AddPlaneSurface(geom_plane, 40.0, 40.0)\n\ncenter = rs.SurfaceAreaCentroid(psurface)[0]  # surface center\nvec = rs.VectorSubtract(orig_point, center)  # translation vector\nrs.MoveObject(psurface, vec)  # move surface",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1088
+}

@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/working-with-nurbs-curve-in-ghpython/37246",
+  "topic_id": 37246,
+  "title": "Working with Nurbs Curve in GhPython",
+  "question": "This is a two part question:\n\n\n\n\n\n\nWhat is the ghpythonlib.component equivalent for NurbsCrv (the version where the input is point, weight and kink)? The NurbsCurve() method I’m getting calls for vertices, degree and periodic (see image below).\n\n\n\n\n\n\nI’d much rather avoid ghpythonlib.component. How do I get the control points, weight and kink of a curve via rhinocommon? I’d like to transform the control points and then reconstruct the curve. How then do I create a curve with respect to those three variables with rhinocommon?\n\n\n\n\n\n\nSide question: how do I duplicate a list of points. I need to transform the duplicate without affecting the original? Point3d does not seem to have a .Duplicate() method.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\ndef C_PWK(pts, knots, weights=None):\n    \n    if len(pts) < 2: raise Exception(\"Too few pts\")\n    if not weights: weights = [1]*len(knots)\n    if len(knots) != len(weights):  raise Exception(\"length mismatch\")\n    \n    degree = len(knots) - len(pts) + 1\n    if degree <= 0 or degree > 11: raise Exception(\"invalid degree\")\n    \n    c = rg.NurbsCurve.Create(False, degree, pts)\n    \n    for i in range(c.Points.Count):\n        c.Points[i] = rg.ControlPoint(pts[i], weights[i])\n        \n    for i in range(c.Knots.Count):\n        c.Knots[i] = knots[i]\n    \n    if not c.IsValid: raise Exception(\"created curve is invalid\")\n    \n    return c\n\nif P:\n    a = C_PWK(P,K,W)",
+      "language": "python",
+      "author": "piac",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 2299
+}

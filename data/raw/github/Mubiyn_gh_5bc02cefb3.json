@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/Mubiyn/gh/blob/c930335c36dd52d02d88ac44db0676b531677270/main.py",
+  "repo": "Mubiyn/gh",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "main.py",
+  "instruction": null,
+  "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\nimport compute_rhino3d.Util as rc\nimport rhino3dm\nimport os\nfrom dotenv import load_dotenv\nimport requests\nfrom routes.geometry import router as geometry_router\nfrom routes.export import router as export_router\nfrom routes.grasshopper import router as grasshopper_router\nfrom models.models import SphereParams\nfrom utils.strings import API_KEY, BASE_URL\n\n# Initialize FastAPI application once\napp = FastAPI()\n\n# Load environment variables\nload_dotenv()\n\n# Include routers before starting FastAPI\napp.include_router(geometry_router, prefix=\"/geometry\", tags=[\"Geometry\"])\napp.include_router(export_router, prefix=\"/export\", tags=[\"Export\"])\napp.include_router(grasshopper_router, prefix=\"/grasshopper\", tags=[\"Grasshopper\"])\n\n# Initialize Rhino.Compute\nif not API_KEY:\n    raise ValueError(\"API Key not found! Set RHINO_COMPUTE_API_KEY in your environment.\")\nrc.apiKey = API_KEY\nrc.url = f\"{BASE_URL}\"\n\n# Base Route\n@app.get(\"/\")\ndef read_root():\n    return {\"message\": \"Welcome to the Mubiyn's Compute API\"}\n\n# Healthcheck endpoint\n@app.get(\"/healthcheck\")\ndef rhino_compute_healthcheck():\n    try:\n        # Send an HTTP GET request to the Rhino.Compute server's healthcheck endpoint\n        response = requests.get(f\"{BASE_URL}healthcheck\")\n        \n        # Check the status code\n        if response.status_code == 200:\n            return {\"message\": \"Mubiyn's Rhino.Compute Wrapper is running\", \"status\": response.content}\n        else:\n            raise HTTPException(status_code=response.status_code, detail=\"Rhino.Compute is not healthy\")\n    except requests.exceptions.RequestException as e:\n        raise HTTPException(status_code=500, detail=f\"Error connecting to Rhino.Compute: {e}\")\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

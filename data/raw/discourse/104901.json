@@ -1,0 +1,48 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/previous-layer-state-isolate-layers-of-selected-objects/104901",
+  "topic_id": 104901,
+  "title": "Previous layer state & Isolate layers of selected objects",
+  "question": "Hello!\n\n\nI’m an advanced 2D/3D user of both Autocad and Rhino. Rhino is an excellent application. Much better for 3D modeling than Autocad, especially viewport manipulation and 3D performance. But in the field of layer manipulation, I find Autocad much better than Rhino. I miss “Previous Layer State” (without saving layer state with Layer state manager) and “Isolate  Layers of selected objects” option. Are there some way to implement this option in Rhino 6.\n\n\nThanks!\n\n\nIgor",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n#get object and find layer it is on\nobj = rs.GetObject('select an object on the layer to isolate')\nlayer = rs.ObjectLayer(obj)\nisCurrent = rs.IsLayerCurrent(layer)\n#Save Current layer state\nplugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\nif plugin is not None:\n    plugin.SaveLayerState(\"Isolate_Layer\")\n\n#Find all current layers\nallLayers = rs.LayerNames()\n\n#Make select obj current layer\nif isCurrent == False:\n    rs.CurrentLayer(layer)\n\n#Hide Layers not including selected object\nallLayers.remove(layer)\n\nfor L in allLayers:\n    rs.LayerVisible(L,False)",
+      "language": "python",
+      "author": "tsrchapman",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#Restore Layer state\nplugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\nif plugin is not None:\n    plugin.RestoreLayerState(\"Isolate_Layer\")\n\n#Deleate Layer state\nplugin.DeleteLayerState(\"Isolate_Layer\")",
+      "language": "python",
+      "author": "tsrchapman",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n\n#get object and find layer it is on\nobj = rs.GetObjects('select an object on the layer to isolate')\n\nrs.EnableRedraw(False)\n\n\n#creat list of selected obj layers\nselectedlayers = []\nfor i in obj:\n    layer = rs.ObjectLayer(i)\n    selectedlayers.append(layer)\n\n#select all objects on each layer\n\nfor i in selectedlayers:\n    rs.ObjectsByLayer(i,True)\nisolate = rs.SelectedObjects()\n\nallObjects = rs.AllObjects()\n\nfor i in isolate:\n    allObjects.remove(i)\n\n\n#hide selected objects\n\nrs.HideObjects(allObjects)\n\nrs.UnselectAllObjects()\n\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "tsrchapman",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nobj = rs.AllObjects()\n\nrs.ShowObjects(obj)",
+      "language": "python",
+      "author": "tsrchapman",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 6,
+  "views": 1717
+}

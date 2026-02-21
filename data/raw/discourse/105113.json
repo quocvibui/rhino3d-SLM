@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cannot-disable-redraw-in-rhino-6/105113",
+  "topic_id": 105113,
+  "title": "Cannot disable redraw in Rhino 6",
+  "question": "Hi, I have a script that disables redraw for speed while it creates geometry, then enables it again afterwards:\n\n\nimport rhinoscriptsyntax as rs\n\nrs.EnableRedraw(False)\n\n…do stuff…\n\nrs.EnableRedraw(True)\n\n\nIn rhino 5 it works as expected.\n\nHowever when I run the same script in rhino 6 I can see the geometry being created in front of me on screen (and it takes minutes to complete, as opposed to seconds in rhino 5) - redraw is not disabled.\n\n\nIs there something I’m not aware of here? Does redraw() behave differently in rhino 6 than it does in rhino 5?\n\n\nIn case it’s relevant, here is the OpenGL info from options in rhino 5:\n\n\nimage\n617×537 22 KB\n\n\nAnd in rhino 6:\n\n\nimage\n807×677 212 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef main():\t\n\trs.EnableRedraw( False )\t\n\tdoStuff( )\t\t\n\trs.EnableRedraw( True )\t\n\treturn 0\n\t\t\ndef doStuff( ):\t\n\tfor i in range( 0, 10 ):\t\t\n\t\tif (scriptcontext.escape_test(False)): break\t\t\t\n\t\ts = rs.AddSphere( [ 100*i , 0, 0 ] , 30 )\t\t\n\t\tsave( )\t\t\t\n\treturn 0\n\t\t\ndef save(  ):\t\t\n\trs.AllObjects( True )\n\trs.Command('_-Export {} _Enter'.format( \"temp.3dm\" ))\t\t\t\n\treturn 0\n\t\nmain()",
+      "language": "python",
+      "author": "fergus.hudson",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 1293
+}

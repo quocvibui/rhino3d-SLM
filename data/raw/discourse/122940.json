@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-scripting-circle-within-circle/122940",
+  "topic_id": 122940,
+  "title": "Help: scripting circle within circle",
+  "question": "Hi everyone, I am new to the forum and a 2-week new Rhino learner without much programming experience, but trying to create a recursive loop with python(!).  Brain racked for days so am seeking help here…\n\n\nI attempt to write a script that draws a circle within a circle and continues for a few generations.  As I am confused about the syntax, I am mostly only able to write down the steps I think the script should do.\n\n\n\n\ncirclewithincircle_script\n1578×633 85.5 KB\n\n\n\n\n\n\nDoes what I outline make sense in Python?  I am most unsure about how I may locate a point on the circle to draw the next circle.\n\n\nAny help from major direction to actual solutions appreciated!  Many thanks in advance!",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef concentric_circles():\n    circle = rs.GetObject(\"select starting circle\",4)\n    if not circle:\n        print (\"Without giving me a circle what do you expect?\")\n        return\n    if not rs.IsCircle(circle):\n        print (\"Did you try to fool me?\")\n        return\n    radius = rs.CircleRadius(circle)\n    if radius<2.0:\n        print (\"Your circle is to small for this task.\")\n        return\n    while radius>2.0:\n        radius-=1\n        center = rs.CircleCenterPoint(circle)\n        rs.AddCircle(center, radius)\n\nconcentric_circles()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\nimport math\n\ndef touching_circles():\n    circle = rs.GetObject(\"select starting circle\",4)\n    if not circle:\n        print (\"without giving me a circle what do you expect?\")\n        return\n    if not rs.IsCircle(circle):\n        print (\"did you try to fool me?\")\n        return\n    radius = rs.CircleRadius(circle)\n    if radius<2.0:\n        print (\"Your circle is to small for this task.\")\n        return\n    while radius>2.0:\n        radius-=1\n        center = rs.CircleCenterPoint(circle)\n        circle = rs.AddCircle(center, radius)\n        angle = random.random()*2*math.pi\n        x = math.sin(angle)\n        y = math.cos(angle)\n        trans=(x,y,0)\n        rs.MoveObject(circle, trans)\n\ntouching_circles()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\nimport math\n\ndef spiraling_circles():\n    circle = rs.GetObject(\"select starting circle\",4)\n    if not circle:\n        print (\"without giving me a circle what do you expect?\")\n        return\n    if not rs.IsCircle(circle):\n        print (\"did you try to fool me?\")\n        return\n    radius = rs.CircleRadius(circle)\n    if radius<2.0:\n        print (\"Your circle is to small for this task.\")\n        return\n    angle = 0\n    while radius>2.0:\n        radius-=1\n        center = rs.CircleCenterPoint(circle)\n        circle = rs.AddCircle(center, radius)\n        angle+= math.pi/7\n        x = math.sin(angle)\n        y = math.cos(angle)\n        trans=(x,y,0)\n        rs.MoveObject(circle, trans)\n\nspiraling_circles()",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 391
+}

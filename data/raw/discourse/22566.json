@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/profiling-of-python-code-in-rhino/22566",
+  "topic_id": 22566,
+  "title": "Profiling of python code in rhino",
+  "question": "Hello I am trying to creat a grid of points, where only the point inside a surface should be set.\n\nTo do this I use IsPointInSurface\n\nThe problem is that I get a huge time difference depending on the setup.\n\n\nDepending on the point setup I get a huge diffrence in time as show below.\n\n\npoint1 = [b0+x*d_x, b1+y*d_y, b2+z*d_z] 17 sec\npoint2 = [b0+x*d_x, b1+y*d_y, b2+z] 2 sec\n\n\n\nIs this because point1 is more inside the surface? se the code below\n\n\nAre there any way of profiling the code more in deapth? python have the profiling tool cProfile which do not work native in the rhino python\n\n\nbest kasper\n\n\nimport rhinoscriptsyntax as rs\nimport random\nimport timeit\n\nrs.EnableRedraw(False)\nsurface = rs.GetObject(\"pick a surface\")\nbounding_box = rs.BoundingBox(surface)\nshape = [25,25,25]\n\nd_x = (bounding_box[1][0] - bounding_box[0][0])/float(shape[0]-1)\nd_y = (bounding_box[2][1] - bounding_box[0][1])/float(shape[1]-1)\nd_z = (bounding_box[4][2] - bounding_box[0][2])/float(shape[2]-1)\n\nb0 = bounding_box[0][0]\nb1 = bounding_box[0][1]\nb2 = bounding_box[0][2]\n\na = 0\nstart = timeit.default_timer()\nfor x in range(shape[0]):\n    for y in range(shape[1]):\n        for z in range(shape[2]):\n            point = [b0+x*d_x, b1+y*d_y, b2+z*d_z]\n            if rs.IsPointInSurface(surface, point, False, 0.01):\n                a += 1\nprint str(timeit.default_timer() - start) + \" sec\"\nstart = timeit.default_timer()\n\nfor x in range(shape[0]):\n    for y in range(shape[1]):\n        for z in range(shape[2]):\n            point = [b0+x*d_x, b1+y*d_y, b2+z]\n            if rs.IsPointInSurface(surface, point, False, 0.01):\n                a += 1\nprint str(timeit.default_timer() - start) + \" sec\"\n\nrs.EnableRedraw(True)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\nimport timeit\n\nrs.EnableRedraw(False)\nsurface = rs.GetObject(\"pick a surface\")\nbounding_box = rs.BoundingBox(surface)\nshape = [25,25,25]\n\nd_x = (bounding_box[1][0] - bounding_box[0][0])/float(shape[0]-1)\nd_y = (bounding_box[2][1] - bounding_box[0][1])/float(shape[1]-1)\nd_z = (bounding_box[4][2] - bounding_box[0][2])/float(shape[2]-1)\n\nb0 = bounding_box[0][0]\nb1 = bounding_box[0][1]\nb2 = bounding_box[0][2]\n\na = 0\nstart = timeit.default_timer()\nfor x in range(shape[0]):\n    for y in range(shape[1]):\n        for z in range(shape[2]):\n            point = [b0+x*d_x, b1+y*d_y, b2+z*d_z]\n            if rs.IsPointInSurface(surface, point, False, 0.01):\n                a += 1\nprint str(timeit.default_timer() - start) + \" sec\"\nstart = timeit.default_timer()\n\nfor x in range(shape[0]):\n    for y in range(shape[1]):\n        for z in range(shape[2]):\n            point = [b0+x*d_x, b1+y*d_y, b2+z]\n            if rs.IsPointInSurface(surface, point, False, 0.01):\n                a += 1\nprint str(timeit.default_timer() - start) + \" sec\"\n\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "kasper_steenstrup",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 1211
+}

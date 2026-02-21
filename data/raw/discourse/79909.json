@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-move-objects-to-layer-by-name-rhinocommon/79909",
+  "topic_id": 79909,
+  "title": "How to move objects to layer by name RhinoCommon",
+  "question": "Two questions here:\n\n\n\n\nHow to move objects with a specific name to a specific layer.\n\n\nHow to move selected objects to a layer with specific name (not index)\n\n\n\n\npreferably in python\n\n\nThanks in advance.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef MoveNamedObjectsToLayer(obj_name=None, layer_name=None):\n    if not obj_name or not layer_name: return\n    \n    # get objects with obj_name\n    obj_ids = rs.ObjectsByName(obj_name)\n    if not obj_ids: return\n    \n     # find first layer which has a matching layer name\n    for layer_id in rs.LayerIds():\n        \n        # strip the layer name from the layer path\n        this_name = rs.LayerName(layer_id, fullpath=False)\n        \n        # if the layer name equals 'layer_name', change objs layer\n        if this_name.strip() == layer_name.strip():\n            rs.ObjectLayer(obj_ids, layer_id)\n            break\n    \nMoveNamedObjectsToLayer(obj_name=\"Ivelin\", layer_name=\"Ivelin\")",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 2907
+}

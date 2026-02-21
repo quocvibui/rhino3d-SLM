@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/custom-save-as-script-with-date-prefix/127360",
+  "topic_id": 127360,
+  "title": "Custom Save_As script with date prefix",
+  "question": "Hi Guys,\n\n\nI’ve been using a custom Save_As button for a few years as part of my own file management.\n\n\nWhat it does is take what ever Rhino Doc I have open and add/update the file name with a YYMMDD_ prefix and save it to my desktop.\n\n\nIf a Grasshopper Doc is open at same time it gets the same filename/prefix/save to Desktop treatment.\n\n\nUp until today the Desktop folder was hard coded into the script, but some looking around the GH API docs last night had me find the Grasshopper.Folders.Desktop method - which allows easy finding of the current users desk top folder and makes this code now very portable.\n\n\nHere it is for anyone else want the same function:\n\n\n#Saves open rhino and grasshopper to Desktop with YYMMDD_ prefix\n\nimport rhinoscriptsyntax as rs\nimport System\nimport time\n\nimport Rhino\nimport Grasshopper\n\nGH = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\n\ndateandtimenow = time.strftime(\"%Y%m%d\")\nsave_date = dateandtimenow[2:]\n\ndesktop_path = Grasshopper.Folders.Desktop\n\ncurrent_name = rs.DocumentName()\n\nif ('_') in current_name:\n\tcurrent_name = current_name.split('_',1)[1]\n\nrhino_save_file_name = chr(34) + desktop_path + '\\\\'+ save_date + '_' + current_name + chr(34)\n\ncmd = '-_SaveAs ' + rhino_save_file_name \n\nrs.Command(cmd, True)\n\nif GH.IsEditorLoaded():\n\t\n\timport clr\n\tclr.AddReference('Grasshopper')\n\timport Grasshopper \n\t\n\tgh_save_file_name = desktop_path + '\\\\' + save_date + '_' + current_name.split('.')[0] + '.gh'\n\t\n\tGrasshopper.Plugin.GH_RhinoScriptInterface.SaveDocumentAs(GH, gh_save_file_name)",
+  "code_blocks": [
+    {
+      "code": "#! python 2\n#Saves open rhino and grasshopper to Desktop with YYMMDD_ prefix\n#! _-RunPythonScript \"220202_save with date format to desktop.py\"\n\nimport rhinoscriptsyntax as rs\nimport System\nimport time\nimport Rhino\nimport clr\nclr.AddReference('Grasshopper')\nimport Grasshopper \nimport os.path\n\nGH = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\n\ndateandtimenow = time.strftime(\"%Y%m%d\")\nsave_date = dateandtimenow[2:]\n\ndesktop_path = Grasshopper.Folders.Desktop\n\ncurrent_name = rs.DocumentName()\n\nif current_name is None:\n    current_name = \"Untitled.3dm\"\n\nif ('_') in current_name:\n\tcurrent_name = current_name.split('_',1)[1]\n\nsave_name = save_date + '_' + current_name\n\nfull_path = os.path.join(desktop_path,save_name)\n\n#print full_path\n\nrhino_save_file_name = chr(34) + full_path + chr(34)\n\n#print rhino_save_file_name\n\ncmd = '-_SaveAs ' + rhino_save_file_name \n\nrs.Command(cmd, True)\n\nif GH.IsEditorLoaded():\n\t\n\t\n\tgh_save_file_name = full_path.split('.')[0] + '.gh'\n\t\n\t#print gh_save_file_name\n\t\n\tGrasshopper.Plugin.GH_RhinoScriptInterface.SaveDocumentAs(GH, gh_save_file_name)",
+      "language": "python",
+      "author": "kiteboardshaper",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "#Saves open rhino and grasshopper to Desktop with YYMMDD_ prefix\n\nimport rhinoscriptsyntax as rs\nimport System\nimport time\n\nimport Rhino\nimport Grasshopper\n\nGH = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\n\ndateandtimenow = time.strftime(\"%Y%m%d\")\nsave_date = dateandtimenow[2:]\n\ndesktop_path = Grasshopper.Folders.Desktop\n\ncurrent_name = rs.DocumentName()\n\nif ('_') in current_name:\n\tcurrent_name = current_name.split('_',1)[1]\n\nrhino_save_file_name = chr(34) + desktop_path + '\\\\'+ save_date + '_' + current_name + chr(34)\n\ncmd = '-_SaveAs ' + rhino_save_file_name \n\nrs.Command(cmd, True)\n\nif GH.IsEditorLoaded():\n\t\n\timport clr\n\tclr.AddReference('Grasshopper')\n\timport Grasshopper \n\t\n\tgh_save_file_name = desktop_path + '\\\\' + save_date + '_' + current_name.split('.')[0] + '.gh'\n\t\n\tGrasshopper.Plugin.GH_RhinoScriptInterface.SaveDocumentAs(GH, gh_save_file_name)",
+      "language": "python",
+      "author": "kiteboardshaper",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 358
+}

@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bake-to-layer-component-with-m-material-input/94820",
+  "topic_id": 94820,
+  "title": "'Bake to Layer' component with 'M' (Material) input?",
+  "question": "I posted a reply in this thread before realizing it’s limited to ‘Grasshopper Developer’ instead of the whole GH forum, so will re-post that reply below:\n\n\n\n\n\n\n\n\n\n\nBake component in ghPython - add extra options?\n \nGrasshopper Developer\n\n\n\n\n\n    I just discovered a wonderful set of ghPython scripts and in one of them I need to add some extra functionality. \nMore exactly, into the script listed bellow I need to add two additional options: \n\ninput for “layerColor”\nMake “obj” input to accept more object types like text and dimensions.\n\n4-8. Baking Input Objects with Attributes \n\nhttp://atlv.org/education/ghpython/\n\n\nhttp://atlv.org/education/ghpython/python_attributes8.gh\n \n# ================\n\n#  bake objects with attributes\n\n#  input type - …\n  \n\n\n\n\nI found this thread in my quest to work around the bleeding edge deficiencies and \nglaringly obvious flaws\n in R6.  This snippet of Python looks very promising except that when I open \nthat GH file\n, not only is the \nCone\n not visible in the Rhino wiindow but any other geometry I add to the GH canvas also isn’t visible!??  \nHow absurd is that!?\n  Another in a very long list of wild goose chases in the pursuit of basic functionality that is sorely missing from Grasshopper itself.  \n\n\npython_attributes8\n615×398 15.7 KB\n\n\nTwo years ago I cobbled together a simple Python ‘\nbake to layer\n’ component from examples found on the forum.  It worked great at the time but has no ‘M’ input for material, depending as it did on the material being defined on each layer in the .3dm file.  Now I’d rather avoid.that dependency, which is why I’ve \nextended the C# code for creating materials in GH\n that are suitable for viewing and baking with \nCustom Preview\n.\n\n\nI’d like a \nBake to Layer\n component that accepts the same ‘G’ and ‘M’ inputs as \nCustom Preview\n.  I might eventually figure it out myself but would rather focus on my own project instead of coding GH “enhancements” that should have been built in years ago.\n\n\nI would post my old Pytho...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport System.Drawing\n\ndef AddMaterial():\n    # materials are stored in the document's material table\n    index = scriptcontext.doc.Materials.Add()\n    mat = scriptcontext.doc.Materials[index]\n    mat.DiffuseColor = System.Drawing.Color.Chocolate\n    mat.SpecularColor = System.Drawing.Color.CadetBlue\n    mat.CommitChanges()\n\n    # set up object attributes to say they use a specific material\n    sp = Rhino.Geometry.Sphere(Rhino.Geometry.Plane.WorldXY, 5)\n    attr = Rhino.DocObjects.ObjectAttributes()\n    attr.MaterialIndex = index\n    attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject\n    scriptcontext.doc.Objects.AddSphere(sp, attr)\n\n    # add a sphere without the material attributes set\n    sp.Center = Rhino.Geometry.Point3d(10, 10, 0)\n    scriptcontext.doc.Objects.AddSphere(sp)\n\n    scriptcontext.doc.Views.Redraw();\n\nif __name__==\"__main__\":\n    AddMaterial()",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "finally:\n    #we put back the original Grasshopper document as default\n    scriptcontext.doc = ghdoc",
+      "language": "python",
+      "author": "Joseph_Oster",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "# At this point, you will see render materials show up in Rhino's\n# Materials panel. Note, RhinoDoc.Materials.Count will equal 0. This\n# is because we have not added any Rhino materials. We've only added\n# Render materials. When you assign a Render material to an object\n# or a layer, a compatible Rhino material will be added RhinoDoc.Materials,\n# and this material will be referenced by the Render material.",
+      "language": "unknown",
+      "author": "chanley",
+      "post_number": 11,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "materials",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 44,
+  "views": 9033
+}

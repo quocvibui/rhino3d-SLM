@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/fellesverkstedet/Bark-beetle-parametric-toolpaths/blob/a2f2f73aaebe195b05ba010fcd1ffe2bdcd1d0ed/Python_scripts/define_material_cnc.py",
+  "repo": "fellesverkstedet/Bark-beetle-parametric-toolpaths",
+  "repo_stars": 119,
+  "repo_description": "A grasshopper plugin for digital fabrication. Enables direct fabrication of geometry with 3D printers, CNC milling, Laser cutters, Robot arms and more. Also featuring 1:1 augmented reality toolpath projections.",
+  "license": "unknown",
+  "filepath": "Python_scripts/define_material_cnc.py",
+  "instruction": "this script creates an interface for selecting material outline curve, define the material type and the material thickness",
+  "code": "#this script creates an interface for selecting material outline curve, define the material type and the material thickness\n\n\n### prep\n\n#import script types\nimport rhinoscriptsyntax as rs\nimport Rhino\n\n#define User Key (so that the GH definition will know that this curve object is representing the material outline)\nmatkey = \"CNCmaterial\"\n\n#define list of material options as strings\nfoam_wax = \"Foam_Wax\"\nsoft_wood = \"SoftWood\"\nhard_wood = \"HardWood\"\nplastic = \"Plastic\"\naluminium_brass = \"Aluminium_Brass\"\nbronze = \"Bronze\"\nsoft_steel = \"SoftSteel\"\nstainless_steel = \"StainlessSteel\"\nprinted = \"3DprintedPlasticStock\"\n\n#format strings into a list\nmatoptions = [foam_wax,soft_wood,hard_wood,plastic,aluminium_brass,bronze,soft_steel,stainless_steel,printed]\n\n\n### inputs\n\n#make input request for material outline curve\nmaterialcurve = rs.GetObject(message=\"Select your material outline curve\", filter=rs.filter.curve, preselect=True, select=False)\n#if(materialcurve==None):return ..not working\n\n#make command line input for material type with options\nmaterialtype = rs.GetString(message=\"Choose your material type\", defaultString=None, strings=matoptions)\n\n#make command line input for material thickness\nmaterialthickness = rs.GetReal(message=\"What is the thickness of your material in mm?\", number=None, minimum=0.01, maximum=120)\n\n\n### clear old values\n\n#find out how many old User text values to clear\nkeylist = rs.GetUserText(materialcurve, key=None , attached_to_geometry=False)\nkeylistlength = len(keylist)\n\n# Set the User Text to nothing (thereby clearing old values)\nfor x in range(0,  keylistlength):\n    rskeys = rs.GetUserText(materialcurve, key=None , attached_to_geometry=False)\n    rs.SetUserText(materialcurve, rskeys[0], value=None, attach_to_geometry=False)\n\n\n### set User Text values with the inputs given\n\n# format our User Key value\n\nmatvalue = [materialtype,materialthickness]\n\n# Set the User Text\nrs.SetUserText(materialcurve, matkey, value=matvalue, attach_to_geometry=False)\n\n\n### make Grasshopper recompute\ngh = Rhino.RhinoApp.GetPlugInObject(\"Grasshopper\")\ngh.RunSolver(True)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

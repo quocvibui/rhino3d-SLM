@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/c-how-do-i-copy-the-mesh-texture-to-a-new-mesh/213818",
+  "topic_id": 213818,
+  "title": "C# - How do I copy the Mesh texture to a new Mesh?",
+  "question": "I’m modifying the topology of a mesh which has a picture mapped to it (decal) using Grasshopper.\n\n\nIn the GH component I first make a copy of the mesh, but I just can’t find a way to copy also the texture to make the new mesh a full copy. How is that done in C#?\n\n\nThe mesh I copied like so:\n\n\nvar newMesh = oldMesh.DuplicateMesh();\n\n// Now, how to copy also the texture?\n\n\n\n//Rolf",
+  "code_blocks": [
+    {
+      "code": "var mesh = M.DuplicateMesh();\n\n\tif(!GetDecalCopyFromMesh(M, mesh, out mesh, out Decal newDecal, out Guid copyId))\n\t{\n\t     PrintError(“Error - Copying Mesh Texture failed.”);\n\t     return;\n\t} \n\n\t// Creates a Decal from the original mesh and returns the id (Guid) of the pre-created mesh copy.\n\t// The decal is not applied here directly, since it requires Baking the copy, which is left to\n\t// the caller to do decide later. If baking, the decal is then applied to the copy after it\n\t// has been added to Rhino Document (this is not always a given, if the calling code is aborted\n\t// for so reason)\n\t//\n\tprivate bool GetDecalCopyFromMesh(Mesh originalMesh, Mesh meshCopy, out Mesh texturedMesh, out Decal newDecal, out Guid copyId)\n\t{\n\t// --------------------------------------------------\n\t// initialize out-params in case aborting prematurely\n\t// --------------------------------------------------\n\n    texturedMesh = null;\n    newDecal = null;\n    copyId = Guid.Empty;\n\n    // --------------------------------------------------\n    // Retrieve the original mesh (must already exist in \n    // the Rhino doc in order to access its object and decals)\n    // --------------------------------------------------\n\n    //Guid originalId = RhinoDoc.ActiveDoc.Objects.AddMesh(originalMesh);\n    if (!FindObjectGuidForMesh(originalMesh, out Guid originalId))\n    {\n        PrintError(\"The input (original) Mesh doesn't seem to exist in the Rhino Document\");\n        return false;\n    }\n    RhinoObject originalObj = RhinoDoc.ActiveDoc.Objects.FindId(originalId);\n    if (originalObj == null) \n    {\n        PrintError(\"The input (original) Mesh doesn't seem to exist as a RhinoObject (Mesh)\");\n        return false;\n    }\n\n    // --------------------------------------------------\n    // Get decals from the original object\n    // --------------------------------------------------\n\n    var decals = originalObj.Attributes.Decals;\n    if (decals.Count() == 0)\n    {\n        PrintError(\"No decals found on the original mesh.\");\n        return false;\n    }\n\n    // --------------------------------------------------\n    // Duplicate the geometry (ensure it's a clean copy)\n    // --------------------------------------------------\n\n    Mesh copy_mesh = meshCopy.DuplicateMesh();\n\n    // ----------------------------------------------\n    // Copy decal data\n    // ----------------------------------------------\n\n    foreach (Rhino.Render.Decal decal in decals)\n    {\n        // Create a new decal instance with the same properties\n        var decal_params = new  Rhino.Render.DecalCreateParams();\n\n            decal_params.DecalMapping = decal.Mapping;\n            decal_params.DecalProjection = decal.Projection;\n            decal_params.EndLatitude = decal.EndLatitude;\n            decal_params.EndLongitude = decal.EndLongitude;\n            decal_params.Height = decal.Height;\n            decal_params.MapToInside = decal.MapToInside;\n            decal_params.MaxU = 1.0; //decal.MaxU;\n            decal_params.MaxV = 1.0; //decal.MaxV;\n            decal_params.MinU = 0.0; //decal.MinU;\n            decal_params.MinV = 0.0; //decal.MinV;\n            decal_params.Origin = decal.Origin;\n            decal_params.Radius = decal.Radius;\n            decal_params.StartLatitude = decal.StartLatitude;\n            decal_params.StartLongitude = decal.StartLongitude;\n            decal_params.TextureInstanceId = decal.TextureInstanceId;\n            decal_params.Transparency = decal.Transparency;\n            decal_params.VectorAcross = decal.VectorAcross;\n            decal_params.VectorUp = decal.VectorUp;\n\n        newDecal = Decal.Create(decal_params);\n        if (newDecal == null)\n        {\n            PrintError(\"Failed to create decal copy.\");\n            return false;\n        }\n    }       \n\n    texturedMesh = copy_mesh;\n    return true;\n}",
+      "language": "csharp",
+      "author": "RIL",
+      "post_number": 5,
+      "is_solution": true
+    },
+    {
+      "code": "// Bakes a mesh to the Rhino Document. Applies a (prepared) Decal Texture to \n    // the  mesh and places the Mesh on a dedicated Layer (\"toLayer\")\n    //\n    private Guid BakeMesh(Mesh newMesh, Decal decal, string toLayer)\n    {\n        // Ensure that a target Layer actually exists\n        const int notFoundValue = -1;\n        var toLayerIndex = RhinoDoc.ActiveDoc.Layers.FindByFullPath(toLayer, -1);\n        if (toLayerIndex == notFoundValue)\n        {\n            PrintError(\"The target Layer doesn't exist in the Rhino Document\");\n            return Guid.Empty;\n        }\n\n        ObjectAttributes attrs = new ObjectAttributes();\n        if (decal != null)\n        {\n            attrs.LayerIndex = toLayerIndex;\n            attrs.Decals.Add(decal);\n            // newMesh.Attributes.Decals.Add(newDecal);\n        }\n\n        // Bake\n        var guid = RhinoDoc.ActiveDoc.Objects.AddMesh(newMesh, attrs);\n\n        // Find the baked instance reference inside the Rhino document.\n        var meshObj = RhinoDoc.ActiveDoc.Objects.FindId(guid);\n        meshObj.CommitChanges();\n\n        // Update display\n        RhinoDoc.ActiveDoc.Views.Redraw();\n        return guid;\n    }",
+      "language": "csharp",
+      "author": "RIL",
+      "post_number": 5,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "materials",
+    "mesh",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 5,
+  "views": 97
+}

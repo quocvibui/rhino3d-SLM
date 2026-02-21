@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_intersectlinecircle.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_intersectlinecircle.py",
+  "instruction": "Ex intersectlinecircle",
+  "code": "import rhinoscriptsyntax as rs\nfrom scriptcontext import doc\nimport Rhino\nfrom Rhino.Geometry.Intersect import Intersection, LineCircleIntersection\n\ndef RunCommand():\n  rc, circle = Rhino.Input.RhinoGet.GetCircle()\n  if rc != Rhino.Commands.Result.Success:\n    return rc\n  doc.Objects.AddCircle(circle)\n  doc.Views.Redraw()\n\n  rc, line = Rhino.Input.RhinoGet.GetLine()\n  if rc != Rhino.Commands.Result.Success:\n    return rc\n  doc.Objects.AddLine(line)\n  doc.Views.Redraw()\n\n  lineCircleIntersect, t1, point1, t2, point2 = Intersection.LineCircle(line, circle)\n  message = \"\"\n  if lineCircleIntersect == LineCircleIntersection.None:\n    message = \"line does not intersect circle\"\n  elif lineCircleIntersect == LineCircleIntersection.Single:\n    message = \"line intersects circle at point ({0},{1},{2})\".format(point1.X, point1.Y, point1.Z)\n    doc.Objects.AddPoint(point1)\n  elif lineCircleIntersect == LineCircleIntersection.Multiple:\n    message = \"line intersects circle at points ({0},{1},{2}) and ({3},{4},{5})\".format(\n      point1.X, point1.Y, point1.Z, point2.X, point2.Y, point2.Z)\n    doc.Objects.AddPoint(point1)\n    doc.Objects.AddPoint(point2)\n    \n  print message\n  doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n    RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

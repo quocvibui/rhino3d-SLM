@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/please-delete-this-post/93789",
+  "topic_id": 93789,
+  "title": "Please Delete This Post",
+  "question": "Hello\n\nHow can I define the following GHPython code to solve following problem?\n\nThe cylinder is divided in 3 sectors. The height of the cylinder h should be here constant.\n\nTherefore, I would like change the height of any sector how I want and the other two sectors will change automatically, but the sum of the height of the 3 sectors should not be more than the height h.\n\nHere is a screen shot of the cylinder divided in 3 sectors.\n\n\n\n\ngrafik\n956×463 59.6 KB\n\n\n\nHere is the Grasshopper file.\n\n\nGHPython_13.Dec.2019.gh\n (17.2 KB)\n\nI am looking forward to your helping and many thanks in advance.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\n\n# Calculate the minimum allowed distance between the segments\nmin_dist = MaxHeight / (Count)\ndist = Distance\n\n# Set the distance to the minimum distance if it exceeds the maximum height\nif dist > min_dist:\n    dist = min_dist\n\n# Construct the points\npts = []\nfor i in xrange(Count+1):\n    pt = rg.Point3d(BasePoint.X, BasePoint.Y, i * dist)\n    pts.append(pt)\n\n# Outputs\na = pts",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "\"\"\"Divides the distance between a start and end point into a desired number of\n    segments. The distance between the first two segments corresponds to the\n    desired distance values, whereas the remaining distance is divided equally.\n    If one or both desired distances exceed the distance between both points,\n    both distances get remapped to fit the limits.\n    \n    Inputs:\n        StartPoint: Start point\n        EndPoint: End point\n        Count: Number of segments\n        Dist1: Distance of the first segment\n        Dist2: Distance of the second segment\n    Output:\n        Points: Division points\"\"\"\n\n\nghenv.Component.Name = \"PythonicCustomDivide\"\nghenv.Component.NickName = \"CustomDivide\"\n\n__author__ = \"p1r4t3b0y\"\n__email__ = \"p1r4t3b0y@gmail.com\"\n__version__ = \"1.0\"\n\n\nimport Rhino.Geometry as rg\n\n\ndef fit(value, source_min, source_max, target_min, target_max):\n    \"\"\"Fits a value into new numeric domain.\n    \n    Args:\n      value (int, float): A value to remap.\n      source_min: A start value of the source domain.\n      source_max: An end value of the source domain.\n      target_min: A start value of the target domain.\n      target_max: An end value of the target domain.\n    Returns:\n      The remapped value.\n    \"\"\"\n    source_range = source_max - source_min\n    if source_range == 0:\n        new_value = target_min\n    else:\n        target_range = target_max - target_min\n        new_value = (((value - source_min) * target_range) / \\\n                    source_range) + target_min\n    return new_value\n\n\n# Get the directional vector\ndir = EndPoint - StartPoint\n# Get the maximum distance between the start and end point\nmax_dist = dir.Length\n# Calculate the rest length \nrest_len = max_dist - (Dist1 + Dist2)\n# Unitize the directional vector to length 1\ndir.Unitize()\n\ndiv_pts = [] # divison points\n\n# Get the division points\nif rest_len >= 0: # rest length supports at least the first two divisions\n    # Calculate the division length beyond the second divison\n    div_len = rest_len / (Count - 2)\n    init_dists = [Dist1, Dist2] # initial distances\n    trav_dist = 0.0 # already travelled distance\n    \n    for i in xrange(Count+1):\n        if i == 0: # the start point is the first division point\n            div_pts.append(StartPoint)\n        else: # other division points\n            # Process the desired first and second division points first\n            if len(init_dists) > 0:\n                trav_dist += init_dists[0]\n                next_pt = StartPoint + dir * trav_dist\n                div_pts.append(next_pt)\n                del init_dists[0]\n            # Process the remaining divisions\n            else:\n                # The following two lines are optional!\n                if rest_len == 0.0: # no rest length to divide\n                    break # don't produce points\n                trav_dist += div_len\n                next_pt = StartPoint + dir * trav_dist\n                div_pts.append(next_pt)\n                \nelse: # rest length does not supports even the first two divisions\n    # Remap the desired distances to fit between 0.0 and the maximum distance\n    d1 = fit(Dist1, 0.0, max([Dist1, Dist2]), 0.0, max_dist)\n    d2 = fit(Dist2, 0.0, max([Dist1, Dist2]), 0.0, max_dist)\n    min_d, max_d = sorted([d1, d2]) \n    init_dists = [min_d, max_d - min_d] # initial distances\n    trav_dist = 0.0 # already travelled distance\n    print init_dists\n    for i in xrange(3):\n        if i == 0: # the start point is the first division point\n            div_pts.append(StartPoint)\n        else: # other division points\n            # Process only the remapped first and second division points\n            if len(init_dists) > 0:\n                trav_dist += init_dists[0]\n                next_pt = StartPoint + dir * trav_dist\n                div_pts.append(next_pt)\n                del init_dists[0]     \n\n\n# Outputs\nPoints = div_pts",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 863
+}

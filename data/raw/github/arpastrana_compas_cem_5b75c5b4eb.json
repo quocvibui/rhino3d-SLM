@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/arpastrana/compas_cem/blob/15c9c69fb49971302b5e91be13ab9ad23b7e6f98/src/compas_cem/ghpython/components/CompasCem_TopologyDiagram/code.py",
+  "repo": "arpastrana/compas_cem",
+  "repo_stars": 39,
+  "repo_description": "Inverse design of 3D truss networks with automatic differentiation",
+  "license": "MIT",
+  "filepath": "src/compas_cem/ghpython/components/CompasCem_TopologyDiagram/code.py",
+  "instruction": "Assemble a topology diagram.",
+  "code": "\"\"\"\nAssemble a topology diagram.\n\"\"\"\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom compas_cem.diagrams import TopologyDiagram\n\n\nclass AssembleTopologyDiagramComponent(component):\n    def RunScript(self, trail_edges, deviation_edges, loads, supports, add_auxiliary_trails):\n\n        add_auxiliary_trails = add_auxiliary_trails or False\n        topology = TopologyDiagram()\n\n        if trail_edges:\n            for trail_edge in trail_edges:\n                if trail_edge:\n                    topology.add_edge(trail_edge)\n\n        if deviation_edges:\n            for deviation_edge in deviation_edges:\n                if deviation_edge:\n                    topology.add_edge(deviation_edge)\n\n        if loads:\n            for load in loads:\n                if load:\n                    topology.add_load(load)\n\n        if supports:\n            for support in supports:\n                if support:\n                    topology.add_support(support)\n\n        if trail_edges and supports:\n            topology.build_trails(add_auxiliary_trails)\n\n        elif deviation_edges and add_auxiliary_trails:\n            topology.build_trails(add_auxiliary_trails)\n\n        return topology\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

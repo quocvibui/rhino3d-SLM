@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/very-simple-mover-script-pretty-laggy-in-rhino-6/92705",
+  "topic_id": 92705,
+  "title": "Very simple mover script pretty laggy in Rhino 6?",
+  "question": "Hi,\n\n\nThis script produces a very simple mover/agent/particle that randomly travels within two-dimensional bounds.\n\nI think that it used to work great back in Rhino 5, but seems very laggy in version 6. The mover seems to slow down when approaching the scene centre (?) and the other GH components start to recompute like crazy. There is nothing particular evaluated in this region though.\n\n\n\n\n2019-11-25 10-51-57.2019-11-25 10_53_21.gif\n1410×536 1.87 MB\n\n\n\n\nHere’s the GHPython script:\n\n\nimport Rhino.Geometry as rg\nimport Grasshopper as gh\nimport random\nimport math\n\n\nclass Mover:\n    def __init__(self, pos, vel):\n        \"\"\"Inits this mover.\"\"\"\n        self.pos = pos\n        self.vel = self.contruct_random_vector3d()\n        \n    def update(self):\n        \"\"\"Updates this mover.\"\"\"\n        self.check_bounds()\n        self.pos += self.vel\n        \n    def contruct_random_vector3d(self):\n        \"\"\"Returns a random three-dimensional unit vector.\"\"\"\n        vec = rg.Vector3d.YAxis\n        angles = [math.radians(a) for a in range(15, 345+1, 30)]\n        angle = random.choice(angles)\n        vec.Rotate(angle, rg.Vector3d.ZAxis)\n        return vec\n    \n    def check_bounds(self):\n        next_pos = self.pos + self.vel\n        if next_pos.X > 100 or next_pos.X < -100:\n            self.vel *= -1\n        if next_pos.Y > 100 or next_pos.Y < -100:\n            self.vel *= -1\n    \n###############################################################################    \n\ndef update_component():\n    \"\"\"Updates this component, similar to using a Grasshopper timer.\"\"\"\n    def call_back(e):\n        ghenv.Component.ExpireSolution(False)\n    # Get this Grasshopper document\n    gh_doc = ghenv.Component.OnPingDocument()\n    # Schedule this component to expire\n    gh_doc.ScheduleSolution(1, gh.Kernel.GH_Document.GH_ScheduleDelegate(call_back))\n\n###############################################################################\n\nif Run:\n    mv.update()\n    a = mv.pos\n    b = mv.vel\n    update_component()...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper as gh\nimport random\nimport math\n\n\nclass Mover:\n    def __init__(self, pos, vel):\n        \"\"\"Inits this mover.\"\"\"\n        self.pos = pos\n        self.vel = self.contruct_random_vector3d()\n        \n    def update(self):\n        \"\"\"Updates this mover.\"\"\"\n        self.check_bounds()\n        self.pos += self.vel\n        \n    def contruct_random_vector3d(self):\n        \"\"\"Returns a random three-dimensional unit vector.\"\"\"\n        vec = rg.Vector3d.YAxis\n        angles = [math.radians(a) for a in range(15, 345+1, 30)]\n        angle = random.choice(angles)\n        vec.Rotate(angle, rg.Vector3d.ZAxis)\n        return vec\n    \n    def check_bounds(self):\n        next_pos = self.pos + self.vel\n        if next_pos.X > 100 or next_pos.X < -100:\n            self.vel *= -1\n        if next_pos.Y > 100 or next_pos.Y < -100:\n            self.vel *= -1\n    \n###############################################################################    \n\ndef update_component():\n    \"\"\"Updates this component, similar to using a Grasshopper timer.\"\"\"\n    def call_back(e):\n        ghenv.Component.ExpireSolution(False)\n    # Get this Grasshopper document\n    gh_doc = ghenv.Component.OnPingDocument()\n    # Schedule this component to expire\n    gh_doc.ScheduleSolution(1, gh.Kernel.GH_Document.GH_ScheduleDelegate(call_back))\n\n###############################################################################\n\nif Run:\n    mv.update()\n    a = mv.pos\n    b = mv.vel\n    update_component()\nelse:\n    mv = Mover(Position, Velocity)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 10,
+  "views": 765
+}

@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/offsetting-surface-borders-script-fails-on-rhino-v6-for-windows-but-not-on-v5-for-mac/93965",
+  "topic_id": 93965,
+  "title": "Offsetting Surface borders - script fails on Rhino V6 for windows but not on V5 for Mac?",
+  "question": "As I have mentioned in other topics, I am developing a script for creating tool paths in Rhino. I know there are specialized plugins for that, but I prefer to do it this way.\n\nThe script is ready and works well on my Mac with Rhino 5.4.2, but the main purpose is to share it with a Windows V6 user, and we encountered some problems.\n\n\nI have included an excerpt of my script here, together with a Rhino V6 file containing some of the problematic objects. Basically, you run the script,  select a number of surfaces and an external (i.e. outside the surfaces) reference point, and the script creates the border curves initially, for both external and internal borders.\n\nThe external borders use the user defined reference point. For the internal borders I had to find a way to create a point inside the surface hole, and I chose to rotate a point around the curve end point in 8 steps until one was found inside the borders of the hole.\n\n\nThe test script pauses for a visual check to see if all border curves have been created. When acknowledged, it proceeds to offset the curves by a prescribed amount of 0.15 mm, and then terminates.\n\n\nAs I indicated, this works fine for my Mac and V5, but fails on some (not all) surfaces for Windows V6. I have searched for indicators to find a way to remedy this, but did not find any. I know some of the surfaces are upside down, i.e. with the back face up, but only one of those is problematic.\n\n\nCan somebody help me find the cause?\n\n\nMax.\n\n\nLaserCutting_test.py\n (1.8 KB)\n\n\nmaxtest1.3dm\n (439.3 KB)\n\n\nmaxtest2.3dm\n (787.9 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef OffsetCurveDist(crv_ID,plane,dist,style=1,tol=sc.doc.ModelAbsoluteTolerance):\n    crv=rs.coercecurve(crv_ID)\n    if style==0: trans=Rhino.Geometry.CurveOffsetCornerStyle.None\n    elif style==1: trans=Rhino.Geometry.CurveOffsetCornerStyle.Sharp\n    elif style==2: trans=Rhino.Geometry.CurveOffsetCornerStyle.Round\n    elif style==3: trans=Rhino.Geometry.CurveOffsetCornerStyle.Smooth\n    elif style==4: trans=Rhino.Geometry.CurveOffsetCornerStyle.Chamfer\n    offset=crv.Offset(plane,dist,tol,trans)\n    #offset could contain one or multiple curves or be None\n    if offset:\n        rc=[sc.doc.Objects.AddCurve(o_crv) for o_crv in offset]\n        sc.doc.Views.Redraw()\n        return rc\n\n\n#test function\ncrv_ID=rs.GetObject(\"Select curve to offset\")\ndist=rs.GetReal(\"OffsetDistance?\")\nif crv_ID and dist:\n    offset_ID=OffsetCurveDist(crv_ID,rs.WorldXYPlane(),dist,1)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 19,
+  "views": 1272
+}

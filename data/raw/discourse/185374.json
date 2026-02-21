@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/brep-centroid-without-using-areamassproperties/185374",
+  "topic_id": 185374,
+  "title": "Brep Centroid without using AreaMassProperties",
+  "question": "Dear forum,\n\n\nAfter some debugging I have come to realise that computing the centroid of a brep using\n\n\nAreaMassProperties.Compute\n\n\ntakes a lot of time, even though I only set firstMoment to \ntrue\n.\n\n\nI am wondering if there is an alternative way to AreaMassProperties for getting the centroid of a brep? The Brep is very spatial, thus using the bounding box is not an option.\n\n\nThanks,\n\ndavid",
+  "code_blocks": [
+    {
+      "code": "private void RunScript(Brep x, ref object a)\n    {\n\n        Mesh[] myMesh = Rhino.Geometry.Mesh.CreateFromBrep(x);\n        a = MeshCentroid(myMesh[0]);\n    }\n\n    public Point3d MeshCentroid(Mesh M){\n    M.Faces.ConvertQuadsToTriangles();\n\n    double meshVolume = 0;\n    Point3d temp = new Point3d (0, 0, 0);\n\n    var MTV = M.TopologyVertices;\n    var MF = M.Faces;\n\n    for(int i = 0; i < MF.Count;i++){\n      int[] adjV = MTV.IndicesFromFace(i);\n      Point3d[] V = new Point3d[adjV.Length];\n      for(int j = 0; j < adjV.Length;j++) V[j] = MTV[adjV[j]];\n\n      Point3d center = (V[0] + V[1] + V[2]) / 4;\n      double volume = DotProduct((Vector3d) V[0], CrossProduct((Vector3d) V[1], (Vector3d) V[2])) / 6;\n      meshVolume += volume;\n      temp += center * volume;\n    }\n\n    return temp / meshVolume;\n  }\n\n  public double DotProduct(Vector3d v1, Vector3d v2){\n    double dot = (v1.X * v2.X) + (v1.Y * v2.Y) + (v1.Z * v2.Z);\n    return dot;\n  }\n\n  public Vector3d CrossProduct(Vector3d V1, Vector3d V2){\n    Vector3d cross = new Vector3d (\n      (V1.Y * V2.Z - V1.Z * V2.Y),\n      (V1.Z * V2.X - V1.X * V2.Z),\n      (V1.X * V2.Y - V1.Y * V2.X));\n    return cross;\n  }",
+      "language": "csharp",
+      "author": "DavAndLar",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 8,
+  "views": 259
+}

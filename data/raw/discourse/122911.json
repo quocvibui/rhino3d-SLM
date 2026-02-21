@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-organize-this-code-memory-handling-vs-readability/122911",
+  "topic_id": 122911,
+  "title": "How to organize this code? Memory handling vs readability",
+  "question": "Hi there,\n\n\nWhat is the best way to organize code?\n\n\n\n\n\n\nOrganize by topic categories to be readable and follow logic:\n\n\nAdd user texts: includes a loop for usertext asignment\n\nAdd objects to group: includes another loop\n\n\n\n\n\n\n\n\n# Add user texts:\nrs.SetUserText(obj, \"wallSurface\", \"Base\", attach_to_geometry=False)\nrs.SetUserText(obj, \"SurfaceType\", \"Planar\", attach_to_geometry=False)\nfor i in loft:\n    rs.SetUserText(i, \"wallSurface\", \"Edge_surface\", attach_to_geometry=False)\n# Add objects to group\ngroup = rs.AddGroup()\nrs.AddObjectsToGroup([obj,surfaceOffset[0]], group)\nloft = rs.ExplodePolysurfaces (loft, True)\nfor i in loft:\n    rs.AddObjectToGroup(i,group)\n\n\n\n\n\n\n\n\n\nOrganize that efficient in terms of memory handling.\n\n\nAdd user texts:\n\nAdd objects to group: contains one loop (with user text asignment)\n\n\n\n\n\n\n\n\n# Add user texts:\nrs.SetUserText(obj, \"wallSurface\", \"Base\", attach_to_geometry=False)\nrs.SetUserText(obj, \"SurfaceType\", \"Planar\", attach_to_geometry=False)\n# Add objects to group\ngroup = rs.AddGroup()\nrs.AddObjectsToGroup([obj,surfaceOffset[0]], group)\nloft = rs.ExplodePolysurfaces (loft, True)\nfor i in loft:\n    rs.AddObjectToGroup(i,group)\n    rs.SetUserText(i, \"wallSurface\", \"Edge_surface\", attach_to_geometry=False)",
+  "code_blocks": [
+    {
+      "code": "# Add user texts:\nrs.SetUserText(obj, \"wallSurface\", \"Base\", attach_to_geometry=False)\nrs.SetUserText(obj, \"SurfaceType\", \"Planar\", attach_to_geometry=False)\nfor i in loft:\n    rs.SetUserText(i, \"wallSurface\", \"Edge_surface\", attach_to_geometry=False)\n# Add objects to group\ngroup = rs.AddGroup()\nrs.AddObjectsToGroup([obj,surfaceOffset[0]], group)\nloft = rs.ExplodePolysurfaces (loft, True)\nfor i in loft:\n    rs.AddObjectToGroup(i,group)",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "# Add user texts:\nrs.SetUserText(obj, \"wallSurface\", \"Base\", attach_to_geometry=False)\nrs.SetUserText(obj, \"SurfaceType\", \"Planar\", attach_to_geometry=False)\n# Add objects to group\ngroup = rs.AddGroup()\nrs.AddObjectsToGroup([obj,surfaceOffset[0]], group)\nloft = rs.ExplodePolysurfaces (loft, True)\nfor i in loft:\n    rs.AddObjectToGroup(i,group)\n    rs.SetUserText(i, \"wallSurface\", \"Edge_surface\", attach_to_geometry=False)",
+      "language": "python",
+      "author": "onrender",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 316
+}

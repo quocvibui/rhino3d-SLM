@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/issue-with-polylinecurve-output-in-custom-plugin-ghpython/199985",
+  "topic_id": 199985,
+  "title": "Issue with PolylineCurve Output in Custom Plugin (GHPython)",
+  "question": "Hi everyone,\n\n\nI’m developing a custom Rhino 8 plugin using the RhinoScript editor, and I’m encountering an issue when trying to output PolylineCurves generated from a CPython script.\n\n\nMy script generates streamlines. It works fine when running the code within GHPython or as a Grasshopper user object. However, when I package it as a Rhino plugin, the output of the component displays the following instead of actual curves:\n\n\n<Rhino.Geometry.PolylineCurve object at 0x00000176561EE1C0>\n<Rhino.Geometry.PolylineCurve object at 0x0000017656256200>\n...\n\n\n\nI tried converting the PolylineCurves to NurbsCurves using \nToNurbsCurve()\n and ensuring the output type is set to “Curve” in Grasshopper. Now, when I connect the output to other Grasshopper components, I get this error in the \nGrasshopper Breakpoint\n window:\n\n\nThe supplied data could not be converted.  \nParameter type: GH_Curve, Supplied type: PyObject\n\n\n\nThe same problem occurs with \nPoint3d\n objects for the seed points.\n\n\nHere’s an example of how I’m processing the output:\n\n\n# Convert PolylineCurves to NurbsCurves\ngh_stream_lines = []\nfor curve in streamlines:\n    if curve is not None:\n        try:\n            nurbs = curve.ToNurbsCurve()\n            gh_stream_lines.append(nurbs)\n        except Exception as e:\n            print(\"Error converting curve:\", e)\nstream_lines = gh_stream_lines\n\n\n\n\nEven with these conversions, the issue persists.\n\n\nHas anyone encountered a similar problem when packaging GHPython scripts into plugins? Any suggestions for resolving this conversion issue would be greatly appreciated!\n\n\nThanks in advance for your help!",
+  "code_blocks": [
+    {
+      "code": "<Rhino.Geometry.PolylineCurve object at 0x00000176561EE1C0>\n<Rhino.Geometry.PolylineCurve object at 0x0000017656256200>\n...",
+      "language": "unknown",
+      "author": "Arianna_Venettoni",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 74
+}

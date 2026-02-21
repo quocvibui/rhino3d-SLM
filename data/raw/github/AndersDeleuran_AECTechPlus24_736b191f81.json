@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/AndersDeleuran/AECTechPlus24/blob/1c6ecd8208efc50843b14f890b68c95a837e3dac/Exercises/src/05_GetRhinoObjectsByLayer.py",
+  "repo": "AndersDeleuran/AECTechPlus24",
+  "repo_stars": 34,
+  "repo_description": "For sharing files with workshop participants at AECTech+ Barcelona 2024.",
+  "license": "Apache-2.0",
+  "filepath": "Exercises/src/05_GetRhinoObjectsByLayer.py",
+  "instruction": "05 get rhino objects by layer",
+  "code": "﻿\"\"\"\nGet Geometry on Rhino Layer. Dynamically recomputes on changes in Rhino document.\n    Inputs:\n        Layer: Name of Rhino layer to get Geometry from {item,str}\n    Outputs:\n        Geometry: Geometry that is on Rhino Layer {list,geometry}\n    Remarks:\n        Author: Anders Holden Deleuran (BIG IDEAS)\n        Rhino: 7.12.21299.13001\n        Version: 211028\n\"\"\"\n\nghenv.Component.Name = \"GetRhinoGeometry\"\nghenv.Component.NickName = \"GRG\"\n\nimport Rhino as rc\nimport GhPython.Assemblies.ExecutingComponent as component\n\nclass GetRhinoGeometry(component):\n    \n    runs = 0\n    def RunScript(self,Layer):\n        if Layer:\n            self.runs += 1\n            self.Message = \"Recomputes: \" + str(self.runs)\n            Geometry = []\n            for obj in rc.RhinoDoc.ActiveDoc.Objects.FindByLayer(Layer):\n                Geometry.append(obj.Geometry)\n            return Geometry\n        else:\n            return []\n            \n    def callBack(self,e):\n        self.ExpireSolution(False)\n        \n    def updateComponent(self,sender,e):\n        self.OnPingDocument().ScheduleSolution(1,self.callBack)\n        \n    def __enter__(self):\n        rc.RhinoDoc.AddRhinoObject += self.updateComponent\n        rc.RhinoDoc.DeleteRhinoObject += self.updateComponent\n        rc.RhinoDoc.UndeleteRhinoObject += self.updateComponent\n        rc.RhinoDoc.ModifyObjectAttributes += self.updateComponent\n        \n    def __exit__(self):\n        rc.RhinoDoc.AddRhinoObject -= self.updateComponent\n        rc.RhinoDoc.DeleteRhinoObject -= self.updateComponent\n        rc.RhinoDoc.UndeleteRhinoObject -= self.updateComponent\n        rc.RhinoDoc.ModifyObjectAttributes -= self.updateComponent",
+  "language": "python",
+  "imports": [
+    "Rhino"
+  ],
+  "has_docstring": false
+}

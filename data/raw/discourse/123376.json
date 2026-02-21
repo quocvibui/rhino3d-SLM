@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grasshopper-python-cant-move-objects-on-one-different-layer/123376",
+  "topic_id": 123376,
+  "title": "Grasshopper Python: Can't Move objects on one different Layer",
+  "question": "Hello, here is my first post, beeing new to Python but rather skilled on Rhino and Grasshopper.\n\nMy project is to automate import of large number of iGES files, made of many surfaces. That I need to join in polysurfaces. I then need to store them in different layers and sublayers.\n\nI found how to code in a GH Python Component the importing of files and joining the surface objects, but the moving to layers does not work.\n\nI am stuck with this for hours… My research on Forums and web seem to show that ObjectLayer may not work in Grasshopper, but no clue on how to achieve this…\n\nMany thanks for your help.\n\n\nI have following error code\n\n\nRuntime error (TypeErrorException): Parameter must be a Guid or string representing a Guid\n\n\nTraceback:\n\n\n\n\nline 890, in coerceguid, “C:\\Users\\d3h\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py”*\n\n\nline 1062, in coercerhinoobject, “C:\\Users\\d3h\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\utility.py”*\n\n\nline 910, in ObjectLayer, “C:\\Users\\d3h\\AppData\\Roaming\\McNeel\\Rhinoceros\\6.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\object.py”*\n\n\nline 23, in RunScript, “”*\n\n\n\n\nHere is the code in GH component:\n\n\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nimport Grasshopper, GhPython\n\nimport System\n\nimport Rhino\n\nimport rhinoscriptsyntax as rs\n\nfrom scriptcontext import doc\n\n\nclass MyComponent(component):\n\n\ndef RunScript(self, LayerPath, igesfile):\n\n    __author__ = \"d3h\"\n    __version__ = \"2021.04.29\"\n    \n    import rhinoscriptsyntax as rs\n    import os\n    rs.EnableRedraw(False)\n    rs.Command('_-Import \"{}\" _Enter'.format(igesfile), False)\n    NewObj=rs.Command('_SelLast')\n    if NewObj:\n        #Join surfaces in a Polysurface\n        NewObj_Join=rs.Command('_Join')\n        rs.ObjectLayer(NewObj,LayerPath)\n    rs.Ena...",
+  "code_blocks": [
+    {
+      "code": "def RunScript(self, LayerPath, igesfile):\n            \n    __author__ = \"d3h\"\n    __version__ = \"2021.04.29\"\n\n    def ObjInLayer(LayerPath, igesfile):\n    \n        import Rhino as rc\n        import scriptcontext as sc\n        import rhinoscriptsyntax as rs\n        import os\n    \n    # Set context to Rhino document and disable redraw\n        sc.doc = rc.RhinoDoc.ActiveDoc\n        rs.EnableRedraw(False)\n        \n        NewObj=rs.Command('_-Import \"{}\" _Enter'.format(igesfile), False)\n        #NewObj=rs.Command('_SelLast')\n        if NewObj:\n            #Join surfaces in a Polysurface\n            rs.Command('_Join')\n            \n            #rs.Command('_SelLast')\n            #print rs.SelectedObjects()\n            if NewObj_Join:\n                ObjInLayer= rs.ObjectLayer(rs.SelectedObjects,LayerPath)\n\n        # Set context back to Grasshopper\n        rs.EnableRedraw(True)\n        sc.doc = ghdoc\n        ResultOK=ObjInLayer\n        \n        # return outputs if you have them; here I try it for you:\n        return ResultOK",
+      "language": "python",
+      "author": "jean-luc.baudry",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def RunScript(self, LayerPath, igesfile):\n\n    __author__ = \"d3h\"\n    __version__ = \"2021.04.29\"\n    \n    import rhinoscriptsyntax as rs\n    import os\n    rs.EnableRedraw(False)\n    rs.Command('_-Import \"{}\" _Enter'.format(igesfile), False)\n    NewObj=rs.Command('_SelLast')\n    if NewObj:\n        #Join surfaces in a Polysurface\n        NewObj_Join=rs.Command('_Join')\n        rs.ObjectLayer(NewObj,LayerPath)\n    rs.EnableRedraw(True)\n   \n    return a",
+      "language": "python",
+      "author": "jean-luc.baudry",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 3,
+  "views": 848
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/finding-object-reference-by-guid-or-name/188024",
+  "topic_id": 188024,
+  "title": "Finding object reference by GUID (or name)",
+  "question": "How would I retrieve the object reference of an object which I can identify by its name or GUID?  Let us assume I have mesh named “stone” (e.g. in attached demo), I can find it by name and retrieve its GUID\n\n\nimport rhinoscriptsyntax as rs\ndub = rs.ObjectsByName(\"stone\")\nprint(dub)\nprint(dub[0])\n\n\n\nthis returns\n\n\n[<System.Guid object at 0x000001D30EE8BA80>]\n682b1c40-beeb-4799-8634-1b9c82edeedf\n\n\n\nHow would I get the object reference pointer to that “stone” object? This would empower me to directly utilize methods taking ObjRef (instead of GUID) as input reference. My below attempt\n\n\nRhino.DocObjects.Tables.ObjectTable.FindId(dub)\nRhino.DocObjects.Tables.ObjectTable.FindId(dub[0])\n\n\n\nsadly does not work out? Any help appreciated\n\n\ndemo.3dm\n (215.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\nimport Rhino\nname = \"stone\"\nguids = rs.ObjectsByName(name)\n\nif guids:\n    guid = guids[0]\n    print(\"GUID:\", guid)\n    rhino_object = scriptcontext.doc.Objects.Find(guid)\n    \n    if rhino_object:\n        obj_ref = Rhino.DocObjects.ObjRef(rhino_object)\n        print(\"ObjRef:\", obj_ref)\n    else:\n        print(\"Object not found in document.\")\nelse:\n    print(\"No object with the name 'stone' found.\")",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ndub = rs.ObjectsByName(\"stone\")\nprint(dub)\nprint(dub[0])",
+      "language": "python",
+      "author": "Carsten_Keil",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 158
+}

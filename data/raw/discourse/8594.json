@@ -1,0 +1,46 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-plug-in-object-using-rhinocommon/8594",
+  "topic_id": 8594,
+  "title": "Get plug-in object using RhinoCommon",
+  "question": "Hello Community,\n\n\nI try to get the plug in object using RhinoCommon in python but the RhinoCommon function keep returning me None…\n\n\nI am sure that I missed somthing…\n\n\nHere the code trying to get the plug in “Calc” object in standard in Rhinoceros.\n\n\n# coding=utf-8\n\nimport rhinoscriptsyntax as rs\nimport Rhino \nimport scriptcontext \n\n\ndef Main():\n\t\n\t\n\tIdPlugIn = Rhino.PlugIns.PlugIn.IdFromName(\"Calc\")\n\t\n\tobjPlugIn = Rhino.PlugIns.PlugIn.Find(IdPlugIn)\n\t\n\tprint IdPlugIn , \" \" , IdPlugIn.GetType()\n\tprint objPlugIn\n\t\n\t\n\treturn\n\n\nif( __name__ == \"__main__\" ):\n\tMain()\n\n\n\nIt return:\n\n\nf967607d-dfdc-497e-9fa6-28acedd332c7   System.Guid\nNone\n\n\n\nI thank you in advance for the hand.\n\n\nLoïc\n\n\nPS : I use the last SR 9 version 64bit",
+  "code_blocks": [
+    {
+      "code": "Listing all plugIns that could not be loaded:\nPlugIn WebBrowser could not be loaded!\nPlugIn Renderer Development Kit could not be loaded!\nPlugIn RPC could not be loaded!\nPlugIn Rhino Bonus Tools could not be loaded!\nPlugIn Rhino Labs Tools could not be loaded!\nPlugIn AnimationTools could not be loaded!\nPlugIn IdleProcessor could not be loaded!\nPlugIn Rhino Render could not be loaded!\nPlugIn AssemblyLibrary could not be loaded!\nPlugIn Renderer Development Kit UI could not be loaded!\nPlugIn Snapshots could not be loaded!\nPlugIn Alerter could not be loaded!\nPlugIn IronPython could not be loaded!\nPlugIn ScaleOverlay could not be loaded!\nPlugIn Grasshopper could not be loaded!\nPlugIn LNurbs could not be loaded!\nPlugIn PDF Export could not be loaded!\nPlugIn 3Dconnexion 3D Mouse could not be loaded!\nPlugIn BlockEdit could not be loaded!\nPlugIn Displacement could not be loaded!\nPlugIn SolidTools could not be loaded!\nPlugIn import_3MF could not be loaded!\nPlugIn Export_FBX could not be loaded!\nPlugIn MeshFromPoints could not be loaded!\nPlugIn RhinoScript Editor could not be loaded!\nPlugIn Import_FBX could not be loaded!\nPlugIn ACIS Export could not be loaded!\nPlugIn ZCorp Import could not be loaded!\nPlugIn MicroStation file import: import_DGN could not be loaded!\nPlugIn Lightwave Import could not be loaded!\nPlugIn RhinoScript could not be loaded!\nPlugIn VRML Import could not be loaded!\nPlugIn export_3MF could not be loaded!\nPlugIn X Export could not be loaded!\nPlugIn Raw Triangles Export could not be loaded!\nPlugIn STL Export could not be loaded!\nPlugIn Import_AMF could not be loaded!\nPlugIn SLC Import could not be loaded!\nPlugIn Import_DST could not be loaded!\nPlugIn AutoCAD file export : export_ACAD could not be loaded!\nPlugIn Lightwave Export could not be loaded!\nPlugIn Windows Metafile Export could not be loaded!\nPlugIn VRML/X3D Export could not be loaded!\nPlugIn Squish could not be loaded!\nPlugIn export_OBJ could not be loaded!\nPlugIn Adobe Illustrator Export could not be loaded!\nPlugIn XGL Export could not be loaded!\nPlugIn Import_M could not be loaded!\nPlugIn CreaseAngle could not be loaded!\nPlugIn Points Export could not be loaded!\nPlugIn ZCorp Export could not be loaded!\nPlugIn OFF Import could not be loaded!\nPlugIn SketchUp Export could not be loaded!\nPlugIn POV-Ray Export could not be loaded!\nPlugIn Tutorials could not be loaded!\nPlugIn PLY - Polygon File Format Import could not be loaded!\nPlugIn AutoCAD file import: import_ACAD could not be loaded!\nPlugIn STEP Import could not be loaded!\nPlugIn Renderman Export could not be loaded!\nPlugIn MeshCommands could not be loaded!\nPlugIn MicroScribe Digitizer could not be loaded!\nPlugIn STEP Export could not be loaded!\nPlugIn Rhino Options Manager could not be loaded!\nPlugIn IGES Export Plug-in could not be loaded!\nPlugIn WAMIT Export could not be loaded!\nPlugIn IGES Import Plug-in could not be loaded!\nPlugIn VDA Export could not be loaded!\nPlugIn X Import could not be loaded!\nPlugIn RAW Triangle Import could not be loaded!\nPlugIn SLC Export could not be loaded!\nPlugIn PDFReader could not be loaded!\nPlugIn Walkabout could not be loaded!\nPlugIn Moray Export could not be loaded!\nPlugIn NextEngine Import could not be loaded!\nPlugIn MeshTools could not be loaded!\nPlugIn GTS Export could not be loaded!\nPlugIn Romer Digitizer could not be loaded!\nPlugIn WAMIT import could not be loaded!\nPlugIn export_xaml could not be loaded!\nPlugIn Export SVG could not be loaded!\nPlugIn STL Import could not be loaded!\nPlugIn VDA Import could not be loaded!\nPlugIn SketchUp Import could not be loaded!\nPlugIn PLY - Polygon File Format Export could not be loaded!\nPlugIn Cult3D Export could not be loaded!\nPlugIn General Hydrostatics (GHS) Export could not be loaded!\nPlugIn Export_DAE could not be loaded!\nPlugIn Solidworks Import could not be loaded!\nPlugIn 3D Studio Export could not be loaded!\nPlugIn Parasolid Export could not be loaded!\nPlugIn Faro USB Digitizer could not be loaded!\nPlugIn General Hydrostatics (GHS) Import could not be loaded!\nPlugIn Export_AMF could not be loaded!\nPlugIn Comma Separated Value Export could not be loaded!\nPlugIn E57 Import could not be loaded!\nPlugIn Points Import could not be loaded!\nPlugIn MPlane could not be loaded!\nPlugIn Import_SVG could not be loaded!\nPlugIn Calc could not be loaded!\nPlugIn GTS Triangle Import could not be loaded!\nPlugIn Import_OBJ could not be loaded!\nPlugIn Named Position could not be loaded!\nPlugIn Denoise Raytraced could not be loaded!\n\nNow listing all PlugIns tha loaded successfully:\nPlugIn Commands loaded successfully!\nPlugIn BlockManagerQOL loaded successfully!\nPlugIn RDK_EtoUI loaded successfully!\nPlugIn RhinoCycles loaded successfully!\nPlugIn Toolbars loaded successfully!\nPlugIn RaytracedBlendMaterial loaded successfully!\nPlugIn Rhino Render Next loaded successfully!\n\nFrom 110 installed plugIns only 7 could be loaded, the other 103 failed to load!",
+      "language": "python",
+      "author": "lando.schumpich",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "var names = Rhino.PlugIns.PlugIn.GetInstalledPlugInNames();\n            List<string>[] results = new List<string>[2] {new List<string>(), new List<string>()};\n            foreach (var name in names)\n            {\n                var id = Rhino.PlugIns.PlugIn.IdFromName(name);\n                var plugIn = Rhino.PlugIns.PlugIn.Find(id);\n\n                if(plugIn is null)results[0].Add(name);\n                else results[1].Add(name);\n            }\n\n            RhinoApp.WriteLine(\"Listing all plugIns that could not be loaded:\");\n            foreach (var notLoaded in results[0])\n            {\n                RhinoApp.WriteLine($\"PlugIn {notLoaded} could not be loaded!\");\n            }\n\n            RhinoApp.WriteLine(\"\");\n            RhinoApp.WriteLine(\"Now listing all PlugIns tha loaded successfully:\");\n            foreach (var loaded in results[1])\n            {\n                RhinoApp.WriteLine($\"PlugIn {loaded} loaded successfully!\");\n\n            }\n            RhinoApp.WriteLine(\"\");\n            RhinoApp.WriteLine($\"From {names.Length} installed plugIns only {results[1].Count} could be loaded, the other {results[0].Count} failed to load!\");",
+      "language": "csharp",
+      "author": "lando.schumpich",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "# coding=utf-8\n\nimport rhinoscriptsyntax as rs\nimport Rhino \nimport scriptcontext \n\n\ndef Main():\n\t\n\t\n\tIdPlugIn = Rhino.PlugIns.PlugIn.IdFromName(\"Calc\")\n\t\n\tobjPlugIn = Rhino.PlugIns.PlugIn.Find(IdPlugIn)\n\t\n\tprint IdPlugIn , \" \" , IdPlugIn.GetType()\n\tprint objPlugIn\n\t\n\t\n\treturn\n\n\nif( __name__ == \"__main__\" ):\n\tMain()",
+      "language": "python",
+      "author": "loic",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "materials",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 13,
+  "views": 3546
+}

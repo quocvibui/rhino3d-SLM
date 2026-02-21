@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/createfilletcurves-returns-empty-array/40452",
+  "topic_id": 40452,
+  "title": "CreateFilletCurves returns empty array",
+  "question": "Hello,\n\nCan someone Please tell me what is wrong with this chunk of code?\n\n\nfrom Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\nimport math\n\ndef BowProfFillet(StemCrv,KeelCrv):\n    Crv1 = rs.coercecurve(StemCrv)\n    Pt1 = rs.CurveStartPoint(StemCrv)\n    Crv2 = rs.coercecurve(KeelCrv)\n    Pt2 = rs.CurveStartPoint(KeelCrv)\n    FilletCrvs = Curve.CreateFilletCurves(Crv1,Pt1,Crv2,Pt2,1,\n        True,True,True,0.001, 0.01)\n    doc.Objects.AddCurve(FilletCrvs[0])\n\n\n\nStemCrv and KeelCrv are GUIDs of the two curves I am trying to fillet, but I get an empty array back from Curve.CreateFilletCurves(). Is there something I’m am doing wrong? I found the example code online that uses Curve.CreateFilletCurves() and can get it to work, but when I try to implement it in my own code I get nothing.\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\nimport math\n\n__commandname__ = \"GenHull\"\n\ndef StemLine(Input):\n    BaseLinePt = (-Input['Origin_Height']/(math.tan(Input['Bow_Rake_Angle']*math.pi/180.0)),0.0,0.0)\n    BowPt = ((Input['Depth']-Input['Origin_Height'])/(math.tan(Input['Bow_Rake_Angle']*math.pi/180.0)),0.0,Input['Depth'])\n    crvpts = [BowPt,BaseLinePt]\n    StemCrv = rs.AddCurve(crvpts,degree=3)\n    return StemCrv\n\ndef KeelLine(Input,StemCrv):\n    KeelStrtPt = rs.CurveEndPoint(StemCrv)\n    FwdPt = rs.CurveStartPoint(StemCrv)\n    KeelFlatEndPt = (Input['Midbody_Hull_XPos'],0.0,0.0)\n    SternPt2 = (FwdPt.X-Input['LOA'],0.0,Input['Prop_Clearance'])\n    SternRun = -math.cos(Input['Stern_Rise_Angle']*math.pi/180.0)\n    SternRise = math.sin(Input['Stern_Rise_Angle']*math.pi/180.0)\n    SternPt1 = (SternPt2[0]-SternRun*Input['Stern_Length'],0.0,SternPt2[2]-SternRise*Input['Stern_Length'])\n    KeelCrv1Pts = [KeelStrtPt,KeelFlatEndPt]\n    KeelCrv2Pts = [KeelFlatEndPt,SternPt1]\n    KeelCrv3Pts = [SternPt1,SternPt2]\n    KeelCrv1 = rs.AddCurve(KeelCrv1Pts,degree = 1)\n    KeelCrv2 = rs.AddInterpCurve(KeelCrv2Pts,degree = 3,knotstyle=2,start_tangent=(-1.0,0.0,0.0),end_tangent=(SternRun,0.0,SternRise))\n    KeelCrv3 = rs.AddCurve(KeelCrv3Pts,degree = 1)\n    KeelCrv = rs.JoinCurves([KeelCrv1,KeelCrv2,KeelCrv3],delete_input=True)\n    \n    return KeelCrv\n    \ndef BowProfFillet(Input,StemCrv,KeelCrv):\n    Crv1 = rs.coercecurve(StemCrv)\n    Pt1 = rs.CurveEndPoint(StemCrv)\n    Crv2 = rs.coercecurve(KeelCrv)\n    Pt2 = rs.CurveStartPoint(KeelCrv)\n    FilletCrvs = Curve.CreateFilletCurves(Crv1,Pt1,Crv2,Pt2,10.0,\n        True,True,True,0.001, 0.01)\n    doc.Objects.AddCurve(FilletCrvs[0])\n    #StemCrv = rs.JoinCurves(Crvs[0],Crvs[1])\n    #KeelCrv = Crvs[2]\n    \n    print \"pause\"\n    return\n\n\"\"\"\ndef SternLine():\n    \n    #return SternCrv\n\ndef DeckLine():\n    \n    #return DeckCrv\n\"\"\"\ndef RunCommand( is_interactive ):\n    #inputs\n    Input = {'Beam' : 30,\n                   'LOA'  : 100,\n                   'LWL'  : 75,\n                   'Depth' : 25,\n                   'Origin_Height' : 7,\n                   'Midbody_Hull_Length' : 20,\n                   'Midbody_Hull_XPos' : -60,\n                   'Midbody_Deck_Length' : 35,\n                   'Midbody_Deck_XPos' : -67.5,\n                   'Keel_Width' : 2,\n                   'Bilge_Radius' : 3,\n                   'Deadrise' : 1,\n                   'Half_Entrance_Angle': 30,\n                   'Bow_Rake_Angle' : 60,\n                   'Bow_Radius' : 10,\n                   'Prop_Clearance' : 6.5,\n                   'Stern_Width' : 25,\n                   'Stern_Length' : 4,\n                   'Stern_Rise_Angle' : 7}\n    \n    StemCrv = StemLine(Input)\n    KeelCrv = KeelLine(Input,StemCrv)\n    BowProfFillet(Input,StemCrv,KeelCrv)\n\nif( __name__==\"__main__\" ):\n    RunCommand(True)",
+      "language": "python",
+      "author": "NavArch",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def BowProfFillet(Input,StemCrv,KeelCrv):\n\nCrv1 = rs.coercecurve(StemCrv)\ndom =  Crv1.Domain\npar = dom.Mid + ((dom.T1-dom.Mid)/2)\nPt1 = Crv1.PointAt(par)\n\nCrv2 = rs.coercecurve(KeelCrv)\ndom =  Crv2.Domain\npar = dom.Mid + ((dom.T1-dom.Mid)/2)\nPt2 = Crv2.PointAt(par)\n\n#Pt2 = rs.CurveStartPoint(KeelCrv)\nFilletCrvs = Curve.CreateFilletCurves(Crv1,Pt1,Crv2,Pt2,10.0,\n    True,True,True,0.001, 0.01)\n    \nif len(FilletCrvs) !=0: doc.Objects.AddCurve(FilletCrvs[0])\ndoc.Views.Redraw()\n   \n#StemCrv = rs.JoinCurves(Crvs[0],Crvs[1])\n#KeelCrv = Crvs[2]\n\nprint \"pause\"\nreturn",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "from Rhino import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Input.Custom import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\nimport math\n\ndef BowProfFillet(StemCrv,KeelCrv):\n    Crv1 = rs.coercecurve(StemCrv)\n    Pt1 = rs.CurveStartPoint(StemCrv)\n    Crv2 = rs.coercecurve(KeelCrv)\n    Pt2 = rs.CurveStartPoint(KeelCrv)\n    FilletCrvs = Curve.CreateFilletCurves(Crv1,Pt1,Crv2,Pt2,1,\n        True,True,True,0.001, 0.01)\n    doc.Objects.AddCurve(FilletCrvs[0])",
+      "language": "python",
+      "author": "NavArch",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 857
+}

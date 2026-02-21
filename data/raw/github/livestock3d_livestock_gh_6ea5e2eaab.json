@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/livestock3d/livestock_gh/blob/97309ebe4bff2c00ae6ce3a44d5b01e2e433ea6c/python/lib/ssh.py",
+  "repo": "livestock3d/livestock_gh",
+  "repo_stars": 8,
+  "repo_description": "Livestock is a plugin/library for Grasshopper",
+  "license": "LGPL-3.0",
+  "filepath": "python/lib/ssh.py",
+  "instruction": null,
+  "code": "__author__ = \"Christian Kongsgaard\"\n__license__ = \"GNU GPLv3\"\n\n# -------------------------------------------------------------------------------------------------------------------- #\n# Imports\n\n# Module imports\nimport os\n\n# Livestock imports\nimport livestock.lib.misc as gh_misc\nimport livestock.lib.templates as templates\n\n# Grasshopper imports\nimport scriptcontext as sc\n\n\n# -------------------------------------------------------------------------------------------------------------------- #\n# Grasshopper SSH functions\n\nlivestock_path = r'C:\\livestock'\nssh_path = os.path.join(livestock_path, 'ssh')\nlocal_path = os.path.join(livestock_path, 'local')\n\n\ndef get_ssh():\n    \"\"\"Extracts the SSH information from a sticky\"\"\"\n\n    ip = str(sc.sticky[\"SSH\"]['ip'])\n    port = str(sc.sticky[\"SSH\"]['port'])\n    user = str(sc.sticky[\"SSH\"]['user'])\n    pw = str(sc.sticky[\"SSH\"]['password'])\n\n    ssh_dict = {'ip': ip, 'port': port, 'user': user, 'password': pw}\n\n    return ssh_dict\n\n\ndef clean_ssh_folder():\n    \"\"\"Cleans the livestock/ssh folder on the C drive.\"\"\"\n\n    if os.path.isdir(ssh_path):\n        for file in os.listdir(ssh_path):\n            os.remove(ssh_path + '/' + file)\n    else:\n        os.mkdir(ssh_path)\n\n\ndef clean_local_folder():\n    \"\"\"Cleans the livestock/local folder on the C drive.\"\"\"\n\n    if os.path.isdir(local_path):\n        for file in os.listdir(local_path):\n            os.remove(local_path + '/' + file)\n    else:\n        os.mkdir(local_path)\n\n\ndef write_ssh_commands(ssh_dict):\n    \"\"\"\n    Write the files need for Livestock SSH connection to work.\n\n    :param ssh_dict: Dictionary with all SSH information. Needs to be on the following form:\n    {'ip': string, 'user': string,\n    'port': string, 'password': 'string',\n    'file_transfer': list of strings, 'file_run': list of strings,\n    'file_return': list of strings, 'template': string}\n    \"\"\"\n\n    # Write SSH commands\n    gh_misc.write_file([ssh_dict['ip'],\n                        ssh_dict['port'],\n                        ssh_dict['user'],\n                        ssh_dict['password'],\n                        ssh_dict['file_transfer'],\n                        ssh_dict['file_run'],\n                        ssh_dict['file_return']\n                        ],\n                        ssh_path,\n                        'in_data')\n\n    # Write templates\n    templates.ssh_template(ssh_path)\n    templates.pick_template(ssh_dict['template'], ssh_path)\n\n    return True\n",
+  "language": "python",
+  "imports": [
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

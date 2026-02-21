@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/selection-filter-crhinogetobject-curve-object-finds-also-mesh-edges/213023",
+  "topic_id": 213023,
+  "title": "Selection filter CRhinoGetObject::curve_object finds also mesh edges",
+  "question": "When I start a Curve selection with \nCRhinoGetObject::curve_object\n in Rhino 8 in a command and the Curve is on top of a mesh the selection finds also mesh edges. This is very annoying and was not the case in earlier versions. Example:\n\n\n____\n\n\nunsigned int geometry_type_filter = 0;\n\ngeometry_type_filter |= CRhinoGetObject::curve_object;\n\n\nCRhinoGetObject getInputObject;\n\ngetInputObject.SetCommandPrompt(L\"Select 2 to 4 Curves\");\n\ngetInputObject.SetGeometryFilter(geometry_type_filter);\n\n\nCRhinoGet::result myResult = getInputObject.GetObjects(2, 4);\n\n\n____\n\n\nHow can I avoid it programmatically? I know, when I switch off the “Mesh” filter in the GUI the selection returns only a curve or surface edge, but I would like to configure it in my code prior the selection.\n\n\nI tried also \ngetInputObject.SetGeometryAttributeFilter()\n but did not know what input to use.",
+  "code_blocks": [
+    {
+      "code": "CRhinoGetObject go;\ngo.SetCommandPrompt(L\"Select curves\");\ngo.SetGeometryFilter(CRhinoGetObject::curve_object);\ngo.EnableMeshSelections(false);\ngo.EnableSubDSelections(false);\ngo.GetObjects(1, 0);\nif (go.CommandResult() != CRhinoCommand::success)\n  return go.CommandResult();",
+      "language": "unknown",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 3,
+  "views": 62
+}

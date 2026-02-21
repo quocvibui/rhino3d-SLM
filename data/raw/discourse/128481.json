@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-or-rhino-script-experience-needed/128481",
+  "topic_id": 128481,
+  "title": "Python or Rhino Script Experience needed",
+  "question": "I have an old Python Script that could be used to bulk edit a folder of 3dm files.  It purpose was to zoom, shade, position, turn off grid and coordinate symbol.  I had it written for me many years ago and there seems to be some errors that I am very unfamiliar with. I’m trying to find someone who could either correct the errors in the Python script or rewrite it as a rhino script so that I could use it on some models. Please let me know if you are interested I am more than happy to pay for the work and I can share with you the original script that was written for me which I believe would have all the necessary commands and such.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\nimport Rhino as R\nimport sys\nimport os\nimport scriptcontext\n\ntargetfolder = rs.BrowseForFolder()\nprint \"Selecting all 3dm files in \", targetfolder\n\nfor i in os.listdir(targetfolder):\n    if i.endswith(\".3dm\"):\n        print \"-------- processing \",i\n        fullpath=os.path.join(targetfolder,i).lower()\n        print \"-------------- opening\"\n        rs.Command(\"_-Open \"+chr(34)+fullpath+chr(34)+\" _Enter _Enter\", False)\n        print \"-------------- zooming extents\"\n        rs.Command(\"_-Zoom _All _Extents\", False)\n        print \"-------------- setting active view to perspective\"\n        rs.Command(\"_-SetActiveViewport Perspective\", False)\n        print \"-------------- setting viewmode to 1\"\n        rs.Command(\"_-SetDisplayMode Mode=Rendered\", False)\n        print \"-------------- hiding grid\"\n        rs.ShowGrid(show=False)\n        print \"-------------- hiding gridaxes\"\n        rs.ShowGridAxes(show=False)\n        print \"-------------- getting layer\"\n        layer = scriptcontext.doc.Layers.CurrentLayer\n        print \"-------------- setting layer color\"\n        layer.Color = scriptcontext.doc.Layers.CurrentLayer.Color.Turquoise\n        modifySuccess = scriptcontext.doc.Layers.Modify(layer, layer.LayerIndex, False)\n        if( modifySuccess ): scriptcontext.doc.Views.Redraw()\n        print \"-------------- saving\"\n        rs.Command(\"_-Save \"+chr(34)+fullpath+chr(34), False)\nprint \"*******DONE*******\"",
+      "language": "python",
+      "author": "bill4",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport System\nimport Rhino as R\nimport sys\nimport os\nimport scriptcontext\n\ntargetfolder = rs.BrowseForFolder()\nprint \"Selecting all 3dm files in \", targetfolder\n\nfor i in os.listdir(targetfolder):\n    if i.endswith(\".3dm\"):\n            print \"-------- processing \",i\n    fullpath=os.path.join(targetfolder,i).lower()\n    print \"-------------- opening\"\n    rs.Command(\"_-Open \"+chr(34)+fullpath+chr(34)+\" Enter Enter\", False)\n    print \"-------------- zooming extents\"\n    rs.Command(\"-Zoom All Extents\", False)\n    print \"-------------- setting active view to perspective\"\n    rs.Command(\"-SetActiveViewport Perspective\", False)\n    print \"-------------- setting viewmode to 1\"\n    rs.Command(\"-SetDisplayMode Mode=Rendered\", False)\n    print \"-------------- hiding grid\"\n    rs.ShowGrid(show=False)\n    print \"-------------- hiding gridaxes\"\n    rs.ShowGridAxes(show=False)\n    print \"-------------- getting layer\"\n    layer = scriptcontext.doc.Layers.CurrentLayer\n    print \"-------------- setting layer color\"\n    layer.Color = scriptcontext.doc.Layers.CurrentLayer.Color.Turquoise\n    modifySuccess = scriptcontext.doc.Layers.Modify(layer, layer.LayerIndex, False)\n    if( modifySuccess ): scriptcontext.doc.Views.Redraw()\n    print \"-------------- saving\"\n    rs.Command(\"-Save \"+chr(34)+fullpath+chr(34), False)\nprint \"DONE\"",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "materials",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 420
+}

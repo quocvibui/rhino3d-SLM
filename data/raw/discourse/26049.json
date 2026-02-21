@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-create-a-solid-volume-from-surfaces-without-using-the-mouse-to-select-the-surfaces/26049",
+  "topic_id": 26049,
+  "title": "How to create a solid (volume) from surfaces without using the mouse to select the surfaces?",
+  "question": "I know I could use the rhino command to select all and then _createsolid or _join to get by in certain occasions. But what if I just want to select a few not all surfaces that have been generated before using python script. I do not want to use GetObjects to pick objects. Just want to automate the process to either create a volume( solid) or join all the surfaces if the surfaces are not closed.\n\n\nsay previously the surfaces are generated from points.\n\n\nimport Rhino\n\nimport Rhino.Geometry.Point3d as P3\n\nimport scriptcontext as sc\n\n\nptA=P3(0,0,0)\n\nptB=P3(10,0,0)\n\nptC=P3(10,10,0)\n\nptD=P3(0,20,0)\n\nptE=P3(-10,10,0)\n\nptF=P3(-10,0,0)\n\nptG=P3(0,0,10)\n\nptH=P3(10,0,10)\n\nptI=P3(10,10,10)\n\nptJ=P3(0,15,10)\n\nptK=P3(-10,10,10)\n\nptL=P3(-10,0,10)\n\n\npl_crv1=Rhino.Geometry.PolylineCurve([ptA,ptB,ptC,ptD,ptE,ptF,ptA])\n\nbreps1=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv1)\n\nobjID1s=[sc.doc.Objects.AddBrep(brep) for brep in breps1]\n\nsc.doc.Views.Redraw()\n\n\npl_crv2=Rhino.Geometry.PolylineCurve([ptG,ptH,ptI,ptJ,ptK,ptL,ptG])\n\nbreps2=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv2)\n\nobjID2s=[sc.doc.Objects.AddBrep(brep) for brep in breps2]\n\nsc.doc.Views.Redraw()\n\n\npl_crv3=Rhino.Geometry.PolylineCurve([ptF,ptB,ptH,ptL,ptF])\n\nbreps3=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv3)\n\nobjID3s=[sc.doc.Objects.AddBrep(brep) for brep in breps3]\n\nsc.doc.Views.Redraw()\n\n\npl_crv4=Rhino.Geometry.PolylineCurve([ptB,ptH,ptI,ptC,ptB])\n\nbreps4=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv4)\n\nobjID4s=[sc.doc.Objects.AddBrep(brep) for brep in breps4]\n\nsc.doc.Views.Redraw()\n\n\npl_crv5=Rhino.Geometry.PolylineCurve([ptF,ptL,ptK,ptE,ptF])\n\nbreps5=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv5)\n\nobjID5s=[sc.doc.Objects.AddBrep(brep) for brep in breps5]\n\nsc.doc.Views.Redraw()\n\n\npl_crv6=Rhino.Geometry.PolylineCurve([ptI,ptC,ptJ,ptI])\n\nbreps6=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv6)\n\nobjID6s=[sc.doc.Objects.AddBrep(brep) for brep in breps6]\n\nsc.doc.Views.Redraw()\n\n\npl_crv7=Rhino.Geometry.PolylineCurve([ptE,ptK,ptJ,pt...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport Rhino.Geometry.Point3d as P3\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\n\nrs.EnableRedraw(False)\n\nptA=P3(0,0,0)\nptB=P3(10,0,0)\nptC=P3(10,10,0)\nptD=P3(0,20,0)\nptE=P3(-10,10,0)\nptF=P3(-10,0,0)\nptG=P3(0,0,10)\nptH=P3(10,0,10)\nptI=P3(10,10,10)\nptJ=P3(0,15,10)\nptK=P3(-10,10,10)\nptL=P3(-10,0,10)\n\n\nface = []\npl_crv1=Rhino.Geometry.PolylineCurve([ptA,ptB,ptC,ptD,ptE,ptF,ptA])\nbreps1=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv1)\nobjID1s=[sc.doc.Objects.AddBrep(brep) for brep in breps1]\nsc.doc.Views.Redraw()\nface.append(objID1s)\npl_crv2=Rhino.Geometry.PolylineCurve([ptG,ptH,ptI,ptJ,ptK,ptL,ptG])\npl_crv2=Rhino.Geometry.PolylineCurve([ptG,ptH,ptI,ptJ,ptK,ptL,ptG])\nbreps2=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv2)\nobjID2s=[sc.doc.Objects.AddBrep(brep) for brep in breps2]\nsc.doc.Views.Redraw()\nface.append(objID2s)\n\npl_crv3=Rhino.Geometry.PolylineCurve([ptF,ptB,ptH,ptL,ptF])\nbreps3=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv3)\nobjID3s=[sc.doc.Objects.AddBrep(brep) for brep in breps3]\nsc.doc.Views.Redraw()\nface.append(objID3s)\n\npl_crv4=Rhino.Geometry.PolylineCurve([ptB,ptH,ptI,ptC,ptB])\nbreps4=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv4)\nobjID4s=[sc.doc.Objects.AddBrep(brep) for brep in breps4]\nsc.doc.Views.Redraw()\nface.append(objID4s)\n\npl_crv5=Rhino.Geometry.PolylineCurve([ptF,ptL,ptK,ptE,ptF])\nbreps5=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv5)\nobjID5s=[sc.doc.Objects.AddBrep(brep) for brep in breps5]\nsc.doc.Views.Redraw()\nface.append(objID5s)\n\npl_crv6=Rhino.Geometry.PolylineCurve([ptI,ptC,ptJ,ptI])\nbreps6=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv6)\nobjID6s=[sc.doc.Objects.AddBrep(brep) for brep in breps6]\nsc.doc.Views.Redraw()\nface.append(objID6s)\n\npl_crv7=Rhino.Geometry.PolylineCurve([ptE,ptK,ptJ,ptE])\nbreps7=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv7)\nobjID7s=[sc.doc.Objects.AddBrep(brep) for brep in breps7]\nsc.doc.Views.Redraw()\nface.append(objID7s)\n\npl_crv8=Rhino.Geometry.PolylineCurve([ptE,ptD,ptJ,ptE])\nbreps8=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv8)\nobjID8s=[sc.doc.Objects.AddBrep(brep) for brep in breps8]\nsc.doc.Views.Redraw()\nface.append(objID8s)\n\npl_crv9=Rhino.Geometry.PolylineCurve([ptC,ptD,ptJ,ptC])\nbreps9=Rhino.Geometry.Brep.CreatePlanarBreps(pl_crv9)\nobjID9s=[sc.doc.Objects.AddBrep(brep) for brep in breps9]\nsc.doc.Views.Redraw()\nface.append(objID9s)\n\nbrep = rs.JoinSurfaces(face,True)",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 856
+}

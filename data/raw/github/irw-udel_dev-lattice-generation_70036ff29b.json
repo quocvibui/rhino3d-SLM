@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/irw-udel/dev-lattice-generation/blob/6f71e27d2ac6638d6d12643e0040cd4c26a21b29/sdk-scripts/logging_file_writer.py",
+  "repo": "irw-udel/dev-lattice-generation",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "MIT",
+  "filepath": "sdk-scripts/logging_file_writer.py",
+  "instruction": "Writes text input to a file.\n    Inputs:\n        file_path: Path to the file to write\n        content: Content to write to the file\n        write_file: Write the file?",
+  "code": "\"\"\"Writes text input to a file.\n    Inputs:\n        file_path: Path to the file to write\n        content: Content to write to the file\n        write_file: Write the file?\"\"\"\n\n__author__ = \"ianrw\"\n__version__ = \"20220124\"\n\nfrom ghpythonlib.componentbase import executingcomponent as component\nimport Grasshopper, GhPython\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\nimport os\n\ndef write_lines(file, content):\n    for line in content:\n        file.write(line)\n    file.close()\n\nclass Logger(component):\n    def RunScript(self, file_path, content, write_file):\n        ghdoc = scriptcontext.doc\n\n        if write_file and file_path:\n            # working_dir = os.path.dirname(os.path.realpath(ghdoc.Path))\n            # file_path = os.path.join(working_dir, file_path)\n\n            if (os.path.exists(file_path)):\n                file = open(file_path, \"a\")\n                if (os.stat(file_path).st_size != 0):\n                    file.write(\",\" + \"\\n\")           \n                write_lines(file, content)\n\n            else:\n                file = open(file_path, \"w\")\n                write_lines(file, content)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "ghpythonlib",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/digitaldesignunit/clayprinting-slicer/blob/53537d912559e468aa7eac0c1c7942f48033251c/grasshopper_userobjects_src/DDUClayPrintingSlicer_NonPlanarSlicingInfo.py",
+  "repo": "digitaldesignunit/clayprinting-slicer",
+  "repo_stars": 4,
+  "repo_description": "Open-Source Grasshopper-based slicer, primarily for printing clay on the WASP40100.",
+  "license": "MIT",
+  "filepath": "grasshopper_userobjects_src/DDUClayPrintingSlicer_NonPlanarSlicingInfo.py",
+  "instruction": "Dduclay printing slicer non planar slicing info",
+  "code": "import System\nimport Rhino\nimport Grasshopper\nimport rhinoscriptsyntax as rs\n\n# GHENV COMPONENT SETTINGS\nghenv.Component.Name = \"NonPlanarSlicingInfo\"\nghenv.Component.NickName = \"NonPlanarSlicingInfo\"\nghenv.Component.Category = \"DDUClayPrintingSlicer\"\nghenv.Component.SubCategory = \"9 Utilities\"\n\nclass NonPlanarSlicingInfo(Grasshopper.Kernel.GH_ScriptInstance):\n    \"\"\"\n    Author: Max Benjamin Eschenbach\n    License: MIT License\n    Version: 250314\n    \"\"\"\n    \n    def RunScript(self,\n            NPSlicingEnabled: bool,\n            PrintingGeoIsMesh: bool,\n            PrintingGeometryClosed: bool,\n            InjectCustomCurves: bool):\n        INFO = Grasshopper.DataTree[object]()\n        if NPSlicingEnabled and not PrintingGeoIsMesh:\n            INFO = '[SETTING IGNORED] Non Planar slicing is impossible for BREPs! To use this feature, activate remeshing.'\n        elif NPSlicingEnabled and PrintingGeoIsMesh and not PrintingGeometryClosed:\n            INFO = '[INFO] Performing Non Planar slicing...'\n        elif NPSlicingEnabled and PrintingGeometryClosed:\n            INFO = ['[SETTING IGNORED] Non Planar slicing is currently not available for closed objects!',\n                    '[INFO] Performing parallel slicing...']\n        elif InjectCustomCurves:\n            INFO = '[INFO] No slicing is being done! Custom CURVES are injected...'\n        else:\n            INFO = '[INFO] Performing parallel slicing...'\n        return INFO\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-rhinoscriptsyntax-selectobjects-is-slow/17292",
+  "topic_id": 17292,
+  "title": "Python rhinoscriptsyntax SelectObjects() is slow",
+  "question": "Hi,\n\n\nThe SelectObjects() method is slow, due to it calling SelectObject() which is redrawing the view after each selction.\n\nCould this be optimized to only redraw after all are selected?\n\n\nThanks\n\n-Willem\n\n\ndef SelectObjects(object_ids):\n    \"\"\"Selects one or more objects\n    Parameters:\n      object_ids = list of Guids identifying the objects to select\n    Returns:\n      number of selected objects\n    \"\"\"\n    id = rhutil.coerceguid(object_ids, False)\n    if id: object_ids = [id]\n    rc = 0\n    for id in object_ids:\n        if SelectObject(id)==True: rc += 1\n    return rc\n\n\ndef SelectObject(object_id):\n    \"\"\"Selects a single object\n    Parameters:\n      object_id = the identifier of the object to select\n    Returns:\n      True on success\n    \"\"\"\n    rhobj = rhutil.coercerhinoobject(object_id, True, True)\n    rhobj.Select(True)\n    scriptcontext.doc.Views.Redraw()\n    return True",
+  "code_blocks": [
+    {
+      "code": "def SelectObjects(object_ids):\n    \"\"\"Selects one or more objects\n    Parameters:\n      object_ids = list of Guids identifying the objects to select\n    Returns:\n      number of selected objects\n    \"\"\"\n    rhobjs=[rhutil.coercerhinoobject(id, True, True) for id in object_ids]\n    rc=0\n    for rhobj in rhobjs:\n        if rhobj.Select(True): rc+=1\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "def SelectObjects(object_ids):\n    \"\"\"Selects one or more objects\n    Parameters:\n      object_ids = list of Guids identifying the objects to select\n    Returns:\n      number of selected objects\n    \"\"\"\n    id = rhutil.coerceguid(object_ids, False)\n    if id: object_ids = [id]\n    rc = 0\n    for id in object_ids:\n        if SelectObject(id)==True: rc += 1\n    return rc\n\n\ndef SelectObject(object_id):\n    \"\"\"Selects a single object\n    Parameters:\n      object_id = the identifier of the object to select\n    Returns:\n      True on success\n    \"\"\"\n    rhobj = rhutil.coercerhinoobject(object_id, True, True)\n    rhobj.Select(True)\n    scriptcontext.doc.Views.Redraw()\n    return True",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 928
+}

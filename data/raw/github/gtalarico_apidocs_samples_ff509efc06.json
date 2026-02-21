@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinopython/SampleBoxSpaceMorph.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinopython/SampleBoxSpaceMorph.py",
+  "instruction": "SampleBoxSpaceMorph.py Copyright (c) 2017 Robert McNeel & Associates. See License.md in the root of this repository for details.",
+  "code": "################################################################################\n# SampleBoxSpaceMorph.py\n# Copyright (c) 2017 Robert McNeel & Associates.\n# See License.md in the root of this repository for details.\n################################################################################\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\n # Rhino.Geometry.SpaceMorph-inherited class\nclass BoxMorph(Rhino.Geometry.SpaceMorph):\n    \n    def __init__(self, box, corners):\n        if 8 == len(box): self.box = box[:]\n        if 8 == len(corners): self.corners = corners[:]\n        if 8 == len(self.box):\n            self.ref_x = Rhino.Geometry.Line(self.box[0], self.box[1])\n            self.ref_y = Rhino.Geometry.Line(self.box[0], self.box[3])\n            self.ref_z = Rhino.Geometry.Line(self.box[0], self.box[4])\n            \n    def IsValid(self):\n        if 8 == len(self.box) and 8 == len(self.corners): return True\n        return False\n        \n    def MorphPoint(self, point):\n        if not self.IsValid(): return Rhino.Geometry.Point3d.Unset\n        u = self.ref_x.ClosestParameter(point)\n        v = self.ref_y.ClosestParameter(point)\n        w = self.ref_z.ClosestParameter(point)\n        ab = self.corners[0] + (self.corners[1] - self.corners[0]) * u\n        dc = self.corners[3] + (self.corners[2] - self.corners[3]) * u\n        ef = self.corners[4] + (self.corners[5] - self.corners[4]) * u\n        hg = self.corners[7] + (self.corners[6] - self.corners[7]) * u\n        abdc = ab + (dc - ab) * v\n        efhg = ef + (hg - ef) * v\n        return abdc + (efhg - abdc) * w\n        \ndef SampleBoxSpaceMorph():\n    obj_id = rs.GetObject(\"Select surface or polysurface\", rs.filter.surface and rs.filter.polysurface)\n    if None == obj_id: return\n    \n    brep = rs.coercebrep(obj_id)\n    if brep is None: return\n    \n    box = rs.BoundingBox(obj_id)\n    corners = box[:]\n    corners[6] = box[6] * 2\n    \n    morph = BoxMorph(box, corners)\n    if morph.Morph(brep):\n        scriptcontext.doc.Objects.AddBrep(brep)\n        scriptcontext.doc.Views.Redraw()\n        \n        \n# Check to see if this file is being executed as the \"main\" python\n# script instead of being used as a module by some other python script\n# This allows us to use the module which ever way we want.\nif( __name__ == \"__main__\" ):\n    SampleBoxSpaceMorph()\n\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

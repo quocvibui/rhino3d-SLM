@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/plane-object-is-not-scriptable/109109",
+  "topic_id": 109109,
+  "title": "'Plane' object is not scriptable",
+  "question": "I can’t get this to run correctly, line 24 should work but I can only get the next line to work without rotation done correctly.\n\n\nAnyone?..\n\n\nimport rhinoscriptsyntax as rs\nimport math\n\npts = []\n\nfor i in range(n):\n    x = math.sin(i)*scaleX\n    y = math.cos(i)*scaleY\n    z = i * scaleZ\n    pt = rs.AddPoint(x,y,z)\n    pts.append(pt)\n    \ncurve = rs.AddInterpCurve(pts)\n\ncurveDomain = rs.CurveDomain(curve)\nlineList = []\n\nfor i in range(n**2):\n    i = ((curveDomain[1]-curveDomain[0])/n**2)*i\n    t = rs.EvaluateCurve(curve,i)\n    pt2 = rs.AddPoint(t)\n    curveFrame = rs.CurvePerpFrame(curve,i)\n    \n    vector = rs.VectorRotate(curveFrame[1],720*i,curveFrame[3])\n    #vector = rs.VectorRotate([1,0,0], 720*i, [0,0,1])\n    \n    pt3 = rs.CopyObject(pt2,vector*math.sin(i)*scale)\n    line = rs.AddLine(pt2,pt3)\n    lineList.append(line)\n\nspiralSurface = rs.AddLoftSrf(lineList)\n\ncurve_out = curve\nspiralSurface_out = spiralSurface",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\npts = []\n\nfor i in range(n):\n    x = math.sin(i)*scaleX\n    y = math.cos(i)*scaleY\n    z = i * scaleZ\n    pt = rs.AddPoint(x,y,z)\n    pts.append(pt)\n    \ncurve = rs.AddInterpCurve(pts)\n\ncurveDomain = rs.CurveDomain(curve)\nlineList = []\n\nfor i in range(n**2):\n    i = ((curveDomain[1]-curveDomain[0])/n**2)*i\n    t = rs.EvaluateCurve(curve,i)\n    pt2 = rs.AddPoint(t)\n    curveFrame = rs.CurvePerpFrame(curve,i)\n    \n    #vector = rs.VectorRotate(curveFrame[1],720*i,curveFrame[3])\n    vector = rs.VectorRotate([1,1,0], 720*i, [0,1,1])\n    \n    pt3 = rs.CopyObject(pt2,vector*math.sin(i)*scale)\n    line = rs.AddLine(pt2,pt3)\n    lineList.append(line)\n\nspiralSurface = rs.AddLoftSrf(lineList)\n\ncurve_out = curve\nspiralSurface_out = spiralSurface",
+      "language": "python",
+      "author": "mwickerson",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\npts = []\n\nfor i in range(n):\n    x = math.sin(i)*scaleX\n    y = math.cos(i)*scaleY\n    z = i * scaleZ\n    pt = rs.AddPoint(x,y,z)\n    pts.append(pt)\n    \ncurve = rs.AddInterpCurve(pts)\n\ncurveDomain = rs.CurveDomain(curve)\nlineList = []\n\nfor i in range(n**2):\n    i = ((curveDomain[1]-curveDomain[0])/n**2)*i\n    t = rs.EvaluateCurve(curve,i)\n    pt2 = rs.AddPoint(t)\n    curveFrame = rs.CurvePerpFrame(curve,i)\n    \n    vector = rs.VectorRotate(curveFrame[1],720*i,curveFrame[3])\n    #vector = rs.VectorRotate([1,0,0], 720*i, [0,0,1])\n    \n    pt3 = rs.CopyObject(pt2,vector*math.sin(i)*scale)\n    line = rs.AddLine(pt2,pt3)\n    lineList.append(line)\n\nspiralSurface = rs.AddLoftSrf(lineList)\n\ncurve_out = curve\nspiralSurface_out = spiralSurface",
+      "language": "python",
+      "author": "mwickerson",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 409
+}

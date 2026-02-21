@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-layervisible-and-user-strings/56589",
+  "topic_id": 56589,
+  "title": "rs.LayerVisible and User Strings",
+  "question": "Hi all\n\n\nThere might be something strange with rhinoscriptsyntax.LayerVisible\n\nCalling rs.LayerVisible seems to clear user strings attached to the layer\n\n\nimport Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef main():\n  name = rs.GetString( 'Layer name ?' )\n  index = scriptcontext.doc.Layers.FindByFullPath( name, -1 )\n  layer = scriptcontext.doc.Layers[ index ]\n  print( 'Set user string' )\n  ok = layer.SetUserString( 'KEY', 'VALUE' )\n  if not ok:\n    print( 'SetUserString failed' )\n  val = layer.GetUserString( 'KEY' )\n  print( 'KEY => %s' % val )\n  print( 'Call rs.LayerVisible' )\n  rs.LayerVisible( name, False )\n  print( 'Get user string' )\n  val = layer.GetUserString( 'KEY' )\n  print( 'KEY => %s' % val )\n\nmain()\n\n\n\n( I’ve found that if I use the code from Rhino 5’s rhinoscriptsyntax, that is\n\nLayer.CommitChanges instead of Layer.SetPersistentVisibility, all works fine )\n\n\n(6.1.18037.13441, 06/02/2018)\n\nEvaluation\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\n# Sets user text to a layer\ndef SetLayerUserText(name, key, value):\n    index = sc.doc.Layers.FindByFullPath(name, -1)\n    if index >= 0:\n        layer = sc.doc.Layers[index]\n        if layer:\n            layer.SetUserString(key, value)\n            layer.CommitChanges()\n\n# Gets user text to a layer\ndef GetLayerUserText(name, key):\n    index = sc.doc.Layers.FindByFullPath(name, -1)\n    if index >= 0:\n        layer = sc.doc.Layers[index]\n        if layer:\n            return layer.GetUserString(key)\n    return null\n\nname = 'Default'\nkey = 'Test'\nvalue = 'Hello Rhino!'\n\nSetLayerUserText(name, key, value)\nprint 'Before layer lock:'\nprint '  ', GetLayerUserText(name, key)\n\nrs.LayerLocked(name, True)\nprint 'After layer lock:'\nprint '  ', GetLayerUserText(name, key)\n\nrs.LayerLocked(name, False)\nprint 'After layer unlock:'\nprint '  ', GetLayerUserText(name, key)",
+      "language": "python",
+      "author": "dale",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef main():\n  name = rs.GetString( 'Layer name ?' )\n  index = scriptcontext.doc.Layers.FindByFullPath( name, -1 )\n  layer = scriptcontext.doc.Layers[ index ]\n  print( 'Set user string' )\n  ok = layer.SetUserString( 'KEY', 'VALUE' )\n  if not ok:\n    print( 'SetUserString failed' )\n  layer.CommitChanges()\n\n  print( 'Get user string' )\n  index = scriptcontext.doc.Layers.FindByFullPath( name, -1 )\n  layer = scriptcontext.doc.Layers[ index ]\n  val = layer.GetUserString( 'KEY' )\n  print( 'KEY => %s' % val )\n\n  print( 'Call rs.LayerVisible' )\n  rs.LayerVisible( name, False )\n\n  print( 'Get user string' )\n  index = scriptcontext.doc.Layers.FindByFullPath( name, -1 )\n  layer = scriptcontext.doc.Layers[ index ]\n  val = layer.GetUserString( 'KEY' )\n  print( 'KEY => %s' % val )\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef main():\n  name = rs.GetString( 'Layer name ?' )\n  index = scriptcontext.doc.Layers.FindByFullPath( name, -1 )\n  layer = scriptcontext.doc.Layers[ index ]\n  print( 'Set user string' )\n  ok = layer.SetUserString( 'KEY', 'VALUE' )\n  if not ok:\n    print( 'SetUserString failed' )\n  val = layer.GetUserString( 'KEY' )\n  print( 'KEY => %s' % val )\n  print( 'Call rs.LayerVisible' )\n  rs.LayerVisible( name, False )\n  print( 'Get user string' )\n  val = layer.GetUserString( 'KEY' )\n  print( 'KEY => %s' % val )\n\nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 972
+}

@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dir-and-surface-frameat-differ/170117",
+  "topic_id": 170117,
+  "title": "_Dir and Surface.FrameAt() Differ",
+  "question": "@stevebaer\n , all,\n\nafter using \n_Dir _Flip\n, the frame extracted from a surface with \nFrameAt()\n differs from what Rhino \n_Dir\n displays (please see video). Is there a method to consistently get the frame/plane that _Dir displays? The Python code used in the second part of the video is below. This is in Rh7, latest SR. I cannot switch to Rh8 yet.\n\nThanks!\n\n\n\n\n\n\nimport Rhino.Geometry as rhg\nimport rhinoscriptsyntax as rs\n\n\ndef test():\n    sect_srf = rs.GetObject('Select section plane', preselect=True, filter=rs.filter.surface)\n    if not sect_srf:\n        print('Nothing selected, aborting.')\n        return\n\n    sect_rh_srf = rs.coercesurface(sect_srf, True)\n    uv_orig = (sect_rh_srf.Domain(0)[0], sect_rh_srf.Domain(1)[0])\n    res = sect_rh_srf.FrameAt(uv_orig[0], uv_orig[1])\n    if res[0] == False:\n        print('Could not get frame')\n        return\n    sect_plane = res[1]\n    # X Axis of frame is wolrd Z 0,0,1, _Dir is world X 1,0,0\n    print(sect_plane.XAxis)\n    \n    # Draws the visualization of the frame as lines, as seen in video, not shared\n    # rhu.draw_frame(sect_plane)\n\n\ntest()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef test():\n    brep_id = rs.GetObject('Select section plane', preselect=True, filter=rs.filter.surface)\n    if not brep_id:\n        return\n    \n    brep = rs.coercebrep(brep_id, True)\n    if not brep:\n        return\n    \n    face = brep.Faces[0]\n    du = face.Domain(0)\n    dv = face.Domain(1)\n    normal = face.NormalAt(du.Min, dv.Min)\n    if face.OrientationIsReversed:\n        normal.Reverse()\n    print('Normal direction: {0}'.format(normal))\n\ntest()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rhg\nimport rhinoscriptsyntax as rs\n\n\ndef test():\n    sect_srf = rs.GetObject('Select section plane', preselect=True, filter=rs.filter.surface)\n    if not sect_srf:\n        print('Nothing selected, aborting.')\n        return\n\n    sect_rh_srf = rs.coercesurface(sect_srf, True)\n    uv_orig = (sect_rh_srf.Domain(0)[0], sect_rh_srf.Domain(1)[0])\n    res = sect_rh_srf.FrameAt(uv_orig[0], uv_orig[1])\n    if res[0] == False:\n        print('Could not get frame')\n        return\n    sect_plane = res[1]\n    # X Axis of frame is wolrd Z 0,0,1, _Dir is world X 1,0,0\n    print(sect_plane.XAxis)\n    \n    # Draws the visualization of the frame as lines, as seen in video, not shared\n    # rhu.draw_frame(sect_plane)\n\n\ntest()",
+      "language": "python",
+      "author": "silvano",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 247
+}

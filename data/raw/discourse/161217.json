@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-duplicate-instance-by-python/161217",
+  "topic_id": 161217,
+  "title": "How to duplicate instance by python",
+  "question": "Hi guys,\n\nI’d like to ask how to duplicate a defined instance?\n\n\nfor example:\n\nI created a mesh instance with python script, and successfully display it in Rhino viewport. But when I run script again to generate another cube instance, it generate nothing in the viewport. I thought it was the reason of block index conflicting and then move to try to duplicate the instance.\n\n\nBut the duplicate method for normal geometry is not working, I’m able to duplicate the instance reference geometry, but it was not displayed in the viewport.\n\n\nHow could I duplicate instance properly?\n\n\n\n\n2023-06-09_203051\n855×264 13.3 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\ndef create_instance():\n    box_id = rs.AddBox([(0,0,0), (1,0,0), (1,1,0), (0,1,0), (0,0,1), (1,0,1), (1,1,1), (0,1,1)])\n    box = rs.coercegeometry(box_id)\n    instance_definition_name = \"BoxInstance\"\n    instance_definition = sc.doc.InstanceDefinitions.Find(instance_definition_name)\n    # If the block definition does not exist, create a new one\n    if instance_definition is None:\n        instance_definition = sc.doc.InstanceDefinitions.Add(instance_definition_name, \"A box instance definition\", Rhino.Geometry.Point3d.Origin, [box])\n    rs.DeleteObject(box_id)\n    # Create an instance of the instance definition\n    instance = rs.InsertBlock(instance_definition_name, (0,0,0))\n    return instance\ndef duplicate_instance(instance):\n    instance_definition_name = rs.BlockInstanceName(instance)\n    new_instance = rs.InsertBlock(instance_definition_name, (0,0,0))\n    return new_instance\ninstance = create_instance()\nduplicate_instance(instance)",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 629
+}

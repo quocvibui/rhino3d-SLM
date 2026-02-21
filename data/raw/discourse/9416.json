@@ -1,0 +1,51 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/draw-a-text-dot/9416",
+  "topic_id": 9416,
+  "title": "Draw a text dot...?",
+  "question": "I would like to display a temporary text dot while I’m looping through some code…  I found\n\n\nRhino.Display.DisplayPipeline.DrawDot Method (Point3d, String)\n\n\nbut I don’t know how to implement it…  This doesn’t need to be dynamic, just display at a certain point and then disappear again…  Right now I’m just adding the text dot to the document and deleting it again, but I would like to know how to do this only in the display…\n\n\nEdit: as an auxiliary question, to add a text dot to the document, we have\n\n\nsc.doc.Objects.AddTextDot(td,attrs)\n\n\n\nand I can attribute a color other than the active layer color by using\n\n\nattrs=Rhino.DocObjects.ObjectAttributes()\nattrs.ObjectColor=System.Drawing.Color.Somecolor\n\n\n\nBut how do I attribute a text color to the dot?  It seems it should be possible…\n\n\nDisplayPipeline.DrawDot Method (Point3d, String, Color, Color)\n\n\n\n(the second color being the text color)\n\n\nThanks,  --Mitch",
+  "code_blocks": [
+    {
+      "code": "Imports System\nImports System.Collections.Generic\nImports Rhino\nImports Rhino.Commands\nImports Rhino.Geometry\nImports Rhino.Input\nImports Rhino.Input.Custom\nImports Rhino.Display\nImports System.Drawing\n\nNamespace TextDotTest\n\n    <System.Runtime.InteropServices.Guid(\"5550f864-5075-4ed4-9fa3-97b0c60bbd7e\")> _\n    Public Class TextDotTestCommand\n        Inherits Command\n\n        Shared _instance As TextDotTestCommand\n\n        Public Sub New()\n            ' Rhino only creates one instance of each command class defined in a\n            ' plug-in, so it is safe to store a refence in a static field.\n            _instance = Me\n        End Sub\n\n        '''<summary>The only instance of this command.</summary>\n        Public Shared ReadOnly Property Instance() As TextDotTestCommand\n            Get\n                Return _instance\n            End Get\n        End Property\n\n        '''<returns>The command name as it appears on the Rhino command line.</returns>\n        Public Overrides ReadOnly Property EnglishName() As String\n            Get\n                Return \"TextDotTestCommand\"\n            End Get\n        End Property\n\n        Protected Overrides Function RunCommand(ByVal doc As RhinoDoc, ByVal mode As RunMode) As Result\n\n            Dim MyTextDot As New TextDot(\"Text\", New Point3d(0, 0, 0))\n\n            Dim conduit = New DrawBlueMeshConduit(MyTextDot)\n            conduit.Enabled = True\n\n            doc.Views.Redraw()\n\n            Dim inStr As String = \"\"\n            Rhino.Input.RhinoGet.GetString(\"press <Enter> to continue\", True, inStr)\n\n            conduit.Enabled = False\n            doc.Views.Redraw()\n\n            Return Result.Success\n        End Function\n    End Class\n\n    Class DrawBlueMeshConduit\n        Inherits DisplayConduit\n        Private _TextDot As TextDot = Nothing\n        Private _bbox As BoundingBox\n\n        Public Sub New(ByVal TextDot As TextDot)\n            _TextDot = TextDot\n            If _TextDot IsNot Nothing AndAlso _TextDot.IsValid Then\n                _bbox = _TextDot.GetBoundingBox(True)\n            End If\n        End Sub\n\n        Protected Overrides Sub CalculateBoundingBox(ByVal e As CalculateBoundingBoxEventArgs)\n            MyBase.CalculateBoundingBox(e)\n            e.BoundingBox.Union(_bbox)\n        End Sub\n\n        Protected Overrides Sub PreDrawObjects(ByVal e As DrawEventArgs)\n            MyBase.PreDrawObjects(e)\n            Dim vp = e.Display.Viewport\n            e.Display.DrawDot(_TextDot.Point, _TextDot.Text, Color.Black, Color.White)\n        End Sub\n    End Class\n\nEnd Namespace",
+      "language": "csharp",
+      "author": "jordy1989",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nclass DrawTextDotsConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, points):\n        self.points = points\n        self.bbox = Rhino.Geometry.BoundingBox()\n        for point in points:\n            self.bbox.Union(point)\n    def CalculateBoundingBox(self, e):\n        e.IncludeBoundingBox(self.bbox)\n    def DrawOverlay(self, e):\n        for point in self.points:\n            e.Display.DrawDot(point, point.ToString())\n\ndef DrawTextDots():\n    points = rs.GetPoints()\n    if points:\n        conduit = DrawTextDotsConduit(points)\n        conduit.Enabled = True\n        scriptcontext.doc.Views.Redraw()\n        rs.GetString(\"Press <Enter> to continue\")\n        conduit.Enabled = False\n        scriptcontext.doc.Views.Redraw()\n \nif __name__==\"__main__\":\n    DrawTextDots()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nclass DrawTextDotsConduit(Rhino.Display.DisplayConduit):\n    def __init__(self,point,dirName):\n        self.point = point\n        self.dirName = dirName\n        self.bbox = Rhino.Geometry.BoundingBox()\n        self.bbox.Union(point)\n    def CalculateBoundingBox(self, e):\n        e.IncludeBoundingBox(self.bbox)\n    def DrawOverlay(self, e):\n       e.Display.DrawDot(point, dirName)\n\ndef LookInDirection():\n    compass=[\"North\",\"Northwest\",\"West\",\"Southwest\",\"South\",\"Southeast\",\"East\",\"Northeast\"]\n    zVec=Rhino.Geometry.Vector3d(0,0,1)\n    tarPt=Rhino.Geometry.Point3d(0,0,0)\n    camPt=Rhino.Geometry.Point3d(0,-100,50)\n    ang_inc=45.0\n    xFormR=rs.XformRotation2(ang_inc,zVec,tarPt)\n    rs.ViewCameraTarget(camera=camPt,target=tarPt)\n    for i in range(8):\n        conduit = DrawTextDotsConduit(tarPt,compass[i])\n        conduit.Enabled = True\n        sc.doc.Views.Redraw()\n        rs.GetString(\"Looking {}, press <Enter> for next view\".format(compass[i]))\n        conduit.Enabled = False\n        camPt=rs.PointTransform(camPt,xFormR)\n        rs.RotateView(rs.CurrentView(),1,ang_inc)\n        sc.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    LookInDirection()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nclass DrawTextDotsConduit(Rhino.Display.DisplayConduit):\n    def __init__(self,point,dirName):\n        self.point = point\n        self.dirName = dirName\n        self.bbox = Rhino.Geometry.BoundingBox()\n        self.bbox.Union(point)\n    def CalculateBoundingBox(self, e):\n        e.IncludeBoundingBox(self.bbox)\n    def DrawOverlay(self, e):\n       e.Display.DrawDot(self.point, self.dirName)\n\ndef LookInDirection():\n    compass=[\"North\",\"Northwest\",\"West\",\"Southwest\",\"South\",\"Southeast\",\"East\",\"Northeast\"]\n    zVec=Rhino.Geometry.Vector3d(0,0,1)\n    tarPt=Rhino.Geometry.Point3d(0,0,0)\n    camPt=Rhino.Geometry.Point3d(0,-100,50)\n    ang_inc=45.0\n    xFormR=rs.XformRotation2(ang_inc,zVec,tarPt)\n    rs.ViewCameraTarget(camera=camPt,target=tarPt)\n    for i in range(8):\n        conduit = DrawTextDotsConduit(tarPt,compass[i])\n        conduit.Enabled = True\n        sc.doc.Views.Redraw()\n        rs.GetString(\"Looking {}, press <Enter> for next view\".format(compass[i]))\n        conduit.Enabled = False\n        camPt=rs.PointTransform(camPt,xFormR)\n        rs.RotateView(rs.CurrentView(),1,ang_inc)\n        sc.doc.Views.Redraw()\n\nif __name__==\"__main__\":\n    LookInDirection()",
+      "language": "python",
+      "author": "jordy1989",
+      "post_number": 10,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 5186
+}

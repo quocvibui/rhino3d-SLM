@@ -1,0 +1,83 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-keep-texture-mapping-result/60303",
+  "topic_id": 60303,
+  "title": "How to keep Texture mapping result",
+  "question": "Hi~\n\nThere are cpp, 3dm and jpg in my attached file.\n\n\nTestSample.zip\n (140.3 KB)\n\n\nI want to change texture coordinates and keep the texture result.\n\nEven if it change render mesh density in the Document properties > Mesh > Render mesh quality, I also want to keep my texture mapping result.\n\n\nSo I get the render mesh from Brep\n\n\nconst ON_Mesh* mesh = F->Mesh(ON::render_mesh); \n\n\n\nAnd I change the texture coordinats from m_T in the mesh.\n\n\nON_2fPointArray Texs = mesh->m_T;\nfor (int i = 0; i<mesh->m_T.Count(); i++)\n{\n     ON_2fPoint* fpnt = Texs.At(i);\n     double x = fpnt->x / ScaleX;\n     double y = fpnt->y / ScaleY;\n     fpnt->x = float(x);\n     fpnt->y = float(y);\n }\n const_cast<ON_Mesh*>(mesh)->m_T = Texs;\n\n\n\nAfter computing, I can’t see the result immediately until I click the object again or change viewport.\n\n\nWhen I modify Document properties > Mesh > Render mesh quality and click the object, the texture mapping are changed and the result is Rhino texture mapping way.\n\n\nAnd I run my code again to change the texture mapping, but texture mapping failure.\n\nThe mapping result always keep the Rhino texture mapping way.\n\n\nCan somebody help me to solve the problem?",
+  "code_blocks": [
+    {
+      "code": "CRhinoGetObject get;\n  get.SetGeometryFilter(CRhinoObject::surface_object);\n  get.AcceptNothing(true);\n  get.SetCommandPrompt(L\"Select Surface to move mesh\");\n\n  const CRhinoObject* pObject = NULL;\n  {\n    for (;;)\n    {\n      context.m_doc.UnselectAll();\n      context.m_doc.Redraw();\n\n      CRhinoGet::result res = get.GetObjects(1, 1);\n      if (res == CRhinoGet::object)\n      {\n        pObject = const_cast<CRhinoObject*>(get.Object(0).Object());\n        break;\n      }\n      else if (res == CRhinoGet::cancel)\n        return CRhinoCommand::cancel;\n\n    }\n  }\n  if (pObject)\n  {\n    const auto* pPC = static_cast<const ON_PointCloud*>(pObject->Geometry());\n    const int pointCount = pPC->PointCount();\n    ON_3dVector vec = ON_zaxis;\n    vec.Unitize(); vec = vec * 1.5;\n    for (int i = 0; i < pointCount; i++)\n    {\n      ON_COMPONENT_INDEX ci;\n      ci.m_type = ON_COMPONENT_INDEX::pointcloud_point;\n      ci.m_index = i;\n      ON_3dPoint pt = pPC->Point(ci);\n      pt.z = pt.z + (vec.z);\n    }\n  }",
+      "language": "unknown",
+      "author": "angelwang",
+      "post_number": 11,
+      "is_solution": false
+    },
+    {
+      "code": "class CSampleRMP : public CRhRdkCustomRenderMeshProvider\n{\npublic:\n  CSampleRMP() {}\n  virtual ~CSampleRMP() {}\n  virtual UUID PlugInId(void) const override\n  {\n    // return your plug-in id here\n  }\n  virtual UUID ProviderId(void) const override\n  {\n    // create new id for your custom render mesh provider class and return it\n  }\n  virtual ON_wString Name(void) const override\n  {\n    const static ON_wString wszName = L\"SampleCustomRenderMeshProvider\";\n    return wszName;\n  }\n  bool WillBuildCustomMesh(const ON_Viewport& vp, const CRhinoObject* pObject, const CRhinoDoc& doc, const UUID& uuidRequestingPlugIn, const CDisplayPipelineAttributes* pAttributes) const override\n  {\n    if (nullptr == pObject)\n      return false;\n\n    return true;\n  }\n  ON_BoundingBox BoundingBox(const ON_Viewport& vp, const CRhinoObject* pObject, const CRhinoDoc& doc, const UUID& uuidRequestingPlugIn, const CDisplayPipelineAttributes* pAttributes) const override\n  {\n    if (nullptr == pObject)\n      return ON_BoundingBox::EmptyBoundingBox;\n\n    ON_BoundingBox bb = pObject->BoundingBox();\n    bb.m_max = bb.m_max - 0.5 * ON_3dVector::ZAxis;\n    bb.m_min = bb.m_min - 0.5 * ON_3dVector::ZAxis;\n    return bb;\n  }\n\n  bool BuildCustomMeshes(const ON_Viewport& vp, const UUID& uuidRequestingPlugIn, const CRhinoDoc& doc, IRhRdkCustomRenderMeshes& crmInOut, const CDisplayPipelineAttributes* pAttributes, bool bWillBuildCustomMeshCheck) const override\n  {\n    const CRhinoObject* pObject = crmInOut.Object();\n    if (nullptr == pObject)\n      return false;\n\n    if (bWillBuildCustomMeshCheck)\n    {\n      if (!WillBuildCustomMesh(vp, pObject, doc, uuidRequestingPlugIn, pAttributes))\n      {\n        return false;\n      }\n    }\n\n    ON_SimpleArray<const ON_Mesh*> renderMeshes;\n    if (pObject->GetMeshes(ON::render_mesh, renderMeshes) > 0)\n    {\n      for (int mi = 0; mi < renderMeshes.Count(); mi++)\n      {\n        crmInOut.SetUseObjectsMappingChannels(false);\n        crmInOut.SetInstanceTransform(ON_Xform::IdentityTransformation);\n        crmInOut.SetAutoDeleteMeshesOn();\n        crmInOut.SetAutoDeleteMaterialsOn();\n        ON_Mesh* pMesh = new ON_Mesh(*renderMeshes[mi]);\n        if (nullptr != pMesh)\n        {\n          pMesh->Transform(ON_Xform::TranslationTransformation(0.5 * ON_3dVector::ZAxis));\n        }\n        crmInOut.Add(pMesh, nullptr);\n      }\n    }\n    return true;\n  }\n\n  bool IsViewDependent(void) const override\n  {\n    return false;\n  }\n\n  bool IsRequestingPlugInDependent(void) const override\n  {\n    return false;\n  }\n\n  bool IsPreviewAndStandardSameMesh(void) const override\n  {\n    return true;\n  }\n\n  CRhRdkVariant GetParameter(const CRhinoObject& object, const wchar_t* wszParamName) const override\n  {\n    return CRhRdkVariant::Null();\n  }\n\n  void SetParameter(const CRhinoObject& object, const wchar_t* wszParamName, const CRhRdkVariant& value) override\n  {\n  }\n};",
+      "language": "csharp",
+      "author": "Jussi_Aaltonen",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "if (pObject)\n  {\n    ON_3dmObjectAttributes  Att = CRhinoObjectAttributes(pObject->Attributes());\n    const ON_Brep* brep = ON_Brep::Cast(pObject->Geometry());\n    ON_SimpleArray< const ON_Mesh* > MeshAry;\n    int n = brep->GetMesh(ON::mesh_type::render_mesh, MeshAry);\n    for (int k = 0; k<MeshAry.Count(); k++)\n      context.m_doc.AddMeshObject(**MeshAry.At(k),&Att);\n\n  }",
+      "language": "unknown",
+      "author": "angelwang",
+      "post_number": 13,
+      "is_solution": false
+    },
+    {
+      "code": "bool WillBuildCustomMesh(const ON_Viewport& vp, const CRhinoObject* pObject, const CRhinoDoc& doc, const UUID& uuidRequestingPlugIn, const CDisplayPipelineAttributes* pAttributes) const override\n {\n   if (nullptr == pObject)\n     return false;\n\n   const ON_Brep* Brep = ON_Brep::Cast(pObject->Geometry());\n   if (Brep) return true;\n\n   return false;\n }",
+      "language": "csharp",
+      "author": "angelwang",
+      "post_number": 15,
+      "is_solution": false
+    },
+    {
+      "code": "void CCommandcmdDES_MeshMove::RunMove(ON_SimpleArray<const CRhinoObject*> group_members, double dis)\n{\n  for (int i = 0; i < group_members.Count(); i++)\n  {\n    const CRhinoObject* pObject = *group_members.At(i);\n    const ON_Brep* Brep = ON_Brep::Cast(pObject->Geometry());\n    if (!Brep) return ;\n    for (int j = 0; j < Brep->m_F.Count(); j++)\n    {\n      ON_BrepFace* F = Brep->Face(j);\n      const ON_Surface* Sur = *Brep->m_S.At(j);\n      ON_MeshParameters RhinosMeshParms = RhinoApp().ActiveDoc()->Properties().RenderMeshParameters();\n      ON_Mesh* pMesh = F->CreateMesh(RhinosMeshParms);\n      bool b = const_cast<ON_BrepFace*>(F)->SetMesh(ON::mesh_type::render_mesh, pMesh);\n\n      if (nullptr != pMesh)\n      {\n        //pMesh->Transform(ON_Xform::TranslationTransformation(1.5 * ON_3dVector::ZAxis));\n        //Move Vertex positoin\n        ON_3fPointArray Vertex = pMesh->m_V;\n        ON_2dPointArray pars = pMesh->m_S;\n        for (int i = 0; i < Vertex.Count(); i++)\n        {\n          ON_3fPoint* p3f = Vertex.At(i);\n          ON_2dPoint par = *pars.At(i);\n          //ON_3dVector vec = ON_zaxis;\n          ON_3dVector vec = Sur->NormalAt(par.x, par.y);\n          //vec.Unitize(); vec = vec * 1.5;\n          vec.Unitize(); vec = vec * dis;\n          p3f->x = p3f->x + float(vec.x);\n          p3f->y = p3f->y + float(vec.y);\n          p3f->z = p3f->z + float(vec.z);\n        }\n        pMesh->m_V = Vertex;\n      }\n    }\n   ::RhRdkCustomRenderMeshManager().OnRhinoObjectChanged(*pObject->Document(), pObject);\n  }\n  RhRdkCustomRenderMeshManager().Add(new CSampleRMP());\n  RhinoApp().ActiveDoc()->Regen();\n}",
+      "language": "csharp",
+      "author": "angelwang",
+      "post_number": 37,
+      "is_solution": false
+    },
+    {
+      "code": "void CSampleRhinoEventWatcher::OnReplaceObject(CRhinoDoc& doc, CRhinoObject& old_object, CRhinoObject& new_object)\n{\n  ::RhRdkCustomRenderMeshManager().OnRhinoObjectChanged(doc, new_object.Attributes().m_uuid == ON_nil_uuid ? &old_object : &new_object);\n}",
+      "language": "csharp",
+      "author": "angelwang",
+      "post_number": 37,
+      "is_solution": false
+    },
+    {
+      "code": "bool CDES_RenderMeshRMP::WillBuildCustomMesh(const ON_Viewport& vp, const CRhinoObject* pObject, const CRhinoDoc& doc,\n                                             const UUID& uuidRequestingPlugIn, const CDisplayPipelineAttributes*) const\n{\n\tif (nullptr == pObject)\n\t\treturn false;\n    \n    if (CUtility_ImagineElf::IsImagineElfObj(pObject))  // only our plugin object run custom render mesh \n    {\n      const ON_Brep* Brep = ON_Brep::Cast(pObject->Geometry());\n      if (Brep) return true;\n    }\n\n\treturn false;\n}",
+      "language": "csharp",
+      "author": "angelwang",
+      "post_number": 71,
+      "is_solution": false
+    },
+    {
+      "code": "void ExampleEventWatcher::OnReplaceObject(\n  CRhinoDoc& doc,\n  CRhinoObject& old_object,\n  CRhinoObject& new_object)\n{\n  // Tell custom render mesh manager that an object has been modifed.\n  // This causes custom render mesh manager to ask for updated custom\n  // render meshes from all custom render mesh providers.\n  // Note: use old_object when id of new_object is not set yet.\n  ::RhRdkCustomRenderMeshManager().OnRhinoObjectChanged(doc, new_object.Attributes().m_uuid == ON_nil_uuid ? &old_object : &new_object);\n}",
+      "language": "csharp",
+      "author": "Jussi_Aaltonen",
+      "post_number": 33,
+      "is_solution": false
+    },
+    {
+      "code": "void CCommandcmdDES_MeshMove::RunMove(ON_SimpleArray<const CRhinoObject*> group_members, double dis)\n{\n  for (int i = 0; i < group_members.Count(); i++)\n  {\n    const CRhinoObject* pObject = *group_members.At(i);\n    const ON_Brep* Brep = ON_Brep::Cast(pObject->Geometry());\n    if (!Brep) return ;\n    for (int j = 0; j < Brep->m_F.Count(); j++)\n    {\n      ON_BrepFace* F = Brep->Face(j);\n      const ON_Surface* Sur = *Brep->m_S.At(j);\n      ON_MeshParameters RhinosMeshParms = RhinoApp().ActiveDoc()->Properties().RenderMeshParameters();\n      ON_Mesh* pMesh = F->CreateMesh(RhinosMeshParms);\n      bool b = const_cast<ON_BrepFace*>(F)->SetMesh(ON::mesh_type::render_mesh, pMesh);\n\n      if (nullptr != pMesh)\n      {\n        //pMesh->Transform(ON_Xform::TranslationTransformation(1.5 * ON_3dVector::ZAxis));\n        //Move Vertex positoin\n        ON_3fPointArray Vertex = pMesh->m_V;\n        ON_2dPointArray pars = pMesh->m_S;\n        for (int i = 0; i < Vertex.Count(); i++)\n        {\n          ON_3fPoint* p3f = Vertex.At(i);\n          ON_2dPoint par = *pars.At(i);\n          //ON_3dVector vec = ON_zaxis;\n          ON_3dVector vec = Sur->NormalAt(par.x, par.y);\n          //vec.Unitize(); vec = vec * 1.5;\n          vec.Unitize(); vec = vec * dis;\n          p3f->x = p3f->x + float(vec.x);\n          p3f->y = p3f->y + float(vec.y);\n          p3f->z = p3f->z + float(vec.z);\n        }\n        pMesh->m_V = Vertex;\n      }\n    }\n\n  }\n  RhRdkCustomRenderMeshManager().Add(new CSampleRMP());\n  RhinoApp().ActiveDoc()->Regen();\n}",
+      "language": "csharp",
+      "author": "angelwang",
+      "post_number": 35,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 100,
+  "views": 4988
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Oscar3dm/Rhino3D-Samples/blob/eca3e49214cf484c5764ebaf3b4df9a31442785b/o3dm_rhino/export/export_named_view.py",
+  "repo": "Oscar3dm/Rhino3D-Samples",
+  "repo_stars": 8,
+  "repo_description": "A collection of Rhino 3D functions",
+  "license": "MIT",
+  "filepath": "o3dm_rhino/export/export_named_view.py",
+  "instruction": "Export named view",
+  "code": "import rhinoscriptsyntax as rs\nimport Rhino as rc\nimport scriptcontext as sc\nimport System.Drawing\n\ndef export_named_view(view_name, file_path, width=None, height=None, bbox=None, selected=False):\n    is_current_view = rs.RestoreNamedView(view_name)\n    if not is_current_view:\n        raise Exception(\"Named view not found.\")\n    view = sc.doc.Views.ActiveView\n    if bbox:\n        sc.doc.Views.ActiveView.ActiveViewport.ZoomBoundingBox(bbox)\n    view_capture = rc.Display.ViewCapture()\n    #view_capture.DrawSelectedObjectsOnly = selected\n    view_capture.Width = width or view.ActiveViewport.Size.Width\n    view_capture.Height = height or view.ActiveViewport.Size.Height\n    view_capture.ScaleScreenItems = False\n    view_capture.DrawAxes = False\n    view_capture.DrawGrid = False\n    view_capture.DrawGridAxes = False\n    view_capture.TransparentBackground = True\n    bitmap = view_capture.CaptureToBitmap(view)\n    if bitmap:\n        bitmap.Save(file_path, System.Drawing.Imaging.ImageFormat.Png)",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

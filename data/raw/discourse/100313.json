@@ -1,0 +1,60 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-add-curve-piping-render-property-to-curves/100313",
+  "topic_id": 100313,
+  "title": "[Python] Add Curve Piping Render Property to curves",
+  "question": "Hi,\n\n\nI need to add the Curve Piping Render Property to a series of curves (in Python). I have searched the RhinoCommon API docs, examples, and here on the forum without any success. Perhaps the render attribute version it’s not called “piping” under the hood. (Just to clarify, I am not looking for rhinoscriptsyntax.AddPipe())\n\n\nCan any developers or users with experience in this area point me in the right direction?\n\n\nThanks",
+  "code_blocks": [
+    {
+      "code": "from scriptcontext import doc\nimport System\nimport Rhino\n\nclass DrawMeshConduit(Rhino.Display.DisplayConduit):\n    def __init__(self, mesh):\n        self.mesh = mesh\n        self.color = System.Drawing.Color.White\n        self.material = Rhino.Display.DisplayMaterial()\n        self.material.Diffuse = self.color\n        if mesh != None and mesh.IsValid:\n            self.bbox = mesh.GetBoundingBox(True)\n\n    def CalculateBoundingBox(self, calculateBoundingBoxEventArgs):\n        calculateBoundingBoxEventArgs.BoundingBox.Union(self.bbox)\n\n    def PreDrawObjects(self, drawEventArgs):\n        gvp = drawEventArgs.Display.Viewport\n        if gvp.DisplayMode.EnglishName.ToLower() == \"wireframe\":\n            return\n        else:\n            drawEventArgs.Display.DrawMeshShaded(self.mesh, self.material)\n\n\ncircle = Rhino.Geometry.Circle(20)\nm = Rhino.Geometry.Mesh.CreateFromCurvePipe(circle.ToNurbsCurve(), 0.5, 20, 50, Rhino.Geometry.MeshPipeCapStyle.None, False)\nconduit = DrawMeshConduit(m)\nconduit.Enabled = True\ndoc.Views.Redraw()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\nid = rs.GetCurveObject(\"Select a curve with curve-piping\")[0]\nobj = doc.ActiveDoc.Objects.FindId(id)\n\n#description\nlog =  Rhino.FileIO.TextLog()\nobj.Description(log)\nprint log\n\n#add piping mesh to document\nrenders = obj.GetRenderPrimitiveList(Rhino.DocObjects.ViewportInfo(doc.ActiveDoc.Views.ActiveView.ActiveViewport), None)\nif renders is not None:\n    doc.Objects.AddMesh(renders.Mesh(0))\n\n#add a circle with same attributes\ncircle = Rhino.Geometry.Circle(20)\ndoc.Objects.AddCircle(circle, obj.Attributes)\n\n#remove curve-piping\nobj.Attributes.UserData.Purge()\nobj.CommitChanges()",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    crv_ids = rs.GetObjects(\"Curves\", 4, True, True, True)\n    if not crv_ids: return\n    \n    cmd = \"_-Properties _CurvePiping _On=_Yes _Radius=2 _EnterEnd\"\n    rs.Command(cmd, False)\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    crv_ids = rs.GetObjects(\"Curves\", 4, True, True, True)\n    if not crv_ids: return\n    \n    cmd = \"_-Properties _CurvePiping _On=_Yes _Radius=2 _EnterEnd\"\n    rs.Command(cmd, False)\n    \nDoSomething()",
+      "language": "python",
+      "author": "Alan_Farkas",
+      "post_number": 22,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\nimport System\nfrom System import Convert\n\ncrv_id = rs.GetObject(\"Curve\", 4, True, True)\ncrv_obj = rs.coercerhinoobject(crv_id, True, True)\nguid = Rhino.Render.CustomRenderMeshProvider2.CurvePipingId\nradius = Convert.ToDouble(crv_obj.GetCustomRenderMeshParameter(guid, \"Radius\"))\n\nprint \"Radius = {:.4}\".format(radius)",
+      "language": "python",
+      "author": "clement",
+      "post_number": 23,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 26,
+  "views": 2027
+}

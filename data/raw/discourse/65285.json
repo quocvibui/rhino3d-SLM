@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-scripting-automatic-selection-of-certain-curves/65285",
+  "topic_id": 65285,
+  "title": "Rhino.Python Scripting: Automatic selection of certain curves",
+  "question": "I have a model in which out of  numerous amounts of curves in the work space, I only want four.  So i have curve 1 and cyrve 2 on mesh A, and curve 3 and curve 4 on mesh B. I will do meshintersect+splitmeshwithcurve+deletemeshface, hope that makes sense. Now i am working on a script in which rhino can detect curve 1 and 2 are on mesh A, and perform the intersection etc and this continues on with mesh B.\n\nI originally secluded them by length but each model has different lengths and even range varies, so its not repeatable. SO for now i have settled on selecting these four curves out of the work space using get  object and then performing the necessary tasks. BUT of course this is not preferred. Someone gave me advice on using coordinates ( creating bboxes round each curve, finding the centroid and then using either the x y or z coordinates to select the curves) but thats a bit of work for me, although im still looking into it.  But for now this get object script i have keeps crashing Rhino, it works at times, and crashes most of the time.  can someone check what exactly is wrong with it?\n\n\nSCRIPT >>>\n\nfrom Rhino.Commands import Result\n\nfrom Rhino.DocObjects import ObjectType\n\nimport rhinoscriptsyntax as rs\n\nfrom scriptcontext import doc\n\n\nbfcrv_id = rs.GetObjects(“Select bf curves”,4)\n\nif bfcrv_id:\n\n\n#create\n an empty list\n\nbfcurve=[]\n\nfor obj in bfcrv_id:\n\n\n#find\n curves among the objects\n\nif abs(rs.CurveLength(obj)<100):\n\n\n#\ncurve\n meets selection criteria, append to the list\n\nbfcurve.append(obj)\n\n\nffcrv_id = rs.GetObjects(“Select ff curves”,4)\n\nif ffcrv_id:\n\n\n#create\n an empty list\n\nffcurve=[]\n\nfor obj in ffcrv_id:\n\n\n#find\n curves among the objects\n\nif abs(rs.CurveLength(obj)<100):\n\n\n#\ncurve\n meets selection criteria, append to the list\n\nffcurve.append(obj)\n\n\nrs.UnselectAllObjects()\n\n\ntarget=500\n\n\nback_objs=rs.ObjectsByLayer(“3.08 Back Face Surface”)\n\nif back_objs:\n\nbraces=[]\n\nfor obj in back_objs:\n\nif rs.IsMesh(obj):\n\nif abs(rs.MeshQuadCount(obj)>=target):\n\nbrace...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\ndef IsCurveShortEnoughGeometryFilter (rhObject, geometry, componentIndex):\n    c = rs.coercecurve(geometry)\n    if c:\n        if c.GetLength() < 100: return True\n    return False\n\ndef RunCommand():\n    tol =sc.doc.ModelAbsoluteTolerance\n    id =  rs.GetObject(\"Select a curve shorter than 100\", rs.filter.curve, False, False, IsCurveShortEnoughGeometryFilter)\n    if not id: return\n    \n    meshIds = rs.ObjectsByType(32)\n    if not meshIds:\n        print \"No meshes found\"\n        return\n        \n    crv = sc.doc.Objects.Find(id).Geometry\n    pt = crv.PointAtStart\n    ID = None\n    \n    meshes = [sc.doc.Objects.Find(meshId).Geometry for meshId in meshIds]\n    \n    for n in range(len(meshes)):\n        x = meshes[n].ClosestPoint(pt)\n        cp = meshes[n].ClosestPoint(pt)\n\n        if pt.DistanceTo(cp) < tol:\n            ID = meshIds[n]\n            break\n            \n    if ID: rs.SelectObject(ID)\n\n\n\nif __name__==\"__main__\":\n  RunCommand()",
+      "language": "python",
+      "author": "pascal",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 2268
+}

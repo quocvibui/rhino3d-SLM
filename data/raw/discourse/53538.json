@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-trying-to-use-rs-command-to-revolve-a-curve/53538",
+  "topic_id": 53538,
+  "title": "Python, trying to use rs.Command() to Revolve a curve",
+  "question": "I am trying to Revolve a curve I created in Python. I cannot find a direct call to Revolve command in rs. Therefore I am using a rs.Command call. It works if I use the interactive window to select to Resolve parameters, but I am not able to pass these directly in Python. Here is my code.\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nr1 = 10\nd = 30\nr2 = 12\n\ncurve1 = rs.AddPolyline([[0,0,0], [0,r1,0]])\ncurve2 = rs.AddCurve([[0,r1,0], [0.5 * d,r1,0], [0.5 * d,r2,0], [d,r2,0]])\ncurve3 = rs.AddPolyline([[d,r2,0], [d,0,0]])\n\nshape = rs.JoinCurves([curve1, curve2, curve3],delete_input=True, tolerance=None)\n\nrs.Command(\"-_Revolve SelID %s _Enter 0,0,0 1,0,0 0 360\"%(rs.coercecurve(shape)))\n\n\n\nI tried to directly pass \nshape\n instead of \nrs.coercecurve(shape)\n, not better. I also tried to pass options (\n_FullCircle\n) but this also failed. Nevertheless just calling \nrs.Command(\"-_Revolve \")\n does what I expect it to do. So basically I suppose that I do something wrong passing the parameter.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\nr1 = 10\nd = 30\nr2 = 12\n\ncurve1 = rs.AddPolyline([[0,0,0], [0,r1,0]])\ncurve2 = rs.AddCurve([[0,r1,0], [0.5 * d,r1,0], [0.5 * d,r2,0], [d,r2,0]])\ncurve3 = rs.AddPolyline([[d,r2,0], [d,0,0]])\n\nshape = rs.JoinCurves([curve1, curve2, curve3],delete_input=True, tolerance=None)\n\nrs.Command(\"-_Revolve SelID %s _Enter 0,0,0 1,0,0 0 360\"%(rs.coercecurve(shape)))",
+      "language": "python",
+      "author": "mchevroulet",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 5,
+  "posts_count": 3,
+  "views": 738
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_cloud_mesh_distance/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_cloud_mesh_distance/code.py",
+  "instruction": null,
+  "code": "#! python3\n\nimport System\nimport Rhino\nfrom ghpythonlib.componentbase import executingcomponent as component\nfrom Grasshopper.Kernel import GH_RuntimeMessageLevel as RML\nimport ghpythonlib.treehelpers as th\n\nimport diffCheck\nfrom diffCheck import df_error_estimation\n\n\nclass DFCloudMeshDistance(component):\n\n    def RunScript(self,\n            i_cloud_source: System.Collections.Generic.List[Rhino.Geometry.PointCloud],\n            i_assembly,\n            i_signed_flag: bool,\n            i_swap: bool,\n            i_analysis_resolution: float):\n\n        if i_cloud_source is None or i_assembly is None:\n            return None, None, None, None, None, None\n\n        if i_analysis_resolution is None:\n            scalef = diffCheck.df_util.get_doc_2_meters_unitf()\n            i_analysis_resolution = 0.1 / scalef\n\n        if len(i_assembly.beams) == len(i_cloud_source):\n            ghenv.Component.Message = \"Per Beam\"  # noqa: F821\n            rh_mesh_target_list = [beam.to_mesh(i_analysis_resolution) for beam in i_assembly.beams]\n        elif len(i_assembly.all_joints) == len(i_cloud_source):\n            ghenv.Component.Message = \"Per Joint\"  # noqa: F821\n            rh_mesh_target_list = [joint.to_mesh(i_analysis_resolution) for joint in i_assembly._all_joints]\n        elif len(i_assembly.all_joint_faces) == len(i_cloud_source):\n            ghenv.Component.Message = \"Per Joint Face\"  # noqa: F821\n            rh_mesh_target_list = []\n            for joint in i_assembly._all_joints:\n                for face in joint.faces:\n                    rh_mesh_target_list.append(face.to_mesh())\n        else:\n            ghenv.Component.AddRuntimeMessage(RML.Warning, \"The input number of objects to compare matches neither the number of beams nor the number of joints\")  # noqa: F821\n            return None, None, None, None, None, None\n\n        o_result = df_error_estimation.rh_cloud_2_rh_mesh_comparison(\n            i_assembly,\n            i_cloud_source,\n            rh_mesh_target_list,\n            i_signed_flag,\n            i_swap)  # noqa: F821\n\n        distances_gh_tree = th.list_to_tree(o_result.distances)\n\n        return distances_gh_tree, o_result.distances_mean, o_result.distances_rmse, o_result.distances_max_deviation, o_result.distances_min_deviation, o_result.distances_sd_deviation, o_result\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

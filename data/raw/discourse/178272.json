@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/curveintersections-object-has-no-attribute-item/178272",
+  "topic_id": 178272,
+  "title": "'CurveIntersections' object has no attribute 'Item'?",
+  "question": "Hello,\n\nI am using Rhino 8 (script editor using python 3) and  Rhino common to create sth, now I encounter a problem…As the Rhino common API shows, ‘CurveIntersections’ has properties of ‘Count’ and ‘Item’, while only ‘Count’ property works in my code but ‘Item’ didn’t work. Can anybody help? I uploaded my gh file here.\n\n\nThanks a lot.\n\nXusheng\n\n\npython_basics14_curve_input.gh\n (9.3 KB)\n\n\nScreenshot 2024-03-19 213516\n1147×420 70.1 KB\n\n\nScreenshot 2024-03-19 213758\n1072×1071 110 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\na = []\nb = []\nfor curve1 in curves:\n    for curve2 in curves:\n        if( curve1 != curve2):\n            itxn = rg.Intersect.Intersection.CurveCurve(curve1, curve2, 0.0001, 0.0001)\n            #count=getattr(itxn,'Count')\n            #print(count)\n\n            #this is how you should ge the number of itersection\n            count = itxn.Count\n\n            #this is a standard loop in pythin\n            for i in range(count):\n                #gets the intersection event\n                ix = itxn[i]\n                a.append(ix)\n\n                #gets the intersection point - there's more to this\n                #check https://developer.rhino3d.com/api/rhinocommon/rhino.geometry.intersect.intersectionevent\n                b.append(ix.PointA)",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "# this takes intersection of all curves and build geometry around the intersection\n# input type: curves - Curve (List Access)\nimport rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\n\na = []\nb = []\n\ncurveCount = len(curves)\nfor k in range(curveCount - 1):\n    for m in range(k+1, curveCount):\n        curve1 = curves[k]\n        curve2 = curves[m]\n        if( curve1 != curve2): #this is redundant now...\n            itxn = rg.Intersect.Intersection.CurveCurve(curve1, curve2, 0.0001, 0.0001)\n            #count=getattr(itxn,'Count')\n            #print(count)\n\n            #this is how you should ge the number of itersection\n            count = itxn.Count\n\n            #this is a standard loop in pythin\n            for i in range(count):\n                #gets the intersection event\n                ix = itxn[i]\n                a.append(ix)\n\n                #gets the intersection point - there's more to this\n                #check https://developer.rhino3d.com/api/rhinocommon/rhino.geometry.intersect.intersectionevent\n                b.append(ix.PointA)",
+      "language": "python",
+      "author": "adel.albloushi",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 6,
+  "views": 368
+}

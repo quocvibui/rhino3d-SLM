@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/merge-rhinodocs-in-c/159905",
+  "topic_id": 159905,
+  "title": "Merge RhinoDocs in C#",
+  "question": "Good Morning,\n\n\nI’m hunting for a good way to merge content in two separate RhinoDoc’s which I have generated programatically.  I see that i could call A.Import(filepath) but then i’d have to write B to disk. There is no docA.Import(docB)\n\n\nI wrote the below which works fine for geometry but fails for Text Objects - I assume because the dimension styles don’t copy over? not quite sure how i’d copy them.\n\n\nI wonder if \n@dale\n or \n@stevebaer\n might have a sample or a better approach?\n\n\nThanks!\n\n\nprivate static List<Guid> ImportFromTo(RhinoDoc sDoc, RhinoDoc tDoc) {\n\t\t\tList<Guid> tObjects = new List<Guid>();\n\n\t\t\t// work layer by layer and copy over objects \n\t\t\tforeach (var sLayer in sDoc.Layers) {\n\t\t\t\t// ensure we have a target layer\n\t\t\t\tvar tLayer = tDoc.Layers.FindName(sLayer.Name);\n\t\t\t\tif (tLayer == null) {\n\t\t\t\t\tvar id = tDoc.Layers.Add(sLayer.Name, sLayer.Color);\n\t\t\t\t\tif (id < 0) throw new Exception(\"Could not create layer \" + sLayer.Name);\n\t\t\t\t\ttLayer = tDoc.Layers[id];\n\t\t\t\t}\n\n\t\t\t\t// now copy over objects\n\t\t\t\tvar sObjects = sDoc.SelectObjectsOnLayer(sLayer);\n\n\t\t\t\tforeach (var sObject in sObjects) {\n\t\t\t\t\tvar tGuid = tDoc.Objects.Add(sObject.DuplicateGeometry(), new ObjectAttributes {\n\t\t\t\t\t\tLayerIndex = tLayer.Index,\n\t\t\t\t\t\tColorSource = sObject.Attributes.ColorSource,\n\t\t\t\t\t\tObjectColor = sObject.Attributes.ObjectColor\n\t\t\t\t\t});\n\n\t\t\t\t\ttObjects.Add(tGuid);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\treturn tObjects;\n\t\t}",
+  "code_blocks": [
+    {
+      "code": "FileReadOptions readoptions = new FileReadOptions() {\n\t\t\tImportMode       = true,\n\t\t\tBatchMode        = true,\n\t\t\tUseScaleGeometry = true,\n\t\t\tScaleGeometry    = false, \n\t\t};\n\t\tif (!RhinoDoc.ReadFile(tempPath, readoptions))",
+      "language": "csharp",
+      "author": "david.birch.uk",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test():\n    files = []\n    files.append(r\"C:\\Users\\Dale\\Downloads\\1.3dm\")\n    files.append(r\"C:\\Users\\Dale\\Downloads\\2.3dm\")\n    files.append(r\"C:\\Users\\Dale\\Downloads\\3.3dm\")\n    files.append(r\"C:\\Users\\Dale\\Downloads\\4.3dm\")\n    files.append(r\"C:\\Users\\Dale\\Downloads\\5.3dm\")\n    \n    for file in files:\n        cmd = \"_-Import \\\"{0}\\\" _Enter\".format(file)\n        Rhino.RhinoApp.RunScript(cmd, True)\n    \nif __name__ == \"__main__\":\n    test()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "private static List<Guid> ImportFromTo(RhinoDoc sDoc, RhinoDoc tDoc) {\n\t\t\tList<Guid> tObjects = new List<Guid>();\n\n\t\t\t// work layer by layer and copy over objects \n\t\t\tforeach (var sLayer in sDoc.Layers) {\n\t\t\t\t// ensure we have a target layer\n\t\t\t\tvar tLayer = tDoc.Layers.FindName(sLayer.Name);\n\t\t\t\tif (tLayer == null) {\n\t\t\t\t\tvar id = tDoc.Layers.Add(sLayer.Name, sLayer.Color);\n\t\t\t\t\tif (id < 0) throw new Exception(\"Could not create layer \" + sLayer.Name);\n\t\t\t\t\ttLayer = tDoc.Layers[id];\n\t\t\t\t}\n\n\t\t\t\t// now copy over objects\n\t\t\t\tvar sObjects = sDoc.SelectObjectsOnLayer(sLayer);\n\n\t\t\t\tforeach (var sObject in sObjects) {\n\t\t\t\t\tvar tGuid = tDoc.Objects.Add(sObject.DuplicateGeometry(), new ObjectAttributes {\n\t\t\t\t\t\tLayerIndex = tLayer.Index,\n\t\t\t\t\t\tColorSource = sObject.Attributes.ColorSource,\n\t\t\t\t\t\tObjectColor = sObject.Attributes.ObjectColor\n\t\t\t\t\t});\n\n\t\t\t\t\ttObjects.Add(tGuid);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\treturn tObjects;\n\t\t}",
+      "language": "csharp",
+      "author": "david.birch.uk",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "layers",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 635
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/automatic-snapshots-in-different-rhino-viewpoints-python-script/139755",
+  "topic_id": 139755,
+  "title": "Automatic snapshots in different Rhino viewpoints. Python script",
+  "question": "Hi everyone,\n\n\nI am struggling to create a python script within GH to make snapshots automatically from Rhino baked geometries to .png files.\n\n\nI found this amazing script made by \n@AndersDeleuran\n which solves this problem. However, in the case I have, geometries are placed in different Rhino views and my lack of scripting knowledge makes me impossible to edit the code.\n\n\n\n\n\n\n\n\ngrasshopper3d.com\n\n\n\n\n\n\n\n\na simple trick for producing animations from Kangaroo\n\n\nThis is the normal way of using Kangaroo with the timer, to see the movement on screen:\n\nHowever, if you want to produce and save an animation, you can do this…\n\n\n\n\n\n\n\n\n\n\n\n\nThe input I have is a bunch of curves placed in a row within an individual rectangle which represents the area to print in a png. What I would like to do is to create an individual png file of each rectangle.\n\n\n\n\nimage\n1369×473 38.6 KB\n\n\n\n\nWhat I thought is to create a script, which inputs would be these rectangles, capable of selecting each rectangle, make an individual zoom selected, and use Ander’s script to print the screenshot in a png file with a defined name.\n\n\n\n\n\n\n\n\ndeveloper.rhino3d.com\n\n\n\n\n\n\n\n\nZoom to Object\n\n\nZoom to a Selected Object\n\n\n\n\n\n\n\n\n\n\n\n\nWould anyone help me with this topic?\n\n\nI really appreciate it!\n\n\nRegards!",
+  "code_blocks": [
+    {
+      "code": "import Rhino as rc\nimport ghpythonlib as gh\nimport os\n\ndef zoomSelected(geometryBases):\n    \n    \"\"\" Zoom to geometryBases ala Grasshopper Zoom function, inflate to zoom out \"\"\"\n    \n    bb = rc.Geometry.BoundingBox.Empty\n    for gb in geometryBases:\n        bb.Union(gb.GetBoundingBox(False))\n    bb.Inflate(0)\n    avp = rc.RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport\n    result = avp.ZoomBoundingBox(bb)\n    \n    return result\n\n\ndef captureViewportToFile(width,height,directory,fileName):\n    \n    \"\"\" Captures the Rhino viewport to an image file (png). \"\"\"\n    \n    # Check that the directory exist\n    if not os.path.exists(directory):\n        print \"Folder does not exist\"\n        \n    else:\n        # Concatenate the directory, file and extension strings\n        filePath = directory + \"\\\\\" + fileName + \".png\"\n        filePath = filePath.replace(\"\\\\\",\"\\\\\\\\\")\n        \n        # Setup the capture settings\n        wh = \" _Width=\" + str(width) + \" _Height=\" + str(height)\n        sga = \" _Scale=1 _DrawGrid=No _DrawWorldAxes=No\"\n        abg = \" _DrawCPlaneAxes=No _TransparentBackground=No \"\n        capSettings =  wh + sga + abg\n        \n        # Capture the image to file\n        if rc.RhinoApp.RunScript(\"-ViewCaptureToFile \" + filePath + capSettings + \"_Enter\",echo=False):\n            \n            # Print message\n            print \"Captured: \" + os.path.normpath(filePath)\n\nVector_length = gh.components.ListLength(Geometry)\n\nif Calculate:\n    for i in range(Vector_length):\n        zoomSelected(Geometry[i])\n        captureViewportToFile(Width,Height,Directory,FileName[i])",
+      "language": "python",
+      "author": "bbalbastre",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino as rc\nimport ghpythonlib as gh\nimport os\n\nvector_length=gh.components.ListLength(Geometria)\n\nif Toggle:\n    for i in range(vector_length):\n        bb = rc.Geometry.BoundingBox.Empty\n        gb = Geometria[i]\n        solido = gb.GetBoundingBox(False)\n        avp = rc.RhinoDoc.ActiveDoc.Views.ActiveView.ActiveViewport\n        Result= avp.ZoomBoundingBox(solido)\n        \n        if not os.path.exists(Directory):\n            print \"Folder does not exist\"\n        else:\n            filePath = Directory + \"\\\\\" + FileName[i] + \".png\"\n            filePath = filePath.replace(\"\\\\\",\"\\\\\\\\\")\n            wh = \" _Width=\" + str(Width) + \" _Height=\" + str(Height)\n            sga = \" _Scale=1 _DrawGrid=No _DrawWorldAxes=No\"\n            abg = \" _DrawCPlaneAxes=No _TransparentBackground=No \"\n            capSettings =  wh + sga + abg\n            if rc.RhinoApp.RunScript(\"-ViewCaptureToFile \" + filePath + capSettings + \"_Enter\",echo=False):\n                print \"Captured: \" + os.path.normpath(filePath)",
+      "language": "python",
+      "author": "bbalbastre",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1732
+}

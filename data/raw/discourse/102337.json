@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-getobject-return-subdface-type/102337",
+  "topic_id": 102337,
+  "title": "rs.GetObject, return SubDFace Type?",
+  "question": "I was trying to drill down into the methods for SubDFace / Edge / Vertex. rs.GetObject only seems to return <type ‘SubD’> , even if you subobject select a face. How do I bridge this gap to constructing something from these other classes?\n\n\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\nsubd_id = rs.GetObject(\"Select a SubD Object\", subobjects= False )\nsubd_obj = rs.coercerhinoobject( subd_id )\nsubd_geom = subd_obj.Geometry\n\nsubobject_id = rs.GetObject(\"Subobject select something\", subobjects=True)\nsubobject_obj = rs.coercerhinoobject( subobject_id )\nsubobject_geom = subobject_obj.Geometry\n\nprint type(subobject_geom)\nprint type(subd_geom)\n\n\n\n\nReturns:\n\n<type ‘SubD’>\n\n<type ‘SubD’> ( even if I subobject select a face / edge / vertex )\n\n\n@DavidLeon\n ?",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\nsubd_id = rs.GetObject(\"Select a SubD Object\", subobjects= False )\nsubd_obj = rs.coercerhinoobject( subd_id )\nsubd_geom = subd_obj.Geometry\n\nsubobject_id = rs.GetObject(\"Subobject select (ctrl+shift) something\", subobjects=True) #subobj return is diff\nsubobject_obj = rs.coercerhinoobject( subobject_id ) # Rhino.DocObjects.ObjRef \nsubobject_geom = subobject_obj.Geometry\n\nprint subd_geom.Faces, \"\\n\", subd_geom.Faces.Count, \"picked SubD Faces\"\nprint subobject_geom.Faces, \"\\n\", subobject_geom.Faces.Count, \"picked Subobject Faces\"\n\nprint subd_geom.ComponentIndex(), subd_geom.ComponentIndex().ComponentIndexType, \"SubD ci Type\"\nprint subobject_geom.ComponentIndex(), subobject_geom.ComponentIndex().ComponentIndexType, \"Subobj ci Type\"",
+      "language": "python",
+      "author": "Jonathan_Hutchinson",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "subobject_id = rs.GetObject( \"Pick again\", False, subobjects=True )\nprint subobject_id.GeometryComponentIndex.ComponentIndexType\nprint subobject_id.GeometryComponentIndex.Index",
+      "language": "python",
+      "author": "Jonathan_Hutchinson",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext\n\nsubd_id = rs.GetObject(\"Select a SubD Object\", subobjects= False )\nsubd_obj = rs.coercerhinoobject( subd_id )\nsubd_geom = subd_obj.Geometry\n\nsubobject_id = rs.GetObject(\"Subobject select something\", subobjects=True)\nsubobject_obj = rs.coercerhinoobject( subobject_id )\nsubobject_geom = subobject_obj.Geometry\n\nprint type(subobject_geom)\nprint type(subd_geom)",
+      "language": "python",
+      "author": "Jonathan_Hutchinson",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 1004
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/simplified-populate-geometry-python-implementation/146105",
+  "topic_id": 146105,
+  "title": "Simplified Populate Geometry Python Implementation",
+  "question": "Hi all!\n\n\nI’ve been working with the PopulateGeometry node in Grasshopper for generating a lot of points on a lot of Breps, and as other posts have noted, the logic for evenly-spacing the points slows down the node considerably. I don’t need the points to be evenly-spaced for my use case (though admittedly it would be better if they were), and so I wanted to rewrite a faster version of it as a python script node without the even-spacing logic. I started by following the outline by Laurent from \nthis thread\n, and I’ve got the face selection by area part working, but I can’t find an easy way to choose a random point on a particular face.\n\n\nRight now, the best way I can think of is to call DuplicateFace() on the BrepFace to make a new Brep, create a bounding box for that Brep, and sample the area in the bounding box uniformly, throwing out samples that are outside the face by checking with a call to “IsPointOnFace()” on the original BrepFace. This seems like a somewhat roundabout way to do this random sampling, and I was wondering if there was a simpler way that I wasn’t seeing. Any insight/help would be much appreciated!\n\n\nNote: If I do go with the method I describe above, I’m planning to generate these bounding boxes in advance so that I only have to generate one bounding box per face per model rather than re-generating them for every sample point.",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"######\"\n__version__ = \"2022.08.03\"\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\nimport Grasshopper as gh\nimport Grasshopper.Kernel.Data as ghkd\nimport clr\nimport random\nimport System\n\n# Save old context to reset later\nold_doc = sc.doc\nsc.doc = ghdoc\n\n# Create Boolean Union of Inputs\nx_brep = rs.coercebrep(x)\ny_brep = rs.coercebrep(y)\nnew_brep = rg.Brep.CreateBooleanUnion([x_brep, y_brep], 0.0001)\n\n# Create point samples for each face of the Brep, stored as a DataTree\npoints = gh.DataTree[rg.Point3d]() \nface_counter = 0\nfor face in new_brep[0].Faces:\n    face_path = ghkd.GH_Path(face_counter)\n    face_counter += 1\n    for i in range(100):\n        # Evaluate() mutates StrongBox inputs rather than returning the result, so these inputs are created here\n        new_pt = clr.StrongBox[rg.Point3d]()\n        new_der = clr.StrongBox[System.Array[rg.Vector3d]]()\n        \n        # Randomly sample UV coordinates in [0,1]^2\n        u = random.random()\n        v = random.random()\n\n        # Re-sample UV coordinates if they are outside the Brep Face (give up after 10 tries)\n        attempts = 0\n        while not face.IsPointOnFace(u,v) and attempts < 10:\n            u = random.random()\n            v = random.random()\n            attempts += 1\n        \n        #Evaluate the surface at the chosen UV coordinates   \n        face.Evaluate(u, v, 0, new_pt, new_der)\n\n        # Add the surface evaluation to the DataTree\n        points.Add(new_pt.Value, face_path)\n\n# Reset old context        \nsc.doc = old_doc",
+      "language": "python",
+      "author": "John_Wolford",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 6,
+  "views": 1288
+}

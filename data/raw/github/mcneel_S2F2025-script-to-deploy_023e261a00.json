@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/mcneel/S2F2025-script-to-deploy/blob/09cfcc835bcf84016d539f45e29c18bb98873442/source/04_Libraries/PaintHeights_Lib.py",
+  "repo": "mcneel/S2F2025-script-to-deploy",
+  "repo_stars": 2,
+  "repo_description": "Repository for the Shape to Fabrication 2025 workshop: Script to Deploy",
+  "license": "MIT",
+  "filepath": "source/04_Libraries/PaintHeights_Lib.py",
+  "instruction": "https://www.nuget.org/packages/EasingFunctions https://github.com/emmauss/easing-functions r \"nuget: EasingFunctions, 1.0.1\"",
+  "code": "#! python3\n# https://www.nuget.org/packages/EasingFunctions\n# https://github.com/emmauss/easing-functions\n#r \"nuget: EasingFunctions, 1.0.1\"\nimport sys\nimport System\nfrom System.Drawing import Color\n\nimport Rhino\nfrom Rhino.Input import RhinoGet\nfrom Rhino.Input.Custom import GetPoint, OptionDouble\nfrom Rhino.DocObjects import ObjectType\nfrom Rhino.Commands import Result\nfrom Rhino.Geometry import Point3d, Ray3d, Circle, Plane, Transform, Line, MeshType\n\nfrom Eto.Forms import Keyboard, Keys\n\nfrom Easing import Quartic, Vector\n\nfrom BrushTools import BaseBrush\n\nclass Brush(BaseBrush):\n    def __init__(self, brush_surface):\n        super().__init__()\n\n        self._bsurface = brush_surface\n\n    def GetPaintSurfaces(self):\n        return self._bsurface.GetMeshes(MeshType.Render)\n\n    def ApplyBrush(self, doc, at, reverse):\n        for robj in doc.Objects.FindByObjectType(ObjectType.Extrusion):\n            bbox = robj.Geometry.GetBoundingBox(True)\n            pp = bbox.Min\n            dist = at.DistanceTo(pp)\n            if dist < self._falloff:\n                height = bbox.Max.Z - bbox.Min.Z\n                value = self.ComputeValue(dist, height, reverse)\n                xform = Transform.Scale(Plane.WorldXY, 1.0, 1.0, value / height)\n                doc.Objects.Transform(robj, xform, True)\n\n\nsuccess, obj_ref = RhinoGet.GetOneObject(\"Select Brush Plane\", False, filter=ObjectType.Brep | ObjectType.Mesh)\nif success == Result.Success:\n    brush_surface = obj_ref.Object()\n    brush = Brush(brush_surface)\n    brush.DoPaint()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry"
+  ],
+  "has_docstring": true
+}

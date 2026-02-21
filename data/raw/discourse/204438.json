@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/get-description-of-types-of-a-group-of-objects-1-point-2-curves/204438",
+  "topic_id": 204438,
+  "title": "Get description of types of a group of objects (\"1 point, 2 curves...\")",
+  "question": "If I have a list of objects, is there an easy way to get the text description of their types as in the title?  This is the same output as the added to/removed from selection objects feedback.",
+  "code_blocks": [
+    {
+      "code": "def count_types(objects):\n\tif len(objects) == 0: return \"No objects\"\n\ttype_dict = {\n\t\t0:\t\t\t\"unknown object\",\n\t\t1:\t\t\t\"point\",\n\t\t2:\t\t\t\"point cloud\",\n\t\t4:\t\t\t\"curve\",\n\t\t8:\t\t\t\"surface\",\n\t\t16:\t\t\t\"polysurface\",\n\t\t32:\t\t\t\"mesh\",\n\t\t256:\t\t\"light\",\n\t\t512:\t\t\"annotation\",\n\t\t4096:\t\t\"block instance\",\n\t\t8192:\t\t\"text dot\",\n\t\t16384:\t\t\"grip object\",\n\t\t32768:\t\t\"detail\",\n\t\t65536:\t\t\"hatch\",\n\t\t131072:\t\t\"morph control\",\n\t\t262144:\t\t\"subD object\",\n\t\t134217728:\t\"cage\",\n\t\t268435456:\t\"phantom object\",\n\t\t536870912:\t\"clipping plane\",\n\t\t1073741824:\t\"extrusion\"\n\t}\n\tcount_dict = {}\n\tfor obj in objects:\n\t\ttype = rs.ObjectType(obj)\n\t\tif type not in count_dict:\n\t\t\tcount_dict[type] = 0\n\t\tcount_dict[type] += 1\n\ts = \"\"\n\tfor type in sorted(count_dict):\n\t\tcount = count_dict[type]\n\t\ttype_str = type_dict[type]\n\t\ts += str(count)\n\t\ts += ' '\n\t\ts += type_str\n\t\tif count > 1: s += 'es' if type_str in (\"mesh\") else 's'\n\t\ts += ', '\n\treturn s[:-2]",
+      "language": "python",
+      "author": "Measure",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "mesh",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 109
+}

@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/subtracting-areas-from-surface-python/131691",
+  "topic_id": 131691,
+  "title": "Subtracting areas from surface - python",
+  "question": "Hi all,\n\n\nI am trying to solve the problem below via a python script. I have a lot (600+) of these situation where I have as input surfaces and I would have to remove areas from these surfaces:\n\n\n\n\nimage\n866×726 23.9 KB\n\n\n\n\nHowever I can’t find an easy way to do it via scripting, making the red contours solids and then booleaning them out of the initial surface seems to fail, also I would need to do this on a lot of elements, anyone could suggest a smart way to do it?\n\n\ne.g. script not working and potentially too slow:\n\n\nimport rhinoscriptsyntax as rs\n\nsurface = rs.GetObject(\"srf\", 8)\ncutpieces = rs.GetObjects(\"curves\")\npath = rs.AddLine([0,0,0],[3,0,0])\nsolids = []\n\nfor cutpiece in cutpieces:\n    newsolid = rs.ExtrudeCurve(cutpiece, path)\n    rs.CapPlanarHoles(newsolid)\n    rs.MoveObject(newsolid, [-1.5,0,0])\n    solids.append(newsolid)\n    \nrs.BooleanDifference(surface,solids)\n\n\n\nMany thanks in advance\n\n\nremoving areas.3dm\n (77.1 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\nimport Rhino.RhinoDoc as rr\n\ntol = rr.ActiveDoc.ModelAbsoluteTolerance\n\nsurface = rs.GetObject(\"srf\", rs.filter.surface)\nif surface:\n    curves = rs.GetObjects(\"curves\",rs.filter.curve)\n    if curves:\n        surface_geo =  rs.coercebrep(surface)\n        curves_geos = [rs.coercecurve(guid) for guid in curves]\n        bool_curves = rg.Curve.CreateBooleanUnion(curves_geos)\n        \n        if (bool_curves and surface_geo):\n            bool_breps2 = rg.Brep.CreatePlanarBreps(bool_curves)\n            brep3 = rg.Brep.CreateBooleanDifference([surface_geo],bool_breps2,tol)\n            if brep3:\n                for brep in brep3:\n                    sc.doc.Objects.AddBrep(brep)\n                \n                rs.DeleteObject(surface)\n                rs.DeleteObjects(curves)\n        \n        sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "603419608",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nsurface = rs.GetObject(\"srf\", 8)\ncutpieces = rs.GetObjects(\"curves\")\npath = rs.AddLine([0,0,0],[3,0,0])\nsolids = []\n\nfor cutpiece in cutpieces:\n    newsolid = rs.ExtrudeCurve(cutpiece, path)\n    rs.CapPlanarHoles(newsolid)\n    rs.MoveObject(newsolid, [-1.5,0,0])\n    solids.append(newsolid)\n    \nrs.BooleanDifference(surface,solids)",
+      "language": "python",
+      "author": "revink",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 768
+}

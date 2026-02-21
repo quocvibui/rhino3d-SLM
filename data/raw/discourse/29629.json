@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-in-rhinoscriptsyntax-toolbar-py-more-or-less-solved/29629",
+  "topic_id": 29629,
+  "title": "Bug in rhinoscriptsyntax toolbar.py (more or less solved)",
+  "question": "Continuing the discussion from \nToggle toolbar visibility without knowing its parent \"collection\"\n:\n\n\nRunning the following script in my setup errors out on the line indicated:\n\n\nimport rhinoscriptsyntax as rs\n\ndef ToggleToolbarVisibility(tb_name):\n    for tb_coll in rs.ToolbarCollectionNames():\n        if rs.IsToolbar(tb_coll,tb_name):  #<--Here\n            if rs.IsToolbarVisible(tb_coll,tb_name):\n                rs.HideToolbar(tb_coll,tb_name)\n            else:\n                rs.ShowToolbar(tb_coll,tb_name)\n            break\nToggleToolbarVisibility(\"ToolbarName\")\n\n\n\nThe error message is: “expected int, got str”\n\n\nIsToolbar () is expecting an index for tb_name and not a string.\n\n\nEdit - Never mind…  apparently the example I am using needs the third argument in IsToolbar() to be True.  Otherwise, with the default=False it errors out.  Still, somehow this should be error tolerant and return None, not blow up…  No?\n\n\n–Mitch",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef ToggleToolbarVisibility(tb_name):\n    for tb_coll in rs.ToolbarCollectionNames():\n        if rs.IsToolbar(tb_coll,tb_name):  #<--Here\n            if rs.IsToolbarVisible(tb_coll,tb_name):\n                rs.HideToolbar(tb_coll,tb_name)\n            else:\n                rs.ShowToolbar(tb_coll,tb_name)\n            break\nToggleToolbarVisibility(\"ToolbarName\")",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 694
+}

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/is-there-any-faster-method-to-compute-curve-closest-point/157946",
+  "topic_id": 157946,
+  "title": "Is there any faster method to compute curve closest point?",
+  "question": "I’m trying to compute the closest distance between a list of points and multiple curves and cull the points with distances greater than “X”.\n\n\nWhen I increase the number of points and curves to compute, the grasshopper native component’s time elapsed is relatively slow. So, I wondered if any has a better method to compute this process.\n\n\nI tried some Rhino common in Python but still not getting a smooth method.\n\n\n2023-04-08 20_08_14-Grasshopper - Crv_ClosestPoint DISTANCE WIP_\n3350×1578 500 KB\n\n\nCrv_ClosestPoint.gh\n (131.2 KB)",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper.Kernel.Types as gkt\n\n# Initialize the results list\nresults = []\n\n# Loop over points\nfor point in point_list:\n    if curve.ClosestPoint(point, max)[0]:\n        results.append(gkt.GH_Point(point))",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport Grasshopper.Kernel.Types as gkt\nimport ghpythonlib.treehelpers as th\n\n# Initialize the results list\nresults = []\n\n# Loop over points\nfor curve in curve_list:\n    culled_points = []\n    for point in point_list:\n        if curve.ClosestPoint(point, max)[0]:\n            culled_points.append(gkt.GH_Point(point))\n    results.append(culled_points)\nresults = th.list_to_tree(results)",
+      "language": "python",
+      "author": "kev.r",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 11,
+  "views": 2354
+}

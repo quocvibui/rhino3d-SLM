@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/u-value-at-point-on-curve/14228",
+  "topic_id": 14228,
+  "title": "U value at point on curve",
+  "question": "How do I evaluate the U (parameter) value of a point on a curve? This is directly equivalent to evaluating the UV values of a point on a surface using EvaluateUVPt.\n\n\nAlso, how do I create a point on a curve (corrected from surface) at a specified U (parameter) value? This is directly equivalent to creating a point on a surface using PointsFromUV.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ncrv=rs.GetObject(\"Select curve\",4,True)\npt=rs.GetPointOnCurve(crv,\"Pick point\")\nparam=rs.CurveClosestPoint(crv,pt)\nprint \"The parameter at pick point is {}\".format(param)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nsrf=rs.GetObject(\"Select surface\",8,True)\ndomU=rs.SurfaceDomain(srf,0)\ndomV=rs.SurfaceDomain(srf,1)\nmsg=\"Enter a U parameter value - range is from {} to {}\".format(domU[0],domU[1])\nu=rs.GetReal(msg,(domU[0]+domU[1])/2,minimum=domU[0],maximum=domU[1])\nmsg=\"Enter a V parameter value - range is from {} to {}\".format(domV[0],domV[1])\nv=rs.GetReal(msg,(domV[0]+domV[1])/2,minimum=domV[0],maximum=domV[1])\npt=rs.EvaluateSurface(srf,u,v)\nrs.AddPoint(pt)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\ncrv=rs.GetObject(\"Select curve\",4,True)\ndom=rs.CurveDomain(crv)\nmsg=\"Enter value between {} and {}\".format(dom[0],dom[1])\nparam=rs.GetReal(msg,minimum=dom[0],maximum=dom[1])\npt=rs.EvaluateCurve(crv,param)\nrs.AddPoint(pt)",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 5,
+  "views": 2395
+}

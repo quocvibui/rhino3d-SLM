@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/jhorikawa/compute.rhino3d_handson/blob/54b34e234df16a3165e9ab4cde0b2944cfd6be85/python/bubble_plate.py",
+  "repo": "jhorikawa/compute.rhino3d_handson",
+  "repo_stars": 10,
+  "repo_description": "Repo for hands-on held on 19/04/28.",
+  "license": "MIT",
+  "filepath": "python/bubble_plate.py",
+  "instruction": "Bubble plate",
+  "code": "import rhino3dm\nimport compute_rhino3d.Util\nimport compute_rhino3d.Curve\nimport compute_rhino3d.Brep\nimport json\nimport random\n\nauthToken = \"\"\nwith open('./projectinfo.json') as f:\n    df = json.load(f)\n    authToken = df[\"auth_token\"]\n\ncompute_rhino3d.Util.authToken = authToken\n#compute_rhino3d.Util.url = \"http://192.168.20.2:8081/\"\n\n\nfor n in range(1):\n    model = rhino3dm.File3dm()\n    curves = []\n    for i in range(20):\n        s = 10\n        pt = rhino3dm.Point3d(random.uniform(-s,s), random.uniform(-s, s), 0)\n        r = random.uniform(1, 3)\n        circle = rhino3dm.Circle(pt, r)\n        curve = circle.ToNurbsCurve()\n        curves.append(curve)\n\n    unionCrvsC = compute_rhino3d.Curve.CreateBooleanUnion(curves)\n    unionCrvs = []\n    height = random.uniform(1, 5)\n    for unionCrvC in unionCrvsC:\n        unionCrv = rhino3dm.CommonObject.Decode(unionCrvC)\n        extrusion = rhino3dm.Extrusion.Create(unionCrv, height, True)\n        model.Objects.AddExtrusion(extrusion)\n\n\n    model.Write('outputs/bubble{0}.3dm'.format(str(n)), 5)",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

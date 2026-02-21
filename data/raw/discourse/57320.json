@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/lineardimension-absolute-relative-references/57320",
+  "topic_id": 57320,
+  "title": "LinearDimension absolute/relative references",
+  "question": "Hi,\n\nI try to get “Rhino.Geometry.LinearDimension” working.\n\nI’m migrating my python code to Rhino 6.\n\nI know annotations changed a lot but I wonder why the parameters have changed from\n\n(plane, absoluteExt1, absoluteExt2, absoluteLinePt)\n\nto\n\n(plane, absoluteStartPos, relativeEndPos, relativeLinePos).\n\nIn that case shouldn’t be better to use vector for relatives values ?\n\nPractically and conceptually, isn’t it odd to know the length of a measure before the measurement ?\n\n(Even the python example is a bit twisted (an absolute position named “offset” ???)\n\n\nCan I know goal of that change ?\n\n\nRegards.",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as g\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\nimport math\n\n#Closest point in a plane (2d result)\ndef cp(pl, pt):\n\tb, u, v = pl.ClosestParameter(pt)\n\treturn g.Point2d(u, v)\n\n#Absolute World Coord points\ndef addLD(e1, e2, pt, aligned=False):\n\tif aligned:\n\t\tcplane = rs.ViewCPlane() #Stays in same plane\n\t\txDir = g.Vector3d(e2-e1) #Calc x and y vectors of the new aligned plane\n\t\tyDir = g.Vector3d(xDir)\n\t\tyDir.Rotate(math.pi/2, cplane.Normal)\n\t\tldPlane = g.Plane(e1, xDir, yDir) #1st point = origin\n\telse:\n\t\tldPlane = rs.ViewCPlane()\n\t\tldPlane.Origin = e1 #1st point = origin\n\t\n\t#  cp(ldPlane, e1) == g.Point2d(0,0) == origin\n\tld = g.LinearDimension(ldPlane, cp(ldPlane, e1), cp(ldPlane, e2), cp(ldPlane, pt))\n\t\n\tld.TextHeight = 35;\n\tld.ArrowSize = 30;\n\t\n\tdoc.Objects.AddLinearDimension(ld);\n\n\n#Absolute World Coord pick\naddLD(rs.GetPoint(), rs.GetPoint(), rs.GetPoint(), aligned = False)\nrs.Redraw()",
+      "language": "python",
+      "author": "lahos",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 25,
+  "posts_count": 3,
+  "views": 507
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/969flash/LausLecture/blob/004c0a8938bf805b8d70c744ddf5eb911fd4277f/Lecture3/01_shp_to_geometry.py",
+  "repo": "969flash/LausLecture",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "Lecture3/01_shp_to_geometry.py",
+  "instruction": "01 shp to geometry",
+  "code": "# -*- coding:utf-8 -*-\nfrom typing import List, Tuple, Optional\nimport ghpythonlib.components as ghcomp  # ignore\nimport os\nimport Rhino.Geometry as geo  # ignore\nimport utils\nimport importlib\n\nimportlib.reload(utils)\n\n#########################\n# bsh960flash@snu.ac.kr #\n#########################\n\n# Contour Divide Resolution(Higher value means more points in terrain mesh)\nRESOLUTION = 4\n\n# paths -> parameter of the component in grasshopper that is the path to the zip files\n\nzip_paths = [os.path.join(os.path.dirname(__file__), \"37705092.zip\")]\n\n# Main workflow\n# Read shapefiles from zip\ncontour_shapes = utils.read_shapefiles_from_zip(\n    zip_paths, [\"N1L_F0010000\", \"N3L_F0010000\"]\n)\nbuilding_shapes = utils.read_shapefiles_from_zip(\n    zip_paths, [\"N1A_B0010000\", \"N3A_B0010000\"]\n)\nroad_region_shapes = utils.read_shapefiles_from_zip(zip_paths, [\"N3A_A0010000\"])\nroad_centerline_shapes = utils.read_shapefiles_from_zip(zip_paths, [\"N3L_A0020000\"])\n\n# Extract data using utils functions\ncontour_data = utils.extract_data_from_shapefiles(contour_shapes)\nbuilding_data = utils.extract_data_from_shapefiles(building_shapes)\nroad_region_data = utils.extract_data_from_shapefiles(road_region_shapes)\nroad_centerline_data = utils.extract_data_from_shapefiles(road_centerline_shapes)\n\n# Process contour using utils functions\ncontour_geometry_records = list(zip(contour_data.geometry, contour_data.records))\ncontour_curves = utils.create_contour_curves(contour_geometry_records)\n\n# Process terrain\nmesh_points = utils.create_points_for_mesh(contour_curves, RESOLUTION)\nterrain_mesh = ghcomp.DelaunayMesh(mesh_points)\n\n# Process buildings using utils functions\nbuilding_geometry_records = list(zip(building_data.geometry, building_data.records))\nbuilding_breps = utils.create_building_breps(building_geometry_records, terrain_mesh)\n\n# Process road\nroad_region_curves = [data[0] for data in road_region_data.geometry]\nroad_centerline_curves = [data[0] for data in road_centerline_data.geometry]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

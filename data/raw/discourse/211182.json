@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/tracking-brepface-changes-and-persistent-tracking/211182",
+  "topic_id": 211182,
+  "title": "Tracking BrepFace Changes and Persistent Tracking",
+  "question": "Hello!\n\n\nI am developing a csharp plugin, but we encountered a problem we can seem to solve. We have custom UserData assigned to a Brep, lets call it Space which works great. However, for the Space its relevant for us to be able to track the Surfaces (BrepFaces), because each Face has also UserData, however it is attached to the Space (de-serialized there) and then referenced with the surface index.\n\n\nI would assume this works still good for minor transformations, moving, scaling ,etc. as I assume the surface index order does not change. But it becomed greatly problematic once we look into SplitFace and other commands that change the geometry greatly.\n\n\nIt would be great to be able to assign a Id or Guid to the BrepFace, in order to track and understand changes and then deploy our handlers. But BrepFace.Id does not seem to presist, not even for simple changes like scale or transform.\n\n\nIs there a possible solution for this? Did this change for Rhino 8?\n\n\nI want to be able to explicitly know which surface is which, ideally at all times, or atleast know what is new, removed, etc.\n\n\nKind regards,\n\n\nBen",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommandLogic(RhinoDoc doc)\n{\nvar go = new GetObject();\ngo.GeometryFilter = ObjectType.Surface;\ngo.SubObjectSelect = true;\ngo.SetCommandPrompt(“Select brep-face”);\ngo.Get();\n\nif (go.CommandResult() != Result.Success)\n    return go.CommandResult();\n\nObjRef objRef = go.Object(0);\nvar brep = objRef.Brep();\nif (brep == null)\n    return Result.Failure;\n\nvar key = \"ThisIsTestKey\";\n\nstring text = string.Empty;\nvar rc = RhinoGet.GetString(\"Text\", false, ref text);\nif (rc != Result.Success)\n    return rc;\n\nint faceIndex = objRef.GeometryComponentIndex.Index;\nif (faceIndex >= 0 && faceIndex < brep.Faces.Count)\n{\n    // Testing UserString\n    brep.Faces[faceIndex].SetUserString(key, text);\n\n    // Testing UserDictionary\n    brep.Faces[faceIndex].UserDictionary.Set(key, text);\n\n    // Testing UserData\n    var faceUD = new FaceUserData();\n    faceUD.Text = text;\n\n    brep.Faces[faceIndex].UserData.Add(faceUD);\n\n    doc.Objects.Replace(objRef.ObjectId, brep);\n    doc.Views.Redraw();\n    return Result.Success;\n}\n\nreturn Result.Failure;\n}",
+      "language": "csharp",
+      "author": "Benterich",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "public class FaceUserData : Rhino.DocObjects.Custom.UserData\n{\n    public string Text { get; set; }\n\n    public FaceUserData()\n    { }\n\n    public FaceUserData(string text) => Text = text;\n\n    public override bool ShouldWrite => true;\n\n    protected override bool Write(BinaryArchiveWriter writer)\n    {\n        writer.WriteString(Text ?? string.Empty);\n        return true;\n    }\n\n    protected override bool Read(BinaryArchiveReader reader)\n    {\n        Text = reader.ReadString();\n        return true;\n    }\n\n    public override string ToString() => $\"FaceUserData: {Text}\";\n}",
+      "language": "csharp",
+      "author": "Benterich",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "if (go.CommandResult() != Result.Success) return go.CommandResult();\nif (go.ObjectCount < 1) return Result.Cancel;\n\nforeach (var objRef in go.Objects())\n{\n    var rhObj = objRef.Object();\n    if (rhObj == null) continue;\n\n    Brep brep = rhObj.Geometry as Brep ?? (rhObj.Geometry as Surface)?.ToBrep();\n    if (brep == null)\n    {\n        RhinoApp.WriteLine($\"Object {rhObj.Id} cannot be converted to a Brep. Skipping.\");\n        continue;\n    }\n\n    RhinoApp.WriteLine($\"Checking Object {rhObj.Id} {rhObj.Name}\");\n\n    for (int i = 0; i < brep.Faces.Count; i++)\n    {\n        var face = brep.Faces[i];\n\n        // UserStrings\n        var strings = face.GetUserStrings();\n        var userStringPairs = strings?.AllKeys\n            .Where(k => k != null)\n            .Select(k => $\"{k}={strings[k]}\")\n            .DefaultIfEmpty(\"<none>\")\n            ?? new[] { \"<none>\" };\n\n        // UserDictionary\n        var dictPairs = face.UserDictionary.Keys\n            .Cast<string>()\n            .Select(k => $\"{k}={face.UserDictionary[k]}\")\n            .DefaultIfEmpty(\"<none>\");\n\n        // Custom UserData\n        var userDataEntries = face.UserData\n            .OfType<FaceUserData>()\n            .Select(d => $\"FaceUserData={d.Text}\")\n            .DefaultIfEmpty(\"<none>\");\n\n        string line =\n            $\"Object {rhObj.Id} - Face {i} | \" +\n            $\"UserStrings: [{string.Join(\", \", userStringPairs)}] | \" +\n            $\"UserDictionary: [{string.Join(\", \", dictPairs)}] | \" +\n            $\"UserData: [{string.Join(\", \", userDataEntries)}]\";\n\n        RhinoApp.WriteLine(line);\n    }\n}\n\ndoc.Views.Redraw();\nreturn Result.Success;",
+      "language": "csharp",
+      "author": "Benterich",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 19,
+  "views": 266
+}

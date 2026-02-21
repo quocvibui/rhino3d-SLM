@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/clipped-segments-collection-always-returns-empty/211982",
+  "topic_id": 211982,
+  "title": "Clipped Segments Collection Always Returns Empty",
+  "question": "Description\n\n\nWhen using \nHiddenLineDrawing.Compute()\n to generate section drawings, the collection of clipped segments filtered by \nHiddenLineDrawingSegment.Visibility.Clipped\n is always empty, even though the clipping plane is properly added to the parameters.\n\n\nCode\n\n\nvoid CreateSectionDraft(Brep brep, RhinoDoc doc) \n{\n    var para = new HiddenLineDrawingParameters\n    {\n        Flatten = true,\n        IncludeHiddenCurves = true,\n        OccludingSectionOption = true,\n        AbsoluteTolerance = 0.1,\n        IncludeTangentEdges = false,\n        IncludeTangentSeams = false\n    };\n    \n    var clippingPlane = Plane.WorldXY;\n    \n    if (!para.AddGeometry(brep, null))\n    {\n        RhinoApp.WriteLine(\"can not add geometry to hidden line drawing parameters.\");\n        return;\n    }\n    \n    para.AddClippingPlane(clippingPlane);\n    \n    var viewport = new RhinoViewport();\n    var bBox = brep.GetBoundingBox(true);\n    var center = bBox.Center;\n    _ = viewport.SetToPlanView(center, Vector3d.XAxis, Vector3d.YAxis, true);\n    para.SetViewport(viewport);\n    \n    var drawing = HiddenLineDrawing.Compute(para, true, \n        new Progress<double>(v => RhinoApp.WriteLine($\"progress: {v:P2}\")), \n        CancellationToken.None);\n    \n    if (drawing == null)\n    {\n        RhinoApp.WriteLine(\"can not generate hidden line drawing.\");\n        return;\n    }\n    \n    var visible = drawing.Segments.Where(d => d.SegmentVisibility == HiddenLineDrawingSegment.Visibility.Visible).ToList();\n    var hidden = drawing.Segments.Where(d => d.SegmentVisibility == HiddenLineDrawingSegment.Visibility.Hidden).ToList();\n    var clipped = drawing.Segments.Where(d => d.SegmentVisibility == HiddenLineDrawingSegment.Visibility.Clipped).ToList();\n    \n    // clipped.Count is always 0\n}\n\n\n\n\nExpected Behavior\n\n\nThe \nclipped\n collection should contain the section curves where the clipping plane intersects with the Brep geometry.\n\n\nActual Behavior\n\n\n\n\n\n\nvisible.Count\n > 0 ✓\n\n\n\n\n\n\nhidden.Count\n > 0 ✓\n\n\n\n\n\n\n...",
+  "code_blocks": [
+    {
+      "code": "void CreateSectionDraft(Brep brep, RhinoDoc doc) \n{\n    var para = new HiddenLineDrawingParameters\n    {\n        Flatten = true,\n        IncludeHiddenCurves = true,\n        OccludingSectionOption = true,\n        AbsoluteTolerance = 0.1,\n        IncludeTangentEdges = false,\n        IncludeTangentSeams = false\n    };\n    \n    var clippingPlane = Plane.WorldXY;\n    \n    if (!para.AddGeometry(brep, null))\n    {\n        RhinoApp.WriteLine(\"can not add geometry to hidden line drawing parameters.\");\n        return;\n    }\n    \n    para.AddClippingPlane(clippingPlane);\n    \n    var viewport = new RhinoViewport();\n    var bBox = brep.GetBoundingBox(true);\n    var center = bBox.Center;\n    _ = viewport.SetToPlanView(center, Vector3d.XAxis, Vector3d.YAxis, true);\n    para.SetViewport(viewport);\n    \n    var drawing = HiddenLineDrawing.Compute(para, true, \n        new Progress<double>(v => RhinoApp.WriteLine($\"progress: {v:P2}\")), \n        CancellationToken.None);\n    \n    if (drawing == null)\n    {\n        RhinoApp.WriteLine(\"can not generate hidden line drawing.\");\n        return;\n    }\n    \n    var visible = drawing.Segments.Where(d => d.SegmentVisibility == HiddenLineDrawingSegment.Visibility.Visible).ToList();\n    var hidden = drawing.Segments.Where(d => d.SegmentVisibility == HiddenLineDrawingSegment.Visibility.Hidden).ToList();\n    var clipped = drawing.Segments.Where(d => d.SegmentVisibility == HiddenLineDrawingSegment.Visibility.Clipped).ToList();\n    \n    // clipped.Count is always 0\n}",
+      "language": "csharp",
+      "author": "yangf85",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 1,
+  "views": 31
+}

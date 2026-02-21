@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/splitting-a-closed-curve-in-two-places-not-at-start-end/43840",
+  "topic_id": 43840,
+  "title": "Splitting a closed curve in two places not at start/end",
+  "question": "Hi all,\n\n\nI can’t figure out how to do this in Python/Rhinocommon - I have a closed 4 segment curve which I need to split in two places, neither of which is the curve start/end point.  I can use ClosestPoint() to get the curve params and then use Curve.Split(params) to split the curve, but I end up with 3 segments…  Is there an easy way to get the segments around the start/end point to join back together?  (The normal Rhino Split(Point) command does this).  I tried jumping through a few hoops, but nothing works reliably, must be missing something obvious here…\n\n\nThanks, --Mitch\n\n\n\n\nimage.png\n1348×403 6.98 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    crv_id = rs.GetObject(\"Closed curve\", 4, True, False)\n    if not crv_id: return\n    if not rs.IsCurveClosed(crv_id): return\n    \n    pt0 = rs.GetPointOnCurve(crv_id, \"First split point on curve\")\n    if not pt0: return\n    pt1 = rs.GetPointOnCurve(crv_id, \"Second split point on curve\")\n    if not pt1: return\n    \n    crv = rs.coercecurve(crv_id, -1, True)\n    rc0, param0 = crv.ClosestPoint(pt0)\n    rc1, param1 = crv.ClosestPoint(pt1)\n    if param0 == param1: return\n    \n    c0 = crv.Trim(param0, param1)\n    c1 = crv.Trim(param1, param0)\n    \n    scriptcontext.doc.Objects.AddCurve(c0)\n    scriptcontext.doc.Objects.AddCurve(c1)\n    scriptcontext.doc.Objects.Delete(crv_id, False)\n    scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 1391
+}

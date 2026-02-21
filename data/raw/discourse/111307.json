@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/need-an-example-for-rhino-geometry-brep-joinedges/111307",
+  "topic_id": 111307,
+  "title": "Need an example for Rhino.Geometry.Brep.JoinEdges",
+  "question": "I’m barely familiar with RhinoCommon and there’s not a python method for this, hence the request.\n\nThanks in advance.\n\n\nimage\n1412×892 15.8 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef main():\n    \n    pick = rs.GetEdgeCurves(\"Pick surface edge or Esc/Enter to exit\", 0, 1, False)\n    if not pick: return\n    \n    edge = pick[0][0]\n    panel = pick[0][1]\n    refpt = pick[0][2]\n    xplode = None\n    \n    if not rs.IsSurface(panel):\n        xplode = rs.ExplodePolysurfaces(panel)\n        face = rs.PointClosestObject(refpt, xplode)[0]\n    else:\n        face = panel\n    \n    param = rs.SurfaceClosestPoint(face, refpt)\n    normal = rs.SurfaceNormal(face, param)\n    flange = rs.ExtrudeCurveStraight(edge, normal, (0, 0, 0))\n    \n    if xplode: rs.DeleteObjects(xplode)\n    rs.DeleteObject(edge)\n    \n    #Assign panel closest edge to refpt to a variable?\n    #Assign flange closest edge to refpt to a variable?\n    #join above using Rhino.Geometry.Brep.JoinEdges\n    \n    \nif __name__ == '__main__': main()",
+      "language": "python",
+      "author": "Asterisk",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef main():\n    filter = Rhino.DocObjects.ObjectType.EdgeFilter\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\n        \"Select a brep edge\",\n        False,\n        filter\n    )\n    if rc != Rhino.Commands.Result.Success: return rc\n    \n    if not objref: return Rhino.Commands.Result.Failure\n    \n    brep = objref.Brep()\n    edge = objref.Edge()\n    objref.Object().Select(False)\n    \n    face = brep.Faces[edge.AdjacentFaces()[0]]\n    offset = edge.OffsetNormalToSurface(face.ToNurbsSurface(), 1.)\n    add_face_brep = Rhino.Geometry.Brep.CreateFromLoft(\n        [edge, offset], \n        Rhino.Geometry.Point3d.Unset,\n        Rhino.Geometry.Point3d.Unset,\n        Rhino.Geometry.LoftType.Normal,\n        False\n    )[0]\n    \n    #brep.Join(add_face_brep, 0, True)\n    #brep.JoinNakedEdges(0.)\n    \n    v0 = edge.StartVertex\n    v1 = edge.EndVertex\n    neigh_v0 = -1\n    neigh_v1 = -1\n    for vertex in add_face_brep.Vertices:\n        if neigh_v0 == -1 and (v0.Location - vertex.Location).IsTiny():\n            neigh_v0 = vertex\n        elif neigh_v1 == -1 and (v1.Location - vertex.Location).IsTiny():\n            neigh_v1 = vertex\n        if neigh_v0 != -1 and neigh_v1 != -1:\n            break\n    if neigh_v0 == -1 or neigh_v1 == -1:\n        return False\n    \n    edge_to_merge = -1\n    for neigh_edge_idx in neigh_v0.EdgeIndices():\n        neigh_edge = add_face_brep.Edges[neigh_edge_idx]\n        print(neigh_edge_idx, neigh_edge.StartVertex.VertexIndex, neigh_edge.EndVertex.VertexIndex)\n        if (\n            (\n                neigh_edge.StartVertex.VertexIndex == neigh_v0.VertexIndex\n                and neigh_edge.EndVertex.VertexIndex == neigh_v1.VertexIndex\n            ) or (\n                neigh_edge.EndVertex.VertexIndex == neigh_v0.VertexIndex\n                and neigh_edge.StartVertex.VertexIndex == neigh_v1.VertexIndex\n            )\n        ):\n            edge_to_merge = neigh_edge_idx\n            break\n    if edge_to_merge == -1:\n        return False\n    \n    #brep.JoinEdges(edge.EdgeIndex, edge_to_merge, 0., False)\n    new_brep = Rhino.Geometry.Brep.CreateFromJoinedEdges(\n        brep,\n        edge.EdgeIndex,\n        add_face_brep,\n        edge_to_merge,\n        0.01\n    )\n    \n    brep = new_brep\n    brep.Compact()\n    new_guid = sc.doc.Objects.Add(brep)\n    xf = Rhino.Geometry.Transform.Translation(10, 10, 0)\n    sc.doc.Objects.Transform(new_guid, xf, False)\n    sc.doc.Objects.Delete(sc.doc.Objects.Find(new_guid))\n    sc.doc.Views.Redraw()\n    \n\nif __name__ == \"__main__\":\n    main()",
+      "language": "python",
+      "author": "pierrec",
+      "post_number": 8,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 14,
+  "views": 2028
+}

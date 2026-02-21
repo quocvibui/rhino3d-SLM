@@ -1,0 +1,30 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/subd-and-other-wishes/113716",
+  "topic_id": 113716,
+  "title": "SubD and other Wishes",
+  "question": "Splop objects onto a SubD (even if only using a coarse/dense render mesh underneath for simple, imperfect deformation).\n\n\n\n\n\n\nMatching a subd edge in smooth mode to a polysurface (using the underlying NURBS object, doesn’t need to be exact, just as close as the match can be using the existing geometry). Maybe a refine match could be added, so do it with history and then user can insert points on the edge until they get a match they’re happy with (as some poeple do with MatchSrf + history, adding knots until something looks a better match).\n\n\n\n\n\n\nDelete Input, Quad Remesh\n\n\n\n\n\n\nSubD to Mesh (using extract control polygon), doesn’t preserve selection sets\n\n\n\n\n\n\n‘Points’ command - add undo option\n\n\n\n\n\n\nFlow along surface works amazingly from one subd face to another. How could we do something similar, but flow something from one loop (quad faces, single loop ‘strip’) to another loop strip, perhaps of a different length (but still just a quad loop, one edge wide (but maybe moving up to two edges wide eventally, again only on the condition that the selections form 4 sided all quad topology)\n\n\n\n\n\n\nFreeze border in QuadRemesh - maybe even define segments in edge loop / naked / open edge point count (current/target), or even match a subd surface in box mode to a degree 1 curve (ala matchsrf to curve)\n\n\n\n\n\n\nBringToFront for controls",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ngeometry = rs.GetObjects(\"Select object/s to morph\")\nobj_rh = rs.coercegeometry(geometry)\n\nbase_srf_guid = rs.GetObject(\"Select base surface\")\nbase_srf_brep = rs.coercegeometry ( base_srf_guid )\nbase_srf = base_srf_brep.Surfaces [0]\n\ntarget_srf_guid = rs.GetObject(\"Pick target subd\")\ntarget_srf_brep = rs.coercegeometry( target_srf_guid )\n\ndef SubDSporph(base, target ):\n    vtx_options = rg.SubDToBrepOptions.ExtraordinaryVertexProcessOption( 2 )\n    options = rg.SubDToBrepOptions( True, vtx_options )\n    brep = target.ToBrep( options )\n    if brep.IsSurface:\n        target_srf = brep.Surfaces [0]\n        flowalongsubd = rg.Morphs.SporphSpaceMorph(base_srf, target_srf )\n        \n        return flowalongsubd\n\nflowalongsubd = SubDSporph(base_srf, target_srf_brep)\n\nfor geo in geometry:\n    coerced = rs.coercegeometry(geo)\n    sporphed = rg.Brep.Duplicate(coerced)\n    flowalongsubd.Morph(sporphed)\n    sc.doc.Objects.Add(sporphed)",
+      "language": "python",
+      "author": "Jonathan_Hutchinson",
+      "post_number": 14,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 1,
+  "posts_count": 20,
+  "views": 2401
+}

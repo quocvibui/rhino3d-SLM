@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-extendcurve-keep-giving-iteration-over-non-sequence-of-type-int/157136",
+  "topic_id": 157136,
+  "title": "Rs. ExtendCurve keep giving \"iteration over non-sequence of type int",
+  "question": "I am trying to find the intersection of a line extension and a brep. It keeps to give the following error message. However, after I used print(type(line)) to check, “line” is not int.\n\n\nThe line “extension = rs.ExtendCurve(line, 0, 1, 1)” has an error message\n\n“Runtime error (TypeErrorException): iteration over non-sequence of type int\n\nTraceback:\n\nline 2569, in ExtendCurve, “C:\\Users\\s.su\\AppData\\Roaming\\McNeel\\Rhinoceros\\7.0\\Plug-ins\\IronPython (814d908a-e25c-493d-97e9-ee3861957f49)\\settings\\lib\\rhinoscript\\curve.py”\n\nline 29, in script”\n\n\nMany thanks.\n\n\nThe whole codes are as below.\n\n\nimport rhinoscriptsyntax as rs\nimport math\n\n# create evenly distributed point on a sphere with a given center and a radius\ndef create_points_on_sphere(center, radius, num_points):\n    phi = math.pi * (3 - math.sqrt(5))  # golden angle in radians\n    points = []\n    for i in range(num_points):\n        y = 1 - (i / float(num_points - 1)) * 2  # y goes from 1 to -1\n        radius_at_y = math.sqrt(1 - y * y)  # radius at y\n        theta = phi * i  # golden angle increment\n        x = math.cos(theta) * radius_at_y\n        z = math.sin(theta) * radius_at_y\n        point = [x * radius, y * radius, z * radius]\n        point = rs.PointAdd(center,point)\n        points.append(rs.AddPoint(point))\n    return points\n\n# Create evenly distributed points on the surface of the sphere\npoints = create_points_on_sphere(center, radius, num_points)\n\n# Add lines from the center of the sphere to the points on the sphere and intersection points\nlines = []\nintersection_points = []\nfor point in points:\n    line = rs.AddLine(center, point)\n    extension = rs.ExtendCurve(line, 0, 1, 1)\n    intersection = rs.FirstIntersectingObject(extension, [brep])\n    if intersection:\n        intersection_points.append(intersection[1])\n        lines.append(rs.AddLine(center, intersection[1]))\n    else:\n        lines.append(line)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\n# create evenly distributed point on a sphere with a given center and a radius\ndef create_points_on_sphere(center, radius, num_points):\n    phi = math.pi * (3 - math.sqrt(5))  # golden angle in radians\n    points = []\n    for i in range(num_points):\n        y = 1 - (i / float(num_points - 1)) * 2  # y goes from 1 to -1\n        radius_at_y = math.sqrt(1 - y * y)  # radius at y\n        theta = phi * i  # golden angle increment\n        x = math.cos(theta) * radius_at_y\n        z = math.sin(theta) * radius_at_y\n        point = [x * radius, y * radius, z * radius]\n        point = rs.PointAdd(center,point)\n        points.append(rs.AddPoint(point))\n    return points\n\n# Create evenly distributed points on the surface of the sphere\npoints = create_points_on_sphere(center, radius, num_points)\n\n# Add lines from the center of the sphere to the points on the sphere and intersection points\nlines = []\nintersection_points = []\nfor point in points:\n    line = rs.AddLine(center, point)\n    extension = rs.ExtendCurve(line, 0, 1, 1)\n    intersection = rs.FirstIntersectingObject(extension, [brep])\n    if intersection:\n        intersection_points.append(intersection[1])\n        lines.append(rs.AddLine(center, intersection[1]))\n    else:\n        lines.append(line)",
+      "language": "python",
+      "author": "Su2020",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 274
+}

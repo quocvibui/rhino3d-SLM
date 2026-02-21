@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/makedeformable-failed/212431",
+  "topic_id": 212431,
+  "title": "MakeDeformable failed",
+  "question": "The curve in the attached file causes \nMakeDeformable\n to fail.\n\n\nTo replicate,\n\n\n\n\nUse the command defined as follows:\n\n\n\n\nusing Rhino;\nusing Rhino.Commands;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing Rhino.Input;\nusing Rhino.Input.Custom;\n\nnamespace LayupRH.Commands\n{\n    public class MyMakeDeformableTest : Command\n    {\n        public MyMakeDeformableTest()\n        {\n            Instance = this;\n        }\n\n        public static MyMakeDeformableTest Instance { get; private set; }\n\n        public override string EnglishName => \"MyMakeDeformableTest\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            using GetObject go = new();\n            go.SetCommandPrompt(\"Choose a curve\");\n            go.GeometryFilter = ObjectType.Curve;\n            if (go.Get() == GetResult.Cancel)\n            {\n                return Result.Cancel;\n            }\n            Curve curve = go.Object(0).Curve();\n            if (curve.MakeDeformable())\n            {\n                RhinoApp.WriteLine(\"Successfully made deformable\");\n            }\n            else\n            {\n                RhinoApp.WriteLine(\"Failed to make deformable\");\n            }\n            Curve nurbsCurve = curve.ToNurbsCurve();\n            if (nurbsCurve != null)\n            {\n                RhinoApp.WriteLine(\"Successfully made into NURBS\");\n                if (nurbsCurve.MakeDeformable())\n                {\n                    RhinoApp.WriteLine(\"Successfully made NURBS curve deformable\");\n                }\n                else\n                {\n                    RhinoApp.WriteLine(\"Failed to make NURBS curve deformable\");\n                }\n            } \n            else\n            {\n                RhinoApp.WriteLine(\"Failed to make into Nurbs\");\n            }\n            return Result.Success;\n        }\n    }\n}\n\n\n\n\n\nOpen this file:\n\n\nfailedMakeDeformable.3dm\n (35.9 KB)\n\n\nCall the \nMyMakeDeformableTest\n command and select the curve\n\n\n\n\nThe result is that \n...",
+  "code_blocks": [
+    {
+      "code": "using Rhino;\nusing Rhino.Commands;\nusing Rhino.DocObjects;\nusing Rhino.Geometry;\nusing Rhino.Input;\nusing Rhino.Input.Custom;\n\nnamespace LayupRH.Commands\n{\n    public class MyMakeDeformableTest : Command\n    {\n        public MyMakeDeformableTest()\n        {\n            Instance = this;\n        }\n\n        public static MyMakeDeformableTest Instance { get; private set; }\n\n        public override string EnglishName => \"MyMakeDeformableTest\";\n\n        protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n        {\n            using GetObject go = new();\n            go.SetCommandPrompt(\"Choose a curve\");\n            go.GeometryFilter = ObjectType.Curve;\n            if (go.Get() == GetResult.Cancel)\n            {\n                return Result.Cancel;\n            }\n            Curve curve = go.Object(0).Curve();\n            if (curve.MakeDeformable())\n            {\n                RhinoApp.WriteLine(\"Successfully made deformable\");\n            }\n            else\n            {\n                RhinoApp.WriteLine(\"Failed to make deformable\");\n            }\n            Curve nurbsCurve = curve.ToNurbsCurve();\n            if (nurbsCurve != null)\n            {\n                RhinoApp.WriteLine(\"Successfully made into NURBS\");\n                if (nurbsCurve.MakeDeformable())\n                {\n                    RhinoApp.WriteLine(\"Successfully made NURBS curve deformable\");\n                }\n                else\n                {\n                    RhinoApp.WriteLine(\"Failed to make NURBS curve deformable\");\n                }\n            } \n            else\n            {\n                RhinoApp.WriteLine(\"Failed to make into Nurbs\");\n            }\n            return Result.Success;\n        }\n    }\n}",
+      "language": "csharp",
+      "author": "Russell_Emerine",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 61
+}

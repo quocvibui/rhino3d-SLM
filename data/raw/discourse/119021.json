@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ctb-like-layout-print-widths-with-rhinoscript/119021",
+  "topic_id": 119021,
+  "title": "CTB-like layout print widths with Rhinoscript",
+  "question": "Hello,\n\n\nI’m using this script, which is very useful : \nAutoCAD CTB to Rhino [McNeel Wiki]\n\nIt works fine, but I’m trying to enhance it for my own practice:\n\n\nWhat I’m trying to do is to change the \nLayout Print Width\n and the \nLayout Print Color\n with the script, instead of changing the \nPrint Width\n and \nPrint Color\n.\n\n\nThis way, I would like to be able to have specific print widths according to each layout, and to be able to batch plot all my layouts without having to reload SetAcadPrintInfo for each layout.\n\n\nI didn’t find the corresponding method in the RhinoScript documentation. Is there a way to achieve this?\n\n\nThanks a lot,",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport System\n\ndef test_per_viewport_layer_settings():\n    \n    layer = sc.doc.Layers.CurrentLayer\n    if not layer:\n        return\n    \n    color = System.Drawing.Color.Chartreuse\n    weight = 0.25\n    \n    layer.PlotColor = color\n    layer.PlotWeight = weight\n    \n    view = sc.doc.Views.ActiveView\n    if isinstance(view, Rhino.Display.RhinoPageView):\n        details_views = view.GetDetailViews()\n        for detail in details_views:\n            layer.SetPerViewportPlotColor(detail.Viewport.Id, color)\n            layer.SetPerViewportPlotWeight(detail.Viewport.Id, weight)\n    \n    sc.doc.Views.Redraw()\n    \nif __name__ == \"__main__\":\n    test_per_viewport_layer_settings()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 1445
+}

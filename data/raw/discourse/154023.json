@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/most-effective-method-to-extrude-complex-2d-pattern-to-3d/154023",
+  "topic_id": 154023,
+  "title": "Most effective method to extrude complex 2D pattern to 3D",
+  "question": "I have a 2D pattern of a bunch of tiny holes that I would like to extrude into 3D, but because of the number of spots I have, the extrusion takes a long time. I wonder if there’s a more effective method to extruding other than \nextrudecrv\n\n\nAlso, what would be the recommended method if I would like to have a twisted 3D geometry with this pattern? I tried \nflowalongsurface\n, which works, but like extrusions, it takes forever to do.\n\n\nAttached is a portion of the file I would like to make into 3D, there are 17137 closed curves.\n\nThanks.\n\n\n\n\nimage\n345×904 15.4 KB\n\n\n\n\n2Dpattern.3dm\n (5.3 MB)",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext as sc\nimport Rhino.Geometry as rg\nimport System\n\namp = rg.AreaMassProperties\nvmp = rg.VolumeMassProperties\n\n# Set the GUID of the source object to the one you create\nsrc = sc.doc.Objects.FindId(System.Guid(\"e829d7e8-4c32-40bc-a821-495276c8860b\"))\nsrc_centroid = vmp.Compute(src.Geometry).Centroid\n\nselobs = [(ob, amp.Compute(ob.Geometry).Centroid) for ob in sc.doc.Objects if ob.IsSelected(True)]\n\n# disable view redraw until after all objects have been added\nsc.doc.Views.EnableRedraw(False, False, False)\n\nfor o, c in selobs:\n    ng = src.DuplicateGeometry()\n    ng.Translate(c - src_centroid)\n    sc.doc.Objects.Add(ng)\n\nsc.doc.Views.EnableRedraw(True, True, True)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "nathanletwory",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 147,
+  "posts_count": 9,
+  "views": 1432
+}

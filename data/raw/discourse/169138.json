@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/need-help-make-surface-parallel-surface/169138",
+  "topic_id": 169138,
+  "title": "Need help make surface parallel surface",
+  "question": "I have two surfaces, surface 1 is created with midtop at 0,0,0 and lies on the OZX plane. How do make scirpt to rotate surface 1 according to surface 2 so that the two surfaces are parallel to each other but surface 1 still maintains its position?\n\n\nimage\n848×828 59.4 KB",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport scriptcontext as sc\n\ndef rotate_to_parallel():\n    surface1_id = rs.GetObject(\"Select the first surface\", rs.filter.surface)\n    if not surface1_id: return\n\n    surface2_id = rs.GetObject(\"Select the second surface\", rs.filter.surface)\n    if not surface2_id: return\n\n    surface1 = sc.doc.Objects.Find(surface1_id).Geometry\n    surface2 = sc.doc.Objects.Find(surface2_id).Geometry\n\n    if not isinstance(surface1, rg.Surface) or not isinstance(surface2, rg.Surface):\n        print(\"One of the selected objects is not a surface.\")\n        return\n\n    surface1_plane = surface1.TryGetPlane()[1]\n    surface2_plane = surface2.TryGetPlane()[1]\n\n    angle = rg.Vector3d.VectorAngle(surface1_plane.Normal, surface2_plane.Normal)\n    rotation_axis = rg.Vector3d.CrossProduct(surface1_plane.Normal, surface2_plane.Normal)\n    if rotation_axis.IsZero: l\n        print(\"The surfaces are already parallel\")\n        return\n\n    rotation_axis.Unitize()  # Normalize the rotation axis\n\n    rotation_transform = rg.Transform.Rotation(angle, rotation_axis, surface1_plane.Origin)\n\n    surface1.Transform(rotation_transform)\n    \n    sc.doc.Objects.Replace(surface1_id, surface1)\n    sc.doc.Views.Redraw()\n\n    print(\"The first surface has been rotated to be parallel to the second surface.\")\n\n\nrotate_to_parallel()",
+      "language": "python",
+      "author": "farouk.serragedine",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 226
+}

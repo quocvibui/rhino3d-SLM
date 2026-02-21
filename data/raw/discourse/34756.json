@@ -1,0 +1,29 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/interpolate-points/34756",
+  "topic_id": 34756,
+  "title": "Interpolate Points",
+  "question": "I’ve been given a set of points derived from real-world measurements, but it is apparent that some points are missing. How can I interpolate the points I do have to estimate the points that are missing? I am going to be using this data in Grasshopper and want to fix this via ghpython. The missing points show up as \nnull\n in the grasshopper list, so I know where in the sequence they are. One thing I could do is interpolate curve and get the points in the gap. But then I saw that Rhinocommon has a \ninterpolate\n section (Rhino.Geometry.Interpolator). Can I use those tools to estimate the missing points?\n\n\nI’ve attached a simplified example of my data points.\n\n\n\n\n160718_1.PNG\n1871×636 12.1 KB\n\n\n\n\n160718 Interpolate Point.gh\n (7.6 KB)\n\n\n160718 Interpolate Points.3dm\n (64.8 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\n\ndef InterpolateCosineMissingXYZ(start_index,missing_steps,x_interpolator,y_interpolator,z_interpolator):\n    for T in xrange(1,missing_steps):\n        x = x_interpolator.InterpolateCosine(start_index + (T/missing_steps) )\n        y = y_interpolator.InterpolateCosine(start_index+ (T/missing_steps) )\n        z = z_interpolator.InterpolateCosine(start_index+ (T/missing_steps) )\n        rs.AddPoint(x,y,z)\n\ndef InterpolateCatmullRomMissingXYZ(start_index,missing_steps,x_interpolator,y_interpolator,z_interpolator):\n    for T in xrange(1,missing_steps):\n        x = x_interpolator.InterpolateCatmullRom(start_index + (T/missing_steps) )\n        y = y_interpolator.InterpolateCatmullRom(start_index+ (T/missing_steps) )\n        z = z_interpolator.InterpolateCatmullRom(start_index+ (T/missing_steps) )\n        rs.AddPoint(x,y,z)\n        \n        \ndef InterpolateCubicMissingXYZ(start_index,missing_steps,x_interpolator,y_interpolator,z_interpolator):\n    for T in xrange(1,missing_steps):\n        x = x_interpolator.InterpolateCubic(start_index + (T/missing_steps) )\n        y = y_interpolator.InterpolateCubic(start_index+ (T/missing_steps) )\n        z = z_interpolator.InterpolateCubic(start_index+ (T/missing_steps) )\n        rs.AddPoint(x,y,z)\n\ndef Main():\n    \n    pt_objs = rs.GetObjects('select points',filter = 1)\n    pts = [rs.PointCoordinates(obj) for obj in pt_objs]\n    #sort the points along the x axis to sanitize input for testing\n    pts.sort(key = lambda pt : pt.X)\n\n \n    x_interpolator = Rhino.Geometry.Interpolator([pt.X for pt in pts])\n    y_interpolator = Rhino.Geometry.Interpolator([pt.Y for pt in pts])\n    z_interpolator = Rhino.Geometry.Interpolator([pt.Z for pt in pts])\n    \n    startA,stepsA = 7,3\n    startB,stepsB = 22,4\n    startC,stepsC = 36,5\n    \n    if True:\n        InterpolateCosineMissingXYZ(startA,stepsA,x_interpolator,y_interpolator,z_interpolator)\n        InterpolateCosineMissingXYZ(startB,stepsB,x_interpolator,y_interpolator,z_interpolator)\n        InterpolateCosineMissingXYZ(startC,stepsC,x_interpolator,y_interpolator,z_interpolator)\n\n    if True:\n        InterpolateCatmullRomMissingXYZ(startA,stepsA,x_interpolator,y_interpolator,z_interpolator)\n        InterpolateCatmullRomMissingXYZ(startB,stepsB,x_interpolator,y_interpolator,z_interpolator)\n        InterpolateCatmullRomMissingXYZ(startC,stepsC,x_interpolator,y_interpolator,z_interpolator)\n        \n    if True:\n        InterpolateCubicMissingXYZ(startA,stepsA,x_interpolator,y_interpolator,z_interpolator)\n        InterpolateCubicMissingXYZ(startB,stepsB,x_interpolator,y_interpolator,z_interpolator)\n        InterpolateCubicMissingXYZ(startC,stepsC,x_interpolator,y_interpolator,z_interpolator)\n\nMain()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 7,
+  "views": 3561
+}

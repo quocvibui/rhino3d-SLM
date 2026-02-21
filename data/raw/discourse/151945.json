@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/loft-in-rhinoscriptsyntax/151945",
+  "topic_id": 151945,
+  "title": "Loft in rhinoscriptsyntax",
+  "question": "I’m trying to make a script that lofts 2 closed curves. One in an “irregular circle” (it’s a circle when looking from the top plane, but the 3d geometry is irregular) and the other one is just a bigger concentric circle.\n\n\nI’m trying to do it with just rhinoscriptsyntax.\n\n\nThe loft works great when done manually but when I try doing with a script I end up with the monstrosity below:\n\n\n\n\nimage\n1267×514 131 KB\n\n\n\n\nWhat I’ve already tried:\n\n\n\n\nUsing points to guide the loft\n\n\nChanging the curve directions to match\n\n\nUsing the sweep2 instead of a loft (couldn’t even get that to work)\n\nNone of the above worked for me.\n\n\n\n\nHere’s the code:\n\n\ntryingToLoft.py\n (721 Bytes)\n\n\nimport rhinoscriptsyntax as rs\n\n\nbaseCurves = rs.SelectedObjects()\n\nfor curve in baseCurves:\n\nif rs.IsCircle(curve):\n\nsmoothCircle = curve\n\nelse:\n\nperimeter = curve\n\n\nsameDirection = rs.CurveDirectionsMatch(perimeter, smoothCircle)\n\nif not sameDirection:\n\nsmoothCircle = rs.ReverseCurve(smoothCircle)\n\n\nclosestPoints = rs.CurveClosestObject(perimeter, smoothCircle)\n\nsweepLine = rs.AddLine(closestPoints[1], closestPoints[2])\n\nrs.AddLoftSrf([perimeter, smoothCircle], closestPoints[1], closestPoints[2], 3, 1, 100)\n\n\n#rs\n.AddLoftSrf([perimeter, smoothCircle]), None, None, 3, 1, 100)\n\n\n#rs\n.AddSweep2([perimeter, smoothCircle], sweepLine, True)\n\n\nI’m also attaching the file with the 2 curves if anyone wants to give it a try. You need to select the curves first before running the script.\n\n\n2 closed curves.3dm\n (94.9 KB)\n\n\nAny help is appreciated",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nfrom Rhino.Geometry import *\n\ncurves = rs.SelectedObjects()\ncrvs = [rs.coercecurve(c) for c in curves]\n\nstart = crvs[0].PointAtStart\n_, cp = crvs[1].ClosestPoint(start)\npt = crvs[1].PointAt(cp)\ncrvs[1].ChangeClosedCurveSeam(cp)\n\nloft = Brep.CreateFromLoftRebuild(crvs, Point3d.Unset, Point3d.Unset, LoftType.Normal, False, 100)[0]\nsc.doc.Objects.AddBrep(loft)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 5,
+  "views": 684
+}

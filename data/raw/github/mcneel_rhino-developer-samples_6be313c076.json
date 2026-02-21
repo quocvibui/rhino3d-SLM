@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/py/divide-curve-by-segments.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/py/divide-curve-by-segments.py",
+  "instruction": "Divide curve by segments",
+  "code": "from Rhino.DocObjects import *\nfrom Rhino.Input import *\nfrom Rhino.Commands import *\nfrom Rhino.Geometry import *\nfrom Rhino import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, objref = RhinoGet.GetOneObject(\"Select curve to divide\", False, ObjectType.Curve)\n    if rc != Result.Success or objref == None:\n        return rc\n\n    curve = objref.Curve()\n    if curve == None or curve.IsShort(RhinoMath.ZeroTolerance):\n        return Result.Failure\n\n    segment_count = 2\n    rc, segment_count = RhinoGet.GetInteger(\"Divide curve into how many segments?\", False, segment_count)\n    if rc != Result.Success:\n        return rc\n\n    curve_params = curve.DivideByCount(segment_count, True)\n    if curve_params == None:\n        return Result.Failure\n\n    points = [curve.PointAt(t) for t in curve_params]\n    for point in points:\n        doc.Objects.AddPoint(point)\n\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

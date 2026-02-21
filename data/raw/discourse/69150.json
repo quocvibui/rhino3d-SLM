@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/exit-command-not-working/69150",
+  "topic_id": 69150,
+  "title": "Exit command not working",
+  "question": "I’m trying to run some Rhino command scripts from a DOS prompt, where I exit Rhino after each script. I’ve tried putting the Exit command in either the script I run or the command prompt but neither work. They show up in the command history, but don’t actually do anything. If I manually type exit it works fine.\n\n\nI’m using the latest version of Rhino 6, at least as of writing.\n\n\nThe reason for exiting and starting Rhino again is that each script maxes out the RAM on my system and Rhino doesn’t seem to clear it any other way (such as create new file etc).",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\ndef exit():\n    rs.DocumentModified(False)\n    rs.Exit()\nexit()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "import ctypes\nimport Rhino\nimport scriptcontext\n\ndef test_exit_without_saving():\n    scriptcontext.doc.Modified = False\n    hWnd = Rhino.RhinoApp.MainWindowHandle()\n    ctypes.windll.user32.PostMessageW(hWnd, 0x0010, 0, 0)\n    \ntest_exit_without_saving()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 39,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 35,
+  "views": 3378
+}

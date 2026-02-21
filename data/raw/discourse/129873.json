@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-let-python-do-something-regularly-when-catch-error/129873",
+  "topic_id": 129873,
+  "title": "How to let python do something regularly when catch error?",
+  "question": "I have written a program in python component and I want to use it with the genetic algorithm module. While the program usually meets some unexpected errors. Some of them cannot be fixed perfectly, especially those that come from rhinoscriptsyntax. I tried a lot of times and convince that the program can work great in 90% of conditions, most errors don’t have the fundamental effect of the final result. The only thing they do is just stop the process of the genetic algorithm module and let the whole work break.\n\n\nSo I want to achieve the effect as follow:\n\nThe component would return regular and pre-prepared information or geometry when it catches any error.\n\n\nI have prepared a simple python component that would stop when the random index that points out the int-type object but not the point3d object as the first parameter of the AddCirCle method. What I want to do is that the program should return a regular thing like a line or a string when catching TypeError, and skip the wrong code and end the execution directly\n\n\n\n\nI hope anyone can help me to solve the problem.  I’ve been on this issue for too long😥.\n\n\nThe gh document file is here \nrandomly_return_error.gh\n (4.2 KB)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\nif x == True:\n    pt = rs.coerce3dpoint([0, 10, 0])\n    num = 3\n    rad = 5\n    ctls = (pt, num)\n    \n    indexA = random.randint(0, 1)\n    a = rs.AddCircle(ctls[indexA], rad)",
+      "language": "python",
+      "author": "eastnoob",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\nif x == True:\n    pt = rs.coerce3dpoint([0, 10, 0])\n    num = 3\n    rad = 5\n    ctls = (pt, num)\n    \n    indexA = random.randint(0, 1)\n    try:\n        a = rs.AddCircle(ctls[indexA], rad)\n    except ValueError as e:\n        raise(e)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random\n\nif x == True:\n    pt = rs.coerce3dpoint([0, 10, 0])\n    num = 3\n    rad = 5\n    ctls = (pt, num)\n    \n    indexA = random.randint(0, 1)\n    cir = None\n    try:\n        cir = rs.AddCircle(ctls[indexA], rad)\n    except ValueError as e:\n        cir = rs.AddCircle([0,0,0], rad)\n   \n    a = cir",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": true
+    },
+    {
+      "code": "import Rhino.Geometry as rg\nimport random\n\n\ndef generate_circle(center, radius):\n    \"\"\"Returns a circle, if center is a valid three-dimensional point.\"\"\"\n    if not isinstance(center, rg.Point3d):\n        return\n    return rg.Circle(center, radius)\n\n\nif x == True:\n    pt = rg.Point3d(0, 10, 0)\n    num = 3\n    rad = 5\n    ctls = (pt, num)\n    \n    indexA = random.randint(0, 1)\n    cir = generate_circle(ctls[indexA], rad)\n    \n    a = cir if cir else rg.Circle(rg.Point3d.Origin, rad)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 4,
+  "views": 2116
+}

@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/CADacombs/rhinopython/blob/541b4ade49f1dda6a3861d12b9e2613405182082/xBrep_EdgeContinuity_Interior_All.py",
+  "repo": "CADacombs/rhinopython",
+  "repo_stars": 37,
+  "repo_description": "Python scripts for Rhinoceros (Rhino, Rhino3D).",
+  "license": "LGPL-3.0",
+  "filepath": "xBrep_EdgeContinuity_Interior_All.py",
+  "instruction": "210320: Created.",
+  "code": "\"\"\"\r\n210320: Created.\r\n\"\"\"\r\n\r\nimport Rhino\r\nimport Rhino.DocObjects as rd\r\nimport Rhino.Geometry as rg\r\nimport rhinoscriptsyntax as rs\r\nimport scriptcontext as sc\r\n\r\n\r\ndef main():\r\n    \r\n    gBs = rs.GetObjects(\"Select polysurfaces\", filter=16,\r\n            preselect=True, select=True)\r\n    if not gBs: return\r\n    \r\n    sc.doc.Views.RedrawEnabled = False\r\n    \r\n    sc.doc.Objects.UnselectAll() # For first call to _EdgeContinuity.\r\n    \r\n    Rhino.RhinoApp.SetCommandPrompt(\"\")\r\n    \r\n    for iB in xrange(len(gBs)):\r\n        gB = gBs[iB]\r\n        \r\n        rdB = rs.coercerhinoobject(gB)\r\n        rgB = rdB.Geometry\r\n        \r\n        compIdxs = [None, None]\r\n        \r\n        for idxE in xrange(rgB.Edges.Count):\r\n            edge = rgB.Edges[idxE]\r\n            \r\n            sPrompt = \"Processing edge {} of {}\".format(\r\n                    idxE+1, rgB.Edges.Count)\r\n            if len(gBs) > 1:\r\n                sPrompt += \" in polysurface {} of {}\".format(\r\n                    iB+1, len(gBs))\r\n            \r\n            sPrompt += \" ...\"\r\n            \r\n            Rhino.RhinoApp.CommandPrompt = sPrompt\r\n            \r\n            if sc.escape_test(throw_exception=False):\r\n                print \"Script interrupted by user.\"\r\n                return\r\n            \r\n            if edge.TrimCount == 2:\r\n                iTs = edge.TrimIndices()\r\n                for i in 0,1:\r\n                    compIdxs[i] = rg.ComponentIndex(\r\n                        type=rg.ComponentIndexType.BrepTrim,\r\n                        index=iTs[i])\r\n                for compIdx in compIdxs:\r\n                    rdB.SelectSubObject(\r\n                        componentIndex=compIdx,\r\n                        select=True,\r\n                        syncHighlight=True,\r\n                        persistentSelect=True)\r\n                \r\n                rc = Rhino.RhinoApp.RunScript(\"_EdgeContinuity _Enter\", echo=False)\r\n                \r\n                Rhino.RhinoApp.CommandPrompt = sPrompt\r\n                \r\n                for compIdx in compIdxs:\r\n                    rdB.SelectSubObject(\r\n                        componentIndex=compIdx,\r\n                        select=False,\r\n                        syncHighlight=True,\r\n                        persistentSelect=True)\r\n\r\n    sc.doc.Views.RedrawEnabled = False\r\n\r\n\r\nif __name__ == '__main__': main()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

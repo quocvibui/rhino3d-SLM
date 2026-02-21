@@ -1,0 +1,37 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/custom-input-getobject-infinite-while-loop/1183",
+  "topic_id": 1183,
+  "title": "Custom input GetObject() infinite while loop",
+  "question": "using: rhino python\n\n\nhello, I am trying to have a user select a series of mesh edges, and after each selection run a function which uses the selected mesh edge index. The idea is to let the user select either single edges or chains of edges associated with a single edge. Thus the code should ask the user to select an edge, with the options of making it a chain or leaving it alone.\n\n\nI found this example for getting a point with command line options in the rhinocommon docs. With the ‘break’ statement removed (as I did below)  one can set any number of points, with options:\n\n\nimport Rhino\nimport scriptcontext\n\ndef CommandLineOptions():\n  \n  gp = Rhino.Input.Custom.GetPoint() #if this is changed to GetObject() rhino gets stuck.\n  gp.SetCommandPrompt(\"GetPoint with options\")\n\n  # set up the options\n  intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n  dblOption = Rhino.Input.Custom.OptionDouble(2.2, 0, 99.9)\n  boolOption = Rhino.Input.Custom.OptionToggle(False, \"Off\", \"On\")\n  listValues = \"Item0\", \"Item1\", \"Item2\", \"Item3\", \"Item4\"\n\n  gp.AddOptionInteger(\"Integer\", intOption)\n  gp.AddOptionDouble(\"Double\", dblOption)\n  gp.AddOptionToggle(\"Boolean\", boolOption)\n  listIndex = 3\n  opList = gp.AddOptionList(\"List\", listValues, listIndex)\n  gp.Get()\n  while True:\n    get_rc = gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n    if get_rc==Rhino.Input.GetResult.Point:\n        point = gp.Point()\n        scriptcontext.doc.Objects.AddPoint(point)\n        scriptcontext.doc.Views.Redraw()\n        print \"Command line option values are\"\n        print \" Integer =\", intOption.CurrentValue\n        print \" Double =\", dblOption.CurrentValue\n        print \" Boolean =\", boolOption.CurrentValue\n        print \" List =\", listValues[listIndex]\n    elif get_rc==Rhino.Input.GetResult.Option:\n        if gp.OptionIndex()==opList:\n          listIndex = gp.Option().CurrentListOptionIndex\n        continue\n    #break #I removed this so that one...",
+  "code_blocks": [
+    {
+      "code": "GetObject go = Rhino.Input.Custom.GetObject();\nwhile True:\n    get_rc = go.GetMultiple(<min>,<max>)\n    objects = go.Objects()\n    etc. etc",
+      "language": "unknown",
+      "author": "menno",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef CommandLineOptions():\n  \n  gp = Rhino.Input.Custom.GetPoint() #if this is changed to GetObject() rhino gets stuck.\n  gp.SetCommandPrompt(\"GetPoint with options\")\n\n  # set up the options\n  intOption = Rhino.Input.Custom.OptionInteger(1, 1, 99)\n  dblOption = Rhino.Input.Custom.OptionDouble(2.2, 0, 99.9)\n  boolOption = Rhino.Input.Custom.OptionToggle(False, \"Off\", \"On\")\n  listValues = \"Item0\", \"Item1\", \"Item2\", \"Item3\", \"Item4\"\n\n  gp.AddOptionInteger(\"Integer\", intOption)\n  gp.AddOptionDouble(\"Double\", dblOption)\n  gp.AddOptionToggle(\"Boolean\", boolOption)\n  listIndex = 3\n  opList = gp.AddOptionList(\"List\", listValues, listIndex)\n  gp.Get()\n  while True:\n    get_rc = gp.Get()\n    if gp.CommandResult()!=Rhino.Commands.Result.Success:\n        return gp.CommandResult()\n    if get_rc==Rhino.Input.GetResult.Point:\n        point = gp.Point()\n        scriptcontext.doc.Objects.AddPoint(point)\n        scriptcontext.doc.Views.Redraw()\n        print \"Command line option values are\"\n        print \" Integer =\", intOption.CurrentValue\n        print \" Double =\", dblOption.CurrentValue\n        print \" Boolean =\", boolOption.CurrentValue\n        print \" List =\", listValues[listIndex]\n    elif get_rc==Rhino.Input.GetResult.Option:\n        if gp.OptionIndex()==opList:\n          listIndex = gp.Option().CurrentListOptionIndex\n        continue\n    #break #I removed this so that one can pick any number of points\n  return Rhino.Commands.Result.Success\n\n\nif __name__ == \"__main__\":\n    CommandLineOptions()",
+      "language": "python",
+      "author": "jlopezbi",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "boolean",
+    "csharp",
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 2475
+}

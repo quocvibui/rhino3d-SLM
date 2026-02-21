@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/creating-brep-or-surface-or-nurbs-surface-from-a-set-of-coordinates/50008",
+  "topic_id": 50008,
+  "title": "Creating BREP or Surface (or NURBS Surface) from a set of coordinates",
+  "question": "I am attempting to create a BREP/Surface/Mesh using a set of point coordinates inside a list (which I can turn into Rhino.Geometry.Point3d objects and also to Curve objects), that describe irregular polygons (sometimes with holes or ‘Inner Loops’, according to BREP terminology). A sample shape (\nEDIT:\n  a planar surface with six inner loops and one outer loop) is attached as .3dm here:\n\n\nsample.3dm\n (54.4 KB)\n\n\nand it looks like this:\n\n\n\n\nPreviously, I was using CreateFromCornerPoints (which I understand creates one BREP face) to make quadrilaterals.\n\n\nHowever, based on what I’ve seen in the Developer methods and also on the forum, creating a BREP from scratch using scripting appears to be very difficult. \nHow then do I best go about creating BREP/Surface  from scratch using a set of Point3d/Curve objects in Python and Rhinocommon?\n Are there workarounds to direct BREP construction? If you could provide me with links to similar discussions (which I may have missed) or with a simple example for an irregular polygon with one inner loop as Rhino Geometry (so that they can first be previewed using Grasshopper, and are not added to the Rhino document right away), then I can take it from there.\n\n\nThe output would need to be a Surface (trimmed in this case), and it would need to be able to handle any number of sides and Inner Loops. I understand that after the main BREP face is made, then one ‘trims’ it with the BREP faces that serve as ‘holes’.\n\n\nTLDR; I want to recreate a shape like the one above as a BREP/Surface, but the only data I have about that shape are its coordinates (Point3d objects), normal, u and v vectors. How do I do it in Python with the output being Rhino.Geometry (not GUIDs) in the least painful way?",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ncrvIDs=rs.GetObjects(\"Select curves\",4,preselect=True)\nif crvIDs:\n    crvs=[rs.coercecurve(crvID) for crvID in crvIDs]\n    breps=Rhino.Geometry.Brep.CreatePlanarBreps(crvs)\n    if breps:\n        srfIDs=[sc.doc.Objects.AddBrep(brep) for brep in breps]\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 3483
+}

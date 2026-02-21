@@ -1,0 +1,50 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/draw-tangent-circle-for-each-arc-within-polycurve/148683",
+  "topic_id": 148683,
+  "title": "Draw tangent circle for each arc within polycurve",
+  "question": "I have a drawing made of many polylines with arcs. I need to draw circles that are tangent to each arc in the polylines. Doing this manually, I am drawing each circle by hovering by each arc, using the center snap command to draw the center of the circle and then the perp snap to bring the edge tangent to the line at that point.\n\n\nThis is taking forever and I’m hoping to write a script to iterate through each arc for each polyline. It’s been a few years since I scripted, so I’m a bit rusty on the functions. Thank you so much for any help!\n\n\n\n\narc help\n2097×1679 125 KB",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ntry:\n    sc.doc = Rhino.RhinoDoc.ActiveDoc\n    objs = rs.ObjectsByType(4)\n    \n    for obj in objs:\n        if rs.IsArc(obj):\n            center = rs.ArcCenterPoint(obj)\n            radius = rs.ArcRadius(obj)\n            rs.AddCircle(center, radius)\n            # relies on \"active construction plane\"\nfinally:\n    sc.doc = ghdoc",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\n\nobjs = rs.ObjectsByType(4)\n\nfor obj in objs:\n    if rs.IsArc(obj):\n        center = rs.ArcCenterPoint(obj)\n        radius = rs.ArcRadius(obj)\n        rs.AddCircle(center, radius)\n        # relies on \"active construction plane\"",
+      "language": "python",
+      "author": "James_Parrott",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\n\ndef AddCirclesToPolyCurve():\n    obj_ids=rs.GetObjects(\"Select polycurves to process\",4,preselect=True)\n    if not obj_ids: return\n    \n    for obj_id in obj_ids:\n        #get the RhinoCommon curve object geometry\n        crv=rs.coercecurve(obj_id)\n        #find all the subsegments\n        segs=crv.DuplicateSegments()\n        #loop and check each segment to see if it is an arc curve\n        for seg in segs:\n            if isinstance(seg,Rhino.Geometry.ArcCurve):\n                #segment is an arc curve, get underlying arc plane and radius\n                radius=seg.Arc.Radius\n                plane=seg.Arc.Plane\n                #make new circles with arc data\n                circle=Rhino.Geometry.Circle(plane,radius)\n                #add the circles to the document\n                sc.doc.Objects.AddCircle(circle)\n        sc.doc.Views.Redraw()\nAddCirclesToPolyCurve()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef AddCirclesToPolyCurve():\n    obj_ids=rs.GetObjects(\"Select polycurves to process\",4,preselect=True)\n    if not obj_ids: return\n    \n    rs.EnableRedraw(False)\n    for obj_id in obj_ids:\n        seg_ids=rs.ExplodeCurves(obj_id) #makes a copy, doesn't delete original\n        for seg_id in seg_ids:\n            if rs.IsArc(seg_id):\n                #segment is an arc curve\n                radius=rs.ArcRadius(seg_id)\n                plane=rs.CurvePlane(seg_id)\n                #make new circles with arc data\n                circle_id=rs.AddCircle(plane,radius)\n        #delete the copied segments after\n        rs.DeleteObjects(seg_ids)\n\nAddCirclesToPolyCurve()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 9,
+  "views": 741
+}

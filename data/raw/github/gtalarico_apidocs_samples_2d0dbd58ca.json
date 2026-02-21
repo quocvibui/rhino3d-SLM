@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/extract-isocurve.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/grasshopper/mcneel/rhino-developer-samples/rhinocommon/snippets/py/extract-isocurve.py",
+  "instruction": "Extract isocurve",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Commands import *\nfrom Rhino.Input import *\nfrom Rhino.Input.Custom import *\nfrom Rhino.Geometry import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n    rc, obj_ref = RhinoGet.GetOneObject(\"Select surface\", False, ObjectType.Surface)\n    if rc != Result.Success or obj_ref == None:\n        return rc\n    surface = obj_ref.Surface()\n\n    gp = GetPoint()\n    gp.SetCommandPrompt(\"Point on surface\")\n    gp.Constrain(surface, False)\n    option_toggle = OptionToggle(False, \"U\", \"V\")\n    gp.AddOptionToggle(\"Direction\", option_toggle)\n    point = Point3d.Unset\n\n    while True:\n        grc = gp.Get()\n        if grc == GetResult.Option:\n            continue\n        elif grc == GetResult.Point:\n            point = gp.Point()\n            break\n        else:\n            return Result.Nothing\n\n    if point == Point3d.Unset:\n        return Result.Nothing\n\n    direction = 1 if option_toggle.CurrentValue else 0\n    b, u_parameter, v_parameter = surface.ClosestPoint(point)\n    if not b: return Result.Failure\n\n    iso_curve = surface.IsoCurve(direction, u_parameter if direction == 1 else v_parameter)\n    if iso_curve == None:\n        return Result.Failure\n\n    doc.Objects.AddCurve(iso_curve)\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__ == \"__main__\":\n    RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

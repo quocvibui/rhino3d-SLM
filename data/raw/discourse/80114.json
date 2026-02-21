@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-printing-catalogue-into-multiple-pdfs/80114",
+  "topic_id": 80114,
+  "title": "[Python] Printing Catalogue into Multiple PDFs",
+  "question": "Hi guys,\n\n\nI was wondering if someone could help me write a script to automate a very tedious workflow.\n\n\nI want to keep this simple. I work by organizing multiple 2D drawings inside a grid on one single Rhino file.\n\nWhat I need to do is automate the printing of each of these drawings to separate PDFs files (one for each grid cell).\n\n\nNot sure which is the best direction to take: To use “Layouts” or “Print Window”.\n\nUsing Layout offers no advantage to me for this specific workflow.\n\n\n\n\nCatalogue.png\n1285×733 91.6 KB\n\n\n\n\nCatalogueExample.3dm\n (753.9 KB)\n\n\nEach cell should be a different pdf. You can imagine doing this with the Ctrl + P and “moving” the “Print Window” form its center to the center of each cell and saving and naming each PDF gets quite tedious. (Not to mention the select > invert > hide combo to get each individual drawing alone).\n\n\nMaybe to simplify things I could first print 1 pdf with all correct settings (given that Rhino remembers used settings) and then run the script.\n\n\nAny insight would mean a tremendous help!\n\nThanks in advance,\n\nShynn",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\ni = 0\ndef createLayout(name):\n    pageview = Rhino.RhinoDoc.ActiveDoc.Views.AddPageView(name, 34, 20)\n    top_left = Rhino.Geometry.Point2d(0,0)\n    bottom_right = Rhino.Geometry.Point2d(34,20)\n    detail = pageview.AddDetailView(None, top_left, bottom_right, Rhino.Display.DefinedViewportProjection.Top)\n    detail.DetailGeometry.IsProjectionLocked = True\n    pageview.SetActiveDetail(detail.Id)\n    detail.DetailGeometry.SetScale(1, Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem, 1, Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem)\n    detail.CommitChanges()\nobjs = rs.AllObjects()\nrs.EnableRedraw(False)\nfor obj in objs:\n    if rs.IsCurve(obj):\n        if not rs.IsPolyline(obj):\n            rs.SelectObject(obj)\n            rs.HideObject(rs.InvertSelectedObjects())\n            createLayout(str(i))\n            i = i +1\n    rs.ShowObjects(objs)\nrs.Command(\"_Show\")",
+      "language": "python",
+      "author": "Mahdiyar",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "objs = rs.ObjectsByLayer(\"Curves\", True)\nrs.EnableRedraw(False)\nfor obj in objs:\n    rs.HideObject(rs.InvertSelectedObjects())\n    createLayout(str(i))\n    i = i +1\n    rs.ShowObjects(objs)\nrs.Command(\"_Show\")",
+      "language": "python",
+      "author": "ShynnSup",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 2314
+}

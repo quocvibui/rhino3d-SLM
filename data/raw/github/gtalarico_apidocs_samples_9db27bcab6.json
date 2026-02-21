@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_createmeshfrombrep.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_createmeshfrombrep.py",
+  "instruction": "Ex createmeshfrombrep",
+  "code": "import Rhino\nfrom Rhino.Geometry import *\nfrom Rhino.Input import RhinoGet\nfrom Rhino.Commands import Result\nfrom Rhino.DocObjects import ObjectType\nimport rhinoscriptsyntax as rs\nfrom scriptcontext import doc\n\ndef RunCommand():\n  rc, objRef = RhinoGet.GetOneObject(\"Select surface or polysurface to mesh\", True, \n                                     ObjectType.Surface | ObjectType.PolysrfFilter)\n  if rc <> Result.Success:\n    return rc\n  brep = objRef.Brep()\n  if None == brep:\n    return Result.Failure\n\n  jaggedAndFaster = MeshingParameters.Coarse\n  smoothAndSlower = MeshingParameters.Smooth\n  defaultMeshParams = MeshingParameters.Default\n  minimal = MeshingParameters.Minimal\n\n  meshes = Mesh.CreateFromBrep(brep, smoothAndSlower)\n  if meshes == None or meshes.Length == 0:\n    return Result.Failure\n\n  brepMesh = Mesh()\n  for mesh in meshes:\n    brepMesh.Append(mesh)\n  doc.Objects.AddMesh(brepMesh)\n  doc.Views.Redraw()\n\nif __name__ == \"__main__\":\n  RunCommand()\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

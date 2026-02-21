@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/enhancement-request-rs-xformscale-optional-argument-plane/178674",
+  "topic_id": 178674,
+  "title": "Enhancement request - rs.XformScale optional argument \"Plane\"",
+  "question": "Currently rs.XformScale only allows scaling in the world coordinate system.  There is a RhinoCommon transform method that allows scaling based on an arbitrary plane.\n\n\nhttps://developer.rhino3d.com/api/rhinocommon/rhino.geometry.transform/scale\n\n(first overload)\n\n\nThe funny thing is the rhinoscriptsyntax method actually uses the above RhinoCommon variant, but then shuts it off…\n\n\ndef XformScale(scale, point=None):\n    factor = rhutil.coerce3dpoint(scale)\n    if factor is None:\n        if type(scale) is int or type(scale) is float:\n            factor = (scale,scale,scale)\n        if factor is None: return scriptcontext.errorhandler()\n    if point: point = rhutil.coerce3dpoint(point, True)\n    else: point = Rhino.Geometry.Point3d.Origin\n    plane = Rhino.Geometry.Plane(point, Rhino.Geometry.Vector3d.ZAxis);\n    xf = Rhino.Geometry.Transform.Scale(plane, factor[0], factor[1], factor[2])\n    return xf\n\n\n\nSo it could easily be made to accept a point or a plane as an argument…  Like this I think:\n\n\ndef XformScale(scale,origin=None):\n    factor = rhutil.coerce3dpoint(scale)\n    if factor is None:\n        if type(scale) is int or type(scale) is float:\n            factor = (scale,scale,scale)\n        if factor is None: return scriptcontext.errorhandler()\n    plane=Rhino.Geometry.Plane.WorldXY\n    if origin:\n        if isinstance(origin,Rhino.Geometry.Plane):\n                #a plane was passed\n                plane=origin\n        else:\n            point=rhutil.coerce3dpoint(origin)\n            if point:\n                #a point was passed, move world XY plane origin to point\n                plane.Origin=origin\n    xf = Rhino.Geometry.Transform.Scale(plane, factor[0], factor[1], factor[2])\n    return xf\n\n\n\nOr, add a plane as a second optional argument, but I think the above would be better (just change the Help…)",
+  "code_blocks": [
+    {
+      "code": "def XformScale(scale, point=None):\n    factor = rhutil.coerce3dpoint(scale)\n    if factor is None:\n        if type(scale) is int or type(scale) is float:\n            factor = (scale,scale,scale)\n        if factor is None: return scriptcontext.errorhandler()\n    if point: point = rhutil.coerce3dpoint(point, True)\n    else: point = Rhino.Geometry.Point3d.Origin\n    plane = Rhino.Geometry.Plane(point, Rhino.Geometry.Vector3d.ZAxis);\n    xf = Rhino.Geometry.Transform.Scale(plane, factor[0], factor[1], factor[2])\n    return xf",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "def XformScale(scale,origin=None):\n    factor = rhutil.coerce3dpoint(scale)\n    if factor is None:\n        if type(scale) is int or type(scale) is float:\n            factor = (scale,scale,scale)\n        if factor is None: return scriptcontext.errorhandler()\n    plane=Rhino.Geometry.Plane.WorldXY\n    if origin:\n        if isinstance(origin,Rhino.Geometry.Plane):\n                #a plane was passed\n                plane=origin\n        else:\n            point=rhutil.coerce3dpoint(origin)\n            if point:\n                #a point was passed, move world XY plane origin to point\n                plane.Origin=origin\n    xf = Rhino.Geometry.Transform.Scale(plane, factor[0], factor[1], factor[2])\n    return xf",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 2,
+  "views": 152
+}

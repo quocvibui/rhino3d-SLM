@@ -1,0 +1,47 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/cross-platform-simple-mouse-event/176635",
+  "topic_id": 176635,
+  "title": "Cross Platform - Simple Mouse Event?",
+  "question": "Hello,\n\n\nI’m trying to implement the simple functionality of detecting a mouse button press and release and pulling my hair out. It seems \nRhino.UI.MouseCallback\n has all the functionality I need for this but I can’t seem to get any code working that does anything “OnMouseDown” or “OnMouseUp” in Rhino8.\n\n\nI’m sure I’m overlooking something obvious, I guess I’ve had my head in the sand for too long on this and now I’m just completely stuck. I’ve had success with mouse events in GH components I’ve written but just stumped in Rhino right now.\n\n\nI found this code circa 2018 that seemed like a simple enough python implementation but only the else statement of the definition “TestSampleMouseCallback” prints its statement. (And quite honestly, I may just be misunderstanding the intent of this code but I expect it to print the button name on a Mouse click but that doesn’t seem to happen)\n\n\nimport System\nimport Rhino\nimport scriptcontext as sc\n\nclass SampleMouseCallback(Rhino.UI.MouseCallback):\n  def OnMouseDown(self, e):\n\n    print \"OnMouseDown\", e.Button\n    \ndef TestSampleMouseCallback():\n    \n    if sc.sticky.has_key('TestSampleMouseCallback'):\n        callback = sc.sticky['TestSampleMouseCallback']\n        if callback:\n            callback.Enabled = False\n            callback = None\n            sc.sticky.Remove('TestSampleMouseCallback')\n    else:\n        callback = SampleMouseCallback()\n        callback.Enabled = True\n        sc.sticky['TestSampleMouseCallback'] = callback\n        Rhino.RhinoApp.WriteLine(\"Click somewhere...\")\n\nif __name__ == \"__main__\":\n  TestSampleMouseCallback()\n\n\n\nI’m after having a cross platform code solution to simply test if a mouse button was pressed or released and then DoSomething().\n\n\nAny leads are greatly appreciated, thank you!",
+  "code_blocks": [
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nclass MiddleMouseCallback(Rhino.UI.MouseCallback):\n    def OnMouseDown(self, e):\n        if e.Button == System.Windows.Forms.MouseButtons.Middle:\n            Rhino.RhinoApp.WriteLine(\"Middle mouse down\")\n        else:\n            Rhino.RhinoApp.WriteLine(\"Other mouse down\")\n    \n    def OnMouseUp(self, e):\n        if e.Button == System.Windows.Forms.MouseButtons.Middle:\n            Rhino.RhinoApp.WriteLine(\"Middle mouse up\")\n        else:\n            Rhino.RhinoApp.WriteLine(\"Other mouse up\")\n    \ndef TestSampleMouseCallback():\n    \n    if sc.sticky.has_key('TestSampleMouseCallback'):\n        callback = sc.sticky['TestSampleMouseCallback']\n        if callback:\n            callback.Enabled = False\n            callback = None\n            sc.sticky.Remove('TestSampleMouseCallback')\n    else:\n        callback = MiddleMouseCallback()\n        callback.Enabled = True\n        sc.sticky['TestSampleMouseCallback'] = callback\n        Rhino.RhinoApp.WriteLine(\"Click somewhere...\")\n\nif __name__ == \"__main__\":\n    TestSampleMouseCallback()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\n\nclass MiddleMouseCallback(Rhino.UI.MouseCallback):\n    def OnMouseDown(self, e):\n        if e.Button == Rhino.UI.MouseButton.Middle:\n            Rhino.RhinoApp.WriteLine(\"Middle mouse down\")\n        else:\n            Rhino.RhinoApp.WriteLine(\"Other mouse down\")\n    \n    def OnMouseUp(self, e):\n        if e.Button == Rhino.UI.MouseButton.Middle:\n            Rhino.RhinoApp.WriteLine(\"Middle mouse up\")\n        else:\n            Rhino.RhinoApp.WriteLine(\"Other mouse up\")\n    \ndef TestSampleMouseCallback():\n    \n    if sc.sticky.has_key('TestSampleMouseCallback'):\n        callback = sc.sticky['TestSampleMouseCallback']\n        if callback:\n            callback.Enabled = False\n            callback = None\n            sc.sticky.Remove('TestSampleMouseCallback')\n    else:\n        callback = MiddleMouseCallback()\n        callback.Enabled = True\n        sc.sticky['TestSampleMouseCallback'] = callback\n        Rhino.RhinoApp.WriteLine(\"Click somewhere...\")\n\nif __name__ == \"__main__\":\n    TestSampleMouseCallback()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\nclass SampleMouseCallback(Rhino.UI.MouseCallback):\n    def OnMouseDown(self, e):\n        Rhino.RhinoApp.WriteLine(\"mousy\")\n        print \"OnMouseDown\", e.Button\n    \ndef TestSampleMouseCallback():\n    \n    if sc.sticky.has_key('TestSampleMouseCallback'):\n        callback = sc.sticky['TestSampleMouseCallback']\n        if callback:\n            callback.Enabled = False\n            callback = None\n            sc.sticky.Remove('TestSampleMouseCallback')\n    else:\n        callback = SampleMouseCallback()\n        callback.Enabled = True\n        sc.sticky['TestSampleMouseCallback'] = callback\n        Rhino.RhinoApp.WriteLine(\"Click somewhere...\")\n\nif __name__ == \"__main__\":\n  TestSampleMouseCallback()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport scriptcontext as sc\n\nclass SampleMouseCallback(Rhino.UI.MouseCallback):\n  def OnMouseDown(self, e):\n\n    print \"OnMouseDown\", e.Button\n    \ndef TestSampleMouseCallback():\n    \n    if sc.sticky.has_key('TestSampleMouseCallback'):\n        callback = sc.sticky['TestSampleMouseCallback']\n        if callback:\n            callback.Enabled = False\n            callback = None\n            sc.sticky.Remove('TestSampleMouseCallback')\n    else:\n        callback = SampleMouseCallback()\n        callback.Enabled = True\n        sc.sticky['TestSampleMouseCallback'] = callback\n        Rhino.RhinoApp.WriteLine(\"Click somewhere...\")\n\nif __name__ == \"__main__\":\n  TestSampleMouseCallback()",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 481
+}

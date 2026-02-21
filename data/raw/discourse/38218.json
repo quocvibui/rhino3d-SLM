@@ -1,0 +1,58 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/specified-cast-is-not-valid-error/38218",
+  "topic_id": 38218,
+  "title": "\"Specified cast is not valid\" Error",
+  "question": "Hi there,\n\n\nIn testing some tutorial code, I got an error message and did not find the cause. Appreciate any hints.\n\n\nThe error was with the line-\n\n\nrs.AddCurve(newverts, 5)\n\n\n\n–Max\n\n\nCode:\n\n\nimport rhinoscriptsyntax as rs\n\ndef blendcorners():\n\tpolyline_id = rs.GetObject(\"Polyline to blend\", 4, True, True)\n\tif not polyline_id: return\n\tvertices = rs.PolylineVertices(polyline_id)\n\tif not vertices: return\n\tradius = rs.GetReal(\"Blend radius\", 1.0, 0.0)\n\tif radius is None: return\n\tbetween = lambda a,b: (a+b)/2.0\n\tnewverts = []\n\tfor i in range(len(vertices)-1):\n\t\ta = vertices[i]\n\t\tb = vertices[i+1]\n\t\tsegmentlength = rs.Distance(a, b)\n\t\tvec_segment = rs.PointSubtract(b, a)\n\t\tvec_segment = rs.VectorUnitize(vec_segment)\n\t\tif radius<(0.5*segmentlength):\n\t\t\tvec_segment = rs.VectorScale(vec_segment, radius)\n\t\telse:\n\t\t\tvec_segment = rs.VectorScale(vec_segment, 0.5*segmentlength)\n\t\tw1 = rs.VectorAdd(a, vec_segment)\n\t\tw2 = rs.VectorSubtract(b, vec_segment)\n\t\tnewverts.append(a)\n\t\tnewverts.append(between(a,w1))\n\t\tnewverts.append(w1)\n\t\tnewverts.append(between(w1,w2))\n\t\tnewverts.append(w2)\n\t\tnewverts.append(between(w2,b))\n\t\t\n\tnewverts.append(vertices[len(vertices)-1])\n\trs.AddCurve(newverts, 5)\n\tprint(newverts)\n\trs.DeleteObject(polyline_id)\n\nif __name__ == \"__main__\":\n    blendcorners()",
+  "code_blocks": [
+    {
+      "code": "def AddCurve(points, degree=3):\n    \"\"\"Adds a control points curve object to the document\n    Parameters:\n      points = a list of points\n      degree[opt] = degree of the curve\n    Returns:\n      id of the new curve object\n    Example:\n      import rhinoscriptsyntax as rs\n      points = rs.GetPoints(True, message1=\"Pick curve point\")\n      if points: rs.AddCurve(points)\n    See Also:\n      AddInterpCurve\n      IsCurve\n    \"\"\"\n    points = rhutil.coerce3dpointlist(points, True)\n    curve = Rhino.Geometry.Curve.CreateControlPointCurve(points, degree)\n    if not curve: raise Exception(\"unable to create control point curve from given points\")\n    rc = scriptcontext.doc.Objects.AddCurve(curve)\n    if rc==System.Guid.Empty: raise Exception(\"Unable to add curve to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "menno",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef blendcorners():\n\tpolyline_id = rs.GetObject(\"Polyline to blend\", 4, True, True)\n\tif not polyline_id: return\n\tvertices = rs.PolylineVertices(polyline_id)\n\tif not vertices: return\n\tradius = rs.GetReal(\"Blend radius\", 1.0, 0.0)\n\tif radius is None: return\n\tbetween = lambda a,b: (a+b)/2.0\n\tnewverts = []\n\tfor i in range(len(vertices)-1):\n\t\ta = vertices[i]\n\t\tb = vertices[i+1]\n\t\tsegmentlength = rs.Distance(a, b)\n\t\tvec_segment = rs.PointSubtract(b, a)\n\t\tvec_segment = rs.VectorUnitize(vec_segment)\n\t\tif radius<(0.5*segmentlength):\n\t\t\tvec_segment = rs.VectorScale(vec_segment, radius)\n\t\telse:\n\t\t\tvec_segment = rs.VectorScale(vec_segment, 0.5*segmentlength)\n\t\tw1 = rs.VectorAdd(a, vec_segment)\n\t\tw2 = rs.VectorSubtract(b, vec_segment)\n\t\tnewverts.append(a)\n\t\tnewverts.append(between(a,w1))\n\t\tnewverts.append(w1)\n\t\tnewverts.append(between(w1,w2))\n\t\tnewverts.append(w2)\n\t\tnewverts.append(between(w2,b))\n\t\t\n\tnewverts.append(vertices[len(vertices)-1])\n\tfor p in newverts:\n\t    print type(p)\n\trs.AddCurve(newverts, 5)\n\tprint(newverts)\n\trs.DeleteObject(polyline_id)\n\nblendcorners()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\n\nmyvector = # ...\nmypoint = Rhino.Geometry.Point3d( myvector )",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "newverts.append(a)\n\tnewverts.append(between(a,w1))\n\tnewverts.append(rs.coerce3dpoint(w1))\n\tnewverts.append(between(w1,w2))\n\tnewverts.append(rs.coerce3dpoint(w2))\n\tnewverts.append(between(w2,b))",
+      "language": "python",
+      "author": "max.wwwang",
+      "post_number": 21,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef blendcorners():\n\tpolyline_id = rs.GetObject(\"Polyline to blend\", 4, True, True)\n\tif not polyline_id: return\n\tvertices = rs.PolylineVertices(polyline_id)\n\tif not vertices: return\n\tradius = rs.GetReal(\"Blend radius\", 1.0, 0.0)\n\tif radius is None: return\n\tbetween = lambda a,b: (a+b)/2.0\n\tnewverts = []\n\tfor i in range(len(vertices)-1):\n\t\ta = vertices[i]\n\t\tb = vertices[i+1]\n\t\tsegmentlength = rs.Distance(a, b)\n\t\tvec_segment = rs.PointSubtract(b, a)\n\t\tvec_segment = rs.VectorUnitize(vec_segment)\n\t\tif radius<(0.5*segmentlength):\n\t\t\tvec_segment = rs.VectorScale(vec_segment, radius)\n\t\telse:\n\t\t\tvec_segment = rs.VectorScale(vec_segment, 0.5*segmentlength)\n\t\tw1 = rs.VectorAdd(a, vec_segment)\n\t\tw2 = rs.VectorSubtract(b, vec_segment)\n\t\tnewverts.append(a)\n\t\tnewverts.append(between(a,w1))\n\t\tnewverts.append(w1)\n\t\tnewverts.append(between(w1,w2))\n\t\tnewverts.append(w2)\n\t\tnewverts.append(between(w2,b))\n\t\t\n\tnewverts.append(vertices[len(vertices)-1])\n\trs.AddCurve(newverts, 5)\n\tprint(newverts)\n\trs.DeleteObject(polyline_id)\n\nif __name__ == \"__main__\":\n    blendcorners()",
+      "language": "python",
+      "author": "max.wwwang",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 21,
+  "views": 3847
+}

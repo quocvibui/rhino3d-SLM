@@ -1,0 +1,36 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinocommon-ghpython-how-to-find-if-a-point-lies-on-a-surface/77966",
+  "topic_id": 77966,
+  "title": "Rhinocommon - Ghpython - How to find if a point lies on a surface",
+  "question": "Hi,\n\nI calculated multiple ray intersection on several surfaces.\n\nNow i want to identify the surfaces/faces where those intersections happened and cull the others that don’t intersect.\n\nFor that purpose I’m trying to find the equivalent of rs.isPointOnSurface in Rhinocommon … with no success quite several hours,\n\nI’ll appreciate any help to find this command or other options to achieve the goal.\n\nThanks,\n\n-A.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport inspect\n\nprint inspect.getsource(rs.IsPointOnSurface)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "def IsPointOnSurface(object_id, point):\n    \"\"\"Verifies that a point lies on a surface\n    Parameters:\n      object_id: the object's identifier\n      point: list of three numbers or Point3d. The test, or sampling point\n    Returns:\n      True if successful, otherwise False\n    Example:\n      import rhinoscriptsyntax as rs\n      surf = rs.GetObject(\"Select a surface\")\n      if rs.IsSurface(surf):\n      point = rs.GetPoint(\"Pick a test point\")\n      if point:\n      if rs.IsPointOnSurface(surf, point):\n      print \"The point is on the surface.\"\n      else:\n      print \"The point is not on the surface.\"\n    See Also:\n      IsPointInSurface\n    \"\"\"\n    surf = rhutil.coercesurface(object_id, True)\n    point = rhutil.coerce3dpoint(point, True)\n    rc, u, v = surf.ClosestPoint(point)\n    if rc:\n        srf_pt = surf.PointAt(u,v)\n        if srf_pt.DistanceTo(point)>scriptcontext.doc.ModelAbsoluteTolerance:\n            rc = False\n        else:\n            rc = surf.IsPointOnFace(u,v) != Rhino.Geometry.PointFaceRelation.Exterior\n    return rc",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 8,
+  "views": 3859
+}

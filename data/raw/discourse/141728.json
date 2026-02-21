@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhino-python-help/141728",
+  "topic_id": 141728,
+  "title": "Rhino Python help",
+  "question": "Hi, I’m making a script to produce these objects inside a closed curve boundary. It keeps giving me error\n\n\nMessage : Parameter must be a Guid or string representing a Guid.\n\n\nimport rhinoscriptsyntax as rs\nimport math\nfrom math import*\nfrom scriptcontext import escape_test\nimport random\nfrom random import randrange\n\n\n\n###############################################\n# SCRIPT TO CREATE NETWORKED HOUSING COMPLEX FROM ANY SITE\n\ndef move_start_point_angle( start_point , angle , distance ):\n    start_x , start_y = start_point[0], start_point[1]\n    new_x = cos(radians(angle))*distance + start_x\n    new_y = sin(radians(angle))*distance + start_y\n    \n    return (new_x, new_y)\n\n\n\n\ndef explode_point(Start_Point,Distance,Number,Site):\n    Count = 0\n    Lines = [ ]\n    P_end = [ ]\n    while Count <= Number:\n        Count += 1\n        A = random.uniform(-Distance,Distance)\n        B = random.uniform(-Distance,Distance)\n        C = random.uniform(-Distance,Distance)\n        P2 = ( Start_Point[0] + A , Start_Point[1] + B , Start_Point [2] + C )\n        P2_point = rs.AddPoint(P2)\n        if rs.PointInPlanarClosedCurve(P2_point,Site) == 1 :\n            P_end.append(P2)\n        if rs.PointInPlanarClosedCurve(P2_point,Site) == 0 :\n            rs.DeleteObject(P2_point)\n        Line = rs.AddLine(Start_Point , P2)\n        Lines.append(Line)\n    return (P_end)\n\n\n\ndef make_building ( start_point , point_b , point_c , Max_Height , Thickness ):\n    \n\n    mid_point = ( ( (start_point[0]+point_b[0]+point_c[0]) / 3) , ( (start_point[1]+point_b[1]+point_c[1]) / 3)  )\n\n    points = start_point , point_b , point_c , mid_point\n\n    for i in points:\n        rs.AddPoint(i)\n\n    line_1 = rs.AddLine( start_point , mid_point)\n    line_2 = rs.AddLine( point_b , mid_point)\n    line_3 = rs.AddLine( point_c , mid_point)\n\n    vector = rs.AddLine( (0,0,0) , (0,0,Max_Height) )\n\n    surface_1 = rs.ExtrudeCurve( line_1 , vector)\n    surface_2 = rs.ExtrudeCurve( line_2 , vector)\n    surface_3 = rs.ExtrudeCurve(...",
+  "code_blocks": [
+    {
+      "code": "def branch( start_point, end_point , angle_add , max_length , min_length):\n\n    # ...\n    \n    ### get end points\n    point_b = move_start_point_angle(end_point, angle_b, max_length)\n    # if rs.PointInPlanarClosedCurve(point_b,Site) == 0 :\n    #     rs.DeleteObject(point_b)\n\n    point_c = move_start_point_angle(end_point, angle_c, max_length)\n    # if rs.PointInPlanarClosedCurve(point_c,Site) == 0 :\n    #     rs.DeleteObject(point_c)\n   \n    # ...",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "line_a = rs.AddLine ( start_point , end_point )\n     tangent_a = ( ( end_y - start_y ) / ( end_x - start_x ) )\n     angle_a = degrees( math.atan ( tangent_a ) )",
+      "language": "python",
+      "author": "Pieter_Prasetya",
+      "post_number": 12,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\nfrom math import*\nfrom scriptcontext import escape_test\nimport random\nfrom random import randrange\n\n\n\n###############################################\n# SCRIPT TO CREATE NETWORKED HOUSING COMPLEX FROM ANY SITE\n\ndef move_start_point_angle( start_point , angle , distance ):\n    start_x , start_y = start_point[0], start_point[1]\n    new_x = cos(radians(angle))*distance + start_x\n    new_y = sin(radians(angle))*distance + start_y\n    \n    return (new_x, new_y)\n\n\n\n\ndef explode_point(Start_Point,Distance,Number,Site):\n    Count = 0\n    Lines = [ ]\n    P_end = [ ]\n    while Count <= Number:\n        Count += 1\n        A = random.uniform(-Distance,Distance)\n        B = random.uniform(-Distance,Distance)\n        C = random.uniform(-Distance,Distance)\n        P2 = ( Start_Point[0] + A , Start_Point[1] + B , Start_Point [2] + C )\n        P2_point = rs.AddPoint(P2)\n        if rs.PointInPlanarClosedCurve(P2_point,Site) == 1 :\n            P_end.append(P2)\n        if rs.PointInPlanarClosedCurve(P2_point,Site) == 0 :\n            rs.DeleteObject(P2_point)\n        Line = rs.AddLine(Start_Point , P2)\n        Lines.append(Line)\n    return (P_end)\n\n\n\ndef make_building ( start_point , point_b , point_c , Max_Height , Thickness ):\n    \n\n    mid_point = ( ( (start_point[0]+point_b[0]+point_c[0]) / 3) , ( (start_point[1]+point_b[1]+point_c[1]) / 3)  )\n\n    points = start_point , point_b , point_c , mid_point\n\n    for i in points:\n        rs.AddPoint(i)\n\n    line_1 = rs.AddLine( start_point , mid_point)\n    line_2 = rs.AddLine( point_b , mid_point)\n    line_3 = rs.AddLine( point_c , mid_point)\n\n    vector = rs.AddLine( (0,0,0) , (0,0,Max_Height) )\n\n    surface_1 = rs.ExtrudeCurve( line_1 , vector)\n    surface_2 = rs.ExtrudeCurve( line_2 , vector)\n    surface_3 = rs.ExtrudeCurve( line_3 , vector)\n\n    rs.OffsetSurface( surface_1 , Thickness , tolerance = None, both_sides = True , create_solid = True)\n    rs.OffsetSurface( surface_2 , Thickness , tolerance = None, both_sides = True , create_solid = True)\n    rs.OffsetSurface( surface_3 , Thickness , tolerance = None, both_sides = True , create_solid = True)\n\ndef branch( start_point, end_point , angle_add , max_length , min_length):\n    \n    \n    unit_block = []\n    \n    ### list points\n    start_x , start_y   =  start_point[0], start_point[1] \n    end_x , end_y   =  end_point[0] , end_point[1]  \n\n    ### gett angle of line_a\n    line_a = rs.AddLine ( start_point , end_point )\n    tangent_a = ( ( end_y - start_y ) / ( end_x - start_x ) )\n    angle_a = degrees( math.atan ( tangent_a ) )\n    \n    ### add random angle to angle_a \n    angle_addition = random.uniform(10,angle_add)\n    \n    angle_b = angle_a + angle_addition\n    angle_c = angle_a - angle_addition\n    \n    ### get end points\n    point_b = move_start_point_angle(end_point, angle_b, max_length)\n    if rs.PointInPlanarClosedCurve(point_b,Site) == 0 :\n        rs.DeleteObject(point_b)\n\n    point_c = move_start_point_angle(end_point, angle_c, max_length)\n    if rs.PointInPlanarClosedCurve(point_c,Site) == 0 :\n        rs.DeleteObject(point_c)\n    \n    Max_Height = 10\n    Thickness = 10\n    \n    make_building(start_point,point_b,point_c,Max_Height,Thickness)\n\n\n\n    ### looping\n    distance = ( rs.Distance(start_point, point_b) + rs.Distance(start_point, point_c) ) / 2\n    \n    if distance > min_length:\n        \n        escape_test(True)\n        \n        angle_addition = random.uniform(10,angle_add)\n        \n        angle_b2 = angle_b + angle_addition\n        angle_c2 = angle_c - angle_addition\n\n        if rs.IsPoint(point_b):\n            end_b = move_start_point_angle(point_b, angle_b2, max_length*.7)\n            if rs.PointInPlanarClosedCurve(point_b,Site) == 1 :\n                branch(point_b,end_b,angle_add, max_length*.7, min_length)\n        if rs.IsPoint(point_c):\n            end_c = move_start_point_angle(point_c, angle_c2, max_length*.7)\n            if rs.PointInPlanarClosedCurve(point_c,Site) == 1 :\n                branch(point_c,end_c,angle_add, max_length*.7, min_length)\n        \n        \n        \n    return(unit_block)\n\ndef object_color(objects):\n    C = 0\n    Inc = 255 / ( len( objects ) ) \n    for i in objects:\n        A = random.randint(1,255)\n        B = random.randint(1,255)\n        C += Inc\n        \n        Color = rs.CreateColor((C,50,120))\n        rs.AddMaterialToObject(i)\n        rs.ObjectColor(i,Color)\n        Index = rs.ObjectMaterialIndex(i)\n        rs.MaterialColor(Index,Color)\n\n\n\n\n    \n\n\n###############################################\n\nstartpoints = rs.GetPoints()\n\nSite = rs.GetObject('Site')\n\nfor i in startpoints:\n    P2 = explode_point(i, 100 , 5 , Site) \n    for j in P2 :\n        branch(i,j,20,100,60)",
+      "language": "python",
+      "author": "Pieter_Prasetya",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinoscriptsyntax",
+    "selection",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 759
+}

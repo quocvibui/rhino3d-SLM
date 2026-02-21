@@ -1,0 +1,43 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/set-object-material-in-python/123978",
+  "topic_id": 123978,
+  "title": "Set object material in Python",
+  "question": "Frustrated with how slow the material drop down is (sometimes hangs forever), I’m trying to create a quick dialog that lets me assign a material to an object with a listbox and no thumbnail previews.\n\n\nI’m struggling to find the material index. I thought it would be the index of the material in the list, but the result seems to be pretty random.\n\n\nI tried sc.doc.Materials.find() but it seems to always return -1. And sc.doc.RenderMaterials has no find methods.\n\n\nSurprisingly, there was no rhinoscriptsyntax.GetMaterialIndex() either.\n\n\nI would appreciate any pointers!\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino as rc\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\n    \ndef AssignMaterialFast():\n        ids = rs.GetObjects(\"Select object to change material\", preselect=True)\n        \n        rmats = [rm for rm in sc.doc.RenderMaterials]\n        materialNames = []\n        for mat in rmats:\n            materialNames.append(mat.Name)\n        \n        materialNames.sort()\n        result = rs.ListBox(materialNames, \"Select Material\", \"Assign Material\")\n        if result is None: return\n        \n        for i, mat in enumerate(rmats):\n            if mat.Name == result:\n                index = i\n                break\n        \n        attr = rc.DocObjects.ObjectAttributes()\n        attr.MaterialIndex = index\n        attr.MaterialSource = rc.DocObjects.ObjectMaterialSource.MaterialFromObject\n        \n        for id in ids:\n            sc.doc.Objects.ModifyAttributes(id, attr, True)\n        sc.doc.Views.Redraw()\n\n    if __name__ == \"__main__\":\n        AssignMaterialFast()",
+  "code_blocks": [
+    {
+      "code": "rmats = [rm for rm in sc.doc.RenderMaterials]\nmaterialNames = []\nfor mat in rmats:\n    materialNames.append(mat.Name)\n\nmaterialNames.sort()\nresult = rs.ListBox(materialNames, \"Select Material\", \"Assign Material\")\nif result is None: return\n\nrs.SelectObjects(ids)\ncmdString = \"-_RenderAssignMaterialToObjects \" + result + \" \"\nrs.Command(cmdString, False)",
+      "language": "python",
+      "author": "Tim_Williams",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport re\n\n\nids = rs.GetObjects(\"Select objects to change material\", preselect=True)\n\nrmats = [rm for rm in sc.doc.RenderMaterials]\nmaterialNames = []\nfor mat in rmats:\n    if not bool(re.search(r\"\\s\", mat.Name)) and len(mat.Name) <= 10:\n        materialNames.append(mat.Name)\n\nmaterialNames.sort(reverse=True)\nresult = rs.ListBox(materialNames, \"\", \"Materials\")\n\nrs.SelectObjects(ids)\ncmdString = \"-_RenderAssignMaterialToObjects \" + result + \" \" \"n\"\nrs.Command(cmdString, False)\ncmdString = \"-_RenderAssignMaterialToObjects \" + result + \" \" \"y\"\nrs.Command(cmdString, False)\nrs.UnselectAllObjects()",
+      "language": "python",
+      "author": "martinsiegrist",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino as rc\nimport scriptcontext as sc\nimport Rhino.Geometry as rg\n    \ndef AssignMaterialFast():\n        ids = rs.GetObjects(\"Select object to change material\", preselect=True)\n        \n        rmats = [rm for rm in sc.doc.RenderMaterials]\n        materialNames = []\n        for mat in rmats:\n            materialNames.append(mat.Name)\n        \n        materialNames.sort()\n        result = rs.ListBox(materialNames, \"Select Material\", \"Assign Material\")\n        if result is None: return\n        \n        for i, mat in enumerate(rmats):\n            if mat.Name == result:\n                index = i\n                break\n        \n        attr = rc.DocObjects.ObjectAttributes()\n        attr.MaterialIndex = index\n        attr.MaterialSource = rc.DocObjects.ObjectMaterialSource.MaterialFromObject\n        \n        for id in ids:\n            sc.doc.Objects.ModifyAttributes(id, attr, True)\n        sc.doc.Views.Redraw()\n\n    if __name__ == \"__main__\":\n        AssignMaterialFast()",
+      "language": "python",
+      "author": "Tim_Williams",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection",
+    "ui"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 1066
+}

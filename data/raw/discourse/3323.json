@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/crashing-python-and-need-to-check-for-esc/3323",
+  "topic_id": 3323,
+  "title": "Crashing Python, and need to check for ESC",
+  "question": "This is a dual question:\n\n\n1: Why does this crash Rhino, and eat up so much ram so quickly? (I would expect it to draw thousands of points prior to crashing)\n\n\n2: How do I check for keyboard presses in Python? I need to be able to “esc” scripts like these.\n\n\nThanks!",
+  "code_blocks": [
+    {
+      "code": "# Draw points test\n\nimport rhinoscriptsyntax as rs\nimport RhinoPython.Host as __host\n\nprint \"This is a test\"\n\ndone = False\n\nballx = 0\t# Ball position variables\nbally = 0\nballxmove = 0.3\nballymove = 0.7\n\nwhile done == False:\n\n    ballx = ballx + ballxmove    # Update ball position\n    bally = bally + ballymove\n    \n    rs.AddPoint( (ballx,bally,0) )\n\n    if ballx > 30:       # Ball reached screen edges?\n        ballxmove = ballxmove * -1\n    if ballx < 0:\n        ballxmove = ballxmove* -1\n    if bally > 30:\n        ballymove = ballymove* -1\n    if bally < 0:\n        ballymove = ballymove* -1",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nprint \"This is a test\"\n\nballx = 0 # Ball position variables\nbally = 0\nballxmove = 0.3\nballymove = 0.7\n\ni = 0\nmaxSteps = 200    # number of iterations\nwhile i < maxSteps:\n\n    ballx = ballx + ballxmove    # Update ball position\n    bally = bally + ballymove\n    \n    sph = rs.AddSphere( (ballx,bally,0) ,2)\n    rs.DeleteObject(sph)\n    if ballx > 30:       # Ball reached screen edges?\n        ballxmove = ballxmove * -1\n    if ballx < 0:\n        ballxmove = ballxmove* -1\n    if bally > 30:\n        ballymove = ballymove* -1\n    if bally < 0:\n        ballymove = ballymove* -1\n    i += 1",
+      "language": "python",
+      "author": "djordje",
+      "post_number": 4,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext\n\nfor i in range(1000000):\n    #do something\n    #test every 100th iteration\n    if i%100==0 and scriptcontext.escape_test(False):\n        break #get out of the loop",
+      "language": "python",
+      "author": "stevebaer",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 15,
+  "views": 3805
+}

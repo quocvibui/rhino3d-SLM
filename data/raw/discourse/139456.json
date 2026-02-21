@@ -1,0 +1,42 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/bug-mesh-smooth-it-is-controlled-by-smooth-command-settings/139456",
+  "topic_id": 139456,
+  "title": "Bug? mesh.Smooth() it is controlled by SMOOTH command settings",
+  "question": "Hi guys, I have a script where I use\n\n\ncoordinateSystem = Rhino.Geometry.SmoothingCoordinateSystem(2)\n\nplane = Rhino.Geometry.Plane.WorldXY\n\nmesh.Smooth(grips,1,True,True,True,False, coordinateSystem, plane)\n\n\nAnd I see that if I have ran the Smooth command in Rhino first and changed it’s setting to exclude some directions, then that affects the mesh.Smooth() too…\n\n\n(to sum it up: The command Smooth’s settings overrides the mesh.Smooth() setttings)\n\n\nI presume that is not as intended.",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\nimport time\n\nmesh_id = rs.GetObject(\"mesh to smooth\", rs.filter.mesh, preselect=True)\nif mesh_id:\n    ### Make a mesh to smooth\n    mesh = rs.coercemesh(mesh_id)\n    ### make a list for vertice indicators\n    vertexIndices = []\n    ### add them all\n    nrV = len(mesh.Vertices)\n    for i in range(nrV):\n        vertexIndices.append(i)\n    ### setup the variables to smooth 100% in all directions according to world\n    smoothFactor = 1\n    bXSmooth = True\n    bYSmooth = True\n    bZSmooth = True\n    bFixBoundaries = True\n    coordinateSystem = Rhino.Geometry.SmoothingCoordinateSystem(0)\n    plane = rs.WorldXYPlane()\n    ### Set up timers for feedback\n    runTime = time.time()\n    startTime = time.time()\n    ### Set it up to smooth 1/10 of the number of vertices\n    nrPasses = int(nrV/10)\n    ### Make sure it smooths at least 10 times\n    if nrPasses < 10:\n        nrPasses = 10\n    ###\n    ### Smooth the mesh\n    ###\n    for i in range(nrPasses):\n        mesh.Smooth(vertexIndices, 1, bXSmooth, bYSmooth, bZSmooth, bFixBoundaries, coordinateSystem, plane)\n        \n        ###\n        ### Make the script escapable and give feedback \n        ###\n        if sc.escape_test(False):\n            print \"ESC pressed\"\n            break\n        ### Update the user how it is going on because blank screens are horrible\n        if time.time()-runTime > 0.5:\n            rs.Prompt(\"Smoothing pass \"+str(i)+\" of \"+str(nrPasses)+\" - Press ESC to terminate\" )\n            runTime = time.time()\n    \n    ### Add the mesh, update the view and give feedback\n    sc.doc.Objects.AddMesh(mesh)\n    sc.doc.Views.Redraw()\n    print \"Completed in \"+str(round(time.time()-startTime,2))+\" sec\"",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport time\nimport Rhino.Geometry.Mesh as mesh\nimport scriptcontext as sc\n\nplane = rs.WorldXYPlane()\ncoordinatesystem = Rhino.Geometry.SmoothingCoordinateSystem.World\n\n\nmesh_id = rs.GetObject(\"mesh\",rs.filter.mesh,preselect=True)\nif mesh_id:\n    mesh = rs.coercemesh(mesh_id)\n    vertices = mesh.Vertices\n    \n    list = range(0,len(vertices)-1)\n    \n    startTime = time.time()\n    for i in range(100):\n        mesh.Smooth(list, 1, True, True, True, True, Rhino.Geometry.SmoothingCoordinateSystem.World, plane)\n    print time.time()-startTime\n    sc.doc.Objects.Replace(mesh_id,mesh)\n    sc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport time\n\ndef test():\n    p0 = Rhino.Geometry.Point3d(0, 0, 0)\n    p1 = Rhino.Geometry.Point3d(10, 10, 10)\n    bbox = Rhino.Geometry.BoundingBox(p0, p1)\n    mesh = Rhino.Geometry.Mesh.CreateFromBox(bbox, 40, 40, 40)\n    cs = Rhino.Geometry.SmoothingCoordinateSystem.World\n    pl = Rhino.Geometry.Plane.WorldXY\n    startTime=time.time()\n    if rs.ExeVersion()==7:\n        for i in range(1000):\n            mesh.Smooth(0.2, True, True, True, True, cs, pl)\n    elif rs.ExeVersion() >=8:\n        mesh.Smooth(0.2, 1000, True, True, True, True, cs, pl)\n    if mesh:\n        sc.doc.Objects.Add(mesh)\n        sc.doc.Views.Redraw()\n    \n    print round(time.time()-startTime,3),\"sec\"\ntest()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 12,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 12,
+  "views": 752
+}

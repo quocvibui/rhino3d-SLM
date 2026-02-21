@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/Teakomatic/RETools-6d40c603-c950-4785-9bb8-cc46930ae150-/blob/eba4673906419c4113e196b14d0fa16304b13823/dev/ZoomNext_cmd.py",
+  "repo": "Teakomatic/RETools-6d40c603-c950-4785-9bb8-cc46930ae150-",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "dev/ZoomNext_cmd.py",
+  "instruction": "Zoom to next fillet in the document.\r\n\r\nAlgorithm:\r\n    1. Get all curves on the \"Final\" layer\r\n    2. Find all endpoints of those curves\r\n    3. Select a random endpoint\r\n    4. Find the neartest...",
+  "code": "\"\"\"\r\nZoom to next fillet in the document.\r\n\r\nAlgorithm:\r\n    1. Get all curves on the \"Final\" layer\r\n    2. Find all endpoints of those curves\r\n    3. Select a random endpoint\r\n    4. Find the neartest endpoint\r\n    5. Zoom to both endpoints\r\n\"\"\"\r\n\r\nimport Rhino\r\nfrom scriptcontext import doc\r\nimport rhinoscriptsyntax as rs\r\nfrom Rhino.DocObjects import CurveObject\r\nfrom services import rhino, log\r\n\r\n\r\n# Layer name to scan for geometry\r\nLAYER = \"Final\"\r\nMODE = \"lowest_left\"\r\ndef layer_curves(layer_name):\r\n    \"\"\"Return all curves on a layer.\"\"\"\r\n    layer_objects = doc.Objects.FindByLayer(layer_name)\r\n    if not layer_objects:\r\n        return []\r\n    return [crv for crv in layer_objects if isinstance(crv, CurveObject)]\r\n\r\ndef RunCommand(is_interactive):\r\n    curves = layer_curves(LAYER)\r\n    end_points = rhino.end_points(curves)\r\n    pairs_estimated = len(end_points)/2\r\n    \r\n    if not end_points:\r\n        log.info(\"No endpoints found. Nothing to do!\")\r\n        return 0\r\n\r\n    log.info(\"Fillets left: {}\".format(pairs_estimated))\r\n\r\n    if MODE == \"random\":\r\n        rhino.zoom_random_close_pair(end_points)\r\n    \r\n    if MODE == \"nearest\":\r\n        rhino.zoom_nearest_close_pair(end_points)\r\n    \r\n    if MODE == \"lowest_left\":\r\n        rhino.zoom_upper_left_close_pair(end_points)\r\n\r\n    return 0\r\n     ",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": true
+}

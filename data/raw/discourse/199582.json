@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/capturing-viewports-on-rhino-7-8/199582",
+  "topic_id": 199582,
+  "title": "Capturing Viewports on Rhino 7 & 8",
+  "question": "Hello, I’ve been developing a set of custom components, and I need to save viewports as images.\n\n\nI tried doing this with RhinoDoc.ActiveDoc.Views.CaptureToBitmap(), and this works perfectly well enough for Rhino 8.\n\nI have to target Rhino 7 as well however, and I found that the namespace Grasshopper.Rhinoceros.Display does not exist for it. I need this in order to access the type ModelStandardViewport, which is the input to one of my components.\n\n\nIs there a way to capture viewports on Grasshopper / Rhino 7 programmatically? Or am I going about this the wrong way (in terms of not using built-in components)?\n\n\nThank you in advance for any help or insight!\n\n\nEDIT: I couldn’t find any developer docs for Rhino 7 / Grasshopper. If anyone could point me to it, I would check that as well.\n\n\nKrishna Sivakumar",
+  "code_blocks": [
+    {
+      "code": "#! python 3\n\nimport Rhino\nimport os\n\n\npath = \"/Users/marc/Desktop\"  # change the path of the output directory\nimg_format = \".png\"\n\n\nfor view in Rhino.RhinoDoc.ActiveDoc.Views:\n    if view is None:\n        continue\n    \n    view_name = view.MainViewport.Name\n    \n    filename = f\"{view_name.lower()}{img_format}\"\n    file_path = os.path.join(path, filename)\n    print(file_path)\n\n    bmp = view.CaptureToBitmap()\n    \n    if bmp is not None:\n        bmp.Save(file_path)\n        bmp.Dispose()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\n\nimport Rhino\nimport os\n\n\npath = \"/Users/marc/Desktop\"  # change the path of the output directory\nimg_format = \".png\"\nimg_width = 1920\nimg_height = 1080\n\n\nfor view in Rhino.RhinoDoc.ActiveDoc.Views:\n    if view is None:\n        continue\n    \n    view_name = view.MainViewport.Name\n\n    view_capture = Rhino.Display.ViewCapture()\n    view_capture.Width = img_width\n    view_capture.Height = img_height\n    view_capture.TransparentBackground = False\n    \n    bmp = view_capture.CaptureToBitmap(view)\n    \n    if bmp is not None:\n        filename = f\"{view_name.lower()}{img_format}\"\n        file_path = os.path.join(path, filename)\n        #print(file_path)\n\n        bmp.Save(file_path)\n        bmp.Dispose()",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "#! python 3\n\nimport Rhino\nimport os\n\n\npath = _filepath\nimg_format_png = \".png\"\nimg_format_svg = \".svg\"\nimg_width = 1920\nimg_height = 1080\nimg_resolution = 200\n\n\nfor view in Rhino.RhinoDoc.ActiveDoc.Views:\n    if view is None:\n        continue\n    \n    view_name = view.MainViewport.Name\n\n    view_capture = Rhino.Display.ViewCapture()\n    view_capture.Width = img_width\n    view_capture.Height = img_height\n    view_capture.TransparentBackground = False\n    \n    view_capture_settings = Rhino.Display.ViewCaptureSettings()\n    #view_settings.Resolution = img_resolution\n    \n    bmp = view_capture.CaptureToBitmap(view)\n    svg = view_capture.CaptureToSvg(view)\n    \n    if bmp is not None:\n        filename = f\"{view_name.lower()}{img_format_png}\"\n        file_path = os.path.join(path, filename)\n        #print(file_path)\n\n        bmp.Save(file_path)\n        bmp.Dispose()\n\n    if svg is not None:\n        filename = f\"{view_name.lower()}{img_format_svg}\"\n        file_path = os.path.join(path, filename)\n        #print(file_path)\n\n        svg.Save(file_path)\n        svg.Dispose()",
+      "language": "python",
+      "author": "TLO",
+      "post_number": 9,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 12,
+  "views": 211
+}

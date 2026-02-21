@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/unable-to-use-nurbscurve-setgrevillepoints/159560",
+  "topic_id": 159560,
+  "title": "Unable to use NurbsCurve.SetGrevillePoints()",
+  "question": "Hi all, I am creating a tool and it uses GrevillePoints to better edit the NurbsCurve.\n\n\nBelow is a simplified snippet of what I am trying to do.\n\n\n            var pt1 = new Point3d(1, 2, 0);\n            var pt2 = new Point3d(2, 3, 0);\n            var pt3 = new Point3d(5, 12, 0);\n            var pt4 = new Point3d(12, 3, 0);\n            var dynamic_points = new[] { pt1, pt2, pt3, pt4 };\n            var curve = new NurbsCurve(3, 4);\n             curve.SetGrevillePoints(dynamic_points); //always return with false\n\n\n\n\n\n\ncurve.SetGrevillePoints(dynamic_points);\n\n\n\n\nthe above line fails to execute. What am I missing here?\n\n\nI have read the below thread, but I am still unable to grasp how to better manipulate a curve with Edit / Greville Points in RhinoCommon.\n\n\n\n\n\n\n\n\n\n\nEdit/Greville point explanation wanted\n \nRhino for Windows\n\n\n\n\n\n    You can go back and forth easily between control points and Greville points, using the mathematics of B-spline curves. That makes the Greville points logical choices to use as edit points, because after moving the edit point, the locations of all control points can be computed. \nAnd I guess that because of their averaged nature, the influence of each control point is taken into account at the same level, making it mathematically more stable/robust. The matrix structure is always a banded matrix …\n  \n\n\n\n\n@menno\n\n\n@TomTom",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\n\ndef main():\n    cu = Rhino.Geometry.NurbsCurve( 3, 4 )\n    cu.Points[ 0 ] = Rhino.Geometry.ControlPoint( 0, 0, 0 )\n    cu.Points[ 1 ] = Rhino.Geometry.ControlPoint( 0, 1, 0 )\n    cu.Points[ 2 ] = Rhino.Geometry.ControlPoint( 0, 2, 0 )\n    cu.Points[ 3 ] = Rhino.Geometry.ControlPoint( 0, 3, 0 )\n    cu.Knots.CreateUniformKnots( 1 )\n    print( cu.SetGrevillePoints( [\n        Rhino.Geometry.Point3d( 1, 2, 0 ),\n        Rhino.Geometry.Point3d( 2, 3, 0 ),\n        Rhino.Geometry.Point3d( 5, 12, 0 ),\n        Rhino.Geometry.Point3d( 12, 3, 0 ) ] ) )\n    scriptcontext.doc.Objects.AddCurve( cu )\n    scriptcontext.doc.Views.Redraw()\n    \nmain()",
+      "language": "python",
+      "author": "emilio",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 545
+}

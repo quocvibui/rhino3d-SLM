@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-learning-a-better-way-to-script-this/39560",
+  "topic_id": 39560,
+  "title": "Help learning a better way to script this",
+  "question": "Second attempt at python. this does what I need it to do but i’m sure there is a better/proper way.\n\n\nIf anyone has some time to check it out and maybe give suggestions on how to do this better, especially with how i did the direction of the flag and just repeating the points with the X coordinates. also i’m sure i could have done something else instead of creating the flag at 0,0 and then moving it.\n\n\nThanks in advance, much appreciated.\n\n\nimport rhinoscriptsyntax as rs\n\ndef AddFlagNote():\n\n    # some constants\n    fontSize = 0.125\n    printWidth = 0.60\n\n    # draw leader line\n    leaderPoints = rs.GetPoints(True, False, \"Select leader points\")\n    leader_line = rs.AddLeader(leaderPoints)\n    leader_end = leaderPoints[-1]\n\n    # test direction for flag orientation\n    vector = rs.VectorCreate(leader_end, leaderPoints[-2])\n\n    if vector[0] < 0:\n\n        # points left flag\n        pt01 = (0.0, 0.0, 0.0)\n        pt02 = (-0.1875, -0.125, 0.0)\n        pt03 = (-0.5625, -0.125, 0.0)\n        pt04 = (-0.5625, 0.125, 0.0)\n        pt05 = (-0.1875, 0.125, 0.0)\n        ptText = (-0.375, 0, 0,)\n\n        # draw left facing flag curve\n        flag_crv = rs.AddPolyline(pt01 + pt02 + pt03 + pt04 + pt05)\n        rs.Command(\"_CloseCrv SelId %s _Enter\" % flag_crv)\n        rs.ObjectPrintWidth(flag_crv, printWidth)\n        # print \"vector neg\"\n    else:\n        # points right flag\n        pt01 = (0.0, 0.0, 0.0)\n        pt02 = (0.1875, -0.125, 0.0)\n        pt03 = (0.5625, -0.125, 0.0)\n        pt04 = (0.5625, 0.125, 0.0)\n        pt05 = (0.1875, 0.125, 0.0)\n        ptText = (0.375, 0, 0,)\n\n        # draw right facing flag curve\n        flag_crv = rs.AddPolyline(pt01 + pt02 + pt03 + pt04 + pt05)\n        rs.Command(\"_NoEcho _CloseCrv SelId %s _Enter\" % flag_crv)\n        rs.ObjectPrintWidth(flag_crv, printWidth)\n        # print \"vector pos\"\n\n\n    # turn redraw off\n    rs.EnableRedraw(False)\n\n    # hatch flag\n    hatch_id = rs.AddHatch(flag_crv)\n    rs.ObjectPrintColor(hatch_id, (255, 255, 255...",
+  "code_blocks": [
+    {
+      "code": "def mirrorX(pt):\n   pt[0] = pt[0] * -1\n   return pt\n\n#Variables\nx1 = 0.1875\nx2 = 0.375\nx3 = 0.5625\ny1 = 0.125\n\n#Make list with six zero points (start and end will be the same)\npts = list(itertools.repeat([0.0, 0.0, 0.0], 6))\n\npts[1] = [x1, -y1, 0.0]\npts[2] = [x3, -y1, 0.0]\npts[3] = [x3, y1, 0.0]\npts[4] = [(x1, y1, 0.0]\n\nptText = [x2, 0.0, 0.0]\n\n#For left arrow\nif vector[0] >= 0.0:\n    pts = [mirrorX(pt) for pt in pts]\n    ptText = mirrorX(ptText)\n\n# draw flag curve\nflag_crv = rs.AddPolyline(pts)\nrs.ObjectPrintWidth(flag_crv, printWidth)",
+      "language": "python",
+      "author": "ParamDesSing",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef AddFlagNote():\n\n    # some constants\n    fontSize = 0.125\n    printWidth = 0.60\n\n    # draw leader line\n    leaderPoints = rs.GetPoints(True, False, \"Select leader points\")\n    leader_line = rs.AddLeader(leaderPoints)\n    leader_end = leaderPoints[-1]\n\n    # test direction for flag orientation\n    vector = rs.VectorCreate(leader_end, leaderPoints[-2])\n\n    if vector[0] < 0:\n\n        # points left flag\n        pt01 = (0.0, 0.0, 0.0)\n        pt02 = (-0.1875, -0.125, 0.0)\n        pt03 = (-0.5625, -0.125, 0.0)\n        pt04 = (-0.5625, 0.125, 0.0)\n        pt05 = (-0.1875, 0.125, 0.0)\n        ptText = (-0.375, 0, 0,)\n\n        # draw left facing flag curve\n        flag_crv = rs.AddPolyline(pt01 + pt02 + pt03 + pt04 + pt05)\n        rs.Command(\"_CloseCrv SelId %s _Enter\" % flag_crv)\n        rs.ObjectPrintWidth(flag_crv, printWidth)\n        # print \"vector neg\"\n    else:\n        # points right flag\n        pt01 = (0.0, 0.0, 0.0)\n        pt02 = (0.1875, -0.125, 0.0)\n        pt03 = (0.5625, -0.125, 0.0)\n        pt04 = (0.5625, 0.125, 0.0)\n        pt05 = (0.1875, 0.125, 0.0)\n        ptText = (0.375, 0, 0,)\n\n        # draw right facing flag curve\n        flag_crv = rs.AddPolyline(pt01 + pt02 + pt03 + pt04 + pt05)\n        rs.Command(\"_NoEcho _CloseCrv SelId %s _Enter\" % flag_crv)\n        rs.ObjectPrintWidth(flag_crv, printWidth)\n        # print \"vector pos\"\n\n\n    # turn redraw off\n    rs.EnableRedraw(False)\n\n    # hatch flag\n    hatch_id = rs.AddHatch(flag_crv)\n    rs.ObjectPrintColor(hatch_id, (255, 255, 255))\n\n    # get flag text\n    flagPrompt = rs.GetString(\"Enter note number:\")\n    flagText = rs.AddText(flagPrompt, ptText, fontSize, justification=2 + 131072)\n\n\n    objs2 = (flag_crv, hatch_id, flagText)\n    rs.MoveObject(objs2, leader_end) # move flag group to point\n    rs.SelectObjects(objs2)\n    rs.Command(\"_NoEcho _BringToFront _SelNone\")\n\n    # group all together\n    my_group = rs.AddGroup(group_name=None)\n    objs1 = (leader_line, flag_crv, hatch_id, flagText)\n    rs.AddObjectsToGroup(objs1, my_group)\n\n\n    # turn redraw back on\n    rs.EnableRedraw(True)\n\nAddFlagNote()",
+      "language": "python",
+      "author": "kleerkoat",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 816
+}

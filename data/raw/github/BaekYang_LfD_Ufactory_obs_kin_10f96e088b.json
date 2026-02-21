@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/BaekYang/LfD_Ufactory_obs_kin/blob/d35fcffdc4d61aa0c8a0537562f8e9fb75260194/RhinoTransfer/4rhinoTocsv.py",
+  "repo": "BaekYang/LfD_Ufactory_obs_kin",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "RhinoTransfer/4rhinoTocsv.py",
+  "instruction": "4rhino tocsv",
+  "code": "# -*- coding: utf-8 -*-\r\nimport rhinoscriptsyntax as rs\r\nimport csv\r\nimport os\r\n\r\ndef export_curve_points_to_csv():\r\n    # 1) 곡선 선택\r\n    curve_id = rs.GetObject(u\"CSV로 내보낼 곡선을 선택하세요\", rs.filter.curve)\r\n    if not curve_id:\r\n        print(\"곡선이 선택되지 않았습니다.\")\r\n        return\r\n\r\n    # 2) 포인트(편집점) 가져오기\r\n    pts = rs.CurvePoints(curve_id)\r\n    if not pts:\r\n        print(\"곡선으로부터 포인트를 가져올 수 없습니다.\")\r\n        return\r\n\r\n    # 3) 타임스탬프 설정\r\n    start_time    = rs.GetReal(\"Enter start timestamp\", 0.0)\r\n    timestamp_gap = rs.GetReal(\"Enter timestamp gap (seconds)\", 1.0)\r\n\r\n    # 4) 파일명 입력\r\n    filename = rs.GetString(u\"저장할 CSV 파일명을 입력하세요 (예: result.csv)\", \"inference_result.csv\")\r\n    if not filename:\r\n        print(\"파일명이 입력되지 않았습니다.\")\r\n        return\r\n    if not filename.lower().endswith(\".csv\"):\r\n        filename += \".csv\"\r\n    filepath = filename\r\n\r\n    # 5) Roll/Pitch/Yaw 고정값\r\n    roll, pitch, yaw = 172.9, -83, 7\r\n\r\n    # 6) CSV 쓰기 (Python 2.x에서는 binary 모드로)\r\n    f_out = open(filepath, \"wb\")\r\n    writer = csv.writer(f_out)\r\n    writer.writerow([\"timestamp\", \"x\", \"y\", \"z\", \"roll\", \"pitch\", \"yaw\"])\r\n    for idx, pt in enumerate(pts):\r\n        ts = start_time + idx * timestamp_gap\r\n        x = int(pt[0] * 100) / 100.0\r\n        y = int(pt[1] * 100) / 100.0\r\n        z = int(pt[2] * 100) / 100.0\r\n        writer.writerow([int(ts), x, y, z, roll, pitch, yaw])\r\n    f_out.close()\r\n\r\n    print(\"CSV 파일이 저장되었습니다:\\n\" + os.path.abspath(filepath))\r\n\r\nif __name__ == \"__main__\":\r\n    export_curve_points_to_csv()\r\n",
+  "language": "python",
+  "imports": [
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": false
+}

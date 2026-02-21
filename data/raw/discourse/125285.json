@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/export-text-data-from-textdot-to-csv-format/125285",
+  "topic_id": 125285,
+  "title": "Export text data from TextDot to csv format",
+  "question": "Hi All,\n\n\nDoes anyone know how to export the text data of multiple textdots in one csv file?\n\n\nThanks in advance",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef ExportDotsCSV():\n    dots=rs.GetObjects(\"Select text dots to export\",8192,preselect=True)\n    if not dots: return\n    \n    filter = \"CSV File (*.csv)|*.csv||\"\n    filename = rs.SaveFileName(\"Save data file as\", filter)\n    if not filename: return\n    \n    file = open(filename, \"w\")\n    for i,dot in enumerate(dots):\n        txt=rs.TextDotText(dot)\n        #don't add separator for last line\n        if i<len(dots)-1: txt+=\",\"\n        file.write(txt)\n    file.close()\nExportDotsCSV()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\ndef ExportDotsCSV():\n    dots=rs.GetObjects(\"Select text dots to export\",8192,preselect=True)\n    if not dots: return\n    \n    filter = \"CSV File (*.csv)|*.csv||\"\n    filename = rs.SaveFileName(\"Save data file as\", filter)\n    if not filename: return\n    \n    to_write=\"\"\n    for i,dot in enumerate(dots):\n        to_write+=rs.TextDotText(dot)\n        if i<len(dots)-1: to_write+=\",\"\n\n    with open(filename, \"w\") as file: file.write(to_write)\n\nExportDotsCSV()",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 474
+}

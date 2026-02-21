@@ -1,0 +1,34 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-model-a-curve-with-a-constantly-changing-curvature/17318",
+  "topic_id": 17318,
+  "title": "How to model a curve with a constantly changing curvature",
+  "question": "Hi guys,\n\n\nI would like to model a curve which has a constant change of radius over a certain arc\n\nlength.\n\n\nThe idea would be to have the “motion path” of a car driving at a constant speed and the\n\ndriver changing the steering wheel from “straight” to fully turned. (turning\n\nthe wheel at a constant rate).\n\n\nI tried to create it through a python script by letting it grow through connecting arc\n\nsegments, but the result is not a constant curve – it has radi jumps all over\n\nthe place.\n\n\nI’m trying to solve this in code, because I would  need to check several variations.\n\n\nDoes anyone have an idea how to model this kind of curve in Rhino Manually / and or create it\n\nthrough code?\n\n\nThanks,\n\nKarl",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport math\n\n\ndef bucket_and_string():\n\n    inner = rs.GetReal('Radius of inner circle', 10)\n    if not inner: return\n\n    start = rs.GetReal('Starting radius', 50)\n    if not start: return\n\n    rs.AddCircle((0, 0, 0), inner)\n    line = rs.AddLine((inner, 0, 0), (inner, start, 0))\n    startlength = rs.CurveLength(line)\n    points = [(inner, start, 0)]\n\n    for i in range(1, 72):\n\n        angle = math.radians(i * 5)\n        arclength = inner * angle\n\n        if startlength - arclength < 0:\n            break\n\n        rotatedline = rs.RotateObject(line, (0, 0, 0), i * 5, None, True)\n        rs.ExtendCurveLength(rotatedline, 0, 1, -arclength)\n        pt = rs.CurveEndPoint(rotatedline)\n        points.append(pt)\n\n    rs.AddInterpCurve(points)\n\n\nbucket_and_string()",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\n\n# parameters\na = 50  # starting radius\nb = -1  # increment in which the radius will shrink (or grow) per rotation\n\n\nline = rs.AddLine((0, 0, 0), (0, a, 0))\n\npoints = [rs.CurveEndPoint(line)]\n\nfor i in range(1, 50):\n    line = rs.RotateObject(line, (0, 0, 0), 5, None, True)\n    rs.ExtendCurveLength(line, 0, 1, b)\n    if rs.CurveLength(line) < 0:\n        break\n\n    points.append(rs.CurveEndPoint(line))\n\nrs.AddInterpCurve(points)",
+      "language": "python",
+      "author": "jeff_hammond",
+      "post_number": 5,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "transformation",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 6,
+  "views": 2380
+}

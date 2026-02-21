@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/selecting-objects-on-layers-with-rhino-python/19693",
+  "topic_id": 19693,
+  "title": "Selecting objects on layers with Rhino python",
+  "question": "I’m trying to write a simple script to set the color and line weight of lines based on a list that maps layers to the relevant properties.\n\n\nThis seems to be running into problems with nested layers - rs.IsLayer can find a layer like “parent::child”, but scriptcontext.doc.Objects.FindByLayer won’t - is there another way that I should call the layer / a different way to do this?\n\n\nMy code is linked here:\n\n\nhttp://pastebin.com/CG8MDJV2\n\n\nThanks,\n\nChris",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext\n\ndef main():\n\n    #list of layer names\n    layer_names = rs.LayerNames()\n    \n    # get a list of all layer objects in the document that are not deleted\n    layer_objects = list(layer for layer in scriptcontext.doc.Layers if not layer.IsDeleted)\n    \n    \n    for name in layer_names:\n        # find layer object with FullPath == name and break out to pass layer_obj in FindByLayer\n        layer_obj = None\n        for layer_obj in layer_objects:\n            if layer_obj.FullPath == name:\n                break\n        if layer_obj:\n            # FindByLayer accepts both names ad layer objects so pass the layer object\n            rhobjs = scriptcontext.doc.Objects.FindByLayer(layer_obj)\n            print rhobjs\n        else:\n            #catch possible error here\n            pass\n\n\nmain()",
+      "language": "python",
+      "author": "Willem",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 5099
+}

@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/gtalarico/apidocs.samples/blob/0be4e40d29aecae672e37d90a8f199343e6033c3/repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_offsetcurve.py",
+  "repo": "gtalarico/apidocs.samples",
+  "repo_stars": 11,
+  "repo_description": "Samples for ApiDocs.co",
+  "license": "unknown",
+  "filepath": "repos/rhinocommon/mcneel/rhino-developer-samples/rhinocommon/snippets/from_rhinocommon/py/ex_offsetcurve.py",
+  "instruction": "Ex offsetcurve",
+  "code": "from Rhino import *\nfrom Rhino.DocObjects import *\nfrom Rhino.Geometry import *\nfrom Rhino.Input import *\nfrom Rhino.Commands import *\nfrom scriptcontext import doc\nimport rhinoscriptsyntax as rs\n\ndef RunCommand():\n  rs, obj_ref = RhinoGet.GetOneObject(\"Select Curve\", False, ObjectType.Curve)\n  if rs <> Result.Success:\n    return rs\n  curve = obj_ref.Curve()\n  if curve == None:\n    return Result.Nothing\n    \n  rs, point = RhinoGet.GetPoint(\"Select Side\", False)\n  if rs <> Result.Success:\n    return rs\n  if point == Point3d.Unset:\n    return Result.Nothing\n\n  curves = curve.Offset(point, Vector3d.ZAxis, 1.0, \n    doc.ModelAbsoluteTolerance, CurveOffsetCornerStyle.None)\n\n  for offset_curve in curves:\n    doc.Objects.AddCurve(offset_curve)\n\n  doc.Views.Redraw()\n  return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "rhinoscriptsyntax",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

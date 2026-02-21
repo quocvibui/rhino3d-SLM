@@ -1,0 +1,41 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/background-color-slider/16636",
+  "topic_id": 16636,
+  "title": "Background color slider",
+  "question": "Would it be possible to create a dockable color slider for the viewport background? I often have a variety of layer colors, some best viewed with a light background, some a dark background, and some in between. I have two wireframe display modes, white background and black background, but that’s not always enough.\n\n\nI do a little scripting, but haven’t spent much time with the Rhino interface or application settings. If anybody can point me in the right direction for (a) how to create a dockable slider and (b) what class and/or method(s) to use to change the viewport background, I’d be quite appreciative.",
+  "code_blocks": [
+    {
+      "code": "-M\n\n\n  [1]: http://4.rhino3d.com/5/rhinocommon/?topic=html/T_Rhino_ApplicationSettings_AppearanceSettings.htm",
+      "language": "csharp",
+      "author": "Miguel",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino.ApplicationSettings.AppearanceSettings\nimport scriptcontext\nfrom scriptcontext import doc\n\ndef Main():\n    color = System.Drawing.Color.CadetBlue\n    settings = Rhino.ApplicationSettings.AppearanceSettings\n    settings.ViewportBackgroundColor = color\n    doc.Views.Redraw()\n    \n# Execute it...\nif( __name__ == \"__main__\" ):\n    Main()",
+      "language": "python",
+      "author": "ledisnomad",
+      "post_number": 6,
+      "is_solution": false
+    },
+    {
+      "code": "import random\nimport Rhino.ApplicationSettings.AppearanceSettings\nimport System\nimport scriptcontext\n\n# \n# Background Colors\n# by Damon Sidel (based on Mark Meier's UI examples)\n# http://mkmra2.blogspot.com/2012/12/creating-graphical-user-interfaces-with.html\n# \ndef Main():\n    # Make the UI object\n    ui = AllControlExample()\n    # Show the dialog from the UI class\n    Rhino.UI.Dialogs.ShowSemiModal(ui.form)\n    # Define a starting color for the background\n    lightness = 127\n\n# This is just a class to test all the UI controls\nclass AllControlExample():\n    def __init__(self):\n        # Make a new form (dialog)\n        self.form = Meier_UI_Utility.UIForm(\"Background Color\") \n        # Accumulate controls for the form\n        self.addControls()\n        # Layout the controls on the form\n        self.form.layoutControls() \n    \n    # Add each control to an accumulated list of controls\n    def addControls(self):\n        # The controls get added to the panel of the form\n        p = self.form.panel\n        \n        p.addLabel(\"\", \"Brightness: \", None, False)\n        p.addTrackBar(\"trackBar1\", 0, 255, 1, 2, 1, 5, 150, False, self.trackBar1_OnValueChange)\n        p.addLabel(\"\", \"Value: \", None, False)\n        p.addReadonlyText(\"readonlyTextbox\", \"5\", 50, True)\n    \n    # ====================== Delegates =====================\n    # Called when the text changes in the box (every keypress)\n    # Called when the value changes\n    def trackBar1_OnValueChange(self, sender, e):\n        try:\n            c = self.form.panel.Controls.Find(\"readonlyTextbox\", True)[0]\n            c.Text = str(sender.Value)\n            color = System.Drawing.Color.FromArgb(c, c, c)\n            settings = Rhino.ApplicationSettings.AppearanceSettings\n            settings.ViewportBackgroundColor = color\n            scriptcontext.doc.Views.Redraw()\n        except:\n            pass\n\n# Execute it...\nif( __name__ == \"__main__\" ):\n    Main()",
+      "language": "python",
+      "author": "ledisnomad",
+      "post_number": 6,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 1909
+}

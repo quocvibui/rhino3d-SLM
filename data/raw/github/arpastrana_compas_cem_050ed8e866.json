@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/arpastrana/compas_cem/blob/15c9c69fb49971302b5e91be13ab9ad23b7e6f98/src/compas_cem/ghpython/components/CompasCem_OriginNodesMove/code.py",
+  "repo": "arpastrana/compas_cem",
+  "repo_stars": 39,
+  "repo_description": "Inverse design of 3D truss networks with automatic differentiation",
+  "license": "MIT",
+  "filepath": "src/compas_cem/ghpython/components/CompasCem_OriginNodesMove/code.py",
+  "instruction": "Move the origin nodes of a topology diagram to a new location.",
+  "code": "\"\"\"\nMove the origin nodes of a topology diagram to a new location.\n\"\"\"\nfrom ghpythonlib.componentbase import executingcomponent as component\n\nfrom compas.utilities import iterable_like\nfrom compas_rhino.geometry import RhinoPoint\n\n\nclass MoveOriginNodesComponent(component):\n    def RunScript(self, topology, origin_node_keys, points):\n        if not topology or not origin_node_keys or not points:\n            return\n\n        topology = topology.copy()\n        points = iterable_like(origin_node_keys, points, points[-1])\n\n        for node_key, point in zip(origin_node_keys, points):\n            point = RhinoPoint.from_geometry(point).to_compas()\n            topology.node_attributes(node_key, names=\"xyz\", values=point)\n\n        return topology\n",
+  "language": "python",
+  "imports": [
+    "ghpythonlib"
+  ],
+  "has_docstring": true
+}

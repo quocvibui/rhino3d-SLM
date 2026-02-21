@@ -1,0 +1,24 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/dynamically-setting-ghpython-nodes-gives-error-in-v8/177651",
+  "topic_id": 177651,
+  "title": "Dynamically setting GHPython nodes gives error in V8?",
+  "question": "For some of my Grasshopper components, I like to have them configure themselves dynamically based on some user-input. This normally works just fine. However I have noticed now in Rhino-8 that I’m getting a small error in certain situations:\n\n\n\n\nAssuming I have a GHPython component that looks roughly like this (note, this a very, very simplified example without any validation or error-handling, just to show the issue):\n\n\nScreenshot 2024-03-10 at 3.22.33 PM\n1700×973 247 KB\n\n\nfrom Grasshopper.Kernel import GH_ParamAccess\nfrom GhPython import Component\n\ninput_sets = {\n    \"inputs_a\" : {\n        1: {\"name\":\"_example_item_a\", \"access\":GH_ParamAccess.item},\n        2: {\"name\":\"_example_list_a\", \"access\":GH_ParamAccess.list},\n    },\n    \"inputs_b\" : {\n        1: {\"name\":\"_example_item_b\", \"access\":GH_ParamAccess.item},\n        2: {\"name\":\"_example_list_b\", \"access\":GH_ParamAccess.list},\n    },\n}\n\ninput_set = input_sets[_type]\n\nfor k, v in input_set.items():\n    input_node = ghenv.Component.Params.Input[k]\n    input_node.NickName = v[\"name\"]\n    input_node.Name = v[\"name\"]\n    input_node.Access = v[\"access\"]\n    input_node.TypeHint = Component.NewStrHint()\n\nfor input_node in ghenv.Component.Params.Input:\n    if input_node.Access == GH_ParamAccess.item:\n        input_ = list(input_node.VolatileData[0])[0]\n    elif input_node.Access == GH_ParamAccess.list:\n        input_ = [str(_) for _ in input_node.VolatileData[0]]\n    elif input_node.Access == GH_ParamAccess.tree:\n        input_ = None # Ignore\n    else:\n        input_ = None # Ignore\n    \n    print \"{} = {}\".format(input_node.Name, input_)\n\n\n\nThis works fine. I can change the input nodes based on the ‘type’ selected by the user. The issue comes if I change the Access type of a node from \nitem\n to \nlist\n. So for instance, if ‘inputs_a’ has an ‘item’ type at first, but ‘inputs_b’ has a ‘list’ type for that node\n\n\n....\ninput_sets = {\n    \"inputs_a\" : {\n        1: {\"name\":\"_example_item_a\", \"access\":GH_ParamAccess.item},\n     ...",
+  "code_blocks": [
+    {
+      "code": "from Grasshopper.Kernel import GH_ParamAccess\nfrom GhPython import Component\n\ninput_sets = {\n    \"inputs_a\" : {\n        1: {\"name\":\"_example_item_a\", \"access\":GH_ParamAccess.item},\n        2: {\"name\":\"_example_list_a\", \"access\":GH_ParamAccess.list},\n    },\n    \"inputs_b\" : {\n        1: {\"name\":\"_example_item_b\", \"access\":GH_ParamAccess.item},\n        2: {\"name\":\"_example_list_b\", \"access\":GH_ParamAccess.list},\n    },\n}\n\ninput_set = input_sets[_type]\n\nfor k, v in input_set.items():\n    input_node = ghenv.Component.Params.Input[k]\n    input_node.NickName = v[\"name\"]\n    input_node.Name = v[\"name\"]\n    input_node.Access = v[\"access\"]\n    input_node.TypeHint = Component.NewStrHint()\n\nfor input_node in ghenv.Component.Params.Input:\n    if input_node.Access == GH_ParamAccess.item:\n        input_ = list(input_node.VolatileData[0])[0]\n    elif input_node.Access == GH_ParamAccess.list:\n        input_ = [str(_) for _ in input_node.VolatileData[0]]\n    elif input_node.Access == GH_ParamAccess.tree:\n        input_ = None # Ignore\n    else:\n        input_ = None # Ignore\n    \n    print \"{} = {}\".format(input_node.Name, input_)",
+      "language": "python",
+      "author": "ed.p.may",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 58,
+  "posts_count": 1,
+  "views": 212
+}

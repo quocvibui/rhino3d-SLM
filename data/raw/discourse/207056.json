@@ -1,0 +1,33 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/export-lines-to-dxf/207056",
+  "topic_id": 207056,
+  "title": "Export lines to DXF",
+  "question": "I’m trying to write some lines to a DXF using RhinoCommon C#. My code is as follows:\n\n\nusing (RhinoDoc doc = RhinoDoc.CreateHeadless(\"Large Objects - Millimeters.3dm\"))\n{\n    var a = new Point3d(0,0,0);\n    var b = new Point3d(length,0,0);\n    var c = new Point3d(length,165.1,0);\n    var d = new Point3d(0,165.1,0);\n    doc.Objects.Add(new LineCurve(a, b));\n    doc.Objects.Add(new LineCurve(b, c));\n    doc.Objects.Add(new LineCurve(c, d));\n    doc.Objects.Add(new LineCurve(d, a));\n    var options = new FileDwgWriteOptions();\n    Rhino.FileIO.FileDwg.Write(path, doc, options);\n}\n\n\n\nThis works, but It is creating .3dm files, not dwg files, which is strange because I’m using FileDwg.Write.\n\nAlso, there is no FileIO.FileDxf? How can I export to DXF?",
+  "code_blocks": [
+    {
+      "code": "protected override Result RunCommand(RhinoDoc doc, RunMode mode)\n{\n  string templateFolder = Rhino.ApplicationSettings.FileSettings.TemplateFolder;\n  if (!Directory.Exists(templateFolder))\n  {\n    RhinoApp.WriteLine(\"Template folder not found.\");\n    return Result.Failure;\n  }\n\n\n  string templateFile = \"Large Objects - Millimeters.3dm\";\n  string templatePath = Path.Combine(templateFolder, templateFile);\n  if (!File.Exists(templatePath))\n  {\n    RhinoApp.WriteLine(\"Template file \\\"{0}\\\" not found.\", templateFile);\n    return Result.Failure;\n  }\n\n  using (RhinoDoc headlessDoc = RhinoDoc.CreateHeadless(templatePath))\n  {\n    double length = 10.0;\n    Point3d a = Point3d.Origin;\n    Point3d b = new Point3d(length, 0.0, 0.0);\n    Point3d c = new Point3d(length, length, 0.0);\n    Point3d d = new Point3d(0.0, length, 0.0);\n\n    headlessDoc.Objects.Add(new LineCurve(a, b));\n    headlessDoc.Objects.Add(new LineCurve(b, c));\n    headlessDoc.Objects.Add(new LineCurve(c, d));\n    headlessDoc.Objects.Add(new LineCurve(d, a));\n\n    string desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);\n    //string path = Path.Combine(desktopFolder, $\"{EnglishName}.dwg\");\n    string path = Path.Combine(desktopFolder, $\"{EnglishName}.dxf\");\n\n    FileDwgWriteOptions options = new FileDwgWriteOptions();\n    bool rc = FileDwg.Write(path, headlessDoc, options);\n    if (rc)\n      RhinoApp.WriteLine(\"File successfully saved as \\\"{0}\\\".\", path);\n    else\n      RhinoApp.WriteLine(\"Failed to save \\\"{0}\\\".\", path);\n  }\n\n  return Result.Success;\n}",
+      "language": "csharp",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "using (RhinoDoc doc = RhinoDoc.CreateHeadless(\"Large Objects - Millimeters.3dm\"))\n{\n    var a = new Point3d(0,0,0);\n    var b = new Point3d(length,0,0);\n    var c = new Point3d(length,165.1,0);\n    var d = new Point3d(0,165.1,0);\n    doc.Objects.Add(new LineCurve(a, b));\n    doc.Objects.Add(new LineCurve(b, c));\n    doc.Objects.Add(new LineCurve(c, d));\n    doc.Objects.Add(new LineCurve(d, a));\n    var options = new FileDwgWriteOptions();\n    Rhino.FileIO.FileDwg.Write(path, doc, options);\n}",
+      "language": "csharp",
+      "author": "Nick_Drian",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 96
+}

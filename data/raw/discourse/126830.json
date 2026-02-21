@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/ghpython-bug-messed-guids/126830",
+  "topic_id": 126830,
+  "title": "GHPython bug - messed GUIDs?",
+  "question": "Hi,\n\n\nDoes anyone encountered strange behaviour of GHPython component that after disconnecting and reconnecting one of the inputs and/or if the tree structure of such input changes it starts to have problems with GUIDs like \nError: Runtime error (ValueErrorException): Could not convert 255327f4-3bbd-4b2a-8a18-b4390abb89ae to a Point3d\n. The code works perfectly before change of the inputs and even after getting back to exact same data as before it’s not recovering and still throwing such errors.\n\n\nIt’s hard to isolate the issue since the whole GH patch is quite complex and also referring 3dm file, but from this behaviour I infer that’s not an issue with the patch itself but rather something more universal regarding how GHPython handles the GUIDs maybe ?\n\n\nI’ve tried clearing and recomputing solution, restarting Rhino etc. and it seems with some combination of such actions it eventually could recover, but it seems quite indeterministic.\n\n\nAny help with narrowing down the issue / workarounds etc would be much appreciated !\n\n\nRunning the latest version (7.8.21181.05002, 2021-06-30 ) under Mac OS.\n\n\nCheers,",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Provides a scripting component.\n    Inputs:\n        x: The x script variable\n        y: The y script variable\n    Output:\n        a: The a output variable\"\"\"\n\n__author__ = \"jkozniewski\"\n\nimport rhinoscriptsyntax as rs\nimport ghpythonlib.treehelpers as th\nimport Rhino\nimport copy\n\n_ptA = th.tree_to_list(ptA,0)\n_ptB = th.tree_to_list(ptB,0)\n_lA = th.tree_to_list(lA,0)\n_lB = th.tree_to_list(lB,0)\n\n_linesA = copy.deepcopy(_lA)\n_linesB = copy.deepcopy(_lB)\n\nconnectionsA = []\nconnectionsB = []\n\n\n\nfor index_A, linesIdListA in enumerate(_lA):\n    \n    for iA, liA in enumerate(linesIdListA):\n        \n        for index_B, linesIdListB in enumerate(_lB):\n            \n            for iB, liB in enumerate(linesIdListB):\n            \n                if( liA == liB ):\n                    \n                    _linesA[index_A][iA] = rs.AddLine( _ptA[index_A][iA], _ptB[index_B][iB] )\n                    _linesB[index_B][iB] = rs.AddLine( _ptB[index_B][iB], _ptA[index_A][iA] )\n                    \n                    connectionsA.append( \"{}.{} -> {}.{}\".format( idA[index_A], iA, idB[index_B], iB) )\n                    connectionsB.append( \"{}.{} -> {}.{}\".format( idB[index_B], iB, idA[index_A], iA) )\n                    \n\nconnectionsA.sort()\nconnectionsB.sort()\n\nlinesA = th.list_to_tree(_linesA)\nlinesB = th.list_to_tree(_linesB)",
+      "language": "python",
+      "author": "jkozniewski",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 3,
+  "views": 309
+}

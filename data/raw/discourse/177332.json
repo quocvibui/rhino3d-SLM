@@ -1,0 +1,56 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-find-if-an-object-is-a-lands-design-object/177332",
+  "topic_id": 177332,
+  "title": "How to find if an object is a Lands Design object?",
+  "question": "Hi,\n\nHow can I find all objects that are lands generated?\n\nI am making some tools where the lands objects (like row etc) is messing up.\n\n\n–\n\nIn another script I use rs.ObjectDescription(obj) to see if it is tagged as “Terrain”,\n\nbut I don’t want to check for all possible names as this might change in the future.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nobjects = rs.GetObjects(\"Select objects\", preselect=True)\n\nif objects:\n    for object in objects:\n        obj = sc.doc.Objects.Find(object)\n        print obj.Id\n        p = obj.GetRenderMeshParameters()\n        obrefs = Rhino.DocObjects.RhinoObject.GetRenderMeshes([obj], True, True)\n        print rs.ObjectDescription(obj)\n        \n        ### If object is terrain use only the first object in the list which is the top surface\n        if rs.ObjectDescription(obj)==\"terrain\":\n            mesh = obrefs[0].Mesh()\n            if mesh:\n                tempMesh = sc.doc.Objects.AddMesh( mesh)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport ctypes\n#Check if Lands is installed\nLandsInstalled = False\n# Load DLL into memory.\ntry:\n    Lands = ctypes.WinDLL (\"C:\\Program Files\\Rhino 7\\System\\Lands.Script.dll\")\n    LandsInstalled = True\nexcept:\n    print \"could not use dll\"\n    pass\n\nobjectId = rs.GetObject(\"\")\nif LandsInstalled:\n    if (Lands.Script.IsLandsObject(objectId)):\n        print \"Landsobject\"",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "Ok, should this work then?\nimport rhinoscriptsyntax as rs\nimport clr\n#Check if Lands is installed\nLandsInstalled = False\n# Load DLL into memory.\ntry:\n    clr.AddReference(\"Lands.Script\")\n    import Lands.Script as la\n    LandsInstalled = True\nexcept:\n    print \"could not use dll\"\n    pass\nobjectId = rs.GetObject(\"\")\nif LandsInstalled:\n    if la.IsTerrain(objectId):\n        print \"Landsobject\"",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport clr\nclr.AddReference(\"Lands.Script\")\nimport Lands.Script as la\n\nobjectId = rs.GetObject(\"\")\nif objectId:\n    print la.IsLandsObject(objectId)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport clr\nclr.AddReference(\"Lands.Script\")\nimport Lands.Script as la\n\nobjectId = rs.GetObject(\"\")\nif objectId:\n    print la.IsLandsObject(objectId)",
+      "language": "python",
+      "author": "albert",
+      "post_number": 8,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport rhinoscriptsyntax as rs\nimport Rhino\n\nobjects = rs.GetObjects(\"Select objects\", preselect=True)\n\nif objects:\n    for object in objects:\n        obj = sc.doc.Objects.Find(object)\n        print obj.Id\n        p = obj.GetRenderMeshParameters()\n        obrefs = Rhino.DocObjects.RhinoObject.GetRenderMeshes([obj], True, True)\n        print rs.ObjectDescription(obj)\n        \n        ### If object is terrain use only the first object in the list which is the top surface\n        if rs.ObjectDescription(obj)==\"terrain\":\n            mesh = obrefs[0].Mesh()\n            if mesh:\n                tempMesh = sc.doc.Objects.AddMesh( mesh)",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "materials",
+    "mesh",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 64,
+  "posts_count": 9,
+  "views": 268
+}

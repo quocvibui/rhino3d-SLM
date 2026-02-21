@@ -1,0 +1,35 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/joining-meshes-became-super-slow-in-recent-v6-builds/84306",
+  "topic_id": 84306,
+  "title": "Joining Meshes became super slow in recent V6 builds : (",
+  "question": "Hi \n@Pascal\n,\n\n\nNot sure what changed in Rhino recently, but joining meshes became super slow and seriously gets in the way of our workflow where this is something we have to do very often.\n\n\nJoining 100K+ pieces together in V5 or earlier versions of V6 is really just a blink of an eye fast, and now in latest V6 Rhino freezes for a good minute.\n\nPlease see attached sample file to compare, if you have access to V5 or earlier V6 builds… Hope this can get fixed!\n\n\nEDIT: working with Version 6 SR16\n\n(6.16.19150.22171, 5/30/2019)\n\n\nthank you,\n\n\n–Jarek\n\n\nJoin_Mesh_Test_100K.zip (9.8 MB)",
+  "code_blocks": [
+    {
+      "code": "import scriptcontext\nimport Rhino\n\ndef FastJoinMesh():\n    \n    # Pick some meshes\n    go = Rhino.Input.Custom.GetObject()\n    go.SetCommandPrompt(\"Select meshes to join\")\n    go.GeometryFilter = Rhino.DocObjects.ObjectType.Mesh\n    go.GetMultiple(1, 0)\n    if go.CommandResult() != Rhino.Commands.Result.Success: \n        return\n    \n    # Make a list of mesh geometry\n    meshes = []\n    for objref in go.Objects():\n        meshes.append(objref.Mesh())\n    \n    # Join 'em up\n    new_mesh = Rhino.Geometry.Mesh()\n    new_mesh.Append(meshes)\n    \n    # Add new mesh to doc\n    scriptcontext.doc.Objects.Add(new_mesh)\n    \n    # Delete the selected meshes\n    for objref in go.Objects():\n        scriptcontext.doc.Objects.Delete(objref.ObjectId, False)\n        \nFastJoinMesh()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 9,
+      "is_solution": false
+    },
+    {
+      "code": "def JoinByLayer() :\n    layer_list = rs.LayerIds()\n    rs.EnableRedraw(False)\n    for layer_id in layer_list:\n        rs.UnselectAllObjects()\n        rs.ObjectsByLayer(layer_id,True)\n        objs=rs.SelectedObjects()\n        if objs and len(objs)>1: rs.Command(\"_Join\")",
+      "language": "python",
+      "author": "Pitti",
+      "post_number": 15,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "mesh",
+    "python",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 1,
+  "posts_count": 21,
+  "views": 1353
+}

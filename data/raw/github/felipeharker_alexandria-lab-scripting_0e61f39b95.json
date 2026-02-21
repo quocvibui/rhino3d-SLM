@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/felipeharker/alexandria-lab-scripting/blob/1771434a741c840da1d8ab008876e4866d6fecf3/mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/compute/py/SampleGhBasic/lines.py",
+  "repo": "felipeharker/alexandria-lab-scripting",
+  "repo_stars": 0,
+  "repo_description": "python, c#, etc. script library for Alexandria Labs",
+  "license": "unknown",
+  "filepath": "mcneel-docs/GitHub-Rhino-Developer-Samples-Repo/compute/py/SampleGhBasic/lines.py",
+  "instruction": null,
+  "code": "import compute_rhino3d.Util\nimport compute_rhino3d.Grasshopper as gh\nimport rhino3dm\nimport json\n\ncompute_rhino3d.Util.url = \"http://localhost:5000/\"\n#compute_rhino3d.Util.apiKey = \"\"\n\npt1 = rhino3dm.Point3d(0, 0, 0)\ncircle = rhino3dm.Circle(pt1, 5)\nangle = 20\n\n# convert circle to curve and stringify\ncurve = json.dumps(circle.ToNurbsCurve().Encode())\n\n# create list of input trees\ncurve_tree = gh.DataTree(\"curve\")\ncurve_tree.Append([0], [curve])\nrotate_tree = gh.DataTree(\"rotate\")\nrotate_tree.Append([0], [angle])\ntrees = [curve_tree, rotate_tree]\n\noutput = gh.EvaluateDefinition('twisty.gh', trees)\nprint(output)\n\n# decode results\nbranch = output['values'][0]['InnerTree']['{0;0}']\nlines = [rhino3dm.CommonObject.Decode(json.loads(item['data'])) for item in branch]\n\nfilename = 'twisty.3dm'\n\nprint('Writing {} lines to {}'.format(len(lines), filename))\n\n# create a 3dm file with results\nmodel = rhino3dm.File3dm()\nfor l in lines:\n    model.Objects.AddCurve(l) # they're actually LineCurves...\n\nmodel.Write(filename)\n",
+  "language": "python",
+  "imports": [
+    "rhino3dm"
+  ],
+  "has_docstring": false
+}

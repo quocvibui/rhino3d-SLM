@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rir-ghpython-create-modelcurve-revit-api-problem/85571",
+  "topic_id": 85571,
+  "title": "RiR - GHPython Create ModelCurve - Revit API problem",
+  "question": "Hi all,\n\nI just started to use RiR and wanted to develop my knowledge in the REVIT API by using GH in order to set Dynamo out of my life \n\n\nSo I started by creating a GHPython Script to create Model Line…but I am stuck and the problem is that I have no clue on which is the problem.\n\n\nAttached you can find the .GH file, but the problem is here\n\n\n…\n\nfor line in revitLines:\n\n____modelLine = RCR.ItemFactoryBase.NewModelCurve(line, sketch)\n\n____modelLines.append(modelLine)\n\n…\n\n\nthe error says\n\nRuntime error (ArgumentTypeException): NewModelCurve() takes exactly 3 arguments (2 given)\n\n(but in the API the NewModelCurve method wants 2 argument a curve and a sketch plane)\n\n\nit seems that the problem concerns the Argument Type (the line element is an Autodesk.DB.Revit.Line).\n\n\nDo you have any idea?\n\n\nThank you in advance\n\nMauro\n\n\nModelLines_GH",
+  "code_blocks": [
+    {
+      "code": "import clr\nclr.AddReference('System.Core')\nclr.AddReference('RhinoInside.Revit')\nclr.AddReference('RevitAPI') \nclr.AddReference('RevitAPIUI')\n        \nfrom System.Linq import Enumerable\nimport Autodesk.Revit.DB as RDB\nimport Autodesk.Revit.Creation as RCR\nfrom Rhino.Geometry import *\nfrom RhinoInside.Revit import Revit, Convert\n        \ndoc = Revit.ActiveDBDocument\n\n#Create Lines\n\nstartPoint = []\nendPoint = []\nrevitLines = []\nmodelLines = []\n\nwith RDB.Transaction(doc, \"RiR_ModelLine\") as trans:\n    trans.Start()\n    \n    for elemento in x:\n        startPoint.append(RDB.XYZ(elemento.PointAtStart.X, elemento.PointAtStart.Y, elemento.PointAtStart.Z))\n        endPoint.append(RDB.XYZ(elemento.PointAtEnd.X, elemento.PointAtEnd.Y, elemento.PointAtEnd.Z))\n    \n    for punto in startPoint:\n        revitLine = RDB.Line.CreateBound(punto, endPoint[startPoint.index(punto)])\n        revitLines.append(revitLine)\n    \n    piano = RDB.Plane.CreateByThreePoints(RDB.XYZ(-100,-100,0), RDB.XYZ(100,-100,0), RDB.XYZ(100,100,0))\n    sketch = RDB.SketchPlane.Create(doc, piano)\n    \n    \n    for line in revitLines:\n        modelLine = doc.Create.NewModelCurve(line, sketch)\n        modelLines.append(modelLine)\n    \n    trans.Commit()\n\n# Assegnare l'output dell'utente alla variabile OUT.\n        \nModelLine = revitLines",
+      "language": "python",
+      "author": "kike",
+      "post_number": 2,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 111,
+  "posts_count": 3,
+  "views": 1757
+}

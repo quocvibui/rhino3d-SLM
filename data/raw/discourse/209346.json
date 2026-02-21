@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/extract-brep-vertices-in-ghpython/209346",
+  "topic_id": 209346,
+  "title": "Extract brep vertices in GHPython",
+  "question": "I’m GHPython beginner and I need your help.\n\nI tried to made deconstruct brep component to GHPython, but extract vertices part doesn’t work.\n\n\nimage\n1608×783 122 KB\n\n\ninput = brep\n\nitem acess\n\ntype hint = brep\n\n\nI search RhinoScriptSyntax and found some codes but it doesn’t work.\n\nPolylineVertices(curve_id, segment_index=-1)\n\n\n2025.09.05.gh\n (12.5 KB)\n\n\ncode\n\nimport Rhino\n\n\nverts = \n\nedges = \n\nfaces = \n\n\nif brep:\n\nif isinstance(brep, Rhino.Geometry.Brep):\n\nverts = [v.Location for v in brep.Vertices]\n\nedges = [e.EdgeCurve for e in brep.Edges]\n\nfaces = [f for f in brep.Faces]\n\n\na = verts\n\nb = edges\n\nc = faces",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\n\nimport Rhino\n\n\n\ncurves = x if isinstance(x, list) else [x]\n\n\n\nall_points = []\n\n\n\nfor crv in curves:\n\n    if crv is None: \n\n        continue\n\n    \n\n    if isinstance(crv, Rhino.Geometry.PolylineCurve):\n\n        pts = [pt for pt in crv.ToPolyline().ToArray()]\n\n        all_points.extend(pts)\n\n    \n\n    elif isinstance(crv, Rhino.Geometry.LineCurve):\n\n        all_points.append(crv.PointAtStart)\n\n        all_points.append(crv.PointAtEnd)\n\n    \n\n    elif isinstance(crv, Rhino.Geometry.ArcCurve):\n\n        all_points.append(crv.PointAtStart)\n\n        all_points.append(crv.PointAtEnd)\n\n        all_points.append(crv.Arc.MidPoint)\n\n    \n\n    elif isinstance(crv, Rhino.Geometry.Curve):\n\n        pline = crv.ToPolyline(0,0,0,0,0,0,True)\n\n        if pline: \n\n            all_points.extend([pt for pt in pline])\n\n        else:\n\n            all_points.append(crv.PointAtStart)\n\n            all_points.append(crv.PointAtEnd)\n\n\n\na = all_points",
+      "language": "python",
+      "author": "종이비행기",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 2,
+  "posts_count": 7,
+  "views": 100
+}

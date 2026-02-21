@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/load-nurbs-curves-and-points-from-obj-files/17150",
+  "topic_id": 17150,
+  "title": "Load NURBS Curves and Points from .obj files",
+  "question": "Hi Everyone,\n\n\nRecently I’ve been looking for a way of getting simple geometry (curves and points) between Rhino and Processing. Rhino does a nice job of exporting curves and points as .obj if you select the NURBS option but it only seems to import meshes so I wrote a small obj parser. It’s very limited and only copes with curves and  points as exported from Rhino but its enough for my purposes. Most curves seems to roundtrip ok (export then run the script then selDup) except some closed curves, they look ok but aren’t recognised as duplicates.\n\nI thought I’d share it here in case someone else has use for it or feels Inclined to add more features to it.\n\n\nCheers,\n\nTobias\n\n\n\nimport Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport string as s\n\ndef load(filename):\n    with open(filename) as f:\n        \n        vs = []\n        \n        parsingCurve = False\n        isRational = False\n        ps = []\n        ks = [] \n        u0 = 0\n        u1 = 0\n        deg = 0\n        \n        for line in f:\n            line = s.rstrip(line)\n            \n            if not line or s.find(line, \"#\") == 0: \n                continue\n            \n            while s.rfind(line, \"\\\\\") != -1:\n                line = s.split(line, \"\\\\\")[0]\n                nextLine = f.readline()\n                if nextLine:\n                    line = line + s.strip(nextLine)\n            \n            parts = s.split(line)\n            \n            if parts[0] == \"v\":\n                x = float(parts[1])\n                y = float(parts[2])\n                z = float(parts[3])\n                w = 1.0\n                if len(parts) > 4:\n                    w = float(parts[4])\n                vs.append(rg.Point4d(x, y, z, w))\n            \n            elif parts[0] == \"p\":\n                idx = int(parts[1]) - 1\n                sc.doc.Objects.AddPoint(rg.Point3d(vs[idx]))\n            \n            elif parts[0] == \"cstype\":\n                if parts[1] == \"rat\" and parts[2] == \"bspline\"...",
+  "code_blocks": [
+    {
+      "code": "import Rhino.Geometry as rg\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport string as s\n\ndef load(filename):\n    with open(filename) as f:\n        \n        vs = []\n        \n        parsingCurve = False\n        isRational = False\n        ps = []\n        ks = [] \n        u0 = 0\n        u1 = 0\n        deg = 0\n        \n        for line in f:\n            line = s.rstrip(line)\n            \n            if not line or s.find(line, \"#\") == 0: \n                continue\n            \n            while s.rfind(line, \"\\\\\") != -1:\n                line = s.split(line, \"\\\\\")[0]\n                nextLine = f.readline()\n                if nextLine:\n                    line = line + s.strip(nextLine)\n            \n            parts = s.split(line)\n            \n            if parts[0] == \"v\":\n                x = float(parts[1])\n                y = float(parts[2])\n                z = float(parts[3])\n                w = 1.0\n                if len(parts) > 4:\n                    w = float(parts[4])\n                vs.append(rg.Point4d(x, y, z, w))\n            \n            elif parts[0] == \"p\":\n                idx = int(parts[1]) - 1\n                sc.doc.Objects.AddPoint(rg.Point3d(vs[idx]))\n            \n            elif parts[0] == \"cstype\":\n                if parts[1] == \"rat\" and parts[2] == \"bspline\":\n                    parsingCurve = True\n                    isRational = True\n                elif parts[1] == \"bspline\":\n                    parsingCurve = True\n            \n            elif parts[0] == \"deg\":\n                deg = int(parts[1])\n            \n            elif parts[0] == \"curv\":\n                u0 = float(parts[1])\n                u1 = float(parts[2])\n                for i in range(3, len(parts)):\n                    idx = int(parts[i]) - 1\n                    ps.append(vs[idx])\n            \n            elif parts[0] == \"parm\" and parts[1] == \"u\":\n                for i in range(2, len(parts)):\n                    ks.append(float(parts[i]))\n            \n            elif parts[0] == \"end\" and parsingCurve:\n                curve = rg.NurbsCurve(3, isRational, deg + 1, len(ps))\n                for i in range(len(ps)):\n                    curve.Points.SetPoint(i, ps[i])\n                for i in range(curve.Knots.Count):\n                    # Rhino skips the first and last knot\n                    # compared to .obj\n                    curve.Knots[i] = ks[i+1]\n                if curve.IsValid:\n                    sc.doc.Objects.AddCurve(curve);\n\n                parsingCurve = False\n                isRational = False\n                ps = []\n                ks = []\n        \n        sc.doc.Views.Redraw()\n    \n    \nif( __name__ == \"__main__\" ):\n    filename = rs.OpenFileName(title=\"Open Obj\", filter=\"OBJ|*.obj||\")\n    if filename:\n        load(filename)",
+      "language": "python",
+      "author": "tobiasjewson",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "mesh",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 806
+}

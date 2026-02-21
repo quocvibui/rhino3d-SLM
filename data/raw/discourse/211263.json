@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/reset-gh-canvas-setting-after-closing-rhino/211263",
+  "topic_id": 211263,
+  "title": "Reset GH canvas setting after closing Rhino",
+  "question": "Hi everyone,\n\n\nI’m developing a custom plugin in C# for Grasshopper. One of the components checks which packages are used in the GH canvas. If any disallowed packages are detected, the canvas background turns \nred\n to alert the user that something is wrong.\n\n\nHere are the considerations I’m working on:\n\n\n\n\n\n\nWhen the checking component is removed, the canvas colors should automatically revert to the user’s original colors.\n\n\n\n\n\n\nWhen the GH document is closed or unloaded, the canvas colors should also return to the user’s original settings. (I’m currently handling this by subscribing to the \nContextChanged\n event.)\n\n\n\n\n\n\nprivate void OnDocumentContextChanged(object sender, GH_DocContextEventArgs e)\n{\n    // Restore canvas colors when document is closing\n    if (e.Context == GH_DocumentContext.Close || e.Context == GH_DocumentContext.Unloaded)\n    {\n        RestoreOriginalCanvasColors();\n    }\n}\n\n\n\nHowever, there’s an issue with the second case. Here’s the procedure I follow to reproduce the error:\n\n\n\n\nOpen Rhino and Grasshopper.\n\n\nLoad the component.\n\n\nPlace a plugin that is not allowed on the canvas and the GH canvas turns red as expected.\n\n\nClose Rhino \nwithout\n closing Grasshopper.\n\n\n\n\nAfter doing this, if I open Grasshopper again, the canvas colors are still red.\n\n\nI tried handling the \nRhino.Closing\n event, but it doesn’t seem to trigger — the same issue remains.\n\n\n// ---------------------------------------------------------------------------         \n// RhinoApp.Closing Event Handler\n// ---------------------------------------------------------------------------\n\nprivate void SubscribeToRhinoClosingEvent()\n{\n     if (_rhinoClosingEventSubscribed) return;\n     RhinoApp.Closing += OnRhinoClosing;\n      _rhinoClosingEventSubscribed = true;\n}\n\nprivate void OnRhinoClosing(object sender, EventArgs e)\n{\n     // Restore canvas colors before Rhino closes\n     RestoreOriginalCanvasColors();\n}\n\nprivate void UnsubscribeFromRhinoClosingEvent()\n{\n     if (!_rhinoClosingEvent...",
+  "code_blocks": [
+    {
+      "code": "// ---------------------------------------------------------------------------         \n// RhinoApp.Closing Event Handler\n// ---------------------------------------------------------------------------\n\nprivate void SubscribeToRhinoClosingEvent()\n{\n     if (_rhinoClosingEventSubscribed) return;\n     RhinoApp.Closing += OnRhinoClosing;\n      _rhinoClosingEventSubscribed = true;\n}\n\nprivate void OnRhinoClosing(object sender, EventArgs e)\n{\n     // Restore canvas colors before Rhino closes\n     RestoreOriginalCanvasColors();\n}\n\nprivate void UnsubscribeFromRhinoClosingEvent()\n{\n     if (!_rhinoClosingEventSubscribed) return;\n     RhinoApp.Closing -= OnRhinoClosing;\n     _rhinoClosingEventSubscribed = false;\n}",
+      "language": "csharp",
+      "author": "bbalbastre",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "grasshopper",
+    "python",
+    "transformation"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 8,
+  "posts_count": 4,
+  "views": 93
+}

@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/dtbinh/T1_python-exercises/blob/f4710c3dc2ba8ddb3e3e9069ab8d65df674463ab/07_ur_online/shifted_frames_setup/compas/__debugging/mesh_shapeop/run_subprocess.py",
+  "repo": "dtbinh/T1_python-exercises",
+  "repo_stars": 0,
+  "repo_description": null,
+  "license": "unknown",
+  "filepath": "07_ur_online/shifted_frames_setup/compas/__debugging/mesh_shapeop/run_subprocess.py",
+  "instruction": "Run subprocess",
+  "code": "import os\nimport sys\n\nHERE = os.path.dirname(__file__)\n\nsys.path.insert(0, '/Users/vanmelet/bitbucket/compas_framework/src')\n\nimport compas\nimport compas_rhino.utilities as rhino\n\nfrom compas_rhino.utilities.scripts import ScriptServer\n\nserver = ScriptServer(HERE + '/subprocesses', HERE + '/subprocesses/temp', '/opt/local/bin/pythonw')\n\n# from compas.datastructures.mesh.mesh import Mesh\n# from compas_rhino.xxx import add_mesh_gui_helpers\n# Mesh = add_mesh_gui_helpers(Mesh)\n# mesh = Mesh.from_obj()\n\nfrom compas_rhino.datastructures.mesh import RhinoMesh\n\nmesh = RhinoMesh.from_obj(compas.find_resource('faces.obj'))\nmesh.attributes['name'] = 'FACES'\n\nmesh.vertex['25']['z'] = 0.0\nmesh.vertex['29']['z'] = 0.0\n\nres = server.mesh_force_density(mesh=mesh.to_data())\nmesh.data = res['mesh']\n\n# res = server.planarize_mesh_faces(mesh=mesh.to_data())\n# mesh.data = res['mesh']\n\nres = server.circularize_mesh_faces(mesh=mesh.to_data())\nmesh.data = res['mesh']\n\nmesh.draw()\n",
+  "language": "python",
+  "imports": [],
+  "has_docstring": false
+}

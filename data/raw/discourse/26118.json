@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/how-to-filter-points-based-on-distance-from-sphere-center/26118",
+  "topic_id": 26118,
+  "title": "How to filter points based on distance from sphere center?",
+  "question": "Hey guys, so I have a sphere and three types of curves intersecting the sphere. I have populated the curves with points and would like to filter out those points based on their distance from the spheres center. Once I filter those points (between a radius of 40 and 50 from sphereCenter) I want to randomly connect 3 points with a crv. Right now I’m not sure how to filter the list of points…\n\n\nscript below\n\n\n#Random Numbers\n#Random Lines\n\nimport rhinoscriptsyntax as rs\nimport random as rnd\n\nsphereCenter = [50,50,50]\n\nsphere = rs.AddSphere(sphereCenter,45)\n\nrs.EnableRedraw(False)\n\npts = []\n\nfor i in range(0,100):\n    #coordinates\n    x = rnd.uniform(0,100)\n    y = rnd.uniform(0,100)\n    z = rnd.uniform(0,100)\n    pt = [x,y,z]\n    \n    pts.append(pt)\n    \npl = rs.AddPolyline(pts)\ncrv = rs.AddCurve(pts)\nintpcrv = rs.AddInterpCurve(pts)\n \ncolor01 = [0,255,255]\ncolor02 = [255,0,255]\ncolor03 = [255,255,0]\n \nrs.ObjectColor(pl, color01)\nrs.ObjectColor(crv, color02)\nrs.ObjectColor(intpcrv, color03)\n\npt = []\n\npt1 = pt.append(rs.DivideCurve(pl,5000,True,True))\npt2 = pt.append(rs.DivideCurve(crv,5000,True,True))\npt3 = pt.append(rs.DivideCurve(intpcrv,5000,True,True))\n\n\n\n\n\n\n\n\n\n\n\n\n\n#rs.GetPoint(sphereCenter, [pt], 45)\n\n#if pt.x or pt.y or pt.z <= 45:\n#    rs.AddSphere([pt],5)\n#else:\n#    rs.DeleteObjects([pt])\n\n#rs.GetPointOnSurface(sphere, None)",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport random as rnd\n\n#make a real 3dPoint object for later use\nsphereCenter = rs.coerce3dpoint([50,50,50])\nsphere = rs.AddSphere(sphereCenter,45)\n#rs.EnableRedraw(False)\n\npts = []\nfor i in range(0,100):\n#coordinates\n    x = rnd.uniform(0,100)\n    y = rnd.uniform(0,100)\n    z = rnd.uniform(0,100)\n    pt = [x,y,z]\n    pts.append(pt)\n\npl = rs.AddPolyline(pts)\ncrv = rs.AddCurve(pts)\nintpcrv = rs.AddInterpCurve(pts)\n\ncolor01 = [0,255,255]\ncolor02 = [255,0,255]\ncolor03 = [255,255,0]\n\nrs.ObjectColor(pl, color01)\nrs.ObjectColor(crv, color02)\nrs.ObjectColor(intpcrv, color03)\n\ndiv_pts = []\n\n#use extend not append to keep all points in one array\ndiv_pts.extend(rs.DivideCurve(pl,5000,False,True))\ndiv_pts.extend(rs.DivideCurve(crv,5000,False,True))\ndiv_pts.extend(rs.DivideCurve(intpcrv,5000,False,True))\n\n#collect all points between 40 and 50 units from center\ngood_pts=[]\nfor pt in div_pts:\n    d=pt.DistanceTo(sphereCenter)\n    if d<50 and d>40:\n        good_pts.append(pt)\n        \n#get random sample of 3 points from above list\nthree_rnd_pts=rnd.sample(good_pts,3)\n#add first point again for closed curve\nthree_rnd_pts.append(three_rnd_pts[0])\n#make curve periodic with knotstyle=3\ncrv_thru_pts=rs.AddInterpCurve(three_rnd_pts,3,knotstyle=3)\nrs.DeleteObjects([pl,crv,intpcrv])",
+      "language": "python",
+      "author": "Helvetosaur",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "#Random Numbers\n#Random Lines\n\nimport rhinoscriptsyntax as rs\nimport random as rnd\n\nsphereCenter = [50,50,50]\n\nsphere = rs.AddSphere(sphereCenter,45)\n\nrs.EnableRedraw(False)\n\npts = []\n\nfor i in range(0,100):\n    #coordinates\n    x = rnd.uniform(0,100)\n    y = rnd.uniform(0,100)\n    z = rnd.uniform(0,100)\n    pt = [x,y,z]\n    \n    pts.append(pt)\n    \npl = rs.AddPolyline(pts)\ncrv = rs.AddCurve(pts)\nintpcrv = rs.AddInterpCurve(pts)\n \ncolor01 = [0,255,255]\ncolor02 = [255,0,255]\ncolor03 = [255,255,0]\n \nrs.ObjectColor(pl, color01)\nrs.ObjectColor(crv, color02)\nrs.ObjectColor(intpcrv, color03)\n\npt = []\n\npt1 = pt.append(rs.DivideCurve(pl,5000,True,True))\npt2 = pt.append(rs.DivideCurve(crv,5000,True,True))\npt3 = pt.append(rs.DivideCurve(intpcrv,5000,True,True))\n\n\n\n\n\n\n\n\n\n\n\n\n\n#rs.GetPoint(sphereCenter, [pt], 45)\n\n#if pt.x or pt.y or pt.z <= 45:\n#    rs.AddSphere([pt],5)\n#else:\n#    rs.DeleteObjects([pt])\n\n#rs.GetPointOnSurface(sphere, None)",
+      "language": "python",
+      "author": "Daniel_Fougere",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 5,
+  "views": 1346
+}

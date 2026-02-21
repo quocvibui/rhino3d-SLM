@@ -1,0 +1,32 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/getting-area-of-curve-inside-instance-reference/13981",
+  "topic_id": 13981,
+  "title": "Getting area of curve inside instance reference",
+  "question": "I have the following code and need to know what the method is for getting the area of a closed, planar curve inside a block in order to record it as User Data.\n\n\n        Rhino.DocObjects.ObjRef objref;\n        var rc = Rhino.Input.RhinoGet.GetOneObject(\"Select instance\", false, Rhino.DocObjects.ObjectType.InstanceReference, out objref);\n        if (rc != Rhino.Commands.Result.Success)\n            return rc;\n        var iref = objref.Object() as Rhino.DocObjects.InstanceObject;\n        if (iref != null)\n        {\n            var idef = iref.InstanceDefinition;\n            if (idef != null)\n            {\n                var rhino_objects = idef.GetObjects();\n                for (int i = 0; i < rhino_objects.Length; i++)\n                    if ((rhino_objects[i].Geometry).ObjectType == Rhino.DocObjects.ObjectType.Curve)\n                    {\n                        if ((((Rhino.DocObjects.CurveObject)(rhino_objects[i])).CurveGeometry).IsClosed)\n                        {\n                            if (rhino_objects[i].Attributes.LayerIndex == LayerIndexOf(\"Cut\"))\n                            {\n                                if (((Rhino.Geometry.PolyCurve)(rhino_objects[i].Geometry)).IsPlanar())\n                                {\n                                    //What method to I place here to get the area of this closed curve?  <----- my question.\n                                }\n                            }\n                        }\n                    }\n            }\n        }\n        return Rhino.Commands.Result.Success;\n    }",
+  "code_blocks": [
+    {
+      "code": "curveToTest = this closed curve\nareaMassProps = Rhino.Geometry.AreaMassProperties.Compute(curveToTest)\ncurveArea = areaMassProps.Area",
+      "language": "unknown",
+      "author": "gmacarchitect",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "Rhino.DocObjects.ObjRef objref;\n        var rc = Rhino.Input.RhinoGet.GetOneObject(\"Select instance\", false, Rhino.DocObjects.ObjectType.InstanceReference, out objref);\n        if (rc != Rhino.Commands.Result.Success)\n            return rc;\n        var iref = objref.Object() as Rhino.DocObjects.InstanceObject;\n        if (iref != null)\n        {\n            var idef = iref.InstanceDefinition;\n            if (idef != null)\n            {\n                var rhino_objects = idef.GetObjects();\n                for (int i = 0; i < rhino_objects.Length; i++)\n                    if ((rhino_objects[i].Geometry).ObjectType == Rhino.DocObjects.ObjectType.Curve)\n                    {\n                        if ((((Rhino.DocObjects.CurveObject)(rhino_objects[i])).CurveGeometry).IsClosed)\n                        {\n                            if (rhino_objects[i].Attributes.LayerIndex == LayerIndexOf(\"Cut\"))\n                            {\n                                if (((Rhino.Geometry.PolyCurve)(rhino_objects[i].Geometry)).IsPlanar())\n                                {\n                                    //What method to I place here to get the area of this closed curve?  <----- my question.\n                                }\n                            }\n                        }\n                    }\n            }\n        }\n        return Rhino.Commands.Result.Success;\n    }",
+      "language": "csharp",
+      "author": "cestes001",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "layers",
+    "rhinocommon",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 8,
+  "views": 2356
+}

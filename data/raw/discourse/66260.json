@@ -1,0 +1,27 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/init-takes-exactly-2-arguments-3-given/66260",
+  "topic_id": 66260,
+  "title": "__init__() takes exactly 2 arguments (3 given)",
+  "question": "Hi, I am trying to create a 2d array that access points with two value [i][j]\n\nBut I am getting this error message: \ninit\n() takes exactly 2 arguments (3 given)\n\ncould you give me a hint about the problem?\n\nIf needed, I can send the rest of the script.\n\nthanks\n\n\nclass Network():\n    def __init__(self, points, stiffness):\n        self.stiffness=stiffness \n        self.nodes=[]\n        self.points = points\n        for point_row in self.points:\n            nodes_row = []\n            for point in point_row:\n                nodes_row.append(Node(point,True))\n            self.nodes.append(nodes_row)\n        self.uniformforce = rg.Vector3d(0,0,0)\n        self.calculate_neighbours()\n        self.calculate_desired_distance()",
+  "code_blocks": [
+    {
+      "code": "<import rhinoscriptsyntax as rs\nimport Rhino.Geometry as rg\nimport Rhino\nimport System\nimport scriptcontext\nimport random\nimport math\nclass Network():\n    def __init__(self, points):\n        self.nodes=[]\n        self.points = points\n        for point_row in self.points:\n            nodes_row = []\n            for point in point_row:\n                nodes_row.append(Node(point,True))\n            self.nodes.append(nodes_row)\n        self.calculate_neighbours()\n        self.calculate_desired_distance()\n    def calculate_neighbours(self):\n        for i in range(len(self.nodes)):\n            for j in range(len(self.nodes[i])):\n                #orthogonal neighbours\n                try:\n                    self.nodes[i][j].node_neighbours.append(self.nodes[i+1][j])\n                except:\n                    pass\n                try:\n                    if i-1 >= 0:\n                        self.nodes[i][j].node_neighbours.append(self.nodes[i-1][j])\n                except:\n                    pass\n                try:\n                    self.nodes[i][j].node_neighbours.append(self.nodes[i][j+1])\n                except:\n                    pass\n                try:\n                    if j-1 >= 0:\n                        self.nodes[i][j].node_neighbours.append(self.nodes[i][j-1])\n                except:\n                    pass\n                #diagonal neighbours\n                try:\n                    self.nodes[i][j].node_neighbours.append(self.nodes[i+1][j+1])\n                except:\n                    pass\n                try:\n                    if j-1 >= 0:\n                        self.nodes[i][j].node_neighbours.append(self.nodes[i+1][j-1])\n                except:\n                    pass\n                try:\n                    if i-1 >= 0:\n                        self.nodes[i][j].node_neighbours.append(self.nodes[i-1][j+1])\n                except:\n                    pass\n                try:\n                    if (i-1 >= 0) and (j-1 >= 0):\n                        self.nodes[i][j].node_neighbours.append(self.nodes[i-1][j-1])\n                except:\n                    pass\n    def calculate_desired_distance(self):\n        for i in range(len(self.nodes)):\n            for j in range(len(self.nodes[i])):\n                for k, neighbour in enumerate(self.nodes[i][j].node_neighbours):\n                    distance=rs.Distance(neighbour.pos, (self.nodes[i][j]).pos)\n                    self.nodes[i][j].desired_distances.append(distance)\nclass Node:\n    def __init__(self,position):\n        self.pos=position\n        self.node_neighbours=[]\n        self.desired_distances =[]\n        self.force=rg.Vector3d(0,0,0)\n\ncurves = rs.GetObjects('Select boundary curves', 4)\ndiv=10\npoints = []\nlines=[]\nfor j in range (len(curves)-1):\n    first_points = rs.DivideCurve(curves[j], div)\n    second_points = rs.DivideCurve(curves[j+1], div)\n    for i in range(div+1):\n        line = rs.AddLine(first_points[i],second_points[i])\n        lines.append(line)\n    for line in lines:\n        row_points = rs.DivideCurve(line, div)\n        points.append(row_points)\n        \nnetwork = Network(points)\nprint network.desired_distances>",
+      "language": "python",
+      "author": "mimosapudica",
+      "post_number": 3,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 4,
+  "views": 2448
+}

@@ -1,0 +1,40 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/basic-question-what-is-rhino-scriptcontext-when-we-typing-import-rhino-import-scriptcontext/126131",
+  "topic_id": 126131,
+  "title": "Basic question: What is 'Rhino' & 'scriptcontext' when we typing 'import rhino' & 'import scriptcontext'?",
+  "question": "Hi guys, I\nm just starting to learn rhino python. Recently i\nve read some python script in the forum, and notice that sometime we need to import rhino and scriptcontext. What are these files? Where could I find  introduction about these 2 files?\n\n\nI only find introduction about importing Rhinoscriptsyntax in this page:\n\n\nhttps://developer.rhino3d.com/guides/rhinopython/python-rhinoscriptsyntax-introduction/\n\n\nBut nothing about importing rhino and scriptcontex. Is it a must-have before scripting everytime? Or we do it when needed?\n\n\nIf it is a ‘do-when-needed’,then when do we need to import them and what function they have? Could ‘Rhinoscriptsyntax’ replace both/either of them?\n\n\nMany thanks",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport inspect\n\nprint inspect.getsource(rs.AddPoint)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "def AddPoint(point, y=None, z=None):\n    \"\"\"Adds point object to the document.\n    Parameters:\n      point (point): a point3d or list(x,y,z) location of point to add\n    Returns:\n      guid: identifier for the object that was added to the doc\n    Example:\n      import rhinoscriptsyntax as rs\n      rs.AddPoint( (1,2,3) )\n    See Also:\n      IsPoint\n      PointCoordinates\n    \"\"\"\n    if y is not None: point = Rhino.Geometry.Point3d(point, y, z or 0.0)\n    point = rhutil.coerce3dpoint(point, True)\n    rc = scriptcontext.doc.Objects.AddPoint(point)\n    if rc==System.Guid.Empty: raise Exception(\"unable to add point to document\")\n    scriptcontext.doc.Views.Redraw()\n    return rc",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": true
+    },
+    {
+      "code": "import scriptcontext as sc\n\nprint(sc.__file__)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": true
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 3,
+  "posts_count": 9,
+  "views": 1847
+}

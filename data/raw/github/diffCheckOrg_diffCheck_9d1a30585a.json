@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/diffCheckOrg/diffCheck/blob/8f668b1f273e8d81a282c6115ba3eae07eef9235/src/gh/components/DF_load_mesh_from_file/code.py",
+  "repo": "diffCheckOrg/diffCheck",
+  "repo_stars": 15,
+  "repo_description": "diffCheck is a CAD-integrated tool for evaluating digital timber fabrication processes.",
+  "license": "GPL-3.0",
+  "filepath": "src/gh/components/DF_load_mesh_from_file/code.py",
+  "instruction": null,
+  "code": "#! python3\n\n\nimport Rhino.Geometry as rg\nfrom ghpythonlib.componentbase import executingcomponent as component\n\n\nfrom diffCheck import diffcheck_bindings\nfrom diffCheck import df_cvt_bindings\n\nclass DFLoadMeshFromFile(component):\n    def RunScript(self,\n        i_path: str,\n        i_scalef: float) -> rg.Mesh:\n        # import and convert to Rhino Mesh\n        df_mesh = diffcheck_bindings.dfb_geometry.DFMesh()\n        df_mesh.load_from_PLY(i_path)\n        rh_mesh = df_cvt_bindings.cvt_dfmesh_2_rhmesh(df_mesh)\n\n        # scale  if needed\n        centroid = rh_mesh.GetBoundingBox(True).Center\n        x_form_scale = rg.Transform.Scale(centroid, i_scalef)\n        rh_mesh.Transform(x_form_scale)\n\n        return [rh_mesh]\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "ghpythonlib"
+  ],
+  "has_docstring": false
+}

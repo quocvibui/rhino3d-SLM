@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rs-explodecurves-has-different-behavior-than-explode-rhino-command/142350",
+  "topic_id": 142350,
+  "title": "rs.ExplodeCurves has different behavior than Explode Rhino command?",
+  "question": "I am writing a python script that makes use of the ExplodeCurves command in rhinoscriptsyntax. However I noticed that the command does not give the same result as when I go through the process manually.\n\nIf you use the attached file and dummy script, you will see that calling the Explode command in Rhino will return 6 curves. While using the python script only returns 2 curves.\n\nIs this intentional? If so what am I missing?\n\n\nExplodeCurve.3dm\n (22.8 KB)\n\n\nExplodeCurve.py\n (119 Bytes)",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext as sc\n\ndef test_explode_curve():\n    # Pick a single curve object\n    filter = Rhino.DocObjects.ObjectType.Curve\n    rc, objref = Rhino.Input.RhinoGet.GetOneObject(\"Select curve to explode\", False, filter)\n    if not objref or rc != Rhino.Commands.Result.Success: \n        return\n    \n    # Get the selected Rhino object\n    rh_obj = objref.Object()\n    if not rh_obj:\n        return\n    \n    # Get the sub0objects\n    sub_objs = rh_obj.GetSubObjects()\n    if not sub_objs:\n        return\n    \n    # Add the sub-object geometry\n    for sub_obj in sub_objs:\n        sc.doc.Objects.Add(sub_obj.Geometry)\n    sc.doc.Objects.Delete(rh_obj)\n    sc.doc.Views.Redraw();\n\nif __name__ == \"__main__\":\n    test_explode_curve()",
+      "language": "python",
+      "author": "dale",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 3,
+  "views": 703
+}

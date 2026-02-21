@@ -1,0 +1,63 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/python-script-advice/152270",
+  "topic_id": 152270,
+  "title": "Python Script Advice",
+  "question": "I’m new to Python scripting and managed to get together a few scripts that work, but I’m wondering if there might be a better way to implement them or if this is the way it should be done.  If there is a better way to do things, then learning about it now would be better than writing tons of scripts in ways that could be better, so now is the time to learn.\n\n\nThis script is meant to export a selection to an Iges file.  What I am selecting as input to this are some blocks as well as some things not in a block.  The blocks are nested and there are some text objects inside one of the nested blocks that I need to explode before exporting, otherwise It doesn’t get exported because the Iges file format has no way to store text.\n\n\nWhat I have been doing by hand is exploding 3 times, and that gets the text exploded, then exporting my file, then undoing 4 times… once to undo the export, which really does nothing, because the file has been created, and 3 more times to undo the 3 explodes.\n\n\nSo, I quickly found out a few things…\n\n\n\n\nUndo from inside a python script is either completely impossible, or very difficult.\n\n\nUndo after running a script undoes everything that happened in the script.\n\n\nRunning anything after a script with a button doesn’t work\n\n\n\n\nso my initial thought was that it would be GREAT to just undo the entire script… then I can do whatever I want, not bother to keep track of anything or make it complicated, get my file exported, then just do one undo and everything gets undone.\n\nI do something similar in rhino all the time, I do a BlockEdit, then do whatever I want to the contents of the block to extract various geometry, and completely destroy everything in there to get what I want, copy what I want to the clipboard, then hit the X on the BlockEdit, and poof, nothing I did in there mattered at all… then Paste.\n\nSo since undoing an Export really does nothing, because the file is saved already, I can just undo my entire script, and everything is great.   So I ...",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef extract(obj):\n    objs = obj.GetSubObjects()\n    for o in objs:\n        if type (o) == Rhino.DocObjects.InstanceObject:\n            o = extract(o)\n        else:\n            array_objs.append(o)\n\nobjs = sc.doc.Objects\narray_objs = []\nfor obj in objs:\n    if type(obj) == Rhino.DocObjects.InstanceObject:\n        extract(obj)\n    else:\n        array_objs.append(obj)\nrs.EnableRedraw(False)        \nrs.UnselectAllObjects()\nfor obj in array_objs:\n    rs.SelectObject(sc.doc.Objects.Add(obj.Geometry))\nrs.Command(\"-_Export d:\\\\test.igs Enter\")\nrs.Command(\"_Delete\")\nrs.EnableRedraw(True)",
+      "language": "python",
+      "author": "Gijs",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef SelObjsLayerAndSubs(layer):\n    rs.ObjectsByLayer(layer, True)\n    subLayers = rs.LayerChildren(layer)\n    if(subLayers):\n        #layer has one or more sublayers\n        for sLayer in subLayers:\n            #recurse\n            SelObjsLayerAndSubs(sLayer)\n\ndef ExportProcedure(ExportType):\n    #Restore Layer state\n    plugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\n    if plugin is not None:\n        if ExportType == \"Drill\":\n            plugin.RestoreLayerState(\"Wall Notch\")\n            rs.ObjectsByLayer(\"Drill Alignment\", True)        \n        if ExportType == \"Cut\":\n            plugin.RestoreLayerState(\"Compound Miter\")\n            SelObjsLayerAndSubs(\"Containment\")\n    rs.Command(\"_CopyToClipboard\")\n    rs.UnselectAllObjects()\n    rs.Command(\"_Paste\")\n    rs.Command(\"_Explode\")\n    rs.Command(\"_Explode\")\n    rs.Command(\"_Explode\")\n    if ExportType == \"Drill\":\n        folder = r'M:\\CNC_Data\\Struts\\Drill\\2x4\\Iges Files'\n    else:\n        folder = r'M:\\CNC_Data\\Struts\\Cut\\2x4\\Iges Files'\n    name = rs.DocumentName()\n    name = name.replace('Strut 2x4 ', '')\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    if PrintExportDetails:\n        print path\n    rs.Command(\"_-Export _Pause \\\"{0}\\\" _Enter\".format(path))\n    rs.Command(\"_Delete\")\n\ndef SelectZone(Zone):\n    objs = sc.doc.Objects\n    array_objs = []\n    for obj in objs:\n        if rs.IsBlockInstance(obj):\n            array_objs.append(obj)\n            if PrintSelectDetails:\n                print(obj)\n                print(rs.BlockInstanceName(obj))\n                print(rs.BlockInstanceInsertPoint(obj))\n                print(\"rs.BlockInstanceInsertPoint(obj) = \",rs.BlockInstanceInsertPoint(obj))\n                print(\"(-3.4,0,0) = \",Rhino.Geometry.Point3d(-3.4,0,0))\n            if rs.BlockInstanceInsertPoint(obj) == Rhino.Geometry.Point3d(-3.4,0,0):\n                if PrintSelectDetails:\n                    print (\"Left Zone\")\n                if Zone == \"Left\":\n                   rs.SelectObject(obj)\n            else:\n                if rs.BlockInstanceInsertPoint(obj) == Rhino.Geometry.Point3d(0,0,0):\n                    if PrintSelectDetails:\n                        print (\"Right Zone\")\n                    if Zone == \"Right\":\n                        rs.SelectObject(obj)\n                else:\n                    if PrintSelectDetails:\n                        print (\"Other Block Ignored\")\ndef ExportEverything():\n    rs.Command(\"_Save\")\n    rs.UnselectAllObjects()\n    SelectZone(\"Left\")\n    ExportProcedure(\"Drill\")\n    rs.UnselectAllObjects()\n    SelectZone(\"Left\")\n    SelectZone(\"Right\")\n    ExportProcedure(\"Cut\")\n    rs.UnselectAllObjects()\n    rs.Command(\"_-Revert\")\n\nPrintSelectDetails = False\nPrintExportDetails = True\nExportEverything();",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 16,
+      "is_solution": false
+    },
+    {
+      "code": "rs.Command(\"_CopyToClipboard\")\n    rs.Command(\"_-Layer _On * _Enter \")\n    rs.Command(\"_SelAll\")\n    rs.Command(\"_Lock\")\n    rs.Command(\"_Paste\")\n...\n   #Explode things, do whatever to get my export done#\n...\n    rs.Command(\"_-Layer _On * _Enter \")\n    rs.Command(\"_SelAll\")\n    rs.Command(\"_Delete\")\n    rs.Command(\"_Unlock\")",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\n\ndef SelObjsLayerAndSubs(layer):\n    rs.ObjectsByLayer(layer, True)\n    subLayers = rs.LayerChildren(layer)\n    if(subLayers):\n        #layer has one or more sublayers\n        for sLayer in subLayers:\n            #recurse\n            SelObjsLayerAndSubs(sLayer)\n\ndef RestoreLayerState(LayerStateName):\n    #Restore Layer state\n    plugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\n    if plugin is not None:\n        plugin.RestoreLayerState(LayerStateName)\n\ndef ExportProcedure(ExportType):\n    if ExportType == \"Drill\":\n        RestoreLayerState(\"Wall Notch\")\n        rs.ObjectsByLayer(\"Drill Alignment\", True)        \n    if ExportType == \"Cut\":\n        RestoreLayerState(\"Compound Miter\")\n        SelObjsLayerAndSubs(\"Containment\")\n    rs.Command(\"_CopyToClipboard\")\n    rs.Command(\"_-Layer _On * _Enter \")\n    rs.Command(\"_SelAll\")\n    rs.Command(\"_Lock\")\n    rs.Command(\"_Paste\")\n    rs.Command(\"_Explode\")\n    rs.Command(\"_Explode\")\n    rs.Command(\"_Explode\")\n    if ExportType == \"Drill\":\n        rs.Command(\"_Move -3.4,0 3.5,0\")\n        rs.Command(\"_Rotate3D 0 0,100 90\")\n        folder = r'M:\\CNC_Data\\Struts\\Drill\\2x4\\Iges Files'\n    else:\n        folder = r'M:\\CNC_Data\\Struts\\Cut\\2x4\\Iges Files'\n    name = rs.DocumentName()\n    name = name.replace('Strut 2x4 ', '')\n    name = name.replace('Strut 2x6 ', '')\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    if PrintExportDetails:\n        print path\n    rs.Command(\"_-Export _Pause \\\"{0}\\\" _Enter\".format(path))\n    rs.Command(\"_-Layer _On * _Enter \")\n    rs.Command(\"_SelAll\")\n    rs.Command(\"_Delete\")\n    rs.Command(\"_Unlock\")\n\ndef SelectZone(Zone):\n    objs = sc.doc.Objects\n    array_objs = []\n    for obj in objs:\n        if rs.IsBlockInstance(obj):\n            array_objs.append(obj)\n            if PrintSelectDetails:\n                print(obj)\n                print(rs.BlockInstanceName(obj))\n                print(rs.BlockInstanceInsertPoint(obj))\n                print(\"rs.BlockInstanceInsertPoint(obj) = \",rs.BlockInstanceInsertPoint(obj))\n                print(\"(-3.4,0,0) = \",Rhino.Geometry.Point3d(-3.4,0,0))\n            if rs.BlockInstanceInsertPoint(obj) == Rhino.Geometry.Point3d(-3.4,0,0):\n                if PrintSelectDetails:\n                    print (\"Left Zone\")\n                if Zone == \"Left\":\n                   rs.SelectObject(obj)\n            else:\n                if rs.BlockInstanceInsertPoint(obj) == Rhino.Geometry.Point3d(0,0,0):\n                    if PrintSelectDetails:\n                        print (\"Right Zone\")\n                    if Zone == \"Right\":\n                        rs.SelectObject(obj)\n                else:\n                    if PrintSelectDetails:\n                        print (\"Other Block Ignored\")\ndef ExportEverything():\n    #rs.Command(\"_Save\")\n    rs.UnselectAllObjects()\n    SelectZone(\"Left\")\n    ExportProcedure(\"Drill\")\n    rs.UnselectAllObjects()\n    SelectZone(\"Left\")\n    SelectZone(\"Right\")\n    ExportProcedure(\"Cut\")\n    rs.UnselectAllObjects()\n    RestoreLayerState(\"Compound Miter\")\n    #rs.Command(\"_-Revert\")\n\nPrintSelectDetails = False\nPrintExportDetails = True\nExportEverything();",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 20,
+      "is_solution": false
+    },
+    {
+      "code": "! _-RunPythonScript (\nimport System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Drill():\n    #Restore Layer state\n    plugin = rs.GetPlugInObject(\"Rhino Bonus Tools\")\n    if plugin is not None:\n        plugin.RestoreLayerState(\"Wall Notch\")\n    script = \"_-SelLayer \\\"{0}\\\" _Enter\".format(\"Drill Alignment\")\n    Rhino.RhinoApp.RunScript(script, True)\n    script = \"_-Explode\"\n    Rhino.RhinoApp.RunScript(script, True)\n    Rhino.RhinoApp.RunScript(script, True)\n    Rhino.RhinoApp.RunScript(script, True)\n    folder = r'M:\\CNC_Data\\Drill\\2x4'\n    name = rs.DocumentName()\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    print path\n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\n    Rhino.RhinoApp.RunScript(script, True)\n\nExport_Drill()\n)\nUndo",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 1,
+      "is_solution": false
+    },
+    {
+      "code": "import System\nimport Rhino\nimport rhinoscriptsyntax as rs\n\ndef Export_Cut():\n    script = \"_-CopyToClipboard\"\n    Rhino.RhinoApp.RunScript(script, True)\n    script = \"_-SelNone\"\n    Rhino.RhinoApp.RunScript(script, True)\n    script = \"_-Paste\"\n    Rhino.RhinoApp.RunScript(script, True)\n    script = \"_-Explode\"\n    Rhino.RhinoApp.RunScript(script, True)\n    Rhino.RhinoApp.RunScript(script, True)\n    Rhino.RhinoApp.RunScript(script, True)\n    folder = r'M:\\CNC_Data\\Cut\\2x4'\n    name = rs.DocumentName()\n    extension = \".igs\"\n    path = System.IO.Path.Combine(folder, name)\n    path = System.IO.Path.ChangeExtension(path, extension)\n    print path\n    script = \"_-Export _Pause \\\"{0}\\\" _Enter\".format(path)\n    Rhino.RhinoApp.RunScript(script, True)\n    script = \"_-Delete\"\n    Rhino.RhinoApp.RunScript(script, True)\nExport_Cut()",
+      "language": "python",
+      "author": "James_Richters",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "layers",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "transformation"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 37,
+  "views": 2012
+}

@@ -1,0 +1,39 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/test-host-process-crash-when-running-multiple-tests/201259",
+  "topic_id": 201259,
+  "title": "Test host process crash when running multiple tests",
+  "question": "Hi,\n\n\nI am developing my custom rhino plugin and am setting up the automated tests for the various features. I am encountering a problem with the testing environment where I can run smoothly each test one by one without failure, I can even run some tests grouped at once but if I group too many of them or try to run all tests the process freezes at some point and crashes with the enigmatic message “[Error] The active test run was aborted. Reason: Test host process crashed” …\n\n\n\n\nAny idea on how to solve this ?\n\n\nCould this be related to RhinoDoc.ActiveDoc usage on several tests ? I was also wondering if there is a safe way to clean the ActiveDoc between tests when running multiple tests, since some of them are testing the serialisation of my plugin (through Read/WriteDocument) I kind of need to go with ActiveDoc save/Open right ?\n\n\n\n\nI am using Rhino.Testing package and correctly (hopefully) using RhinoSetupFixture and RhinoTestFixture.\n\n\nThanks for your help",
+  "code_blocks": [
+    {
+      "code": "[Test]\npublic void MyFirstTest()\n{\n    // do stuff\n    string file = \"myoutput.3dm\";\n    // test save\n    Rhino.RhinoDoc.ActiveDoc.SaveAs(file);\n    // some tests\n    // test reload with mycustomplugin ReadDocument being called (that's what I want to test)\n    Rhino.RhinoDoc.Open(file, out bool _);\n    // some tests\n}\n\n[Test]\npublic void MySecondTest()\n{\n    //do stuff and load files using File3dm.Read\n    // usually crashes after some files have been read but not all, if I read only file there is no crash ...\n}",
+      "language": "csharp",
+      "author": "thomas.pitiot",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Settings>\n  <RhinoSystemDirectory>C:\\Program Files\\Rhino 8\\System</RhinoSystemDirectory>\n  <LoadRDK>true</LoadRDK>\n  <LoadGrasshopper>false</LoadGrasshopper>\n  <CreateRhinoView>false</CreateRhinoView>\n\t<LoadPlugins>\n\t\t<Plugin Location=\"Plug-ins\\Commands.rhp\"/>\n\t</LoadPlugins>\n</Settings>",
+      "language": "unknown",
+      "author": "thomas.pitiot",
+      "post_number": 7,
+      "is_solution": false
+    },
+    {
+      "code": "[05/05/2025 10:45:41.894 ] [Error] Fatal error. System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt.\n[05/05/2025 10:45:41.896 ] [Error] Repeat 2 times:\n[05/05/2025 10:45:41.897 ] [Error] --------------------------------\n[05/05/2025 10:45:41.899 ] [Error]    at UnsafeNativeMethods.CRhinoDoc_Delete(UInt32)\n[05/05/2025 10:45:41.902 ] [Error] --------------------------------\n[05/05/2025 10:45:41.903 ] [Error]    at Rhino.RhinoDoc.Finalize()",
+      "language": "unknown",
+      "author": "thomas.pitiot",
+      "post_number": 8,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 11,
+  "views": 544
+}

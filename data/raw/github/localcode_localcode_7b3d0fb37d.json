@@ -1,0 +1,15 @@
+{
+  "source_url": "https://github.com/localcode/localcode/blob/3089aee227d257adc856021a4e1eb678d9527f50/rhinopostsites.py",
+  "repo": "localcode/localcode",
+  "repo_stars": 4,
+  "repo_description": "Code repository for the local code project",
+  "license": "unknown",
+  "filepath": "rhinopostsites.py",
+  "instruction": "Standard library imports",
+  "code": "# Standard library imports\nimport json\n\n# home-baked imports\nfrom rhinopythonscripts.GeoJson2Rhino import *\n\nclass RhinoFeature():\n    def __init__(self, geometry, attributes):\n        self.geom = geometry\n        self.att = attributes\n\n    def asTuple(self):\n        return (self.geom, self.att)\n\nclass Layer(object):\n    \"\"\"Used to hold information about individual layers.\"\"\"\n    def __init__(self, name):\n        self.name = name\n        self.name_in_db = name\n        self.cols = None\n        self.features = []\n        self.color = None\n        self.zColumn = None\n        self.geoJson = None\n\n    def __unicode__(self):\n        return 'Layer: %s' % self.name\n\n    def __str__(self):\n        return unicode(self).encode('utf-8')\n\n\nclass Site(object):\n    \"\"\"Used to hold information about individual sites.\"\"\"\n    def __init__(self, id):\n        self.id = None\n        self.layers = []\n        self.siteLayer = None\n        self.terrainLayer = None\n        self.connection = None\n        self.json = None\n\n    def __unicode__(self):\n        return 'Site: id=%s' % self.id\n\n    def __str__(self):\n        return unicode(self).encode('utf-8')\n\ndef buildSiteLayer(rawLayer):\n    layer = Layer(rawLayer['name'])\n    if 'color' in rawLayer: # get the color if it exists\n        layer.color = rlayer['color']\n    jsonFeatures = rawLayer['contents']['features']\n    for jsonFeature in jsonFeatures:\n        # jsonToRhinoCommon comes from\n        # rhinopythonscripts.GeoJson2Rhino\n        geom = jsonToRhinoCommon(jsonFeature)\n        att = jsonFeature['properties']\n        rhFeature = RhinoFeature(geom, att)\n        layer.features.append(rhFeature)\n    return layer\n\ndef buildSite(id, layerCollection):\n    site = Site(id)\n    for rLayer in layerCollection['layers']:\n        if len(rLayer['contents']['features']):\n            site.layers.append(buildSiteLayer(rLayer))\n    return site\n\ndef jsonsToPostSites(jsonSiteDict):\n    sites = []\n    for idKey in jsonSiteDict:\n        layerColl = json.loads(jsonSiteDict[idKey])\n        site = buildSite(idKey, layerColl)\n        sites.append(site)\n    return sites\n\n\n",
+  "language": "python",
+  "imports": [
+    "RhinoCommon"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/CADacombs/rhinopython/blob/541b4ade49f1dda6a3861d12b9e2613405182082/spb_GetObjDrawColor.py",
+  "repo": "CADacombs/rhinopython",
+  "repo_stars": 37,
+  "repo_description": "Python scripts for Rhinoceros (Rhino, Rhino3D).",
+  "license": "LGPL-3.0",
+  "filepath": "spb_GetObjDrawColor.py",
+  "instruction": "Per https://developer.rhino3d.com/api/rhinocommon/rhino.docobjects.objectattributes/drawcolor\r\n\"object's draw color, which is based on the object's color source\"\r\n\r\nThis is not the ObjectColor of the...",
+  "code": "\"\"\"\r\nPer https://developer.rhino3d.com/api/rhinocommon/rhino.docobjects.objectattributes/drawcolor\r\n\"object's draw color, which is based on the object's color source\"\r\n\r\nThis is not the ObjectColor of the RhinoObject when ColorSource is one of\r\nColorFromLayer, ColorFromMaterial, or ColorFromParent\r\n\"\"\"\r\n\r\n#! python 2  Must be on a line less than 32.\r\nfrom __future__ import absolute_import, division, print_function, unicode_literals\r\n\r\n\"\"\"\r\n150830: Created, starting with SetObjectColor.py.\r\n170926: Changed file name from getObjectColor.py to listObjectColor.py.\r\n171003: Added ColorSource to output.\r\n250922: Now, prints name of color in NamedColorList instead of from System.Drawing.Color.\r\n\"\"\"\r\n\r\nimport Rhino\r\nimport rhinoscriptsyntax as rs\r\n\r\n\r\ndef getStringFromColor(color):\r\n\r\n    sKnownColor = color.ToKnownColor().ToString()\r\n\r\n    # '0' is returned from ToKnownColor when color is not named.\r\n    if sKnownColor == '0':\r\n        return \"({} {} {})\".format(color.R, color.G, color.B)\r\n\r\n    return sKnownColor\r\n\r\n\r\ndef _tryFindRhinoColorName(color):\r\n    for rh_UI_NamedColor in Rhino.UI.NamedColorList.Default:\r\n        if rh_UI_NamedColor.Color == color:\r\n            return \"{} ({} {} {})\".format(\r\n                rh_UI_NamedColor.Name,\r\n                color.R,\r\n                color.G,\r\n                color.B)\r\n    return \"({} {} {})\".format(\r\n        color.R,\r\n        color.G,\r\n        color.B)\r\n\r\n\r\ndef main():\r\n\r\n    gObjs = rs.GetObjects(\"Select objects to list their colors\", preselect=True, select=True)\r\n    if gObjs is None: return\r\n\r\n    colorsFound = []\r\n\r\n    for gObj in gObjs:\r\n        rdObj = rs.coercerhinoobject(gObj)\r\n\r\n        colorDisplayed = rs.ObjectColor(gObj)\r\n        sColorDisplayed = _tryFindRhinoColorName(colorDisplayed)\r\n        #sColorDisplayed = getStringFromColor(colorDisplayed)\r\n\r\n        colorSource = rdObj.Attributes.ColorSource.ToString()\r\n\r\n        if (sColorDisplayed, colorSource) not in colorsFound:\r\n            colorsFound.append((sColorDisplayed, colorSource))\r\n\r\n    for a,b in colorsFound:\r\n        print(a, b)\r\n\r\n\r\nif __name__ == '__main__': main()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "rhinoscriptsyntax"
+  ],
+  "has_docstring": true
+}

@@ -1,0 +1,28 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/launching-a-python-http-server-from-gh-python-without-blocking/164123",
+  "topic_id": 164123,
+  "title": "Launching a Python HTTP server from GH Python without blocking",
+  "question": "Hi Guys,\n\n\nFurther to my web browser based UI proof of concept thread:\n\n\n\n\n\n\n\n\n\n\nRhino Web Browser as UI for GH - proof of concept\n \nGrasshopper\n\n\n\n\n\n    There is no such thing as a perfect plugin. it is better to write all the necessary Eto UI tools yourself in C#.\n  \n\n\n\n\nI’ve managed to borrow a Mac Mini from a friend to test/develop for cross platform and I’ve had my first attempts to get a HTML UI up and running.\n\n\nMy code launches a web browser from Rhino fine on MacOS, but the server is not working.\n\n\nWhat it looks like the Bengesht http server components are not compatible with MacOS - which is not a surprise as they are really older than the MacOS Rhino.\n\n\nNot so much of an issue, as I think I can roll my own simple http server in Iron Python.\n\n\nI have run into a road block tho - when I launch a python http server from a GH Python component both Rhino and Grasshopper cease to be responsive.\n\n\nBy checking the local host port from Chrome I can confirm that the server is running:\n\n\nImage 828\n1146×882 135 KB\n\n\nDoes anyone know a way of launching a python http server from GH Python and having it running in the background? I’ve looked at Threads in Iron Python and this looks like maybe where to head, but getting ‘live’ data from the server might be an issue?\n\n\nWould love your input if you have some ideas.\n\n\nCheers\n\n\nDK\n\n\nimport SimpleHTTPServer\nimport SocketServer\n\nPORT = 8000\n\nHandler = SimpleHTTPServer.SimpleHTTPRequestHandler\n\nhttpd = SocketServer.TCPServer((\"\", PORT), Handler)\n\nprint \"serving at port\", PORT\nhttpd.serve_forever()",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport SimpleHTTPServer\nimport SocketServer\nimport thread\n\nPORT = 8010\n\nrs.MessageBox(\"main_thread\")\n\nimport thread\n\ndef my_server(new_port):\n\n    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler\n    \n    httpd = SocketServer.TCPServer((\"\", PORT), Handler)\n    \n    rs.MessageBox(\"serving at \" + str(new_port))\n    \n    httpd.serve_forever()\n\n\nid = thread.start_new_thread(my_server, (PORT,))\n\nprint id",
+      "language": "python",
+      "author": "kiteboardshaper",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinoscriptsyntax",
+    "ui"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 2,
+  "views": 1200
+}

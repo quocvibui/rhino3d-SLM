@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/grouping-lines-that-connect/108958",
+  "topic_id": 108958,
+  "title": "Grouping lines that connect",
+  "question": "Dear people I really need your help on this one,\n\n\nI am trying to group different sets of lines inside of a polygon.\n\nAs shown in example picture, in this case there are 5 lines. These lines could be grouped into two groups where the lines in the groups have connecting endpoints.\n\n\ngroup 1: containing line 0,1,2\n\ngroup 2: containing line 3,4\n\n\nI already started on the definition but am unable to finish it. I got so far as to define which line indices are connected in list shown on the picture (each branch shows two connected lines).\n\n\nI am suspecting the solution has to do something with \nset union\n but I cant get it to work\n\n\nI attached my script with internalised data\n\n\n\n\nQuestion\n1541×648 79.7 KB\n\n\n\n\nQuestion.gh\n (14.1 KB)\n\n\nKind regards,\n\nDaniel",
+  "code_blocks": [
+    {
+      "code": "\"\"\"Groups curves that are connected at their end points\n    Inputs:\n        Curves: A list of curves to group\n    Output:\n        Groups: A tree with connected curves in each branch.\"\"\"\n\n\n__author__ = \"p1r4t3b0y\"\n__email__ = \"p1r4t3b0y@gmail.com\"\n__version__ = \"0.0.1\"\n\n\nghenv.Component.Name = \"Group Connected Curves\"\nghenv.Component.NickName = \"GroupCrv\"\n\n# ------------------------------------------------------------------------------\n\nimport Rhino.Geometry as rg\nfrom ghpythonlib import treehelpers\n\n\nsampled = []\ngroups = []\nt = 0.01\n\nfor i in xrange(len(Curves)):\n    \n    if i in sampled:\n        continue\n    \n    groups.append([Curves[i]])\n    sampled.append(i)\n    \n    for j in xrange(len(Curves)):\n        if j in sampled:\n            continue\n        if Curves[i].PointAtStart.DistanceTo(Curves[j].PointAtStart) < t:\n            groups[-1].append(Curves[j])\n            sampled.append(j)\n        elif Curves[i].PointAtStart.DistanceTo(Curves[j].PointAtEnd) < t:\n            groups[-1].append(Curves[j])\n            sampled.append(j)\n        elif Curves[i].PointAtEnd.DistanceTo(Curves[j].PointAtStart) < t:\n            groups[-1].append(Curves[j])\n            sampled.append(j)\n        elif Curves[i].PointAtEnd.DistanceTo(Curves[j].PointAtEnd) < t:\n            groups[-1].append(Curves[j])\n            sampled.append(j)\n\n\n# Outputs\nGroups = treehelpers.list_to_tree(groups)",
+      "language": "python",
+      "author": "diff-arch",
+      "post_number": 4,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "grasshopper",
+    "python",
+    "rhinocommon"
+  ],
+  "has_accepted_answer": true,
+  "category_id": 2,
+  "posts_count": 18,
+  "views": 2353
+}

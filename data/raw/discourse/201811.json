@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/rhinoscriptsyntax-addfilletcurve/201811",
+  "topic_id": 201811,
+  "title": "Rhinoscriptsyntax AddFilletCurve",
+  "question": "Hi\n\n\nI am looking for a Rhinoscriptsyntax function in python 3 for adding a fillet between two curves and trimming the input curves and joining the fillet and remaining curves together.\n\n\nBasically the rs equivalent to the manual command.\n\n\nI appreciate there is a rhino common command but I lack experience in this approach so would like to stick to rs commands if possible. If there isn’t such a a command then I shall ask the powers to be why there isn’t as I’m sure other people would need this as well.\n\n\nRoger",
+  "code_blocks": [
+    {
+      "code": "#! python 3 \nimport rhinoscriptsyntax as rs\n\n\n\ndef FilletAndJoinCurves(radius):\n    # Get curves to fillet\n    curves = rs.GetObjects(\"Select curves to fillet\", rs.filter.curve, preselect=True)\n    if not curves or len(curves) < 2:\n        print(\"At least two curves must be selected\")\n        return\n\n    curve_id_1 = curves[0]\n    curve_id_2 = curves[1]\n\n    # Store curves for joining\n    crvs_to_join = []\n\n    # Get fillet points before creating the fillet\n    crv_fillet_pts = rs.CurveFilletPoints(curve_id_1, curve_id_2, radius, None, None, True)\n\n    if crv_fillet_pts:\n        # Create the fillet\n        fillet_curve = rs.AddFilletCurve(curve_id_1, curve_id_2, radius)\n        if fillet_curve:\n            crvs_to_join.append(fillet_curve)\n\n            # Get parameters on the curves\n            param_1 = rs.CurveClosestPoint(curve_id_1, crv_fillet_pts[0])\n            param_2 = rs.CurveClosestPoint(curve_id_2, crv_fillet_pts[1])\n\n            # Get the fillet center point (reference point)\n            fillet_curve_midpoint = rs.CurveMidPoint(fillet_curve)\n\n            # The correct way to use TrimCurve - create domain intervals\n            domain_1 = rs.CurveDomain(curve_id_1)\n            domain_2 = rs.CurveDomain(curve_id_2)\n\n            # For first curve, check which segment to keep\n            segment1_a_midpoint = rs.EvaluateCurve(curve_id_1, (domain_1[0] + param_1) / 2)\n            segment1_b_midpoint = rs.EvaluateCurve(curve_id_1, (param_1 + domain_1[1]) / 2)\n\n            dist1_a = rs.Distance(segment1_a_midpoint, fillet_curve_midpoint)\n            dist1_b = rs.Distance(segment1_b_midpoint, fillet_curve_midpoint)\n\n            # Keep segment farther from fillet (reverse the previous logic)\n            if dist1_a > dist1_b:\n                curve_1_trim = rs.TrimCurve(curve_id_1, (domain_1[0], param_1), True)\n            else:\n                curve_1_trim = rs.TrimCurve(curve_id_1, (param_1, domain_1[1]), True)\n\n            # For second curve, check which segment to keep\n            segment2_a_midpoint = rs.EvaluateCurve(curve_id_2, (domain_2[0] + param_2) / 2)\n            segment2_b_midpoint = rs.EvaluateCurve(curve_id_2, (param_2 + domain_2[1]) / 2)\n\n            dist2_a = rs.Distance(segment2_a_midpoint, fillet_curve_midpoint)\n            dist2_b = rs.Distance(segment2_b_midpoint, fillet_curve_midpoint)\n\n            # Keep segment farther from fillet (reverse the previous logic)\n            if dist2_a > dist2_b:\n                curve_2_trim = rs.TrimCurve(curve_id_2, (domain_2[0], param_2), True)\n            else:\n                curve_2_trim = rs.TrimCurve(curve_id_2, (param_2, domain_2[1]), True)\n\n            if curve_1_trim:\n                crvs_to_join.append(curve_1_trim)\n\n            if curve_2_trim:\n                crvs_to_join.append(curve_2_trim)\n\n            # Join all curves\n            if len(crvs_to_join) >= 2:\n                joined_curve = rs.JoinCurves(crvs_to_join, True)\n                return joined_curve\n\n    return None\n\n\n# Run the script\nif __name__ == \"__main__\":\n    # Set radius for filleting\n    radius = 3\n    # Fillet and join the selected curves to specified radius\n    FilletAndJoinCurves(radius)",
+      "language": "python",
+      "author": "michaelvollrath",
+      "post_number": 2,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 100
+}

@@ -1,0 +1,26 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/export-temporary-stp-and-autoload-in-bambu-lab-slicer/204815",
+  "topic_id": 204815,
+  "title": "Export temporary .stp and autoload in Bambu Lab Slicer",
+  "question": "I started writing a script to load a brep directly in bambu studio. A temp step file is saved and opened with bambu.\n\nWhat I would like to do is that if bambu studio is alredy running to just inject the file and open a new buildplate but I couldnt find any hint how to make that work. Bambus api seems to be focused on network control of the printer.\n\n\nimport rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport System\nimport os\nimport platform\n\n# 1. Let user select multiple Breps\nbrep_ids = rs.GetObjects(\"Select Breps to export (press Enter to finish)\", rs.filter.polysurface | rs.filter.surface)\nif not brep_ids or len(brep_ids) == 0:\n    print(\"No Breps selected.\")\n    exit()\n\n# 2. Prepare temp export file\ntemp_dir = System.IO.Path.GetTempPath()\ntemp_file = os.path.join(temp_dir, \"exported_model.step\")\n\n# 3. Unselect all, select only desired Breps\nrs.UnselectAllObjects()\nfor id in brep_ids:\n    rs.SelectObject(id)\n\n# 4. Export via Rhino command\nexport_command = '-_Export \"{}\" _Enter'.format(temp_file)\nsuccess = Rhino.RhinoApp.RunScript(export_command, False)\n\n# 5. Deselect after export\nrs.UnselectAllObjects()\n\nif success:\n    print(\"Exported to:\", temp_file)\n    \n    # 6. Determine OS and Bambu Studio path\n    system = platform.system()\n    if system == 'Windows':\n        bambu_path = r\"C:\\Program Files\\Bambu Studio\\bambu-studio.exe\"\n    elif system == 'Darwin':\n        bambu_path = \"/Applications/Bambu Studio.app/Contents/MacOS/Bambu Studio\"\n    else:\n        bambu_path = None\n    \n    # 7. Launch Bambu Studio\n    if bambu_path and os.path.exists(bambu_path):\n        print(\"Launching Bambu Studio...\")\n        System.Diagnostics.Process.Start(bambu_path, '\"{}\"'.format(temp_file))\n    else:\n        print(\"Bambu Studio executable not found or unsupported OS. Opening with default app.\")\n        psi = System.Diagnostics.ProcessStartInfo()\n        psi.FileName = temp_file\n        psi.UseShellExecute = True\n        System.Diagnostics.Process.Start(psi)\nels...",
+  "code_blocks": [
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport scriptcontext as sc\nimport Rhino\nimport System\nimport os\nimport platform\n\n# 1. Let user select multiple Breps\nbrep_ids = rs.GetObjects(\"Select Breps to export (press Enter to finish)\", rs.filter.polysurface | rs.filter.surface)\nif not brep_ids or len(brep_ids) == 0:\n    print(\"No Breps selected.\")\n    exit()\n\n# 2. Prepare temp export file\ntemp_dir = System.IO.Path.GetTempPath()\ntemp_file = os.path.join(temp_dir, \"exported_model.step\")\n\n# 3. Unselect all, select only desired Breps\nrs.UnselectAllObjects()\nfor id in brep_ids:\n    rs.SelectObject(id)\n\n# 4. Export via Rhino command\nexport_command = '-_Export \"{}\" _Enter'.format(temp_file)\nsuccess = Rhino.RhinoApp.RunScript(export_command, False)\n\n# 5. Deselect after export\nrs.UnselectAllObjects()\n\nif success:\n    print(\"Exported to:\", temp_file)\n    \n    # 6. Determine OS and Bambu Studio path\n    system = platform.system()\n    if system == 'Windows':\n        bambu_path = r\"C:\\Program Files\\Bambu Studio\\bambu-studio.exe\"\n    elif system == 'Darwin':\n        bambu_path = \"/Applications/Bambu Studio.app/Contents/MacOS/Bambu Studio\"\n    else:\n        bambu_path = None\n    \n    # 7. Launch Bambu Studio\n    if bambu_path and os.path.exists(bambu_path):\n        print(\"Launching Bambu Studio...\")\n        System.Diagnostics.Process.Start(bambu_path, '\"{}\"'.format(temp_file))\n    else:\n        print(\"Bambu Studio executable not found or unsupported OS. Opening with default app.\")\n        psi = System.Diagnostics.ProcessStartInfo()\n        psi.FileName = temp_file\n        psi.UseShellExecute = True\n        System.Diagnostics.Process.Start(psi)\nelse:\n    print(\"Export failed.\")",
+      "language": "python",
+      "author": "maxhausmann",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "python",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 11,
+  "posts_count": 1,
+  "views": 100
+}

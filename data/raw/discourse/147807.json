@@ -1,0 +1,25 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/status-of-rhino-compute/147807",
+  "topic_id": 147807,
+  "title": "Status of Rhino.Compute",
+  "question": "I was trying to find out if Rhino.Compute is still being actively worked on. We built an internal Python application which is using Rhino.Compute to process grasshopper workflows for automating a custom manufacturing process that runs continuously. Since our design engineers use Rhino, we don’t have any alternatives to automation other than API interfacing with Grasshopper which this or the NodeJS version providing the framework. Both projects seem to have very little development activity.\n\n\nI have reported some memory bugs back in March in the GitHub issues list but I haven’t seen any feedback or responses on that in the last 6 months.\n\n\n\n\n\n\ngithub.com/mcneel/compute.rhino3d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncompute.geometry.exe not releasing memory\n\n\n\n\n\n\n\n        opened \n05:16PM - 08 Mar 22 UTC\n\n\n\n\n\n\n\n\n\n          jeffswilkinson\n        \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe compute.geometry.exe process spawned by rhino compute running under IIS does\n…\n not release memory and eventually crashes the server. I have coded a workaround by checking for the working set size each time I send a grasshopper request to the compute node. When the working set gets over 10GB I kill the process and restart the app pool.\n![image](https://user-images.githubusercontent.com/68235177/157290464-df5c9b3f-7899-4256-9956-86a2a2d58423.png)",
+  "code_blocks": [
+    {
+      "code": "{\n              string solveUrl;\n              var pathType = GetPathType();\n              if (pathType == PathType.NonresponsiveUrl)\n                  return null;\n          \n              if (pathType == PathType.GrasshopperDefinition || pathType == PathType.ComponentGuid || pathType == PathType.InternalizedDefinition)\n              {\n                  solveUrl = Servers.GetSolveUrl();\n                  if (!string.IsNullOrEmpty(_cacheKey))\n                      inputSchema.Pointer = _cacheKey;\n              }\n              else\n              {\n                  int index = Path.LastIndexOf('/');\n                  var authority = new Uri(Path).Authority;\n                  solveUrl = \"http://\" + authority + \"/solve\";\n                  //solveUrl = Path.Substring(0, index + 1) + \"solve\";\n              }\n          \n              string inputJson = JsonConvert.SerializeObject(inputSchema);",
+      "language": "csharp",
+      "author": "stevebaer",
+      "post_number": 7,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "csharp",
+    "geometry",
+    "grasshopper",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 90,
+  "posts_count": 17,
+  "views": 1955
+}

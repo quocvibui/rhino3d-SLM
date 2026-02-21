@@ -1,0 +1,16 @@
+{
+  "source_url": "https://github.com/AntonelloDN/lb_envimet/blob/f49c125fcf2cc2dd9deaab3ae220523a805a0247/Newlb_envimet/lb_envimet/Geometry/singlewall.py",
+  "repo": "AntonelloDN/lb_envimet",
+  "repo_stars": 4,
+  "repo_description": "﻿lb_envimet: a series of components to connect Ladybug and Gismo to Envimet for urban microclimatic analysis",
+  "license": "GPL-3.0",
+  "filepath": "Newlb_envimet/lb_envimet/Geometry/singlewall.py",
+  "instruction": "Singlewall",
+  "code": "import Rhino as rc\nimport collections\nimport scriptcontext as sc\nfrom copy import deepcopy\n\n\nclass SingleWall(object):\n\n    def __init__(self, geometry, material):\n        self.geometry = geometry\n        self.material = material\n\n\n    def __generateMinValueZ(self, zNumbers):\n\n        def diffArrayZdir(num, zNumbers):\n            newArr = [abs(num - n) for n in zNumbers]\n            return newArr.index(min(newArr))\n\n        bboxGeo = self.geometry.GetBoundingBox(True)\n        # take min point\n        minPoint = bboxGeo.Min\n        zValueGeo = minPoint.Z\n\n        return diffArrayZdir(zValueGeo, zNumbers)\n\n\n    def simpleWallStringCalcZdir(self, grid):\n\n        contentXml = \"\"\n        for i in range(0, grid.numX + 1):\n            for j in range(0, grid.numY + 1):\n\n                point = rc.Geometry.Point3d((i * grid.dimX) + grid.minX, (j * grid.dimY) + grid.minY, 0)\n                ln = rc.Geometry.Line(point, rc.Geometry.Vector3d.ZAxis, grid.dimX * 2)\n\n                # projection\n                projection = rc.Geometry.Transform.PlanarProjection(rc.Geometry.Plane.WorldXY)\n                modShading = deepcopy(self.geometry)\n                modShading.Transform(projection)\n\n                if rc.Geometry.Intersect.Intersection.MeshLine(modShading, ln)[0]:\n                    contentXml += \"{0},{1},{2},{3},{4},{5}\\n\".format(i, j, self.__generateMinValueZ(grid.zHeight), \"\", \"\", self.material)\n\n        return contentXml\n",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://github.com/mcneel/rhino-developer-samples/blob/HEAD/rhinocommon/snippets/from_rhinocommon/py/ex_reparameterizecrv.py",
+  "repo": "mcneel/rhino-developer-samples",
+  "repo_stars": 743,
+  "repo_description": "Rhino and Grasshopper developer sample code",
+  "license": "NOASSERTION",
+  "filepath": "rhinocommon/snippets/from_rhinocommon/py/ex_reparameterizecrv.py",
+  "instruction": "Ex reparameterizecrv",
+  "code": "from System import *\nfrom  Rhino import *\nfrom  Rhino.Commands import *\nfrom  Rhino.DocObjects import *\nfrom  Rhino.Geometry import *\nfrom  Rhino.Input import *\nfrom scriptcontext import doc\n\ndef RunCommand():\n  \n  rc, obj_ref = RhinoGet.GetOneObject(\"Select curve to reparameterize\", False, ObjectType.Curve)\n  if rc <> Result.Success:\n    return rc\n  curve = obj_ref.Curve()\n  if curve == None:\n    return Result.Failure\n\n  domain_start = 0\n  rc, domain_start = RhinoGet.GetNumber(\"Domain start\", False, domain_start)\n  if rc <> Result.Success:\n    return rc\n\n  domain_end = 100\n  rc, domain_end = RhinoGet.GetNumber(\"Domain end\", False, domain_end)\n  if rc <> Result.Success:\n    return rc\n\n  if Math.Abs(curve.Domain.T0 - domain_start) < RhinoMath.ZeroTolerance and \\\n      Math.Abs(curve.Domain.T1 - domain_end) < RhinoMath.ZeroTolerance:\n    return Result.Nothing\n\n  curve_copy = curve.DuplicateCurve()\n  curve_copy.Domain = Interval(domain_start, domain_end)\n  if not doc.Objects.Replace(obj_ref, curve_copy):\n    return Result.Failure\n  else:\n    doc.Views.Redraw()\n    return Result.Success\n\nif __name__ == \"__main__\":\n  RunCommand()",
+  "language": "python",
+  "imports": [
+    "Rhino",
+    "Rhino.Geometry",
+    "scriptcontext"
+  ],
+  "has_docstring": false
+}

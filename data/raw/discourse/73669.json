@@ -1,0 +1,23 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/exact-positioning-of-value-list-controls/73669",
+  "topic_id": 73669,
+  "title": "Exact positioning of value list controls",
+  "question": "Hello,\n\n\nI am having a hard time understanding how to position properly an automatically added control  (a value list in my case) relative to its parent component.\n\n\nWhat I would like to do is load one or many predefined value list when I put my component on the canevas for the first time.\n\n\nHow would you achieve a constant margin (say 30px) between the left part of a component and the right part of a value list ?\n\n\npublic override void AddedToDocument(GH_Document document)\n    {\n        if (Params.Input[3].SourceCount == 0)\n        {\n            // Perform Layout to get actual positionning of the component on the canevas\n            this.Attributes.ExpireLayout();\n            this.Attributes.PerformLayout();\n\n            //instantiate new value list\n            var control = new Grasshopper.Kernel.Special.GH_ValueList();\n            control.CreateAttributes();\n            control.NickName = \"Load Direction\";\n\n            //populate value list with our own data\n            control.ListItems.Clear();\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"X\", \"0\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"Y\", \"1\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"Z\", \"2\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"XX\", \"3\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"YY\", \"4\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"ZZ\", \"5\"));\n            control.ToggleItem(2);\n\n            // get the correct bounds of the populated value list \n            control.Attributes.ExpireLayout();\n            control.Attributes.PerformLayout();\n\n            //customise value list position\n            \n            var x = (float)this.Attributes.Bounds.Left - control.Attributes.Bounds.Width / 2 - 30;\n            var y = (float)Params.Input[3].Attributes.Pivot.Y -...",
+  "code_blocks": [
+    {
+      "code": "public override void AddedToDocument(GH_Document document)\n    {\n        if (Params.Input[3].SourceCount == 0)\n        {\n            // Perform Layout to get actual positionning of the component on the canevas\n            this.Attributes.ExpireLayout();\n            this.Attributes.PerformLayout();\n\n            //instantiate new value list\n            var control = new Grasshopper.Kernel.Special.GH_ValueList();\n            control.CreateAttributes();\n            control.NickName = \"Load Direction\";\n\n            //populate value list with our own data\n            control.ListItems.Clear();\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"X\", \"0\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"Y\", \"1\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"Z\", \"2\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"XX\", \"3\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"YY\", \"4\"));\n            control.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(\"ZZ\", \"5\"));\n            control.ToggleItem(2);\n\n            // get the correct bounds of the populated value list \n            control.Attributes.ExpireLayout();\n            control.Attributes.PerformLayout();\n\n            //customise value list position\n            \n            var x = (float)this.Attributes.Bounds.Left - control.Attributes.Bounds.Width / 2 - 30;\n            var y = (float)Params.Input[3].Attributes.Pivot.Y - control.Attributes.Bounds.Height / 2; // 11 is half the height of the control\n            control.Attributes.Pivot = new PointF(x, y);\n\n            // add to doc and connect\n            document.AddObject(control, false);\n            Params.Input[3].AddSource(control);\n        }\n        base.AddedToDocument(document);\n    }",
+      "language": "csharp",
+      "author": "lionpeloux",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "geometry",
+    "grasshopper"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 8,
+  "posts_count": 2,
+  "views": 435
+}

@@ -1,0 +1,31 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/layer-isvisible-weirdness/420",
+  "topic_id": 420,
+  "title": "Layer.IsVisible weirdness",
+  "question": "The other day I tried to add two layers to a Rhino document and make IsVisible true in one layer and false in the other:\n\n\nint i = doc.Layers.Add(\"Layer 1\", Color.Red);\nint j = doc.Layers.Add(\"Layer 2\", Color.Blue);\ndoc.Layers[i].IsVisible = true;\ndoc.Layers[j].IsVisible = false;\ndoc.Layers[i].CommitChanges();\ndoc.Layers[j].CommitChanges();\n\n\n\nThis does not work. You must do it this way:\n\n\nLayer l1 = doc.Layers[i];\nl1.IsVisible = true;\nl1.CommitChanges();\nLayer l2 = doc.Layers[j];\nl2.IsVisible = false;\nl2.CommitChanges();\n\n\n\nI have two issues with this:\n\n\n\n\nWhy do I need to issue CommitChanges()? Why can’t the IsVisible property propagate the desired changes?\n\n\nWhy can’t I do it in the first order, but must I do it in the second order? It seems like every time I issue doc.Layers[i] a new Layer object is created, so that when I set IsVisible on the first and issue CommitChanges on the second the end result is not that the visibility is changed.\n\n\n\n\nAdmittedly, I’m still on SR0 waiting for our IT department to roll out SR4, so it may already be solved.",
+  "code_blocks": [
+    {
+      "code": "import Rhino\nimport scriptcontext\nlayer_index = scriptcontext.doc.Layers.Add()\nif layer_index >= 0:\n    scriptcontext.doc.Layers[layer_index].IsVisible = False",
+      "language": "python",
+      "author": "dale",
+      "post_number": 5,
+      "is_solution": false
+    },
+    {
+      "code": "int i = doc.Layers.Add(\"Layer 1\", Color.Red);\nint j = doc.Layers.Add(\"Layer 2\", Color.Blue);\ndoc.Layers[i].IsVisible = true;\ndoc.Layers[j].IsVisible = false;\ndoc.Layers[i].CommitChanges();\ndoc.Layers[j].CommitChanges();",
+      "language": "python",
+      "author": "menno",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "layers",
+    "python"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 6,
+  "views": 972
+}

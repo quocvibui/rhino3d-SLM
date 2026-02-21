@@ -1,0 +1,49 @@
+{
+  "source_url": "https://discourse.mcneel.com/t/help-need-a-flow-along-curve-tool/133691",
+  "topic_id": 133691,
+  "title": "Help: Need a Flow along curve tool",
+  "question": "Hi guys, I am trying to make a “flow along cuve” tool but I am hitting walls…\n\nThe only tool I found was the “Rhino.Geometry.Curve.FlowSpaceMorph()” but I can’t seem to get it right.\n\n\nThanks for any help!\n\n\n(This is a small part of a project curved curve onto geometry and then make a straight line with the length of the projected curve and then flow the projection onto the straight line)\n\n\n\n\nimage\n1321×625 52.1 KB\n\n\n\n\nHere’s what I have tried:\n\n\n\nimport rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\n\ndef flowObject():\n    \n    rc, crv_id = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, Rhino.DocObjects.ObjectType.Curve)\n    if rc!=Rhino.Commands.Result.Success: return\n    curve = crv_id.Curve()\n    \n    flow_id = rs.GetObject(\"Backbone\")\n    if not flow_id:\n        return\n    flow = rs.coercecurve(flow_id)\n    \n    length = flow.GetLength()\n    print length\n    \n    \n    \n    # .GetCurveParameterFromNurbsFormParameter\n    \n    line=Rhino.Geometry.NurbsCurve(1,2)\n    #line.Degree=1\n    line.SetStartPoint(rs.coerce3dpoint((0,0,0)))\n    line.SetEndPoint(rs.coerce3dpoint((length,0,0)))\n    \n    \n    newCrv = curve.FlowSpaceMorph(flow, line, False)\n    \n    \n    sc.doc.Objects.Replace(crv_id, newCrv)\n\nflowObject()\n\n\n\n#Rhino.Geometry.Morphs.FlowSpaceMorph()",
+  "code_blocks": [
+    {
+      "code": "line = Rhino.Geometry.NurbsCurve.Create(\n    periodic=False,\n    degree=1,\n    points=rs.coerce3dpointlist(((0,0,0), (length,0,0))))",
+      "language": "python",
+      "author": "spb",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "crv_WIP = curve.DuplicateCurve() # Good to do this since curve.IsDocumentControlled == True.\nfsm = Rhino.Geometry.Morphs.FlowSpaceMorph(flow, line, False)\nfsm.Morph(crv_WIP)\nsc.doc.Objects.Replace(crv_id, crv_WIP)\nsc.doc.Views.Redraw()",
+      "language": "python",
+      "author": "spb",
+      "post_number": 2,
+      "is_solution": false
+    },
+    {
+      "code": "import Rhino\nimport scriptcontext\nimport rhinoscriptsyntax as rs\n\ndef DoSomething():\n    \n    flow_crv_id = rs.GetObject(\"Curve to flow\", 4, True, False)\n    if not flow_crv_id: return\n    backbone_crv_id = rs.GetObject(\"Backbone curve\", 4, False, False)\n    if not backbone_crv_id: return\n    crv_to_flow = rs.coercecurve(flow_crv_id)\n    backbone_crv = rs.coercecurve(backbone_crv_id, -1, True)\n    p0 = Rhino.Geometry.Point3d.Origin\n    p1 = Rhino.Geometry.Point3d(backbone_crv.GetLength(), 0, 0)\n    line_crv = Rhino.Geometry.LineCurve(p0, p1)\n    \n    morph = Rhino.Geometry.Morphs.FlowSpaceMorph(backbone_crv, line_crv, True)\n    if morph.IsValid:\n        morph.Morph(crv_to_flow )\n        scriptcontext.doc.Objects.AddCurve(crv_to_flow)\n        scriptcontext.doc.Views.Redraw()\n    \nDoSomething()",
+      "language": "python",
+      "author": "clement",
+      "post_number": 3,
+      "is_solution": false
+    },
+    {
+      "code": "import rhinoscriptsyntax as rs\nimport Rhino\nimport scriptcontext as sc\n\n\ndef flowObject():\n    \n    rc, crv_id = Rhino.Input.RhinoGet.GetOneObject(\"Select curve\", False, Rhino.DocObjects.ObjectType.Curve)\n    if rc!=Rhino.Commands.Result.Success: return\n    curve = crv_id.Curve()\n    \n    flow_id = rs.GetObject(\"Backbone\")\n    if not flow_id:\n        return\n    flow = rs.coercecurve(flow_id)\n    \n    length = flow.GetLength()\n    print length\n    \n    \n    \n    # .GetCurveParameterFromNurbsFormParameter\n    \n    line=Rhino.Geometry.NurbsCurve(1,2)\n    #line.Degree=1\n    line.SetStartPoint(rs.coerce3dpoint((0,0,0)))\n    line.SetEndPoint(rs.coerce3dpoint((length,0,0)))\n    \n    \n    newCrv = curve.FlowSpaceMorph(flow, line, False)\n    \n    \n    sc.doc.Objects.Replace(crv_id, newCrv)\n\nflowObject()\n\n\n\n#Rhino.Geometry.Morphs.FlowSpaceMorph()",
+      "language": "python",
+      "author": "Holo",
+      "post_number": 1,
+      "is_solution": false
+    }
+  ],
+  "tags": [
+    "file-io",
+    "geometry",
+    "nurbs",
+    "python",
+    "rhinocommon",
+    "rhinoscriptsyntax",
+    "selection"
+  ],
+  "has_accepted_answer": false,
+  "category_id": 3,
+  "posts_count": 4,
+  "views": 757
+}
